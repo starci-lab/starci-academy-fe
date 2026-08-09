@@ -17,14 +17,14 @@ const labels: IdentityStatsLabels = {
     empty: "Not available",
 }
 
-const rows: readonly IdentityStatRow[] = [
-    { label: "Streak", state: "ready", value: "5 days" },
-    { label: "AI credit", state: "skeleton", value: "" },
-    { label: "Reward points", state: "empty", value: "" },
+const rows: ReadonlyArray<IdentityStatRow> = [
+    { label: "Streak", value: "5 days" },
+    { label: "AI credit", isLoading: true, value: "" },
+    { label: "Reward points", isEmpty: true, value: "" },
 ]
 
 /** Read the `data-state` of every value node, in render order. */
-const valueStates = (container: HTMLElement): string[] =>
+const valueStates = (container: HTMLElement): Array<string> =>
     [...container.querySelectorAll("[data-part='value']")].map((node) => node.getAttribute("data-state") ?? "")
 
 afterEach(() => {
@@ -55,7 +55,7 @@ describe("_IdentityStats", () => {
 
     it("keeps every row in place across the three states", () => {
         const { container } = render(<_IdentityStats rows={rows} labels={labels} />)
-        expect(valueStates(container)).toEqual(["ready", "skeleton", "empty"])
+        expect(valueStates(container)).toEqual(["ready", "loading", "empty"])
         expect([...container.querySelectorAll("[data-part='label']")].map((node) => node.textContent))
             .toEqual(["Streak", "AI credit", "Reward points"])
     })
@@ -67,12 +67,19 @@ describe("_IdentityStats", () => {
 
     it("stands in for a value that has not arrived", () => {
         const { container } = render(<_IdentityStats rows={rows} labels={labels} />)
-        expect(container.querySelector("[data-state='skeleton']")?.textContent).toBe(labels.loading)
+        expect(container.querySelector("[data-state='loading']")?.textContent).toBe(labels.loading)
     })
 
     it("stands in for a request that settled with nothing", () => {
         const { container } = render(<_IdentityStats rows={rows} labels={labels} />)
         expect(container.querySelector("[data-state='empty']")?.textContent).toBe(labels.empty)
+    })
+
+    it("reads a row that is still loading as loading rather than as empty", () => {
+        const both: ReadonlyArray<IdentityStatRow> = [{ label: "Streak", isLoading: true, isEmpty: true, value: "" }]
+        const { container } = render(<_IdentityStats rows={both} labels={labels} />)
+        expect(container.querySelector("[data-part='value']")?.getAttribute("data-state")).toBe("loading")
+        expect(container.querySelector("[data-part='value']")?.textContent).toBe(labels.loading)
     })
 
     it("renders the heading and an empty stack when there are no rows", () => {

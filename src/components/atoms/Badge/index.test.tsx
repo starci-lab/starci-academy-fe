@@ -16,12 +16,12 @@ const FRACTIONAL_SPACING = /\b[a-z-]+-\d+\.5\b/
 const ARBITRARY_VALUE = /\[[^\]]+\]/
 
 /** The whole tone vocabulary, mirrored so a loop can walk it. */
-const TONES: readonly BadgeTone[] = ["neutral", "accent", "success", "warning", "danger"]
+const TONES: ReadonlyArray<BadgeTone> = ["neutral", "accent", "success", "warning", "danger"]
 
 /** Render one tone and hand back its root element. */
-const renderBadge = (tone?: BadgeTone, isSkeleton?: boolean): Element => {
+const renderBadge = (tone?: BadgeTone, isLoading?: boolean): Element => {
     const { container } = render(
-        <Badge tone={tone} isSkeleton={isSkeleton}>
+        <Badge tone={tone} isLoading={isLoading}>
             Draft
         </Badge>,
     )
@@ -52,7 +52,7 @@ describe("Badge", () => {
         expect(root.getAttribute("data-tier")).toBe("atom")
         expect(root.getAttribute("data-component")).toBe("Badge")
         expect(root.getAttribute("data-tone")).toBe("danger")
-        expect(root.getAttribute("data-skeleton")).toBe("false")
+        expect(root.getAttribute("data-loading")).toBe("false")
     })
 
     it("publishes the meaning, not the colour, for anything reading the DOM", () => {
@@ -77,9 +77,9 @@ describe("Badge", () => {
 
     it("keeps every class it draws on the house scale", () => {
         for (const tone of TONES) {
-            for (const isSkeleton of [false, true]) {
-                const classes = renderBadge(tone, isSkeleton).getAttribute("class") ?? ""
-                const label = `${tone}/${isSkeleton}`
+            for (const isLoading of [false, true]) {
+                const classes = renderBadge(tone, isLoading).getAttribute("class") ?? ""
+                const label = `${tone}/${isLoading}`
                 expect(classes.trim(), label).not.toBe("")
                 expect(FRACTIONAL_SPACING.test(classes), label).toBe(false)
                 expect(ARBITRARY_VALUE.test(classes), label).toBe(false)
@@ -101,7 +101,7 @@ describe("Badge", () => {
     it("rests as itself rather than as a second shape", () => {
         const root = renderBadge("success", true)
         expect(root.tagName).toBe("SPAN")
-        expect(root.getAttribute("data-skeleton")).toBe("true")
+        expect(root.getAttribute("data-loading")).toBe("true")
         expect(root.getAttribute("aria-hidden")).toBe("true")
         expect(root.getAttribute("class")).toContain("animate-pulse")
         expect(root.textContent).toBe("Draft")

@@ -21,8 +21,8 @@ import {
 
 /** A stand-in slot that records which role mounted it and whether it was told to rest. */
 const slotFor = (role: TreeRole): TreeSlot => {
-    const Slot = ({ isSkeleton }: TreeSlotProps) => (
-        <span data-testid={`slot-${role}`} data-skeleton={isSkeleton === true ? "true" : "false"} />
+    const Slot = ({ isLoading }: TreeSlotProps) => (
+        <span data-testid={`slot-${role}`} data-loading={isLoading === true ? "true" : "false"} />
     )
     return Slot
 }
@@ -38,11 +38,11 @@ const slotsFor = (name: TreeKey): TreeSlots<TreeKey> => {
 }
 
 /** Render one key with a stand-in slot per declared role. */
-const renderKey = (name: TreeKey, isSkeleton?: boolean) =>
-    render(<Tree name={name} slots={slotsFor(name)} isSkeleton={isSkeleton} />)
+const renderKey = (name: TreeKey, isLoading?: boolean) =>
+    render(<Tree name={name} slots={slotsFor(name)} isLoading={isLoading} />)
 
 /** The rendered role order, read back from the stand-in slots. */
-const renderedRoles = (container: HTMLElement): string[] => {
+const renderedRoles = (container: HTMLElement): Array<string> => {
     const mounted = [...container.querySelectorAll("[data-testid^='slot-']")]
     return mounted.map((node) => node.getAttribute("data-testid")?.replace("slot-", "") ?? "")
 }
@@ -95,17 +95,17 @@ describe("Tree", () => {
 
     it("passes the skeleton flag down to every slot", () => {
         const { container } = renderKey("card", true)
-        const slots = [...container.querySelectorAll("[data-skeleton]")]
+        const slots = [...container.querySelectorAll("[data-loading]")]
         expect(slots.length).toBe(treeSpec("card").roles.length)
         for (const slot of slots) {
-            expect(slot.getAttribute("data-skeleton")).toBe("true")
+            expect(slot.getAttribute("data-loading")).toBe("true")
         }
     })
 
     it("leaves the skeleton flag off when it is not set", () => {
         const { container } = renderKey("card")
-        for (const slot of container.querySelectorAll("[data-skeleton]")) {
-            expect(slot.getAttribute("data-skeleton")).toBe("false")
+        for (const slot of container.querySelectorAll("[data-loading]")) {
+            expect(slot.getAttribute("data-loading")).toBe("false")
         }
     })
 

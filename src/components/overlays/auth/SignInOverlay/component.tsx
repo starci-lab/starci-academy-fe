@@ -62,7 +62,7 @@ export interface SignInOverlayProps {
     /** Called for every way out - the close control, Escape, or a native cancel. */
     onDismiss: () => void
     /** Renders the surface and its body in their resting state. */
-    isSkeleton?: boolean
+    isLoading?: boolean
 }
 
 /**
@@ -75,7 +75,7 @@ export const _SignInOverlay = ({
     labels,
     slots,
     onDismiss,
-    isSkeleton = false,
+    isLoading = false,
 }: SignInOverlayProps) => {
     const dialog = useRef<HTMLDialogElement>(null)
 
@@ -114,22 +114,22 @@ export const _SignInOverlay = ({
     }
 
     /** The `heading` role of the `page-header` key. */
-    const Title = ({ isSkeleton: resting }: TreeSlotProps) => (
-        <Heading level={2} isSkeleton={resting}>
+    const Title = ({ isLoading: resting }: TreeSlotProps) => (
+        <Heading level={2} isLoading={resting}>
             <span id={TITLE_ID}>{labels.title}</span>
         </Heading>
     )
 
     /** The `action` role of the `page-header` key: the way out that is visible. */
-    const Dismiss = ({ isSkeleton: resting }: TreeSlotProps) => (
-        <Button variant="ghost" size="sm" isSkeleton={resting} onClick={onDismiss}>
+    const Dismiss = ({ isLoading: resting }: TreeSlotProps) => (
+        <Button variant="ghost" size="sm" isLoading={resting} onClick={onDismiss}>
             {labels.dismiss}
         </Button>
     )
 
     /** The `heading` role of the `section` key: the title line, with its close control on it. */
-    const Header = ({ isSkeleton: resting }: TreeSlotProps) => (
-        <Tree name="page-header" isSkeleton={resting} slots={{ heading: Title, action: Dismiss }} />
+    const Header = ({ isLoading: resting }: TreeSlotProps) => (
+        <Tree name="page-header" isLoading={resting} slots={{ heading: Title, action: Dismiss }} />
     )
 
     /** The `body` role of the `section` key: whatever the caller hung inside. */
@@ -145,7 +145,7 @@ export const _SignInOverlay = ({
             onKeyDown={onKeyDown}
             onCancel={onCancel}
         >
-            <Tree name="section" isSkeleton={isSkeleton} slots={{ heading: Header, body: Body }} />
+            <Tree name="section" isLoading={isLoading} slots={{ heading: Header, body: Body }} />
         </dialog>
     )
 }

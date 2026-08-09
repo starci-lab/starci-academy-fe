@@ -22,7 +22,7 @@ const labels: MyCoursesProgressLabels = {
     empty: "You have not enrolled in a course yet",
 }
 
-const courses: readonly MyCoursesProgressCourse[] = [
+const courses: ReadonlyArray<MyCoursesProgressCourse> = [
     { id: "course-1", title: "System Design", percent: 40, percentText: "40%" },
     { id: "course-2", title: "Full Stack", percent: 75, percentText: "75%" },
 ]
@@ -76,10 +76,10 @@ describe("_MyCoursesProgress", () => {
     })
 
     it("rests as the same tree, with the same stat rows", () => {
-        const { container } = render(<_MyCoursesProgress isSkeleton isEmpty courses={[]} labels={labels} />)
-        expect(listState(container)).toBe("skeleton")
+        const { container } = render(<_MyCoursesProgress isLoading isEmpty courses={[]} labels={labels} />)
+        expect(listState(container)).toBe("loading")
         expect(container.querySelectorAll("[data-node='stat']").length).toBe(2)
-        expect(container.querySelector("[data-part='count']")?.getAttribute("data-state")).toBe("skeleton")
+        expect(container.querySelector("[data-part='count']")?.getAttribute("data-state")).toBe("loading")
     })
 
     it("says nothing is enrolled only once the request has settled", () => {
@@ -90,7 +90,7 @@ describe("_MyCoursesProgress", () => {
     })
 
     it("keeps the heading in every state", () => {
-        const resting = render(<_MyCoursesProgress isSkeleton courses={[]} labels={labels} />)
+        const resting = render(<_MyCoursesProgress isLoading courses={[]} labels={labels} />)
         expect(resting.container.querySelector("h2")?.textContent).toBe(labels.heading)
         cleanup()
 

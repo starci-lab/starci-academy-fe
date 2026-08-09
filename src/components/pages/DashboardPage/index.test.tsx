@@ -78,10 +78,10 @@ describe("DashboardPage", () => {
     it("draws the whole page while every request is still in flight", () => {
         const { container } = render(<DashboardPage />)
         expect(container.querySelector("[data-node='split']")).not.toBeNull()
-        expect(container.querySelector("[data-part='courses']")?.getAttribute("data-state")).toBe("skeleton")
-        expect(container.querySelector("[data-part='readout']")?.getAttribute("data-state")).toBe("skeleton")
+        expect(container.querySelector("[data-part='courses']")?.getAttribute("data-state")).toBe("loading")
+        expect(container.querySelector("[data-part='readout']")?.getAttribute("data-state")).toBe("loading")
         expect([...container.querySelectorAll("[data-part='value']")].map((node) => node.getAttribute("data-state")))
-            .toEqual(["skeleton", "skeleton", "skeleton"])
+            .toEqual(["loading", "loading", "loading"])
     })
 
     it("reads every figure once every request has settled", () => {
@@ -107,7 +107,7 @@ describe("DashboardPage", () => {
         leaves.courses = { isLoading: false, data: [{ globalId: "c", label: "Full Stack", completionPercent: 10 }] }
         const { container } = render(<DashboardPage />)
         expect(container.querySelector("[data-part='courses']")?.getAttribute("data-state")).toBe("ready")
-        expect(container.querySelector("[data-part='readout']")?.getAttribute("data-state")).toBe("skeleton")
+        expect(container.querySelector("[data-part='readout']")?.getAttribute("data-state")).toBe("loading")
     })
 
     it("keeps the same three blocks on screen in every state", () => {

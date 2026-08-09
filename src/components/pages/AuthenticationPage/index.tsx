@@ -2,6 +2,7 @@
 
 import { useCallback } from "react"
 import { SignInFlow } from "@/components/overlays/auth/SignInFlow"
+import type { SignInCompositionChain } from "@/components/classNames"
 import { _AuthenticationPage, type AuthenticationPageLabels } from "./component"
 
 /**
@@ -17,6 +18,20 @@ import { _AuthenticationPage, type AuthenticationPageLabels } from "./component"
 /** Copy the page renders. It moves to the translation tier when that tier exists. */
 const LABELS: AuthenticationPageLabels = {
     title: "Sign in",
+}
+
+/**
+ * This surface's entry in the sign-in chain: the routed composition is the page with the same
+ * connected flow inside it.
+ *
+ * Naming the body here is what stops the routed surface quietly growing a second copy of the
+ * flow: both entries pin `SignInFlow`, so a divergence has to be written as a new chain member
+ * and argued, rather than appearing as one more import nobody compares.
+ */
+export const signInPageChain: SignInCompositionChain = {
+    name: "sign-in-page",
+    surface: _AuthenticationPage,
+    body: SignInFlow,
 }
 
 /**

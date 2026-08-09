@@ -32,8 +32,14 @@ export interface TextProps {
     tone?: TextTone
     /** The reading size. Two steps, because a third is a decision nobody can make consistently. */
     size?: TextSize
-    /** Renders the resting shape: same measure, no readable glyphs. */
-    isSkeleton?: boolean
+    /**
+     * Renders the resting shape: same measure, no readable glyphs.
+     *
+     * MEANS "nothing to show YET" - the first load, no data in hand, which is exactly SWR's
+     * `isLoading`. It does NOT mean "a request is in flight": `isValidating` goes true on every
+     * focus revalidation, and passing it here would replace a sentence mid-read with a shimmer.
+     */
+    isLoading?: boolean
 }
 
 /**
@@ -64,8 +70,8 @@ const RESTING_CLASSES = "animate-pulse select-none rounded bg-slate-500/20 text-
  *
  * @param props - {@link TextProps}
  */
-export const Text = ({ children, tone = "default", size = "md", isSkeleton = false }: TextProps) => {
-    const classes = [BASE_CLASSES, SIZE_CLASSES[size], TONE_CLASSES[tone], isSkeleton && RESTING_CLASSES]
+export const Text = ({ children, tone = "default", size = "md", isLoading = false }: TextProps) => {
+    const classes = [BASE_CLASSES, SIZE_CLASSES[size], TONE_CLASSES[tone], isLoading && RESTING_CLASSES]
         .filter(Boolean)
         .join(" ")
     return (
@@ -74,8 +80,8 @@ export const Text = ({ children, tone = "default", size = "md", isSkeleton = fal
             data-component="Text"
             data-tone={tone}
             data-size={size}
-            data-skeleton={isSkeleton ? "true" : "false"}
-            aria-hidden={isSkeleton ? true : undefined}
+            data-loading={isLoading ? "true" : "false"}
+            aria-hidden={isLoading ? true : undefined}
             className={classes}
         >
             {children}

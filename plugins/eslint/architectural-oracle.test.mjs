@@ -114,7 +114,7 @@ test("no-parallel-skeleton rejects hand-kept skeleton trees", () => {
       valid: [
         {
           filename: "D:/repo/src/components/blocks/example/Example/index.tsx",
-          code: "import { Skeleton } from \"./Skeleton\"\nexport const Example = ({ isSkeleton }) => <Card isSkeleton={isSkeleton} />",
+          code: "import { Skeleton } from \"./Skeleton\"\nexport const Example = ({ isLoading }) => <Card isLoading={isLoading} />",
         },
         {
           filename: "D:/repo/src/components/blocks/example/Example/index.tsx",
@@ -137,7 +137,7 @@ test("no-parallel-skeleton rejects hand-kept skeleton trees", () => {
   )
 })
 
-test("no-inline-skeleton-branch rejects different elements under isSkeleton ternaries", () => {
+test("no-inline-skeleton-branch rejects different elements under isLoading ternaries", () => {
   tester.run(
     "no-inline-skeleton-branch",
     starciFe.rules["no-inline-skeleton-branch"],
@@ -145,7 +145,7 @@ test("no-inline-skeleton-branch rejects different elements under isSkeleton tern
       valid: [
         {
           filename: "D:/repo/src/components/blocks/example/Example/index.tsx",
-          code: "export const Example = ({ isSkeleton }) => isSkeleton ? <Card isSkeleton /> : <Card />",
+          code: "export const Example = ({ isLoading }) => isLoading ? <Card isLoading /> : <Card />",
         },
         {
           filename: "D:/repo/src/components/blocks/example/Example/index.tsx",
@@ -153,13 +153,13 @@ test("no-inline-skeleton-branch rejects different elements under isSkeleton tern
         },
         {
           filename: "D:/repo/src/components/atoms/display/Badge/index.tsx",
-          code: "export const Badge = ({ isSkeleton }) => isSkeleton ? <Skeleton /> : <BadgeInner />",
+          code: "export const Badge = ({ isLoading }) => isLoading ? <Skeleton /> : <BadgeInner />",
         },
       ],
       invalid: [
         {
           filename: "D:/repo/src/components/blocks/example/Example/index.tsx",
-          code: "export const Example = ({ isSkeleton }) => isSkeleton ? <CardSkeleton /> : <Card />",
+          code: "export const Example = ({ isLoading }) => isLoading ? <CardSkeleton /> : <Card />",
           errors: [{ messageId: "branch" }],
         },
         {
@@ -210,13 +210,13 @@ test("token rules read the registry entry, not only the JSX literal", () => {
     {
       valid: [
         {
-          filename: "D:/repo/src/components/classNames.tsx",
+          filename: "D:/repo/src/components/classNames/shapes.ts",
           code: "export const CLASS_NAMES = { card: { classes: \"flex flex-col gap-4\" } }",
         },
       ],
       invalid: [
         {
-          filename: "D:/repo/src/components/classNames.tsx",
+          filename: "D:/repo/src/components/classNames/shapes.ts",
           code: "export const CLASS_NAMES = { card: { classes: \"flex flex-col gap-1.5\" } }",
           errors: [{ messageId: "frac", data: { cls: "gap-1.5" } }],
         },
@@ -235,13 +235,13 @@ test("token rules read the registry entry, not only the JSX literal", () => {
     {
       valid: [
         {
-          filename: "D:/repo/src/components/classNames.tsx",
+          filename: "D:/repo/src/components/classNames/shapes.ts",
           code: "export const CLASS_NAMES = { card: { classes: \"rounded-2xl border p-6\" } }",
         },
       ],
       invalid: [
         {
-          filename: "D:/repo/src/components/classNames.tsx",
+          filename: "D:/repo/src/components/classNames/shapes.ts",
           code: "export const CLASS_NAMES = { card: { classes: \"gap-[7px]\" } }",
           errors: [{ messageId: "space", data: { cls: "gap-[7px]" } }],
         },
@@ -258,7 +258,7 @@ test("no-public-frame-css-props closes the seam the registry key already owns", 
       valid: [
         {
           filename: "D:/repo/src/components/blocks/example/Example/index.tsx",
-          code: "import { Tree } from \"@/components/frames/Tree\"\nexport const Example = () => <Tree name=\"card\" slots={slots} isSkeleton />",
+          code: "import { Tree } from \"@/components/frames/Tree\"\nexport const Example = () => <Tree name=\"card\" slots={slots} isLoading />",
         },
         {
           // The frame declares the props it refuses; only callers are enforced.

@@ -4,7 +4,7 @@
  *   node --test plugins/eslint/registry-rules.test.mjs
  *
  * The key and role cases run against REAL paths inside this repository, so the rules read
- * the actual `src/components/classNames.tsx` rather than a copy of its vocabulary. That is
+ * the actual `src/components/classNames/shapes.ts` rather than a copy of its vocabulary. That is
  * the point of the registry: there is one list, and even the tests do not restate it.
  */
 import assert from "node:assert/strict"
@@ -37,7 +37,7 @@ const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "../..")
 const inRepo = (relative) => join(repoRoot, relative).replace(/\\/g, "/")
 
 const BLOCK = "D:/repo/src/components/blocks/example/Example/index.tsx"
-const REGISTRY = "D:/repo/src/components/classNames.tsx"
+const REGISTRY = "D:/repo/src/components/classNames/shapes.ts"
 
 test("the registry parses into keys and a closed role vocabulary", () => {
   const registry = readRegistry(inRepo("src/components/blocks/example/Example/index.tsx"))

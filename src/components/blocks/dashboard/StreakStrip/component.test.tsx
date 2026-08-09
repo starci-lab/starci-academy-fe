@@ -19,7 +19,7 @@ const labels: StreakStripLabels = {
     longest: "Longest 9 days",
 }
 
-const days: readonly StreakStripDay[] = ["01", "02", "03", "04", "05", "06", "07"].map((day, index) => ({
+const days: ReadonlyArray<StreakStripDay> = ["01", "02", "03", "04", "05", "06", "07"].map((day, index) => ({
     date: `2026-08-${day}`,
     active: index > 3,
     weekday: "M",
@@ -68,11 +68,11 @@ describe("_StreakStrip", () => {
     })
 
     it("rests as the same tree with the same column count", () => {
-        const { container } = render(<_StreakStrip isSkeleton days={[]} labels={labels} />)
+        const { container } = render(<_StreakStrip isLoading days={[]} labels={labels} />)
         expect(container.firstElementChild?.getAttribute("data-node")).toBe("section")
         expect(container.querySelector("[data-node='split']")).not.toBeNull()
         expect(dayCount(container)).toBe(7)
-        expect(container.querySelector("[data-part='readout']")?.getAttribute("data-state")).toBe("skeleton")
+        expect(container.querySelector("[data-part='readout']")?.getAttribute("data-state")).toBe("loading")
     })
 
     it("says so when the learner has no streak yet", () => {

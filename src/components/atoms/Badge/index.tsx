@@ -27,8 +27,14 @@ export interface BadgeProps {
     children: ReactNode
     /** What the state means, not what it looks like. */
     tone?: BadgeTone
-    /** Renders the resting shape: same pill, no readable glyphs. */
-    isSkeleton?: boolean
+    /**
+     * Renders the resting shape: same pill, no readable glyphs.
+     *
+     * MEANS "nothing to show YET" - the first load, no data in hand, which is exactly SWR's
+     * `isLoading`. It does NOT mean "a request is in flight": `isValidating` goes true on every
+     * focus revalidation, and passing it here would blank a state the reader is already reading.
+     */
+    isLoading?: boolean
 }
 
 /** Pill shape and inset. Part of the badge itself, so it is owned here and nowhere else. */
@@ -62,15 +68,15 @@ const RESTING_CLASSES = "animate-pulse select-none bg-slate-500/20 text-transpar
  *
  * @param props - {@link BadgeProps}
  */
-export const Badge = ({ children, tone = "neutral", isSkeleton = false }: BadgeProps) => {
-    const classes = [BASE_CLASSES, isSkeleton ? RESTING_CLASSES : TONE_CLASSES[tone]].filter(Boolean).join(" ")
+export const Badge = ({ children, tone = "neutral", isLoading = false }: BadgeProps) => {
+    const classes = [BASE_CLASSES, isLoading ? RESTING_CLASSES : TONE_CLASSES[tone]].filter(Boolean).join(" ")
     return (
         <span
             data-tier="atom"
             data-component="Badge"
             data-tone={tone}
-            data-skeleton={isSkeleton ? "true" : "false"}
-            aria-hidden={isSkeleton ? true : undefined}
+            data-loading={isLoading ? "true" : "false"}
+            aria-hidden={isLoading ? true : undefined}
             className={classes}
         >
             {children}

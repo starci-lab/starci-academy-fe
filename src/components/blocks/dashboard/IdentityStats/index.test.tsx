@@ -23,7 +23,7 @@ vi.mock("@/hooks", () => ({
 }))
 
 /** Read the `data-state` of every value node, in render order. */
-const valueStates = (container: HTMLElement): string[] =>
+const valueStates = (container: HTMLElement): Array<string> =>
     [...container.querySelectorAll("[data-part='value']")].map((node) => node.getAttribute("data-state") ?? "")
 
 beforeEach(() => {
@@ -39,7 +39,7 @@ afterEach(() => {
 describe("IdentityStats", () => {
     it("rests every row while the first requests are in flight", () => {
         const { container } = render(<IdentityStats />)
-        expect(valueStates(container)).toEqual(["skeleton", "skeleton", "skeleton"])
+        expect(valueStates(container)).toEqual(["loading", "loading", "loading"])
     })
 
     it("reads each figure once its own request settles", () => {
@@ -55,7 +55,7 @@ describe("IdentityStats", () => {
     it("lets a settled row show while a neighbour is still loading", () => {
         leaves.weekly = { isLoading: false, data: { streak: 2 } }
         const { container } = render(<IdentityStats />)
-        expect(valueStates(container)).toEqual(["ready", "skeleton", "skeleton"])
+        expect(valueStates(container)).toEqual(["ready", "loading", "loading"])
     })
 
     it("marks a request that settled with nothing as empty rather than resting forever", () => {

@@ -2,7 +2,7 @@
  * The rules that enforce the NAMED REGISTRY.
  *
  * One idea, stated six ways: a structural node is described ONCE, in
- * `src/components/classNames.tsx`, by a key that owns both the node's classes and the
+ * `src/components/classNames/shapes.ts`, by a key that owns both the node's classes and the
  * contract for its children. An author types the key and nothing else. Everything below
  * exists to make the alternatives - a literal class string, a hand-composed class, a
  * hand-painted registry attribute, an invented key, an invented child role - stop
@@ -118,12 +118,12 @@ export const noLiteralStructuralClass = {
     type: "problem",
     docs: {
       description:
-        "Structural classes come from a registry key in `src/components/classNames.tsx`, never from a literal class string.",
+        "Structural classes come from a registry key in `src/components/classNames/shapes.ts`, never from a literal class string.",
     },
     schema: [],
     messages: {
       structural:
-        "`{{cls}}` is a structural class written as a literal, so this node's shape is decided here instead of in the registry. Add or reuse a key in `src/components/classNames.tsx` and render it with `<Tree name=\"…\" slots={…} />`. The key already owns the classes AND the children that node accepts - typing it is the only layout decision there is.",
+        "`{{cls}}` is a structural class written as a literal, so this node's shape is decided here instead of in the registry. Add or reuse a key in `src/components/classNames/shapes.ts` and render it with `<Tree name=\"…\" slots={…} />`. The key already owns the classes AND the children that node accepts - typing it is the only layout decision there is.",
     },
   },
   create(context) {
@@ -157,7 +157,7 @@ export const noClassCompositionOutsideRegistry = {
       composer:
         "`{{name}}(…)` assembles a class string at runtime - a second registry with no keys, no roles and no reasons. The difference you are branching on is a real distinction: give it a registry key, or a named prop on the component that owns the node.",
       interpolated:
-        "`className` is built by interpolation, so the class string exists only while this component runs and nothing can read it back. Move the whole string into a registry key in `src/components/classNames.tsx` and pass the key.",
+        "`className` is built by interpolation, so the class string exists only while this component runs and nothing can read it back. Move the whole string into a registry key in `src/components/classNames/shapes.ts` and pass the key.",
     },
   },
   create(context) {

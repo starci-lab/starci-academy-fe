@@ -2,6 +2,7 @@
 
 import { useCallback, useRef } from "react"
 import { SignInFlow } from "@/components/overlays/auth/SignInFlow"
+import type { SignInCompositionChain } from "@/components/classNames"
 import { _SignInOverlay, type SignInOverlayLabels } from "./component"
 
 /**
@@ -28,6 +29,22 @@ import { _SignInOverlay, type SignInOverlayLabels } from "./component"
 const LABELS: SignInOverlayLabels = {
     title: "Sign in",
     dismiss: "Close",
+}
+
+/**
+ * This surface's entry in the sign-in chain: the floating composition is the overlay with the
+ * connected flow inside it.
+ *
+ * The two facts are declared together because they are one arrangement, and the compiler holds
+ * both: `SignInOverlayProps` is the only surface props type carrying `isOpen` and `onDismiss`,
+ * and the body is the CONNECTED flow rather than its presentational half - swap in
+ * `_SignInFlow` and the entry stops compiling, because this surface resolves no copy and runs
+ * no request it could pass down.
+ */
+export const signInOverlayChain: SignInCompositionChain = {
+    name: "sign-in-overlay",
+    surface: _SignInOverlay,
+    body: SignInFlow,
 }
 
 /** Props for {@link SignInOverlay}. */

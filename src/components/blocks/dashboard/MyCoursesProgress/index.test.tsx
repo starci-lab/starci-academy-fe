@@ -39,7 +39,7 @@ afterEach(() => {
 describe("MyCoursesProgress", () => {
     it("rests while the first request is in flight", () => {
         const { container } = render(<MyCoursesProgress />)
-        expect(listState(container)).toBe("skeleton")
+        expect(listState(container)).toBe("loading")
         expect(container.querySelectorAll("[data-node='stat']").length).toBe(2)
     })
 

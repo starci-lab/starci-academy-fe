@@ -1,15 +1,15 @@
 import { Fragment } from "react"
 import {
+    treeRoles,
     treeSpec,
     type TreeKey,
-    type TreeRole,
     type TreeSlot,
     type TreeSlots,
 } from "@/components/classNames"
 
 /**
  * FRAME - `Tree`: the ONE frame that renders a registry entry. It takes a key from
- * `src/components/classNames.tsx` and one component per role that key declares, and draws
+ * `src/components/classNames/shapes.ts` and one component per role that key declares, and draws
  * the node plus its children in registry order.
  *
  * WHY THERE IS EXACTLY ONE OF THESE. The retired arrangement had a frame per shape - Stack,
@@ -38,12 +38,16 @@ export interface TreeProps<K extends TreeKey> {
     name: K
     /**
      * One component per role the key declares, passed UNCALLED so this frame can render
-     * each of them with `isSkeleton`. A missing, extra or unknown role does not compile -
+     * each of them with `isLoading`. A missing, extra or unknown role does not compile -
      * see `TreeSlots`.
      */
     slots: TreeSlots<K>
-    /** Renders every slot in its skeleton state. */
-    isSkeleton?: boolean
+    /**
+     * Renders every slot in its resting state. Same meaning as everywhere else in the tree -
+     * nothing to show YET, the first load, SWR's `isLoading` - never "a request is in flight";
+     * see {@link TreeSlotsProps.isLoading}, which is the declaration this one is handed to.
+     */
+    isLoading?: boolean
 }
 
 /**
@@ -52,13 +56,14 @@ export interface TreeProps<K extends TreeKey> {
  *
  * @param props - {@link TreeProps}
  */
-const Tree = <K extends TreeKey>({ name, slots, isSkeleton }: TreeProps<K>) => {
+const Tree = <K extends TreeKey>({ name, slots, isLoading }: TreeProps<K>) => {
     const spec = treeSpec(name)
-    // `slots` is a mapped type over THIS key's roles, while `spec.roles` is widened to the
-    // shared role union - the one place the two views of the same registry have to meet.
-    // Reading it back through a partial record keeps that meeting point honest: a role with
-    // no component renders nothing instead of crashing the tree.
-    const byRole = slots as unknown as Partial<Record<TreeRole, TreeSlot>>
+    // `slots` is a mapped type over THIS key's roles, so it can only be indexed by a role of
+    // THIS key - which is exactly what `treeRoles` hands back, while `spec.roles` is widened
+    // to the shared union and cannot. Reading the order from the narrow list is what lets the
+    // lookup below type-check; it used to be a double cast, which silenced the one check that
+    // makes a wrong tree impossible.
+    const roles = treeRoles(name)
     // The host element is the KEY's decision, never the caller's. A landmark is a structural
     // fact about the node, so it belongs in the registry beside the classes and the roles;
     // absent means the neutral `div`. Without this, a landmark could only be reached by writing
@@ -73,15 +78,19 @@ const Tree = <K extends TreeKey>({ name, slots, isSkeleton }: TreeProps<K>) => {
             data-explain={spec.explain}
             className={spec.classes}
         >
-            {spec.roles.map((role) => {
-                const Slot = byRole[role]
+            {roles.map((role) => {
+                // Annotated rather than inferred: `TreeSlots<K>[TreeRolesOf<K>]` is deferred
+                // while `K` is generic, and JSX cannot check props against a type it has not
+                // resolved. Every value of the mapped type IS a `TreeSlot`, so naming that is
+                // a widening the compiler verifies - not an assertion that skips it.
+                const Slot: TreeSlot | undefined = slots[role]
                 if (!Slot) return null
                 // The node inside a slot belongs to whoever passed it, so it gets no wrapper
                 // and no badge of its own - a wrapper here would be a node the registry never
                 // described, and every one of them is a seam nobody owns.
                 return (
                     <Fragment key={role}>
-                        <Slot isSkeleton={isSkeleton} />
+                        <Slot isLoading={isLoading} />
                     </Fragment>
                 )
             })}

@@ -249,11 +249,11 @@ describe("_SignInFlow", () => {
                 onSubmitCredentials={stubs.onSubmitCredentials}
                 onSubmitCode={stubs.onSubmitCode}
                 onResend={stubs.onResend}
-                isSkeleton
+                isLoading
             />,
         )
         expect(container.querySelector("[data-node='form']")).not.toBeNull()
         expect(container.querySelector("[data-part='email']")).toHaveProperty("disabled", true)
-        expect(container.querySelector("button[type='submit']")?.getAttribute("data-skeleton")).toBe("true")
+        expect(container.querySelector("button[type='submit']")?.getAttribute("data-loading")).toBe("true")
     })
 })

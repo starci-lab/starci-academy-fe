@@ -111,7 +111,7 @@ export interface SignInFlowProps {
     /** Called when the reader asks for a fresh code. */
     onResend: () => void
     /** Renders every slot in its resting state. */
-    isSkeleton?: boolean
+    isLoading?: boolean
 }
 
 /** What the ref carries between renders: everything the reader has typed so far. */
@@ -138,7 +138,7 @@ const PASSWORD_ID = "sign-in-password"
 const CODE_ID = "sign-in-code"
 
 /** The statuses during which a request is in flight and the primary action is not pressable. */
-const PENDING_STATUSES: readonly SignInFlowStatus[] = ["sending", "verifying"]
+const PENDING_STATUSES: ReadonlyArray<SignInFlowStatus> = ["sending", "verifying"]
 
 /** Nothing typed yet. */
 const EMPTY_VALUES: SignInFlowValues = { email: "", password: "", otp: "" }
@@ -156,7 +156,7 @@ export const _SignInFlow = ({
     onSubmitCredentials,
     onSubmitCode,
     onResend,
-    isSkeleton = false,
+    isLoading = false,
 }: SignInFlowProps) => {
     const values = useRef<SignInFlowValues>({ ...EMPTY_VALUES })
 
@@ -193,7 +193,7 @@ export const _SignInFlow = ({
     const EmailLabel = () => <label htmlFor={EMAIL_ID}>{labels.emailLabel}</label>
 
     /** The `field` role of the email `form-field`. */
-    const EmailInput = ({ isSkeleton: resting }: TreeSlotProps) => (
+    const EmailInput = ({ isLoading: resting }: TreeSlotProps) => (
         <input
             id={EMAIL_ID}
             data-part="email"
@@ -213,7 +213,7 @@ export const _SignInFlow = ({
     const PasswordLabel = () => <label htmlFor={PASSWORD_ID}>{labels.passwordLabel}</label>
 
     /** The `field` role of the password `form-field`. */
-    const PasswordInput = ({ isSkeleton: resting }: TreeSlotProps) => (
+    const PasswordInput = ({ isLoading: resting }: TreeSlotProps) => (
         <input
             id={PASSWORD_ID}
             data-part="password"
@@ -237,7 +237,7 @@ export const _SignInFlow = ({
      * the code from the message it just received, and `numeric` is what gets a reader the
      * digit keypad rather than a full keyboard.
      */
-    const CodeInput = ({ isSkeleton: resting }: TreeSlotProps) => (
+    const CodeInput = ({ isLoading: resting }: TreeSlotProps) => (
         <input
             id={CODE_ID}
             data-part="code"
@@ -255,28 +255,28 @@ export const _SignInFlow = ({
     const CodeHint = () => <p data-part="code-hint">{labels.codeHint}</p>
 
     /** The email control, labelled and hinted. */
-    const EmailField = ({ isSkeleton: resting }: TreeSlotProps) => (
+    const EmailField = ({ isLoading: resting }: TreeSlotProps) => (
         <Tree
             name="form-field"
-            isSkeleton={resting}
+            isLoading={resting}
             slots={{ heading: EmailLabel, field: EmailInput, meta: EmailHint }}
         />
     )
 
     /** The password control, labelled and hinted. */
-    const PasswordField = ({ isSkeleton: resting }: TreeSlotProps) => (
+    const PasswordField = ({ isLoading: resting }: TreeSlotProps) => (
         <Tree
             name="form-field"
-            isSkeleton={resting}
+            isLoading={resting}
             slots={{ heading: PasswordLabel, field: PasswordInput, meta: PasswordHint }}
         />
     )
 
     /** The code control, labelled and hinted. */
-    const CodeField = ({ isSkeleton: resting }: TreeSlotProps) => (
+    const CodeField = ({ isLoading: resting }: TreeSlotProps) => (
         <Tree
             name="form-field"
-            isSkeleton={resting}
+            isLoading={resting}
             slots={{ heading: CodeLabel, field: CodeInput, meta: CodeHint }}
         />
     )
@@ -289,12 +289,12 @@ export const _SignInFlow = ({
      * between the last control and the button - and a node that only existed to restate that
      * would be a shape with no reason.
      */
-    const Fields = ({ isSkeleton: resting }: TreeSlotProps) => {
-        if (step === "code") return <CodeField isSkeleton={resting} />
+    const Fields = ({ isLoading: resting }: TreeSlotProps) => {
+        if (step === "code") return <CodeField isLoading={resting} />
         return (
             <>
-                <EmailField isSkeleton={resting} />
-                <PasswordField isSkeleton={resting} />
+                <EmailField isLoading={resting} />
+                <PasswordField isLoading={resting} />
             </>
         )
     }
@@ -316,8 +316,8 @@ export const _SignInFlow = ({
     )
 
     /** The `action` role of the `form` key: the one honest primary action of the surface. */
-    const Submit = ({ isSkeleton: resting }: TreeSlotProps) => (
-        <Button variant="primary" type="submit" disabled={isPending} isSkeleton={resting}>
+    const Submit = ({ isLoading: resting }: TreeSlotProps) => (
+        <Button variant="primary" type="submit" disabled={isPending} isLoading={resting}>
             {step === "code" ? labels.submitCode : labels.submitCredentials}
         </Button>
     )
@@ -329,18 +329,18 @@ export const _SignInFlow = ({
      * is nothing to press yet, so the footer says what pressing the button will DO - the one
      * thing a reader about to hand over a password wants to know.
      */
-    const Secondary = ({ isSkeleton: resting }: TreeSlotProps) => {
+    const Secondary = ({ isLoading: resting }: TreeSlotProps) => {
         if (step !== "code") return <p data-part="hint">{labels.credentialsHint}</p>
         return (
-            <Button variant="ghost" disabled={isResending} isSkeleton={resting} onClick={onResend}>
+            <Button variant="ghost" disabled={isResending} isLoading={resting} onClick={onResend}>
                 {labels.resend}
             </Button>
         )
     }
 
     /** The `heading` role of the confirmation that replaces the form. */
-    const DoneTitle = ({ isSkeleton: resting }: TreeSlotProps) => (
-        <Heading level={3} isSkeleton={resting}>{labels.signedInTitle}</Heading>
+    const DoneTitle = ({ isLoading: resting }: TreeSlotProps) => (
+        <Heading level={3} isLoading={resting}>{labels.signedInTitle}</Heading>
     )
 
     /** The `body` role of the confirmation. */
@@ -352,7 +352,7 @@ export const _SignInFlow = ({
         return (
             <Tree
                 name="section"
-                isSkeleton={isSkeleton}
+                isLoading={isLoading}
                 slots={{ heading: DoneTitle, body: DoneBody }}
             />
         )
@@ -362,7 +362,7 @@ export const _SignInFlow = ({
         <form data-component="SignInFlow" data-step={step} noValidate onSubmit={onSubmit}>
             <Tree
                 name="form"
-                isSkeleton={isSkeleton}
+                isLoading={isLoading}
                 slots={{ body: Fields, meta: Status, action: Submit, footer: Secondary }}
             />
         </form>

@@ -16,6 +16,11 @@ export default defineConfig([
             "**/out/**",
             "**/coverage/**",
             "**/next-env.d.ts",
+            // Agent scratch: `.claude/worktrees/**` holds a FULL git worktree of this
+            // same repo. Left unignored, eslint lints a stale second copy of every
+            // file and reports thousands of problems that no longer exist in source -
+            // noise that buries the real ones and makes a green gate impossible.
+            "**/.claude/**",
         ],
     },
     {
@@ -37,6 +42,20 @@ export default defineConfig([
             "linebreak-style": "off",
             quotes: ["error", "double"],
             semi: ["error", "never"],
+        },
+    },
+    {
+        // One spelling for an array type: `Array<T>` and `ReadonlyArray<T>`, never `T[]`.
+        //
+        // Both forms mean the same thing, which is exactly why this is a rule rather than a
+        // convention - nothing corrects the second spelling, so a file written on a Tuesday
+        // reads differently from its neighbour and every diff carries the noise. The generic
+        // form is the one that stays readable when the element type is itself generic
+        // (`Array<TreeSlots<K>>` against `TreeSlots<K>[]`), and it is already what the query
+        // types and the hooks use, so this fixes the minority rather than the majority.
+        files: ["**/*.{ts,tsx,mts,cts}"],
+        rules: {
+            "@typescript-eslint/array-type": ["error", { default: "generic", readonly: "generic" }],
         },
     },
     {
@@ -62,7 +81,15 @@ export default defineConfig([
             "starci-fe/no-unknown-slot-role": "error",
             "starci-fe/no-fragment-slot": "error",
             "starci-fe/no-structural-host-outside-registry-frame": "error",
+            "starci-fe/no-heading-element-outside-heading-atom": "error",
             "starci-fe/registry-explain-is-a-reason": "error",
+            // The registry folder holds two layers with opposite rules: SHAPES is generic and
+            // capped, CHAINS name real compositions and are not. These two keep that difference
+            // from eroding - the first because a value import there would invert the tier order
+            // and build a real cycle while tsc stayed green, the second because a ceiling that
+            // only a test enforces is one deletion away from not existing.
+            "starci-fe/classnames-type-imports-only": "error",
+            "starci-fe/shapes-vocabulary-ceiling": "error",
             // Token scale - the registry entry is now the only hand-written class string.
             "starci-fe/no-fractional-spacing": "error",
             "starci-fe/no-hero-heading-class": "error",
@@ -72,6 +99,10 @@ export default defineConfig([
             "starci-fe/no-public-classname-prop": "error",
             "starci-fe/no-public-frame-css-props": "error",
             "starci-fe/no-css-door-type-laundering": "error",
+            // The double cast turns type checking OFF at the seam where it is worth most. The
+            // twin tests are exempt inside the rule itself (see `isCastGovernedFile`), because
+            // proving a closed API refuses bad props requires building bad props on purpose.
+            "starci-fe/no-double-cast": "error",
             "starci-fe/no-runtime-namespace": "error",
             // Tiers and file layout.
             "starci-fe/no-heroui-outside-vocabulary": "error",

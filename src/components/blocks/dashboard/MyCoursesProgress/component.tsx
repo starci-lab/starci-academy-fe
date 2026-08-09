@@ -1,5 +1,6 @@
+import { Heading } from "@/components/atoms/Heading"
 import { Tree } from "@/components/frames/Tree"
-import type { TreeSlotProps, TreeSlots } from "@/components/classNames"
+import type { DashboardSectionChain, TreeSlotProps, TreeSlots } from "@/components/classNames"
 
 /**
  * BLOCK - `MyCoursesProgress`, presentational half.
@@ -45,18 +46,22 @@ export interface MyCoursesProgressLabels {
 
 /** Props for {@link _MyCoursesProgress} - presentational; no fetch, no store, no i18n. */
 export interface MyCoursesProgressProps {
-    /** First load with nothing in hand - the list rests as itself. */
-    isSkeleton?: boolean
-    /** Settled with no enrolled courses. */
+    /**
+     * First load with nothing in hand - the list rests as itself. SWR's `isLoading` and not
+     * `isValidating`: a refetch happens with the courses already on screen, and resting on it
+     * would blank a list the reader is reading. See {@link TreeSlotProps.isLoading}.
+     */
+    isLoading?: boolean
+    /** Settled with no enrolled courses. An answer, not a wait - so never the flag above. */
     isEmpty?: boolean
     /** The enrolled courses, in display order. */
-    courses?: readonly MyCoursesProgressCourse[]
+    courses?: ReadonlyArray<MyCoursesProgressCourse>
     /** Resolved copy. */
     labels: MyCoursesProgressLabels
 }
 
 /** Placeholder rows, drawn at a fixed count so the resting shape is the loaded one. */
-const RESTING_ROWS: readonly number[] = Array.from({ length: RESTING_ROW_COUNT }, (_unused, index) => index)
+const RESTING_ROWS: ReadonlyArray<number> = Array.from({ length: RESTING_ROW_COUNT }, (_unused, index) => index)
 
 /**
  * The two slots the `stat` key declares, closed over one course.
@@ -90,31 +95,37 @@ const restingSlots = (loading: string): TreeSlots<"stat"> => ({
  * @param props - {@link MyCoursesProgressProps}
  */
 export const _MyCoursesProgress = ({
-    isSkeleton = false,
+    isLoading = false,
     isEmpty = false,
     courses = [],
     labels,
 }: MyCoursesProgressProps) => {
-    /** The `heading` role of the `section-header` key. */
-    const HeaderTitle = () => <h2>{labels.heading}</h2>
+    /**
+     * The `heading` role of the `section-header` key. `level={2}` is one word that fixes both
+     * the tag and the type scale, so the document outline and the visual order cannot drift.
+     *
+     * It takes no resting state on purpose: the title is copy this file already holds, so
+     * shimmering it would hide a word that is not waiting on anything.
+     */
+    const HeaderTitle = () => <Heading level={2}>{labels.heading}</Heading>
 
     /** The `meta` role of the `section-header` key: the count, on the heading's baseline. */
-    const HeaderCount = ({ isSkeleton: resting }: TreeSlotProps) => (
-        <span data-part="count" data-state={resting === true ? "skeleton" : "ready"}>
+    const HeaderCount = ({ isLoading: resting }: TreeSlotProps) => (
+        <span data-part="count" data-state={resting === true ? "loading" : "ready"}>
             {resting === true ? labels.loading : labels.count}
         </span>
     )
 
     /** The `heading` role of the `section` key. */
-    const Header = ({ isSkeleton: resting }: TreeSlotProps) => (
-        <Tree name="section-header" isSkeleton={resting} slots={{ heading: HeaderTitle, meta: HeaderCount }} />
+    const Header = ({ isLoading: resting }: TreeSlotProps) => (
+        <Tree name="section-header" isLoading={resting} slots={{ heading: HeaderTitle, meta: HeaderCount }} />
     )
 
     /** The `body` role of the `section` key: the rows, resting or real. */
-    const Body = ({ isSkeleton: resting }: TreeSlotProps) => {
+    const Body = ({ isLoading: resting }: TreeSlotProps) => {
         if (resting === true) {
             return (
-                <ul data-part="courses" data-state="skeleton">
+                <ul data-part="courses" data-state="loading">
                     {RESTING_ROWS.map((index) => (
                         <li key={index} data-part="course" aria-hidden="true">
                             <Tree name="stat" slots={restingSlots(labels.loading)} />
@@ -137,5 +148,20 @@ export const _MyCoursesProgress = ({
         )
     }
 
-    return <Tree name="section" isSkeleton={isSkeleton} slots={{ heading: Header, body: Body }} />
+    return <Tree name="section" isLoading={isLoading} slots={{ heading: Header, body: Body }} />
+}
+
+/**
+ * This block's entry in the dashboard chain: it IS the body of the region named
+ * `courses-progress`.
+ *
+ * The `section` and `section-header` keys fix the shape - a heading with a count on its
+ * baseline, over a list - and say nothing about what the list holds. This entry says it, and
+ * says it in code the compiler checks: `MyCoursesProgressProps` is the only props type in the
+ * chain carrying both a `courses` list and a resolved count label, so a block without both
+ * cannot claim this name.
+ */
+export const myCoursesProgressChain: DashboardSectionChain = {
+    name: "courses-progress",
+    body: _MyCoursesProgress,
 }

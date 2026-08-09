@@ -35,8 +35,14 @@ export interface HeadingProps {
     children: ReactNode
     /** Which level of the document outline this title is - drives both the tag and the size. */
     level?: HeadingLevel
-    /** Renders the resting shape: same tag, same measure, no readable text. */
-    isSkeleton?: boolean
+    /**
+     * Renders the resting shape: same tag, same measure, no readable text.
+     *
+     * MEANS "nothing to show YET" - the first load, no data in hand, which is exactly SWR's
+     * `isLoading`. It does NOT mean "a request is in flight": `isValidating` goes true on every
+     * focus revalidation, and passing it here would hide a title the reader is reading by.
+     */
+    isLoading?: boolean
 }
 
 /** The element each level renders, so the visual order and the document outline cannot drift. */
@@ -75,18 +81,18 @@ const RESTING_CLASSES = "animate-pulse select-none rounded bg-slate-500/20 text-
  *
  * @param props - {@link HeadingProps}
  */
-export const Heading = ({ children, level = 2, isSkeleton = false }: HeadingProps) => {
+export const Heading = ({ children, level = 2, isLoading = false }: HeadingProps) => {
     // Typed as `ElementType` rather than left as the literal union: the four tags accept the same
     // attributes anyway, and a union of intrinsic names is the one JSX shape that reads badly.
     const Tag: ElementType = TAGS[level]
-    const classes = [BASE_CLASSES, LEVEL_CLASSES[level], isSkeleton && RESTING_CLASSES].filter(Boolean).join(" ")
+    const classes = [BASE_CLASSES, LEVEL_CLASSES[level], isLoading && RESTING_CLASSES].filter(Boolean).join(" ")
     return (
         <Tag
             data-tier="atom"
             data-component="Heading"
             data-level={level}
-            data-skeleton={isSkeleton ? "true" : "false"}
-            aria-hidden={isSkeleton ? true : undefined}
+            data-loading={isLoading ? "true" : "false"}
+            aria-hidden={isLoading ? true : undefined}
             className={classes}
         >
             {children}

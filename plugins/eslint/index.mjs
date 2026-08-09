@@ -6,7 +6,7 @@
  *
  * The registry rules (`./registry-rules.mjs`) are the centre of gravity now. The retired
  * `principle` / `PrincipleToken` / `data-principle` rules described ONE node and left the
- * author to guess the rest; the named registry in `src/components/classNames.tsx` answers
+ * author to guess the rest; the named registry in `src/components/classNames/shapes.ts` answers
  * the classes, the children and the reason in one key, so the rules that policed the
  * guessing were retargeted at the registry or deleted outright.
  *
@@ -20,8 +20,12 @@ import {
 import { noRuntimeNamespace } from "./namespaces.mjs"
 import { noPublicClassNameProp } from "./public-contracts.mjs"
 import { noFragmentSlot } from "./slots.mjs"
-import { noStructuralHostOutsideRegistryFrame } from "./structural-hosts.mjs"
+import {
+  noHeadingElementOutsideHeadingAtom,
+  noStructuralHostOutsideRegistryFrame,
+} from "./structural-hosts.mjs"
 import { noCssDoorTypeLaundering } from "./css-door-laundering.mjs"
+import { noDoubleCast } from "./double-cast.mjs"
 import {
   noClassCompositionOutsideRegistry,
   noHandWrittenRegistryAttrs,
@@ -30,6 +34,10 @@ import {
   noUnregisteredTreeKey,
   registryExplainIsAReason,
 } from "./registry-rules.mjs"
+import {
+  classnamesTypeImportsOnly,
+  shapesVocabularyCeiling,
+} from "./registry-folder.mjs"
 
 /** Static className string from one JSXAttribute (literal or pure template quasi). */
 function classNameText(node) {
@@ -360,16 +368,16 @@ const presentationalPurity = {
 
 // A hand-kept skeleton tree (`import FooSkeleton from './FooSkeleton'`, or `skeleton={<...>}`) is a
 // second description of a shape that already has one, and it drifts the first time the real one
-// changes. Thread `isSkeleton` to each leaf so the resting shape IS the loaded shape. Global - both
+// changes. Thread `isLoading` to each leaf so the resting shape IS the loaded shape. Global - both
 // forms are a parallel tree at any tier. A bare `Skeleton` import is the primitive, not a twin.
 const noParallelSkeleton = {
   meta: {
     type: "problem",
-    docs: { description: "Ban hand-kept skeleton trees (skeleton={JSX} prop or relative *Skeleton import) - thread isSkeleton to leaves." },
+    docs: { description: "Ban hand-kept skeleton trees (skeleton={JSX} prop or relative *Skeleton import) - thread isLoading to leaves." },
     schema: [],
     messages: {
-      prop: "Prop `skeleton={<...>}` is a hand-kept parallel skeleton tree that drifts from the real shape - thread `isSkeleton` to each leaf so the shimmer mirrors the loaded tree.",
-      import: "Import `{{name}}` (relative) is a hand-kept parallel skeleton - thread `isSkeleton` to each leaf instead of keeping a second tree.",
+      prop: "Prop `skeleton={<...>}` is a hand-kept parallel skeleton tree that drifts from the real shape - thread `isLoading` to each leaf so the shimmer mirrors the loaded tree.",
+      import: "Import `{{name}}` (relative) is a hand-kept parallel skeleton - thread `isLoading` to each leaf instead of keeping a second tree.",
     },
   },
   create(context) {
@@ -465,7 +473,7 @@ const noInlineSkeletonBranch = {
     },
     schema: [],
     messages: {
-      branch: "`{{flag}} ? ... : ...` picks between two DIFFERENT elements - that is a resting shape written by hand at the call site, and it drifts from the real one the first time the real one changes. Give the component below an `isSkeleton` prop and pass the flag down; let it rest as ITSELF. A ternary is fine when both arms are the same component.",
+      branch: "`{{flag}} ? ... : ...` picks between two DIFFERENT elements - that is a resting shape written by hand at the call site, and it drifts from the real one the first time the real one changes. Give the component below an `isLoading` prop and pass the flag down; let it rest as ITSELF. A ternary is fine when both arms are the same component.",
     },
   },
   create(context) {
@@ -543,13 +551,13 @@ const noSkeletonTwinComponent = {
     },
     schema: [],
     messages: {
-      twin: "`{{name}}` is a hand-mirrored twin: a second description of a shape that already has one. Give the component it mirrors an `isSkeleton` prop and let it rest as ITSELF - the twin cannot be kept in step, it can only be noticed after it has already drifted. (The `Skeleton.*` primitives under `blocks/skeleton/` are the pieces you rest WITH, and are exempt.)",
+      twin: "`{{name}}` is a hand-mirrored twin: a second description of a shape that already has one. Give the component it mirrors an `isLoading` prop and let it rest as ITSELF - the twin cannot be kept in step, it can only be noticed after it has already drifted. (The `Skeleton.*` primitives under `blocks/skeleton/` are the pieces you rest WITH, and are exempt.)",
     },
   },
   create(context) {
     const file = (context.filename || context.getFilename()).replace(/\\/g, "/")
     if (!file.includes("/src/components/")) return {}
-    // the primitives themselves, and the atoms' own `isSkeleton` plumbing, are the exception
+    // the primitives themselves, and the atoms' own `isLoading` plumbing, are the exception
     if (file.includes("/blocks/skeleton/") || file.includes("/atoms/")) return {}
     const m = file.match(/\/([A-Za-z0-9]*Skeleton)\/index\.tsx$/) || file.match(/\/([A-Za-z0-9]*Skeleton)\.tsx$/)
     if (!m) return {}
@@ -621,7 +629,7 @@ const noPublicFrameCssProps = {
     schema: [],
     messages: {
       cssProp:
-        "`{{prop}}` on <{{frame}}> reopens the seam the registry key already owns. A frame renders an entry from `src/components/classNames.tsx` and takes nothing but the key and its slots - if the shape here is genuinely different, it is a different key.",
+        "`{{prop}}` on <{{frame}}> reopens the seam the registry key already owns. A frame renders an entry from `src/components/classNames/shapes.ts` and takes nothing but the key and its slots - if the shape here is genuinely different, it is a different key.",
     },
   },
   create(context) {
@@ -661,7 +669,11 @@ export default {
     "no-unknown-slot-role": noUnknownSlotRole,
     "no-fragment-slot": noFragmentSlot,
     "no-structural-host-outside-registry-frame": noStructuralHostOutsideRegistryFrame,
+    "no-heading-element-outside-heading-atom": noHeadingElementOutsideHeadingAtom,
     "registry-explain-is-a-reason": registryExplainIsAReason,
+    // -- how the registry FOLDER itself is written: two layers, opposite rules --
+    "classnames-type-imports-only": classnamesTypeImportsOnly,
+    "shapes-vocabulary-ceiling": shapesVocabularyCeiling,
     // -- token scale --
     "no-fractional-spacing": noFractionalSpacing,
     "no-hero-heading-class": noHeroHeadingClass,
@@ -671,6 +683,7 @@ export default {
     "no-public-classname-prop": noPublicClassNameProp,
     "no-public-frame-css-props": noPublicFrameCssProps,
     "no-css-door-type-laundering": noCssDoorTypeLaundering,
+    "no-double-cast": noDoubleCast,
     "no-runtime-namespace": noRuntimeNamespace,
     // -- tiers and file layout --
     "no-heroui-outside-vocabulary": noHerouiOutsideVocabulary,

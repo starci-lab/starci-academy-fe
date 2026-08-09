@@ -17,12 +17,12 @@ const FRACTIONAL_SPACING = /\b[a-z-]+-\d+\.5\b/
 const ARBITRARY_VALUE = /\[[^\]]+\]/
 
 /** Every level, so a loop can walk the whole vocabulary instead of restating it. */
-const LEVELS: readonly HeadingLevel[] = [1, 2, 3, 4]
+const LEVELS: ReadonlyArray<HeadingLevel> = [1, 2, 3, 4]
 
 /** Render one level and hand back its root element. */
-const renderHeading = (level?: HeadingLevel, isSkeleton?: boolean): Element => {
+const renderHeading = (level?: HeadingLevel, isLoading?: boolean): Element => {
     const { container } = render(
-        <Heading level={level} isSkeleton={isSkeleton}>
+        <Heading level={level} isLoading={isLoading}>
             Course catalogue
         </Heading>,
     )
@@ -57,7 +57,7 @@ describe("Heading", () => {
         expect(root.getAttribute("data-tier")).toBe("atom")
         expect(root.getAttribute("data-component")).toBe("Heading")
         expect(root.getAttribute("data-level")).toBe("3")
-        expect(root.getAttribute("data-skeleton")).toBe("false")
+        expect(root.getAttribute("data-loading")).toBe("false")
     })
 
     it("renders the resolved copy it was handed", () => {
@@ -66,9 +66,9 @@ describe("Heading", () => {
 
     it("keeps every class it draws on the house scale", () => {
         for (const level of LEVELS) {
-            for (const isSkeleton of [false, true]) {
-                const classes = renderHeading(level, isSkeleton).getAttribute("class") ?? ""
-                const label = `level ${level} skeleton ${isSkeleton}`
+            for (const isLoading of [false, true]) {
+                const classes = renderHeading(level, isLoading).getAttribute("class") ?? ""
+                const label = `level ${level} skeleton ${isLoading}`
                 expect(classes.trim(), label).not.toBe("")
                 expect(FRACTIONAL_SPACING.test(classes), label).toBe(false)
                 expect(ARBITRARY_VALUE.test(classes), label).toBe(false)
@@ -90,7 +90,7 @@ describe("Heading", () => {
     it("rests as itself rather than as a second shape", () => {
         const root = renderHeading(2, true)
         expect(root.tagName).toBe("H2")
-        expect(root.getAttribute("data-skeleton")).toBe("true")
+        expect(root.getAttribute("data-loading")).toBe("true")
         expect(root.getAttribute("aria-hidden")).toBe("true")
         expect(root.getAttribute("class")).toContain("animate-pulse")
         expect(root.textContent).toBe("Course catalogue")

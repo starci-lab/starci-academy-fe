@@ -39,7 +39,7 @@ export interface AuthenticationPageProps {
     /** What hangs on the page. */
     slots: AuthenticationPageSlots
     /** Renders the page in its resting state. */
-    isSkeleton?: boolean
+    isLoading?: boolean
 }
 
 /**
@@ -47,14 +47,14 @@ export interface AuthenticationPageProps {
  *
  * @param props - {@link AuthenticationPageProps}
  */
-export const _AuthenticationPage = ({ labels, slots, isSkeleton = false }: AuthenticationPageProps) => {
+export const _AuthenticationPage = ({ labels, slots, isLoading = false }: AuthenticationPageProps) => {
     /** The `heading` role of the `section` key. */
-    const Title = ({ isSkeleton: resting }: TreeSlotProps) => (
-        <Heading level={1} isSkeleton={resting}>{labels.title}</Heading>
+    const Title = ({ isLoading: resting }: TreeSlotProps) => (
+        <Heading level={1} isLoading={resting}>{labels.title}</Heading>
     )
 
     /** The `body` role of the `section` key: the flow the caller handed in. */
     const Body = slots.body
 
-    return <Tree name="section" isSkeleton={isSkeleton} slots={{ heading: Title, body: Body }} />
+    return <Tree name="section" isLoading={isLoading} slots={{ heading: Title, body: Body }} />
 }

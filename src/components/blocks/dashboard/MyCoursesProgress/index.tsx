@@ -1,6 +1,7 @@
 "use client"
 
 import { useQueryMyCoursesSwr } from "@/hooks"
+import { type MyCourseRow } from "@/modules/api/graphql/queries/types/my-courses"
 import {
     _MyCoursesProgress,
     type MyCoursesProgressCourse,
@@ -16,23 +17,12 @@ import {
  * the request has not come back.
  */
 
-/** The part of the enrolled-courses request this block reads. */
-interface MyCoursesLeaf {
-    /** The settled payload, absent until it arrives. */
-    data?: CourseSlice[]
-    /** True while the first request is still in flight. */
-    isLoading?: boolean
-}
-
-/** The course fields this block reads. */
-interface CourseSlice {
-    /** Opaque id of the course. */
-    globalId: string
-    /** Course title. */
-    label: string
-    /** Overall completion, 0 to 100. */
-    completionPercent: number
-}
+/*
+ * The payload shape is NOT restated here. This file used to declare its own `MyCoursesLeaf`
+ * and `CourseSlice` and then double-cast the hook onto them, which meant the query could
+ * rename a field and this block would still compile and render `undefined`. It now reads
+ * `MyCourseRow` - the type the query itself publishes - so the seam is checked.
+ */
 
 /** Copy that does not depend on the payload. */
 const STATIC_LABELS = {
@@ -58,7 +48,7 @@ const clampPercent = (percent: number): number => {
  *
  * @param course - One course of the payload.
  */
-const toCourseRow = (course: CourseSlice): MyCoursesProgressCourse => {
+const toCourseRow = (course: MyCourseRow): MyCoursesProgressCourse => {
     const percent = clampPercent(course.completionPercent)
     return {
         id: course.globalId,
@@ -82,16 +72,16 @@ const toLabels = (count: number): MyCoursesProgressLabels => ({
  * Fetch the enrolled courses and render them.
  */
 export const MyCoursesProgress = () => {
-    const enrolled = useQueryMyCoursesSwr() as unknown as MyCoursesLeaf
+    const enrolled = useQueryMyCoursesSwr()
     const courses = (enrolled.data ?? []).map(toCourseRow)
 
     // Rests only on a FIRST load: once anything is in hand the list shows it, so a
     // refetch never blanks a list the reader was already reading.
-    const isSkeleton = courses.length === 0 && enrolled.isLoading === true
+    const isLoading = courses.length === 0 && enrolled.isLoading === true
 
     return (
         <_MyCoursesProgress
-            isSkeleton={isSkeleton}
+            isLoading={isLoading}
             isEmpty={courses.length === 0}
             courses={courses}
             labels={toLabels(courses.length)}

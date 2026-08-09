@@ -47,9 +47,9 @@ describe("_AuthenticationPage", () => {
 
     it("rests as the same tree rather than as a second one", () => {
         const { container } = render(
-            <_AuthenticationPage labels={labels} slots={{ body: Body }} isSkeleton />,
+            <_AuthenticationPage labels={labels} slots={{ body: Body }} isLoading />,
         )
         expect(container.firstElementChild?.getAttribute("data-node")).toBe("section")
-        expect(container.querySelector("h1")?.getAttribute("data-skeleton")).toBe("true")
+        expect(container.querySelector("h1")?.getAttribute("data-loading")).toBe("true")
     })
 })

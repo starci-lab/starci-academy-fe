@@ -1,7 +1,7 @@
-import type { ComponentType } from "react"
+import type { TreeNodeSpec, TreeSlot } from "./roles"
 
 /**
- * THE NAMED REGISTRY (replaces the old `principle` token union).
+ * THE NAMED REGISTRY - SHAPES (replaces the old `principle` token union).
  *
  * The retired `PrincipleToken` described ONE node: a token resolved to a gap step and
  * nothing else, so the author still decided what went inside the node, how many children
@@ -21,6 +21,14 @@ import type { ComponentType } from "react"
  * explodes until the registry buys no consistency at all. A ROLE is the smallest thing a
  * layout actually needs to know about a child, so nine roles cover every key below.
  *
+ * WHAT A SHAPE THEREFORE CANNOT SAY, AND WHO SAYS IT. A role constrains the SHAPE of a tree
+ * and nothing else, so two call sites of `section` may put entirely unrelated components in
+ * the same `body`. That is not a defect to be fixed by adding keys - it is the price of a
+ * vocabulary that stays learnable. The complement lives in `./chains/`: a chain names ONE
+ * real composition and pins its slot to `ComponentType<XxxProps>`, so the intended component
+ * is readable straight off the type. Shapes stay capped; chains are uncapped by design,
+ * because there is one chain entry per composition that actually exists.
+ *
  * WHAT THE AUTHOR TYPES: the key. Nothing else. No class, no gap step, no decision about
  * whether a wrapper is needed, no guess about which children belong. TypeScript turns a
  * wrong tree into a compile error - see {@link TreeSlots}.
@@ -29,91 +37,13 @@ import type { ComponentType } from "react"
  * `form` - was added for the one shape none of them could express: a submission whose
  * outcome line must sit BETWEEN its last control and its button. A fourteenth key is only
  * ever justified the same way, by a tree shape no existing key can hold - never by a caller
- * who wanted a different gap.
- */
-
-/**
- * The closed set of child roles a registry key may ask for. A role says what a child DOES
- * in the tree, never which component it is.
+ * who wanted a different gap. The ceiling is mechanical, not advisory: the twin test and
+ * `starci-fe/shapes-vocabulary-ceiling` both hold this file to at most sixteen keys.
  *
- * - `nav` - route-level navigation that stays put while the body changes.
- * - `heading` - the name of the thing; at most one per node.
- * - `meta` - secondary facts about the heading (count, timestamp, hint, unit).
- * - `media` - avatar, icon or thumbnail that identifies the row at a glance.
- * - `body` - the content the node exists to carry.
- * - `field` - something the reader types into or selects from.
- * - `action` - something the reader presses.
- * - `aside` - content that supports the body and may drop below it when narrow.
- * - `footer` - closing content of a bounded surface, below its body.
+ * THIS FILE NAMES NO COMPONENT. It imports the role vocabulary beside it and nothing else,
+ * which is what keeps it usable from every tier at once. A component type reached from here
+ * would point the generic vocabulary at one screen.
  */
-export type TreeRole =
-    | "nav"
-    | "heading"
-    | "meta"
-    | "media"
-    | "body"
-    | "field"
-    | "action"
-    | "aside"
-    | "footer"
-
-/**
- * The props every slot component receives from the frame that mounts it. The frame owns the
- * loading state of the region, so it hands the flag down rather than asking the caller to
- * build two trees.
- */
-export interface TreeSlotProps {
-    /** True while the region is resting - the slot renders its own skeleton shape. */
-    isSkeleton?: boolean
-}
-
-/**
- * A slot is passed UNCALLED - a component reference, never a built element - so the frame
- * can render it with `isSkeleton` and both states come from one source. Same contract as the
- * `ComponentTypeWithSkeleton` slot idiom the frames tier already uses.
- */
-export type TreeSlot = ComponentType<TreeSlotProps>
-
-/**
- * The shape of one registry entry: the node's own class string, the ordered contract for its
- * children, and the one sentence that says why the node exists.
- */
-export interface TreeNodeSpec {
-    /** The class string of the node itself. Not a prop, not reachable by a caller. */
-    readonly classes: string
-    /** The ordered child roles this node accepts - each role appears exactly once. */
-    readonly roles: readonly TreeRole[]
-    /**
-     * Why this node exists, in one sentence - emitted as `data-explain` so the reason is
-     * readable exactly where the problem is being looked at. A reason, never a restatement
-     * of the key: "row of chips" only repeats the key; "the tags wrap onto their own line
-     * before the title does" is the fact that made the node exist.
-     */
-    readonly explain: string
-    /**
-     * The host element this node renders as. Omitted means `div`.
-     *
-     * A landmark is a structural decision, so the KEY owns it exactly the way the key already
-     * owns the classes and the child roles - an author never picks the tag any more than they
-     * pick the gap. Without this a landmark could only be reached by writing `<nav>` by hand,
-     * which `no-structural-host-outside-registry-frame` rightly refuses: the registry would be
-     * forcing the very violation it exists to prevent.
-     */
-    readonly element?: TreeElement
-}
-
-/**
- * The host elements a registry key may render as - a closed set, so a key cannot reach for an
- * arbitrary tag. Everything here is either a landmark or the neutral default.
- */
-export type TreeElement =
-    | "div"
-    | "nav"
-    | "main"
-    | "header"
-    | "footer"
-    | "aside"
-    | "section"
 
 /**
  * The registry. Each key is a whole tree: its own classes plus the children it accepts.
@@ -212,6 +142,9 @@ export type TreeRolesOf<K extends TreeKey> = (typeof CLASS_NAMES)[K]["roles"][nu
  * a MISSING role fails because the mapped type makes every declared role required; an
  * EXTRA or UNKNOWN role fails because the object literal carries a property the mapped
  * type does not declare. The author cannot invent a child the key never agreed to.
+ *
+ * What it does NOT decide is WHICH component fills a role - that is the chain's job, and
+ * the two constraints are meant to be read together.
  */
 export type TreeSlots<K extends TreeKey> = {
     readonly [R in TreeRolesOf<K>]: TreeSlot
@@ -227,7 +160,32 @@ export type TreeSlots<K extends TreeKey> = {
 export const treeSpec = (name: TreeKey): TreeNodeSpec => CLASS_NAMES[name]
 
 /**
+ * The roles ONE key declares, kept at that key's own role type instead of the widened
+ * `TreeRole` union.
+ *
+ * {@link treeSpec} widens on purpose, which is right for the classes and the reason but wrong
+ * for the roles: a caller that walks the widened list can no longer index {@link TreeSlots} of
+ * the same key with what it is holding, and the frame paid for that with a double cast. Read
+ * through here, the role a caller has in hand is exactly a key the slots object declares, so
+ * the lookup type-checks and nothing has to be asserted.
+ *
+ * @param name - The registry key to read.
+ */
+export const treeRoles = <K extends TreeKey>(name: K): ReadonlyArray<TreeRolesOf<K>> =>
+    CLASS_NAMES[name].roles
+
+/**
  * Every registry key, in declaration order. Exported so gates and tests can walk the whole
  * vocabulary instead of restating it.
  */
-export const TREE_KEYS: readonly TreeKey[] = Object.keys(CLASS_NAMES) as TreeKey[]
+export const TREE_KEYS: ReadonlyArray<TreeKey> = Object.keys(CLASS_NAMES) as Array<TreeKey>
+
+/**
+ * The most keys this vocabulary may hold, stated once so the twin test and the lint rule
+ * that both guard it cannot disagree about the number.
+ *
+ * It caps SHAPES ONLY. Chains are uncapped by design - one entry per composition that really
+ * exists - so a reader who finds the two layers counted differently is looking at the rule,
+ * not at a discrepancy to tidy away.
+ */
+export const TREE_KEY_CEILING = 16

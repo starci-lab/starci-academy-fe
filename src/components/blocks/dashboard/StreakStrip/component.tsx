@@ -1,5 +1,6 @@
+import { Heading } from "@/components/atoms/Heading"
 import { Tree } from "@/components/frames/Tree"
-import type { TreeSlotProps } from "@/components/classNames"
+import type { DashboardSectionChain, TreeSlotProps } from "@/components/classNames"
 
 /**
  * BLOCK - `StreakStrip`, presentational half.
@@ -46,18 +47,22 @@ export interface StreakStripLabels {
 
 /** Props for {@link _StreakStrip} - presentational; no fetch, no store, no i18n. */
 export interface StreakStripProps {
-    /** First load with nothing in hand - the strip rests as itself. */
-    isSkeleton?: boolean
-    /** Settled with no activity to show. */
+    /**
+     * First load with nothing in hand - the strip rests as itself. SWR's `isLoading` and not
+     * `isValidating`: a refetch happens with the week already on screen, and resting on it would
+     * blank a strip the reader is reading. See {@link TreeSlotProps.isLoading}.
+     */
+    isLoading?: boolean
+    /** Settled with no activity to show. An answer, not a wait - so never the flag above. */
     isEmpty?: boolean
     /** The last seven days, oldest first. */
-    days?: readonly StreakStripDay[]
+    days?: ReadonlyArray<StreakStripDay>
     /** Resolved copy. */
     labels: StreakStripLabels
 }
 
 /** Placeholder columns, kept at the real count so the resting shape is the loaded one. */
-const RESTING_DAYS: readonly number[] = Array.from({ length: DAY_COUNT }, (_unused, index) => index)
+const RESTING_DAYS: ReadonlyArray<number> = Array.from({ length: DAY_COUNT }, (_unused, index) => index)
 
 /**
  * Render the strip. See the file header for why these two keys.
@@ -65,20 +70,26 @@ const RESTING_DAYS: readonly number[] = Array.from({ length: DAY_COUNT }, (_unus
  * @param props - {@link StreakStripProps}
  */
 export const _StreakStrip = ({
-    isSkeleton = false,
+    isLoading = false,
     isEmpty = false,
     days = [],
     labels,
 }: StreakStripProps) => {
-    /** The `heading` role of the `section` key. */
-    const Heading = () => <h2>{labels.heading}</h2>
+    /**
+     * The `heading` role of the `section` key. `level={2}` is one word that fixes both the tag
+     * and the type scale, so the document outline and the visual order cannot drift.
+     *
+     * It takes no resting state on purpose: the title is copy this file already holds, so
+     * shimmering it would hide a word that is not waiting on anything.
+     */
+    const SectionHeading = () => <Heading level={2}>{labels.heading}</Heading>
 
     /** The `body` role of the `split` key: the seven day columns. */
-    const DayList = ({ isSkeleton: resting }: TreeSlotProps) => (
-        <ul data-part="days" data-state={resting === true ? "skeleton" : "ready"}>
+    const DayList = ({ isLoading: resting }: TreeSlotProps) => (
+        <ul data-part="days" data-state={resting === true ? "loading" : "ready"}>
             {resting === true
                 ? RESTING_DAYS.map((index) => (
-                    <li key={index} data-part="day" data-state="skeleton" aria-hidden="true">
+                    <li key={index} data-part="day" data-state="loading" aria-hidden="true">
                         <span data-part="dot" />
                     </li>
                 ))
@@ -93,9 +104,9 @@ export const _StreakStrip = ({
     )
 
     /** The `aside` role of the `split` key: what the seven days add up to. */
-    const Readout = ({ isSkeleton: resting }: TreeSlotProps) => {
+    const Readout = ({ isLoading: resting }: TreeSlotProps) => {
         if (resting === true) {
-            return <p data-part="readout" data-state="skeleton">{labels.loading}</p>
+            return <p data-part="readout" data-state="loading">{labels.loading}</p>
         }
         if (isEmpty) {
             return <p data-part="readout" data-state="empty">{labels.empty}</p>
@@ -109,9 +120,23 @@ export const _StreakStrip = ({
     }
 
     /** The `body` role of the `section` key. */
-    const Body = ({ isSkeleton: resting }: TreeSlotProps) => (
-        <Tree name="split" isSkeleton={resting} slots={{ body: DayList, aside: Readout }} />
+    const Body = ({ isLoading: resting }: TreeSlotProps) => (
+        <Tree name="split" isLoading={resting} slots={{ body: DayList, aside: Readout }} />
     )
 
-    return <Tree name="section" isSkeleton={isSkeleton} slots={{ heading: Heading, body: Body }} />
+    return <Tree name="section" isLoading={isLoading} slots={{ heading: SectionHeading, body: Body }} />
+}
+
+/**
+ * This block's entry in the dashboard chain: it IS the body of the region named
+ * `streak-strip`.
+ *
+ * `section` and `split` fix the shape - a heading over two halves that stack when narrow - and
+ * neither can say that the left half is a WEEK. This entry says it, and the compiler holds it:
+ * `StreakStripProps` is the only props type in the chain taking a `days` list, so a block that
+ * does not model seven columns cannot fill this region.
+ */
+export const streakStripChain: DashboardSectionChain = {
+    name: "streak-strip",
+    body: _StreakStrip,
 }

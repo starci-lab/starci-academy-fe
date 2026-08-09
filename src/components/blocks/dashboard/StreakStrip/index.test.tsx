@@ -44,7 +44,7 @@ afterEach(() => {
 describe("StreakStrip", () => {
     it("rests while the first request is in flight", () => {
         const { container } = render(<StreakStrip />)
-        expect(container.querySelector("[data-part='readout']")?.getAttribute("data-state")).toBe("skeleton")
+        expect(container.querySelector("[data-part='readout']")?.getAttribute("data-state")).toBe("loading")
         expect(container.querySelectorAll("[data-part='day']").length).toBe(7)
     })
 

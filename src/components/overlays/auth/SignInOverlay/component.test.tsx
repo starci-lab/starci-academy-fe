@@ -156,10 +156,10 @@ describe("_SignInOverlay", () => {
                 labels={labels}
                 slots={{ body: Body }}
                 onDismiss={vi.fn()}
-                isSkeleton
+                isLoading
             />,
         )
         expect(container.querySelector("[data-node='page-header']")).not.toBeNull()
-        expect(container.querySelector("button")?.getAttribute("data-skeleton")).toBe("true")
+        expect(container.querySelector("button")?.getAttribute("data-loading")).toBe("true")
     })
 })

@@ -17,15 +17,15 @@ const FRACTIONAL_SPACING = /\b[a-z-]+-\d+\.5\b/
 const ARBITRARY_VALUE = /\[[^\]]+\]/
 
 /** The whole tone vocabulary, mirrored so a loop can walk it. */
-const TONES: readonly TextTone[] = ["default", "muted"]
+const TONES: ReadonlyArray<TextTone> = ["default", "muted"]
 
 /** The whole size vocabulary, mirrored so a loop can walk it. */
-const SIZES: readonly TextSize[] = ["sm", "md"]
+const SIZES: ReadonlyArray<TextSize> = ["sm", "md"]
 
 /** Render one combination and hand back its root element. */
-const renderText = (tone?: TextTone, size?: TextSize, isSkeleton?: boolean): Element => {
+const renderText = (tone?: TextTone, size?: TextSize, isLoading?: boolean): Element => {
     const { container } = render(
-        <Text tone={tone} size={size} isSkeleton={isSkeleton}>
+        <Text tone={tone} size={size} isLoading={isLoading}>
             Twelve lessons remaining
         </Text>,
     )
@@ -59,7 +59,7 @@ describe("Text", () => {
         expect(root.getAttribute("data-component")).toBe("Text")
         expect(root.getAttribute("data-tone")).toBe("muted")
         expect(root.getAttribute("data-size")).toBe("sm")
-        expect(root.getAttribute("data-skeleton")).toBe("false")
+        expect(root.getAttribute("data-loading")).toBe("false")
     })
 
     it("renders the resolved copy it was handed", () => {
@@ -87,9 +87,9 @@ describe("Text", () => {
     it("keeps every class it draws on the house scale", () => {
         for (const tone of TONES) {
             for (const size of SIZES) {
-                for (const isSkeleton of [false, true]) {
-                    const classes = renderText(tone, size, isSkeleton).getAttribute("class") ?? ""
-                    const label = `${tone}/${size}/${isSkeleton}`
+                for (const isLoading of [false, true]) {
+                    const classes = renderText(tone, size, isLoading).getAttribute("class") ?? ""
+                    const label = `${tone}/${size}/${isLoading}`
                     expect(classes.trim(), label).not.toBe("")
                     expect(FRACTIONAL_SPACING.test(classes), label).toBe(false)
                     expect(ARBITRARY_VALUE.test(classes), label).toBe(false)
@@ -112,7 +112,7 @@ describe("Text", () => {
     it("rests as itself rather than as a second shape", () => {
         const root = renderText("default", "md", true)
         expect(root.tagName).toBe("P")
-        expect(root.getAttribute("data-skeleton")).toBe("true")
+        expect(root.getAttribute("data-loading")).toBe("true")
         expect(root.getAttribute("aria-hidden")).toBe("true")
         expect(root.getAttribute("class")).toContain("animate-pulse")
         expect(root.textContent).toBe("Twelve lessons remaining")

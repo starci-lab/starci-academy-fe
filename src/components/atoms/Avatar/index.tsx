@@ -32,8 +32,14 @@ export interface AvatarProps {
     src?: string
     /** The size step. */
     size?: AvatarSize
-    /** Renders the resting shape: same circle, same footprint, no image and no glyphs. */
-    isSkeleton?: boolean
+    /**
+     * Renders the resting shape: same circle, same footprint, no image and no glyphs.
+     *
+     * MEANS "nothing to show YET" - the first load, no data in hand, which is exactly SWR's
+     * `isLoading`. It does NOT mean "a request is in flight": `isValidating` goes true on every
+     * focus revalidation, and passing it here would shimmer over a face already on screen.
+     */
+    isLoading?: boolean
 }
 
 /** Diameter and initial size per step. */
@@ -85,18 +91,18 @@ const initialsOf = (name: string): string =>
  *
  * @param props - {@link AvatarProps}
  */
-export const Avatar = ({ name, src, size = "md", isSkeleton = false }: AvatarProps) => {
-    const classes = [BASE_CLASSES, SIZE_CLASSES[size], isSkeleton ? RESTING_CLASSES : FILL_CLASSES]
+export const Avatar = ({ name, src, size = "md", isLoading = false }: AvatarProps) => {
+    const classes = [BASE_CLASSES, SIZE_CLASSES[size], isLoading ? RESTING_CLASSES : FILL_CLASSES]
         .filter(Boolean)
         .join(" ")
-    const showsImage = src !== undefined && src !== "" && !isSkeleton
+    const showsImage = src !== undefined && src !== "" && !isLoading
     return (
         <span
             data-tier="atom"
             data-component="Avatar"
             data-size={size}
-            data-skeleton={isSkeleton ? "true" : "false"}
-            aria-hidden={isSkeleton ? true : undefined}
+            data-loading={isLoading ? "true" : "false"}
+            aria-hidden={isLoading ? true : undefined}
             className={classes}
         >
             {showsImage ? <img src={src} alt={name} className={IMAGE_CLASSES} /> : initialsOf(name)}

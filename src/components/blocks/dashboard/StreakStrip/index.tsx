@@ -1,6 +1,7 @@
 "use client"
 
 import { useQueryMyWeeklyStatsSwr } from "@/hooks"
+import { type MyWeeklyStatsDay } from "@/modules/api/graphql/queries/types/my-weekly-stats"
 import {
     _StreakStrip,
     type StreakStripDay,
@@ -16,31 +17,13 @@ import {
  * can be rendered from a test or a story without either of them.
  */
 
-/** The part of the weekly-stats request this block reads. */
-interface WeeklyStatsLeaf {
-    /** The settled payload, absent until it arrives. */
-    data?: WeeklyStatsSlice
-    /** True while the first request is still in flight. */
-    isLoading?: boolean
-}
-
-/** One day of the payload. */
-interface WeeklyStatsDay {
-    /** Calendar day, `YYYY-MM-DD`, oldest first. */
-    date: string
-    /** Whether the learner earned anything that day. */
-    active: boolean
-}
-
-/** The weekly-stats fields this block reads. */
-interface WeeklyStatsSlice {
-    /** Consecutive active days up to today. */
-    streak: number
-    /** Longest run of consecutive active days ever reached. */
-    longestStreak: number
-    /** The last seven calendar days, oldest first. */
-    days: WeeklyStatsDay[]
-}
+/*
+ * The payload shape is NOT restated here. This file used to declare its own `WeeklyStatsLeaf`
+ * and `WeeklyStatsSlice` and then double-cast the hook onto them, so the query could rename
+ * `longestStreak` and this block would keep compiling and render a zero it invented. It now
+ * reads the hook's own return type, and `MyWeeklyStatsDay` - the type the query publishes -
+ * for the one function that takes a day apart.
+ */
 
 /**
  * The locale the dates are formatted in. Fixed here on purpose: locale resolution is
@@ -60,7 +43,7 @@ const DATE_FORMAT = new Intl.DateTimeFormat(DATE_LOCALE, { dateStyle: "medium", 
  *
  * @param day - One day of the payload.
  */
-const toStripDay = (day: WeeklyStatsDay): StreakStripDay => {
+const toStripDay = (day: MyWeeklyStatsDay): StreakStripDay => {
     const date = new Date(`${day.date}T00:00:00Z`)
     return {
         date: day.date,
@@ -88,18 +71,18 @@ const toLabels = (streak: number, longest: number): StreakStripLabels => ({
  * Fetch the week and render the strip.
  */
 export const StreakStrip = () => {
-    const weekly = useQueryMyWeeklyStatsSwr() as unknown as WeeklyStatsLeaf
+    const weekly = useQueryMyWeeklyStatsSwr()
     const stats = weekly.data
 
     // Rests only on a FIRST load: once anything is in hand the strip shows it, so a
     // refetch never blanks a week the reader was already reading.
-    const isSkeleton = !stats && weekly.isLoading === true
+    const isLoading = !stats && weekly.isLoading === true
     const days = (stats?.days ?? []).map(toStripDay)
     const isEmpty = !stats || ((stats.streak ?? 0) === 0 && !days.some((day) => day.active))
 
     return (
         <_StreakStrip
-            isSkeleton={isSkeleton}
+            isLoading={isLoading}
             isEmpty={isEmpty}
             days={days}
             labels={toLabels(stats?.streak ?? 0, stats?.longestStreak ?? 0)}

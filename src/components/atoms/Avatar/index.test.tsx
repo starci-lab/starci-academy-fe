@@ -17,7 +17,7 @@ const FRACTIONAL_SPACING = /\b[a-z-]+-\d+\.5\b/
 const ARBITRARY_VALUE = /\[[^\]]+\]/
 
 /** The whole size vocabulary, mirrored so a loop can walk it. */
-const SIZES: readonly AvatarSize[] = ["sm", "md", "lg"]
+const SIZES: ReadonlyArray<AvatarSize> = ["sm", "md", "lg"]
 
 /** A data URI, so the test never reaches the network for a picture. */
 const PICTURE = "data:image/gif;base64,R0lGODlhAQABAAAAACw="
@@ -45,7 +45,7 @@ describe("Avatar", () => {
         expect(root.getAttribute("data-tier")).toBe("atom")
         expect(root.getAttribute("data-component")).toBe("Avatar")
         expect(root.getAttribute("data-size")).toBe("lg")
-        expect(root.getAttribute("data-skeleton")).toBe("false")
+        expect(root.getAttribute("data-loading")).toBe("false")
     })
 
     it("falls back to initials when there is no picture", () => {
@@ -75,9 +75,9 @@ describe("Avatar", () => {
     })
 
     it("rests without a picture, at the same diameter, so nothing beside it moves", () => {
-        const resting = renderAvatar({ src: PICTURE, size: "md", isSkeleton: true })
+        const resting = renderAvatar({ src: PICTURE, size: "md", isLoading: true })
         expect(resting.querySelector("img")).toBe(null)
-        expect(resting.getAttribute("data-skeleton")).toBe("true")
+        expect(resting.getAttribute("data-loading")).toBe("true")
         expect(resting.getAttribute("aria-hidden")).toBe("true")
         expect(resting.getAttribute("class")).toContain("animate-pulse")
         const restingClasses = resting.getAttribute("class") ?? ""
@@ -99,9 +99,9 @@ describe("Avatar", () => {
 
     it("keeps every class it draws on the house scale", () => {
         for (const size of SIZES) {
-            for (const isSkeleton of [false, true]) {
-                const classes = renderAvatar({ size, isSkeleton }).getAttribute("class") ?? ""
-                const label = `${size}/${isSkeleton}`
+            for (const isLoading of [false, true]) {
+                const classes = renderAvatar({ size, isLoading }).getAttribute("class") ?? ""
+                const label = `${size}/${isLoading}`
                 expect(classes.trim(), label).not.toBe("")
                 expect(FRACTIONAL_SPACING.test(classes), label).toBe(false)
                 expect(ARBITRARY_VALUE.test(classes), label).toBe(false)

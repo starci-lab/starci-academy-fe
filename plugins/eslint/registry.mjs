@@ -1,35 +1,60 @@
 /**
- * Reader for the NAMED REGISTRY at `src/components/classNames.tsx`.
+ * Reader for the NAMED REGISTRY at `src/components/classNames/`.
  *
  * The registry is the single source of truth for class strings, child roles and the reason
  * a node exists. Rules that need to know which keys and which roles exist read them FROM
- * that file rather than restating them here, because a second copy of the vocabulary is a
+ * those files rather than restating them here, because a second copy of the vocabulary is a
  * second thing to drift - and the whole point of the registry is that there is one place.
+ *
+ * IT USED TO BE ONE FILE. `src/components/classNames.tsx` held the role union and the entry
+ * table together; the folder split them into `roles.ts` and `shapes.ts` so the generic
+ * vocabulary could stay free of the chain layer beside it. This reader follows the split, and
+ * follows it LOUDLY: when the path moved and this file still pointed at the old one, every
+ * registry rule went quietly silent - `readRegistry` returned null, the rules did nothing, and
+ * eslint reported a clean tree while an invented key and an invented role both walked through.
+ * That is why the twin test asserts the real repository parses, not just that the parser works.
  *
  * Parsing is deliberately textual. An ESLint rule runs under one parser on one file at a
  * time and cannot import a TypeScript module; the two shapes read below (`TreeRole` and
- * `CLASS_NAMES`) are stable, and the registry's own twin test is what keeps them honest.
+ * `CLASS_NAMES`) are stable, and the registry's own twin tests are what keep them honest.
  */
 import { existsSync, readFileSync, statSync } from "node:fs"
 import { dirname, join } from "node:path"
 
-/** Location of the registry, relative to the repository root. */
-export const REGISTRY_RELATIVE = "src/components/classNames.tsx"
+/** The registry folder, relative to the repository root. */
+export const REGISTRY_DIR_RELATIVE = "src/components/classNames"
 
-/** Parsed registries, keyed by absolute path and invalidated by mtime. */
+/** The entry table - keys, classes, roles and reasons. Relative to the repository root. */
+export const REGISTRY_SHAPES_RELATIVE = `${REGISTRY_DIR_RELATIVE}/shapes.ts`
+
+/** The closed role vocabulary. Relative to the repository root. */
+export const REGISTRY_ROLES_RELATIVE = `${REGISTRY_DIR_RELATIVE}/roles.ts`
+
+/** Parsed registries, keyed by the shapes path and invalidated by both files' mtimes. */
 const cache = new Map()
 
 /** Forward-slash form of a filename, so Windows paths compare like every other path. */
 export const normalizePath = (filename) => String(filename || "").replace(/\\/g, "/")
 
-/** True when this file IS the registry - the one place a class string may be written. */
-export const isRegistryFile = (filename) => normalizePath(filename).endsWith(`/${REGISTRY_RELATIVE}`)
+/**
+ * True when this file holds the entry table - the one place a class string or an `explain`
+ * may be written.
+ *
+ * It is the SHAPES file specifically, not the whole folder: `roles.ts` declares a vocabulary
+ * with no classes in it, and the chain modules declare no classes either, so widening this
+ * would hand three more files an exemption none of them needs.
+ */
+export const isRegistryFile = (filename) => normalizePath(filename).endsWith(`/${REGISTRY_SHAPES_RELATIVE}`)
+
+/** True when this file sits anywhere inside the registry folder. */
+export const isRegistryFolderFile = (filename) =>
+  normalizePath(filename).includes(`/${REGISTRY_DIR_RELATIVE}/`)
 
 /** Walk up from a linted file to the registry; null when no registry sits above it. */
 export const findRegistryFile = (filename) => {
   let dir = dirname(normalizePath(filename))
   for (let depth = 0; depth < 40; depth += 1) {
-    const candidate = normalizePath(join(dir, REGISTRY_RELATIVE))
+    const candidate = normalizePath(join(dir, REGISTRY_SHAPES_RELATIVE))
     if (existsSync(candidate)) return candidate
     const parent = dirname(dir)
     if (!parent || parent === dir) return null
@@ -41,13 +66,13 @@ export const findRegistryFile = (filename) => {
 /** Every double-quoted lowercase word in a slice of source. */
 const quotedWords = (text) => [...String(text).matchAll(/"([a-z][a-z-]*)"/g)].map((hit) => hit[1])
 
-/** The closed role vocabulary, read off the `TreeRole` union. */
+/** The closed role vocabulary, read off the `TreeRole` union in `roles.ts`. */
 const parseRoles = (source) => {
   const match = source.match(/export type TreeRole\s*=([\s\S]*?)(?:\n\s*\n|\nexport )/)
   return match ? quotedWords(match[1]) : []
 }
 
-/** Every registry key mapped to the ordered roles it declares. */
+/** Every registry key mapped to the ordered roles it declares, read off `shapes.ts`. */
 const parseEntries = (source) => {
   const start = source.indexOf("export const CLASS_NAMES")
   if (start < 0) return {}
@@ -61,34 +86,52 @@ const parseEntries = (source) => {
   return entries
 }
 
+/** Modification time of a file, or null when it cannot be read. */
+const stampOf = (path) => {
+  try {
+    return statSync(path).mtimeMs
+  } catch {
+    return null
+  }
+}
+
+/** Text of a file, or null when it cannot be read. */
+const textOf = (path) => {
+  try {
+    return readFileSync(path, "utf8")
+  } catch {
+    return null
+  }
+}
+
 /**
  * Read the registry that governs a linted file.
  *
  * Returns `null` when there is no registry above the file, or when it cannot be read as
  * keys plus roles. A rule that gets `null` must do nothing: a registry nobody can read is
  * a reason to stay quiet, never a reason to call every call site wrong.
+ *
+ * @param filename - The file being linted.
  */
 export const readRegistry = (filename) => {
-  const path = findRegistryFile(filename)
-  if (!path) return null
-  let stamp = 0
-  try {
-    stamp = statSync(path).mtimeMs
-  } catch {
-    return null
-  }
-  const hit = cache.get(path)
+  const shapesPath = findRegistryFile(filename)
+  if (!shapesPath) return null
+  const rolesPath = normalizePath(join(dirname(shapesPath), "roles.ts"))
+  const shapesStamp = stampOf(shapesPath)
+  const rolesStamp = stampOf(rolesPath)
+  if (shapesStamp === null || rolesStamp === null) return null
+  const stamp = `${shapesStamp}:${rolesStamp}`
+  const hit = cache.get(shapesPath)
   if (hit && hit.stamp === stamp) return hit.value
-  let source = ""
-  try {
-    source = readFileSync(path, "utf8")
-  } catch {
-    return null
-  }
-  const rolesByKey = parseEntries(source)
+  const shapesSource = textOf(shapesPath)
+  const rolesSource = textOf(rolesPath)
+  if (shapesSource === null || rolesSource === null) return null
+  const rolesByKey = parseEntries(shapesSource)
   const keys = Object.keys(rolesByKey)
-  const roles = parseRoles(source)
-  const value = keys.length > 0 && roles.length > 0 ? { path, keys, roles, rolesByKey } : null
-  cache.set(path, { stamp, value })
+  const roles = parseRoles(rolesSource)
+  const value = keys.length > 0 && roles.length > 0
+    ? { path: shapesPath, rolesPath, keys, roles, rolesByKey }
+    : null
+  cache.set(shapesPath, { stamp, value })
   return value
 }

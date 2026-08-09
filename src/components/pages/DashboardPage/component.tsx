@@ -1,3 +1,4 @@
+import { Heading } from "@/components/atoms/Heading"
 import { Tree } from "@/components/frames/Tree"
 import { IdentityStats } from "@/components/blocks/dashboard/IdentityStats"
 import { MyCoursesProgress } from "@/components/blocks/dashboard/MyCoursesProgress"
@@ -48,11 +49,15 @@ const ProgressBody = () => (
  * @param props - {@link DashboardPageProps}
  */
 export const _DashboardPage = ({ labels }: DashboardPageProps) => {
-    /** The `heading` role of the outer `section`. */
-    const Title = () => <h1>{labels.title}</h1>
+    /**
+     * The `heading` role of the outer `section`. `level={1}` because this is the name of the
+     * PAGE, and the atom turns that one word into both the tag a screen reader builds the
+     * outline from and the size a reader sees - so the two cannot disagree.
+     */
+    const Title = () => <Heading level={1}>{labels.title}</Heading>
 
-    /** The `heading` role of the inner `section`. */
-    const ProgressHeading = () => <h2>{labels.progressHeading}</h2>
+    /** The `heading` role of the inner `section` - a section of the page, so `level={2}`. */
+    const ProgressHeading = () => <Heading level={2}>{labels.progressHeading}</Heading>
 
     /** The `body` role of the `split` key: everything the reader came to read. */
     const MainColumn = () => (

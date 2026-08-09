@@ -17,10 +17,10 @@ const FRACTIONAL_SPACING = /\b[a-z-]+-\d+\.5\b/
 const ARBITRARY_VALUE = /\[[^\]]+\]/
 
 /** The whole variant vocabulary, mirrored so a loop can walk it. */
-const VARIANTS: readonly ButtonVariant[] = ["primary", "secondary", "ghost"]
+const VARIANTS: ReadonlyArray<ButtonVariant> = ["primary", "secondary", "ghost"]
 
 /** The whole size vocabulary, mirrored so a loop can walk it. */
-const SIZES: readonly ButtonSize[] = ["sm", "md"]
+const SIZES: ReadonlyArray<ButtonSize> = ["sm", "md"]
 
 /** Render with the given props and hand back the rendered control. */
 const renderButton = (props: Partial<ButtonProps> = {}): HTMLButtonElement => {
@@ -58,7 +58,7 @@ describe("Button", () => {
         expect(root.getAttribute("data-component")).toBe("Button")
         expect(root.getAttribute("data-variant")).toBe("primary")
         expect(root.getAttribute("data-size")).toBe("sm")
-        expect(root.getAttribute("data-skeleton")).toBe("false")
+        expect(root.getAttribute("data-loading")).toBe("false")
     })
 
     it("renders the resolved label it was handed", () => {
@@ -81,16 +81,16 @@ describe("Button", () => {
 
     it("refuses the press while it is resting, not just visually", () => {
         const onClick = vi.fn()
-        const root = renderButton({ onClick, isSkeleton: true })
+        const root = renderButton({ onClick, isLoading: true })
         expect(root.disabled).toBe(true)
-        expect(root.getAttribute("data-skeleton")).toBe("true")
+        expect(root.getAttribute("data-loading")).toBe("true")
         expect(root.getAttribute("class")).toContain("animate-pulse")
         fireEvent.click(root)
         expect(onClick).not.toHaveBeenCalled()
     })
 
     it("keeps its own height and inset while resting, so the row does not reflow", () => {
-        const resting = renderButton({ size: "md", isSkeleton: true }).getAttribute("class") ?? ""
+        const resting = renderButton({ size: "md", isLoading: true }).getAttribute("class") ?? ""
         cleanup()
         const loaded = renderButton({ size: "md" }).getAttribute("class") ?? ""
         for (const token of loaded.split(/\s+/).filter((cls) => /^(?:h-|px-)/.test(cls))) {
@@ -110,9 +110,9 @@ describe("Button", () => {
     it("keeps every class it draws on the house scale", () => {
         for (const variant of VARIANTS) {
             for (const size of SIZES) {
-                for (const isSkeleton of [false, true]) {
-                    const classes = renderButton({ variant, size, isSkeleton }).getAttribute("class") ?? ""
-                    const label = `${variant}/${size}/${isSkeleton}`
+                for (const isLoading of [false, true]) {
+                    const classes = renderButton({ variant, size, isLoading }).getAttribute("class") ?? ""
+                    const label = `${variant}/${size}/${isLoading}`
                     expect(classes.trim(), label).not.toBe("")
                     expect(FRACTIONAL_SPACING.test(classes), label).toBe(false)
                     expect(ARBITRARY_VALUE.test(classes), label).toBe(false)

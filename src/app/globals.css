@@ -4,7 +4,7 @@
  * The ONLY stylesheet in the app.
  *
  * Every structure on screen is drawn by a registry entry in
- * `src/components/classNames.tsx` and rendered by the `Tree` frame, so this file
+ * `src/components/classNames/shapes.ts` and rendered by the `Tree` frame, so this file
  * owns nothing but the ground the registry paints on: the page surface, the text
  * colour, and the seam colour the `card` key's `border` resolves against.
  *

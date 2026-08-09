@@ -46,8 +46,15 @@ export interface ButtonProps {
     disabled?: boolean
     /** Called on press. Named `on*` because it is a handler, not a thing that happens. */
     onClick?: () => void
-    /** Renders the resting shape and refuses the press while it rests. */
-    isSkeleton?: boolean
+    /**
+     * Renders the resting shape and refuses the press while it rests.
+     *
+     * MEANS "nothing to show YET" - the first load, no data in hand, which is exactly SWR's
+     * `isLoading`. It does NOT mean "a request is in flight": that is `disabled`, which is the
+     * prop for a submit already on its way, and routing SWR's `isValidating` here would make a
+     * button the reader was about to press go dead on every focus revalidation.
+     */
+    isLoading?: boolean
 }
 
 /** Shape, focus ring and disabled behaviour - true of every button regardless of variant. */
@@ -97,9 +104,9 @@ export const Button = ({
     type = "button",
     disabled = false,
     onClick,
-    isSkeleton = false,
+    isLoading = false,
 }: ButtonProps) => {
-    const classes = [BASE_CLASSES, SIZE_CLASSES[size], isSkeleton ? RESTING_CLASSES : VARIANT_CLASSES[variant]]
+    const classes = [BASE_CLASSES, SIZE_CLASSES[size], isLoading ? RESTING_CLASSES : VARIANT_CLASSES[variant]]
         .filter(Boolean)
         .join(" ")
     return (
@@ -108,9 +115,9 @@ export const Button = ({
             data-component="Button"
             data-variant={variant}
             data-size={size}
-            data-skeleton={isSkeleton ? "true" : "false"}
+            data-loading={isLoading ? "true" : "false"}
             type={type}
-            disabled={disabled || isSkeleton}
+            disabled={disabled || isLoading}
             onClick={onClick}
             className={classes}
         >
