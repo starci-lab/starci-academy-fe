@@ -3,8 +3,10 @@
  *
  * A public StarCi component owns its intrinsic appearance; where it SITS is decided by the
  * registry key of the node above it, never by a `className` handed in from outside. That is
- * why the new registry is named `classNames` and is still not a CSS door: a component
- * passes a KEY, and the key already carries the class string.
+ * why the registry is named `contracts` and is not a CSS door: a component passes a KEY, and
+ * the key already carries the class string. The registry used to be called `classNames`,
+ * which is exactly the confusion this rule exists to prevent - `className` is the vendor's
+ * prop, `contracts` is what makes handing one out unnecessary.
  *
  * The retired version of this rule kept two boundaries - `frames/Box` as a documented
  * foreign-mount escape hatch, and the vendor-wrapper atoms. Both are gone here. This is a
@@ -63,7 +65,7 @@ export const noPublicClassNameProp = {
       usage:
         "Do not pass `{{prop}}` to house component `{{component}}`. Whatever this string is adjusting is a real distinction: name it as a registry key on the parent node, or as a variant on `{{component}}`.",
       withClassNames:
-        "`WithClassNames<...>` re-opens the CSS door through a type. The registry named `classNames` hands out KEYS, not class strings - replace this with a semantic API.",
+        "`WithClassNames<...>` re-opens the CSS door through a type. The `contracts` registry hands out KEYS, not class strings - replace this with a semantic API.",
     },
   },
 

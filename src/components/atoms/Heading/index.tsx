@@ -1,4 +1,5 @@
-import type { ElementType, ReactNode } from "react"
+import { Typography, skeletonVariants } from "@heroui/react"
+import type { ReactNode } from "react"
 
 /**
  * ATOM - `Heading`: the name of a thing.
@@ -9,6 +10,17 @@ import type { ElementType, ReactNode } from "react"
  * title line, `section-header` puts it on a baseline beside a count, `card-header` puts it after
  * the media. Three different placements, one appearance, and the atom never learns which of the
  * three it is in.
+ *
+ * WHAT IT DRAWS. `Typography.Heading` from HeroUI, which owns the tag and the tracking, with
+ * the SIZE of each step set here. The vendor is imported HERE and only here - blocks, pages and
+ * overlays reach the scale through this atom.
+ *
+ * WHY THE SIZE IS OURS AND NOT THE VENDOR'S. HeroUI's heading steps are a marketing scale -
+ * `h1` at 36px, `h2` at 30px - and an application screen built on it reads as a wireframe: four
+ * display-sized lines stacked down a page whose content is 14px. The live product's own scale
+ * is dense, and this is it: the page title is one step above body, and a section title IS body
+ * size carrying more weight. Hierarchy on a working screen comes from weight and seam, not from
+ * size - which is exactly what the utilities below say, in one file, for every heading there is.
  *
  * WHY THERE IS NO `className`. A caller who can reach in is a caller who can make this heading
  * different from every other heading on the site, and that difference then lives at the call
@@ -45,60 +57,58 @@ export interface HeadingProps {
     isLoading?: boolean
 }
 
-/** The element each level renders, so the visual order and the document outline cannot drift. */
-const TAGS = {
-    1: "h1",
-    2: "h2",
-    3: "h3",
-    4: "h4",
-} as const
-
-/** The intrinsic appearance of each level. Never spacing - the node above owns that. */
+/**
+ * The product's own heading scale - dense, four steps, ported from the live app.
+ *
+ * `1` is the page title at one step above body; `2` is a section title at body size with more
+ * weight; `3` and `4` are a card title and a row title, both at the small body step. Every step
+ * overrides the vendor's own font-size class, which sits in the `components` layer and therefore
+ * loses to a utility - the one place in the tree where our scale and HeroUI's disagree.
+ */
 const LEVEL_CLASSES = {
-    1: "text-3xl font-semibold tracking-tight",
-    2: "text-2xl font-semibold tracking-tight",
-    3: "text-lg font-semibold",
-    4: "text-base font-semibold",
+    1: "text-xl font-semibold tracking-tight",
+    2: "text-base font-semibold",
+    3: "text-sm font-semibold",
+    4: "text-sm font-medium",
 } as const
 
 /**
- * Wrapping, shared by every level. There is deliberately NO text colour here: `globals.css` owns
- * the page ink, and a colour restated in an atom is a second place for the theme to disagree with
- * itself - the light theme gets fixed, the dark one does not, and nobody finds out for a month.
+ * The resting shape, borrowed from the vendor's own skeleton rather than described a second
+ * time. The heading keeps its TAG and its measure and wears the skeleton's fill and shimmer -
+ * one shape in two states, which is the only arrangement that cannot drift. `text-transparent`
+ * takes the glyphs out; the measure they set is what stops the row reflowing when the real
+ * title lands.
  */
-const BASE_CLASSES = "text-balance"
+const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({
+    className: "select-none text-transparent",
+})
 
-/**
- * The resting shape. It keeps the heading's own measure and hides only the glyphs, so the
- * shimmer is the real heading at rest rather than a second description of it. The fill is a
- * translucent tint rather than a fixed grey, so it works on either page surface without the
- * atom knowing which one it is on.
- */
-const RESTING_CLASSES = "animate-pulse select-none rounded bg-slate-500/20 text-transparent"
+/** Each level's own appearance, plus the skeleton fill when the title has not arrived. */
+const RESTING_LEVEL_CLASSES = {
+    1: LEVEL_CLASSES[1].concat(" ", RESTING_CLASSES),
+    2: LEVEL_CLASSES[2].concat(" ", RESTING_CLASSES),
+    3: LEVEL_CLASSES[3].concat(" ", RESTING_CLASSES),
+    4: LEVEL_CLASSES[4].concat(" ", RESTING_CLASSES),
+} as const
 
 /**
  * Draw a title at one level of the document outline.
  *
  * @param props - {@link HeadingProps}
  */
-export const Heading = ({ children, level = 2, isLoading = false }: HeadingProps) => {
-    // Typed as `ElementType` rather than left as the literal union: the four tags accept the same
-    // attributes anyway, and a union of intrinsic names is the one JSX shape that reads badly.
-    const Tag: ElementType = TAGS[level]
-    const classes = [BASE_CLASSES, LEVEL_CLASSES[level], isLoading && RESTING_CLASSES].filter(Boolean).join(" ")
-    return (
-        <Tag
-            data-tier="atom"
-            data-component="Heading"
-            data-level={level}
-            data-loading={isLoading ? "true" : "false"}
-            aria-hidden={isLoading ? true : undefined}
-            className={classes}
-        >
-            {children}
-        </Tag>
-    )
-}
+export const Heading = ({ children, level = 2, isLoading = false }: HeadingProps) => (
+    <Typography.Heading
+        data-tier="atom"
+        data-component="Heading"
+        data-level={level}
+        data-loading={isLoading ? "true" : "false"}
+        aria-hidden={isLoading ? true : undefined}
+        level={level}
+        className={isLoading ? RESTING_LEVEL_CLASSES[level] : LEVEL_CLASSES[level]}
+    >
+        {children}
+    </Typography.Heading>
+)
 
 /** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
 export const meta = { tier: "atom", name: "Heading" } as const

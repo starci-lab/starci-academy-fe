@@ -63,7 +63,8 @@ const toLabels = (streak: number, longest: number): StreakStripLabels => ({
     heading: "Learning streak",
     loading: "Loading",
     empty: "No streak yet",
-    current: `${streak} day streak`,
+    currentLabel: "Current streak",
+    current: streak === 1 ? "1 day" : `${streak} days`,
     longest: `Longest ${longest} days`,
 })
 
@@ -74,11 +75,13 @@ export const StreakStrip = () => {
     const weekly = useQueryMyWeeklyStatsSwr()
     const stats = weekly.data
 
-    // Rests only on a FIRST load: once anything is in hand the strip shows it, so a
-    // refetch never blanks a week the reader was already reading.
-    const isLoading = !stats && weekly.isLoading === true
+    // Rests only on a FIRST load, and never once the request has FAILED: SWR retries a rejected
+    // key on a backoff and reports `isLoading` again on every attempt, so a strip that read the
+    // flag alone would shimmer for as long as the backend was unreachable.
+    const hasFailed = weekly.error !== undefined && weekly.error !== null
+    const isLoading = !stats && !hasFailed && weekly.isLoading === true
     const days = (stats?.days ?? []).map(toStripDay)
-    const isEmpty = !stats || ((stats.streak ?? 0) === 0 && !days.some((day) => day.active))
+    const isEmpty = hasFailed || !stats || ((stats.streak ?? 0) === 0 && !days.some((day) => day.active))
 
     return (
         <_StreakStrip

@@ -82,7 +82,7 @@ export const noStructuralHostOutsideRegistryFrame = {
     schema: [],
     messages: {
       host:
-        "`<{{tag}}>` written here is a node with no key: nothing records what classes it should carry, which children belong inside it, or why it exists. Name the shape in `src/components/classNames/shapes.ts` and render it with `<Tree name=\"…\" />` - and if no key fits, that is the finding, not a reason to open a div.",
+        "`<{{tag}}>` written here is a node with no key: nothing records what classes it should carry, which children belong inside it, or why it exists. Name the shape in `src/components/contracts/shapes.ts` and render it with `<Tree contract=\"…\" />` - and if no key fits, that is the finding, not a reason to open a div.",
     },
   },
 

@@ -1,28 +1,31 @@
 /**
- * Reader for the NAMED REGISTRY at `src/components/classNames/`.
+ * Reader for the NAMED REGISTRY at `src/components/contracts/`.
  *
  * The registry is the single source of truth for class strings, child roles and the reason
  * a node exists. Rules that need to know which keys and which roles exist read them FROM
  * those files rather than restating them here, because a second copy of the vocabulary is a
  * second thing to drift - and the whole point of the registry is that there is one place.
  *
- * IT USED TO BE ONE FILE. `src/components/classNames.tsx` held the role union and the entry
- * table together; the folder split them into `roles.ts` and `shapes.ts` so the generic
- * vocabulary could stay free of the chain layer beside it. This reader follows the split, and
- * follows it LOUDLY: when the path moved and this file still pointed at the old one, every
- * registry rule went quietly silent - `readRegistry` returned null, the rules did nothing, and
- * eslint reported a clean tree while an invented key and an invented role both walked through.
- * That is why the twin test asserts the real repository parses, not just that the parser works.
+ * THE PATH HAS MOVED TWICE, AND THE FIRST TIME IT BROKE THIS FILE SILENTLY. It began as the
+ * single file `src/components/classNames.tsx`, holding the role union and the entry table
+ * together; that was split into `roles.ts` and `shapes.ts` inside a folder, so the generic
+ * vocabulary could stay free of the chain layer beside it. The folder was then renamed to
+ * `contracts/`. When the FIRST of those moves happened and this reader still pointed at the
+ * old path, every registry rule went quietly silent - `readRegistry` returned null, the rules
+ * did nothing, and eslint reported a clean tree while an invented key and an invented role
+ * both walked through. That is why the twin test asserts the REAL repository parses, not just
+ * that the parser works: a path constant is the one thing here that can be wrong without
+ * anything turning red.
  *
  * Parsing is deliberately textual. An ESLint rule runs under one parser on one file at a
- * time and cannot import a TypeScript module; the two shapes read below (`TreeRole` and
- * `CLASS_NAMES`) are stable, and the registry's own twin tests are what keep them honest.
+ * time and cannot import a TypeScript module; the two shapes read below (`ContractRole` and
+ * `CONTRACTS`) are stable, and the registry's own twin tests are what keep them honest.
  */
 import { existsSync, readFileSync, statSync } from "node:fs"
 import { dirname, join } from "node:path"
 
 /** The registry folder, relative to the repository root. */
-export const REGISTRY_DIR_RELATIVE = "src/components/classNames"
+export const REGISTRY_DIR_RELATIVE = "src/components/contracts"
 
 /** The entry table - keys, classes, roles and reasons. Relative to the repository root. */
 export const REGISTRY_SHAPES_RELATIVE = `${REGISTRY_DIR_RELATIVE}/shapes.ts`
@@ -66,15 +69,15 @@ export const findRegistryFile = (filename) => {
 /** Every double-quoted lowercase word in a slice of source. */
 const quotedWords = (text) => [...String(text).matchAll(/"([a-z][a-z-]*)"/g)].map((hit) => hit[1])
 
-/** The closed role vocabulary, read off the `TreeRole` union in `roles.ts`. */
+/** The closed role vocabulary, read off the `ContractRole` union in `roles.ts`. */
 const parseRoles = (source) => {
-  const match = source.match(/export type TreeRole\s*=([\s\S]*?)(?:\n\s*\n|\nexport )/)
+  const match = source.match(/export type ContractRole\s*=([\s\S]*?)(?:\n\s*\n|\nexport )/)
   return match ? quotedWords(match[1]) : []
 }
 
 /** Every registry key mapped to the ordered roles it declares, read off `shapes.ts`. */
 const parseEntries = (source) => {
-  const start = source.indexOf("export const CLASS_NAMES")
+  const start = source.indexOf("export const CONTRACTS")
   if (start < 0) return {}
   const end = source.indexOf("} as const", start)
   const block = source.slice(start, end < 0 ? source.length : end)

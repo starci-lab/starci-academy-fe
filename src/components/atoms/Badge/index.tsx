@@ -1,3 +1,4 @@
+import { Chip, skeletonVariants } from "@heroui/react"
 import type { ReactNode } from "react"
 
 /**
@@ -8,6 +9,11 @@ import type { ReactNode } from "react"
  * atom exists, and it is also the reason there should rarely be two of them beside each other: a
  * row of badges is a reader deciding which colour matters, which is a decision the surface was
  * supposed to have already made.
+ *
+ * WHAT IT DRAWS. HeroUI's `Chip` in its `soft` variant, which is the vendor's own tinted pairing:
+ * the fill is the tone at low alpha and the label is the same tone's soft foreground, with the
+ * contrast already tuned. That pairing is exactly what a hand-mixed `bg-<hue>/10 text-<hue>` gets
+ * wrong - it passes review on white and fails it in the dark theme, once, quietly.
  *
  * WHY `tone` IS A NAME AND NOT A COLOUR. `tone="danger"` says what the state MEANS; `bg-rose-100`
  * says what it looks like today. Only the first one survives a palette change, and only the first
@@ -37,52 +43,43 @@ export interface BadgeProps {
     isLoading?: boolean
 }
 
-/** Pill shape and inset. Part of the badge itself, so it is owned here and nowhere else. */
-const BASE_CLASSES = "inline-flex shrink-0 items-center whitespace-nowrap rounded-full px-2 py-1 text-xs font-medium"
-
 /**
- * The meaning of each tone, spelled as colour in exactly one place.
- *
- * Each fill is a translucent tint of its hue rather than a fixed light/dark pair, so one class
- * is legible on either page surface - `globals.css` owns which surface that is, and a badge that
- * had to be told would be a badge with two chances to be told wrong. `neutral` adds no ink of its
- * own for the same reason: the page ink is already the right colour.
+ * The meaning of each tone, mapped once onto the vendor's colour token. `neutral` is the
+ * vendor's `default`, which is the tone that claims nothing rather than a sixth hue.
  */
-const TONE_CLASSES = {
-    neutral: "bg-slate-500/15",
-    accent: "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300",
-    success: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
-    warning: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
-    danger: "bg-rose-500/15 text-rose-700 dark:text-rose-300",
+const TONE_COLORS = {
+    neutral: "default",
+    accent: "accent",
+    success: "success",
+    warning: "warning",
+    danger: "danger",
 } as const
 
-/**
- * The resting shape - the pill keeps its width so the row above it does not reflow. It REPLACES
- * the tone rather than layering over it: two `bg-*` utilities on one node resolve by stylesheet
- * order, not by the order they were typed, so a tint that only usually wins is not a shape.
- */
-const RESTING_CLASSES = "animate-pulse select-none bg-slate-500/20 text-transparent"
+/** The resting shape - the pill keeps its width so the row above it does not reflow. */
+const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({
+    className: "select-none text-transparent",
+})
 
 /**
  * Draw one classification.
  *
  * @param props - {@link BadgeProps}
  */
-export const Badge = ({ children, tone = "neutral", isLoading = false }: BadgeProps) => {
-    const classes = [BASE_CLASSES, isLoading ? RESTING_CLASSES : TONE_CLASSES[tone]].filter(Boolean).join(" ")
-    return (
-        <span
-            data-tier="atom"
-            data-component="Badge"
-            data-tone={tone}
-            data-loading={isLoading ? "true" : "false"}
-            aria-hidden={isLoading ? true : undefined}
-            className={classes}
-        >
-            {children}
-        </span>
-    )
-}
+export const Badge = ({ children, tone = "neutral", isLoading = false }: BadgeProps) => (
+    <Chip
+        data-tier="atom"
+        data-component="Badge"
+        data-tone={tone}
+        data-loading={isLoading ? "true" : "false"}
+        aria-hidden={isLoading ? true : undefined}
+        color={TONE_COLORS[tone]}
+        variant="soft"
+        size="sm"
+        className={isLoading ? RESTING_CLASSES : undefined}
+    >
+        {children}
+    </Chip>
+)
 
 /** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
 export const meta = { tier: "atom", name: "Badge" } as const

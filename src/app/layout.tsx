@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
 import type { ReactNode } from "react"
+import { ShellNav } from "@/components/layouts/ShellNav"
 import { Tree } from "@/components/frames/Tree"
+import { AppProviders } from "./providers"
 import "./globals.css"
 
 /**
@@ -11,6 +13,10 @@ import "./globals.css"
  * a route change repaints the body without tearing the nav down. Expressing that as
  * a key rather than as markup here means the relationship is checked by the type
  * system instead of being re-decided by whoever edits this file next.
+ *
+ * The bar itself is `layouts/ShellNav`, not markup written here: it holds the state that says
+ * whether the sign-in overlay is open, and this file is a server component that cannot hold
+ * state. The one thing this file adds around the whole tree is the vendor's context.
  */
 
 /** Browser-level metadata for every route under this shell. */
@@ -25,25 +31,6 @@ interface RootLayoutProps {
     children: ReactNode
 }
 
-/** The single link the shell nav carries today - the `action` role of `shell-nav`. */
-const DashboardLink = () => <a href="/dashboard">Dashboard</a>
-
-/**
- * Route-level navigation - the `nav` role of the `page-shell` key.
- *
- * The `<nav>` landmark is not written here. `shell-nav` declares it, so the landmark is a fact
- * the registry owns rather than a tag this file picked - the same reason the gap and the child
- * contract are not written here either.
- */
-const ShellNav = () => (
-    <Tree
-        name="shell-nav"
-        slots={{
-            action: DashboardLink,
-        }}
-    />
-)
-
 /**
  * Root layout: draws the shell tree and mounts the routed page into its `body` role.
  *
@@ -55,7 +42,9 @@ const RootLayout = ({ children }: RootLayoutProps) => {
     return (
         <html lang="en">
             <body>
-                <Tree name="page-shell" slots={{ nav: ShellNav, body: ShellBody }} />
+                <AppProviders>
+                    <Tree contract="page-shell" slots={{ nav: ShellNav, body: ShellBody }} />
+                </AppProviders>
             </body>
         </html>
     )

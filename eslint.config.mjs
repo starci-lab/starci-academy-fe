@@ -51,7 +51,7 @@ export default defineConfig([
         // convention - nothing corrects the second spelling, so a file written on a Tuesday
         // reads differently from its neighbour and every diff carries the noise. The generic
         // form is the one that stays readable when the element type is itself generic
-        // (`Array<TreeSlots<K>>` against `TreeSlots<K>[]`), and it is already what the query
+        // (`Array<ContractSlots<K>>` against `ContractSlots<K>[]`), and it is already what the query
         // types and the hooks use, so this fixes the minority rather than the majority.
         files: ["**/*.{ts,tsx,mts,cts}"],
         rules: {
@@ -88,7 +88,7 @@ export default defineConfig([
             // from eroding - the first because a value import there would invert the tier order
             // and build a real cycle while tsc stayed green, the second because a ceiling that
             // only a test enforces is one deletion away from not existing.
-            "starci-fe/classnames-type-imports-only": "error",
+            "starci-fe/contracts-type-imports-only": "error",
             "starci-fe/shapes-vocabulary-ceiling": "error",
             // Token scale - the registry entry is now the only hand-written class string.
             "starci-fe/no-fractional-spacing": "error",

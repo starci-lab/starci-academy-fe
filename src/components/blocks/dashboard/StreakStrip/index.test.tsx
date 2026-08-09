@@ -4,10 +4,11 @@ import { cleanup, render } from "@testing-library/react"
 import { StreakStrip } from "@/components/blocks/dashboard/StreakStrip"
 
 /**
- * What these tests guard: the three things the connected half decides - when the strip
- * rests, when it is genuinely empty rather than merely slow, and what the dates read
- * as. The last one is fixed to one locale on purpose, so the same build renders the
- * same text everywhere.
+ * What these tests guard: the four things the connected half decides - when the strip rests,
+ * when it is genuinely empty rather than merely slow, when the request has FAILED (which SWR
+ * keeps reporting as loading while it retries, and which used to leave the strip shimmering for
+ * as long as the backend was down), and what the dates read as. The last one is fixed to one
+ * locale on purpose, so the same build renders the same text everywhere.
  */
 
 const leaves = vi.hoisted(() => ({
@@ -33,6 +34,10 @@ const week = {
     ],
 }
 
+/** The readout line - the `aside` of the split, drawn as a `card-header`. */
+const readout = (container: HTMLElement): Element | null =>
+    container.querySelector("[data-node='split'] > [data-node='card-header']")
+
 beforeEach(() => {
     leaves.weekly = { isLoading: true }
 })
@@ -44,7 +49,7 @@ afterEach(() => {
 describe("StreakStrip", () => {
     it("rests while the first request is in flight", () => {
         const { container } = render(<StreakStrip />)
-        expect(container.querySelector("[data-part='readout']")?.getAttribute("data-state")).toBe("loading")
+        expect(readout(container)?.children[2].getAttribute("data-loading")).toBe("true")
         expect(container.querySelectorAll("[data-part='day']").length).toBe(7)
     })
 
@@ -57,11 +62,12 @@ describe("StreakStrip", () => {
             .toEqual(["false", "false", "false", "false", "false", "true", "true"])
     })
 
-    it("reads the current and longest streak from the payload", () => {
+    it("reads the current streak as a figure and the record beside the heading", () => {
         leaves.weekly = { isLoading: false, data: week }
         const { container } = render(<StreakStrip />)
-        expect(container.querySelector("[data-part='current']")?.textContent).toBe("2 day streak")
-        expect(container.querySelector("[data-part='longest']")?.textContent).toBe("Longest 9 days")
+        expect(container.querySelector("[data-component='Badge']")?.textContent).toBe("2 days")
+        expect(container.querySelector("[data-node='section-header']")?.children[1].textContent)
+            .toBe("Longest 9 days")
     })
 
     it("formats each date in one fixed locale", () => {
@@ -76,14 +82,19 @@ describe("StreakStrip", () => {
             data: { streak: 0, longestStreak: 0, days: week.days.map((day) => ({ ...day, active: false })) },
         }
         const { container } = render(<StreakStrip />)
-        const readout = container.querySelector("[data-part='readout']")
-        expect(readout?.getAttribute("data-state")).toBe("empty")
-        expect(readout?.textContent).toBe("No streak yet")
+        expect(readout(container)?.children[2].textContent).toBe("No streak yet")
     })
 
     it("treats a settled request with no payload as empty, not as loading", () => {
         leaves.weekly = { isLoading: false }
         const { container } = render(<StreakStrip />)
-        expect(container.querySelector("[data-part='readout']")?.getAttribute("data-state")).toBe("empty")
+        expect(readout(container)?.children[2].textContent).toBe("No streak yet")
+    })
+
+    it("settles a FAILED request rather than resting on a retry that reports itself as loading", () => {
+        leaves.weekly = { isLoading: true, error: new Error("unreachable") }
+        const { container } = render(<StreakStrip />)
+        expect(readout(container)?.children[2].getAttribute("data-loading")).toBe("false")
+        expect(readout(container)?.children[2].textContent).toBe("No streak yet")
     })
 })

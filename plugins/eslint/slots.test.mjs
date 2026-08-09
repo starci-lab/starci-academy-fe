@@ -21,39 +21,39 @@ test("no-fragment-slot rejects a slot that smuggles a second child", () => {
   tester.run("no-fragment-slot", noFragmentSlot, {
     valid: [
       {
-        code: "const View = () => <Tree name=\"content-row\" slots={{ field: Field, action: Action }} />",
+        code: "const View = () => <Tree contract=\"content-row\" slots={{ field: Field, action: Action }} />",
       },
       {
-        code: "const View = () => <Tree name=\"content-row\" slots={{ field: () => <Input />, action: () => <Button /> }} />",
+        code: "const View = () => <Tree contract=\"content-row\" slots={{ field: () => <Input />, action: () => <Button /> }} />",
       },
       {
         // One child inside a fragment is still one child.
-        code: "const View = () => <Tree name=\"stat\" slots={{ meta: () => <><Label /></>, body: Body }} />",
+        code: "const View = () => <Tree contract=\"stat\" slots={{ meta: () => <><Label /></>, body: Body }} />",
       },
       {
         // The honest answer: the second child belongs to a nested key.
-        code: "const View = () => <Tree name=\"card\" slots={{ heading: H, body: () => <Tree name=\"content-row\" slots={{ field: F, action: A }} />, footer: Foot }} />",
+        code: "const View = () => <Tree contract=\"card\" slots={{ heading: H, body: () => <Tree contract=\"content-row\" slots={{ field: F, action: A }} />, footer: Foot }} />",
       },
       {
         // Documented gap: a `React.Fragment` member element is not a JSXFragment node.
-        code: "const View = () => <Tree name=\"stat\" slots={{ meta: () => <React.Fragment><A /><B /></React.Fragment>, body: Body }} />",
+        code: "const View = () => <Tree contract=\"stat\" slots={{ meta: () => <React.Fragment><A /><B /></React.Fragment>, body: Body }} />",
       },
     ],
     invalid: [
       {
-        code: "const View = () => <Tree name=\"stat\" slots={{ meta: () => <><Label /><Hint /></>, body: Body }} />",
+        code: "const View = () => <Tree contract=\"stat\" slots={{ meta: () => <><Label /><Hint /></>, body: Body }} />",
         errors: [{ messageId: "fragment", data: { role: "meta" } }],
       },
       {
-        code: "const View = () => <Tree name=\"stat\" slots={{ meta: () => { return <><Label /><Hint /></> }, body: Body }} />",
+        code: "const View = () => <Tree contract=\"stat\" slots={{ meta: () => { return <><Label /><Hint /></> }, body: Body }} />",
         errors: [{ messageId: "fragment", data: { role: "meta" } }],
       },
       {
-        code: "const pair = <><Label /><Hint /></>; const View = () => <Tree name=\"stat\" slots={{ meta: () => pair, body: Body }} />",
+        code: "const pair = <><Label /><Hint /></>; const View = () => <Tree contract=\"stat\" slots={{ meta: () => pair, body: Body }} />",
         errors: [{ messageId: "fragment", data: { role: "meta" } }],
       },
       {
-        code: "const pair = <><Label /><Hint /></>; const View = () => <Tree name=\"stat\" slots={{ meta: pair, body: Body }} />",
+        code: "const pair = <><Label /><Hint /></>; const View = () => <Tree contract=\"stat\" slots={{ meta: pair, body: Body }} />",
         errors: [{ messageId: "fragment", data: { role: "meta" } }],
       },
     ],

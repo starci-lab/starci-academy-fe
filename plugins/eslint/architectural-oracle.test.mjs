@@ -210,14 +210,14 @@ test("token rules read the registry entry, not only the JSX literal", () => {
     {
       valid: [
         {
-          filename: "D:/repo/src/components/classNames/shapes.ts",
-          code: "export const CLASS_NAMES = { card: { classes: \"flex flex-col gap-4\" } }",
+          filename: "D:/repo/src/components/contracts/shapes.ts",
+          code: "export const CONTRACTS = { card: { classes: \"flex flex-col gap-4\" } }",
         },
       ],
       invalid: [
         {
-          filename: "D:/repo/src/components/classNames/shapes.ts",
-          code: "export const CLASS_NAMES = { card: { classes: \"flex flex-col gap-1.5\" } }",
+          filename: "D:/repo/src/components/contracts/shapes.ts",
+          code: "export const CONTRACTS = { card: { classes: \"flex flex-col gap-1.5\" } }",
           errors: [{ messageId: "frac", data: { cls: "gap-1.5" } }],
         },
         {
@@ -235,14 +235,14 @@ test("token rules read the registry entry, not only the JSX literal", () => {
     {
       valid: [
         {
-          filename: "D:/repo/src/components/classNames/shapes.ts",
-          code: "export const CLASS_NAMES = { card: { classes: \"rounded-2xl border p-6\" } }",
+          filename: "D:/repo/src/components/contracts/shapes.ts",
+          code: "export const CONTRACTS = { card: { classes: \"rounded-2xl border p-6\" } }",
         },
       ],
       invalid: [
         {
-          filename: "D:/repo/src/components/classNames/shapes.ts",
-          code: "export const CLASS_NAMES = { card: { classes: \"gap-[7px]\" } }",
+          filename: "D:/repo/src/components/contracts/shapes.ts",
+          code: "export const CONTRACTS = { card: { classes: \"gap-[7px]\" } }",
           errors: [{ messageId: "space", data: { cls: "gap-[7px]" } }],
         },
       ],
@@ -258,7 +258,7 @@ test("no-public-frame-css-props closes the seam the registry key already owns", 
       valid: [
         {
           filename: "D:/repo/src/components/blocks/example/Example/index.tsx",
-          code: "import { Tree } from \"@/components/frames/Tree\"\nexport const Example = () => <Tree name=\"card\" slots={slots} isLoading />",
+          code: "import { Tree } from \"@/components/frames/Tree\"\nexport const Example = () => <Tree contract=\"card\" slots={slots} isLoading />",
         },
         {
           // The frame declares the props it refuses; only callers are enforced.
@@ -269,12 +269,12 @@ test("no-public-frame-css-props closes the seam the registry key already owns", 
       invalid: [
         {
           filename: "D:/repo/src/components/blocks/example/Example/index.tsx",
-          code: "import { Tree } from \"@/components/frames/Tree\"\nexport const Example = () => <Tree name=\"card\" slots={slots} gap={4} />",
+          code: "import { Tree } from \"@/components/frames/Tree\"\nexport const Example = () => <Tree contract=\"card\" slots={slots} gap={4} />",
           errors: [{ messageId: "cssProp", data: { prop: "gap", frame: "Tree" } }],
         },
         {
           filename: "D:\\repo\\src\\components\\pages\\HomePage\\component.tsx",
-          code: "import { Tree } from \"@/components/frames/Tree\"\nexport const HomePage = () => <Tree name=\"page-shell\" slots={slots} className=\"p-4\" />",
+          code: "import { Tree } from \"@/components/frames/Tree\"\nexport const HomePage = () => <Tree contract=\"page-shell\" slots={slots} className=\"p-4\" />",
           errors: [{ messageId: "cssProp", data: { prop: "className", frame: "Tree" } }],
         },
       ],

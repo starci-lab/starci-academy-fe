@@ -31,6 +31,13 @@ import {
  */
 interface StatLeaf {
     /**
+     * Why the request failed, when it did. A failure is a SETTLED answer: SWR keeps retrying a
+     * failed key with a backoff, and its `isLoading` goes true again for every one of those
+     * attempts - so a row that read only the flag would shimmer for as long as the backend was
+     * down, which is exactly what a signed-out visitor sees on an auth-gated query.
+     */
+    error?: unknown
+    /**
      * The settled payload. `undefined` until the request answers, `null` when the server
      * answered with nothing - the hooks keep those two apart on purpose, and this block
      * treats both as "no value", the difference being which flag it turns into.
@@ -47,9 +54,8 @@ interface StatLeaf {
 
 /** Copy this block renders. It moves to the translation tier when that tier exists. */
 const LABELS: IdentityStatsLabels = {
-    heading: "Your standing",
     loading: "Loading",
-    empty: "Not available",
+    empty: "Sign in to see",
 }
 
 /**
@@ -62,6 +68,9 @@ const LABELS: IdentityStatsLabels = {
  */
 const leafFlags = (leaf: StatLeaf): Pick<IdentityStatRow, "isLoading" | "isEmpty"> => {
     if (leaf.data !== null && leaf.data !== undefined) return { isLoading: false, isEmpty: false }
+    // A failure is read BEFORE the flag: SWR retries a failed key on a backoff and reports
+    // `isLoading` again on every attempt, so reading the flag first would rest forever.
+    if (leaf.error !== undefined && leaf.error !== null) return { isLoading: false, isEmpty: true }
     if (leaf.isLoading) return { isLoading: true, isEmpty: false }
     return { isLoading: false, isEmpty: true }
 }
@@ -78,16 +87,19 @@ export const IdentityStats = () => {
     const rows: ReadonlyArray<IdentityStatRow> = [
         {
             label: "Streak",
+            icon: "streak",
             ...leafFlags(weekly),
             value: `${weekly.data?.streak ?? 0} days`,
         },
         {
             label: "AI credit",
+            icon: "credit",
             ...leafFlags(quota),
             value: credit ? `${credit.remainingWeek} of ${credit.limitWeek}` : "",
         },
         {
             label: "Reward points",
+            icon: "reward",
             ...leafFlags(wallet),
             value: `${wallet.data?.balance ?? 0}`,
         },

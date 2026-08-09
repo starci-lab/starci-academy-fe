@@ -1,10 +1,10 @@
 /**
  * The two rules that govern the registry FOLDER itself.
  *
- * `src/components/classNames/` holds two layers that answer different questions and obey
+ * `src/components/contracts/` holds two layers that answer different questions and obey
  * opposite rules, and each of these rules keeps one of those differences from quietly eroding:
  *
- *   1. `classnames-type-imports-only` - a chain may NAME a component from any tier, but only
+ *   1. `contracts-type-imports-only` - a chain may NAME a component from any tier, but only
  *      as a type. This is the difference between the registry being readable from everywhere
  *      and the registry importing half the application.
  *   2. `shapes-vocabulary-ceiling` - the SHAPE layer is capped and the CHAIN layer is not. The
@@ -54,12 +54,12 @@ const valueSpecifiers = (node) => {
  * mode nothing else in the gate detects, which is why it is made impossible instead of
  * discouraged.
  */
-export const classnamesTypeImportsOnly = {
+export const contractsTypeImportsOnly = {
   meta: {
     type: "problem",
     docs: {
       description:
-        "Inside `src/components/classNames/**`, a project module is imported as a type or not at all.",
+        "Inside `src/components/contracts/**`, a project module is imported as a type or not at all.",
     },
     schema: [],
     messages: {
@@ -91,10 +91,28 @@ export const classnamesTypeImportsOnly = {
   },
 }
 
-/** The most keys the SHAPE vocabulary may hold, whatever the file itself claims. */
-const HARD_CEILING = 16
+/**
+ * The most keys the SHAPE vocabulary may hold, whatever the file itself claims.
+ *
+ * RAISED FROM 16 TO 23, and the fact that it took TWO edits is the point. `CONTRACT_CEILING`
+ * lives in `shapes.ts`, where an author who needs one more key can reach it; this number lives
+ * in the enforcement layer, where they cannot reach it while writing the key that needs it. A
+ * cap a caller can move on their own is not a cap, so raising the ceiling is deliberately not a
+ * one-line edit: it is a request in one file and a consent in another.
+ *
+ * The consent recorded here is the port of the live product's dashboard into this tree. Seven
+ * shapes in that product genuinely repeat and none of them is a variant of another - a bounded
+ * surface whose content ends with its body, a run of columns, a grid of peer cards, a tab strip,
+ * a checklist row, a meter row, an identity line. Sixteen keys could not hold them, and the
+ * alternative - one key per optional-role combination - is the key explosion the role vocabulary
+ * exists to prevent.
+ *
+ * It is a CEILING, not a target: the tree is at 17 and every further key still has to be argued
+ * as a shape no existing key can hold.
+ */
+const HARD_CEILING = 23
 
-/** The `CLASS_NAMES` object expression, unwrapped from `as const satisfies ...`. */
+/** The `CONTRACTS` object expression, unwrapped from `as const satisfies ...`. */
 const unwrapAssertion = (node) => {
   if (!node) return null
   if (node.type === "TSAsExpression" || node.type === "TSSatisfiesExpression") {
@@ -125,7 +143,7 @@ const initialiserOf = (declaration, name) => {
  * author to reuse an entry describing something else, which is exactly the drift the chain
  * layer was added to prevent. A reader who notices the asymmetry is looking at a decision.
  *
- * The number is read from the file's own `TREE_KEY_CEILING`, so it is stated once and the twin
+ * The number is read from the file's own `CONTRACT_CEILING`, so it is stated once and the twin
  * test and this rule cannot disagree about it. Deleting the constant is itself an error - that
  * being the obvious way to make a ceiling stop failing.
  */
@@ -134,16 +152,16 @@ export const shapesVocabularyCeiling = {
     type: "problem",
     docs: {
       description:
-        "`CLASS_NAMES` in `shapes.ts` stays within the declared `TREE_KEY_CEILING`; chains are deliberately uncapped.",
+        "`CONTRACTS` in `shapes.ts` stays within the declared `CONTRACT_CEILING`; chains are deliberately uncapped.",
     },
     schema: [],
     messages: {
       tooMany:
-        "`CLASS_NAMES` declares {{count}} keys, over the ceiling of {{ceiling}}. A vocabulary is only worth having while it can be held in one head. A new key is justified by a tree shape no existing key can hold - never by a caller who wanted a different gap. If what you are describing is one real composition rather than a general shape, it belongs in `./chains/`, which is uncapped on purpose.",
+        "`CONTRACTS` declares {{count}} keys, over the ceiling of {{ceiling}}. A vocabulary is only worth having while it can be held in one head. A new key is justified by a tree shape no existing key can hold - never by a caller who wanted a different gap. If what you are describing is one real composition rather than a general shape, it belongs in `./chains/`, which is uncapped on purpose.",
       missingCeiling:
-        "`shapes.ts` no longer declares `TREE_KEY_CEILING`. That constant is the ceiling this rule and the twin test both read, so removing it is how the cap silently stops applying. If the vocabulary genuinely needs to grow, raise the number where it is written and argue it there.",
+        "`shapes.ts` no longer declares `CONTRACT_CEILING`. That constant is the ceiling this rule and the twin test both read, so removing it is how the cap silently stops applying. If the vocabulary genuinely needs to grow, raise the number where it is written and argue it there.",
       ceilingRaised:
-        "`TREE_KEY_CEILING` is {{ceiling}}, above the hard limit of {{hard}}. The ceiling may be lowered but not raised past this: a cap a caller can move is not a cap. A shape that does not fit is either a nested key or a chain entry.",
+        "`CONTRACT_CEILING` is {{ceiling}}, above the hard limit of {{hard}}. The ceiling may be lowered but not raised past this: a cap a caller can move is not a cap. A shape that does not fit is either a nested key or a chain entry.",
     },
   },
   create(context) {
@@ -157,7 +175,7 @@ export const shapesVocabularyCeiling = {
     let count = null
     return {
       VariableDeclaration(node) {
-        const ceilingDeclarator = initialiserOf(node, "TREE_KEY_CEILING")
+        const ceilingDeclarator = initialiserOf(node, "CONTRACT_CEILING")
         if (ceilingDeclarator && ceilingDeclarator.init) {
           const value = unwrapAssertion(ceilingDeclarator.init)
           if (value && value.type === "Literal" && typeof value.value === "number") {
@@ -165,7 +183,7 @@ export const shapesVocabularyCeiling = {
             ceiling = value.value
           }
         }
-        const entriesDeclarator = initialiserOf(node, "CLASS_NAMES")
+        const entriesDeclarator = initialiserOf(node, "CONTRACTS")
         if (entriesDeclarator && entriesDeclarator.init) {
           const value = unwrapAssertion(entriesDeclarator.init)
           if (value && value.type === "ObjectExpression") {

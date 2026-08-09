@@ -1,15 +1,15 @@
 import { Fragment } from "react"
 import {
-    treeRoles,
-    treeSpec,
-    type TreeKey,
-    type TreeSlot,
-    type TreeSlots,
-} from "@/components/classNames"
+    contractRoles,
+    contractSpec,
+    type ContractKey,
+    type ContractSlot,
+    type ContractSlots,
+} from "@/components/contracts"
 
 /**
  * FRAME - `Tree`: the ONE frame that renders a registry entry. It takes a key from
- * `src/components/classNames/shapes.ts` and one component per role that key declares, and draws
+ * `src/components/contracts/shapes.ts` and one component per role that key declares, and draws
  * the node plus its children in registry order.
  *
  * WHY THERE IS EXACTLY ONE OF THESE. The retired arrangement had a frame per shape - Stack,
@@ -30,22 +30,22 @@ import {
  */
 
 /** Props for {@link Tree}. */
-export interface TreeProps<K extends TreeKey> {
+export interface TreeProps<K extends ContractKey> {
     /**
      * The registry key. This is the ONLY layout decision an author makes: it fixes the
      * node's classes, the children it accepts and the order they render in.
      */
-    name: K
+    contract: K
     /**
      * One component per role the key declares, passed UNCALLED so this frame can render
      * each of them with `isLoading`. A missing, extra or unknown role does not compile -
-     * see `TreeSlots`.
+     * see `ContractSlots`.
      */
-    slots: TreeSlots<K>
+    slots: ContractSlots<K>
     /**
      * Renders every slot in its resting state. Same meaning as everywhere else in the tree -
      * nothing to show YET, the first load, SWR's `isLoading` - never "a request is in flight";
-     * see {@link TreeSlotsProps.isLoading}, which is the declaration this one is handed to.
+     * see {@link ContractSlotProps.isLoading}, which is the declaration this one is handed to.
      */
     isLoading?: boolean
 }
@@ -56,14 +56,14 @@ export interface TreeProps<K extends TreeKey> {
  *
  * @param props - {@link TreeProps}
  */
-const Tree = <K extends TreeKey>({ name, slots, isLoading }: TreeProps<K>) => {
-    const spec = treeSpec(name)
+const Tree = <K extends ContractKey>({ contract, slots, isLoading }: TreeProps<K>) => {
+    const spec = contractSpec(contract)
     // `slots` is a mapped type over THIS key's roles, so it can only be indexed by a role of
-    // THIS key - which is exactly what `treeRoles` hands back, while `spec.roles` is widened
+    // THIS key - which is exactly what `contractRoles` hands back, while `spec.roles` is widened
     // to the shared union and cannot. Reading the order from the narrow list is what lets the
     // lookup below type-check; it used to be a double cast, which silenced the one check that
     // makes a wrong tree impossible.
-    const roles = treeRoles(name)
+    const roles = contractRoles(contract)
     // The host element is the KEY's decision, never the caller's. A landmark is a structural
     // fact about the node, so it belongs in the registry beside the classes and the roles;
     // absent means the neutral `div`. Without this, a landmark could only be reached by writing
@@ -73,17 +73,17 @@ const Tree = <K extends TreeKey>({ name, slots, isLoading }: TreeProps<K>) => {
         <Host
             data-tier="frame"
             data-component="Tree"
-            data-node={name}
+            data-node={contract}
             data-roles={spec.roles.join(" ")}
             data-explain={spec.explain}
             className={spec.classes}
         >
             {roles.map((role) => {
-                // Annotated rather than inferred: `TreeSlots<K>[TreeRolesOf<K>]` is deferred
+                // Annotated rather than inferred: `ContractSlots<K>[ContractRolesOf<K>]` is deferred
                 // while `K` is generic, and JSX cannot check props against a type it has not
-                // resolved. Every value of the mapped type IS a `TreeSlot`, so naming that is
+                // resolved. Every value of the mapped type IS a `ContractSlot`, so naming that is
                 // a widening the compiler verifies - not an assertion that skips it.
-                const Slot: TreeSlot | undefined = slots[role]
+                const Slot: ContractSlot | undefined = slots[role]
                 if (!Slot) return null
                 // The node inside a slot belongs to whoever passed it, so it gets no wrapper
                 // and no badge of its own - a wrapper here would be a node the registry never

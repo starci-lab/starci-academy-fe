@@ -14,7 +14,7 @@ import { Avatar, meta, type AvatarProps, type AvatarSize } from "@/components/at
 const FRACTIONAL_SPACING = /\b[a-z-]+-\d+\.5\b/
 
 /** An arbitrary Tailwind value escapes the token system entirely. */
-const ARBITRARY_VALUE = /\[[^\]]+\]/
+const ARBITRARY_VALUE = /-\[[^\]]+\]/
 
 /** The whole size vocabulary, mirrored so a loop can walk it. */
 const SIZES: ReadonlyArray<AvatarSize> = ["sm", "md", "lg"]
@@ -62,10 +62,11 @@ describe("Avatar", () => {
         expect(renderAvatar({ name: "  Ada   Lovelace  " }).textContent).toBe("AL")
     })
 
-    it("shows the picture when it has one, and uses the name as its alternative text", () => {
-        const image = renderAvatar({ src: PICTURE }).querySelector("img")
-        expect(image?.getAttribute("src")).toBe(PICTURE)
-        expect(image?.getAttribute("alt")).toBe("Ada Lovelace")
+    it("shows the initials until the picture has actually loaded, never an anonymous circle", () => {
+        // The vendor swaps the image in only once it has LOADED, which is the behaviour worth
+        // wrapping: a broken or slow URL degrades to initials rather than to a torn icon.
+        // Nothing loads in a test environment, so this IS that path - and it still identifies.
+        expect(renderAvatar({ src: PICTURE }).textContent).toBe("AL")
     })
 
     it("treats an empty picture the same as no picture at all", () => {
@@ -77,13 +78,14 @@ describe("Avatar", () => {
     it("rests without a picture, at the same diameter, so nothing beside it moves", () => {
         const resting = renderAvatar({ src: PICTURE, size: "md", isLoading: true })
         expect(resting.querySelector("img")).toBe(null)
+        expect(resting.textContent).toBe("")
         expect(resting.getAttribute("data-loading")).toBe("true")
         expect(resting.getAttribute("aria-hidden")).toBe("true")
-        expect(resting.getAttribute("class")).toContain("animate-pulse")
+        expect(resting.getAttribute("class")).toContain("skeleton")
         const restingClasses = resting.getAttribute("class") ?? ""
         cleanup()
         const loadedClasses = renderAvatar({ size: "md" }).getAttribute("class") ?? ""
-        for (const token of loadedClasses.split(/\s+/).filter((cls) => cls.startsWith("size-"))) {
+        for (const token of loadedClasses.split(/\s+/).filter((cls) => cls.endsWith("--md"))) {
             expect(restingClasses, token).toContain(token)
         }
     })

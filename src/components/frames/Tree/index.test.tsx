@@ -3,14 +3,14 @@ import { afterEach, describe, expect, it } from "vitest"
 import { cleanup, render } from "@testing-library/react"
 import { Tree, meta } from "@/components/frames/Tree"
 import {
-    TREE_KEYS,
-    treeSpec,
-    type TreeKey,
-    type TreeRole,
-    type TreeSlot,
-    type TreeSlotProps,
-    type TreeSlots,
-} from "@/components/classNames"
+    CONTRACT_KEYS,
+    contractSpec,
+    type ContractKey,
+    type ContractRole,
+    type ContractSlot,
+    type ContractSlotProps,
+    type ContractSlots,
+} from "@/components/contracts"
 
 /**
  * What these tests are really guarding: that the rendered tree is the registry entry and
@@ -20,8 +20,8 @@ import {
  */
 
 /** A stand-in slot that records which role mounted it and whether it was told to rest. */
-const slotFor = (role: TreeRole): TreeSlot => {
-    const Slot = ({ isLoading }: TreeSlotProps) => (
+const slotFor = (role: ContractRole): ContractSlot => {
+    const Slot = ({ isLoading }: ContractSlotProps) => (
         <span data-testid={`slot-${role}`} data-loading={isLoading === true ? "true" : "false"} />
     )
     return Slot
@@ -32,14 +32,14 @@ const slotFor = (role: TreeRole): TreeSlot => {
  * one loop - `slots` is a mapped type over one key's roles, and a loop only has the widened
  * union. Call sites in real code never need it: they name the key and get the exact shape.
  */
-const slotsFor = (name: TreeKey): TreeSlots<TreeKey> => {
-    const entries: Array<[TreeRole, TreeSlot]> = treeSpec(name).roles.map((role) => [role, slotFor(role)])
-    return Object.fromEntries(entries) as unknown as TreeSlots<TreeKey>
+const slotsFor = (name: ContractKey): ContractSlots<ContractKey> => {
+    const entries: Array<[ContractRole, ContractSlot]> = contractSpec(name).roles.map((role) => [role, slotFor(role)])
+    return Object.fromEntries(entries) as unknown as ContractSlots<ContractKey>
 }
 
 /** Render one key with a stand-in slot per declared role. */
-const renderKey = (name: TreeKey, isLoading?: boolean) =>
-    render(<Tree name={name} slots={slotsFor(name)} isLoading={isLoading} />)
+const renderKey = (name: ContractKey, isLoading?: boolean) =>
+    render(<Tree contract={name} slots={slotsFor(name)} isLoading={isLoading} />)
 
 /** The rendered role order, read back from the stand-in slots. */
 const renderedRoles = (container: HTMLElement): Array<string> => {
@@ -57,29 +57,29 @@ describe("Tree", () => {
     })
 
     it("renders every role of every key exactly once, in registry order", () => {
-        for (const key of TREE_KEYS) {
+        for (const key of CONTRACT_KEYS) {
             const { container } = renderKey(key)
-            expect(renderedRoles(container), key).toEqual([...treeSpec(key).roles])
+            expect(renderedRoles(container), key).toEqual([...contractSpec(key).roles])
             cleanup()
         }
     })
 
     it("wears the registry class string and nothing else", () => {
-        for (const key of TREE_KEYS) {
+        for (const key of CONTRACT_KEYS) {
             const { container } = renderKey(key)
             const root = container.firstElementChild
-            expect(root?.getAttribute("class"), key).toBe(treeSpec(key).classes)
+            expect(root?.getAttribute("class"), key).toBe(contractSpec(key).classes)
             cleanup()
         }
     })
 
     it("emits the key, the child contract and the reason on the node", () => {
-        for (const key of TREE_KEYS) {
+        for (const key of CONTRACT_KEYS) {
             const { container } = renderKey(key)
             const root = container.firstElementChild
             expect(root?.getAttribute("data-node"), key).toBe(key)
-            expect(root?.getAttribute("data-roles"), key).toBe(treeSpec(key).roles.join(" "))
-            expect(root?.getAttribute("data-explain"), key).toBe(treeSpec(key).explain)
+            expect(root?.getAttribute("data-roles"), key).toBe(contractSpec(key).roles.join(" "))
+            expect(root?.getAttribute("data-explain"), key).toBe(contractSpec(key).explain)
             expect(root?.getAttribute("data-tier"), key).toBe("frame")
             expect(root?.getAttribute("data-component"), key).toBe("Tree")
             cleanup()
@@ -96,7 +96,7 @@ describe("Tree", () => {
     it("passes the skeleton flag down to every slot", () => {
         const { container } = renderKey("card", true)
         const slots = [...container.querySelectorAll("[data-loading]")]
-        expect(slots.length).toBe(treeSpec("card").roles.length)
+        expect(slots.length).toBe(contractSpec("card").roles.length)
         for (const slot of slots) {
             expect(slot.getAttribute("data-loading")).toBe("true")
         }
@@ -119,8 +119,8 @@ describe("Tree", () => {
         // TypeScript rejects this shape at every real call site - a missing role is a compile
         // error. The runtime path exists so a JavaScript caller degrades to a thinner tree
         // rather than taking the page down.
-        const partial = { field: slotFor("field") } as unknown as TreeSlots<"content-row">
-        const { container } = render(<Tree name="content-row" slots={partial} />)
+        const partial = { field: slotFor("field") } as unknown as ContractSlots<"content-row">
+        const { container } = render(<Tree contract="content-row" slots={partial} />)
         expect(renderedRoles(container)).toEqual(["field"])
         expect(container.firstElementChild?.getAttribute("data-roles")).toBe("field action")
     })
@@ -130,7 +130,7 @@ describe("Tree", () => {
         // that NOBODY WROTE ONE. An author reaching for the tag by hand would be deciding
         // structure the registry is meant to own, and the lint rightly refuses that.
         const { container } = render(
-            <Tree name="shell-nav" slots={{ action: slotFor("action") }} />,
+            <Tree contract="shell-nav" slots={{ action: slotFor("action") }} />,
         )
         expect(container.firstElementChild?.tagName).toBe("NAV")
     })
@@ -140,7 +140,7 @@ describe("Tree", () => {
         // landmark map useless to a screen reader. Absent means div, deliberately.
         const { container } = render(
             <Tree
-                name="content-row"
+                contract="content-row"
                 slots={{
                     field: slotFor("field"),
                     action: slotFor("action"),
@@ -153,11 +153,11 @@ describe("Tree", () => {
     it("accepts exactly the slots a key declares", () => {
         // Type-level assertion: the slots object is checked against the key's own roles, so
         // "field" and "action" here are not interchangeable with any other key's roles.
-        const slots: TreeSlots<"content-row"> = {
+        const slots: ContractSlots<"content-row"> = {
             field: slotFor("field"),
             action: slotFor("action"),
         }
-        const { container } = render(<Tree name="content-row" slots={slots} />)
+        const { container } = render(<Tree contract="content-row" slots={slots} />)
         expect(renderedRoles(container)).toEqual(["field", "action"])
     })
 })

@@ -57,11 +57,11 @@ test("no-double-cast rejects a type erased through unknown, and spares the tests
       {
         // `any` erases exactly as much as `unknown` does; the hole is the same hole.
         filename: "D:\\repo\\src\\components\\frames\\Tree\\index.tsx",
-        code: "const byRole = slots as any as Partial<Record<TreeRole, TreeSlot>>",
+        code: "const byRole = slots as any as Partial<Record<ContractRole, ContractSlot>>",
         errors: [
           {
             messageId: "doubleCast",
-            data: { erased: "any", target: "Partial<Record<TreeRole, TreeSlot>>" },
+            data: { erased: "any", target: "Partial<Record<ContractRole, ContractSlot>>" },
           },
         ],
       },

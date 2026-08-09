@@ -1,19 +1,29 @@
-import { Heading } from "@/components/atoms/Heading"
+import { Badge } from "@/components/atoms/Badge"
+import { DayCell } from "@/components/atoms/DayCell"
+import { Text } from "@/components/atoms/Text"
 import { Tree } from "@/components/frames/Tree"
-import type { DashboardSectionChain, TreeSlotProps } from "@/components/classNames"
+import { IconLabelValueRow } from "@/components/composites/lists/IconLabelValueRow"
+import { SurfaceCard } from "@/components/composites/cards/SurfaceCard"
+import type { DashboardSectionChain, ContractSlotProps } from "@/components/contracts"
 
 /**
  * BLOCK - `StreakStrip`, presentational half.
  *
- * The last seven days as a row of dots, beside the streak readout they add up to.
+ * The last seven days as a run of columns, beside the readout they add up to.
  *
- * Structure is two registry keys. `section` carries the heading and the strip. `split`
- * carries the two halves, and it is the right key for the reason the key itself states:
- * the readout SUPPORTS the seven days rather than competing with them, so at a narrow
- * width it drops underneath instead of halving the room the dots need.
+ * WHAT IS LEFT HERE AFTER THE PORT. `SurfaceCard` owns the bounded region and the title line
+ * with the record on its baseline; `IconLabelValueRow` owns the readout, which is the same spec
+ * line the identity rail draws three of - the same shape for the same kind of fact, rather than
+ * a second one that has to be kept in step. What remains is this block's own business: that a
+ * week is SEVEN columns whatever the payload says, and that the readout supports the run rather
+ * than competing with it.
  *
- * The resting state is the same tree with the same seven columns, never a second one.
- * A hand-kept resting copy is only ever noticed after it has already drifted.
+ * `split` is the right key for that last part for the reason the key itself states: the aside
+ * drops underneath at a narrow width instead of halving the room the days need. `track` draws
+ * the run, and owns the list element, so the seven columns are announced as seven.
+ *
+ * The resting state is the same tree with the same seven columns, never a second one. A
+ * hand-kept resting copy is only ever noticed after it has already drifted.
  */
 
 /** How many day columns the strip draws - the last seven days, always seven. */
@@ -39,9 +49,11 @@ export interface StreakStripLabels {
     loading: string
     /** Read when the learner has no streak to show yet. */
     empty: string
-    /** Current-streak sentence, already interpolated. */
+    /** Names the figure beside it - the label of the readout, never the figure itself. */
+    currentLabel: string
+    /** Current-streak figure, already interpolated. */
     current: string
-    /** Longest-streak sentence, already interpolated. */
+    /** Longest-streak sentence, already interpolated - a record, so it sits by the heading. */
     longest: string
 }
 
@@ -50,10 +62,10 @@ export interface StreakStripProps {
     /**
      * First load with nothing in hand - the strip rests as itself. SWR's `isLoading` and not
      * `isValidating`: a refetch happens with the week already on screen, and resting on it would
-     * blank a strip the reader is reading. See {@link TreeSlotProps.isLoading}.
+     * blank a strip the reader is reading. See {@link ContractSlotProps.isLoading}.
      */
     isLoading?: boolean
-    /** Settled with no activity to show. An answer, not a wait - so never the flag above. */
+    /** Settled with no activity to show - including settled by failing. Never the flag above. */
     isEmpty?: boolean
     /** The last seven days, oldest first. */
     days?: ReadonlyArray<StreakStripDay>
@@ -65,7 +77,7 @@ export interface StreakStripProps {
 const RESTING_DAYS: ReadonlyArray<number> = Array.from({ length: DAY_COUNT }, (_unused, index) => index)
 
 /**
- * Render the strip. See the file header for why these two keys.
+ * Render the strip.
  *
  * @param props - {@link StreakStripProps}
  */
@@ -75,64 +87,73 @@ export const _StreakStrip = ({
     days = [],
     labels,
 }: StreakStripProps) => {
-    /**
-     * The `heading` role of the `section` key. `level={2}` is one word that fixes both the tag
-     * and the type scale, so the document outline and the visual order cannot drift.
-     *
-     * It takes no resting state on purpose: the title is copy this file already holds, so
-     * shimmering it would hide a word that is not waiting on anything.
-     */
-    const SectionHeading = () => <Heading level={2}>{labels.heading}</Heading>
-
-    /** The `body` role of the `split` key: the seven day columns. */
-    const DayList = ({ isLoading: resting }: TreeSlotProps) => (
-        <ul data-part="days" data-state={resting === true ? "loading" : "ready"}>
+    /** The `body` role of the `track` key: the seven columns themselves. */
+    const Days = ({ isLoading: resting }: ContractSlotProps) => (
+        <>
             {resting === true
                 ? RESTING_DAYS.map((index) => (
-                    <li key={index} data-part="day" data-state="loading" aria-hidden="true">
-                        <span data-part="dot" />
-                    </li>
+                    <DayCell key={index} weekday="" label={labels.loading} isLoading />
                 ))
                 : days.map((day) => (
-                    <li key={day.date} data-part="day" data-active={day.active ? "true" : "false"}>
-                        <span data-part="dot" aria-hidden="true" />
-                        <span data-part="weekday">{day.weekday}</span>
-                        <span data-part="date">{day.title}</span>
-                    </li>
+                    <DayCell
+                        key={day.date}
+                        weekday={day.weekday}
+                        label={day.title}
+                        isActive={day.active}
+                    />
                 ))}
-        </ul>
+        </>
     )
 
-    /** The `aside` role of the `split` key: what the seven days add up to. */
-    const Readout = ({ isLoading: resting }: TreeSlotProps) => {
-        if (resting === true) {
-            return <p data-part="readout" data-state="loading">{labels.loading}</p>
-        }
-        if (isEmpty) {
-            return <p data-part="readout" data-state="empty">{labels.empty}</p>
-        }
-        return (
-            <p data-part="readout" data-state="ready">
-                <span data-part="current">{labels.current}</span>
-                <span data-part="longest">{labels.longest}</span>
-            </p>
-        )
+    /** The `body` role of the `split` key: the week as a run of columns. */
+    const DayList = ({ isLoading: resting }: ContractSlotProps) => (
+        <Tree contract="track" isLoading={resting} slots={{ body: Days }} />
+    )
+
+    /**
+     * The figure the seven days add up to.
+     *
+     * A badge rather than a sentence because it is the one number this block exists to produce -
+     * and a settled zero is a fact rather than a wait, so it keeps its words and drops the
+     * accent instead of shimmering forever.
+     */
+    const ReadoutValue = () => {
+        if (isLoading) return <Text size="sm" isLoading>{labels.loading}</Text>
+        if (isEmpty) return <Text tone="muted" size="sm">{labels.empty}</Text>
+        return <Badge tone="accent">{labels.current}</Badge>
     }
 
-    /** The `body` role of the `section` key. */
-    const Body = ({ isLoading: resting }: TreeSlotProps) => (
-        <Tree name="split" isLoading={resting} slots={{ body: DayList, aside: Readout }} />
+    /** The `aside` role of the `split` key: the same spec line the identity rail draws. */
+    const Readout = () => (
+        <IconLabelValueRow
+            icon="streak"
+            label={labels.currentLabel}
+            value={labels.current}
+            valueSlot={ReadoutValue}
+            isLoading={isLoading}
+        />
     )
 
-    return <Tree name="section" isLoading={isLoading} slots={{ heading: SectionHeading, body: Body }} />
+    /** The `body` role of the surface: the week, with what it adds up to beside it. */
+    const Body = ({ isLoading: resting }: ContractSlotProps) => (
+        <Tree contract="split" isLoading={resting} slots={{ body: DayList, aside: Readout }} />
+    )
+
+    return (
+        <SurfaceCard
+            label={labels.heading}
+            meta={isLoading ? labels.loading : labels.longest}
+            body={Body}
+            isLoading={isLoading}
+        />
+    )
 }
 
 /**
- * This block's entry in the dashboard chain: it IS the body of the region named
- * `streak-strip`.
+ * This block's entry in the dashboard chain: it IS the body of the region named `streak-strip`.
  *
- * `section` and `split` fix the shape - a heading over two halves that stack when narrow - and
- * neither can say that the left half is a WEEK. This entry says it, and the compiler holds it:
+ * The keys fix the shape - a bounded surface over two halves that stack when narrow - and none
+ * of them can say that the left half is a WEEK. This entry says it, and the compiler holds it:
  * `StreakStripProps` is the only props type in the chain taking a `days` list, so a block that
  * does not model seven columns cannot fill this region.
  */

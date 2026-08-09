@@ -1,9 +1,16 @@
+import { Avatar as HeroAvatar, skeletonVariants } from "@heroui/react"
+
 /**
  * ATOM - `Avatar`: the picture that identifies a row or a card faster than its title does.
  *
  * This is one of the atoms the registry's `media` role is drawn with. `card-header` puts it first
  * because the thumbnail is read before the title; `list-row` puts it first for the same reason.
  * The atom never learns which of the two it is in, and that is exactly why it can be used in both.
+ *
+ * WHAT IT DRAWS. HeroUI's `Avatar`, whose `Image` and `Fallback` parts are a single decision
+ * rather than two: the fallback is shown until the picture has actually loaded, so a broken URL
+ * degrades to initials instead of to a torn image icon. Rebuilding that by hand is how an avatar
+ * ends up with a moment of empty circle on every render.
  *
  * WHY `name` IS REQUIRED AND `src` IS NOT. A person always has a name and does not always have a
  * picture, so the name is the real identity and the image is the decoration on top of it. Making
@@ -42,34 +49,17 @@ export interface AvatarProps {
     isLoading?: boolean
 }
 
-/** Diameter and initial size per step. */
-const SIZE_CLASSES = {
-    sm: "size-8 text-xs",
-    md: "size-10 text-sm",
-    lg: "size-12 text-base",
+/** The size step, as the vendor names it. */
+const SIZES = {
+    sm: "sm",
+    md: "md",
+    lg: "lg",
 } as const
 
-/**
- * The circle and its crop. No ink of its own: initials are read in the page ink that
- * `globals.css` already owns, so this atom has nothing to disagree with it about.
- */
-const BASE_CLASSES = "inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full font-medium uppercase"
-
-/**
- * The fill behind the initials - a translucent tint rather than a fixed grey, so one class is
- * legible on either page surface without the atom being told which one it is on.
- */
-const FILL_CLASSES = "bg-slate-500/15"
-
-/** The picture fills the circle and is cropped by it rather than distorted into it. */
-const IMAGE_CLASSES = "size-full object-cover"
-
-/**
- * The resting shape - the same circle at the same diameter, so nothing beside it moves. It
- * REPLACES the fill rather than layering over it: two `bg-*` utilities on one node resolve by
- * stylesheet order, not by the order they were typed.
- */
-const RESTING_CLASSES = "animate-pulse select-none bg-slate-500/20 text-transparent"
+/** The resting shape - the same circle at the same diameter, so nothing beside it moves. */
+const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({
+    className: "select-none text-transparent",
+})
 
 /**
  * The one or two letters shown when there is no picture, read off the name the caller resolved.
@@ -92,21 +82,21 @@ const initialsOf = (name: string): string =>
  * @param props - {@link AvatarProps}
  */
 export const Avatar = ({ name, src, size = "md", isLoading = false }: AvatarProps) => {
-    const classes = [BASE_CLASSES, SIZE_CLASSES[size], isLoading ? RESTING_CLASSES : FILL_CLASSES]
-        .filter(Boolean)
-        .join(" ")
     const showsImage = src !== undefined && src !== "" && !isLoading
     return (
-        <span
+        <HeroAvatar
             data-tier="atom"
             data-component="Avatar"
             data-size={size}
             data-loading={isLoading ? "true" : "false"}
             aria-hidden={isLoading ? true : undefined}
-            className={classes}
+            size={SIZES[size]}
+            color="accent"
+            className={isLoading ? RESTING_CLASSES : undefined}
         >
-            {showsImage ? <img src={src} alt={name} className={IMAGE_CLASSES} /> : initialsOf(name)}
-        </span>
+            {showsImage ? <HeroAvatar.Image src={src} alt={name} /> : null}
+            <HeroAvatar.Fallback>{isLoading ? "" : initialsOf(name)}</HeroAvatar.Fallback>
+        </HeroAvatar>
     )
 }
 

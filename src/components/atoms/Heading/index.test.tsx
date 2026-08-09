@@ -14,7 +14,7 @@ import { Heading, meta, type HeadingLevel, type HeadingProps } from "@/component
 const FRACTIONAL_SPACING = /\b[a-z-]+-\d+\.5\b/
 
 /** An arbitrary Tailwind value escapes the token system entirely. */
-const ARBITRARY_VALUE = /\[[^\]]+\]/
+const ARBITRARY_VALUE = /-\[[^\]]+\]/
 
 /** Every level, so a loop can walk the whole vocabulary instead of restating it. */
 const LEVELS: ReadonlyArray<HeadingLevel> = [1, 2, 3, 4]
@@ -92,7 +92,7 @@ describe("Heading", () => {
         expect(root.tagName).toBe("H2")
         expect(root.getAttribute("data-loading")).toBe("true")
         expect(root.getAttribute("aria-hidden")).toBe("true")
-        expect(root.getAttribute("class")).toContain("animate-pulse")
+        expect(root.getAttribute("class")).toContain("skeleton")
         expect(root.textContent).toBe("Course catalogue")
     })
 

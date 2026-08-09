@@ -91,7 +91,7 @@ test("content allowlist covers locale dictionaries and fixtures", () => {
   assert.equal(isContentAllowlisted("/repo/src/foo.test.tsx"), true)
   assert.equal(isContentAllowlisted("/repo/src/resources/copy/vi.ts"), true)
   assert.equal(isContentAllowlisted("/repo/src/components/atoms/X/index.tsx"), false)
-  assert.equal(isContentAllowlisted("/repo/src/components/classNames/shapes.ts"), false)
+  assert.equal(isContentAllowlisted("/repo/src/components/contracts/shapes.ts"), false)
 })
 
 test("exports stay English-only in meta messages", () => {

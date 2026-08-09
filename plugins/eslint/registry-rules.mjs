@@ -2,7 +2,7 @@
  * The rules that enforce the NAMED REGISTRY.
  *
  * One idea, stated six ways: a structural node is described ONCE, in
- * `src/components/classNames/shapes.ts`, by a key that owns both the node's classes and the
+ * `src/components/contracts/shapes.ts`, by a key that owns both the node's classes and the
  * contract for its children. An author types the key and nothing else. Everything below
  * exists to make the alternatives - a literal class string, a hand-composed class, a
  * hand-painted registry attribute, an invented key, an invented child role - stop
@@ -118,12 +118,12 @@ export const noLiteralStructuralClass = {
     type: "problem",
     docs: {
       description:
-        "Structural classes come from a registry key in `src/components/classNames/shapes.ts`, never from a literal class string.",
+        "Structural classes come from a registry key in `src/components/contracts/shapes.ts`, never from a literal class string.",
     },
     schema: [],
     messages: {
       structural:
-        "`{{cls}}` is a structural class written as a literal, so this node's shape is decided here instead of in the registry. Add or reuse a key in `src/components/classNames/shapes.ts` and render it with `<Tree name=\"…\" slots={…} />`. The key already owns the classes AND the children that node accepts - typing it is the only layout decision there is.",
+        "`{{cls}}` is a structural class written as a literal, so this node's shape is decided here instead of in the registry. Add or reuse a key in `src/components/contracts/shapes.ts` and render it with `<Tree contract=\"…\" slots={…} />`. The key already owns the classes AND the children that node accepts - typing it is the only layout decision there is.",
     },
   },
   create(context) {
@@ -157,7 +157,7 @@ export const noClassCompositionOutsideRegistry = {
       composer:
         "`{{name}}(…)` assembles a class string at runtime - a second registry with no keys, no roles and no reasons. The difference you are branching on is a real distinction: give it a registry key, or a named prop on the component that owns the node.",
       interpolated:
-        "`className` is built by interpolation, so the class string exists only while this component runs and nothing can read it back. Move the whole string into a registry key in `src/components/classNames/shapes.ts` and pass the key.",
+        "`className` is built by interpolation, so the class string exists only while this component runs and nothing can read it back. Move the whole string into a registry key in `src/components/contracts/shapes.ts` and pass the key.",
     },
   },
   create(context) {
@@ -222,7 +222,7 @@ export const noHandWrittenRegistryAttrs = {
 export const noUnregisteredTreeKey = {
   meta: {
     type: "problem",
-    docs: { description: "`<Tree name>` and `treeSpec()` take a key that exists in the registry." },
+    docs: { description: "`<Tree contract>` and `contractSpec()` take a key that exists in the registry." },
     schema: [],
     messages: {
       unknown:
@@ -241,11 +241,11 @@ export const noUnregisteredTreeKey = {
     return {
       JSXOpeningElement(node) {
         if (jsxElementName(node) !== "Tree") return
-        const key = attributeText(node, "name")
+        const key = attributeText(node, "contract")
         if (key) report(node, key)
       },
       CallExpression(node) {
-        if (!node.callee || node.callee.type !== "Identifier" || node.callee.name !== "treeSpec") return
+        if (!node.callee || node.callee.type !== "Identifier" || node.callee.name !== "contractSpec") return
         const argument = node.arguments[0]
         if (argument && argument.type === "Literal" && typeof argument.value === "string") {
           report(argument, argument.value)
@@ -293,7 +293,7 @@ export const noUnknownSlotRole = {
         if (object.properties.some((property) => property.type !== "Property")) return
         const given = object.properties.map((property) => ({ name: propertyName(property), node: property }))
         if (given.some((entry) => entry.name === null)) return
-        const key = attributeText(node, "name")
+        const key = attributeText(node, "contract")
         const expected = key ? registry.rolesByKey[key] : null
         for (const entry of given) {
           if (!registry.roles.includes(entry.name)) {

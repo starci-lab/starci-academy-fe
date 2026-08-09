@@ -27,7 +27,7 @@ test("no-public-classname-prop closes every public CSS door", () => {
       {
         // The registry hands out a KEY, never a class string - that is why it can be a prop.
         filename: "D:/repo/src/components/blocks/example/Example.tsx",
-        code: "import { Tree } from \"@/components/frames/Tree\"\nexport const Example = () => <Tree name=\"card\" slots={slots} />",
+        code: "import { Tree } from \"@/components/frames/Tree\"\nexport const Example = () => <Tree contract=\"card\" slots={slots} />",
       },
       {
         // Outside the component tree, only the call site is enforced.

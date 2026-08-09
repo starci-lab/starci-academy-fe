@@ -6,7 +6,7 @@
  *
  * The registry rules (`./registry-rules.mjs`) are the centre of gravity now. The retired
  * `principle` / `PrincipleToken` / `data-principle` rules described ONE node and left the
- * author to guess the rest; the named registry in `src/components/classNames/shapes.ts` answers
+ * author to guess the rest; the named registry in `src/components/contracts/shapes.ts` answers
  * the classes, the children and the reason in one key, so the rules that policed the
  * guessing were retargeted at the registry or deleted outright.
  *
@@ -35,7 +35,7 @@ import {
   registryExplainIsAReason,
 } from "./registry-rules.mjs"
 import {
-  classnamesTypeImportsOnly,
+  contractsTypeImportsOnly,
   shapesVocabularyCeiling,
 } from "./registry-folder.mjs"
 
@@ -629,7 +629,7 @@ const noPublicFrameCssProps = {
     schema: [],
     messages: {
       cssProp:
-        "`{{prop}}` on <{{frame}}> reopens the seam the registry key already owns. A frame renders an entry from `src/components/classNames/shapes.ts` and takes nothing but the key and its slots - if the shape here is genuinely different, it is a different key.",
+        "`{{prop}}` on <{{frame}}> reopens the seam the registry key already owns. A frame renders an entry from `src/components/contracts/shapes.ts` and takes nothing but the key and its slots - if the shape here is genuinely different, it is a different key.",
     },
   },
   create(context) {
@@ -672,7 +672,7 @@ export default {
     "no-heading-element-outside-heading-atom": noHeadingElementOutsideHeadingAtom,
     "registry-explain-is-a-reason": registryExplainIsAReason,
     // -- how the registry FOLDER itself is written: two layers, opposite rules --
-    "classnames-type-imports-only": classnamesTypeImportsOnly,
+    "contracts-type-imports-only": contractsTypeImportsOnly,
     "shapes-vocabulary-ceiling": shapesVocabularyCeiling,
     // -- token scale --
     "no-fractional-spacing": noFractionalSpacing,

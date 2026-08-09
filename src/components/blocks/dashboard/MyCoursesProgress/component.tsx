@@ -1,28 +1,36 @@
-import { Heading } from "@/components/atoms/Heading"
+import { Button } from "@/components/atoms/Button"
 import { Tree } from "@/components/frames/Tree"
-import type { DashboardSectionChain, TreeSlotProps, TreeSlots } from "@/components/classNames"
+import { CourseProgressBar } from "@/components/composites/stats/CourseProgressBar"
+import { EmptyState } from "@/components/composites/feedback/EmptyState"
+import { SurfaceCard } from "@/components/composites/cards/SurfaceCard"
+import type { DashboardSectionChain, ContractSlotProps } from "@/components/contracts"
 
 /**
  * BLOCK - `MyCoursesProgress`, presentational half.
  *
  * The courses the learner is enrolled in, each with how far through it they are.
  *
- * Three registry keys, each for the reason the key itself states. `section-header`
- * puts the course COUNT on the heading's baseline, because the count reads as part of
- * the heading sentence rather than as a second line. `section` seams the heading off
- * from the list below it. `stat` holds one course, because the title is read before
- * the figure and must never share its line - a long course title on a narrow column
- * would otherwise wrap between the number and its unit.
+ * WHAT IS LEFT HERE AFTER THE PORT. Three composites now carry what this file used to spell out:
+ * `SurfaceCard` owns the bounded region and its title line with the count on the baseline,
+ * `CourseProgressBar` owns one course, and `EmptyState` owns the settled nothing and the way out
+ * of it. What remains is this block's own business: that a course list is a GRID of peer cards -
+ * they are compared with each other rather than read in order - and that a resting list draws
+ * the same cards at a fixed count.
  *
- * The resting state is this same tree with placeholder rows, never a second tree.
+ * THE ORDER OF THE THREE STATES IS NOT A COMPONENT. Resting is read first and empty second, and
+ * that is written here as two lines rather than routed through a wrapper: the frame already
+ * threads the resting flag to every slot from one place, so a component whose whole job was to
+ * choose between the states would be a second description of a decision the spine already makes.
+ *
+ * The resting state is this same tree with placeholder cards, never a second tree.
  */
 
-/** How many placeholder rows the resting list draws. */
+/** How many placeholder cards the resting list draws. */
 const RESTING_ROW_COUNT = 2
 
 /** One already-resolved course row. */
 export interface MyCoursesProgressCourse {
-    /** Stable id of the course. Used as the row key. */
+    /** Stable id of the course. Used as the card key. */
     id: string
     /** Course title. */
     title: string
@@ -38,10 +46,12 @@ export interface MyCoursesProgressLabels {
     heading: string
     /** Course count, already interpolated - sits on the heading's baseline. */
     count: string
-    /** Stands in for the count and the rows while the request is in flight. */
+    /** Stands in for the count and the cards while the request is in flight. */
     loading: string
     /** Read once the request settles with no enrolled courses. */
     empty: string
+    /** The label of the way out of the empty state. */
+    retry: string
 }
 
 /** Props for {@link _MyCoursesProgress} - presentational; no fetch, no store, no i18n. */
@@ -49,48 +59,31 @@ export interface MyCoursesProgressProps {
     /**
      * First load with nothing in hand - the list rests as itself. SWR's `isLoading` and not
      * `isValidating`: a refetch happens with the courses already on screen, and resting on it
-     * would blank a list the reader is reading. See {@link TreeSlotProps.isLoading}.
+     * would blank a list the reader is reading. See {@link ContractSlotProps.isLoading}.
      */
     isLoading?: boolean
-    /** Settled with no enrolled courses. An answer, not a wait - so never the flag above. */
+    /** Settled with no enrolled courses - including settled by failing. Never the flag above. */
     isEmpty?: boolean
     /** The enrolled courses, in display order. */
     courses?: ReadonlyArray<MyCoursesProgressCourse>
     /** Resolved copy. */
     labels: MyCoursesProgressLabels
+    /**
+     * Asks for the list again, from the empty state.
+     *
+     * An empty region still has to offer a way out, and this is the honest one: a learner who
+     * has enrolled in nothing is looking at the same screen as a learner whose backend answered
+     * before its data was there, and only asking again tells them apart. The connected half
+     * always passes it; it is optional so a story can draw the state without a handler.
+     */
+    onRetry?: () => void
 }
 
-/** Placeholder rows, drawn at a fixed count so the resting shape is the loaded one. */
+/** Placeholder cards, drawn at a fixed count so the resting shape is the loaded one. */
 const RESTING_ROWS: ReadonlyArray<number> = Array.from({ length: RESTING_ROW_COUNT }, (_unused, index) => index)
 
 /**
- * The two slots the `stat` key declares, closed over one course.
- *
- * @param course - The course being drawn.
- */
-const courseSlots = (course: MyCoursesProgressCourse): TreeSlots<"stat"> => ({
-    meta: () => <span data-part="title">{course.title}</span>,
-    body: () => (
-        <>
-            <progress data-part="bar" value={course.percent} max={100} aria-label={course.title} />
-            <span data-part="percent">{course.percentText}</span>
-        </>
-    ),
-})
-
-/**
- * The two slots a resting row draws - the same `stat` key, the same two roles, with
- * nothing yet to put in them.
- *
- * @param loading - Copy that stands in for a title that has not arrived.
- */
-const restingSlots = (loading: string): TreeSlots<"stat"> => ({
-    meta: () => <span data-part="title">{loading}</span>,
-    body: () => <progress data-part="bar" aria-label={loading} />,
-})
-
-/**
- * Render the course list. See the file header for why these three keys.
+ * Render the course list.
  *
  * @param props - {@link MyCoursesProgressProps}
  */
@@ -99,67 +92,85 @@ export const _MyCoursesProgress = ({
     isEmpty = false,
     courses = [],
     labels,
+    onRetry,
 }: MyCoursesProgressProps) => {
+    /** The `action` role of the empty state: the way out the key insists on. */
+    const Retry = () => (
+        <Button variant="secondary" icon="retry" onClick={onRetry}>
+            {labels.retry}
+        </Button>
+    )
+
+    /** What the region says once it has settled with nothing to show. */
+    const Empty = () => <EmptyState icon="course" title={labels.empty} action={Retry} />
+
     /**
-     * The `heading` role of the `section-header` key. `level={2}` is one word that fixes both
-     * the tag and the type scale, so the document outline and the visual order cannot drift.
+     * The `body` role of the `grid` key: the cards themselves, resting or real.
      *
-     * It takes no resting state on purpose: the title is copy this file already holds, so
-     * shimmering it would hide a word that is not waiting on anything.
+     * A resting card is the SAME card at the same count, so the grid does not reflow when the
+     * courses land - which is the whole reason the placeholder count is fixed rather than
+     * guessed from a list that is not there yet.
      */
-    const HeaderTitle = () => <Heading level={2}>{labels.heading}</Heading>
-
-    /** The `meta` role of the `section-header` key: the count, on the heading's baseline. */
-    const HeaderCount = ({ isLoading: resting }: TreeSlotProps) => (
-        <span data-part="count" data-state={resting === true ? "loading" : "ready"}>
-            {resting === true ? labels.loading : labels.count}
-        </span>
-    )
-
-    /** The `heading` role of the `section` key. */
-    const Header = ({ isLoading: resting }: TreeSlotProps) => (
-        <Tree name="section-header" isLoading={resting} slots={{ heading: HeaderTitle, meta: HeaderCount }} />
-    )
-
-    /** The `body` role of the `section` key: the rows, resting or real. */
-    const Body = ({ isLoading: resting }: TreeSlotProps) => {
+    const Cards = ({ isLoading: resting }: ContractSlotProps) => {
         if (resting === true) {
             return (
-                <ul data-part="courses" data-state="loading">
+                <>
                     {RESTING_ROWS.map((index) => (
-                        <li key={index} data-part="course" aria-hidden="true">
-                            <Tree name="stat" slots={restingSlots(labels.loading)} />
-                        </li>
+                        <CourseProgressBar
+                            key={index}
+                            title={labels.loading}
+                            percent={0}
+                            percentText=""
+                            isLoading
+                        />
                     ))}
-                </ul>
+                </>
             )
         }
-        if (isEmpty) {
-            return <p data-part="courses" data-state="empty">{labels.empty}</p>
-        }
         return (
-            <ul data-part="courses" data-state="ready">
+            <>
                 {courses.map((course) => (
-                    <li key={course.id} data-part="course">
-                        <Tree name="stat" slots={courseSlots(course)} />
-                    </li>
+                    <CourseProgressBar
+                        key={course.id}
+                        title={course.title}
+                        percent={course.percent}
+                        percentText={course.percentText}
+                    />
                 ))}
-            </ul>
+            </>
         )
     }
 
-    return <Tree name="section" isLoading={isLoading} slots={{ heading: Header, body: Body }} />
+    /**
+     * The `body` role of the surface: whichever of the three shapes this region is in.
+     *
+     * Resting is read BEFORE empty, always. A first load has nothing in hand, so a list is
+     * momentarily empty for a reason that is not an answer - and read the other way round, an
+     * enrolled learner is shown the message that says they have enrolled in nothing.
+     */
+    const Body = ({ isLoading: resting }: ContractSlotProps) => {
+        if (resting !== true && isEmpty) return <Empty />
+        return <Tree contract="grid" isLoading={resting} slots={{ body: Cards }} />
+    }
+
+    return (
+        <SurfaceCard
+            label={labels.heading}
+            meta={isLoading ? labels.loading : labels.count}
+            body={Body}
+            isLoading={isLoading}
+        />
+    )
 }
 
 /**
  * This block's entry in the dashboard chain: it IS the body of the region named
  * `courses-progress`.
  *
- * The `section` and `section-header` keys fix the shape - a heading with a count on its
- * baseline, over a list - and say nothing about what the list holds. This entry says it, and
- * says it in code the compiler checks: `MyCoursesProgressProps` is the only props type in the
- * chain carrying both a `courses` list and a resolved count label, so a block without both
- * cannot claim this name.
+ * The keys fix the shape - a bounded surface with a count on the title's baseline, over a grid -
+ * and say nothing about what the grid holds. This entry says it, and says it in code the
+ * compiler checks: `MyCoursesProgressProps` is the only props type in the chain carrying both a
+ * `courses` list and a resolved count label, so a block without both cannot claim this name.
  */
 export const myCoursesProgressChain: DashboardSectionChain = {
     name: "courses-progress",

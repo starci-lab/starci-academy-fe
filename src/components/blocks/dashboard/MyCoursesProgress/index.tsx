@@ -29,6 +29,7 @@ const STATIC_LABELS = {
     heading: "My courses",
     loading: "Loading",
     empty: "You have not enrolled in a course yet",
+    retry: "Check again",
 }
 
 /**
@@ -75,9 +76,19 @@ export const MyCoursesProgress = () => {
     const enrolled = useQueryMyCoursesSwr()
     const courses = (enrolled.data ?? []).map(toCourseRow)
 
-    // Rests only on a FIRST load: once anything is in hand the list shows it, so a
-    // refetch never blanks a list the reader was already reading.
-    const isLoading = courses.length === 0 && enrolled.isLoading === true
+    // Rests only on a FIRST load, and never once the request has FAILED: SWR retries a rejected
+    // key on a backoff and reports `isLoading` again on every attempt, so a list that read the
+    // flag alone would shimmer for as long as the backend was unreachable - which is exactly
+    // what an auth-gated query does for a reader with no session.
+    const hasFailed = enrolled.error !== undefined && enrolled.error !== null
+    const isLoading = courses.length === 0 && !hasFailed && enrolled.isLoading === true
+
+    // The empty state's way out. It is SWR's own revalidation rather than a page reload,
+    // because the commonest reason this list is empty is a backend that answered before its
+    // data was there - and a reader should not have to throw the whole page away to ask again.
+    const onRetry = () => {
+        void enrolled.mutate()
+    }
 
     return (
         <_MyCoursesProgress
@@ -85,6 +96,7 @@ export const MyCoursesProgress = () => {
             isEmpty={courses.length === 0}
             courses={courses}
             labels={toLabels(courses.length)}
+            onRetry={onRetry}
         />
     )
 }

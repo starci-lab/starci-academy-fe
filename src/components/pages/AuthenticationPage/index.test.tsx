@@ -2,38 +2,47 @@
 import { useEffect } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { cleanup, render } from "@testing-library/react"
+import type { ContractSlot } from "@/components/contracts"
 import { AuthenticationPage } from "@/components/pages/AuthenticationPage"
 
 /**
- * What these tests guard: that the page holds the flow still. It builds the slot once, so a
- * re-render of the route cannot restart a challenge the reader is part way through answering,
- * and it hands the flow no completion callback - where a reader should land after signing in
- * is a fact about where they came FROM, which this page has not been told.
+ * What these tests guard: that the page holds the panel still, and hands it nothing.
+ *
+ * It builds the slot once, so a re-render of the route cannot restart a challenge the reader is
+ * part way through answering. It hands the panel no completion callback, because where a reader
+ * should land after signing in is a fact about where they came FROM and this page has not been
+ * told. And it hands the panel no title-line slot, which is the whole difference between the
+ * routed surface and the floating one: a page that is already the screen has no way out to draw.
  */
 
 const leaves = vi.hoisted(() => ({
     signedIn: undefined as (() => void) | undefined,
+    action: undefined as unknown,
     mounts: 0,
 }))
 
-/** The single prop the stand-in flow is handed. */
-interface FlowStubProps {
-    /** Called by the flow once a token is in hand. */
+/** What the stand-in panel records rather than drawing. */
+interface PanelStubProps {
+    /** Called by the panel once a token is in hand. */
     onSignedIn?: () => void
+    /** What the host hung on the title line. */
+    slots?: { action?: ContractSlot }
 }
 
-vi.mock("@/components/overlays/auth/SignInFlow", () => ({
-    SignInFlow: ({ onSignedIn }: FlowStubProps) => {
+vi.mock("@/components/blocks/auth/AuthenticationPanel", () => ({
+    AuthenticationPanel: ({ onSignedIn, slots }: PanelStubProps) => {
         leaves.signedIn = onSignedIn
+        leaves.action = slots?.action
         useEffect(() => {
             leaves.mounts += 1
         }, [])
-        return <p data-part="flow">Flow</p>
+        return <p data-part="panel">Panel</p>
     },
 }))
 
 beforeEach(() => {
     leaves.signedIn = undefined
+    leaves.action = undefined
     leaves.mounts = 0
 })
 
@@ -42,23 +51,22 @@ afterEach(() => {
 })
 
 describe("AuthenticationPage", () => {
-    it("titles the page from its own copy", () => {
+    it("renders the panel", () => {
         const { container } = render(<AuthenticationPage />)
-        expect(container.querySelector("h1")?.textContent).toBe("Sign in")
+        expect(container.querySelector("[data-part='panel']")?.textContent).toBe("Panel")
     })
 
-    it("renders the flow inside the page body", () => {
-        const { container } = render(<AuthenticationPage />)
-        const section = container.querySelector("[data-node='section']")
-        expect(section?.querySelector("[data-part='flow']")).not.toBeNull()
-    })
-
-    it("draws the flow bare - the route is the surface, so nothing floats above it", () => {
+    it("draws the panel bare - the route is the surface, so nothing floats above it", () => {
         const { container } = render(<AuthenticationPage />)
         expect(container.querySelector("dialog")).toBeNull()
     })
 
-    it("builds the flow once, however often the route re-renders", () => {
+    it("hands the panel no way out, because a full-screen route has none", () => {
+        render(<AuthenticationPage />)
+        expect(leaves.action).toBeUndefined()
+    })
+
+    it("builds the panel once, however often the route re-renders", () => {
         const { rerender } = render(<AuthenticationPage />)
         rerender(<AuthenticationPage />)
         rerender(<AuthenticationPage />)

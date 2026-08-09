@@ -19,10 +19,10 @@ test("no-css-door-type-laundering rejects hiding a door behind a utility type", 
       {
         filename: "D:/repo/src/components/layouts/InnerLayout/component.tsx",
         code: `
-          import type { TreeSlot } from "@/components/classNames"
+          import type { ContractSlot } from "@/components/contracts"
           export interface InnerLayoutProps {
-            nav: TreeSlot
-            body: TreeSlot
+            nav: ContractSlot
+            body: ContractSlot
             showFooter: boolean
           }
         `,

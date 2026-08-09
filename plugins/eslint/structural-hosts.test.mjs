@@ -36,7 +36,7 @@ test("no-structural-host-outside-registry-frame sends a bare div back to the reg
     valid: [
       {
         filename: "D:/repo/src/components/blocks/example/Example/index.tsx",
-        code: "export const Example = () => <Tree name=\"card\" slots={slots} />",
+        code: "export const Example = () => <Tree contract=\"card\" slots={slots} />",
       },
       {
         // Leaves are not structure: an atom still renders its own text and controls.

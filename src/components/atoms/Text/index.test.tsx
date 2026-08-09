@@ -14,7 +14,7 @@ import { Text, meta, type TextProps, type TextSize, type TextTone } from "@/comp
 const FRACTIONAL_SPACING = /\b[a-z-]+-\d+\.5\b/
 
 /** An arbitrary Tailwind value escapes the token system entirely. */
-const ARBITRARY_VALUE = /\[[^\]]+\]/
+const ARBITRARY_VALUE = /-\[[^\]]+\]/
 
 /** The whole tone vocabulary, mirrored so a loop can walk it. */
 const TONES: ReadonlyArray<TextTone> = ["default", "muted"]
@@ -114,7 +114,7 @@ describe("Text", () => {
         expect(root.tagName).toBe("P")
         expect(root.getAttribute("data-loading")).toBe("true")
         expect(root.getAttribute("aria-hidden")).toBe("true")
-        expect(root.getAttribute("class")).toContain("animate-pulse")
+        expect(root.getAttribute("class")).toContain("skeleton")
         expect(root.textContent).toBe("Twelve lessons remaining")
     })
 

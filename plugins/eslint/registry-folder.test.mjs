@@ -11,7 +11,7 @@
 import test from "node:test"
 import { RuleTester } from "eslint"
 import tsParser from "@typescript-eslint/parser"
-import { classnamesTypeImportsOnly, shapesVocabularyCeiling } from "./registry-folder.mjs"
+import { contractsTypeImportsOnly, shapesVocabularyCeiling } from "./registry-folder.mjs"
 
 const tester = new RuleTester({
   languageOptions: {
@@ -22,13 +22,13 @@ const tester = new RuleTester({
   },
 })
 
-const CHAIN = "D:/repo/src/components/classNames/chains/dashboard.ts"
-const CHAIN_TWIN = "D:/repo/src/components/classNames/chains/dashboard.test.ts"
-const SHAPES = "D:/repo/src/components/classNames/shapes.ts"
+const CHAIN = "D:/repo/src/components/contracts/chains/dashboard.ts"
+const CHAIN_TWIN = "D:/repo/src/components/contracts/chains/dashboard.test.ts"
+const SHAPES = "D:/repo/src/components/contracts/shapes.ts"
 const BLOCK = "D:/repo/src/components/blocks/dashboard/IdentityStats/component.tsx"
 
-test("classnames-type-imports-only keeps the registry's upward references erasable", () => {
-  tester.run("classnames-type-imports-only", classnamesTypeImportsOnly, {
+test("contracts-type-imports-only keeps the registry's upward references erasable", () => {
+  tester.run("contracts-type-imports-only", contractsTypeImportsOnly, {
     valid: [
       {
         // The whole point of the folder: a chain NAMES a block, as a type.
@@ -66,7 +66,7 @@ test("classnames-type-imports-only keeps the registry's upward references erasab
       {
         // A relative value import is the same inversion wearing a shorter path.
         filename: SHAPES,
-        code: "import { treeSpec } from \"./chains/dashboard\"\nexport const x = treeSpec",
+        code: "import { contractSpec } from \"./chains/dashboard\"\nexport const x = contractSpec",
         errors: [{ messageId: "valueImport" }],
       },
       {
@@ -89,48 +89,48 @@ test("shapes-vocabulary-ceiling caps shapes and leaves chains alone", () => {
     valid: [
       {
         filename: SHAPES,
-        code: "export const TREE_KEY_CEILING = 16\nexport const CLASS_NAMES = { a: {}, b: {} } as const",
+        code: "export const CONTRACT_CEILING = 16\nexport const CONTRACTS = { a: {}, b: {} } as const",
       },
       {
         // A lower ceiling is always allowed; the hard limit is a maximum, not a target.
         filename: SHAPES,
-        code: "export const TREE_KEY_CEILING = 4\nexport const CLASS_NAMES = { a: {}, b: {} } as const",
+        code: "export const CONTRACT_CEILING = 4\nexport const CONTRACTS = { a: {}, b: {} } as const",
       },
       {
         // CHAINS ARE NOT SUBJECT TO THE CEILING. This is the case that keeps the asymmetry a
         // decision rather than an oversight: a chain module may hold as many entries as there
         // are compositions, and this rule must stay silent about it.
         filename: CHAIN,
-        code: "export const CLASS_NAMES = { a: {}, b: {}, c: {}, d: {}, e: {}, f: {}, g: {}, h: {}, i: {}, j: {}, k: {}, l: {}, m: {}, n: {}, o: {}, p: {}, q: {}, r: {} } as const",
+        code: "export const CONTRACTS = { a: {}, b: {}, c: {}, d: {}, e: {}, f: {}, g: {}, h: {}, i: {}, j: {}, k: {}, l: {}, m: {}, n: {}, o: {}, p: {}, q: {}, r: {} } as const",
       },
       {
         // The role vocabulary declares no keys, so there is nothing here to count.
-        filename: "D:/repo/src/components/classNames/roles.ts",
-        code: "export type TreeRole = \"body\"",
+        filename: "D:/repo/src/components/contracts/roles.ts",
+        code: "export type ContractRole = \"body\"",
       },
       {
         // Outside the registry entirely.
         filename: BLOCK,
-        code: "export const CLASS_NAMES = { a: {}, b: {}, c: {} }",
+        code: "export const CONTRACTS = { a: {}, b: {}, c: {} }",
       },
     ],
     invalid: [
       {
         filename: SHAPES,
-        code: "export const TREE_KEY_CEILING = 2\nexport const CLASS_NAMES = { a: {}, b: {}, c: {} } as const",
+        code: "export const CONTRACT_CEILING = 2\nexport const CONTRACTS = { a: {}, b: {}, c: {} } as const",
         errors: [{ messageId: "tooMany", data: { count: 3, ceiling: 2 } }],
       },
       {
         // Deleting the constant is the obvious way to make a ceiling stop failing.
         filename: SHAPES,
-        code: "export const CLASS_NAMES = { a: {}, b: {} } as const",
+        code: "export const CONTRACTS = { a: {}, b: {} } as const",
         errors: [{ messageId: "missingCeiling" }],
       },
       {
         // Raising it past the hard limit is the second-most obvious way.
         filename: SHAPES,
-        code: "export const TREE_KEY_CEILING = 99\nexport const CLASS_NAMES = { a: {}, b: {} } as const",
-        errors: [{ messageId: "ceilingRaised", data: { ceiling: 99, hard: 16 } }],
+        code: "export const CONTRACT_CEILING = 99\nexport const CONTRACTS = { a: {}, b: {} } as const",
+        errors: [{ messageId: "ceilingRaised", data: { ceiling: 99, hard: 23 } }],
       },
     ],
   })

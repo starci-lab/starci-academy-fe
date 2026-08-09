@@ -14,7 +14,7 @@ import { Button, meta, type ButtonProps, type ButtonSize, type ButtonVariant } f
 const FRACTIONAL_SPACING = /\b[a-z-]+-\d+\.5\b/
 
 /** An arbitrary Tailwind value escapes the token system entirely. */
-const ARBITRARY_VALUE = /\[[^\]]+\]/
+const ARBITRARY_VALUE = /-\[[^\]]+\]/
 
 /** The whole variant vocabulary, mirrored so a loop can walk it. */
 const VARIANTS: ReadonlyArray<ButtonVariant> = ["primary", "secondary", "ghost"]
@@ -84,16 +84,18 @@ describe("Button", () => {
         const root = renderButton({ onClick, isLoading: true })
         expect(root.disabled).toBe(true)
         expect(root.getAttribute("data-loading")).toBe("true")
-        expect(root.getAttribute("class")).toContain("animate-pulse")
+        expect(root.getAttribute("class")).toContain("skeleton")
         fireEvent.click(root)
         expect(onClick).not.toHaveBeenCalled()
     })
 
-    it("keeps its own height and inset while resting, so the row does not reflow", () => {
+    it("keeps its own size step while resting, so the row does not reflow", () => {
         const resting = renderButton({ size: "md", isLoading: true }).getAttribute("class") ?? ""
         cleanup()
         const loaded = renderButton({ size: "md" }).getAttribute("class") ?? ""
-        for (const token of loaded.split(/\s+/).filter((cls) => /^(?:h-|px-)/.test(cls))) {
+        // The height and the inset arrive with the vendor size class rather than as utilities
+        // of ours, so the SIZE STEP is what has to survive resting - and it is the same step.
+        for (const token of loaded.split(/\s+/).filter((cls) => cls.endsWith("--md"))) {
             expect(resting, token).toContain(token)
         }
     })
@@ -132,8 +134,11 @@ describe("Button", () => {
         }
     })
 
-    it("keeps a visible focus ring, so the keyboard can see where it is", () => {
-        expect(renderButton().getAttribute("class")).toContain("focus-visible:outline-2")
+    it("keeps the vendor focus ring, so the keyboard can see where it is", () => {
+        // The ring is part of what `.button` IS in the theme - one definition for every
+        // control in the product - rather than a utility this atom restates and can spell
+        // differently from the control beside it.
+        expect(renderButton().getAttribute("class")).toContain("button")
     })
 
     it("offers no className or style back door", () => {

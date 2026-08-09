@@ -1,41 +1,239 @@
 @import "tailwindcss";
+@import "@heroui/styles/css";
 
 /*
- * The ONLY stylesheet in the app.
+ * The ONLY stylesheet in the app, and the ONLY place a colour is written down.
  *
  * Every structure on screen is drawn by a registry entry in
- * `src/components/classNames/shapes.ts` and rendered by the `Tree` frame, so this file
- * owns nothing but the ground the registry paints on: the page surface, the text
- * colour, and the seam colour the `card` key's `border` resolves against.
+ * `src/components/contracts/shapes.ts`; every leaf is drawn by an atom that wraps a HeroUI
+ * primitive. Neither of them names a colour: they name a TOKEN - `bg-surface`, `text-muted`,
+ * `border-border` - and the token resolves here.
  *
- * Nothing here is a component style. A rule that describes one component belongs
- * to that component's tier, not to a global sheet nobody can trace a node back to.
+ * WHERE THESE VALUES COME FROM. They are PORTED from the live product's own stylesheet
+ * (`starci-academy/src/app/globals.css`), token for token, so this app is the same product
+ * wearing a different spine rather than a second palette that happens to look similar. Nothing
+ * below was invented: the brand hue, the surfaces, the field family and the container measures
+ * are the ones academy.starci.org already ships.
+ *
+ * The names are HeroUI's, deliberately. The vendor's own components resolve their fills,
+ * foregrounds and focus rings from exactly these variables, so a `Chip` nobody styled comes out
+ * in the product's palette on its first render.
+ *
+ * WHAT IS NOT HERE. No component style of our own. The two vendor overrides at the bottom are
+ * ported with the tokens, for the same reason: they are part of how the product's cards look.
  */
 
-:root {
-    color-scheme: light dark;
-    --page-surface: #ffffff;
-    --page-ink: #101317;
-    --page-seam: #e3e6ea;
+/*
+ * Container measures, mirroring the viewport scale.
+ *
+ * The app renders in a centred column, and the shell reads against THAT column rather than the
+ * window. The names exist because Tailwind's built-in container scale is a different scale from
+ * the viewport one - `lg:` is 1024px, `@lg:` is 512px - so a rename between them silently halves
+ * every breakpoint. Pinned here to the same pixel values as the viewport scale.
+ */
+@theme {
+    --container-app-sm: 40rem;
+    --container-app-md: 48rem;
+    --container-app-lg: 64rem;
+    --container-app-xl: 80rem;
 }
 
+/*
+ * THE LIGHT THEME.
+ *
+ * Only the BASE tokens are written. Every soft, hover and border-level token HeroUI ships is
+ * derived from these with `color-mix`, on this same element, so overriding the base is enough
+ * to move the whole family - `--accent-soft`, `--accent-soft-foreground` and `--focus` all
+ * follow `--accent` without being restated.
+ */
+:root,
+.light,
+.default,
+[data-theme="light"],
+[data-theme="default"] {
+    /* Brand. One accent - hue 354, the product's rose - so that being the accent still means something. */
+    --accent: oklch(70.03% 0.2092 354.13);
+    --accent-foreground: oklch(100% 0 0);
+
+    /* Backgrounds: the page itself, then the surfaces laid on it. */
+    --background: oklch(97.02% 0.0015 354.13);
+    --surface: oklch(100% 0.0008 354.13);
+    --surface-foreground: oklch(21.03% 0.0015 354.13);
+    --surface-secondary: oklch(95.24% 0.0012 354.13);
+    --surface-secondary-foreground: oklch(21.03% 0.0015 354.13);
+    --surface-tertiary: oklch(93.73% 0.0012 354.13);
+    --surface-tertiary-foreground: oklch(21.03% 0.0015 354.13);
+    --overlay: oklch(100% 0.0004 354.13);
+    --overlay-foreground: oklch(21.03% 0.0015 354.13);
+    --default: oklch(94% 0.0015 354.13);
+    --default-foreground: oklch(21.03% 0.0059 354.13);
+    --segment: oklch(100% 0.0015 354.13);
+    --segment-foreground: oklch(21.03% 0.0015 354.13);
+
+    /* Text: one foreground, one muted foreground, and the semantic quartet below. */
+    --foreground: oklch(21.03% 0.0015 354.13);
+    --muted: oklch(55.17% 0.003 354.13);
+
+    /* Status. Anything categorical maps back onto these rather than inventing a hue. */
+    --success: oklch(73.29% 0.1941 162.85);
+    --success-foreground: oklch(21.03% 0.0059 162.85);
+    --warning: oklch(78.19% 0.159 84.37);
+    --warning-foreground: oklch(21.03% 0.0059 84.37);
+    --danger: oklch(65.32% 0.2335 37.78);
+    --danger-foreground: oklch(99.11% 0 0);
+    /* Info is the palette's only blue - a calm status tone, never a second brand colour. */
+    --info: oklch(72% 0.17 250);
+    --info-foreground: oklch(21.03% 0.0059 250);
+
+    /* Borders: a separator for hairlines between things, a border for the outline of one. */
+    --border: oklch(90% 0.0015 354.13);
+    --separator: oklch(92% 0.0015 354.13);
+    --focus: oklch(70.03% 0.2092 354.13);
+    --scrollbar: oklch(87.1% 0.0015 354.13);
+
+    /* Form fields move independently of cards, so they carry their own family. */
+    --field-background: oklch(100% 0.0008 354.13);
+    --field-border: transparent;
+    --field-foreground: oklch(21.03% 0.0015 354.13);
+    --field-placeholder: oklch(55.17% 0.003 354.13);
+
+    /* Radius. Every `rounded-*` step is derived from these two numbers. */
+    --radius: 0.5rem;
+    --field-radius: 0.75rem;
+
+    /* Tooltips answer immediately - the vendor's 1500ms default reads as a broken hover. */
+    --tooltip-delay: 0ms;
+    --tooltip-close-delay: 0ms;
+
+    /* The resting shape shimmers rather than pulses - it reads as "arriving", not "broken". */
+    --skeleton-animation: shimmer;
+}
+
+/*
+ * THE DARK THEME.
+ *
+ * Ported from the same source, and reachable two ways: the vendor's `.dark` / `[data-theme]`
+ * hooks, for when a theme toggle lands, and the reader's own system setting below - which is
+ * the only one this build can actually use, because there is no toggle yet.
+ */
+.dark,
+[data-theme="dark"] {
+    color-scheme: dark;
+
+    --accent: oklch(70.03% 0.2092 354.13);
+    --accent-foreground: oklch(100% 0 0);
+
+    --background: oklch(12% 0.0015 354.13);
+    --surface: oklch(21.03% 0.003 354.13);
+    --surface-foreground: oklch(99.11% 0.0015 354.13);
+    --surface-secondary: oklch(25.7% 0.0023 354.13);
+    --surface-secondary-foreground: oklch(99.11% 0.0015 354.13);
+    --surface-tertiary: oklch(27.21% 0.0023 354.13);
+    --surface-tertiary-foreground: oklch(99.11% 0.0015 354.13);
+    --overlay: oklch(21.03% 0.003 354.13);
+    --overlay-foreground: oklch(99.11% 0.0015 354.13);
+    --default: oklch(27.4% 0.0015 354.13);
+    --default-foreground: oklch(99.11% 0 0);
+    --segment: oklch(39.64% 0.0015 354.13);
+    --segment-foreground: oklch(99.11% 0.0015 354.13);
+
+    --foreground: oklch(99.11% 0.0015 354.13);
+    --muted: oklch(70.5% 0.003 354.13);
+
+    --success: oklch(73.29% 0.1941 162.85);
+    --success-foreground: oklch(21.03% 0.0059 162.85);
+    --warning: oklch(82.03% 0.1392 88.38);
+    --warning-foreground: oklch(21.03% 0.0059 88.38);
+    --danger: oklch(59.4% 0.1973 36.67);
+    --danger-foreground: oklch(99.11% 0 0);
+    --info: oklch(72% 0.17 250);
+    --info-foreground: oklch(21.03% 0.0059 250);
+
+    --border: oklch(28% 0.0015 354.13);
+    --separator: oklch(25% 0.0015 354.13);
+    --focus: oklch(70.03% 0.2092 354.13);
+    --scrollbar: oklch(70.5% 0.0015 354.13);
+
+    --field-background: oklch(21.03% 0.003 354.13);
+    --field-border: transparent;
+    --field-foreground: oklch(99.11% 0.0015 354.13);
+    --field-placeholder: oklch(70.5% 0.003 354.13);
+
+    --tooltip-delay: 0ms;
+    --tooltip-close-delay: 0ms;
+}
+
+/*
+ * The scheme a reader without a toggle actually gets. Same values as the block above; declared
+ * again rather than shared, because a media query cannot be spelled as a class and the vendor's
+ * hook has to keep working the day a toggle does land.
+ */
 @media (prefers-color-scheme: dark) {
     :root {
-        --page-surface: #0d1014;
-        --page-ink: #eef1f4;
-        --page-seam: #262b31;
+        color-scheme: dark;
+
+        --background: oklch(12% 0.0015 354.13);
+        --surface: oklch(21.03% 0.003 354.13);
+        --surface-foreground: oklch(99.11% 0.0015 354.13);
+        --surface-secondary: oklch(25.7% 0.0023 354.13);
+        --surface-secondary-foreground: oklch(99.11% 0.0015 354.13);
+        --surface-tertiary: oklch(27.21% 0.0023 354.13);
+        --surface-tertiary-foreground: oklch(99.11% 0.0015 354.13);
+        --overlay: oklch(21.03% 0.003 354.13);
+        --overlay-foreground: oklch(99.11% 0.0015 354.13);
+        --default: oklch(27.4% 0.0015 354.13);
+        --default-foreground: oklch(99.11% 0 0);
+        --segment: oklch(39.64% 0.0015 354.13);
+        --segment-foreground: oklch(99.11% 0.0015 354.13);
+
+        --foreground: oklch(99.11% 0.0015 354.13);
+        --muted: oklch(70.5% 0.003 354.13);
+
+        --warning: oklch(82.03% 0.1392 88.38);
+        --warning-foreground: oklch(21.03% 0.0059 88.38);
+        --danger: oklch(59.4% 0.1973 36.67);
+        --danger-foreground: oklch(99.11% 0 0);
+
+        --border: oklch(28% 0.0015 354.13);
+        --separator: oklch(25% 0.0015 354.13);
+        --scrollbar: oklch(70.5% 0.0015 354.13);
+
+        --field-background: oklch(21.03% 0.003 354.13);
+        --field-foreground: oklch(99.11% 0.0015 354.13);
+        --field-placeholder: oklch(70.5% 0.003 354.13);
     }
 }
 
+/*
+ * The page ground. The body is the one element no registry key draws, so it is the one element
+ * this file may describe.
+ */
 body {
-    background-color: var(--page-surface);
-    color: var(--page-ink);
+    background-color: var(--background);
+    color: var(--foreground);
 }
 
 /*
- * The `card` registry entry declares `border` with no colour of its own, because a
- * colour there would be a second place to disagree with the theme. It resolves here.
+ * A registry entry writes `border` with no colour of its own, because a colour there would be a
+ * second place to disagree with the theme. Tailwind's default for an unqualified border is
+ * `currentColor` - a hairline in the text colour, which a seam never is - so it resolves to the
+ * border token here, once, for every node that draws one.
  */
-* {
-    border-color: var(--page-seam);
+*,
+::before,
+::after {
+    border-color: var(--border);
+}
+
+/*
+ * VENDOR OVERRIDES, ported with the tokens.
+ *
+ * A card in this product is a SHADOW-LIFTED surface, not an outlined box, and it pads at four
+ * spacing steps because it holds groups and its outer edge should breathe at the same rhythm as
+ * the seams inside it. Both facts belong to the theme rather than to a component: they are true
+ * of every card, and a component that restated them would be a second place to disagree.
+ */
+.card {
+    border: none !important;
+    padding: calc(var(--spacing) * 4) !important;
 }
