@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+/*
+ * The ONLY stylesheet in the app.
+ *
+ * Every structure on screen is drawn by a registry entry in
+ * `src/components/classNames.tsx` and rendered by the `Tree` frame, so this file
+ * owns nothing but the ground the registry paints on: the page surface, the text
+ * colour, and the seam colour the `card` key's `border` resolves against.
+ *
+ * Nothing here is a component style. A rule that describes one component belongs
+ * to that component's tier, not to a global sheet nobody can trace a node back to.
+ */
+
+:root {
+    color-scheme: light dark;
+    --page-surface: #ffffff;
+    --page-ink: #101317;
+    --page-seam: #e3e6ea;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --page-surface: #0d1014;
+        --page-ink: #eef1f4;
+        --page-seam: #262b31;
+    }
+}
+
+body {
+    background-color: var(--page-surface);
+    color: var(--page-ink);
+}
+
+/*
+ * The `card` registry entry declares `border` with no colour of its own, because a
+ * colour there would be a second place to disagree with the theme. It resolves here.
+ */
+* {
+    border-color: var(--page-seam);
+}
