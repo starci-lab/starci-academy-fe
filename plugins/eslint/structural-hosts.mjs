@@ -37,18 +37,33 @@ const DEEPEST_HEADING_LEVEL = 4
 const normalize = (filename) => String(filename || "").replace(/\\/g, "/")
 
 /** The one frame that renders a registry entry, and therefore the one that owns hosts. */
-export const isRegistryFrameFile = (filename) => normalize(filename).includes("/src/components/frames/Tree/")
+export const isRegistryFrameFile = (filename) => normalize(filename).includes("/src/components/branches/Tree/")
+
+/**
+ * A LEAF - an atom, or a fixed cluster of atoms.
+ *
+ * A leaf owns its own interior, including the element it opens and the seam between its parts.
+ * That interior is the same everywhere and forever, so there is nothing for the registry to tune
+ * and nothing for this rule to send back to it.
+ *
+ * THIS EXEMPTION IS A FOLDER, so it is a POLICY boundary and not a type: anyone can escape the
+ * rule by filing a component here. What keeps a region out is the question a reader asks - would
+ * fixing this interior force a contract per call site? If yes it is a branch, and it belongs to
+ * the registry. No gate asks that question.
+ */
+export const isLeafFile = (filename) => normalize(filename).includes("/src/components/leaves/")
 
 /** Product source under `src/`, excluding twin tests which build fixture markup by hand. */
 export const isGovernedFile = (filename) => {
   const file = normalize(filename)
   if (!file.includes("/src/")) return false
   if (/\.(?:test|spec)\.(?:ts|tsx|js|jsx)$/.test(file)) return false
+  if (isLeafFile(file)) return false
   return !isRegistryFrameFile(file)
 }
 
-/** The atom that owns every heading, and therefore the one file allowed to write the tags. */
-export const isHeadingAtomFile = (filename) => normalize(filename).includes("/src/components/atoms/Heading/")
+/** The leaf that owns every heading, and therefore the one file allowed to write the tags. */
+export const isHeadingAtomFile = (filename) => normalize(filename).includes("/src/components/leaves/Heading/")
 
 /**
  * Product source under `src/` that must go through the atom.

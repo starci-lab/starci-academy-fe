@@ -1,0 +1,204 @@
+{
+    "app": {
+        "title": "StarCi Academy",
+        "description": "Bảng điều khiển của người học."
+    },
+    "shell": {
+        "brand": "StarCi Academy",
+        "signIn": "Đăng nhập",
+        "routes": {
+            "dashboard": "Trang chủ",
+            "courses": "Khóa học",
+            "contact": "Liên hệ"
+        },
+        "themeLight": "Chuyển sang sáng",
+        "themeDark": "Chuyển sang tối",
+        "locale": "Đổi ngôn ngữ",
+        "tabs": {
+            "overview": "Tổng quan",
+            "explore": "Khám phá",
+            "courses": "Khóa học",
+            "community": "Cộng đồng"
+        },
+        "quickActions": "Truy cập nhanh",
+        "actions": {
+            "course": "Xem khóa học",
+            "review": "Ôn tập",
+            "practice": "Luyện code",
+            "league": "Bảng xếp hạng",
+            "saved": "Đã lưu",
+            "rewards": "Phần thưởng",
+            "blog": "Blog",
+            "talents": "Nhân tài",
+            "jobs": "Việc làm IT"
+        },
+        "search": "Tìm kiếm",
+        "searchPlaceholder": "Tìm kiếm",
+        "searchShortcut": "Ctrl K",
+        "cart": "Giỏ hàng",
+        "account": "Tài khoản",
+        "railHeading": "Thống kê & bảng tin"
+    },
+    "dashboard": {
+        "title": "Bảng điều khiển",
+        "progressHeading": "Tiến độ của bạn",
+        "railHeading": "Vị trí của bạn",
+        "signOut": "Đăng xuất",
+        "signedOutTitle": "Đăng nhập để xem bảng điều khiển",
+        "signIn": "Đăng nhập"
+    },
+    "identity": {
+        "loading": "Đang tải",
+        "empty": "Đăng nhập để xem",
+        "streak": "Chuỗi ngày học",
+        "aiCredit": "Tín dụng AI",
+        "rewardPoints": "Điểm thưởng",
+        "days": "{count} ngày",
+        "creditOf": "{remaining} trên {limit}",
+        "points": "{balance}"
+    },
+    "courses": {
+        "count": "{count} khóa học",
+        "heading": "Khóa học của tôi",
+        "loading": "Đang tải",
+        "empty": "Bạn chưa ghi danh khóa học nào",
+        "retry": "Kiểm tra lại",
+        "failed": "Không tải được khóa học của bạn"
+    },
+    "streak": {
+        "heading": "Đà học",
+        "loading": "Đang tải",
+        "empty": "Học một nội dung để nhóm lửa chuỗi của bạn",
+        "failed": "Không tải được chuỗi ngày học",
+        "currentLabel": "Chuỗi hiện tại",
+        "current": "Chuỗi {count} ngày",
+        "longest": "Dài nhất {count}",
+        "retry": "Thử lại"
+    },
+    "auth": {
+        "signIn": {
+            "title": "Đăng nhập",
+            "submitDetails": "Đăng nhập",
+            "submitCode": "Đăng nhập",
+            "passwordLabel": "Mật khẩu",
+            "passwordHint": "",
+            "doneTitle": "Bạn đã đăng nhập",
+            "doneHint": "Bạn có thể tiếp tục chỗ đang dở.",
+            "subtitle": "Đăng nhập để tiếp tục",
+            "promptQuestion": "Chưa có tài khoản?",
+            "promptAction": "Đăng ký"
+        },
+        "signUp": {
+            "title": "Đăng ký",
+            "submitDetails": "Tạo tài khoản",
+            "submitCode": "Hoàn tất đăng ký",
+            "passwordLabel": "Chọn mật khẩu",
+            "passwordHint": "Đây là mật khẩu bạn sẽ dùng để đăng nhập từ giờ trở đi.",
+            "doneTitle": "Tài khoản của bạn đã sẵn sàng",
+            "doneHint": "Bạn đã đăng nhập và có thể bắt đầu ngay.",
+            "subtitle": "Tạo tài khoản để tiếp tục",
+            "promptQuestion": "Đã có tài khoản?",
+            "promptAction": "Đăng nhập"
+        },
+        "forgotPassword": {
+            "title": "Đặt lại mật khẩu",
+            "submitDetails": "Gửi mã cho tôi",
+            "submitCode": "Đổi mật khẩu",
+            "passwordLabel": "Mật khẩu mới",
+            "passwordHint": "Mã ở bước sau là thứ cho phép việc đổi mật khẩu này.",
+            "doneTitle": "Mật khẩu của bạn đã đổi",
+            "doneHint": "Bạn đã đăng nhập bằng mật khẩu mới.",
+            "subtitle": "Chúng tôi sẽ gửi mã tới email của bạn",
+            "promptQuestion": "Nhớ ra rồi?",
+            "promptAction": "Đăng nhập"
+        },
+        "shared": {
+            "emailLabel": "Email",
+            "emailHint": "",
+            "codeLabel": "Mã OTP",
+            "resend": "Gửi lại mã",
+            "useAnotherEmail": "Dùng email khác",
+            "oauthGoogle": "Đăng nhập với Google",
+            "oauthGithub": "Đăng nhập với GitHub",
+            "agreeToTerms": "Tôi đồng ý với điều khoản dịch vụ và chính sách riêng tư",
+            "switchToSignIn": "Đăng nhập thay vì vậy",
+            "switchToSignUp": "Tạo tài khoản",
+            "switchToForgotPassword": "Quên mật khẩu?",
+            "codeHint": "Đã gửi tới {email}.",
+            "yourEmail": "email của bạn",
+            "or": "HOẶC",
+            "emailPlaceholder": "Nhập email của bạn",
+            "passwordLabel": "Mật khẩu",
+            "passwordPlaceholder": "Nhập mật khẩu của bạn",
+            "revealPassword": "Hiện mật khẩu",
+            "hidePassword": "Ẩn mật khẩu",
+            "rememberMe": "Ghi nhớ đăng nhập",
+            "forgotPassword": "Quên mật khẩu?",
+            "codePlaceholder": "Nhập mã OTP 6 số",
+            "dismiss": "Đóng",
+            "devSignIn": "Vào bằng tài khoản thử"
+        },
+        "status": {
+            "sending": "Đang kiểm tra thông tin của bạn",
+            "sent": "Chúng tôi đã gửi mã tới email của bạn. Nhập mã bên dưới.",
+            "verifying": "Đang kiểm tra mã của bạn",
+            "resending": "Đang gửi mã mới",
+            "resent": "Mã mới đang trên đường tới. Mã trước đó không còn dùng được.",
+            "signedIn": "Đã đăng nhập",
+            "transport": "Chúng tôi không kết nối được tới máy chủ. Kiểm tra đường truyền rồi thử lại.",
+            "refused": "Chưa được. Vui lòng thử lại.",
+            "dev": {
+                "refused": "Cửa tài khoản thử không mở. Kiểm tra .env.local và Keycloak.",
+                "transport": "Không gọi được máy chủ dev."
+            }
+        },
+        "expiry": {
+            "seconds": " Mã hết hạn sau {count} giây.",
+            "minutes": " Mã hết hạn sau {count} phút."
+        }
+    },
+    "theme": {
+        "label": "Giao diện",
+        "light": "Sáng",
+        "dark": "Tối",
+        "system": "Theo hệ thống"
+    },
+    "locale": {
+        "label": "Ngôn ngữ",
+        "en": "English",
+        "vi": "Tiếng Việt"
+    },
+    "quest": {
+        "heading": "Nhiệm vụ hôm nay",
+        "empty": "Hôm nay chưa có nhiệm vụ nào",
+        "failed": "Không tải được nhiệm vụ hôm nay",
+        "retry": "Thử lại",
+        "claim": "Nhận {count} điểm",
+        "claimed": "Đã nhận thưởng",
+        "reward": "Hoàn thành cả nhiệm vụ để nhận {count} điểm",
+        "tasks": {
+            "readContent": "Đọc nội dung",
+            "passChallenge": "Pass challenge",
+            "reviewFlashcards": "Ôn flashcard",
+            "mockInterview": "Hoàn thành 1 phiên Phỏng vấn thử",
+            "quizSession": "Hoàn thành 1 phiên Quiz nhanh"
+        }
+    },
+    "kpi": {
+        "heading": "Mục tiêu tuần",
+        "edit": "Sửa",
+        "retry": "Thử lại",
+        "failed": "Không tải được mục tiêu tuần",
+        "prompt": "Đặt mục tiêu tuần để theo dõi tiến độ",
+        "summary": "{percent}% tuần này · đạt {completed}/{total} mục tiêu",
+        "resetIn": "Reset sau {days} ngày {hours} giờ",
+        "labels": {
+            "lessons": "Nội dung",
+            "studyDays": "Ngày học",
+            "challenges": "Challenge",
+            "coding": "Coding",
+            "flashcards": "Flashcard",
+            "milestones": "Dự án cá nhân"
+        }
+    }
+}

@@ -1,138 +1,161 @@
-import { Button } from "@/components/atoms/Button"
-import { Heading } from "@/components/atoms/Heading"
-import { Link } from "@/components/atoms/Link"
-import { Tree } from "@/components/frames/Tree"
-import { EmptyState } from "@/components/composites/feedback/EmptyState"
-import { SurfaceCard } from "@/components/composites/cards/SurfaceCard"
-import { IdentityStats } from "@/components/blocks/dashboard/IdentityStats"
-import { MyCoursesProgress } from "@/components/blocks/dashboard/MyCoursesProgress"
+import { Tree } from "@/components/branches/Tree"
+import { Heading } from "@/components/leaves/Heading"
+import { NavLink } from "@/components/leaves/NavLink"
+import { Button } from "@/components/leaves/Button"
+import { EmptyNotice } from "@/components/leaves/EmptyNotice"
+import { QuickActions } from "@/components/blocks/dashboard/QuickActions"
+import { IdentityRail } from "@/components/blocks/dashboard/IdentityRail"
+import { DailyQuest } from "@/components/blocks/dashboard/DailyQuest"
 import { StreakStrip } from "@/components/blocks/dashboard/StreakStrip"
+import { WeeklyGoals } from "@/components/blocks/dashboard/WeeklyGoals"
+import { MyCoursesProgress } from "@/components/blocks/dashboard/MyCoursesProgress"
+import type { IconName } from "@/components/leaves/Icon"
 
 /**
  * PAGE - `DashboardPage`, presentational half.
  *
- * The dashboard is one scrolling column with a supporting rail, and that shape is a
- * registry key rather than a decision made here: `split` says the rail SUPPORTS the
- * body rather than competing with it, so at a narrow width it drops underneath instead
- * of halving the room the progress column needs. The rail is a `card` because that is what it
- * is in the live product - one bounded surface holding the viewer's standing, with the action
- * that ends the session closing it.
+ * IT OWNS NO REQUEST. Every figure on screen belongs to a block that fetches it. What it owns is
+ * the ONE fact none of those blocks can settle - whether there is a session at all.
  *
- * THE SIGNED-OUT VIEW IS A DESIGN, NOT A FALLBACK. Every figure on this page comes from an
- * auth-gated request, so a visitor with no session is the commonest reader this screen has. They
- * used to get four regions of shimmer that never resolved - a page saying "wait" when the honest
- * answer was "sign in". They now get one panel that says so and the control that fixes it, and
- * the blocks are not mounted at all: three rows reading "sign in to see" beside a panel that
- * already said it is the same sentence four times.
+ * WHY THAT MATTERS MORE THAN IT LOOKS. Every query behind this screen is auth-gated, so without a
+ * token they do not fail slowly, they fail forever: SWR retries a rejected key on a backoff and
+ * reports `isLoading` again each time, which is how a signed-out dashboard ends up shimmering at a
+ * reader who is not waiting for anything. Answering it here, once, before a single request is
+ * made, is what stops that.
  *
- * What this page does NOT do is fetch. Each block owns its own request, so a slow one
- * rests on its own without holding the page behind it. The page's only job is where
- * they sit.
+ * WHAT IS DELIBERATELY NOT BUILT. The live product carries daily quests, weekly goals, streak
+ * freezes, contributions, job readiness, leagues and a changelog. This repo has six queries and
+ * none of them backs those, so they are reported here rather than mocked - an invented number is
+ * worse than an honest gap.
  */
 
-/** Every string the page renders, already resolved by the connected half. */
-export interface DashboardPageLabels {
-    /** The page title. */
-    title: string
-    /** Heading over the two progress blocks. */
-    progressHeading: string
-    /** Heading over the rail's standing rows. */
-    railHeading: string
-    /** The label of the control that ends the session. */
-    signOut: string
-    /** What a reader with no session is told, in place of the whole dashboard. */
-    signedOutTitle: string
-    /** The label of the control that starts a session. */
-    signIn: string
+/** One section of the dashboard. */
+export type DashboardTab = {
+    /** Identity of the tab, used as the key. */
+    readonly id: string
+    /** The already-resolved words. */
+    readonly label: string
+    /** The meaning drawn before the words. */
+    readonly icon: IconName
+    /** Whether this is the section being shown. */
+    readonly isCurrent: boolean
+    /** Where it goes. */
+    readonly href: string
 }
 
-/** Props for {@link _DashboardPage} - presentational; no fetch, no store, no i18n. */
-export interface DashboardPageProps {
-    /** Resolved copy. */
-    labels: DashboardPageLabels
-    /**
-     * Nobody is signed in. Not a loading state and not an error: it is a settled fact about the
-     * reader, and it decides which of two pages this is.
-     */
-    isSignedOut?: boolean
-    /** Ends the session. Only ever reachable while there is one. */
-    onSignOut?: () => void
+/** What the page carries in EVERY state. */
+export type DashboardFrame = {
+    /** The already-resolved name of the screen. */
+    readonly title: string
+    /** The sections, in reading order. */
+    readonly tabs: ReadonlyArray<DashboardTab>
 }
 
-/** Where a reader with no session is sent. The routed sign-in, which needs no shell to summon. */
-const SIGN_IN_HREF = "/authentication"
-
-/** The `body` role of the inner `section`: the two progress blocks, in reading order. */
-const ProgressBody = () => (
-    <>
-        <StreakStrip />
-        <MyCoursesProgress />
-    </>
-)
-
-/** The `body` role of the rail `card`: the three standing rows. */
-const RailStats = () => <IdentityStats />
-
-/**
- * Render the dashboard. See the file header for why these keys.
- *
- * @param props - {@link DashboardPageProps}
- */
-export const _DashboardPage = ({ labels, isSignedOut = false, onSignOut }: DashboardPageProps) => {
-    /**
-     * The `heading` role of the outer `section`. `level={1}` because this is the name of the
-     * PAGE, and the atom turns that one word into both the tag a screen reader builds the
-     * outline from and the size a reader sees - so the two cannot disagree.
-     */
-    const Title = () => <Heading level={1}>{labels.title}</Heading>
-
-    /** The `heading` role of the inner `section` - a section of the page, so `level={2}`. */
-    const ProgressHeading = () => <Heading level={2}>{labels.progressHeading}</Heading>
-
-    /** The `footer` role of the rail card: the one action a signed-in reader has here. */
-    const RailAction = () => (
-        <Button variant="ghost" size="sm" icon="signIn" onClick={onSignOut}>
-            {labels.signOut}
-        </Button>
-    )
-
-    /** The `aside` role of the `split` key: who the reader is, and where they stand. */
-    const Rail = () => (
-        <SurfaceCard label={labels.railHeading} body={RailStats} footer={RailAction} />
-    )
-
-    /** The `body` role of the `split` key: everything the reader came to read. */
-    const MainColumn = () => (
-        <Tree contract="section" slots={{ heading: ProgressHeading, body: ProgressBody }} />
-    )
-
-    /**
-     * The `action` role of the signed-out empty state.
-     *
-     * A LINK rather than a button, because it changes the address: a reader can open the sign-in
-     * in a new tab, copy it, or see where it goes before pressing - none of which a button that
-     * navigates would let them do.
-     */
-    const SignedOutAction = () => (
-        <Link href={SIGN_IN_HREF} icon="signIn" emphasis="primary">
-            {labels.signIn}
-        </Link>
-    )
-
-    /** The `body` role of the outer `section`: the dashboard, or the reason there is none. */
-    const Body = () => {
-        if (isSignedOut) {
-            return (
-                <EmptyState
-                    icon="signIn"
-                    title={labels.signedOutTitle}
-                    action={SignedOutAction}
-                    level={2}
-                />
-            )
-        }
-        return <Tree contract="split" slots={{ body: MainColumn, aside: Rail }} />
+/** Props for {@link _DashboardPage}, discriminated by the situation. */
+export type DashboardPageProps =
+    | {
+        readonly state: "signedOut"
+        readonly props: DashboardFrame & { readonly message: string; readonly signInLabel: string }
+    }
+    | {
+        readonly state: "signedIn"
+        readonly props: DashboardFrame & { readonly signOutLabel: string }
     }
 
-    return <Tree contract="section" slots={{ heading: Title, body: Body }} />
+/** What the page reports. */
+export type DashboardPageActions = {
+    /** Called when the reader ends the session. */
+    readonly signOut?: () => void
+    /** Called when a signed-out reader asks to sign in. */
+    readonly signIn?: () => void
 }
+
+/**
+ * Render the dashboard.
+ *
+ * @param input - {@link DashboardPageProps}
+ */
+export const _DashboardPage = (input: DashboardPageProps & { readonly on?: DashboardPageActions }) => {
+    const tabs = (
+        <Tree contract="underlined-tab-strip">
+            {input.props.tabs.map((tab) => (
+                <NavLink
+                    key={tab.id}
+                    props={{
+                        href: tab.href,
+                        label: tab.label,
+                        icon: tab.icon,
+                        isCurrent: tab.isCurrent,
+                        kind: "tab",
+                    }}
+                />
+            ))}
+        </Tree>
+    )
+
+    /**
+     * The rail is drawn in BOTH states, because the shortcuts on it need no session: they are
+     * destinations, not the reader's data. Hiding them behind sign-in would take away the one
+     * thing a signed-out visitor can actually use, and leave the screen with nothing but a refusal.
+     *
+     * WHO THE READER IS COMES FIRST, WHERE THEY MIGHT GO COMES LAST. The rail is read top-down on
+     * arrival, and standing is the thing a reader checks every visit; the shortcuts are the thing
+     * they reach for once they have decided to move. Putting the destinations above the standing
+     * makes the column answer a question nobody asked yet.
+     */
+    const rail = (
+        <Tree contract="stacked-sections">
+            {input.state === "signedIn" ? <IdentityRail /> : null}
+            <QuickActions />
+        </Tree>
+    )
+
+    if (input.state === "signedOut") {
+        return (
+            <Tree contract="heading-over-body">
+                {tabs}
+                <Tree contract="title-with-end-action">
+                    <Heading props={{ content: input.props.title, level: 1 }} />
+                </Tree>
+                <Tree contract="rail-then-main">
+                    {rail}
+                    <EmptyNotice
+                        props={{ icon: "signIn", message: input.props.message, actionLabel: input.props.signInLabel }}
+                        on={{ act: input.on?.signIn }}
+                    />
+                </Tree>
+            </Tree>
+        )
+    }
+
+    return (
+        <Tree contract="heading-over-body">
+            {tabs}
+            <Tree contract="title-with-end-action">
+                <Heading props={{ content: input.props.title, level: 1 }} />
+                <Button
+                    props={{ label: input.props.signOutLabel, variant: "ghost", size: "sm", icon: "signIn" }}
+                    on={{ press: input.on?.signOut }}
+                />
+            </Tree>
+            <Tree contract="rail-then-main">
+                {rail}
+                {/*
+                  * READ IN THE ORDER A DAY IS SPENT: what to do now, how the run is going, what
+                  * the week is aiming at, then what is already under way. Each block owns its own
+                  * request, so they land out of step - which is the deliberate trade, because one
+                  * flag between them would make the fastest wait on the slowest.
+                  */}
+                <Tree contract="stacked-sections">
+                    <DailyQuest />
+                    <StreakStrip />
+                    <WeeklyGoals />
+                    <MyCoursesProgress />
+                </Tree>
+            </Tree>
+        </Tree>
+    )
+}
+
+/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
+export const meta = { world: "pure", domain: "dashboard" } as const

@@ -11,3 +11,19 @@ import {
 afterEach(() => {
     cleanup()
 })
+
+// jsdom ships no `matchMedia`, and `next-themes` asks for it the moment it mounts to learn what
+// the operating system prefers. Answering "no preference, and nothing is listening" is the honest
+// stand-in: a test asserting on a theme sets the theme rather than pretending to be an OS.
+if (typeof window !== "undefined" && typeof window.matchMedia !== "function") {
+    window.matchMedia = (query: string): MediaQueryList => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: () => undefined,
+        removeListener: () => undefined,
+        addEventListener: () => undefined,
+        removeEventListener: () => undefined,
+        dispatchEvent: () => false,
+    })
+}

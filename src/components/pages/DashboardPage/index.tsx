@@ -1,42 +1,63 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { setSessionToken, useSessionToken } from "@/hooks/auth/useSessionToken"
-import { _DashboardPage, type DashboardPageLabels } from "./component"
+import { _DashboardPage, type DashboardTab } from "./component"
+import type { IconName } from "@/components/leaves/Icon"
 
 /**
  * PAGE - `DashboardPage`, connected half.
  *
- * The page owns no request of its own: every figure on screen belongs to a block that
- * fetches it. What it does own is the ONE fact none of those blocks can settle for
- * themselves - whether there is a session at all. Every query behind this screen is
- * auth-gated, so without a token they do not fail slowly, they fail forever: SWR retries a
- * rejected key on a backoff and reports `isLoading` again each time, which is how a signed-out
- * dashboard ends up shimmering at a reader who is not waiting for anything.
- *
- * Reading the token here answers that once, before a single request is made, and hands the
- * presentational half a settled fact rather than four regions of guesswork.
+ * It resolves the one fact the screen owns - whether there is a session - and hands the other half
+ * a settled situation rather than four regions of guesswork.
  */
 
-/** Copy the dashboard renders. It moves to the translation tier when that tier exists. */
-const LABELS: DashboardPageLabels = {
-    title: "Dashboard",
-    progressHeading: "Your progress",
-    railHeading: "Your standing",
-    signOut: "Sign out",
-    signedOutTitle: "Sign in to see your dashboard",
-    signIn: "Sign in",
-}
+/** The sections of the dashboard, in reading order. */
+const TABS: ReadonlyArray<{ id: string, icon: IconName, href: string }> = [
+    { id: "overview", icon: "home", href: "/dashboard" },
+    { id: "explore", icon: "explore", href: "/dashboard/explore" },
+    { id: "courses", icon: "course", href: "/dashboard/courses" },
+    { id: "community", icon: "community", href: "/dashboard/community" },
+]
 
 /**
- * The dashboard surface.
+ * Resolve the session and draw the dashboard.
  */
 export const DashboardPage = () => {
+    const t = useTranslations("dashboard")
+    const tShell = useTranslations("shell")
     const token = useSessionToken()
 
-    /** Ending the session is the whole of it: the store wakes every reader of the token. */
-    const onSignOut = () => {
-        setSessionToken(undefined)
+    const tabs: ReadonlyArray<DashboardTab> = TABS.map((tab) => ({
+        id: tab.id,
+        icon: tab.icon,
+        href: tab.href,
+        label: tShell(`tabs.${tab.id}`),
+        // Only the overview is built. The other three are declared so the strip is honest about
+        // what the product has, and they route rather than pretending to switch in place.
+        isCurrent: tab.id === "overview",
+    }))
+
+    const title = t("title")
+
+    if (token === undefined) {
+        return (
+            <_DashboardPage
+                state="signedOut"
+                props={{ title, tabs, message: t("signedOutTitle"), signInLabel: t("signIn") }}
+            />
+        )
     }
 
-    return <_DashboardPage labels={LABELS} isSignedOut={token === undefined} onSignOut={onSignOut} />
+    return (
+        <_DashboardPage
+            state="signedIn"
+            props={{ title, tabs, signOutLabel: t("signOut") }}
+            // Ending the session is the whole of it: the store wakes every reader of the token.
+            on={{ signOut: () => setSessionToken(undefined) }}
+        />
+    )
 }
+
+/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
+export const meta = { world: "connected", domain: "dashboard" } as const

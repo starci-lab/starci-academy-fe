@@ -36,6 +36,14 @@
     --container-app-md: 48rem;
     --container-app-lg: 64rem;
     --container-app-xl: 80rem;
+
+    /*
+     * How tall a pinned rail may grow before it scrolls on its own. The viewport minus the space
+     * it is pinned below and the same space again beneath it, so a rail longer than the screen
+     * scrolls INSIDE itself and its last shortcut stays reachable - without this it grows past
+     * the bottom edge and the end of it becomes unreachable while the rail is stuck.
+     */
+    --max-height-rail: calc(100dvh - 3rem);
 }
 
 /*

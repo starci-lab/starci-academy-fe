@@ -1,0 +1,204 @@
+{
+    "app": {
+        "title": "StarCi Academy",
+        "description": "Learner dashboard."
+    },
+    "shell": {
+        "brand": "StarCi Academy",
+        "signIn": "Sign in",
+        "routes": {
+            "dashboard": "Home",
+            "courses": "Courses",
+            "contact": "Contact"
+        },
+        "themeLight": "Switch to light",
+        "themeDark": "Switch to dark",
+        "locale": "Change language",
+        "tabs": {
+            "overview": "Overview",
+            "explore": "Explore",
+            "courses": "Courses",
+            "community": "Community"
+        },
+        "quickActions": "Quick access",
+        "actions": {
+            "course": "Browse courses",
+            "review": "Review",
+            "practice": "Practice code",
+            "league": "Leaderboard",
+            "saved": "Saved",
+            "rewards": "Rewards",
+            "blog": "Blog",
+            "talents": "Talents",
+            "jobs": "IT jobs"
+        },
+        "search": "Search",
+        "searchPlaceholder": "Search",
+        "searchShortcut": "Ctrl K",
+        "cart": "Basket",
+        "account": "Account",
+        "railHeading": "Stats & updates"
+    },
+    "dashboard": {
+        "title": "Dashboard",
+        "progressHeading": "Your progress",
+        "railHeading": "Your standing",
+        "signOut": "Sign out",
+        "signedOutTitle": "Sign in to see your dashboard",
+        "signIn": "Sign in"
+    },
+    "identity": {
+        "loading": "Loading",
+        "empty": "Sign in to see",
+        "streak": "Streak",
+        "aiCredit": "AI credit",
+        "rewardPoints": "Reward points",
+        "days": "{count, plural, one {# day} other {# days}}",
+        "creditOf": "{remaining} of {limit}",
+        "points": "{balance}"
+    },
+    "courses": {
+        "count": "{count, plural, one {# course} other {# courses}}",
+        "heading": "My courses",
+        "loading": "Loading",
+        "empty": "You have not enrolled in a course yet",
+        "retry": "Check again",
+        "failed": "Could not load your courses"
+    },
+    "streak": {
+        "heading": "Streak",
+        "loading": "Loading",
+        "empty": "Read content to start your streak",
+        "failed": "Couldn't load your streak",
+        "currentLabel": "Current streak",
+        "current": "{count}-day streak",
+        "longest": "Longest {count}",
+        "retry": "Try again"
+    },
+    "auth": {
+        "signIn": {
+            "title": "Sign In",
+            "submitDetails": "Sign In",
+            "submitCode": "Sign in",
+            "passwordLabel": "Password",
+            "passwordHint": "",
+            "doneTitle": "You are signed in",
+            "doneHint": "You can carry on where you were.",
+            "subtitle": "Sign in to your account to continue",
+            "promptQuestion": "Don't have an account?",
+            "promptAction": "Sign Up"
+        },
+        "signUp": {
+            "title": "Sign Up",
+            "submitDetails": "Create account",
+            "submitCode": "Finish signing up",
+            "passwordLabel": "Choose a password",
+            "passwordHint": "This is the password you will sign in with from now on.",
+            "doneTitle": "Your account is ready",
+            "doneHint": "You are signed in and can start straight away.",
+            "subtitle": "Create an account to continue",
+            "promptQuestion": "Already have an account?",
+            "promptAction": "Sign In"
+        },
+        "forgotPassword": {
+            "title": "Reset your password",
+            "submitDetails": "Send me a code",
+            "submitCode": "Change my password",
+            "passwordLabel": "New password",
+            "passwordHint": "The code in the next step is what authorises the change.",
+            "doneTitle": "Your password has changed",
+            "doneHint": "You are signed in with the new password.",
+            "subtitle": "We will send a code to your email",
+            "promptQuestion": "Remembered it?",
+            "promptAction": "Sign In"
+        },
+        "shared": {
+            "emailLabel": "Email",
+            "emailHint": "",
+            "codeLabel": "OTP code",
+            "resend": "Resend code",
+            "useAnotherEmail": "Use a different email",
+            "oauthGoogle": "Sign In With Google",
+            "oauthGithub": "Sign In With GitHub",
+            "agreeToTerms": "I agree to the terms of service and the privacy policy",
+            "switchToSignIn": "Sign in instead",
+            "switchToSignUp": "Create an account",
+            "switchToForgotPassword": "Forgot your password?",
+            "codeHint": "Sent to {email}.",
+            "yourEmail": "your email",
+            "or": "OR",
+            "emailPlaceholder": "Enter your email",
+            "passwordLabel": "Password",
+            "passwordPlaceholder": "Enter your password",
+            "revealPassword": "Show password",
+            "hidePassword": "Hide password",
+            "rememberMe": "Remember me",
+            "forgotPassword": "Forgot Password?",
+            "codePlaceholder": "Enter 6-digit OTP",
+            "dismiss": "Close",
+            "devSignIn": "Use the test account"
+        },
+        "status": {
+            "sending": "Checking your details",
+            "sent": "We sent a code to your email. Enter it below.",
+            "verifying": "Checking your code",
+            "resending": "Sending a new code",
+            "resent": "A new code is on its way. The one before it no longer works.",
+            "signedIn": "Signed in",
+            "transport": "We could not reach the server. Check your connection and try again.",
+            "refused": "That did not work. Please try again.",
+            "dev": {
+                "refused": "The test-account door is closed. Check .env.local and Keycloak.",
+                "transport": "Couldn't reach the dev server."
+            }
+        },
+        "expiry": {
+            "seconds": " It expires in {count, plural, one {# second} other {# seconds}}.",
+            "minutes": " It expires in {count, plural, one {# minute} other {# minutes}}."
+        }
+    },
+    "theme": {
+        "label": "Theme",
+        "light": "Light",
+        "dark": "Dark",
+        "system": "System"
+    },
+    "locale": {
+        "label": "Language",
+        "en": "English",
+        "vi": "Tiếng Việt"
+    },
+    "quest": {
+        "heading": "Today's quest",
+        "empty": "Nothing set for today",
+        "failed": "Couldn't load today's quest",
+        "retry": "Retry",
+        "claim": "Claim {count} pts",
+        "claimed": "Reward claimed",
+        "reward": "Complete every task to earn {count} pts",
+        "tasks": {
+            "readContent": "Read content",
+            "passChallenge": "Pass a challenge",
+            "reviewFlashcards": "Review flashcards",
+            "mockInterview": "Complete a Mock Interview session",
+            "quizSession": "Complete a Quick Quiz session"
+        }
+    },
+    "kpi": {
+        "heading": "Weekly goals",
+        "edit": "Edit",
+        "retry": "Retry",
+        "failed": "Couldn't load your weekly goals",
+        "prompt": "Set weekly targets to track your progress",
+        "summary": "{percent}% this week · {completed}/{total} goals met",
+        "resetIn": "Resets in {days}d {hours}h",
+        "labels": {
+            "lessons": "Content",
+            "studyDays": "Study days",
+            "challenges": "Challenges",
+            "coding": "Coding",
+            "flashcards": "Flashcards",
+            "milestones": "Personal project"
+        }
+    }
+}

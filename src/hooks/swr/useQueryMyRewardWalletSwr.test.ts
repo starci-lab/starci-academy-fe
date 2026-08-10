@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { createElement, type PropsWithChildren } from "react"
 import { renderHook, waitFor } from "@testing-library/react"
 import { SWRConfig } from "swr"
+import { setSessionToken } from "../auth/useSessionToken"
 import {
     QUERY_MY_REWARD_WALLET_SWR_KEY,
     useQueryMyRewardWalletSwr,
@@ -35,6 +36,9 @@ const wrapper = ({ children }: PropsWithChildren) =>
 const wallet = { balance: 240 }
 
 beforeEach(() => {
+    // A viewer must exist before any of this fetches: the key is viewer-scoped, and with nobody
+    // signed in the hook passes a null key and makes no request at all, by design.
+    setSessionToken("token-under-test")
     mocks.queryMyRewardWallet.mockReset()
     mocks.queryMyRewardWallet.mockResolvedValue({
         data: { myRewardWallet: { success: true, message: "ok", data: wallet } },

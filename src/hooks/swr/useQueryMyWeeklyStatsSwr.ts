@@ -1,4 +1,5 @@
 import useSWR from "swr"
+import { useViewerKey } from "../auth/useViewerKey"
 import { queryMyWeeklyStats } from "../../modules/api/graphql/queries/query-my-weekly-stats"
 import { type MyWeeklyStatsData } from "../../modules/api/graphql/queries/types/my-weekly-stats"
 
@@ -18,8 +19,13 @@ export const QUERY_MY_WEEKLY_STATS_SWR_KEY = ["QUERY_MY_WEEKLY_STATS_SWR"]
  * `data.myWeeklyStats.data`. A missing payload becomes `null` rather than `undefined`, so a
  * component can still tell "the server has no week for you" from "the week is on its way".
  */
-export const useQueryMyWeeklyStatsSwr = () =>
-    useSWR<MyWeeklyStatsData | null>(QUERY_MY_WEEKLY_STATS_SWR_KEY, async () => {
-        const result = await queryMyWeeklyStats()
-        return result.data?.myWeeklyStats?.data ?? null
-    })
+export const useQueryMyWeeklyStatsSwr = () => {
+    const viewer = useViewerKey()
+    return useSWR<MyWeeklyStatsData | null>(
+        viewer === undefined ? null : [...QUERY_MY_WEEKLY_STATS_SWR_KEY, viewer],
+        async () => {
+            const result = await queryMyWeeklyStats()
+            return result.data?.myWeeklyStats?.data ?? null
+        },
+    )
+}

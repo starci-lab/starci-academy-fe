@@ -1,12 +1,14 @@
 "use client"
 
-import { AuthenticationPage } from "@/components/pages/AuthenticationPage"
+import { AuthenticationPanel } from "@/components/blocks/auth/AuthenticationPanel"
 
 /**
- * The `/authentication` route. It renders the page component and nothing else: the route is a
- * mounting point, so every decision about what signing in IS lives one tier down where it can
- * be rendered, tested and changed without a router.
+ * The routed sign-in surface.
+ *
+ * It mounts the panel directly. There is no page component between them because there would be
+ * nothing for it to do: a connected half exists only when there is something to resolve, and this
+ * route resolves nothing the panel does not already resolve for itself.
  */
-const AuthenticationRoute = () => <AuthenticationPage />
+const AuthenticationRoute = () => <AuthenticationPanel />
 
 export default AuthenticationRoute

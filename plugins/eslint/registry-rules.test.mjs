@@ -4,7 +4,7 @@
  *   node --test plugins/eslint/registry-rules.test.mjs
  *
  * The key and role cases run against REAL paths inside this repository, so the rules read
- * the actual `src/components/contracts/shapes.ts` rather than a copy of its vocabulary. That is
+ * the actual `src/components/contracts/index.ts` rather than a copy of its vocabulary. That is
  * the point of the registry: there is one list, and even the tests do not restate it.
  */
 import assert from "node:assert/strict"
@@ -18,7 +18,6 @@ import {
   noClassCompositionOutsideRegistry,
   noHandWrittenRegistryAttrs,
   noLiteralStructuralClass,
-  noUnknownSlotRole,
   noUnregisteredTreeKey,
   registryExplainIsAReason,
 } from "./registry-rules.mjs"
@@ -37,23 +36,21 @@ const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "../..")
 const inRepo = (relative) => join(repoRoot, relative).replace(/\\/g, "/")
 
 const BLOCK = "D:/repo/src/components/blocks/example/Example/index.tsx"
-const REGISTRY = "D:/repo/src/components/contracts/shapes.ts"
+const REGISTRY = "D:/repo/src/components/contracts/index.ts"
 
-test("the registry parses into keys and a closed role vocabulary", () => {
+test("the registry parses into the keys the repository actually declares", () => {
   const registry = readRegistry(inRepo("src/components/blocks/example/Example/index.tsx"))
   assert.ok(registry, "expected the repository registry to be readable")
-  assert.ok(registry.keys.includes("content-row"))
-  assert.deepEqual(registry.rolesByKey["content-row"], ["field", "action"])
-  assert.ok(registry.roles.includes("action"))
-  assert.equal(registry.roles.includes("sidebar"), false)
-})
+  assert.ok(registry.keys.includes("title-with-baseline-fact"))
+  assert.equal(registry.keys.includes("content-row"), false)
+      })
 
 test("no-literal-structural-class sends every structural node back to a registry key", () => {
   tester.run("no-literal-structural-class", noLiteralStructuralClass, {
     valid: [
       {
         filename: BLOCK,
-        code: "export const Example = () => <Tree contract=\"content-row\" slots={{ field: F, action: A }} />",
+        code: "export const Example = () => <Tree contract=\"title-with-baseline-fact\" slots={{ field: F, action: A }} />",
       },
       {
         // Appearance on a leaf is the leaf's own business; the TREE is what the registry owns.
@@ -94,7 +91,7 @@ test("no-literal-structural-class sends every structural node back to a registry
 test("no-class-composition-outside-registry rejects class strings assembled at runtime", () => {
   tester.run("no-class-composition-outside-registry", noClassCompositionOutsideRegistry, {
     valid: [
-      { filename: BLOCK, code: "export const Example = () => <Tree contract=\"card\" slots={slots} />" },
+      { filename: BLOCK, code: "export const Example = () => <Tree contract=\"card\" />" },
       { filename: BLOCK, code: "export const Example = ({ tone }) => <Chip tone={tone} />" },
       { filename: REGISTRY, code: "const join = (a, b) => cn(a, b)" },
     ],
@@ -122,8 +119,8 @@ test("no-hand-written-registry-attrs keeps the markers on the frame that earns t
   tester.run("no-hand-written-registry-attrs", noHandWrittenRegistryAttrs, {
     valid: [
       {
-        filename: "D:/repo/src/components/frames/Tree/index.tsx",
-        code: "export const Tree = ({ spec, name }) => <div data-node={name} data-roles={spec.roles} data-explain={spec.explain} />",
+        filename: "D:/repo/src/components/branches/Tree/index.tsx",
+        code: "export const Tree = ({ spec, name }) => <div data-node={name} data-why={spec.why} />",
       },
       { filename: BLOCK, code: "export const Example = () => <Row data-testid=\"row\" />" },
     ],
@@ -135,8 +132,8 @@ test("no-hand-written-registry-attrs keeps the markers on the frame that earns t
       },
       {
         filename: "D:\\repo\\src\\components\\pages\\HomePage\\component.tsx",
-        code: "export const HomePage = () => <Row data-explain=\"because\" />",
-        errors: [{ messageId: "marker", data: { attr: "data-explain" } }],
+        code: "export const HomePage = () => <Row data-why=\"because\" />",
+        errors: [{ messageId: "marker", data: { attr: "data-why" } }],
       },
     ],
   })
@@ -147,21 +144,21 @@ test("no-unregistered-tree-key answers an invented key with the keys that exist"
     valid: [
       {
         filename: inRepo("src/components/blocks/example/Example/index.tsx"),
-        code: "export const Example = () => <Tree contract=\"content-row\" slots={slots} />",
+        code: "export const Example = () => <Tree contract=\"title-with-baseline-fact\" />",
       },
       {
         filename: inRepo("src/components/blocks/example/Example/index.tsx"),
-        code: "export const Example = ({ name }) => <Tree contract={name} slots={slots} />",
+        code: "export const Example = ({ name }) => <Tree contract={name} />",
       },
       {
         filename: inRepo("src/components/blocks/example/Example/index.tsx"),
-        code: "const spec = contractSpec(\"card\")",
+        code: "const spec = contractSpec(\"bounded-content-card\")",
       },
     ],
     invalid: [
       {
         filename: inRepo("src/components/blocks/example/Example/index.tsx"),
-        code: "export const Example = () => <Tree contract=\"content-row-a\" slots={slots} />",
+        code: "export const Example = () => <Tree contract=\"content-row\" />",
         errors: [{ messageId: "unknown" }],
       },
       {
@@ -173,65 +170,29 @@ test("no-unregistered-tree-key answers an invented key with the keys that exist"
   })
 })
 
-test("no-unknown-slot-role holds a tree to the roles its key declares", () => {
-  tester.run("no-unknown-slot-role", noUnknownSlotRole, {
-    valid: [
-      {
-        filename: inRepo("src/components/blocks/example/Example/index.tsx"),
-        code: "export const Example = () => <Tree contract=\"content-row\" slots={{ field: Field, action: Action }} />",
-      },
-      {
-        filename: inRepo("src/components/blocks/example/Example/index.tsx"),
-        code: "export const Example = () => <Tree contract=\"card\" slots={{ heading: H, body: B, footer: F }} />",
-      },
-      {
-        // A slots object built elsewhere is out of reach; TypeScript still checks it.
-        filename: inRepo("src/components/blocks/example/Example/index.tsx"),
-        code: "export const Example = () => <Tree contract=\"card\" slots={slots} />",
-      },
-    ],
-    invalid: [
-      {
-        filename: inRepo("src/components/blocks/example/Example/index.tsx"),
-        code: "export const Example = () => <Tree contract=\"card\" slots={{ heading: H, body: B, footer: F, sidebar: S }} />",
-        errors: [{ messageId: "unknownRole" }],
-      },
-      {
-        filename: inRepo("src/components/blocks/example/Example/index.tsx"),
-        code: "export const Example = () => <Tree contract=\"content-row\" slots={{ field: F, action: A, heading: H }} />",
-        errors: [{ messageId: "wrongRole" }],
-      },
-      {
-        filename: inRepo("src/components/blocks/example/Example/index.tsx"),
-        code: "export const Example = () => <Tree contract=\"card\" slots={{ heading: H, body: B }} />",
-        errors: [{ messageId: "missingRole", data: { key: "card", role: "footer" } }],
-      },
-    ],
-  })
-})
 
 test("registry-explain-is-a-reason rejects an explain that only says the key again", () => {
   tester.run("registry-explain-is-a-reason", registryExplainIsAReason, {
     valid: [
       {
         filename: REGISTRY,
-        code: "export const CONTRACTS = { \"content-row\": { roles: [\"field\", \"action\"], explain: \"The control acts on the input beside it, so the two must read as one unit that nothing else can fall between.\" } }",
+        code: "export const CONTRACTS = { \"content-row\": { roles: [\"field\", \"action\"], why: \"The control acts on the input beside it, so the two must read as one unit that nothing else can fall between.\" } }",
       },
       {
         // Outside the registry there is no entry to explain.
         filename: BLOCK,
-        code: "const meta = { explain: \"short\" }",
+        code: "const meta = { why: \"short\" }",
       },
     ],
     invalid: [
       {
         filename: REGISTRY,
-        code: "export const CONTRACTS = { \"content-row\": { explain: \"row of controls\" } }",
+        code: "export const CONTRACTS = { \"content-row\": { why: \"row of controls\" } }",
         errors: [{ messageId: "tooShort", data: { key: "content-row" } }],
       },
       {
         filename: REGISTRY,
-        code: "export const CONTRACTS = { \"content-row\": { explain: \"content row content row content row content row content row content row\" } }",
+        code: "export const CONTRACTS = { \"content-row\": { why: \"content row content row content row content row content row content row\" } }",
         errors: [{ messageId: "restates", data: { key: "content-row" } }],
       },
     ],

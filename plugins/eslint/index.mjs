@@ -19,7 +19,6 @@ import {
 } from "./authoring.mjs"
 import { noRuntimeNamespace } from "./namespaces.mjs"
 import { noPublicClassNameProp } from "./public-contracts.mjs"
-import { noFragmentSlot } from "./slots.mjs"
 import {
   noHeadingElementOutsideHeadingAtom,
   noStructuralHostOutsideRegistryFrame,
@@ -30,14 +29,9 @@ import {
   noClassCompositionOutsideRegistry,
   noHandWrittenRegistryAttrs,
   noLiteralStructuralClass,
-  noUnknownSlotRole,
   noUnregisteredTreeKey,
   registryExplainIsAReason,
 } from "./registry-rules.mjs"
-import {
-  contractsTypeImportsOnly,
-  shapesVocabularyCeiling,
-} from "./registry-folder.mjs"
 
 /** Static className string from one JSXAttribute (literal or pure template quasi). */
 function classNameText(node) {
@@ -99,7 +93,7 @@ function attrStringLiteral(node) {
 // sentence: blocks/pages/layouts/overlays (compose sentences; do not draw shapes or fetch).
 // Anything OUTSIDE `src/components/**` (app routes, hooks, modules) is NOT a component tier -
 // each rule using this helper says in its comment whether it skips that scope.
-const VOCAB_TIER_DIRS = new Set(["atoms", "frames", "composites"])
+const VOCAB_TIER_DIRS = new Set(["leaves", "branches", "contracts"])
 const SENTENCE_TIER_DIRS = new Set(["blocks", "pages", "layouts", "overlays"])
 
 /** "vocabulary" | "sentence" | null (null = outside src/components/** or unknown tier dir). */
@@ -666,14 +660,10 @@ export default {
     "no-class-composition-outside-registry": noClassCompositionOutsideRegistry,
     "no-hand-written-registry-attrs": noHandWrittenRegistryAttrs,
     "no-unregistered-tree-key": noUnregisteredTreeKey,
-    "no-unknown-slot-role": noUnknownSlotRole,
-    "no-fragment-slot": noFragmentSlot,
     "no-structural-host-outside-registry-frame": noStructuralHostOutsideRegistryFrame,
     "no-heading-element-outside-heading-atom": noHeadingElementOutsideHeadingAtom,
     "registry-explain-is-a-reason": registryExplainIsAReason,
     // -- how the registry FOLDER itself is written: two layers, opposite rules --
-    "contracts-type-imports-only": contractsTypeImportsOnly,
-    "shapes-vocabulary-ceiling": shapesVocabularyCeiling,
     // -- token scale --
     "no-fractional-spacing": noFractionalSpacing,
     "no-hero-heading-class": noHeroHeadingClass,

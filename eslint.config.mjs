@@ -78,8 +78,6 @@ export default defineConfig([
             "starci-fe/no-class-composition-outside-registry": "error",
             "starci-fe/no-hand-written-registry-attrs": "error",
             "starci-fe/no-unregistered-tree-key": "error",
-            "starci-fe/no-unknown-slot-role": "error",
-            "starci-fe/no-fragment-slot": "error",
             "starci-fe/no-structural-host-outside-registry-frame": "error",
             "starci-fe/no-heading-element-outside-heading-atom": "error",
             "starci-fe/registry-explain-is-a-reason": "error",
@@ -88,8 +86,6 @@ export default defineConfig([
             // from eroding - the first because a value import there would invert the tier order
             // and build a real cycle while tsc stayed green, the second because a ceiling that
             // only a test enforces is one deletion away from not existing.
-            "starci-fe/contracts-type-imports-only": "error",
-            "starci-fe/shapes-vocabulary-ceiling": "error",
             // Token scale - the registry entry is now the only hand-written class string.
             "starci-fe/no-fractional-spacing": "error",
             "starci-fe/no-hero-heading-class": "error",
@@ -160,5 +156,13 @@ export default defineConfig([
         rules: {
             indent: "off",
         },
+    },
+    {
+        // Operator scripts are Node programs that never reach a bundle: they read `process.env`
+        // and exit with a code, both of which are the point rather than an oversight. Declaring
+        // the environment is what keeps `no-undef` meaningful everywhere else - the alternative
+        // is silencing the rule per line in the one place a real leak would look identical.
+        files: ["scripts/**/*.{js,mjs,cjs}"],
+        languageOptions: { globals: globals.node },
     },
 ])

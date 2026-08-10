@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { createElement, type PropsWithChildren } from "react"
 import { renderHook, waitFor } from "@testing-library/react"
 import { SWRConfig } from "swr"
+import { setSessionToken } from "../auth/useSessionToken"
 import {
     QUERY_MY_WEEKLY_STATS_SWR_KEY,
     useQueryMyWeeklyStatsSwr,
@@ -39,6 +40,9 @@ const stats = {
 }
 
 beforeEach(() => {
+    // A viewer must exist before any of this fetches: the key is viewer-scoped, and with nobody
+    // signed in the hook passes a null key and makes no request at all, by design.
+    setSessionToken("token-under-test")
     mocks.queryMyWeeklyStats.mockReset()
     mocks.queryMyWeeklyStats.mockResolvedValue({
         data: { myWeeklyStats: { success: true, message: "ok", data: stats } },

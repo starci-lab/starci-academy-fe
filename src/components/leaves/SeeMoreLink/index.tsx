@@ -1,0 +1,92 @@
+import { CaretRightIcon } from "@phosphor-icons/react/dist/ssr"
+import { Link as HeroLink, skeletonVariants } from "@heroui/react"
+import type { LeafProps } from "@/components/contracts/props"
+
+/**
+ * LEAF - `SeeMoreLink`: the way out of a section, drawn at the end of its label line.
+ *
+ * A CLUSTER LEAF - words and a caret - because the caret is not decoration a caller may drop. It is
+ * the only thing distinguishing this from the fact that would otherwise sit in the same place, and
+ * a section header where a control and a count look alike is one a reader clicks by mistake.
+ *
+ * THE CARET MOVES, THE WORDS DO NOT. The slide answers "is this a link" before the pointer has
+ * travelled anywhere, and it rides the caret rather than the label because a header whose words
+ * shift on hover makes the row underneath jump.
+ *
+ * IT IS NOT A HEADING'S EQUAL. Semibold at the section label's own size, in the accent's soft
+ * foreground rather than the accent itself: loud enough to be found on purpose, quiet enough that
+ * it never wins the line it shares with the name of the section.
+ */
+
+/** What this leaf draws. A `type`, not an `interface` - only an alias satisfies the data fence. */
+export type SeeMoreLinkData = {
+    /** The already-resolved words. Absent while loading. */
+    readonly label?: string
+    /** Where it goes, when it is a destination rather than a thing that happens here. */
+    readonly href?: string
+}
+
+/** What following it does, when there is nowhere to go. */
+export type SeeMoreLinkActions = {
+    /** Called when the reader follows it. Ignored when {@link SeeMoreLinkData.href} is set. */
+    readonly press?: () => void
+}
+
+/** Props for {@link SeeMoreLink}. Three fixed slots, no fourth - see {@link LeafProps}. */
+export type SeeMoreLinkProps = LeafProps<SeeMoreLinkData, SeeMoreLinkActions>
+
+/** The line: never wraps, never grows, and carries the hover group the caret rides. */
+const LINE_CLASSES = "group inline-flex w-fit shrink-0 cursor-pointer items-center gap-1 text-sm font-semibold text-accent-soft-foreground no-underline"
+
+/** Scaled against the font size, not the line box, so it reads as a glyph and not as a button. */
+const CARET_CLASSES = "size-3.5 shrink-0 transition-[translate] group-hover:translate-x-1"
+
+/** The resting shape - the same line box with the glyphs out. */
+const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({
+    className: "inline-flex w-16 shrink-0 select-none text-sm text-transparent",
+})
+
+/**
+ * Draw the way out.
+ *
+ * @param input - {@link SeeMoreLinkProps}
+ */
+export const SeeMoreLink = ({ props, on, isLoading = false }: SeeMoreLinkProps) => {
+    if (isLoading) {
+        return (
+            <span
+                data-tier="leaf"
+                data-component="SeeMoreLink"
+                data-loading="true"
+                aria-hidden
+                className={RESTING_CLASSES}
+            >
+                &nbsp;
+            </span>
+        )
+    }
+
+    const inside = (
+        <>
+            {props.label ?? ""}
+            <CaretRightIcon aria-hidden className={CARET_CLASSES} weight="bold" />
+        </>
+    )
+
+    if (props.href !== undefined) {
+        return (
+            <a data-tier="leaf" data-component="SeeMoreLink" href={props.href} className={LINE_CLASSES}>
+                {inside}
+            </a>
+        )
+    }
+
+    return (
+        <HeroLink data-tier="leaf" data-component="SeeMoreLink" onPress={on?.press} className={LINE_CLASSES}>
+            {inside}
+        </HeroLink>
+    )
+}
+
+/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
+export const meta = { shape: "leaf", world: "pure" } as const

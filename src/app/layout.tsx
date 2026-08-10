@@ -1,7 +1,8 @@
 import type { Metadata } from "next"
 import type { ReactNode } from "react"
+import { getLocale, getMessages, getTranslations } from "next-intl/server"
 import { ShellNav } from "@/components/layouts/ShellNav"
-import { Tree } from "@/components/frames/Tree"
+import { Tree } from "@/components/branches/Tree"
 import { AppProviders } from "./providers"
 import "./globals.css"
 
@@ -19,10 +20,19 @@ import "./globals.css"
  * state. The one thing this file adds around the whole tree is the vendor's context.
  */
 
-/** Browser-level metadata for every route under this shell. */
-export const metadata: Metadata = {
-    title: "StarCi Academy",
-    description: "Learner dashboard.",
+/**
+ * Browser-level metadata for every route under this shell.
+ *
+ * Resolved rather than declared, because the tab title and the description a search engine reads
+ * are copy like any other. A static object here would have been the one English sentence left in
+ * the app, and the one nobody would have noticed.
+ */
+export const generateMetadata = async (): Promise<Metadata> => {
+    const t = await getTranslations("app")
+    return {
+        title: t("title"),
+        description: t("description"),
+    }
 }
 
 /** Props for the root layout. */
@@ -32,18 +42,25 @@ interface RootLayoutProps {
 }
 
 /**
- * Root layout: draws the shell tree and mounts the routed page into its `body` role.
+ * Root layout: draws the shell node and puts the bar and the routed page inside it.
  *
  * @param props - The routed children to mount.
  */
-const RootLayout = ({ children }: RootLayoutProps) => {
-    /** The routed page, wrapped uncalled so the frame can mount it as a slot. */
-    const ShellBody = () => <>{children}</>
+const RootLayout = async ({ children }: RootLayoutProps) => {
+    const locale = await getLocale()
+    const messages = await getMessages()
     return (
-        <html lang="en">
+        // `suppressHydrationWarning` is required by the theme switch and by nothing else: the
+        // provider writes the resolved theme onto this element before React hydrates, so the
+        // server's markup and the browser's first paint differ on purpose. Suppressing it here
+        // is narrow - it covers this element's own attributes, not the tree below it.
+        <html lang={locale} suppressHydrationWarning>
             <body>
-                <AppProviders>
-                    <Tree contract="page-shell" slots={{ nav: ShellNav, body: ShellBody }} />
+                <AppProviders locale={locale} messages={messages}>
+                    <Tree contract="nav-over-body-page">
+                        <ShellNav />
+                        {children}
+                    </Tree>
                 </AppProviders>
             </body>
         </html>

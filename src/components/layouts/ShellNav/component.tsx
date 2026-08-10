@@ -1,84 +1,135 @@
-import { Button } from "@/components/atoms/Button"
-import { Link } from "@/components/atoms/Link"
-import { Tree } from "@/components/frames/Tree"
-import type { ContractSlot, ContractSlotProps } from "@/components/contracts"
+import type { ReactNode } from "react"
+import { Tree } from "@/components/branches/Tree"
+import { Link } from "@/components/leaves/Link"
+import { NavLink } from "@/components/leaves/NavLink"
+import { IconButton } from "@/components/leaves/IconButton"
+import { Button } from "@/components/leaves/Button"
+import { SearchBox } from "@/components/leaves/SearchBox"
 
 /**
  * LAYOUT - `ShellNav`, presentational half.
  *
- * The bar every route is read under: the wordmark that returns a reader to the dashboard, and
- * the one control that opens the sign-in overlay.
+ * The bar the whole app sits under: the mark that says where you are, the routes, and the tools
+ * that change how the app looks rather than what it shows.
  *
- * WHY THE OVERLAY HANGS HERE. The overlay is summoned from the shell, so the shell is where it
- * has to be mounted - until this file existed, `SignInOverlay` was mounted NOWHERE and the only
- * way to sign in was to type the `/authentication` address by hand. The dialog is a sibling of
- * the two controls rather than a wrapper around them: a closed `<dialog>` is `display: none`, so
- * it is not a flex item and the bar lays out as if it were not there at all.
+ * THE TWO SIDES ARE DIFFERENT KINDS OF THING, which is why they are two groups and not one row.
+ * Left is WHERE - a mark and a set of destinations. Right is HOW - theme, language, and the one
+ * control about who you are. A reader looking for a page never scans the right, and a reader
+ * looking for a setting never scans the left.
  *
- * WHY THE BRAND IS A LINK AND THE SIGN-IN IS A BUTTON. One changes the address and the other
- * opens a surface on the page. That difference decides whether a reader can middle-click it,
- * copy it, or see where it goes - which is why they are two different atoms rather than one
- * styled two ways.
- *
- * ONE KEY. `shell-nav` owns the landmark, the seam and the fact that the wordmark and the action
- * sit at opposite ends of the bar. This file names the key and nothing else.
+ * IT TAKES THE DIALOG AS `children`. The bar owns the control that opens one; it does not own
+ * whether one is open, because a bar that decided that would be deciding for every route under it.
  */
 
-/** Every string this bar renders, already resolved by the connected half. */
-export interface ShellNavLabels {
-    /** The wordmark. */
-    brand: string
-    /** The label of the control that opens the sign-in overlay. */
-    signIn: string
+/** One destination in the bar. */
+export type ShellNavRoute = {
+    /** Identity of the row, used as the key. */
+    readonly id: string
+    /** Where it goes. */
+    readonly href: string
+    /** The already-resolved words. */
+    readonly label: string
+    /** Whether this is where the reader already is. */
+    readonly isCurrent?: boolean
 }
 
-/** What hangs off the bar. Typed, so the bar owns the placement rather than a body. */
-export interface ShellNavSlots {
-    /** The sign-in overlay, passed uncalled so the bar can rest it with the surface. */
-    overlay: ContractSlot
+/** What the bar draws. A `type`, not an `interface` - only an alias satisfies the data fence. */
+export type ShellNavData = {
+    /** The product's own name, already resolved. */
+    readonly brand: string
+    /** The routes, in reading order. */
+    readonly routes: ReadonlyArray<ShellNavRoute>
+    /** The already-resolved label of the one control that opens the dialog. */
+    readonly signInLabel: string
+    /** What the theme control is called, in the state it is currently in. */
+    readonly themeLabel: string
+    /** Whether the dark theme is showing, so the glyph says what pressing it will do. */
+    readonly isDark: boolean
+    /** What the language control is called. */
+    readonly localeLabel: string
+    /** What the search field prompts with, and what it is called. */
+    readonly searchPlaceholder: string
+    readonly searchLabel: string
+    /** The keyboard shortcut, written the way a reader would press it. */
+    readonly searchShortcut: string
+    /** What the basket and the account controls are called. */
+    readonly cartLabel: string
+    readonly accountLabel: string
 }
 
-/** Props for {@link _ShellNav} - presentational; no fetch, no store, no i18n. */
-export interface ShellNavProps {
-    /** Resolved copy. */
-    labels: ShellNavLabels
-    /** What hangs off the bar. */
-    slots: ShellNavSlots
+/** What the bar reports. */
+export type ShellNavActions = {
     /** Called when the reader asks to sign in. */
-    onOpenSignIn: () => void
-    /** Renders the bar in its resting state. */
-    isLoading?: boolean
+    readonly openSignIn?: () => void
+    /** Called when the reader flips the theme. */
+    readonly toggleTheme?: () => void
+    /** Called when the reader flips the language. */
+    readonly toggleLocale?: () => void
 }
 
-/** Where the wordmark leads. The dashboard is the only surface a reader can be returned to. */
+/** Props for {@link _ShellNav}. */
+export type ShellNavProps = {
+    /** What it draws. */
+    readonly props: ShellNavData
+    /** What it reports. */
+    readonly on?: ShellNavActions
+    /** The dialog that hangs off the bar, mounted by whoever owns whether it is open. */
+    readonly children?: ReactNode
+}
+
+/** Where the mark takes the reader. */
 const HOME_HREF = "/dashboard"
 
 /**
- * Render the shell bar. See the file header for why the overlay is mounted here.
+ * Draw the bar.
  *
- * @param props - {@link ShellNavProps}
+ * @param input - {@link ShellNavProps}
  */
-export const _ShellNav = ({ labels, slots, onOpenSignIn, isLoading = false }: ShellNavProps) => {
-    const Overlay = slots.overlay
+export const _ShellNav = (input: ShellNavProps) => (
+    <Tree contract="brand-links-then-tools-bar">
+        <Tree contract="inline-nav-links">
+            <Link props={{ href: HOME_HREF, label: input.props.brand, icon: "brand", emphasis: "brand" }} />
+            {input.props.routes.map((route) => (
+                <NavLink
+                    key={route.id}
+                    props={{ href: route.href, label: route.label, isCurrent: route.isCurrent, kind: "route" }}
+                />
+            ))}
+        </Tree>
+        <Tree contract="inline-tool-row">
+            <SearchBox
+                props={{
+                    placeholder: input.props.searchPlaceholder,
+                    label: input.props.searchLabel,
+                    shortcut: input.props.searchShortcut,
+                }}
+            />
+            <IconButton
+                props={{ icon: "cart", label: input.props.cartLabel }}
+            />
+            <IconButton
+                props={{ icon: "account", label: input.props.accountLabel }}
+            />
+            <IconButton
+                props={{ icon: "locale", label: input.props.localeLabel }}
+                on={{ press: input.on?.toggleLocale }}
+            />
+            <IconButton
+                props={{
+                    icon: input.props.isDark ? "light" : "dark",
+                    label: input.props.themeLabel,
+                    isActive: input.props.isDark,
+                }}
+                on={{ press: input.on?.toggleTheme }}
+            />
+            <Button
+                props={{ label: input.props.signInLabel, variant: "primary", size: "sm", icon: "signIn" }}
+                on={{ press: input.on?.openSignIn }}
+            />
+        </Tree>
+        {input.children}
+    </Tree>
+)
 
-    /**
-     * The `action` role of the `shell-nav` key.
-     *
-     * Three children for one role, and they are one thing: the bar IS the row, so the wordmark
-     * and the control are its direct children rather than a nested node repeating the same
-     * flex - and the dialog beside them draws nothing until it is open.
-     */
-    const Actions = ({ isLoading: resting }: ContractSlotProps) => (
-        <>
-            <Link href={HOME_HREF} icon="brand" emphasis="brand">
-                {labels.brand}
-            </Link>
-            <Button variant="primary" size="sm" icon="signIn" isLoading={resting} onClick={onOpenSignIn}>
-                {labels.signIn}
-            </Button>
-            <Overlay />
-        </>
-    )
-
-    return <Tree contract="shell-nav" isLoading={isLoading} slots={{ action: Actions }} />
-}
+/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
+export const meta = { world: "pure", domain: "shell" } as const

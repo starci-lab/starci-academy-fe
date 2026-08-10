@@ -22,7 +22,14 @@ const isTestFile = (file) => /\.(?:test|spec)\.(?:ts|tsx|js|jsx|mjs|cjs)$/.test(
 const isSourceFile = (file) => file.includes("/src/")
 
 /** The one frame allowed to render a registry entry, and therefore to paint its markers. */
-const isRegistryFrameFile = (file) => file.includes("/src/components/frames/Tree/")
+const isRegistryFrameFile = (file) => file.includes("/src/components/branches/Tree/")
+
+/**
+ * A LEAF owns its own interior, including its structural classes: the interior is fixed, so there
+ * is nothing for the registry to share or tune. The exemption is a folder, which makes it policy
+ * rather than type - see the same constant in `registry.mjs`.
+ */
+const isLeafFile = (file) => file.includes("/src/components/leaves/")
 
 /** Class tokens that decide the SHAPE of a tree rather than the look of one leaf. */
 const STRUCTURAL_EXACT = new Set([
@@ -44,7 +51,7 @@ const STRUCTURAL_PREFIX = /^(?:flex-|grid-cols-|grid-rows-|col-|row-|gap-|items-
 const CLASS_COMPOSERS = new Set(["cn", "clsx", "classnames", "classNames", "twMerge", "twJoin", "cva", "tv"])
 
 /** Markers the registry frame paints from the entry it renders. */
-const REGISTRY_ATTRS = new Set(["data-node", "data-roles", "data-explain"])
+const REGISTRY_ATTRS = new Set(["data-node", "data-why"])
 
 /** Strip responsive/state variants and the important marker: `lg:hover:!flex` -> `flex`. */
 const bareToken = (token) => {
@@ -128,7 +135,7 @@ export const noLiteralStructuralClass = {
   },
   create(context) {
     const file = normalizePath(context.filename || context.getFilename())
-    if (!isSourceFile(file) || isRegistryFile(file) || isTestFile(file)) return {}
+    if (!isSourceFile(file) || isRegistryFile(file) || isTestFile(file) || isLeafFile(file)) return {}
     return {
       JSXAttribute(node) {
         if (!isClassAttribute(node)) return
@@ -162,7 +169,7 @@ export const noClassCompositionOutsideRegistry = {
   },
   create(context) {
     const file = normalizePath(context.filename || context.getFilename())
-    if (!isSourceFile(file) || isRegistryFile(file) || isTestFile(file)) return {}
+    if (!isSourceFile(file) || isRegistryFile(file) || isTestFile(file) || isLeafFile(file)) return {}
     return {
       CallExpression(node) {
         const callee = node.callee
@@ -226,7 +233,7 @@ export const noUnregisteredTreeKey = {
     schema: [],
     messages: {
       unknown:
-        "`{{key}}` is not a registry key, so it describes no classes and no child contract. Existing keys: {{keys}}. A thirteenth key is only justified by a tree shape none of these can express - never by wanting a different gap.",
+        "`{{key}}` is not a registry key, so it describes no classes and no reason. Existing keys: {{keys}}. A new key is justified by a node shape none of these express - never by wanting a different gap - and its NAME must fix what goes inside it, or it stops constraining anything.",
     },
   },
   create(context) {
@@ -336,9 +343,9 @@ export const registryExplainIsAReason = {
     schema: [],
     messages: {
       tooShort:
-        "`{{key}}` has an `explain` too short to carry a reason. One clause naming what breaks, wraps or overflows when this node is removed - not a label.",
+        "`{{key}}` has a `why` too short to carry a reason. One clause naming what breaks, wraps or overflows when this node is removed - not a label.",
       restates:
-        "`{{key}}` has an `explain` built only from the words in the key, so it says the key twice and nothing else. Write the fact that made the node exist: what wraps, what overflows, what stops being pressable.",
+        "`{{key}}` has a `why` built only from the words in the key, so it says the key twice and nothing else. Write the fact that made the node exist: what wraps, what overflows, what stops being pressable.",
     },
   },
   create(context) {
@@ -346,7 +353,7 @@ export const registryExplainIsAReason = {
     if (!isRegistryFile(file)) return {}
     return {
       Property(node) {
-        if (propertyName(node) !== "explain") return
+        if (propertyName(node) !== "why") return
         if (!node.value || node.value.type !== "Literal" || typeof node.value.value !== "string") return
         const owner = node.parent && node.parent.parent
         const key = owner && owner.type === "Property" ? propertyName(owner) : "this entry"

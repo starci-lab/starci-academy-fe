@@ -1,178 +1,82 @@
-import { Button } from "@/components/atoms/Button"
-import { Tree } from "@/components/frames/Tree"
-import { CourseProgressBar } from "@/components/composites/stats/CourseProgressBar"
-import { EmptyState } from "@/components/composites/feedback/EmptyState"
-import { SurfaceCard } from "@/components/composites/cards/SurfaceCard"
-import type { DashboardSectionChain, ContractSlotProps } from "@/components/contracts"
+import { SurfaceCard } from "@/components/branches/SurfaceCard"
+import { Tree } from "@/components/branches/Tree"
+import { LabelledProgressRow, type LabelledProgressRowData } from "@/components/leaves/LabelledProgressRow"
+import { EmptyNotice } from "@/components/leaves/EmptyNotice"
 
 /**
  * BLOCK - `MyCoursesProgress`, presentational half.
  *
- * The courses the learner is enrolled in, each with how far through it they are.
+ * THE STATE PICKS THE TREE. `empty` and `failed` draw a notice with a way out; `pending` and
+ * `ready` draw the same list, one of them resting. A situation that did not change the tree would
+ * be props.
  *
- * WHAT IS LEFT HERE AFTER THE PORT. Three composites now carry what this file used to spell out:
- * `SurfaceCard` owns the bounded region and its title line with the count on the baseline,
- * `CourseProgressBar` owns one course, and `EmptyState` owns the settled nothing and the way out
- * of it. What remains is this block's own business: that a course list is a GRID of peer cards -
- * they are compared with each other rather than read in order - and that a resting list draws
- * the same cards at a fixed count.
- *
- * THE ORDER OF THE THREE STATES IS NOT A COMPONENT. Resting is read first and empty second, and
- * that is written here as two lines rather than routed through a wrapper: the frame already
- * threads the resting flag to every slot from one place, so a component whose whole job was to
- * choose between the states would be a second description of a decision the spine already makes.
- *
- * The resting state is this same tree with placeholder cards, never a second tree.
+ * THE LIST IS A LEAF'S BUSINESS, not the registry's. `LabelledProgressRow` keeps its own count and
+ * its own keys; the contract here supplies only the seam between rows.
  */
 
-/** How many placeholder cards the resting list draws. */
-const RESTING_ROW_COUNT = 2
+/** How many resting rows are drawn, so the resting card has the height of a real one. */
+const RESTING_ROWS: ReadonlyArray<LabelledProgressRowData> = [
+    { id: "resting-0" },
+    { id: "resting-1" },
+    { id: "resting-2" },
+]
 
-/** One already-resolved course row. */
-export interface MyCoursesProgressCourse {
-    /** Stable id of the course. Used as the card key. */
-    id: string
-    /** Course title. */
-    title: string
-    /** Overall completion, 0 to 100 - the value of the progress element. */
-    percent: number
-    /** Already-formatted completion readout. */
-    percentText: string
+/** What the card carries in EVERY state. */
+export type MyCoursesFrame = {
+    /** The already-resolved name of the region. */
+    readonly label: string
 }
 
-/** Every string this block renders, already resolved by the connected half. */
-export interface MyCoursesProgressLabels {
-    /** Heading over the list. */
-    heading: string
-    /** Course count, already interpolated - sits on the heading's baseline. */
-    count: string
-    /** Stands in for the count and the cards while the request is in flight. */
-    loading: string
-    /** Read once the request settles with no enrolled courses. */
-    empty: string
-    /** The label of the way out of the empty state. */
-    retry: string
-}
+/** Props for {@link _MyCoursesProgress}, discriminated by the situation. */
+export type MyCoursesProgressProps =
+    | { readonly state: "pending"; readonly props: MyCoursesFrame }
+    | { readonly state: "empty"; readonly props: MyCoursesFrame & { readonly message: string; readonly retryLabel: string } }
+    | { readonly state: "failed"; readonly props: MyCoursesFrame & { readonly message: string; readonly retryLabel: string } }
+    | {
+        readonly state: "ready"
+        readonly props: MyCoursesFrame & {
+            readonly count: string
+            readonly rows: ReadonlyArray<LabelledProgressRowData>
+        }
+    }
 
-/** Props for {@link _MyCoursesProgress} - presentational; no fetch, no store, no i18n. */
-export interface MyCoursesProgressProps {
-    /**
-     * First load with nothing in hand - the list rests as itself. SWR's `isLoading` and not
-     * `isValidating`: a refetch happens with the courses already on screen, and resting on it
-     * would blank a list the reader is reading. See {@link ContractSlotProps.isLoading}.
-     */
-    isLoading?: boolean
-    /** Settled with no enrolled courses - including settled by failing. Never the flag above. */
-    isEmpty?: boolean
-    /** The enrolled courses, in display order. */
-    courses?: ReadonlyArray<MyCoursesProgressCourse>
-    /** Resolved copy. */
-    labels: MyCoursesProgressLabels
-    /**
-     * Asks for the list again, from the empty state.
-     *
-     * An empty region still has to offer a way out, and this is the honest one: a learner who
-     * has enrolled in nothing is looking at the same screen as a learner whose backend answered
-     * before its data was there, and only asking again tells them apart. The connected half
-     * always passes it; it is optional so a story can draw the state without a handler.
-     */
-    onRetry?: () => void
+/** What the block reports. */
+export type MyCoursesProgressActions = {
+    /** Called when the reader asks for the list again. */
+    readonly retry?: () => void
 }
-
-/** Placeholder cards, drawn at a fixed count so the resting shape is the loaded one. */
-const RESTING_ROWS: ReadonlyArray<number> = Array.from({ length: RESTING_ROW_COUNT }, (_unused, index) => index)
 
 /**
- * Render the course list.
+ * Render the list.
  *
- * @param props - {@link MyCoursesProgressProps}
+ * @param input - {@link MyCoursesProgressProps}
  */
-export const _MyCoursesProgress = ({
-    isLoading = false,
-    isEmpty = false,
-    courses = [],
-    labels,
-    onRetry,
-}: MyCoursesProgressProps) => {
-    /** The `action` role of the empty state: the way out the key insists on. */
-    const Retry = () => (
-        <Button variant="secondary" icon="retry" onClick={onRetry}>
-            {labels.retry}
-        </Button>
-    )
-
-    /** What the region says once it has settled with nothing to show. */
-    const Empty = () => <EmptyState icon="course" title={labels.empty} action={Retry} />
-
-    /**
-     * The `body` role of the `grid` key: the cards themselves, resting or real.
-     *
-     * A resting card is the SAME card at the same count, so the grid does not reflow when the
-     * courses land - which is the whole reason the placeholder count is fixed rather than
-     * guessed from a list that is not there yet.
-     */
-    const Cards = ({ isLoading: resting }: ContractSlotProps) => {
-        if (resting === true) {
-            return (
-                <>
-                    {RESTING_ROWS.map((index) => (
-                        <CourseProgressBar
-                            key={index}
-                            title={labels.loading}
-                            percent={0}
-                            percentText=""
-                            isLoading
-                        />
-                    ))}
-                </>
-            )
-        }
+export const _MyCoursesProgress = (input: MyCoursesProgressProps & { readonly on?: MyCoursesProgressActions }) => {
+    if (input.state === "empty" || input.state === "failed") {
         return (
-            <>
-                {courses.map((course) => (
-                    <CourseProgressBar
-                        key={course.id}
-                        title={course.title}
-                        percent={course.percent}
-                        percentText={course.percentText}
-                    />
-                ))}
-            </>
+            <SurfaceCard props={{ label: input.props.label }}>
+                <EmptyNotice
+                    props={{ icon: "course", message: input.props.message, actionLabel: input.props.retryLabel }}
+                    on={{ act: input.on?.retry }}
+                />
+            </SurfaceCard>
         )
     }
-
-    /**
-     * The `body` role of the surface: whichever of the three shapes this region is in.
-     *
-     * Resting is read BEFORE empty, always. A first load has nothing in hand, so a list is
-     * momentarily empty for a reason that is not an answer - and read the other way round, an
-     * enrolled learner is shown the message that says they have enrolled in nothing.
-     */
-    const Body = ({ isLoading: resting }: ContractSlotProps) => {
-        if (resting !== true && isEmpty) return <Empty />
-        return <Tree contract="grid" isLoading={resting} slots={{ body: Cards }} />
-    }
-
+    const isLoading = input.state === "pending"
+    const rows = input.state === "ready" ? input.props.rows : RESTING_ROWS
     return (
         <SurfaceCard
-            label={labels.heading}
-            meta={isLoading ? labels.loading : labels.count}
-            body={Body}
+            props={{ label: input.props.label, fact: input.state === "ready" ? input.props.count : undefined }}
             isLoading={isLoading}
-        />
+        >
+            <Tree contract="stacked-sections">
+                {rows.map((row) => (
+                    <LabelledProgressRow key={row.id} props={row} isLoading={isLoading} />
+                ))}
+            </Tree>
+        </SurfaceCard>
     )
 }
 
-/**
- * This block's entry in the dashboard chain: it IS the body of the region named
- * `courses-progress`.
- *
- * The keys fix the shape - a bounded surface with a count on the title's baseline, over a grid -
- * and say nothing about what the grid holds. This entry says it, and says it in code the
- * compiler checks: `MyCoursesProgressProps` is the only props type in the chain carrying both a
- * `courses` list and a resolved count label, so a block without both cannot claim this name.
- */
-export const myCoursesProgressChain: DashboardSectionChain = {
-    name: "courses-progress",
-    body: _MyCoursesProgress,
-}
+/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
+export const meta = { world: "pure", domain: "courses" } as const
