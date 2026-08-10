@@ -18,7 +18,7 @@ vi.mock("../modules/api/graphql/clients/create-apollo-client", () => ({
     createApolloClient: vi.fn(() => ({ query: vi.fn() })),
 }))
 
-/** The six hooks the app's blocks are entitled to import from `@/hooks`. */
+/** Every hook the app's blocks are entitled to import from `@/hooks`. */
 const EXPECTED = [
     "useQueryCoursesSwr",
     "useQueryPlatformStatsSwr",
@@ -26,6 +26,10 @@ const EXPECTED = [
     "useQueryMyWeeklyStatsSwr",
     "useQueryMyAiQuotaSwr",
     "useQueryMyRewardWalletSwr",
+    "useQueryMyDailyQuestSwr",
+    "useQueryMyKpisSwr",
+    "useQueryMyLearnedLessonsSwr",
+    "useQueryMyInProgressChallengesSwr",
 ]
 
 describe("hooks barrel", () => {
@@ -35,7 +39,7 @@ describe("hooks barrel", () => {
         }
     })
 
-    it("exports the six hooks and NOTHING else", () => {
+    it("exports that roster and NOTHING else", () => {
         expect(Object.keys(hooks).sort()).toEqual([...EXPECTED].sort())
     })
 

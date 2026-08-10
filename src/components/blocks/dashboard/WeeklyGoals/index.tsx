@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
-import { useQueryMyKpisSwr } from "@/hooks/swr/useQueryMyKpisSwr"
+import { useQueryMyKpisSwr } from "@/hooks"
 import { type MyKpiItem } from "@/modules/api/graphql/queries/types/my-kpis"
 import { _WeeklyGoals } from "./component"
 import type { LabelledProgressRowData } from "@/components/leaves/LabelledProgressRow"

@@ -1,7 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { useQueryMyDailyQuestSwr } from "@/hooks/swr/useQueryMyDailyQuestSwr"
+import { useQueryMyDailyQuestSwr } from "@/hooks"
 import { type MyDailyQuestTask } from "@/modules/api/graphql/queries/types/my-daily-quest"
 import { _DailyQuest } from "./component"
 import type { LabelledProgressRowData } from "@/components/leaves/LabelledProgressRow"
