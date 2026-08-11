@@ -25,7 +25,7 @@ const ACTIONS: ReadonlyArray<{ id: string, href: string, icon: IconName }> = [
     { id: "league", href: "/league", icon: "league" },
     { id: "saved", href: "/saved", icon: "saved" },
     { id: "rewards", href: "/rewards", icon: "reward" },
-    { id: "blog", href: "/blog", icon: "explore" },
+    { id: "blog", href: "/blog", icon: "blog" },
     { id: "talents", href: "/talents", icon: "talents" },
     { id: "jobs", href: "/jobs", icon: "jobs" },
 ]

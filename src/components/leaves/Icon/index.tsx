@@ -4,29 +4,31 @@ import {
     ArrowRightIcon,
     ArrowRightOnRectangleIcon,
     BellIcon,
+    BoltIcon,
     BookmarkIcon,
     BookOpenIcon,
     BriefcaseIcon,
     CheckCircleIcon,
-    CircleStackIcon,
     ClipboardDocumentCheckIcon,
     CodeBracketIcon,
     EnvelopeIcon,
     FireIcon,
+    GiftIcon,
+    GlobeAltIcon,
     HomeIcon,
     LanguageIcon,
     LockClosedIcon,
     MagnifyingGlassIcon,
-    MapIcon,
     MoonIcon,
+    NewspaperIcon,
     PaperAirplaneIcon,
     ShieldCheckIcon,
     ShoppingCartIcon,
-    SparklesIcon,
     SunIcon,
     TrophyIcon,
     UserCircleIcon,
     UserGroupIcon,
+    UserPlusIcon,
     XMarkIcon,
 } from "@heroicons/react/24/outline"
 import {
@@ -35,29 +37,31 @@ import {
     ArrowRightIcon as ArrowRightSolidIcon,
     ArrowRightEndOnRectangleIcon as ArrowRightOnRectangleSolidIcon,
     BellIcon as BellSolidIcon,
+    BoltIcon as BoltSolidIcon,
     BookmarkIcon as BookmarkSolidIcon,
     BookOpenIcon as BookOpenSolidIcon,
     BriefcaseIcon as BriefcaseSolidIcon,
     CheckCircleIcon as CheckCircleSolidIcon,
-    CircleStackIcon as CircleStackSolidIcon,
     ClipboardDocumentCheckIcon as ClipboardDocumentCheckSolidIcon,
     CodeBracketIcon as CodeBracketSolidIcon,
     EnvelopeIcon as EnvelopeSolidIcon,
     FireIcon as FireSolidIcon,
+    GiftIcon as GiftSolidIcon,
+    GlobeAltIcon as GlobeAltSolidIcon,
     HomeIcon as HomeSolidIcon,
     LanguageIcon as LanguageSolidIcon,
     LockClosedIcon as LockClosedSolidIcon,
     MagnifyingGlassIcon as MagnifyingGlassSolidIcon,
-    MapIcon as MapSolidIcon,
     MoonIcon as MoonSolidIcon,
+    NewspaperIcon as NewspaperSolidIcon,
     PaperAirplaneIcon as PaperAirplaneSolidIcon,
     ShieldCheckIcon as ShieldCheckSolidIcon,
     ShoppingCartIcon as ShoppingCartSolidIcon,
-    SparklesIcon as SparklesSolidIcon,
     SunIcon as SunSolidIcon,
     TrophyIcon as TrophySolidIcon,
     UserCircleIcon as UserCircleSolidIcon,
     UserGroupIcon as UserGroupSolidIcon,
+    UserPlusIcon as UserPlusSolidIcon,
     XMarkIcon as XMarkSolidIcon,
 } from "@heroicons/react/16/solid"
 import type { ComponentType, SVGProps } from "react"
@@ -74,6 +78,8 @@ import type { LeafProps } from "@/components/contracts/props"
  *
  * WHY THE SET IS CLOSED. Heroicons ships a large glyph catalogue, and a product that can reach all
  * of them has no iconography, it has a search box.
+ * `icon.md` is the canonical feature-to-glyph table: read it before adding a meaning or choosing a
+ * nearby glyph, and update it in the same change as this map.
  *
  * COLOUR IS NOT A PROP. The glyph draws in `currentColor`, so it inherits whatever `text-*` the
  * node above carries and can never disagree with the label beside it.
@@ -86,7 +92,7 @@ export type IconName =
     | "signedIn" | "signIn" | "close" | "next" | "retry" | "send"
     | "home" | "explore" | "community" | "league" | "review"
     | "light" | "dark" | "locale" | "google" | "github"
-    | "search" | "cart" | "notification" | "account" | "saved" | "talents" | "jobs" | "practice"
+    | "search" | "cart" | "notification" | "account" | "saved" | "blog" | "talents" | "jobs" | "practice"
 
 /** The two native Heroicon roles used by the product. */
 export type IconRole = "heading" | "leading" | "chip"
@@ -123,8 +129,8 @@ const cuts = (outline: GlyphComponent, chip: GlyphComponent): GlyphCuts => ({
 const GLYPHS: Record<IconName, GlyphCuts> = {
     brand: cuts(AcademicCapIcon, AcademicCapSolidIcon),
     streak: cuts(FireIcon, FireSolidIcon),
-    credit: cuts(SparklesIcon, SparklesSolidIcon),
-    reward: cuts(CircleStackIcon, CircleStackSolidIcon),
+    credit: cuts(BoltIcon, BoltSolidIcon),
+    reward: cuts(GiftIcon, GiftSolidIcon),
     course: cuts(BookOpenIcon, BookOpenSolidIcon),
     email: cuts(EnvelopeIcon, EnvelopeSolidIcon),
     password: cuts(LockClosedIcon, LockClosedSolidIcon),
@@ -136,7 +142,7 @@ const GLYPHS: Record<IconName, GlyphCuts> = {
     retry: cuts(ArrowPathIcon, ArrowPathSolidIcon),
     send: cuts(PaperAirplaneIcon, PaperAirplaneSolidIcon),
     home: cuts(HomeIcon, HomeSolidIcon),
-    explore: cuts(MapIcon, MapSolidIcon),
+    explore: cuts(GlobeAltIcon, GlobeAltSolidIcon),
     community: cuts(UserGroupIcon, UserGroupSolidIcon),
     league: cuts(TrophyIcon, TrophySolidIcon),
     review: cuts(ClipboardDocumentCheckIcon, ClipboardDocumentCheckSolidIcon),
@@ -148,7 +154,8 @@ const GLYPHS: Record<IconName, GlyphCuts> = {
     notification: cuts(BellIcon, BellSolidIcon),
     account: cuts(UserCircleIcon, UserCircleSolidIcon),
     saved: cuts(BookmarkIcon, BookmarkSolidIcon),
-    talents: cuts(UserGroupIcon, UserGroupSolidIcon),
+    blog: cuts(NewspaperIcon, NewspaperSolidIcon),
+    talents: cuts(UserPlusIcon, UserPlusSolidIcon),
     jobs: cuts(BriefcaseIcon, BriefcaseSolidIcon),
     practice: cuts(CodeBracketIcon, CodeBracketSolidIcon),
     google: cuts(GoogleMark, GoogleMark),
