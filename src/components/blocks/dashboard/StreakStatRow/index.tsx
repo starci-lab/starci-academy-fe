@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl"
 import { useQueryMyWeeklyStatsSwr } from "@/hooks"
-import { StatRow } from "@/components/leaves/StatRow"
+import { _StreakStatRow } from "./component"
 
 /**
  * BLOCK - `StreakStatRow`: the standing streak figure, on the identity rail.
@@ -28,7 +28,9 @@ export const StreakStatRow = () => {
         ? t("empty")
         : t("days", { count: weekly.data.streak ?? 0 })
 
-    return <StatRow props={{ icon: "streak", label: t("streak"), value }} isLoading={isLoading} />
+    if (isLoading) return <_StreakStatRow state="pending" props={{ label: t("streak") }} />
+
+    return <_StreakStatRow state="settled" props={{ label: t("streak"), value }} />
 }
 
 /** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */

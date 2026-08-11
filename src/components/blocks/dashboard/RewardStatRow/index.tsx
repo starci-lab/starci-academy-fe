@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl"
 import { useQueryMyRewardWalletSwr } from "@/hooks"
-import { StatRow } from "@/components/leaves/StatRow"
+import { _RewardStatRow } from "./component"
 
 /**
  * BLOCK - `RewardStatRow`: the reward balance, on the identity rail.
@@ -20,7 +20,9 @@ export const RewardStatRow = () => {
         ? t("empty")
         : t("points", { balance: wallet.data.balance ?? 0 })
 
-    return <StatRow props={{ icon: "reward", label: t("rewardPoints"), value }} isLoading={isLoading} />
+    if (isLoading) return <_RewardStatRow state="pending" props={{ label: t("rewardPoints") }} />
+
+    return <_RewardStatRow state="settled" props={{ label: t("rewardPoints"), value }} />
 }
 
 /** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */

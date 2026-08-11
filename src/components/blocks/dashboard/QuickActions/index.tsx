@@ -2,17 +2,15 @@
 
 import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { QuickActionsList } from "@/components/leaves/QuickActionsList"
 import type { IconName } from "@/components/leaves/Icon"
-import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
+import { _QuickActions } from "./component"
 
 /**
  * BLOCK - `QuickActions`: the rail of shortcuts beside the reading column.
  *
- * IT READS NO REQUEST, so it has no state and no second half. The destinations are a fact about
- * the product rather than about the reader, and a rail that waited on a request would be blank on
- * every first paint for no reason.
+ * IT READS NO REQUEST, but translation and routing still make this the connected half. The pure
+ * `_QuickActions` twin receives resolved labels and reports an id; only this file knows which
+ * locale is active and what navigation means.
  *
  * ORDERED BY EVERYDAY FREQUENCY, not alphabetically and not by section. The rail exists to save a
  * reader the trip through a menu, which it only does if the thing they want most is nearest the
@@ -39,29 +37,21 @@ export const QuickActions = () => {
     const t = useTranslations("shell")
     const router = useRouter()
     return (
-        <SurfaceCard
-            props={{ label: t("quickActions"), isFrameless: true }}
-            contract="stacked-peer-controls"
-            render={defineContractComponent("stacked-peer-controls", {
-                control: [defineLeafComponent("quick-actions-list", {}, () => (
-                    <QuickActionsList
-                        props={{
-                            label: t("quickActions"),
-                            items: ACTIONS.map((action) => ({
-                                id: action.id,
-                                icon: action.icon,
-                                label: t(`actions.${action.id}`),
-                            })),
-                        }}
-                        on={{
-                            activate: (id) => {
-                                const destination = ACTIONS.find((action) => action.id === id)
-                                if (destination !== undefined) router.push(destination.href)
-                            },
-                        }}
-                    />
-                ))],
-            })}
+        <_QuickActions
+            props={{
+                label: t("quickActions"),
+                items: ACTIONS.map((action) => ({
+                    id: action.id,
+                    icon: action.icon,
+                    label: t(`actions.${action.id}`),
+                })),
+            }}
+            on={{
+                activate: (id) => {
+                    const destination = ACTIONS.find((action) => action.id === id)
+                    if (destination !== undefined) router.push(destination.href)
+                },
+            }}
         />
     )
 }

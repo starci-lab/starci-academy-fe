@@ -105,6 +105,7 @@ export default defineConfig([
             // Tiers and file layout.
             "starci-fe/no-heroui-outside-vocabulary": "error",
             "starci-fe/presentational-purity": "error",
+            "starci-fe/connected-block-has-presentational-twin": "error",
             "starci-fe/page-folder-two-files-only": "error",
             "starci-fe/no-helper-folder-in-components": "error",
             "starci-fe/export-matches-folder": "error",

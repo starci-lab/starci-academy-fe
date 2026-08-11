@@ -25,6 +25,7 @@ import {
 } from "./structural-hosts.mjs"
 import { noCssDoorTypeLaundering } from "./css-door-laundering.mjs"
 import { noDoubleCast } from "./double-cast.mjs"
+import { connectedBlockHasPresentationalTwin } from "./connected-block-twins.mjs"
 import {
   noClassCompositionOutsideRegistry,
   noHandWrittenRegistryAttrs,
@@ -681,6 +682,7 @@ export default {
     // -- tiers and file layout --
     "no-heroui-outside-vocabulary": noHerouiOutsideVocabulary,
     "presentational-purity": presentationalPurity,
+    "connected-block-has-presentational-twin": connectedBlockHasPresentationalTwin,
     "page-folder-two-files-only": pageFolderTwoFilesOnly,
     "no-helper-folder-in-components": noHelperFolderInComponents,
     "export-matches-folder": exportMatchesFolder,

@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl"
 import { useQueryMyAiQuotaSwr } from "@/hooks"
-import { StatRow } from "@/components/leaves/StatRow"
+import { _CreditStatRow } from "./component"
 
 /**
  * BLOCK - `CreditStatRow`: this week's remaining AI credit, on the identity rail.
@@ -21,7 +21,9 @@ export const CreditStatRow = () => {
         ? t("creditOf", { remaining: credit.remainingWeek, limit: credit.limitWeek })
         : t("empty")
 
-    return <StatRow props={{ icon: "credit", label: t("aiCredit"), value }} isLoading={isLoading} />
+    if (isLoading) return <_CreditStatRow state="pending" props={{ label: t("aiCredit") }} />
+
+    return <_CreditStatRow state="settled" props={{ label: t("aiCredit"), value }} />
 }
 
 /** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
