@@ -1,6 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
+import { useSearchParams } from "next/navigation"
 import { setSessionToken, useSessionToken } from "@/hooks/auth/useSessionToken"
 import { _DashboardPage, type DashboardTab } from "./component"
 import type { IconName } from "@/components/leaves/Icon"
@@ -14,10 +15,10 @@ import type { IconName } from "@/components/leaves/Icon"
 
 /** The sections of the dashboard, in reading order. */
 const TABS: ReadonlyArray<{ id: string, icon: IconName, href: string }> = [
-    { id: "overview", icon: "home", href: "/dashboard" },
-    { id: "explore", icon: "explore", href: "/dashboard/explore" },
-    { id: "courses", icon: "course", href: "/dashboard/courses" },
-    { id: "community", icon: "community", href: "/dashboard/community" },
+    { id: "overview", icon: "home", href: "/dashboard?tab=overview" },
+    { id: "explore", icon: "explore", href: "/dashboard?tab=explore" },
+    { id: "courses", icon: "course", href: "/dashboard?tab=courses" },
+    { id: "community", icon: "community", href: "/dashboard?tab=community" },
 ]
 
 /**
@@ -27,15 +28,16 @@ export const DashboardPage = () => {
     const t = useTranslations("dashboard")
     const tShell = useTranslations("shell")
     const token = useSessionToken()
+    const searchParams = useSearchParams()
+    const requestedTab = searchParams.get("tab")
+    const selectedTab = TABS.some((tab) => tab.id === requestedTab) ? requestedTab! : "overview"
 
     const tabs: ReadonlyArray<DashboardTab> = TABS.map((tab) => ({
         id: tab.id,
         icon: tab.icon,
         href: tab.href,
         label: tShell(`tabs.${tab.id}`),
-        // Only the overview is built. The other three are declared so the strip is honest about
-        // what the product has, and they route rather than pretending to switch in place.
-        isCurrent: tab.id === "overview",
+        isCurrent: tab.id === selectedTab,
     }))
 
     const title = t("title")
@@ -44,7 +46,7 @@ export const DashboardPage = () => {
         return (
             <_DashboardPage
                 state="signedOut"
-                props={{ title, tabs, message: t("signedOutTitle"), signInLabel: t("signIn") }}
+                props={{ title, tabs, selectedTab, message: t("signedOutTitle"), signInLabel: t("signIn") }}
             />
         )
     }
@@ -52,7 +54,7 @@ export const DashboardPage = () => {
     return (
         <_DashboardPage
             state="signedIn"
-            props={{ title, tabs, signOutLabel: t("signOut") }}
+            props={{ title, tabs, selectedTab, signOutLabel: t("signOut"), unavailableMessage: t("unavailable") }}
             // Ending the session is the whole of it: the store wakes every reader of the token.
             on={{ signOut: () => setSessionToken(undefined) }}
         />

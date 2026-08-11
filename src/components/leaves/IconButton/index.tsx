@@ -44,13 +44,13 @@ export const IconButton = ({ props, on }: IconButtonProps) => (
         data-component="IconButton"
         data-active={props.isActive === true ? "true" : "false"}
         type="button"
-        variant="ghost"
-        size="sm"
+        variant="tertiary"
+        className="rounded-full"
         isIconOnly
         aria-label={props.label}
         onPress={on?.press}
     >
-        <Icon props={{ name: props.icon, size: "sm" }} />
+        <Icon props={{ name: props.icon, size: "md" }} />
     </HeroButton>
 )
 

@@ -1,4 +1,4 @@
-import { IconTile } from "@/components/leaves/IconTile"
+import { Icon } from "@/components/leaves/Icon"
 import { Text } from "@/components/leaves/Text"
 import type { IconName } from "@/components/leaves/Icon"
 import type { LeafProps } from "@/components/contracts/props"
@@ -32,7 +32,7 @@ export type StatRowData = {
 export type StatRowProps = LeafProps<StatRowData>
 
 /** The glyph leads, the name takes the slack, the figure trails and never wraps. */
-const ROW_CLASSES = "flex flex-row items-center gap-3 [&>*:nth-child(2)]:min-w-0 [&>*:nth-child(2)]:grow"
+const ROW_CLASSES = "flex flex-row items-center gap-3 px-2 py-2 [&>*:nth-child(2)]:min-w-0 [&>*:nth-child(2)]:grow"
 
 /**
  * Draw one standing figure.
@@ -41,9 +41,9 @@ const ROW_CLASSES = "flex flex-row items-center gap-3 [&>*:nth-child(2)]:min-w-0
  */
 export const StatRow = ({ props, isLoading = false }: StatRowProps) => (
     <div data-tier="leaf" data-component="StatRow" className={ROW_CLASSES}>
-        <IconTile props={{ icon: props.icon, tone: "accent" }} isLoading={isLoading} />
-        <Text props={{ content: props.label, size: "sm", tone: "muted" }} />
-        <Text props={{ content: props.value, size: "sm", weight: "semibold" }} isLoading={isLoading} />
+        <Icon props={{ name: props.icon, size: "md" }} />
+        <Text props={{ content: props.label, size: "sm" }} />
+        <Text props={{ content: props.value, size: "sm", tone: "muted" }} isLoading={isLoading} />
     </div>
 )
 

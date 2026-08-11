@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
 import { useTheme } from "next-themes"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { SignInOverlay } from "@/components/overlays/auth/SignInOverlay"
 import { LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE } from "@/i18n/config"
 import { useSessionToken } from "@/hooks/auth/useSessionToken"
@@ -30,10 +30,10 @@ const ROUTES: ReadonlyArray<{ id: string, href: string }> = [
 
 /** Dashboard tabs registered as the navbar's bottom layer. */
 const DASHBOARD_TABS: ReadonlyArray<{ id: string, href: string, icon: IconName }> = [
-    { id: "overview", href: "/dashboard", icon: "home" },
-    { id: "explore", href: "/dashboard/explore", icon: "explore" },
-    { id: "courses", href: "/dashboard/courses", icon: "course" },
-    { id: "community", href: "/dashboard/community", icon: "community" },
+    { id: "overview", href: "/dashboard?tab=overview", icon: "home" },
+    { id: "explore", href: "/dashboard?tab=explore", icon: "explore" },
+    { id: "courses", href: "/dashboard?tab=courses", icon: "course" },
+    { id: "community", href: "/dashboard?tab=community", icon: "community" },
 ]
 
 /**
@@ -43,6 +43,8 @@ export const ShellNav = () => {
     const t = useTranslations("shell")
     const locale = useLocale()
     const pathname = usePathname()
+    const router = useRouter()
+    const searchParams = useSearchParams()
     const { resolvedTheme, setTheme } = useTheme()
     const [isOpen, setIsOpen] = useState(false)
     const sessionToken = useSessionToken()
@@ -100,9 +102,13 @@ export const ShellNav = () => {
         ? DASHBOARD_TABS.map((tab) => ({
             ...tab,
             label: t(`tabs.${tab.id}`),
-            isCurrent: pathname === tab.href,
+            isCurrent: tab.id === (searchParams.get("tab") ?? "overview"),
         }))
         : undefined
+
+    const selectTab = useCallback((key: string) => {
+        router.replace(key === "overview" ? "/dashboard" : `/dashboard?tab=${key}`)
+    }, [router])
 
     return (
         <>
@@ -111,7 +117,6 @@ export const ShellNav = () => {
                     brand: t("brand"),
                     routes,
                     tabs,
-                    signInLabel: t("signIn"),
                     themeLabel: isDark ? t("themeLight") : t("themeDark"),
                     isDark,
                     localeLabel: t("locale"),
@@ -123,7 +128,7 @@ export const ShellNav = () => {
                     accountLabel: t("account"),
                     isSignedIn: sessionToken !== undefined,
                 }}
-                on={{ openSignIn, toggleTheme: () => setTheme(isDark ? "light" : "dark"), toggleLocale }}
+                on={{ openSignIn, selectTab, toggleTheme: () => setTheme(isDark ? "light" : "dark"), toggleLocale }}
             />
             <SignInOverlay isOpen={isOpen} onDismiss={dismiss} />
         </>

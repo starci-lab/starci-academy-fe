@@ -64,7 +64,7 @@ export const NavLink = ({ props }: NavLinkProps) => {
             aria-current={isCurrent ? "page" : undefined}
             className={isCurrent ? kind.current : kind.base}
         >
-            {props.icon === undefined ? null : <Icon props={{ name: props.icon, size: "sm" }} />}
+            {props.icon === undefined ? null : <Icon props={{ name: props.icon, size: "md" }} />}
             {props.label}
         </HeroLink>
     )

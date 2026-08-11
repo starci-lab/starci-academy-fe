@@ -46,6 +46,17 @@
     --max-height-rail: calc(100dvh - 3rem);
 }
 
+/* Original StarCi secondary-tab skin: the navbar owns the only baseline. */
+.extended-tabs .tabs__list {
+    border-bottom-width: 0 !important;
+}
+
+.extended-tabs .tabs__tab {
+    width: fit-content !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+}
+
 /*
  * THE LIGHT THEME.
  *

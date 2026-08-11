@@ -2,9 +2,9 @@ import { Tree } from "@/components/branches/Tree"
 import { Link } from "@/components/leaves/Link"
 import { NavLink } from "@/components/leaves/NavLink"
 import { IconButton } from "@/components/leaves/IconButton"
-import { Button } from "@/components/leaves/Button"
 import { PressableInputLike } from "@/components/leaves/PressableInputLike"
 import { ThemeSwitch } from "@/components/leaves/ThemeSwitch"
+import { ExtendedTabs } from "@/components/leaves/ExtendedTabs"
 import type { IconName } from "@/components/leaves/Icon"
 import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
@@ -26,7 +26,6 @@ export type ShellNavData = {
     readonly brand: string
     readonly routes: ReadonlyArray<ShellNavRoute>
     readonly tabs?: ReadonlyArray<ShellNavTab>
-    readonly signInLabel: string
     readonly themeLabel: string
     readonly isDark: boolean
     readonly localeLabel: string
@@ -42,6 +41,7 @@ export type ShellNavData = {
 /** Events reported by navbar controls. */
 export type ShellNavActions = {
     readonly openSignIn?: () => void
+    readonly selectTab?: (key: string) => void
     readonly openSearch?: () => void
     readonly toggleTheme?: () => void
     readonly toggleLocale?: () => void
@@ -65,9 +65,11 @@ export const _ShellNav = (input: ShellNavProps) => (
                     brand: defineLeafComponent("link", { emphasis: "brand" }, () => (
                         <Link props={{ href: HOME_HREF, label: input.props.brand, emphasis: "brand" }} />
                     )),
-                    route: input.props.routes.map((route) => defineLeafComponent("nav-link", { kind: "route" }, () => (
-                        <NavLink props={{ href: route.href, label: route.label, isCurrent: route.isCurrent, kind: "route" }} />
-                    ))),
+                    routes: defineContractComponent("inline-route-links", {
+                        route: input.props.routes.map((route) => defineLeafComponent("nav-link", { kind: "route" }, () => (
+                            <NavLink props={{ href: route.href, label: route.label, isCurrent: route.isCurrent, kind: "route" }} />
+                        ))),
+                    }),
                 }),
                 tools: defineContractComponent("inline-tool-row", {
                     search: defineLeafComponent("pressable-input-like", {}, () => (
@@ -93,23 +95,25 @@ export const _ShellNav = (input: ShellNavProps) => (
                             <IconButton props={{ icon: "notification", label: input.props.notificationLabel }} />
                         ))] : []),
                         defineLeafComponent("icon-button", {}, () => (
-                            <IconButton props={{ icon: "account", label: input.props.accountLabel }} />
+                            <IconButton
+                                props={{ icon: "account", label: input.props.accountLabel }}
+                                on={{ press: input.props.isSignedIn ? undefined : input.on?.openSignIn }}
+                            />
                         )),
                     ],
-                    signIn: input.props.isSignedIn ? undefined : defineLeafComponent("button", { size: "sm", variant: "primary" }, () => (
-                        <Button
-                            props={{ label: input.props.signInLabel, variant: "primary", size: "sm", icon: "signIn" }}
-                            on={{ press: input.on?.openSignIn }}
-                        />
-                    )),
                 }),
             }),
             bottom: input.props.tabs === undefined ? undefined : defineContractComponent("underlined-tab-strip", {
-                tab: input.props.tabs.map((tab) => defineLeafComponent("nav-link", { kind: "tab" }, () => (
-                    <NavLink
-                        props={{ href: tab.href, label: tab.label, icon: tab.icon, isCurrent: tab.isCurrent, kind: "tab" }}
+                tabs: defineLeafComponent("extended-tabs", {}, () => (
+                    <ExtendedTabs
+                        props={{
+                            label: input.props.brand,
+                            selectedKey: input.props.tabs?.find((tab) => tab.isCurrent)?.id ?? "overview",
+                            tabs: input.props.tabs ?? [],
+                        }}
+                        on={{ select: input.on?.selectTab }}
                     />
-                ))),
+                )),
             }),
         })}
     />

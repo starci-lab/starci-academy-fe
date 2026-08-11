@@ -1,8 +1,9 @@
 "use client"
 
 import { useTranslations } from "next-intl"
+import { useRouter } from "next/navigation"
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { QuickActionRow } from "@/components/leaves/QuickActionRow"
+import { QuickActionsList } from "@/components/leaves/QuickActionsList"
 import type { IconName } from "@/components/leaves/Icon"
 import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
@@ -36,25 +37,34 @@ const ACTIONS: ReadonlyArray<{ id: string, href: string, icon: IconName }> = [
  */
 export const QuickActions = () => {
     const t = useTranslations("shell")
+    const router = useRouter()
     return (
         <SurfaceCard
             props={{ label: t("quickActions"), isFrameless: true }}
             contract="stacked-peer-controls"
             render={defineContractComponent("stacked-peer-controls", {
-                control: ACTIONS.map((action) => defineLeafComponent("quick-action-row", {}, () => (
-                    <QuickActionRow
+                control: [defineLeafComponent("quick-actions-list", {}, () => (
+                    <QuickActionsList
                         props={{
-                            id: action.id,
-                            href: action.href,
-                            icon: action.icon,
-                            label: t(`actions.${action.id}`),
+                            label: t("quickActions"),
+                            items: ACTIONS.map((action) => ({
+                                id: action.id,
+                                icon: action.icon,
+                                label: t(`actions.${action.id}`),
+                            })),
+                        }}
+                        on={{
+                            activate: (id) => {
+                                const destination = ACTIONS.find((action) => action.id === id)
+                                if (destination !== undefined) router.push(destination.href)
+                            },
                         }}
                     />
-                ))),
+                ))],
             })}
         />
     )
 }
 
 /** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { world: "pure", domain: "shell" } as const
+export const meta = { world: "connected", domain: "shell" } as const

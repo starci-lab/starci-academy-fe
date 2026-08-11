@@ -1,11 +1,10 @@
 "use client"
 
-import { useTranslations } from "next-intl"
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
+import { Tree } from "@/components/branches/Tree"
 import { StreakStatRow } from "@/components/blocks/dashboard/StreakStatRow"
 import { CreditStatRow } from "@/components/blocks/dashboard/CreditStatRow"
 import { RewardStatRow } from "@/components/blocks/dashboard/RewardStatRow"
-import { defineContractComponent, defineContractProjection } from "@/components/contracts/props"
+import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
 /**
  * BLOCK - `IdentityRail`: the three standing figures, read as one rail.
@@ -21,16 +20,14 @@ import { defineContractComponent, defineContractProjection } from "@/components/
  * nothing to resolve here; and a test rendering this mounts three blocks that fetch.
  */
 export const IdentityRail = () => {
-    const t = useTranslations("dashboard")
     return (
-        <SurfaceCard
-            props={{ label: t("railHeading") }}
-            contract="stacked-sections"
-            render={defineContractComponent("stacked-sections", {
-                section: [
-                    defineContractProjection("label-row-over-card", () => <StreakStatRow />),
-                    defineContractProjection("label-row-over-card", () => <CreditStatRow />),
-                    defineContractProjection("label-row-over-card", () => <RewardStatRow />),
+        <Tree
+            contract="stacked-peer-controls"
+            render={defineContractComponent("stacked-peer-controls", {
+                control: [
+                    defineLeafComponent("stat-row", {}, () => <StreakStatRow />),
+                    defineLeafComponent("stat-row", {}, () => <CreditStatRow />),
+                    defineLeafComponent("stat-row", {}, () => <RewardStatRow />),
                 ],
             })}
         />

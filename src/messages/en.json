@@ -47,6 +47,7 @@
         "signOut": "Sign out",
         "signedOutTitle": "Sign in to see your dashboard",
         "signIn": "Sign in",
+        "unavailable": "This dashboard section is not available yet.",
         "continueLearning": {
             "heading": "Continue learning",
             "resume": "Resume",

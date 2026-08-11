@@ -42,25 +42,31 @@ export type DashboardTab = {
     readonly href: string
 }
 
-/** What the page carries in EVERY state. */
-export type DashboardFrame = {
+/** Data required by the signed-out dashboard tree. */
+export type DashboardSignedOutProps = {
     /** The already-resolved name of the screen. */
     readonly title: string
     /** The sections, in reading order. */
     readonly tabs: ReadonlyArray<DashboardTab>
+    /** The panel selected by the navbar's original `?tab=` contract. */
+    readonly selectedTab: string
+    readonly message: string
+    readonly signInLabel: string
+}
+
+/** Data required by the signed-in dashboard tree. */
+export type DashboardSignedInProps = {
+    /** The already-resolved name of the screen. */
+    readonly title: string
+    /** The sections, in reading order. */
+    readonly tabs: ReadonlyArray<DashboardTab>
+    /** The panel selected by the navbar's original `?tab=` contract. */
+    readonly selectedTab: string
+    readonly signOutLabel: string
+    readonly unavailableMessage: string
 }
 
 /** Props for {@link _DashboardPage}, discriminated by the situation. */
-export type DashboardPageProps =
-    | {
-        readonly state: "signedOut"
-        readonly props: DashboardFrame & { readonly message: string; readonly signInLabel: string }
-    }
-    | {
-        readonly state: "signedIn"
-        readonly props: DashboardFrame & { readonly signOutLabel: string }
-    }
-
 /** What the page reports. */
 export type DashboardPageActions = {
     /** Called when the reader ends the session. */
@@ -69,12 +75,25 @@ export type DashboardPageActions = {
     readonly signIn?: () => void
 }
 
+/** Props for {@link _DashboardPage}, discriminated by the situation. */
+export type DashboardPageProps =
+    | {
+        readonly state: "signedOut"
+        readonly props: DashboardSignedOutProps
+        readonly on?: DashboardPageActions
+    }
+    | {
+        readonly state: "signedIn"
+        readonly props: DashboardSignedInProps
+        readonly on?: DashboardPageActions
+    }
+
 /**
  * Render the dashboard.
  *
  * @param input - {@link DashboardPageProps}
  */
-export const _DashboardPage = (input: DashboardPageProps & { readonly on?: DashboardPageActions }) => {
+export const _DashboardPage = (input: DashboardPageProps) => {
     /**
      * The rail is drawn in BOTH states, because the shortcuts on it need no session: they are
      * destinations, not the reader's data. Hiding them behind sign-in would take away the one
@@ -88,7 +107,7 @@ export const _DashboardPage = (input: DashboardPageProps & { readonly on?: Dashb
     const rail = defineContractComponent("dashboard-rail", {
         section: [
             ...(input.state === "signedIn"
-                ? [defineContractProjection("label-row-over-card", () => <IdentityRail />)]
+                ? [defineContractProjection("stacked-peer-controls", () => <IdentityRail />)]
                 : []),
             defineContractProjection("label-row-over-card", () => <QuickActions />),
         ],
@@ -113,20 +132,31 @@ export const _DashboardPage = (input: DashboardPageProps & { readonly on?: Dashb
         )
     }
 
+    const main = input.props.selectedTab === "courses"
+        ? defineContractComponent("dashboard-main", {
+            section: [defineContractProjection("label-row-over-card", () => <MyCoursesProgress />)],
+        })
+        : input.props.selectedTab === "overview"
+            ? defineContractComponent("dashboard-main", {
+                section: [
+                    defineContractProjection("label-row-over-card", () => <ContinueLearning />),
+                    defineContractProjection("label-row-over-card", () => <DailyQuest />),
+                    defineContractProjection("label-row-over-card", () => <StreakStrip />),
+                    defineContractProjection("label-row-over-card", () => <WeeklyGoals />),
+                ],
+            })
+            : defineContractComponent("centred-empty-notice", {
+                notice: defineLeafComponent("empty-notice", {}, () => (
+                    <EmptyNotice props={{ icon: input.props.selectedTab === "community" ? "community" : "explore", message: input.props.unavailableMessage }} />
+                )),
+            })
+
     return (
         <Tree
             contract="dashboard-rail-then-main"
             render={defineContractComponent("dashboard-rail-then-main", {
                 rail,
-                main: defineContractComponent("dashboard-main", {
-                    section: [
-                        defineContractProjection("label-row-over-card", () => <ContinueLearning />),
-                        defineContractProjection("label-row-over-card", () => <DailyQuest />),
-                        defineContractProjection("label-row-over-card", () => <StreakStrip />),
-                        defineContractProjection("label-row-over-card", () => <WeeklyGoals />),
-                        defineContractProjection("label-row-over-card", () => <MyCoursesProgress />),
-                    ],
-                }),
+                main,
             })}
         />
     )

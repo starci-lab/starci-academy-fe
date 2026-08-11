@@ -30,8 +30,8 @@ export type LayoutClassName =
     | "justify-between" | "justify-center" | "[&>*]:w-full"
     | "gap-1" | "gap-2" | "gap-3" | "gap-4" | "gap-6" | "gap-8"
     | "grid-cols-1" | "sm:grid-cols-2"
-    | "md:flex-row" | "md:items-start"
-    | "mx-auto" | "min-h-screen" | "w-full" | "min-w-0" | "grow" | "max-w-app-lg" | "max-w-6xl" | "max-w-sm"
+    | "md:flex" | "md:flex-row" | "md:items-start"
+    | "mx-auto" | "min-h-screen" | "w-full" | "min-w-0" | "grow" | "flex-1" | "hidden" | "max-w-app-lg" | "max-w-6xl" | "max-w-sm"
     | "h-16" | "min-h-16" | "sticky" | "top-0" | "top-16" | "z-40" | "z-50"
     | "border-b" | "border-separator" | "divide-y" | "bg-background"
     | "px-3" | "px-4" | "px-6" | "py-3" | "py-6" | "p-4" | "p-6"
@@ -192,7 +192,7 @@ export const CONTRACTS = buildContracts({
     "dashboard-rail": {
         classes: ["flex", "w-full", "flex-col", "gap-4"],
         children: {
-            section: { contract: "label-row-over-card", repeats: true, restingCount: 1 },
+            section: { contract: ["stacked-peer-controls", "label-row-over-card"], repeats: true, restingCount: 2 },
         },
         why: "Identity facts and quick destinations form one bare 288px rail, so their labels align without an enclosing surface that would make the rail compete with the content cards.",
     },
@@ -220,7 +220,7 @@ export const CONTRACTS = buildContracts({
         why: "The label is held OUTSIDE the surface it names, so a section whose content is itself a set of cards never draws a card inside a card - and the seam is tighter than the seam between sections, because the label and the surface under it are one object.",
     },
     "empty-notice-card": {
-        classes: ["flex", "flex-col", "gap-4", "rounded-2xl", "bg-surface", "p-4", "shadow-surface"],
+        classes: ["flex", "flex-col", "gap-4"],
         children: {
             notice: { leaf: "empty-notice" },
         },
@@ -236,7 +236,7 @@ export const CONTRACTS = buildContracts({
         why: "The kind, title and way back into one lesson share a bounded ground because none identifies the resumable item without the other two.",
     },
     "daily-quest-card": {
-        classes: ["flex", "flex-col", "gap-4", "rounded-2xl", "bg-surface", "p-4", "shadow-surface"],
+        classes: ["flex", "flex-col", "gap-4"],
         children: {
             tasks: { contract: "stacked-peer-controls" },
             outcome: { leaf: ["text", "button"] },
@@ -244,7 +244,7 @@ export const CONTRACTS = buildContracts({
         why: "The day's task run and its reward outcome share a bounded ground because the outcome only has meaning as the result of that run.",
     },
     "daily-quest-list": {
-        classes: ["overflow-hidden", "rounded-3xl", "bg-surface", "shadow-surface", "divide-y"],
+        classes: ["overflow-hidden", "rounded-3xl", "bg-surface", "shadow-surface"],
         children: {
             task: { leaf: "task-progress-row", repeats: true, restingCount: 5 },
         },
@@ -260,7 +260,7 @@ export const CONTRACTS = buildContracts({
         why: "The label names the joined surface while its reward sentence sits below it, because the reward qualifies completion of the whole list rather than any one task row.",
     },
     "weekly-goals-card": {
-        classes: ["flex", "flex-col", "gap-4", "rounded-2xl", "bg-surface", "p-4", "shadow-surface"],
+        classes: ["flex", "flex-col", "gap-4"],
         children: {
             goals: { contract: "stacked-peer-controls" },
             reset: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
@@ -268,14 +268,14 @@ export const CONTRACTS = buildContracts({
         why: "The week's goal rows and rollover sentence share a bounded ground because the date qualifies the whole run rather than any one goal.",
     },
     "course-progress-card": {
-        classes: ["flex", "flex-col", "gap-4", "rounded-2xl", "bg-surface", "p-4", "shadow-surface"],
+        classes: ["flex", "flex-col", "gap-4"],
         children: {
             rows: { contract: "progress-row-stack" },
         },
         why: "The course progress rows share one bounded ground because they are peer measures of the same enrolled set rather than separate cards.",
     },
     "streak-summary-card": {
-        classes: ["flex", "flex-col", "gap-4", "rounded-2xl", "bg-surface", "p-4", "shadow-surface"],
+        classes: ["flex", "flex-col", "gap-4"],
         children: {
             summary: { contract: "body-with-fixed-aside" },
         },
@@ -363,12 +363,19 @@ export const CONTRACTS = buildContracts({
         why: "The mark and the routes read left because that is where a reader looks to learn where they are; the tools read right because that is where they look to change something - and the bar wraps rather than letting either group fall off a narrow screen.",
     },
     "inline-nav-links": {
-        classes: ["flex", "flex-row", "flex-wrap", "items-center", "gap-6"],
+        classes: ["flex", "flex-row", "items-center", "gap-6"],
         children: {
             brand: { leaf: "link", props: { emphasis: "brand" } },
+            routes: { contract: "inline-route-links" },
+        },
+        why: "The product mark and its destination group keep the legacy 24px seam, so the brand is distinct without becoming detached from the routes it anchors.",
+    },
+    "inline-route-links": {
+        classes: ["hidden", "flex-1", "items-center", "justify-center", "gap-2", "md:flex"],
+        children: {
             route: { leaf: "nav-link", props: { kind: "route" }, repeats: true, restingCount: 0 },
         },
-        why: "Route names sit further apart than words in a sentence, because each is a separate destination and a reader must be able to aim at one without hitting its neighbour.",
+        why: "Desktop route pills sit at the original 8px seam and disappear together below the navigation breakpoint, where the compact shell owns navigation instead.",
     },
     "inline-tool-row": {
         classes: ["flex", "flex-row", "items-center", "gap-2"],
@@ -376,17 +383,16 @@ export const CONTRACTS = buildContracts({
             search: { leaf: "pressable-input-like" },
             locale: { leaf: "icon-button" },
             theme: { leaf: "theme-switch" },
-            tool: { leaf: "icon-button", repeats: true, restingCount: 2 },
-            signIn: { leaf: "button", props: { size: "sm", variant: "primary" }, optional: true },
+            tool: { leaf: "icon-button", repeats: true, restingCount: 3 },
         },
         why: "Icon controls sit tighter than named routes: they are a set of tools rather than a set of destinations, and the tight seam is what makes them read as one group.",
     },
     "underlined-tab-strip": {
-        classes: ["flex", "w-full", "flex-row", "flex-wrap", "items-center", "gap-6", "px-6"],
+        classes: ["w-full"],
         children: {
-            tab: { leaf: "nav-link", props: { kind: "tab" }, repeats: true, restingCount: 0 },
+            tabs: { leaf: "extended-tabs" },
         },
-        why: "Tabs share the bar's inset so the selected one lines up under the route that led here, and they wrap as a whole rather than letting one choice drop away from the set it belongs to.",
+        why: "The original ExtendedTabs primitive owns the inset, compound tab anatomy and selected indicator as one typed run, so no caller can redraw one dashboard tab differently from its peers.",
     },
     "rail-then-main": {
         classes: ["flex", "flex-col", "gap-8", "md:flex-row", "md:items-start", "md:[&>*:first-child]:w-72", "md:[&>*:first-child]:shrink-0", "md:[&>*:first-child]:sticky", "md:[&>*:first-child]:top-6", "md:[&>*:first-child]:self-start", "md:[&>*:first-child]:max-h-rail", "md:[&>*:first-child]:overflow-y-auto", "md:[&>*:last-child]:min-w-0", "md:[&>*:last-child]:grow"],
@@ -423,7 +429,7 @@ export const CONTRACTS = buildContracts({
         children: {
             control: {
                 contract: "spread-choice-row",
-                leaf: ["button", "field", "labelled-progress-row", "quick-action-row", "text"],
+                leaf: ["button", "field", "labelled-progress-row", "quick-action-row", "quick-actions-list", "stat-row", "text"],
                 repeats: true,
                 restingCount: 3,
             },
