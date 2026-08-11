@@ -57,9 +57,23 @@
     padding-right: 0.75rem !important;
 }
 
-/* The dashboard tab separator is the legacy one-pixel rule, not HeroUI's 2px default. */
+/* Active underline is 2px; the navbar's separate border remains the 1px separator. */
 .extended-tabs .tabs__indicator {
-    height: 1px !important;
+    height: 2px !important;
+}
+
+/* HeroUI 3.2 shrank the medium switch; pin it to the live Academy 64x36 control. */
+[data-component="ThemeSwitch"].switch--md,
+[data-component="ThemeSwitch"] .switch__content,
+[data-component="ThemeSwitch"] .switch__control {
+    width: 4rem;
+    height: 2.25rem;
+}
+
+[data-component="ThemeSwitch"] .switch__thumb,
+[data-component="ThemeSwitch"] .switch__icon {
+    width: 1.75rem;
+    height: 1.75rem;
 }
 
 /*
