@@ -9,6 +9,7 @@ import { LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE } from "@/i18n/config"
 import { useSessionToken } from "@/hooks/auth/useSessionToken"
 import { _ShellNav, type ShellNavRoute, type ShellNavTab } from "./component"
 import type { IconName } from "@/components/leaves/Icon"
+import type { AuthMode } from "@/components/blocks/auth/AuthenticationPanel/component"
 
 /**
  * LAYOUT - `ShellNav`, connected half.
@@ -47,6 +48,7 @@ export const ShellNav = () => {
     const searchParams = useSearchParams()
     const { resolvedTheme, setTheme } = useTheme()
     const [isOpen, setIsOpen] = useState(false)
+    const [authMode, setAuthMode] = useState<AuthMode>("signIn")
     const sessionToken = useSessionToken()
 
     /**
@@ -67,6 +69,13 @@ export const ShellNav = () => {
 
     /** Opening is the only thing the bar itself can do to the dialog. */
     const openSignIn = useCallback(() => {
+        setAuthMode("signIn")
+        setIsOpen(true)
+    }, [])
+
+    /** Open account creation from the guest dropdown, without flashing the sign-in form first. */
+    const openSignUp = useCallback(() => {
+        setAuthMode("signUp")
         setIsOpen(true)
     }, [])
 
@@ -126,11 +135,14 @@ export const ShellNav = () => {
                     cartLabel: t("cart"),
                     notificationLabel: t("notifications"),
                     accountLabel: t("account"),
+                    guestMessage: t("guestMessage"),
+                    signInLabel: t("signIn"),
+                    signUpLabel: t("signUp"),
                     isSignedIn: sessionToken !== undefined,
                 }}
-                on={{ openSignIn, selectTab, toggleTheme: () => setTheme(isDark ? "light" : "dark"), toggleLocale }}
+                on={{ openSignIn, openSignUp, selectTab, toggleTheme: () => setTheme(isDark ? "light" : "dark"), toggleLocale }}
             />
-            <SignInOverlay isOpen={isOpen} onDismiss={dismiss} />
+            <SignInOverlay isOpen={isOpen} initialMode={authMode} onDismiss={dismiss} />
         </>
     )
 }

@@ -6,6 +6,8 @@
     "shell": {
         "brand": "StarCi Academy",
         "signIn": "Sign in",
+        "signUp": "Sign up",
+        "guestMessage": "Sign in to follow your progress",
         "routes": {
             "dashboard": "Home",
             "courses": "Courses",

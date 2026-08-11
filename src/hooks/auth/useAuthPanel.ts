@@ -88,6 +88,8 @@ export interface AuthFailure {
 
 /** What a caller may vary about the panel. */
 export interface UseAuthPanelParams {
+    /** Journey selected before the panel mounts. */
+    initialMode?: AuthMode
     /** Called once, after the access token has been stored, so a surface can close itself. */
     onSignedIn?: () => void
 }
@@ -306,8 +308,8 @@ const writeStoredProvider = (provider?: KeycloakIdentityProvider): void => {
  *
  * @param params - {@link UseAuthPanelParams}
  */
-export const useAuthPanel = ({ onSignedIn }: UseAuthPanelParams = {}): AuthPanelState => {
-    const [record, setRecord] = useState<AuthPanelRecord>(INITIAL)
+export const useAuthPanel = ({ initialMode = "signIn", onSignedIn }: UseAuthPanelParams = {}): AuthPanelState => {
+    const [record, setRecord] = useState<AuthPanelRecord>(() => ({ ...INITIAL, mode: initialMode }))
 
     // The handlers read the flow through these refs rather than closing over it, so their
     // identity is stable for the whole life of the surface. See the file header.

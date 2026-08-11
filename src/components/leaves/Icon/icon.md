@@ -37,6 +37,7 @@ icon leaf selects the outline or micro drawing from the role.
 | `code` | Verification/security code | `ShieldCheckIcon` | The checked shield distinguishes verification from programming |
 | `signedIn` | Successful authentication | `CheckCircleIcon` | A checked circle is a completed state, not the sign-in action |
 | `signIn` | Enter account/session | `ArrowRightOnRectangleIcon` | The arrow entering a boundary names session entry |
+| `signUp` | Create an account | `UserPlusIcon` | A person with a plus names account creation |
 | `close` | Dismiss/close | `XMarkIcon` | The conventional close mark has one unambiguous action |
 | `next` | Continue/go forward | `ArrowRightIcon` | A forward arrow names progression without implying login |
 | `retry` | Retry/refresh failed work | `ArrowPathIcon` | The circular path names repeating the same operation |
@@ -57,7 +58,7 @@ icon leaf selects the outline or micro drawing from the role.
 | `account` | Current user account | `UserCircleIcon` | A person in a circle names the signed-in account surface |
 | `saved` | Saved/bookmarked content | `BookmarkIcon` | The bookmark names content retained for later |
 | `blog` | Blog/editorial content | `NewspaperIcon` | A newspaper names published articles without reusing Explore |
-| `talents` | Talent discovery | `UserPlusIcon` | Adding/finding a person distinguishes talent search from Community |
+| `talents` | Talent discovery | `SparklesIcon` | Sparkles name exceptional ability without reusing account creation |
 | `jobs` | IT jobs | `BriefcaseIcon` | A briefcase names employment and vacancies |
 | `practice` | Programming/code practice | `CodeBracketIcon` | Code brackets name programming without reusing verification code |
 

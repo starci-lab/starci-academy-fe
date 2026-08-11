@@ -70,6 +70,8 @@ const toStatus = (
 
 /** Props for {@link AuthenticationPanel}. */
 export type AuthenticationPanelConnectedProps = {
+    /** Journey selected by the control that opened this panel. */
+    readonly initialMode?: AuthMode
     /** Called once the access token is stored, so a surface can close or route away. */
     readonly onSignedIn?: () => void
 }
@@ -79,9 +81,9 @@ export type AuthenticationPanelConnectedProps = {
  *
  * @param input - {@link AuthenticationPanelConnectedProps}
  */
-export const AuthenticationPanel = ({ onSignedIn }: AuthenticationPanelConnectedProps = {}) => {
+export const AuthenticationPanel = ({ initialMode = "signIn", onSignedIn }: AuthenticationPanelConnectedProps = {}) => {
     const t = useTranslations("auth")
-    const panel = useAuthPanel({ onSignedIn })
+    const panel = useAuthPanel({ initialMode, onSignedIn })
     const status = toStatus(t, panel)
     const mode = panel.mode
 

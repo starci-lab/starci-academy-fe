@@ -1,3 +1,4 @@
+import { Link as HeroLink } from "@heroui/react"
 import type { LeafProps } from "@/components/contracts/props"
 
 /**
@@ -27,24 +28,19 @@ export type TextLinkActions = {
 /** Props for {@link TextLink}. Three fixed slots, no fourth - see {@link LeafProps}. */
 export type TextLinkProps = LeafProps<TextLinkData, TextLinkActions>
 
-/** Set as a link, with the focus ring a control owes a keyboard. */
-const LINK_CLASSES = "text-sm text-accent underline-offset-4 hover:underline focus-visible:outline-2"
-
 /**
  * Draw a word that acts.
  *
  * @param input - {@link TextLinkProps}
  */
 export const TextLink = ({ props, on }: TextLinkProps) => (
-    <button
-        type="button"
+    <HeroLink
         data-tier="leaf"
         data-component="TextLink"
-        className={LINK_CLASSES}
-        onClick={on?.press}
+        onPress={on?.press}
     >
         {props.label}
-    </button>
+    </HeroLink>
 )
 
 /** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */

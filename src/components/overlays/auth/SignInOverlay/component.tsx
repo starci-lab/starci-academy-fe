@@ -1,5 +1,5 @@
 import { ModalShell } from "@/components/shells/ModalShell"
-import { Tree } from "@/components/branches/Tree"
+import { ContractContent } from "@/components/branches/Tree"
 import type { ContractKey } from "@/components/contracts"
 import type { ContractComponent } from "@/components/contracts/props"
 
@@ -37,7 +37,7 @@ export type SignInOverlayProps<K extends ContractKey> = {
  */
 export const _SignInOverlay = <const K extends ContractKey>(input: SignInOverlayProps<K>) => (
     <ModalShell isOpen={input.isOpen} size="xs" onDismiss={input.onDismiss}>
-        <Tree contract={input.render.meta.contract} render={input.render} />
+        <ContractContent contract={input.render.meta.contract} render={input.render} />
     </ModalShell>
 )
 

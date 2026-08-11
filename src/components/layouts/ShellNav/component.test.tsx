@@ -1,6 +1,6 @@
 /** @vitest-environment jsdom */
 import { afterEach, describe, expect, it } from "vitest"
-import { cleanup, render, screen } from "@testing-library/react"
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { _ShellNav } from "./component"
 
 class TestResizeObserver implements ResizeObserver {
@@ -26,6 +26,9 @@ const props = {
     cartLabel: "Basket",
     notificationLabel: "Notifications",
     accountLabel: "Account",
+    guestMessage: "Sign in to follow your progress",
+    signInLabel: "Sign in",
+    signUpLabel: "Sign up",
     isSignedIn: false,
 } as const
 
@@ -36,7 +39,7 @@ describe("_ShellNav", () => {
         expect(screen.queryByRole("textbox")).toBeNull()
     })
 
-    it("draws the original switch, icon-only account trigger and ExtendedTabs bottom layer", () => {
+    it("draws the original switch, account dropdown trigger and ExtendedTabs bottom layer", () => {
         const { container } = render(<_ShellNav props={props} />)
         expect(screen.getByRole("switch", { name: "Switch theme" })).toBeTruthy()
         expect(screen.getByRole("button", { name: "Account" })).toBeTruthy()
@@ -44,5 +47,13 @@ describe("_ShellNav", () => {
         const navbar = container.querySelector("[data-node=\"double-navbar\"]")
         expect(navbar?.querySelector("[data-node=\"underlined-tab-strip\"]")).toBeTruthy()
         expect(navbar?.querySelector("[data-component=\"ExtendedTabs\"]")).toBeTruthy()
+    })
+
+    it("opens guest authentication choices from the account trigger", async () => {
+        render(<_ShellNav props={props} />)
+        fireEvent.click(screen.getByRole("button", { name: "Account" }))
+        expect(await screen.findByText("Sign in to follow your progress")).toBeTruthy()
+        expect(screen.getByRole("menuitem", { name: "Sign in" })).toBeTruthy()
+        expect(screen.getByRole("menuitem", { name: "Sign up" })).toBeTruthy()
     })
 })

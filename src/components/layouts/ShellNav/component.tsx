@@ -2,6 +2,7 @@ import { Tree } from "@/components/branches/Tree"
 import { Link } from "@/components/leaves/Link"
 import { NavLink } from "@/components/leaves/NavLink"
 import { IconButton } from "@/components/leaves/IconButton"
+import { AccountMenu } from "@/components/leaves/AccountMenu"
 import { PressableInputLike } from "@/components/leaves/PressableInputLike"
 import { ThemeSwitch } from "@/components/leaves/ThemeSwitch"
 import { ExtendedTabs } from "@/components/leaves/ExtendedTabs"
@@ -35,12 +36,16 @@ export type ShellNavData = {
     readonly cartLabel: string
     readonly notificationLabel: string
     readonly accountLabel: string
+    readonly guestMessage: string
+    readonly signInLabel: string
+    readonly signUpLabel: string
     readonly isSignedIn: boolean
 }
 
 /** Events reported by navbar controls. */
 export type ShellNavActions = {
     readonly openSignIn?: () => void
+    readonly openSignUp?: () => void
     readonly selectTab?: (key: string) => void
     readonly openSearch?: () => void
     readonly toggleTheme?: () => void
@@ -96,12 +101,19 @@ export const _ShellNav = (input: ShellNavProps) => (
                         ...(input.props.isSignedIn ? [defineLeafComponent("icon-button", {}, () => (
                             <IconButton props={{ icon: "notification", label: input.props.notificationLabel }} />
                         ))] : []),
-                        defineLeafComponent("icon-button", {}, () => (
-                            <IconButton
-                                props={{ icon: "account", label: input.props.accountLabel }}
-                                on={{ press: input.props.isSignedIn ? undefined : input.on?.openSignIn }}
+                        ...(input.props.isSignedIn ? [defineLeafComponent("icon-button", {}, () => (
+                            <IconButton props={{ icon: "account", label: input.props.accountLabel }} />
+                        ))] : [defineLeafComponent("account-menu", {}, () => (
+                            <AccountMenu
+                                props={{
+                                    label: input.props.accountLabel,
+                                    guestMessage: input.props.guestMessage,
+                                    signInLabel: input.props.signInLabel,
+                                    signUpLabel: input.props.signUpLabel,
+                                }}
+                                on={{ signIn: input.on?.openSignIn, signUp: input.on?.openSignUp }}
                             />
-                        )),
+                        ))]),
                     ],
                 }),
             }),

@@ -338,7 +338,7 @@ export const _AuthenticationPanel = (
                                                         />
                                                     )
                                                 )),
-                                                exit: defineLeafComponent("text-link", {}, () => (
+                                                exit: input.props.mode !== "signIn" ? undefined : defineLeafComponent("text-link", {}, () => (
                                                     <TextLink
                                                         props={{ label: input.props.forgotPassword }}
                                                         on={{ press: () => input.on?.changeMode?.("forgotPassword") }}

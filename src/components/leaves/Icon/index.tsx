@@ -24,6 +24,7 @@ import {
     PaperAirplaneIcon,
     ShieldCheckIcon,
     ShoppingCartIcon,
+    SparklesIcon,
     SunIcon,
     TrophyIcon,
     UserCircleIcon,
@@ -57,6 +58,7 @@ import {
     PaperAirplaneIcon as PaperAirplaneSolidIcon,
     ShieldCheckIcon as ShieldCheckSolidIcon,
     ShoppingCartIcon as ShoppingCartSolidIcon,
+    SparklesIcon as SparklesSolidIcon,
     SunIcon as SunSolidIcon,
     TrophyIcon as TrophySolidIcon,
     UserCircleIcon as UserCircleSolidIcon,
@@ -89,7 +91,7 @@ import type { LeafProps } from "@/components/contracts/props"
 export type IconName =
     | "brand" | "streak" | "credit" | "reward" | "course"
     | "email" | "password" | "code"
-    | "signedIn" | "signIn" | "close" | "next" | "retry" | "send"
+    | "signedIn" | "signIn" | "signUp" | "close" | "next" | "retry" | "send"
     | "home" | "explore" | "community" | "league" | "review"
     | "light" | "dark" | "locale" | "google" | "github"
     | "search" | "cart" | "notification" | "account" | "saved" | "blog" | "talents" | "jobs" | "practice"
@@ -137,6 +139,7 @@ const GLYPHS: Record<IconName, GlyphCuts> = {
     code: cuts(ShieldCheckIcon, ShieldCheckSolidIcon),
     signedIn: cuts(CheckCircleIcon, CheckCircleSolidIcon),
     signIn: cuts(ArrowRightOnRectangleIcon, ArrowRightOnRectangleSolidIcon),
+    signUp: cuts(UserPlusIcon, UserPlusSolidIcon),
     close: cuts(XMarkIcon, XMarkSolidIcon),
     next: cuts(ArrowRightIcon, ArrowRightSolidIcon),
     retry: cuts(ArrowPathIcon, ArrowPathSolidIcon),
@@ -155,7 +158,7 @@ const GLYPHS: Record<IconName, GlyphCuts> = {
     account: cuts(UserCircleIcon, UserCircleSolidIcon),
     saved: cuts(BookmarkIcon, BookmarkSolidIcon),
     blog: cuts(NewspaperIcon, NewspaperSolidIcon),
-    talents: cuts(UserPlusIcon, UserPlusSolidIcon),
+    talents: cuts(SparklesIcon, SparklesSolidIcon),
     jobs: cuts(BriefcaseIcon, BriefcaseSolidIcon),
     practice: cuts(CodeBracketIcon, CodeBracketSolidIcon),
     google: cuts(GoogleMark, GoogleMark),

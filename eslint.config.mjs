@@ -104,6 +104,9 @@ export default defineConfig([
             "starci-fe/field-input-uses-secondary-variant": "error",
             "starci-fe/field-label-is-text-only": "error",
             "starci-fe/no-surface-branch-in-overlay": "error",
+            "starci-fe/text-link-uses-hero-link": "error",
+            "starci-fe/account-control-owns-dropdown": "error",
+            "starci-fe/auth-overlay-owns-single-content-host": "error",
             "starci-fe/no-public-frame-css-props": "error",
             "starci-fe/no-css-door-type-laundering": "error",
             // The double cast turns type checking OFF at the seam where it is worth most. The

@@ -372,7 +372,7 @@ export const CONTRACTS = buildContracts({
         classes: ["flex", "flex-row", "items-center", "gap-2"],
         children: {
             desktop: { contract: "desktop-navbar-tools" },
-            tool: { leaf: "icon-button", repeats: true, restingCount: 3 },
+            tool: { leaf: ["icon-button", "account-menu"], repeats: true, restingCount: 3 },
         },
         why: "The desktop field controls and round action buttons share one centred row, so controls with different intrinsic heights still sit on the same navbar axis.",
     },
@@ -401,7 +401,7 @@ export const CONTRACTS = buildContracts({
         why: "The rail is pinned in width and STAYS while the column beside it scrolls, because it holds who the reader is and where they can go - facts that do not stop being true a screenful down - and a rail that shrank with the window would clip its own labels before the content beside it became hard to read. Below the breakpoint it moves above rather than halving the column, where sticking it would cost a phone most of its screen.",
     },
     "centred-page-column": {
-        classes: ["mx-auto", "flex", "w-full", "max-w-sm", "flex-col", "gap-6", "py-6"],
+        classes: ["mx-auto", "flex", "w-full", "max-w-sm", "flex-col", "gap-6"],
         children: {
             header: { contract: "centred-title-pair" },
             body: {
@@ -454,7 +454,7 @@ export const CONTRACTS = buildContracts({
         classes: ["flex", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-3"],
         children: {
             choice: { leaf: ["checkbox", "text-link"] },
-            exit: { leaf: "text-link" },
+            exit: { leaf: "text-link", optional: true },
         },
         why: "A choice and the way out of it are pushed to opposite ends of one line, because they are peers that a reader picks BETWEEN rather than a label and the thing it names.",
     },

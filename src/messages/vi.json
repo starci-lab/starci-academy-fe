@@ -6,6 +6,8 @@
     "shell": {
         "brand": "StarCi Academy",
         "signIn": "Đăng nhập",
+        "signUp": "Đăng ký",
+        "guestMessage": "Đăng nhập để theo dõi tiến độ của bạn",
         "routes": {
             "dashboard": "Trang chủ",
             "courses": "Khóa học",

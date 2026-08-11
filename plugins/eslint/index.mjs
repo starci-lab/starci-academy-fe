@@ -31,10 +31,13 @@ import { noCssDoorTypeLaundering } from "./css-door-laundering.mjs"
 import { noDoubleCast } from "./double-cast.mjs"
 import { connectedBlockHasPresentationalTwin } from "./connected-block-twins.mjs"
 import {
+  accountControlOwnsDropdown,
+  authOverlayOwnsSingleContentHost,
   fieldInputUsesSecondaryVariant,
   fieldLabelIsTextOnly,
   modalShellOwnsScrollBody,
   noSurfaceBranchInOverlay,
+  textLinkUsesHeroLink,
 } from "./surface-policy.mjs"
 import { heroiconsFamiliesAreClosed, noVendorIconOutsideIconLeaf } from "./icon-vocabulary.mjs"
 import {
@@ -694,6 +697,9 @@ export default {
     "field-input-uses-secondary-variant": fieldInputUsesSecondaryVariant,
     "field-label-is-text-only": fieldLabelIsTextOnly,
     "no-surface-branch-in-overlay": noSurfaceBranchInOverlay,
+    "text-link-uses-hero-link": textLinkUsesHeroLink,
+    "account-control-owns-dropdown": accountControlOwnsDropdown,
+    "auth-overlay-owns-single-content-host": authOverlayOwnsSingleContentHost,
     "no-public-frame-css-props": noPublicFrameCssProps,
     "no-css-door-type-laundering": noCssDoorTypeLaundering,
     "no-double-cast": noDoubleCast,
