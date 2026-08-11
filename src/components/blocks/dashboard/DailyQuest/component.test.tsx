@@ -64,6 +64,10 @@ describe("_DailyQuest", () => {
             <_DailyQuest state="open" props={{ label: "Today's quest", tasks, rewardLine: "x" }} />,
         )
         expect(container.querySelectorAll("[data-component=\"TaskProgressRow\"]")).toHaveLength(2)
+        expect(container.querySelectorAll("[data-component=\"SurfaceListCardSurface\"]")).toHaveLength(1)
+        expect(container.querySelector("[data-component=\"SurfaceListCardBody\"]")?.getAttribute("data-node"))
+            .toBe("daily-quest-list")
+        expect(container.querySelector("[data-node=\"title-with-end-action\"]")).toBeNull()
     })
 
     it("keeps the card its own size while the day is still on its way", () => {

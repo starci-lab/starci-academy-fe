@@ -117,6 +117,11 @@ test("no-literal-structural-class sends every structural node back to a registry
         filename: "D:/repo/src/components/blocks/example/Example/index.test.tsx",
         code: "const fixture = () => <div className=\"flex gap-2\" />",
       },
+      {
+        // A named surface host owns its one fixed wrapper seam around checked contract content.
+        filename: "D:/repo/src/components/branches/SurfaceListCard/index.tsx",
+        code: "export const SurfaceListCard = () => <div className=\"flex flex-col gap-3\" />",
+      },
     ],
     invalid: [
       {

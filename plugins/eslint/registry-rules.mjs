@@ -21,7 +21,10 @@ const isTestFile = (file) => /\.(?:test|spec)\.(?:ts|tsx|js|jsx|mjs|cjs)$/.test(
 /** Product source lives under `src/`; tooling and config are out of scope. */
 const isSourceFile = (file) => file.includes("/src/")
 
-/** The one frame allowed to render a registry entry, and therefore to paint its markers. */
+/** Branch hosts may own the fixed wrapper mechanics around the contract content they project. */
+const isBranchHostFile = (file) => /\/src\/components\/branches\/(?:Tree|SurfaceCard|SurfaceAccordionCard|SurfaceListCard)\//.test(file)
+
+/** Only Tree paints registry inspection attributes from a dynamic key. */
 const isRegistryFrameFile = (file) => file.includes("/src/components/branches/Tree/")
 
 /**
@@ -135,7 +138,7 @@ export const noLiteralStructuralClass = {
   },
   create(context) {
     const file = normalizePath(context.filename || context.getFilename())
-    if (!isSourceFile(file) || isRegistryFile(file) || isTestFile(file) || isLeafFile(file)) return {}
+    if (!isSourceFile(file) || isRegistryFile(file) || isTestFile(file) || isLeafFile(file) || isBranchHostFile(file)) return {}
     return {
       JSXAttribute(node) {
         if (!isClassAttribute(node)) return

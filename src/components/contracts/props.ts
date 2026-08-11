@@ -76,48 +76,52 @@ export const defineLeafComponent = <
         meta: { shape: "leaf", name, props } as const,
     })
 
-/** Source identity carried by every render function admitted by a contract branch. */
+/** Source identity carried by every contract value admitted by a contract branch. */
 export type ContractComponentMeta<K extends ContractKey> = {
     readonly shape: "contract"
     readonly contract: K
 }
 
-/**
- * A named, contract-bound render function.
- *
- * The metadata is deliberately part of the value type. A bare or inline arrow has no metadata and
- * therefore cannot cross a branch's `render` slot; a component branded for another key cannot be
- * widened into the requested one either.
- */
-export type ContractComponent<K extends ContractKey> = {
-    (): ReactNode
+/** A checked slot record. It carries content; it is deliberately not callable. */
+export type ContractSlots<K extends ContractKey> = {
+    readonly kind: "slots"
     readonly meta: ContractComponentMeta<K>
-    readonly slots?: ChildrenOf<K>
+    readonly slots: ChildrenOf<K>
 }
+
+/** A branch-owned projection that has already drawn the host a contract cannot express. */
+export type ContractProjection<K extends ContractKey> = {
+    readonly kind: "projection"
+    readonly meta: ContractComponentMeta<K>
+    readonly project: () => ReactNode
+}
+
+/** Checked contract content, either as named slots or as one branch-owned projection. */
+export type ContractComponent<K extends ContractKey> = ContractSlots<K> | ContractProjection<K>
 
 /**
  * Bind one exact named slot record to the contract whose child grammar it implements.
  *
  * `ChildrenOf<K>` makes missing, extra, repeated, wrong-identity and wrong-literal slots fail at
- * the builder call; the returned component preserves the key and record across branch boundaries.
+ * the builder call; the returned content preserves the key and record across branch boundaries.
  */
 export const defineContractComponent = <const K extends ContractKey>(
     contract: K,
     slots: ChildrenOf<K>,
-): ContractComponent<K> => Object.assign(
-        () => null,
-        {
-            meta: { shape: "contract", contract } as const,
-            slots,
-        },
-    )
+): ContractSlots<K> => ({
+        kind: "slots",
+        meta: { shape: "contract", contract } as const,
+        slots,
+    })
 
 /** Brand the complete node produced by a branch that owns wrappers a contract cannot express. */
 export const defineContractProjection = <const K extends ContractKey>(
     contract: K,
     render: () => ReactNode,
-): ContractComponent<K> => Object.assign(render, {
+): ContractProjection<K> => ({
+        kind: "projection",
         meta: { shape: "contract", contract } as const,
+        project: render,
     })
 
 /** A branch that projects one typed contract component into its own wrapper mechanics. */

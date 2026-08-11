@@ -50,6 +50,11 @@ test("no-structural-host-outside-registry-frame sends a bare div back to the reg
         code: "export const Tree = ({ spec }) => <div className={spec.classes} />",
       },
       {
+        // A named surface branch is a peer host: its body still receives the caller's contract.
+        filename: "D:/repo/src/components/branches/SurfaceListCard/index.tsx",
+        code: "export const SurfaceListCard = () => <div><Card /></div>",
+      },
+      {
         filename: "D:/repo/src/app/layout.tsx",
         code: "export const RootLayout = ({ children }) => <html><body>{children}</body></html>",
       },

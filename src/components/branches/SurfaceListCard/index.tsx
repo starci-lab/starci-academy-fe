@@ -1,9 +1,10 @@
-import { Tree } from "@/components/branches/Tree"
+import { Card } from "@heroui/react"
+import { ContractContent } from "@/components/branches/Tree"
 import { Heading } from "@/components/leaves/Heading"
 import { Text } from "@/components/leaves/Text"
 import { Button } from "@/components/leaves/Button"
 import { contractNodeProps, type ContractKey } from "@/components/contracts"
-import { defineContractComponent, defineLeafComponent, type ContractBranchProps } from "@/components/contracts/props"
+import type { ContractBranchProps } from "@/components/contracts/props"
 
 /** Copy and optional outcome drawn around a joined list surface. */
 export type SurfaceListCardData = {
@@ -34,17 +35,16 @@ export const SurfaceListCard = <const K extends ContractKey>({
     render,
     isLoading = false,
 }: SurfaceListCardProps<K>) => {
-    const sectionNodeProps = contractNodeProps("label-over-list-and-caption")
-    const label = defineContractComponent("title-with-end-action", {
-        title: defineLeafComponent("heading", {}, () => (
-            <Heading props={{ content: props.label, level: 3 }} />
-        )),
-    })
+    const listNodeProps = contractNodeProps(contract)
 
     return (
-        <div data-component="SurfaceListCard" {...sectionNodeProps}>
-            <Tree contract="title-with-end-action" render={label} />
-            <Tree contract={contract} render={render} />
+        <div data-component="SurfaceListCard" className="flex flex-col gap-3">
+            <Heading props={{ content: props.label, level: 3 }} />
+            <Card data-component="SurfaceListCardSurface">
+                <Card.Content {...listNodeProps} data-component="SurfaceListCardBody">
+                    <ContractContent contract={contract} render={render} />
+                </Card.Content>
+            </Card>
             {props.actionLabel !== undefined && on?.act !== undefined ? (
                 <Button props={{ label: props.actionLabel, size: "sm", variant: "primary" }} on={{ press: on.act }} />
             ) : props.description === undefined ? null : (
@@ -55,4 +55,4 @@ export const SurfaceListCard = <const K extends ContractKey>({
 }
 
 /** Source-level tier marker for the joined-list branch. */
-export const meta = { shape: "branch", contract: "label-over-list-and-caption", world: "pure" } as const
+export const meta = { shape: "branch", world: "pure" } as const

@@ -244,20 +244,11 @@ export const CONTRACTS = buildContracts({
         why: "The day's task run and its reward outcome share a bounded ground because the outcome only has meaning as the result of that run.",
     },
     "daily-quest-list": {
-        classes: ["overflow-hidden", "rounded-3xl", "bg-surface", "shadow-surface"],
+        classes: ["overflow-hidden"],
         children: {
             task: { leaf: "task-progress-row", repeats: true, restingCount: 5 },
         },
         why: "Today's tasks are peer rows of one joined list, so the surface is shared and a full-width rule - rather than card spacing - separates one target from the next.",
-    },
-    "label-over-list-and-caption": {
-        classes: ["flex", "flex-col", "gap-3"],
-        children: {
-            label: { contract: "title-with-end-action" },
-            list: { contract: "$content" },
-            caption: { leaf: ["text", "button"], optional: true },
-        },
-        why: "The label names the joined surface while its reward sentence sits below it, because the reward qualifies completion of the whole list rather than any one task row.",
     },
     "weekly-goals-card": {
         classes: ["flex", "flex-col", "gap-4"],
