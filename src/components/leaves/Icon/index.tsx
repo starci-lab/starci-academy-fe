@@ -7,6 +7,7 @@ import {
     EnvelopeSimpleIcon,
     FireIcon,
     BookmarkSimpleIcon,
+    BellIcon,
     BriefcaseIcon,
     CodeIcon,
     CompassIcon,
@@ -55,7 +56,7 @@ export type IconName =
     | "signedIn" | "signIn" | "close" | "next" | "retry" | "send"
     | "home" | "explore" | "community" | "league" | "review"
     | "light" | "dark" | "locale" | "google" | "github"
-    | "search" | "cart" | "account" | "saved" | "talents" | "jobs" | "practice"
+    | "search" | "cart" | "notification" | "account" | "saved" | "talents" | "jobs" | "practice"
 
 /** The two steps. A third size is a decision nobody can make consistently across screens. */
 export type IconSize = "sm" | "md"
@@ -104,6 +105,7 @@ const GLYPHS: Record<IconName, PhosphorIcon | (() => ReactElement)> = {
     locale: GlobeIcon,
     search: MagnifyingGlassIcon,
     cart: ShoppingCartSimpleIcon,
+    notification: BellIcon,
     account: UserCircleIcon,
     saved: BookmarkSimpleIcon,
     talents: UserCircleIcon,

@@ -1,5 +1,4 @@
 import { Tree } from "@/components/branches/Tree"
-import { NavLink } from "@/components/leaves/NavLink"
 import { EmptyNotice } from "@/components/leaves/EmptyNotice"
 import { ContinueLearning } from "@/components/blocks/dashboard/ContinueLearning"
 import { QuickActions } from "@/components/blocks/dashboard/QuickActions"
@@ -76,20 +75,6 @@ export type DashboardPageActions = {
  * @param input - {@link DashboardPageProps}
  */
 export const _DashboardPage = (input: DashboardPageProps & { readonly on?: DashboardPageActions }) => {
-    const tabs = defineContractComponent("underlined-tab-strip", {
-        tab: input.props.tabs.map((tab) => defineLeafComponent("nav-link", { kind: "tab" }, () => (
-            <NavLink
-                props={{
-                    href: tab.href,
-                    label: tab.label,
-                    icon: tab.icon,
-                    isCurrent: tab.isCurrent,
-                    kind: "tab",
-                }}
-            />
-        ))),
-    })
-
     /**
      * The rail is drawn in BOTH states, because the shortcuts on it need no session: they are
      * destinations, not the reader's data. Hiding them behind sign-in would take away the one
@@ -112,19 +97,16 @@ export const _DashboardPage = (input: DashboardPageProps & { readonly on?: Dashb
     if (input.state === "signedOut") {
         return (
             <Tree
-                contract="dashboard-tabs-over-body"
-                render={defineContractComponent("dashboard-tabs-over-body", {
-                    tabs,
-                    body: defineContractComponent("dashboard-rail-then-main", {
-                        rail,
-                        main: defineContractComponent("centred-empty-notice", {
-                            notice: defineLeafComponent("empty-notice", {}, () => (
-                                <EmptyNotice
-                                    props={{ icon: "signIn", message: input.props.message, actionLabel: input.props.signInLabel }}
-                                    on={{ act: input.on?.signIn }}
-                                />
-                            )),
-                        }),
+                contract="dashboard-rail-then-main"
+                render={defineContractComponent("dashboard-rail-then-main", {
+                    rail,
+                    main: defineContractComponent("centred-empty-notice", {
+                        notice: defineLeafComponent("empty-notice", {}, () => (
+                            <EmptyNotice
+                                props={{ icon: "signIn", message: input.props.message, actionLabel: input.props.signInLabel }}
+                                on={{ act: input.on?.signIn }}
+                            />
+                        )),
                     }),
                 })}
             />
@@ -133,20 +115,17 @@ export const _DashboardPage = (input: DashboardPageProps & { readonly on?: Dashb
 
     return (
         <Tree
-            contract="dashboard-tabs-over-body"
-            render={defineContractComponent("dashboard-tabs-over-body", {
-                tabs,
-                body: defineContractComponent("dashboard-rail-then-main", {
-                    rail,
-                    main: defineContractComponent("dashboard-main", {
-                        section: [
-                            defineContractProjection("label-row-over-card", () => <ContinueLearning />),
-                            defineContractProjection("label-row-over-card", () => <DailyQuest />),
-                            defineContractProjection("label-row-over-card", () => <StreakStrip />),
-                            defineContractProjection("label-row-over-card", () => <WeeklyGoals />),
-                            defineContractProjection("label-row-over-card", () => <MyCoursesProgress />),
-                        ],
-                    }),
+            contract="dashboard-rail-then-main"
+            render={defineContractComponent("dashboard-rail-then-main", {
+                rail,
+                main: defineContractComponent("dashboard-main", {
+                    section: [
+                        defineContractProjection("label-row-over-card", () => <ContinueLearning />),
+                        defineContractProjection("label-row-over-card", () => <DailyQuest />),
+                        defineContractProjection("label-row-over-card", () => <StreakStrip />),
+                        defineContractProjection("label-row-over-card", () => <WeeklyGoals />),
+                        defineContractProjection("label-row-over-card", () => <MyCoursesProgress />),
+                    ],
                 }),
             })}
         />

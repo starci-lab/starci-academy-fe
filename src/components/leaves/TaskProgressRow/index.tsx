@@ -13,7 +13,7 @@ export type TaskProgressRowData = {
 /** Fixed leaf props for a task progress row. */
 export type TaskProgressRowProps = LeafProps<TaskProgressRowData>
 
-const ROOT_CLASSES = "flex min-h-16 w-full flex-row items-center gap-3 px-4 py-3"
+const ROOT_CLASSES = "flex w-full flex-row items-center gap-3 p-3"
 const MARK_CLASSES = "size-5 shrink-0 rounded-full border-2"
 const TITLE_CLASSES = "min-w-0 grow"
 const RESTING_MARK_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({

@@ -62,7 +62,7 @@ const RootLayout = async ({ children }: RootLayoutProps) => {
                         contract="nav-over-body-page"
                         render={defineContractComponent("nav-over-body-page", {
                             navigation: defineContractProjection(
-                                "brand-links-then-tools-bar",
+                                "double-navbar",
                                 () => <ShellNav />,
                             ),
                             body: defineLeafComponent("page", {}, () => children),

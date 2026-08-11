@@ -7,7 +7,8 @@ import { usePathname } from "next/navigation"
 import { SignInOverlay } from "@/components/overlays/auth/SignInOverlay"
 import { LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE } from "@/i18n/config"
 import { useSessionToken } from "@/hooks/auth/useSessionToken"
-import { _ShellNav, type ShellNavRoute } from "./component"
+import { _ShellNav, type ShellNavRoute, type ShellNavTab } from "./component"
+import type { IconName } from "@/components/leaves/Icon"
 
 /**
  * LAYOUT - `ShellNav`, connected half.
@@ -25,6 +26,14 @@ const ROUTES: ReadonlyArray<{ id: string, href: string }> = [
     { id: "dashboard", href: "/dashboard" },
     { id: "courses", href: "/courses" },
     { id: "contact", href: "/contact" },
+]
+
+/** Dashboard tabs registered as the navbar's bottom layer. */
+const DASHBOARD_TABS: ReadonlyArray<{ id: string, href: string, icon: IconName }> = [
+    { id: "overview", href: "/dashboard", icon: "home" },
+    { id: "explore", href: "/dashboard/explore", icon: "explore" },
+    { id: "courses", href: "/dashboard/courses", icon: "course" },
+    { id: "community", href: "/dashboard/community", icon: "community" },
 ]
 
 /**
@@ -87,6 +96,13 @@ export const ShellNav = () => {
         label: t(`routes.${route.id}`),
         isCurrent: pathname === route.href,
     }))
+    const tabs: ReadonlyArray<ShellNavTab> | undefined = pathname.startsWith("/dashboard")
+        ? DASHBOARD_TABS.map((tab) => ({
+            ...tab,
+            label: t(`tabs.${tab.id}`),
+            isCurrent: pathname === tab.href,
+        }))
+        : undefined
 
     return (
         <>
@@ -94,6 +110,7 @@ export const ShellNav = () => {
                 props={{
                     brand: t("brand"),
                     routes,
+                    tabs,
                     signInLabel: t("signIn"),
                     themeLabel: isDark ? t("themeLight") : t("themeDark"),
                     isDark,
@@ -102,6 +119,7 @@ export const ShellNav = () => {
                     searchLabel: t("search"),
                     searchShortcut: t("searchShortcut"),
                     cartLabel: t("cart"),
+                    notificationLabel: t("notifications"),
                     accountLabel: t("account"),
                     isSignedIn: sessionToken !== undefined,
                 }}

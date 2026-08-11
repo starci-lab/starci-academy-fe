@@ -35,7 +35,7 @@ export type LayoutClassName =
     | "h-16" | "min-h-16" | "sticky" | "top-0" | "top-16" | "z-40" | "z-50"
     | "border-b" | "border-separator" | "divide-y" | "bg-background"
     | "px-3" | "px-4" | "px-6" | "py-3" | "py-6" | "p-4" | "p-6"
-    | "rounded-xl" | "rounded-2xl"
+    | "rounded-xl" | "rounded-2xl" | "rounded-3xl"
     | "bg-surface" | "shadow-surface" | "text-center"
     | "[&>*:nth-child(2)]:min-w-0" | "[&>*:nth-child(2)]:grow"
     | "md:[&>*:first-child]:min-w-0" | "md:[&>*:first-child]:grow"
@@ -136,7 +136,7 @@ export const CONTRACTS = buildContracts({
     "nav-over-body-page": {
         classes: ["flex", "min-h-screen", "w-full", "flex-col"],
         children: {
-            navigation: { contract: "brand-links-then-tools-bar" },
+            navigation: { contract: "double-navbar" },
             body: { leaf: "page" },
         },
         why: "The navigation stays a sibling of the routed body rather than a parent of it, so a route change repaints the body without tearing the nav down - and the measure is set here because a reading column running the full width of a desktop screen cannot be scanned at all.",
@@ -244,7 +244,7 @@ export const CONTRACTS = buildContracts({
         why: "The day's task run and its reward outcome share a bounded ground because the outcome only has meaning as the result of that run.",
     },
     "daily-quest-list": {
-        classes: ["overflow-hidden", "rounded-2xl", "bg-surface", "shadow-surface", "divide-y"],
+        classes: ["overflow-hidden", "rounded-3xl", "bg-surface", "shadow-surface", "divide-y"],
         children: {
             task: { leaf: "task-progress-row", repeats: true, restingCount: 5 },
         },
@@ -346,8 +346,16 @@ export const CONTRACTS = buildContracts({
         },
         why: "A form is read one control at a time, so the measure is narrow on purpose and the seam between controls is wider than the seam inside any of them.",
     },
+    "double-navbar": {
+        classes: ["sticky", "top-0", "z-50", "w-full", "border-b", "border-separator", "bg-background"],
+        children: {
+            primary: { contract: "brand-links-then-tools-bar" },
+            bottom: { contract: "underlined-tab-strip", optional: true },
+        },
+        why: "The active page's tab strip is the navbar's second layer, so both rows move as one sticky landmark and share one bottom border instead of drawing two unrelated bars.",
+    },
     "brand-links-then-tools-bar": {
-        classes: ["sticky", "top-0", "z-50", "flex", "h-16", "min-h-16", "w-full", "flex-row", "items-center", "justify-between", "gap-3", "border-b", "border-separator", "bg-background", "px-3"],
+        classes: ["flex", "h-16", "min-h-16", "w-full", "flex-row", "items-center", "justify-between", "gap-3", "px-3"],
         children: {
             navigation: { contract: "inline-nav-links" },
             tools: { contract: "inline-tool-row" },
@@ -365,14 +373,16 @@ export const CONTRACTS = buildContracts({
     "inline-tool-row": {
         classes: ["flex", "flex-row", "items-center", "gap-2"],
         children: {
-            search: { leaf: "search-box" },
-            tool: { leaf: "icon-button", repeats: true, restingCount: 0 },
+            search: { leaf: "pressable-input-like" },
+            locale: { leaf: "icon-button" },
+            theme: { leaf: "theme-switch" },
+            tool: { leaf: "icon-button", repeats: true, restingCount: 2 },
             signIn: { leaf: "button", props: { size: "sm", variant: "primary" }, optional: true },
         },
         why: "Icon controls sit tighter than named routes: they are a set of tools rather than a set of destinations, and the tight seam is what makes them read as one group.",
     },
     "underlined-tab-strip": {
-        classes: ["sticky", "top-16", "z-40", "flex", "w-full", "flex-row", "flex-wrap", "items-center", "gap-6", "border-b", "border-separator", "bg-background", "px-6"],
+        classes: ["flex", "w-full", "flex-row", "flex-wrap", "items-center", "gap-6", "px-6"],
         children: {
             tab: { leaf: "nav-link", props: { kind: "tab" }, repeats: true, restingCount: 0 },
         },
