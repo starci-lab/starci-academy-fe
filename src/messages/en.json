@@ -46,9 +46,6 @@
         "title": "Dashboard",
         "progressHeading": "Your progress",
         "railHeading": "Your standing",
-        "signOut": "Sign out",
-        "signedOutTitle": "Sign in to see your dashboard",
-        "signIn": "Sign in",
         "unavailable": "This dashboard section is not available yet.",
         "continueLearning": {
             "heading": "Continue learning",

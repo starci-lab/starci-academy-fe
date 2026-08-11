@@ -12,8 +12,8 @@ import AuthenticationRoute from "./page"
  * assert nothing about the route.
  */
 
-vi.mock("@/components/blocks/auth/AuthenticationPanel", () => ({
-    AuthenticationPanel: () => <p data-part="panel">Authentication</p>,
+vi.mock("@/components/pages/AuthenticationPage", () => ({
+    AuthenticationPage: () => <p data-part="page">Authentication</p>,
 }))
 
 afterEach(() => {
@@ -21,9 +21,9 @@ afterEach(() => {
 })
 
 describe("AuthenticationRoute", () => {
-    it("mounts the panel", () => {
+    it("mounts the page", () => {
         const { container } = render(<AuthenticationRoute />)
-        expect(container.querySelector("[data-part='panel']")?.textContent).toBe("Authentication")
+        expect(container.querySelector("[data-part='page']")?.textContent).toBe("Authentication")
     })
 
     it("adds no markup of its own around it", () => {

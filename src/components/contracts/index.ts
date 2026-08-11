@@ -141,6 +141,20 @@ export const CONTRACTS = buildContracts({
         },
         why: "The navigation stays a sibling of the routed body rather than a parent of it, so a route change repaints the body without tearing the nav down - and the measure is set here because a reading column running the full width of a desktop screen cannot be scanned at all.",
     },
+    "centred-authentication-page": {
+        classes: ["flex", "w-full", "grow", "items-center", "justify-center", "p-6"],
+        children: {
+            surface: { contract: "authentication-panel-card" },
+        },
+        why: "Authentication is the route's only task, so its one bounded form sits at the visual centre instead of inheriting the dashboard's rail-and-main reading order.",
+    },
+    "authentication-panel-card": {
+        classes: ["w-full", "max-w-sm"],
+        children: {
+            panel: { contract: "centred-page-column" },
+        },
+        why: "The authentication form is one meaningful control group, so one card bounds it while the panel inside retains ownership of its typed form rhythm.",
+    },
     "title-with-end-action": {
         classes: ["flex", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-4"],
         children: {

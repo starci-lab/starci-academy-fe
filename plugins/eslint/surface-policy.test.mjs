@@ -82,11 +82,18 @@ test("an overlay does not draw a second named surface", () => {
       filename: "D:/repo/src/components/overlays/auth/SignInOverlay/component.tsx",
       code: "import { ModalShell } from '@/components/shells/ModalShell'",
     }],
-    invalid: [{
-      filename: "D:/repo/src/components/overlays/auth/SignInOverlay/component.tsx",
-      code: "import { SurfaceCard } from '@/components/branches/SurfaceCard'",
-      errors: [{ messageId: "nested" }],
-    }],
+    invalid: [
+      {
+        filename: "D:/repo/src/components/overlays/auth/SignInOverlay/component.tsx",
+        code: "import { SurfaceCard } from '@/components/branches/SurfaceCard'",
+        errors: [{ messageId: "nested" }],
+      },
+      {
+        filename: "D:/repo/src/components/overlays/auth/SignInOverlay/component.tsx",
+        code: "import { SurfaceFormCard } from '@/components/branches/SurfaceFormCard'",
+        errors: [{ messageId: "nested" }],
+      },
+    ],
   })
 })
 

@@ -14,13 +14,8 @@ import { defineContractComponent, defineContractProjection, defineLeafComponent 
  * PAGE - `DashboardPage`, presentational half.
  *
  * IT OWNS NO REQUEST. Every figure on screen belongs to a block that fetches it. What it owns is
- * the ONE fact none of those blocks can settle - whether there is a session at all.
- *
- * WHY THAT MATTERS MORE THAN IT LOOKS. Every query behind this screen is auth-gated, so without a
- * token they do not fail slowly, they fail forever: SWR retries a rejected key on a backoff and
- * reports `isLoading` again each time, which is how a signed-out dashboard ends up shimmering at a
- * reader who is not waiting for anything. Answering it here, once, before a single request is
- * made, is what stops that.
+ * its block reading order. Session access is settled by the connected half before this tree is
+ * mounted, so no signed-out dashboard arrangement exists here.
  *
  * WHAT IS DELIBERATELY NOT BUILT. The live product carries daily quests, weekly goals, streak
  * freezes, contributions, job readiness, leagues and a changelog. This repo has six queries and
@@ -42,51 +37,19 @@ export type DashboardTab = {
     readonly href: string
 }
 
-/** Data required by the signed-out dashboard tree. */
-export type DashboardSignedOutProps = {
-    /** The already-resolved name of the screen. */
-    readonly title: string
+/** Data required by the dashboard tree. */
+export type DashboardPageData = {
     /** The sections, in reading order. */
     readonly tabs: ReadonlyArray<DashboardTab>
     /** The panel selected by the navbar's original `?tab=` contract. */
     readonly selectedTab: string
-    readonly message: string
-    readonly signInLabel: string
-}
-
-/** Data required by the signed-in dashboard tree. */
-export type DashboardSignedInProps = {
-    /** The already-resolved name of the screen. */
-    readonly title: string
-    /** The sections, in reading order. */
-    readonly tabs: ReadonlyArray<DashboardTab>
-    /** The panel selected by the navbar's original `?tab=` contract. */
-    readonly selectedTab: string
-    readonly signOutLabel: string
     readonly unavailableMessage: string
 }
 
-/** Props for {@link _DashboardPage}, discriminated by the situation. */
-/** What the page reports. */
-export type DashboardPageActions = {
-    /** Called when the reader ends the session. */
-    readonly signOut?: () => void
-    /** Called when a signed-out reader asks to sign in. */
-    readonly signIn?: () => void
+/** Props for {@link _DashboardPage}. */
+export type DashboardPageProps = {
+    readonly props: DashboardPageData
 }
-
-/** Props for {@link _DashboardPage}, discriminated by the situation. */
-export type DashboardPageProps =
-    | {
-        readonly state: "signedOut"
-        readonly props: DashboardSignedOutProps
-        readonly on?: DashboardPageActions
-    }
-    | {
-        readonly state: "signedIn"
-        readonly props: DashboardSignedInProps
-        readonly on?: DashboardPageActions
-    }
 
 /**
  * Render the dashboard.
@@ -95,10 +58,6 @@ export type DashboardPageProps =
  */
 export const _DashboardPage = (input: DashboardPageProps) => {
     /**
-     * The rail is drawn in BOTH states, because the shortcuts on it need no session: they are
-     * destinations, not the reader's data. Hiding them behind sign-in would take away the one
-     * thing a signed-out visitor can actually use, and leave the screen with nothing but a refusal.
-     *
      * WHO THE READER IS COMES FIRST, WHERE THEY MIGHT GO COMES LAST. The rail is read top-down on
      * arrival, and standing is the thing a reader checks every visit; the shortcuts are the thing
      * they reach for once they have decided to move. Putting the destinations above the standing
@@ -106,31 +65,10 @@ export const _DashboardPage = (input: DashboardPageProps) => {
      */
     const rail = defineContractComponent("dashboard-rail", {
         section: [
-            ...(input.state === "signedIn"
-                ? [defineContractProjection("stacked-peer-controls", () => <IdentityRail />)]
-                : []),
+            defineContractProjection("stacked-peer-controls", () => <IdentityRail />),
             defineContractProjection("label-row-over-card", () => <QuickActions />),
         ],
     })
-
-    if (input.state === "signedOut") {
-        return (
-            <Tree
-                contract="dashboard-rail-then-main"
-                render={defineContractComponent("dashboard-rail-then-main", {
-                    rail,
-                    main: defineContractComponent("centred-empty-notice", {
-                        notice: defineLeafComponent("empty-notice", {}, () => (
-                            <EmptyNotice
-                                props={{ icon: "signIn", message: input.props.message, actionLabel: input.props.signInLabel }}
-                                on={{ act: input.on?.signIn }}
-                            />
-                        )),
-                    }),
-                })}
-            />
-        )
-    }
 
     const main = input.props.selectedTab === "courses"
         ? defineContractComponent("dashboard-main", {

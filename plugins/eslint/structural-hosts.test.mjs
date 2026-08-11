@@ -55,6 +55,10 @@ test("no-structural-host-outside-registry-frame sends a bare div back to the reg
         code: "export const SurfaceListCard = () => <div><Card /></div>",
       },
       {
+        filename: "D:/repo/src/components/branches/SurfaceFormCard/index.tsx",
+        code: "export const SurfaceFormCard = () => <Card />",
+      },
+      {
         filename: "D:/repo/src/app/layout.tsx",
         code: "export const RootLayout = ({ children }) => <html><body>{children}</body></html>",
       },

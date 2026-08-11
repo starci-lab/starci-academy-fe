@@ -1,8 +1,9 @@
 "use client"
 
+import { useEffect } from "react"
 import { useTranslations } from "next-intl"
-import { useSearchParams } from "next/navigation"
-import { setSessionToken, useSessionToken } from "@/hooks/auth/useSessionToken"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useSessionToken } from "@/hooks/auth/useSessionToken"
 import { _DashboardPage, type DashboardTab } from "./component"
 import type { IconName } from "@/components/leaves/Icon"
 
@@ -28,6 +29,7 @@ export const DashboardPage = () => {
     const t = useTranslations("dashboard")
     const tShell = useTranslations("shell")
     const token = useSessionToken()
+    const router = useRouter()
     const searchParams = useSearchParams()
     const requestedTab = searchParams.get("tab")
     const selectedTab = TABS.some((tab) => tab.id === requestedTab) ? requestedTab! : "overview"
@@ -40,23 +42,15 @@ export const DashboardPage = () => {
         isCurrent: tab.id === selectedTab,
     }))
 
-    const title = t("title")
+    useEffect(() => {
+        if (token === undefined) router.replace("/authentication")
+    }, [router, token])
 
-    if (token === undefined) {
-        return (
-            <_DashboardPage
-                state="signedOut"
-                props={{ title, tabs, selectedTab, message: t("signedOutTitle"), signInLabel: t("signIn") }}
-            />
-        )
-    }
+    if (token === undefined) return null
 
     return (
         <_DashboardPage
-            state="signedIn"
-            props={{ title, tabs, selectedTab, signOutLabel: t("signOut"), unavailableMessage: t("unavailable") }}
-            // Ending the session is the whole of it: the store wakes every reader of the token.
-            on={{ signOut: () => setSessionToken(undefined) }}
+            props={{ tabs, selectedTab, unavailableMessage: t("unavailable") }}
         />
     )
 }

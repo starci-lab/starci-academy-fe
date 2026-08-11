@@ -22,7 +22,7 @@ const isTestFile = (file) => /\.(?:test|spec)\.(?:ts|tsx|js|jsx|mjs|cjs)$/.test(
 const isSourceFile = (file) => file.includes("/src/")
 
 /** Branch hosts may own the fixed wrapper mechanics around the contract content they project. */
-const isBranchHostFile = (file) => /\/src\/components\/branches\/(?:Tree|SurfaceCard|SurfaceAccordionCard|SurfaceListCard)\//.test(file)
+const isBranchHostFile = (file) => /\/src\/components\/branches\/(?:Tree|SurfaceCard|SurfaceAccordionCard|SurfaceListCard|SurfaceFormCard)\//.test(file)
 
 /** Only Tree paints registry inspection attributes from a dynamic key. */
 const isRegistryFrameFile = (file) => file.includes("/src/components/branches/Tree/")

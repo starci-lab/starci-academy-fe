@@ -121,7 +121,7 @@ export const noSurfaceBranchInOverlay = {
     return {
       ImportDeclaration(node) {
         const source = normalizePath(node.source?.value)
-        const match = source.match(/\/components\/branches\/(SurfaceCard|SurfaceAccordionCard|SurfaceListCard)$/)
+        const match = source.match(/\/components\/branches\/(SurfaceCard|SurfaceAccordionCard|SurfaceListCard|SurfaceFormCard)$/)
         if (match) context.report({ node, messageId: "nested", data: { surface: match[1] } })
       },
     }
