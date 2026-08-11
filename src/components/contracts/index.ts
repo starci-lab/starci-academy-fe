@@ -380,12 +380,19 @@ export const CONTRACTS = buildContracts({
     "inline-tool-row": {
         classes: ["flex", "flex-row", "items-center", "gap-2"],
         children: {
+            desktop: { contract: "desktop-navbar-tools" },
+            tool: { leaf: "icon-button", repeats: true, restingCount: 3 },
+        },
+        why: "The desktop field controls and round action buttons share one centred row, so controls with different intrinsic heights still sit on the same navbar axis.",
+    },
+    "desktop-navbar-tools": {
+        classes: ["hidden", "items-center", "gap-2", "md:flex"],
+        children: {
             search: { leaf: "pressable-input-like" },
             locale: { leaf: "icon-button" },
             theme: { leaf: "theme-switch" },
-            tool: { leaf: "icon-button", repeats: true, restingCount: 3 },
         },
-        why: "Icon controls sit tighter than named routes: they are a set of tools rather than a set of destinations, and the tight seam is what makes them read as one group.",
+        why: "Search, language and appearance are the legacy desktop subgroup, whose own centred flex axis prevents the shorter native switch track from dropping against neighbouring buttons.",
     },
     "underlined-tab-strip": {
         classes: ["w-full"],

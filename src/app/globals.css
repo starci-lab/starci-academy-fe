@@ -57,6 +57,11 @@
     padding-right: 0.75rem !important;
 }
 
+/* The dashboard tab separator is the legacy one-pixel rule, not HeroUI's 2px default. */
+.extended-tabs .tabs__indicator {
+    height: 1px !important;
+}
+
 /*
  * THE LIGHT THEME.
  *

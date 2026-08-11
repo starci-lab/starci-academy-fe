@@ -72,21 +72,23 @@ export const _ShellNav = (input: ShellNavProps) => (
                     }),
                 }),
                 tools: defineContractComponent("inline-tool-row", {
-                    search: defineLeafComponent("pressable-input-like", {}, () => (
-                        <PressableInputLike
-                            props={{ placeholder: input.props.searchPlaceholder, label: input.props.searchLabel, shortcut: input.props.searchShortcut }}
-                            on={{ press: input.on?.openSearch }}
-                        />
-                    )),
-                    locale: defineLeafComponent("icon-button", {}, () => (
-                        <IconButton props={{ icon: "locale", label: input.props.localeLabel }} on={{ press: input.on?.toggleLocale }} />
-                    )),
-                    theme: defineLeafComponent("theme-switch", {}, () => (
-                        <ThemeSwitch
-                            props={{ isDark: input.props.isDark, label: input.props.themeLabel }}
-                            on={{ change: input.on?.toggleTheme }}
-                        />
-                    )),
+                    desktop: defineContractComponent("desktop-navbar-tools", {
+                        search: defineLeafComponent("pressable-input-like", {}, () => (
+                            <PressableInputLike
+                                props={{ placeholder: input.props.searchPlaceholder, label: input.props.searchLabel, shortcut: input.props.searchShortcut }}
+                                on={{ press: input.on?.openSearch }}
+                            />
+                        )),
+                        locale: defineLeafComponent("icon-button", {}, () => (
+                            <IconButton props={{ icon: "locale", label: input.props.localeLabel }} on={{ press: input.on?.toggleLocale }} />
+                        )),
+                        theme: defineLeafComponent("theme-switch", {}, () => (
+                            <ThemeSwitch
+                                props={{ isDark: input.props.isDark, label: input.props.themeLabel }}
+                                on={{ change: input.on?.toggleTheme }}
+                            />
+                        )),
+                    }),
                     tool: [
                         defineLeafComponent("icon-button", {}, () => (
                             <IconButton props={{ icon: "cart", label: input.props.cartLabel }} />
