@@ -405,7 +405,7 @@ export const CONTRACTS = buildContracts({
         children: {
             header: { contract: "centred-title-pair" },
             body: {
-                contract: ["auth-shortcuts-over-divider", "stacked-peer-controls", "centred-title-pair", "spread-choice-row"],
+                contract: ["auth-entry-stack", "stacked-peer-controls", "centred-title-pair", "spread-choice-row"],
                 leaf: ["form", "divider"],
                 repeats: true,
                 restingCount: 0,
@@ -413,6 +413,14 @@ export const CONTRACTS = buildContracts({
             footer: { contract: ["spread-choice-row", "centred-prompt-row"], optional: true },
         },
         why: "A surface read one control at a time is centred and narrow on purpose: a form that runs the width of a desktop screen makes the eye travel between a label and the box it names.",
+    },
+    "auth-entry-stack": {
+        classes: ["flex", "flex-col", "gap-3", "[&>*]:w-full"],
+        children: {
+            shortcuts: { contract: "auth-shortcuts-over-divider" },
+            credentials: { leaf: "form" },
+        },
+        why: "Authentication has exactly two entry blocks: OAuth closed by the OR divider above, and the credential form below. This node alone owns their gap-3 seam so the outer page rhythm cannot add a second gap.",
     },
     "centred-title-pair": {
         classes: ["flex", "flex-col", "gap-2", "items-center", "text-center"],
