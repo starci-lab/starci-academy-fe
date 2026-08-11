@@ -45,7 +45,19 @@
         "railHeading": "Vị trí của bạn",
         "signOut": "Đăng xuất",
         "signedOutTitle": "Đăng nhập để xem bảng điều khiển",
-        "signIn": "Đăng nhập"
+        "signIn": "Đăng nhập",
+        "continueLearning": {
+            "heading": "Tiếp tục học",
+            "resume": "Học tiếp",
+            "browse": "Khám phá khóa học",
+            "onboarding": "Bạn chưa có khóa học nào. Xem danh sách khóa học để bắt đầu.",
+            "empty": "Hiện chưa có gì để học tiếp. Bắt đầu một bài học hoặc challenge mới nhé.",
+            "failed": "Chưa tải được phần bạn đang học.",
+            "kind": {
+                "lesson": "Bài học",
+                "challenge": "Challenge"
+            }
+        }
     },
     "identity": {
         "loading": "Đang tải",

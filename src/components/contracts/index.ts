@@ -25,14 +25,16 @@
  * when the bad value cannot be typed.
  */
 export type LayoutClassName =
-    | "flex" | "grid" | "flex-col" | "flex-row" | "flex-wrap"
+    | "flex" | "grid" | "flex-col" | "flex-row" | "flex-wrap" | "overflow-hidden"
     | "items-center" | "items-baseline" | "items-start"
     | "justify-between" | "justify-center" | "[&>*]:w-full"
-    | "gap-2" | "gap-3" | "gap-4" | "gap-6" | "gap-8"
+    | "gap-1" | "gap-2" | "gap-3" | "gap-4" | "gap-6" | "gap-8"
     | "grid-cols-1" | "sm:grid-cols-2"
     | "md:flex-row" | "md:items-start"
-    | "mx-auto" | "min-h-screen" | "w-full" | "max-w-app-lg" | "max-w-sm"
-    | "px-4" | "py-3" | "py-6" | "p-4" | "p-6"
+    | "mx-auto" | "min-h-screen" | "w-full" | "min-w-0" | "grow" | "max-w-app-lg" | "max-w-6xl" | "max-w-sm"
+    | "h-16" | "min-h-16" | "sticky" | "top-0" | "top-16" | "z-40" | "z-50"
+    | "border-b" | "border-separator" | "divide-y" | "bg-background"
+    | "px-3" | "px-4" | "px-6" | "py-3" | "py-6" | "p-4" | "p-6"
     | "rounded-xl" | "rounded-2xl"
     | "bg-surface" | "shadow-surface" | "text-center"
     | "[&>*:nth-child(2)]:min-w-0" | "[&>*:nth-child(2)]:grow"
@@ -132,7 +134,7 @@ const buildContracts = <const T extends { readonly [K in keyof T]: ContractSpec 
  */
 export const CONTRACTS = buildContracts({
     "nav-over-body-page": {
-        classes: ["mx-auto", "flex", "min-h-screen", "w-full", "max-w-app-lg", "flex-col", "gap-6", "px-4", "py-6"],
+        classes: ["flex", "min-h-screen", "w-full", "flex-col"],
         children: {
             navigation: { contract: "brand-links-then-tools-bar" },
             body: { leaf: "page" },
@@ -170,6 +172,36 @@ export const CONTRACTS = buildContracts({
             section: { contract: "label-row-over-card", repeats: true, restingCount: 0 },
         },
         why: "Sections read as separate objects only while the space between them is larger than the space inside any of them.",
+    },
+    "dashboard-tabs-over-body": {
+        classes: ["flex", "w-full", "flex-col"],
+        children: {
+            tabs: { contract: "underlined-tab-strip" },
+            body: { contract: "dashboard-rail-then-main" },
+        },
+        why: "The section tabs sit flush beneath the global navigation while the dashboard body keeps its own centred measure, matching the product shell without making the page title a second navigation layer.",
+    },
+    "dashboard-rail-then-main": {
+        classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "flex-col", "gap-8", "px-6", "py-6", "md:flex-row", "md:items-start", "md:[&>*:first-child]:w-72", "md:[&>*:first-child]:shrink-0", "md:[&>*:last-child]:min-w-0", "md:[&>*:last-child]:grow"],
+        children: {
+            rail: { contract: "dashboard-rail" },
+            main: { contract: ["dashboard-main", "centred-empty-notice"] },
+        },
+        why: "The learner rail keeps the product's fixed 288px reading width beside a flexible main column, then stacks above it on a narrow screen without becoming a card or a sticky viewport of its own.",
+    },
+    "dashboard-rail": {
+        classes: ["flex", "w-full", "flex-col", "gap-4"],
+        children: {
+            section: { contract: "label-row-over-card", repeats: true, restingCount: 1 },
+        },
+        why: "Identity facts and quick destinations form one bare 288px rail, so their labels align without an enclosing surface that would make the rail compete with the content cards.",
+    },
+    "dashboard-main": {
+        classes: ["flex", "min-w-0", "grow", "flex-col", "gap-6"],
+        children: {
+            section: { contract: "label-row-over-card", repeats: true, restingCount: 4 },
+        },
+        why: "Dashboard sections repeat at the product's 24px seam so each labelled surface reads as a separate part of the learner's overview rather than one long card.",
     },
     "body-with-fixed-aside": {
         classes: ["flex", "flex-col", "gap-8", "md:flex-row", "md:items-start", "md:[&>*:first-child]:min-w-0", "md:[&>*:first-child]:grow", "md:[&>*:last-child]:w-72", "md:[&>*:last-child]:shrink-0"],
@@ -210,6 +242,22 @@ export const CONTRACTS = buildContracts({
             outcome: { leaf: ["text", "button"] },
         },
         why: "The day's task run and its reward outcome share a bounded ground because the outcome only has meaning as the result of that run.",
+    },
+    "daily-quest-list": {
+        classes: ["overflow-hidden", "rounded-2xl", "bg-surface", "shadow-surface", "divide-y"],
+        children: {
+            task: { leaf: "task-progress-row", repeats: true, restingCount: 5 },
+        },
+        why: "Today's tasks are peer rows of one joined list, so the surface is shared and a full-width rule - rather than card spacing - separates one target from the next.",
+    },
+    "label-over-list-and-caption": {
+        classes: ["flex", "flex-col", "gap-3"],
+        children: {
+            label: { contract: "title-with-end-action" },
+            list: { contract: "$content" },
+            caption: { leaf: ["text", "button"], optional: true },
+        },
+        why: "The label names the joined surface while its reward sentence sits below it, because the reward qualifies completion of the whole list rather than any one task row.",
     },
     "weekly-goals-card": {
         classes: ["flex", "flex-col", "gap-4", "rounded-2xl", "bg-surface", "p-4", "shadow-surface"],
@@ -299,7 +347,7 @@ export const CONTRACTS = buildContracts({
         why: "A form is read one control at a time, so the measure is narrow on purpose and the seam between controls is wider than the seam inside any of them.",
     },
     "brand-links-then-tools-bar": {
-        classes: ["flex", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-4", "px-4", "py-3"],
+        classes: ["sticky", "top-0", "z-50", "flex", "h-16", "min-h-16", "w-full", "flex-row", "items-center", "justify-between", "gap-3", "border-b", "border-separator", "bg-background", "px-3"],
         children: {
             navigation: { contract: "inline-nav-links" },
             tools: { contract: "inline-tool-row" },
@@ -319,12 +367,12 @@ export const CONTRACTS = buildContracts({
         children: {
             search: { leaf: "search-box" },
             tool: { leaf: "icon-button", repeats: true, restingCount: 0 },
-            signIn: { leaf: "button", props: { size: "sm", variant: "primary" } },
+            signIn: { leaf: "button", props: { size: "sm", variant: "primary" }, optional: true },
         },
         why: "Icon controls sit tighter than named routes: they are a set of tools rather than a set of destinations, and the tight seam is what makes them read as one group.",
     },
     "underlined-tab-strip": {
-        classes: ["flex", "flex-row", "flex-wrap", "items-center", "gap-6", "px-4"],
+        classes: ["sticky", "top-16", "z-40", "flex", "w-full", "flex-row", "flex-wrap", "items-center", "gap-6", "border-b", "border-separator", "bg-background", "px-6"],
         children: {
             tab: { leaf: "nav-link", props: { kind: "tab" }, repeats: true, restingCount: 0 },
         },

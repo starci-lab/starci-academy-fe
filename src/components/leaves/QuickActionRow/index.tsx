@@ -31,7 +31,7 @@ export type QuickActionRowData = {
 export type QuickActionRowProps = LeafProps<QuickActionRowData>
 
 /** The row is the target: it carries the inset, the radius and the hover. */
-const ROW_CLASSES = "flex flex-row items-center gap-3 rounded-xl px-3 py-2 text-sm hover:bg-default"
+const ROW_CLASSES = "flex flex-row items-center gap-3 rounded-xl px-2 py-2 text-sm hover:bg-default"
 
 /**
  * Draw one shortcut.
@@ -46,7 +46,7 @@ export const QuickActionRow = ({ props }: QuickActionRowProps) => (
         href={props.href}
         className={ROW_CLASSES}
     >
-        <Icon props={{ name: props.icon, size: "sm" }} />
+        <Icon props={{ name: props.icon, size: "md" }} />
         {props.label}
     </HeroLink>
 )

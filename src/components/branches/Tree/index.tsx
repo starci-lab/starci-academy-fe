@@ -47,6 +47,12 @@ export const ContractContent = <const K extends ContractKey>({ contract, render 
             const child = component as ContractComponent<ContractKey> | LeafComponent<string, Readonly<Record<never, never>>>
             if (child.meta.shape === "contract") {
                 const contractChild = child as ContractComponent<ContractKey>
+                // A projection is a branch that already drew the host for this contract. Opening
+                // another Tree around it changes the DOM and therefore the layout: the navbar was
+                // inset twice and every projected SurfaceCard gained a duplicate section wrapper.
+                if (contractChild.slots === undefined) {
+                    return <Fragment key={`${slot}-${index}`}>{contractChild()}</Fragment>
+                }
                 return <Tree key={`${slot}-${index}`} contract={contractChild.meta.contract} render={contractChild} />
             }
             return <Fragment key={`${slot}-${index}`}>{child()}</Fragment>

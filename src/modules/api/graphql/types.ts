@@ -52,6 +52,11 @@ export interface QueryParams<TQuery, TRequest = undefined> {
     withAuth?: boolean
 }
 
+/** A lookup has no meaningful request without the identity being looked up. */
+export interface LookupQueryParams<TQuery, TRequest> extends Omit<QueryParams<TQuery, TRequest>, "request"> {
+    readonly request: TRequest
+}
+
 /** The `request` variable wrapper the back end expects; every operation takes exactly one argument. */
 export interface QueryVariables<TRequest> {
     /** The single argument object the resolver declares. */

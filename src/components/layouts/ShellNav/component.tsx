@@ -55,6 +55,8 @@ export type ShellNavData = {
     /** What the basket and the account controls are called. */
     readonly cartLabel: string
     readonly accountLabel: string
+    /** Signed-in readers already have an account control and do not need a second entry point. */
+    readonly isSignedIn: boolean
 }
 
 /** What the bar reports. */
@@ -109,12 +111,6 @@ export const _ShellNav = (input: ShellNavProps) => (
                 )),
                 tool: [
                     defineLeafComponent("icon-button", {}, () => (
-                        <IconButton props={{ icon: "cart", label: input.props.cartLabel }} />
-                    )),
-                    defineLeafComponent("icon-button", {}, () => (
-                        <IconButton props={{ icon: "account", label: input.props.accountLabel }} />
-                    )),
-                    defineLeafComponent("icon-button", {}, () => (
                         <IconButton
                             props={{ icon: "locale", label: input.props.localeLabel }}
                             on={{ press: input.on?.toggleLocale }}
@@ -130,8 +126,14 @@ export const _ShellNav = (input: ShellNavProps) => (
                             on={{ press: input.on?.toggleTheme }}
                         />
                     )),
+                    defineLeafComponent("icon-button", {}, () => (
+                        <IconButton props={{ icon: "cart", label: input.props.cartLabel }} />
+                    )),
+                    defineLeafComponent("icon-button", {}, () => (
+                        <IconButton props={{ icon: "account", label: input.props.accountLabel }} />
+                    )),
                 ],
-                signIn: defineLeafComponent("button", { size: "sm", variant: "primary" }, () => (
+                signIn: input.props.isSignedIn ? undefined : defineLeafComponent("button", { size: "sm", variant: "primary" }, () => (
                     <Button
                         props={{ label: input.props.signInLabel, variant: "primary", size: "sm", icon: "signIn" }}
                         on={{ press: input.on?.openSignIn }}

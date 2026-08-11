@@ -1,8 +1,7 @@
 import { Tree } from "@/components/branches/Tree"
-import { Heading } from "@/components/leaves/Heading"
 import { NavLink } from "@/components/leaves/NavLink"
-import { Button } from "@/components/leaves/Button"
 import { EmptyNotice } from "@/components/leaves/EmptyNotice"
+import { ContinueLearning } from "@/components/blocks/dashboard/ContinueLearning"
 import { QuickActions } from "@/components/blocks/dashboard/QuickActions"
 import { IdentityRail } from "@/components/blocks/dashboard/IdentityRail"
 import { DailyQuest } from "@/components/blocks/dashboard/DailyQuest"
@@ -101,7 +100,7 @@ export const _DashboardPage = (input: DashboardPageProps & { readonly on?: Dashb
      * they reach for once they have decided to move. Putting the destinations above the standing
      * makes the column answer a question nobody asked yet.
      */
-    const rail = defineContractComponent("stacked-sections", {
+    const rail = defineContractComponent("dashboard-rail", {
         section: [
             ...(input.state === "signedIn"
                 ? [defineContractProjection("label-row-over-card", () => <IdentityRail />)]
@@ -113,15 +112,10 @@ export const _DashboardPage = (input: DashboardPageProps & { readonly on?: Dashb
     if (input.state === "signedOut") {
         return (
             <Tree
-                contract="heading-over-body"
-                render={defineContractComponent("heading-over-body", {
-                    heading: tabs,
-                    body: defineContractComponent("title-with-end-action", {
-                        title: defineLeafComponent("heading", {}, () => (
-                            <Heading props={{ content: input.props.title, level: 1 }} />
-                        )),
-                    }),
-                    continuation: defineContractComponent("rail-then-main", {
+                contract="dashboard-tabs-over-body"
+                render={defineContractComponent("dashboard-tabs-over-body", {
+                    tabs,
+                    body: defineContractComponent("dashboard-rail-then-main", {
                         rail,
                         main: defineContractComponent("centred-empty-notice", {
                             notice: defineLeafComponent("empty-notice", {}, () => (
@@ -139,24 +133,14 @@ export const _DashboardPage = (input: DashboardPageProps & { readonly on?: Dashb
 
     return (
         <Tree
-            contract="heading-over-body"
-            render={defineContractComponent("heading-over-body", {
-                heading: tabs,
-                body: defineContractComponent("title-with-end-action", {
-                    title: defineLeafComponent("heading", {}, () => (
-                        <Heading props={{ content: input.props.title, level: 1 }} />
-                    )),
-                    end: defineLeafComponent("button", {}, () => (
-                        <Button
-                            props={{ label: input.props.signOutLabel, variant: "ghost", size: "sm", icon: "signIn" }}
-                            on={{ press: input.on?.signOut }}
-                        />
-                    )),
-                }),
-                continuation: defineContractComponent("rail-then-main", {
+            contract="dashboard-tabs-over-body"
+            render={defineContractComponent("dashboard-tabs-over-body", {
+                tabs,
+                body: defineContractComponent("dashboard-rail-then-main", {
                     rail,
-                    main: defineContractComponent("stacked-sections", {
+                    main: defineContractComponent("dashboard-main", {
                         section: [
+                            defineContractProjection("label-row-over-card", () => <ContinueLearning />),
                             defineContractProjection("label-row-over-card", () => <DailyQuest />),
                             defineContractProjection("label-row-over-card", () => <StreakStrip />),
                             defineContractProjection("label-row-over-card", () => <WeeklyGoals />),

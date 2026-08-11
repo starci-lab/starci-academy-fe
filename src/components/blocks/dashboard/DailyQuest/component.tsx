@@ -1,8 +1,7 @@
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { LabelledProgressRow } from "@/components/leaves/LabelledProgressRow"
+import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
+import { TaskProgressRow } from "@/components/leaves/TaskProgressRow"
 import { EmptyNotice } from "@/components/leaves/EmptyNotice"
-import { Text } from "@/components/leaves/Text"
-import { Button } from "@/components/leaves/Button"
 import type { LabelledProgressRowData } from "@/components/leaves/LabelledProgressRow"
 import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
@@ -66,6 +65,8 @@ const RESTING_ROWS: ReadonlyArray<LabelledProgressRowData> = [
     { id: "resting-1" },
     { id: "resting-2" },
     { id: "resting-3" },
+    { id: "resting-4" },
+    { id: "resting-5" },
 ]
 
 /**
@@ -98,36 +99,31 @@ export const _DailyQuest = (input: DailyQuestProps & { readonly on?: DailyQuestA
     const tasks = input.state === "pending" ? RESTING_ROWS : input.props.tasks
 
     return (
-        <SurfaceCard props={{ label: input.props.label }} contract="daily-quest-card"
-            render={defineContractComponent("daily-quest-card", {
-                tasks: defineContractComponent("stacked-peer-controls", {
-                    control: tasks.map((task) => defineLeafComponent("labelled-progress-row", {}, () => (
-                        <LabelledProgressRow props={task} isLoading={isLoading} />
-                    ))),
-                }),
-                outcome: input.state === "claimed"
-                    ? defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                        <Text props={{ content: input.props.claimedLine, size: "sm", tone: "muted" }} />
-                    ))
-                    : input.state === "claimable"
-                        ? defineLeafComponent("button", {}, () => (
-                            <Button
-                                props={{ label: input.props.claimLabel, variant: "primary", size: "sm", icon: "reward" }}
-                                on={{ press: input.on?.claim }}
-                            />
-                        ))
-                        : defineLeafComponent("text", {}, () => (
-                            <Text
-                                props={{
-                                    content: input.state === "pending" ? undefined : input.props.rewardLine,
-                                    size: "sm",
-                                    tone: "muted",
-                                }}
-                                isLoading={isLoading}
-                            />
-                        )),
+        <SurfaceListCard
+            props={{
+                label: input.props.label,
+                description: input.state === "open"
+                    ? input.props.rewardLine
+                    : input.state === "claimed" ? input.props.claimedLine : undefined,
+                actionLabel: input.state === "claimable" ? input.props.claimLabel : undefined,
+            }}
+            on={{ act: input.on?.claim }}
+            contract="daily-quest-list"
+            render={defineContractComponent("daily-quest-list", {
+                task: tasks.map((task) => defineLeafComponent("task-progress-row", {}, () => (
+                    <TaskProgressRow
+                        props={{
+                            id: task.id,
+                            title: task.title,
+                            fact: task.percentText,
+                            isComplete: task.percent === 100,
+                        }}
+                        isLoading={isLoading}
+                    />
+                ))),
             })}
-            isLoading={isLoading} />
+            isLoading={isLoading}
+        />
     )
 }
 

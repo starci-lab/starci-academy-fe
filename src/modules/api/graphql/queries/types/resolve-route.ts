@@ -1,4 +1,4 @@
-import { type GraphQLResponse } from "../../types"
+import type { GraphQLResponse } from "../../types"
 
 /**
  * What the route index is asked.
@@ -10,7 +10,7 @@ import { type GraphQLResponse } from "../../types"
  */
 export interface ResolveRouteRequest {
     /** Opaque global id, as it arrives on any reference row. */
-    globalId: string
+    readonly globalId: string
 }
 
 /** What the route index answers. */
@@ -20,11 +20,11 @@ export interface ResolveRouteData {
      * entity has no page - which is a real answer, not a failure, and the reason a caller must
      * check rather than navigate to whatever came back.
      */
-    path: string | null
+    readonly path: string | null
 }
 
 /** The response shape of the `resolveRoute` query, envelope included. */
 export interface QueryResolveRouteResponse {
     /** The top-level field, wrapping the standard envelope. */
-    resolveRoute: GraphQLResponse<ResolveRouteData>
+    readonly resolveRoute: GraphQLResponse<ResolveRouteData>
 }

@@ -37,8 +37,8 @@ export type NavLinkProps = LeafProps<NavLinkData>
 /** The set per kind, with the current one carrying its own weight and rule. */
 const KIND_CLASSES = {
     route: {
-        base: "inline-flex items-center gap-2 text-sm",
-        current: "inline-flex items-center gap-2 text-sm font-semibold text-accent",
+        base: "inline-flex items-center gap-2 whitespace-nowrap rounded-full px-3 py-2 text-sm text-muted",
+        current: "inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-accent-soft px-3 py-2 text-sm font-semibold text-accent-soft-foreground",
     },
     tab: {
         base: "inline-flex items-center gap-2 border-b-2 border-transparent py-3 text-sm text-muted",

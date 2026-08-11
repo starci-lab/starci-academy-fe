@@ -15,7 +15,7 @@ import { _DailyQuest } from "./component"
  * invites a press that teaches the reader nothing.
  */
 
-/** Three rows, enough to tell a list from an empty card. */
+/** Two rows, enough to tell a list from an empty card. */
 const tasks = [
     { id: "readContent", title: "Read content", percent: 0, percentText: "0/1" },
     { id: "passChallenge", title: "Pass a challenge", percent: 50, percentText: "1/2" },
@@ -63,13 +63,13 @@ describe("_DailyQuest", () => {
         const { container } = render(
             <_DailyQuest state="open" props={{ label: "Today's quest", tasks, rewardLine: "x" }} />,
         )
-        expect(container.querySelectorAll("[data-component=\"LabelledProgressRow\"]")).toHaveLength(2)
+        expect(container.querySelectorAll("[data-component=\"TaskProgressRow\"]")).toHaveLength(2)
     })
 
     it("keeps the card its own size while the day is still on its way", () => {
         const { container } = render(<_DailyQuest state="pending" props={{ label: "Today's quest" }} />)
         // Resting rows stand in for real ones so the card does not jump when they land.
-        expect(container.querySelectorAll("[data-component=\"LabelledProgressRow\"]").length).toBeGreaterThan(0)
+        expect(container.querySelectorAll("[data-component=\"TaskProgressRow\"]")).toHaveLength(5)
     })
 
     it("offers a way back when the day could not be read", () => {

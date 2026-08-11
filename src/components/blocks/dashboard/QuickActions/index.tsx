@@ -38,7 +38,7 @@ export const QuickActions = () => {
     const t = useTranslations("shell")
     return (
         <SurfaceCard
-            props={{ label: t("quickActions") }}
+            props={{ label: t("quickActions"), isFrameless: true }}
             contract="stacked-peer-controls"
             render={defineContractComponent("stacked-peer-controls", {
                 control: ACTIONS.map((action) => defineLeafComponent("quick-action-row", {}, () => (

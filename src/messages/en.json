@@ -45,7 +45,19 @@
         "railHeading": "Your standing",
         "signOut": "Sign out",
         "signedOutTitle": "Sign in to see your dashboard",
-        "signIn": "Sign in"
+        "signIn": "Sign in",
+        "continueLearning": {
+            "heading": "Continue learning",
+            "resume": "Resume",
+            "browse": "Browse courses",
+            "onboarding": "You have no courses yet. Browse the catalog to get started.",
+            "empty": "Nothing to pick up right now. Start a new lesson or challenge.",
+            "failed": "Could not load what you were working on.",
+            "kind": {
+                "lesson": "Lesson",
+                "challenge": "Challenge"
+            }
+        }
     },
     "identity": {
         "loading": "Loading",

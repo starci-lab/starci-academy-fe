@@ -32,8 +32,21 @@ export type LinkProps = LeafProps<LinkData>
 const EMPHASIS_CLASSES = {
     default: "inline-flex items-center gap-2 text-sm",
     muted: "inline-flex items-center gap-2 text-sm text-muted",
-    brand: "inline-flex items-center gap-2 text-base font-semibold",
+    brand: "inline-flex items-center gap-2 text-foreground no-underline",
 } as const
+
+/** Intrinsic product lockup; navigation only decides where it leads. */
+const BrandLockup = () => (
+    <>
+        <span aria-hidden="true" className="relative size-8 shrink-0 rounded-full border-[5px] border-accent">
+            <span className="absolute -right-1 top-1/2 h-3 w-3 -translate-y-1/2 bg-background" />
+        </span>
+        <span className="flex flex-col leading-none">
+            <span className="text-base font-semibold">StarCi</span>
+            <span className="text-[8px] font-semibold tracking-[0.18em] text-muted">ACADEMY</span>
+        </span>
+    </>
+)
 
 /**
  * Draw a link.
@@ -48,8 +61,12 @@ export const Link = ({ props }: LinkProps) => (
         href={props.href}
         className={EMPHASIS_CLASSES[props.emphasis ?? "default"]}
     >
-        {props.icon === undefined ? null : <Icon props={{ name: props.icon, size: "sm" }} />}
-        {props.label}
+        {props.emphasis === "brand" ? <BrandLockup /> : (
+            <>
+                {props.icon === undefined ? null : <Icon props={{ name: props.icon, size: "sm" }} />}
+                {props.label}
+            </>
+        )}
     </HeroLink>
 )
 

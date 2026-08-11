@@ -6,6 +6,7 @@ import { useTheme } from "next-themes"
 import { usePathname } from "next/navigation"
 import { SignInOverlay } from "@/components/overlays/auth/SignInOverlay"
 import { LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE } from "@/i18n/config"
+import { useSessionToken } from "@/hooks/auth/useSessionToken"
 import { _ShellNav, type ShellNavRoute } from "./component"
 
 /**
@@ -35,6 +36,7 @@ export const ShellNav = () => {
     const pathname = usePathname()
     const { resolvedTheme, setTheme } = useTheme()
     const [isOpen, setIsOpen] = useState(false)
+    const sessionToken = useSessionToken()
 
     /**
      * WHY THE THEME IS NOT READ UNTIL AFTER MOUNT, and why this is not ceremony.
@@ -101,6 +103,7 @@ export const ShellNav = () => {
                     searchShortcut: t("searchShortcut"),
                     cartLabel: t("cart"),
                     accountLabel: t("account"),
+                    isSignedIn: sessionToken !== undefined,
                 }}
                 on={{ openSignIn, toggleTheme: () => setTheme(isDark ? "light" : "dark"), toggleLocale }}
             />
