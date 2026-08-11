@@ -32,7 +32,8 @@ import { noDoubleCast } from "./double-cast.mjs"
 import { connectedBlockHasPresentationalTwin } from "./connected-block-twins.mjs"
 import {
   fieldInputUsesSecondaryVariant,
-  modalShellPassesContentDirectly,
+  fieldLabelIsTextOnly,
+  modalShellOwnsScrollBody,
   noSurfaceBranchInOverlay,
 } from "./surface-policy.mjs"
 import { heroiconsFamiliesAreClosed, noVendorIconOutsideIconLeaf } from "./icon-vocabulary.mjs"
@@ -689,8 +690,9 @@ export default {
     "no-public-classname-prop": noPublicClassNameProp,
     "no-children-slot-outside-shell": noChildrenSlotOutsideShell,
     "no-surface-list-items-slot": noSurfaceListItemsSlot,
-    "modal-shell-passes-content-directly": modalShellPassesContentDirectly,
+    "modal-shell-owns-scroll-body": modalShellOwnsScrollBody,
     "field-input-uses-secondary-variant": fieldInputUsesSecondaryVariant,
+    "field-label-is-text-only": fieldLabelIsTextOnly,
     "no-surface-branch-in-overlay": noSurfaceBranchInOverlay,
     "no-public-frame-css-props": noPublicFrameCssProps,
     "no-css-door-type-laundering": noCssDoorTypeLaundering,

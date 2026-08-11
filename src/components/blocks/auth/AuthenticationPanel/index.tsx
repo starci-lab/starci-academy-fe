@@ -2,7 +2,6 @@
 
 import { useTranslations } from "next-intl"
 import { useAuthPanel } from "@/hooks/auth/useAuthPanel"
-import { useDevSession } from "@/hooks/auth/useDevSession"
 import type { AuthFailure } from "@/hooks/auth/useAuthPanel"
 import { _AuthenticationPanel, type AuthMode } from "./component"
 
@@ -83,7 +82,6 @@ export type AuthenticationPanelConnectedProps = {
 export const AuthenticationPanel = ({ onSignedIn }: AuthenticationPanelConnectedProps = {}) => {
     const t = useTranslations("auth")
     const panel = useAuthPanel({ onSignedIn })
-    const dev = useDevSession({ onSignedIn })
     const status = toStatus(t, panel)
     const mode = panel.mode
 
@@ -94,12 +92,9 @@ export const AuthenticationPanel = ({ onSignedIn }: AuthenticationPanelConnected
      */
     const frame = {
         title: t(`${mode}.title`),
-        // The test-account door reports through the same one sentence as everything else, and
-        // OUTRANKS the machine's while it has something to say: the reader pressed that control,
-        // so its answer is the one they are waiting for.
-        statusMessage: dev.failure ? t(`status.dev.${dev.failure}`) : status.message,
-        isError: dev.failure !== undefined || status.isError,
-        isPending: panel.isPending || dev.isPending,
+        statusMessage: status.message,
+        isError: status.isError,
+        isPending: panel.isPending,
         subtitle: t(`${mode}.subtitle`),
     }
 
@@ -110,7 +105,6 @@ export const AuthenticationPanel = ({ onSignedIn }: AuthenticationPanelConnected
         changeMode: (next: AuthMode) => panel.onChangeMode(next),
         changeAgreedToTerms: panel.onChangeAgreedToTerms,
         oauthPress: panel.onOauthPress,
-        devSignInPress: dev.onPress,
     }
 
     if (panel.step === "done") {
@@ -167,9 +161,6 @@ export const AuthenticationPanel = ({ onSignedIn }: AuthenticationPanelConnected
                 agreeToTerms: t("shared.agreeToTerms"),
                 oauthGoogle: t("shared.oauthGoogle"),
                 oauthGithub: t("shared.oauthGithub"),
-                // Absent, not false: the other half has no flag to read, so a production build
-                // that stops passing this stops HAVING the control rather than hiding one.
-                devSignInLabel: dev.isAvailable ? t("shared.devSignIn") : undefined,
             }}
             on={on}
         />

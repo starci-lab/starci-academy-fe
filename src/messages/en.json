@@ -149,8 +149,7 @@
             "rememberMe": "Remember me",
             "forgotPassword": "Forgot Password?",
             "codePlaceholder": "Enter 6-digit OTP",
-            "dismiss": "Close",
-            "devSignIn": "Use the test account"
+            "dismiss": "Close"
         },
         "status": {
             "sending": "Checking your details",
@@ -160,11 +159,7 @@
             "resent": "A new code is on its way. The one before it no longer works.",
             "signedIn": "Signed in",
             "transport": "We could not reach the server. Check your connection and try again.",
-            "refused": "That did not work. Please try again.",
-            "dev": {
-                "refused": "The test-account door is closed. Check .env.local and Keycloak.",
-                "transport": "Couldn't reach the dev server."
-            }
+            "refused": "That did not work. Please try again."
         },
         "expiry": {
             "seconds": " It expires in {count, plural, one {# second} other {# seconds}}.",

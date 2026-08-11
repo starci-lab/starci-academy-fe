@@ -36,7 +36,7 @@ export const ModalShell = (input: ModalShellProps) => (
             <Modal.Container size={input.size ?? "md"} placement="center">
                 <Modal.Dialog data-tier="shell" data-component="ModalShell">
                     <Modal.CloseTrigger />
-                    {input.children}
+                    <Modal.Body className="p-0">{input.children}</Modal.Body>
                 </Modal.Dialog>
             </Modal.Container>
         </Modal.Backdrop>

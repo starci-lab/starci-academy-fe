@@ -149,8 +149,7 @@
             "rememberMe": "Ghi nhớ đăng nhập",
             "forgotPassword": "Quên mật khẩu?",
             "codePlaceholder": "Nhập mã OTP 6 số",
-            "dismiss": "Đóng",
-            "devSignIn": "Vào bằng tài khoản thử"
+            "dismiss": "Đóng"
         },
         "status": {
             "sending": "Đang kiểm tra thông tin của bạn",
@@ -160,11 +159,7 @@
             "resent": "Mã mới đang trên đường tới. Mã trước đó không còn dùng được.",
             "signedIn": "Đã đăng nhập",
             "transport": "Chúng tôi không kết nối được tới máy chủ. Kiểm tra đường truyền rồi thử lại.",
-            "refused": "Chưa được. Vui lòng thử lại.",
-            "dev": {
-                "refused": "Cửa tài khoản thử không mở. Kiểm tra .env.local và Keycloak.",
-                "transport": "Không gọi được máy chủ dev."
-            }
+            "refused": "Chưa được. Vui lòng thử lại."
         },
         "expiry": {
             "seconds": " Mã hết hạn sau {count} giây.",

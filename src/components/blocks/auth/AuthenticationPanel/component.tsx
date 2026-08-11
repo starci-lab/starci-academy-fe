@@ -78,15 +78,6 @@ export type AuthDetailsCopy = {
     /** The last line: a question, and the answer that switches journey. */
     readonly promptQuestion: string
     readonly promptAction: string
-    /**
-     * The already-resolved words of the test-account door, drawn only in a development build.
-     *
-     * ABSENT IS HOW IT IS TURNED OFF, and that is the whole gate on this side. The panel never
-     * asks what environment it is in - it draws what it is given. A build that must not offer the
-     * door simply never hands over this string, so there is no flag here to read wrongly and no
-     * branch here to get inverted.
-     */
-    readonly devSignInLabel?: string
 }
 
 /** Copy for the second step. */
@@ -127,8 +118,6 @@ export type AuthenticationPanelActions = {
     readonly changeAgreedToTerms?: (agreed: boolean) => void
     readonly changeRememberMe?: (remember: boolean) => void
     readonly oauthPress?: (provider: KeycloakIdentityProvider) => void
-    /** Called when the reader takes the test-account door. */
-    readonly devSignInPress?: () => void
 }
 
 /** The id the dialog points its label at, so the surface is named by its own title. */
@@ -280,8 +269,8 @@ export const _AuthenticationPanel = (
             render={defineContractComponent("centred-page-column", {
                 header,
                 body: [
-                    defineContractComponent("stacked-peer-controls", {
-                        control: [
+                    defineContractComponent("auth-shortcuts-over-divider", {
+                        shortcut: [
                             defineLeafComponent("button", {}, () => (
                                 <Button
                                     props={{ label: input.props.oauthGoogle, variant: "outline", icon: "google", disabled: input.props.isPending }}
@@ -294,24 +283,11 @@ export const _AuthenticationPanel = (
                                     on={{ press: () => input.on?.oauthPress?.(KeycloakIdentityProvider.Github) }}
                                 />
                             )),
-                            ...(input.props.devSignInLabel === undefined ? [] : [
-                                defineLeafComponent("button", {}, () => (
-                                    <Button
-                                        props={{
-                                            label: input.props.devSignInLabel!,
-                                            variant: "ghost",
-                                            icon: "signedIn",
-                                            disabled: input.props.isPending,
-                                        }}
-                                        on={{ press: input.on?.devSignInPress }}
-                                    />
-                                )),
-                            ]),
                         ],
+                        divider: defineLeafComponent("divider", {}, () => (
+                            <Divider props={{ label: input.props.orLabel }} />
+                        )),
                     }),
-                    defineLeafComponent("divider", {}, () => (
-                        <Divider props={{ label: input.props.orLabel }} />
-                    )),
                     defineLeafComponent("form", {}, () => (
                         <form onSubmit={submit}>
                             <Tree

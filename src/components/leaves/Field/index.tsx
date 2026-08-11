@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { Input as HeroInput, skeletonVariants } from "@heroui/react"
-import { Icon, type IconName } from "@/components/leaves/Icon"
 import { Text } from "@/components/leaves/Text"
 import type { LeafProps } from "@/components/contracts/props"
 
@@ -63,10 +62,10 @@ export type FieldProps = LeafProps<FieldData, FieldActions>
 
 /** The kind, as the platform's own type attribute plus what it should autocomplete. */
 const KINDS = {
-    email: { type: "email", autoComplete: "email", inputMode: "email" as const, icon: "email" as IconName },
-    password: { type: "password", autoComplete: "current-password", inputMode: "text" as const, icon: "password" as IconName },
-    code: { type: "text", autoComplete: "one-time-code", inputMode: "numeric" as const, icon: "code" as IconName },
-    text: { type: "text", autoComplete: "off", inputMode: "text" as const, icon: undefined },
+    email: { type: "email", autoComplete: "email", inputMode: "email" as const },
+    password: { type: "password", autoComplete: "current-password", inputMode: "text" as const },
+    code: { type: "text", autoComplete: "one-time-code", inputMode: "numeric" as const },
+    text: { type: "text", autoComplete: "off", inputMode: "text" as const },
 }
 
 /** The name over the box, tight to it, because the two are one thing. */
@@ -99,7 +98,6 @@ export const Field = ({ props, on, isLoading = false }: FieldProps) => {
     return (
         <div data-tier="leaf" data-component="Field" className={FIELD_CLASSES}>
             <label htmlFor={props.id} className={LABEL_CLASSES}>
-                {kind.icon === undefined ? null : <Icon props={{ name: kind.icon, role: "chip" }} />}
                 {props.label}
             </label>
             <div className={BOX_CLASSES}>

@@ -405,7 +405,7 @@ export const CONTRACTS = buildContracts({
         children: {
             header: { contract: "centred-title-pair" },
             body: {
-                contract: ["stacked-peer-controls", "centred-title-pair", "spread-choice-row"],
+                contract: ["auth-shortcuts-over-divider", "stacked-peer-controls", "centred-title-pair", "spread-choice-row"],
                 leaf: ["form", "divider"],
                 repeats: true,
                 restingCount: 0,
@@ -421,6 +421,14 @@ export const CONTRACTS = buildContracts({
             description: { leaf: "text", props: { size: "sm" } },
         },
         why: "The supporting line sits under the title rather than beside it, because it explains the title rather than qualifying it - and both are centred so the pair reads as the surface's own name rather than as the first row of its content.",
+    },
+    "auth-shortcuts-over-divider": {
+        classes: ["flex", "flex-col", "gap-3", "[&>*]:w-full"],
+        children: {
+            shortcut: { leaf: "button", repeats: true, restingCount: 2 },
+            divider: { leaf: "divider" },
+        },
+        why: "OAuth shortcuts and the OR divider are one alternative-entry cluster: the divider closes the shortcut choice before the credential form begins, so it keeps the cluster's gap rather than the larger seam between form groups.",
     },
     "stacked-peer-controls": {
         classes: ["flex", "flex-col", "gap-3", "[&>*]:w-full"],

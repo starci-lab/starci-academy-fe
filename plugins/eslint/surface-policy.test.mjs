@@ -3,7 +3,8 @@ import { RuleTester } from "eslint"
 import tsParser from "@typescript-eslint/parser"
 import {
   fieldInputUsesSecondaryVariant,
-  modalShellPassesContentDirectly,
+  fieldLabelIsTextOnly,
+  modalShellOwnsScrollBody,
   noSurfaceBranchInOverlay,
 } from "./surface-policy.mjs"
 
@@ -16,17 +17,24 @@ const tester = new RuleTester({
   },
 })
 
-test("ModalShell leaves its uninterpreted interior direct", () => {
-  tester.run("modal-shell-passes-content-directly", modalShellPassesContentDirectly, {
+test("ModalShell owns one zero-inset scroll body", () => {
+  tester.run("modal-shell-owns-scroll-body", modalShellOwnsScrollBody, {
     valid: [{
       filename: "D:/repo/src/components/shells/ModalShell/index.tsx",
-      code: "export const S = ({ children }) => <Modal.Dialog><Modal.CloseTrigger />{children}</Modal.Dialog>",
+      code: "export const S = ({ children }) => <Modal.Dialog><Modal.Body className='p-0'>{children}</Modal.Body></Modal.Dialog>",
     }],
-    invalid: [{
-      filename: "D:/repo/src/components/shells/ModalShell/index.tsx",
-      code: "export const S = ({ children }) => <Modal.Dialog><Modal.Body>{children}</Modal.Body></Modal.Dialog>",
-      errors: [{ messageId: "body" }],
-    }],
+    invalid: [
+      {
+        filename: "D:/repo/src/components/shells/ModalShell/index.tsx",
+        code: "export const S = ({ children }) => <Modal.Dialog>{children}</Modal.Dialog>",
+        errors: [{ messageId: "missing" }],
+      },
+      {
+        filename: "D:/repo/src/components/shells/ModalShell/index.tsx",
+        code: "export const S = ({ children }) => <Modal.Dialog><Modal.Body>{children}</Modal.Body></Modal.Dialog>",
+        errors: [{ messageId: "inset" }],
+      },
+    ],
   })
 })
 
@@ -48,6 +56,20 @@ test("Field uses the secondary variant inside a bounded surface", () => {
         errors: [{ messageId: "variant" }],
       },
     ],
+  })
+})
+
+test("Field does not infer decorative icons from the input kind", () => {
+  tester.run("field-label-is-text-only", fieldLabelIsTextOnly, {
+    valid: [{
+      filename: "D:/repo/src/components/leaves/Field/index.tsx",
+      code: "import { Input } from '@heroui/react'; export const Field = ({ label }) => <label>{label}</label>",
+    }],
+    invalid: [{
+      filename: "D:/repo/src/components/leaves/Field/index.tsx",
+      code: "import { Icon } from '@/components/leaves/Icon'; export const Field = () => <Icon />",
+      errors: [{ messageId: "icon" }],
+    }],
   })
 })
 
