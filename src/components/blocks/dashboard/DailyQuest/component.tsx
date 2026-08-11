@@ -1,10 +1,10 @@
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { Tree } from "@/components/branches/Tree"
 import { LabelledProgressRow } from "@/components/leaves/LabelledProgressRow"
 import { EmptyNotice } from "@/components/leaves/EmptyNotice"
 import { Text } from "@/components/leaves/Text"
 import { Button } from "@/components/leaves/Button"
 import type { LabelledProgressRowData } from "@/components/leaves/LabelledProgressRow"
+import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
 /**
  * BLOCK - `DailyQuest`, presentational half.
@@ -76,19 +76,21 @@ const RESTING_ROWS: ReadonlyArray<LabelledProgressRowData> = [
 export const _DailyQuest = (input: DailyQuestProps & { readonly on?: DailyQuestActions }) => {
     if (input.state === "failed") {
         return (
-            <SurfaceCard props={{ label: input.props.label }}>
-                <EmptyNotice
+            <SurfaceCard props={{ label: input.props.label }} contract="empty-notice-card"
+                render={defineContractComponent("empty-notice-card", { notice: defineLeafComponent("empty-notice", {}, () => <EmptyNotice
                     props={{ icon: "review", message: input.props.message, actionLabel: input.props.retryLabel }}
                     on={{ act: input.on?.retry }}
-                />
-            </SurfaceCard>
+                />) })} />
         )
     }
     if (input.state === "empty") {
         return (
-            <SurfaceCard props={{ label: input.props.label }}>
-                <EmptyNotice props={{ icon: "review", message: input.props.message }} />
-            </SurfaceCard>
+            <SurfaceCard props={{ label: input.props.label }} contract="empty-notice-card"
+                render={defineContractComponent("empty-notice-card", {
+                    notice: defineLeafComponent("empty-notice", {}, () => (
+                        <EmptyNotice props={{ icon: "review", message: input.props.message }} />
+                    )),
+                })} />
         )
     }
 
@@ -96,30 +98,36 @@ export const _DailyQuest = (input: DailyQuestProps & { readonly on?: DailyQuestA
     const tasks = input.state === "pending" ? RESTING_ROWS : input.props.tasks
 
     return (
-        <SurfaceCard props={{ label: input.props.label }} isLoading={isLoading}>
-            <Tree contract="stacked-peer-controls">
-                {tasks.map((task) => (
-                    <LabelledProgressRow key={task.id} props={task} isLoading={isLoading} />
-                ))}
-            </Tree>
-            {input.state === "claimed" ? (
-                <Text props={{ content: input.props.claimedLine, size: "sm", tone: "muted" }} />
-            ) : input.state === "claimable" ? (
-                <Button
-                    props={{ label: input.props.claimLabel, variant: "primary", size: "sm", icon: "reward" }}
-                    on={{ press: input.on?.claim }}
-                />
-            ) : (
-                <Text
-                    props={{
-                        content: input.state === "pending" ? undefined : input.props.rewardLine,
-                        size: "sm",
-                        tone: "muted",
-                    }}
-                    isLoading={isLoading}
-                />
-            )}
-        </SurfaceCard>
+        <SurfaceCard props={{ label: input.props.label }} contract="daily-quest-card"
+            render={defineContractComponent("daily-quest-card", {
+                tasks: defineContractComponent("stacked-peer-controls", {
+                    control: tasks.map((task) => defineLeafComponent("labelled-progress-row", {}, () => (
+                        <LabelledProgressRow props={task} isLoading={isLoading} />
+                    ))),
+                }),
+                outcome: input.state === "claimed"
+                    ? defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                        <Text props={{ content: input.props.claimedLine, size: "sm", tone: "muted" }} />
+                    ))
+                    : input.state === "claimable"
+                        ? defineLeafComponent("button", {}, () => (
+                            <Button
+                                props={{ label: input.props.claimLabel, variant: "primary", size: "sm", icon: "reward" }}
+                                on={{ press: input.on?.claim }}
+                            />
+                        ))
+                        : defineLeafComponent("text", {}, () => (
+                            <Text
+                                props={{
+                                    content: input.state === "pending" ? undefined : input.props.rewardLine,
+                                    size: "sm",
+                                    tone: "muted",
+                                }}
+                                isLoading={isLoading}
+                            />
+                        )),
+            })}
+            isLoading={isLoading} />
     )
 }
 

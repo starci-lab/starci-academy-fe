@@ -67,10 +67,66 @@ export const findRegistryFile = (filename) => {
 }
 
 /** Every registry key, read off the `CONTRACTS` table. */
-const parseKeys = (source) => {
+export const parseKeys = (source) => {
   const start = source.indexOf("buildContracts({")
   if (start < 0) return []
-  const block = source.slice(start)
+  const open = source.indexOf("{", start)
+  if (open < 0) return []
+  let depth = 0
+  let quote = null
+  let escaped = false
+  let lineComment = false
+  let blockComment = false
+  let close = -1
+  for (let index = open; index < source.length; index += 1) {
+    const char = source[index]
+    const next = source[index + 1]
+    if (lineComment) {
+      if (char === "\n") lineComment = false
+      continue
+    }
+    if (blockComment) {
+      if (char === "*" && next === "/") {
+        blockComment = false
+        index += 1
+      }
+      continue
+    }
+    if (quote !== null) {
+      if (escaped) {
+        escaped = false
+      } else if (char === "\\") {
+        escaped = true
+      } else if (char === quote) {
+        quote = null
+      }
+      continue
+    }
+    if (char === "/" && next === "/") {
+      lineComment = true
+      index += 1
+      continue
+    }
+    if (char === "/" && next === "*") {
+      blockComment = true
+      index += 1
+      continue
+    }
+    if (char === "\"" || char === "'" || char === "`") {
+      quote = char
+      continue
+    }
+    if (char === "{") depth += 1
+    if (char === "}") {
+      depth -= 1
+      if (depth === 0) {
+        close = index + 1
+        break
+      }
+    }
+  }
+  if (close < 0) return []
+  const block = source.slice(open, close)
   return [...block.matchAll(/^\s{4}"([a-z][a-z-]*)":\s*\{/gm)].map((hit) => hit[1])
 }
 

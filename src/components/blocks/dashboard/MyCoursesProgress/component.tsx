@@ -1,7 +1,7 @@
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { Tree } from "@/components/branches/Tree"
 import { LabelledProgressRow, type LabelledProgressRowData } from "@/components/leaves/LabelledProgressRow"
 import { EmptyNotice } from "@/components/leaves/EmptyNotice"
+import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
 /**
  * BLOCK - `MyCoursesProgress`, presentational half.
@@ -54,12 +54,13 @@ export type MyCoursesProgressActions = {
 export const _MyCoursesProgress = (input: MyCoursesProgressProps & { readonly on?: MyCoursesProgressActions }) => {
     if (input.state === "empty" || input.state === "failed") {
         return (
-            <SurfaceCard props={{ label: input.props.label }}>
-                <EmptyNotice
-                    props={{ icon: "course", message: input.props.message, actionLabel: input.props.retryLabel }}
-                    on={{ act: input.on?.retry }}
-                />
-            </SurfaceCard>
+            <SurfaceCard props={{ label: input.props.label }} contract="empty-notice-card"
+                render={defineContractComponent("empty-notice-card", {
+                    notice: defineLeafComponent("empty-notice", {}, () => <EmptyNotice
+                        props={{ icon: "course", message: input.props.message, actionLabel: input.props.retryLabel }}
+                        on={{ act: input.on?.retry }}
+                    />),
+                })} />
         )
     }
     const isLoading = input.state === "pending"
@@ -67,14 +68,16 @@ export const _MyCoursesProgress = (input: MyCoursesProgressProps & { readonly on
     return (
         <SurfaceCard
             props={{ label: input.props.label, fact: input.state === "ready" ? input.props.count : undefined }}
+            contract="course-progress-card"
+            render={defineContractComponent("course-progress-card", {
+                rows: defineContractComponent("progress-row-stack", {
+                    row: rows.map((row) => defineLeafComponent("labelled-progress-row", {}, () => (
+                        <LabelledProgressRow props={row} isLoading={isLoading} />
+                    ))),
+                }),
+            })}
             isLoading={isLoading}
-        >
-            <Tree contract="stacked-sections">
-                {rows.map((row) => (
-                    <LabelledProgressRow key={row.id} props={row} isLoading={isLoading} />
-                ))}
-            </Tree>
-        </SurfaceCard>
+        />
     )
 }
 

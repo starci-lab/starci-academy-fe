@@ -143,3 +143,29 @@ export const noPublicClassNameProp = {
     }
   },
 }
+
+/** Only content-agnostic covering shells may expose an untyped React `children` slot. */
+export const noChildrenSlotOutsideShell = {
+  meta: {
+    type: "problem",
+    docs: {
+      description: "Forbid public children slots outside ModalShell and DrawerShell; branches take typed contract renderers.",
+    },
+    schema: [],
+    messages: {
+      children:
+        "`children` is an untyped hole and belongs only to ModalShell/DrawerShell, whose purpose is to ignore the interior shape. A branch must take `contract` plus `render: ContractComponent<K>` instead.",
+    },
+  },
+  create(context) {
+    const filename = String(context.filename || context.getFilename()).replace(/\\/g, "/")
+    if (!filename.includes("/src/components/")) return {}
+    if (filename.includes("/src/components/contracts/")) return {}
+    if (/\/src\/components\/shells\/(?:ModalShell|DrawerShell)\//.test(filename)) return {}
+    return {
+      TSPropertySignature(node) {
+        if (propertyName(node) === "children") context.report({ node, messageId: "children" })
+      },
+    }
+  },
+}

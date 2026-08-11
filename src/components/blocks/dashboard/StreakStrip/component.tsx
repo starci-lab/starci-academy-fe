@@ -1,9 +1,9 @@
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { Tree } from "@/components/branches/Tree"
 import { StreakWeekRun } from "@/components/leaves/StreakWeekRun"
 import { StatRow } from "@/components/leaves/StatRow"
 import { EmptyNotice } from "@/components/leaves/EmptyNotice"
 import type { DayCellData } from "@/components/leaves/DayCell"
+import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
 /**
  * BLOCK - `StreakStrip`, presentational half.
@@ -68,42 +68,50 @@ export type StreakStripActions = {
 export const _StreakStrip = (input: StreakStripProps & { readonly on?: StreakStripActions }) => {
     if (input.state === "failed") {
         return (
-            <SurfaceCard props={{ label: input.props.label }}>
-                <EmptyNotice
+            <SurfaceCard props={{ label: input.props.label }} contract="empty-notice-card"
+                render={defineContractComponent("empty-notice-card", { notice: defineLeafComponent("empty-notice", {}, () => <EmptyNotice
                     props={{ icon: "streak", message: input.props.message, actionLabel: input.props.retryLabel }}
                     on={{ act: input.on?.retry }}
-                />
-            </SurfaceCard>
+                />) })} />
         )
     }
     if (input.state === "empty") {
         return (
-            <SurfaceCard props={{ label: input.props.label }}>
-                <EmptyNotice props={{ icon: "streak", message: input.props.message }} />
-            </SurfaceCard>
+            <SurfaceCard props={{ label: input.props.label }} contract="empty-notice-card"
+                render={defineContractComponent("empty-notice-card", {
+                    notice: defineLeafComponent("empty-notice", {}, () => (
+                        <EmptyNotice props={{ icon: "streak", message: input.props.message }} />
+                    )),
+                })} />
         )
     }
     const isLoading = input.state === "pending"
     return (
         <SurfaceCard
             props={{ label: input.props.label, fact: input.state === "ready" ? input.props.record : undefined }}
+            contract="streak-summary-card"
+            render={defineContractComponent("streak-summary-card", {
+                summary: defineContractComponent("body-with-fixed-aside", {
+                    body: defineLeafComponent("streak-week-run", {}, () => (
+                        <StreakWeekRun
+                            props={{ days: input.state === "ready" ? input.props.days : undefined }}
+                            isLoading={isLoading}
+                        />
+                    )),
+                    aside: defineLeafComponent("stat-row", {}, () => (
+                        <StatRow
+                            props={{
+                                icon: "streak",
+                                label: input.props.readout.label,
+                                value: input.props.readout.value,
+                            }}
+                            isLoading={isLoading}
+                        />
+                    )),
+                }),
+            })}
             isLoading={isLoading}
-        >
-            <Tree contract="body-with-fixed-aside">
-                <StreakWeekRun
-                    props={{ days: input.state === "ready" ? input.props.days : undefined }}
-                    isLoading={isLoading}
-                />
-                <StatRow
-                    props={{
-                        icon: "streak",
-                        label: input.props.readout.label,
-                        value: input.props.readout.value,
-                    }}
-                    isLoading={isLoading}
-                />
-            </Tree>
-        </SurfaceCard>
+        />
     )
 }
 

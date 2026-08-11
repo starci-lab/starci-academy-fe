@@ -36,8 +36,8 @@ const DEEPEST_HEADING_LEVEL = 4
 /** Forward-slash form of a filename. */
 const normalize = (filename) => String(filename || "").replace(/\\/g, "/")
 
-/** The one frame that renders a registry entry, and therefore the one that owns hosts. */
-export const isRegistryFrameFile = (filename) => normalize(filename).includes("/src/components/branches/Tree/")
+/** Frames that apply registry props to real hosts, including the three vendor-surface branches. */
+export const isRegistryFrameFile = (filename) => /\/src\/components\/branches\/(?:Tree|SurfaceCard|SurfaceAccordionCard|SurfaceListCard)\//.test(normalize(filename))
 
 /**
  * A LEAF - an atom, or a fixed cluster of atoms.

@@ -1,8 +1,10 @@
-import { Tree } from "@/components/branches/Tree"
+import { Card } from "@heroui/react"
+import { ContractContent, Tree } from "@/components/branches/Tree"
 import { Heading } from "@/components/leaves/Heading"
 import { Text } from "@/components/leaves/Text"
 import { SeeMoreLink } from "@/components/leaves/SeeMoreLink"
-import type { BranchProps } from "@/components/contracts/props"
+import { contractNodeProps, type ContractKey } from "@/components/contracts"
+import { defineContractComponent, defineLeafComponent, type ContractBranchProps } from "@/components/contracts/props"
 
 /**
  * BRANCH - `SurfaceCard`: a named section, and the surface its content sits on.
@@ -56,31 +58,64 @@ export type SurfaceCardActions = {
 }
 
 /** Props for {@link SurfaceCard}. Fixed slots plus what it assembles - see {@link BranchProps}. */
-export type SurfaceCardProps = BranchProps<SurfaceCardData, SurfaceCardActions>
+export type SurfaceCardProps<K extends ContractKey> = ContractBranchProps<K> & {
+    readonly props: SurfaceCardData
+    readonly on?: SurfaceCardActions
+}
 
 /**
  * Draw a named section.
  *
  * @param input - {@link SurfaceCardProps}
  */
-export const SurfaceCard = ({ props, on, children, isLoading = false }: SurfaceCardProps) => {
+export const SurfaceCard = <const K extends ContractKey>({
+    props,
+    on,
+    contract,
+    render,
+    isLoading = false,
+}: SurfaceCardProps<K>) => {
     // One place at the end of the line: the way out wins it, the fact takes it only if free.
-    const end = props.seeMoreLabel !== undefined && on?.seeMore !== undefined
+    const hasSeeMore = props.seeMoreLabel !== undefined && on?.seeMore !== undefined
+    const end = hasSeeMore
         ? <SeeMoreLink props={{ label: props.seeMoreLabel }} on={{ press: on.seeMore }} />
         : props.fact === undefined
             ? null
             : <Text props={{ content: props.fact, size: "sm", tone: "muted" }} isLoading={isLoading} />
 
+    const labelContract = !hasSeeMore && props.fact !== undefined
+        ? "title-with-baseline-fact"
+        : "title-with-end-action"
+    const title = defineLeafComponent("heading", {}, () => (
+        <Heading props={{ content: props.label, level: 3 }} />
+    ))
+    const labelRow = labelContract === "title-with-baseline-fact"
+        ? defineContractComponent("title-with-baseline-fact", {
+            title,
+            fact: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => end),
+        })
+        : defineContractComponent("title-with-end-action", {
+            title,
+            ...(hasSeeMore ? {
+                end: defineLeafComponent("see-more-link", {}, () => end),
+            } : {}),
+        })
+    const cardNodeProps = contractNodeProps(contract)
+    const sectionNodeProps = contractNodeProps("label-row-over-card")
+
     return (
-        <Tree contract="label-row-over-card">
-            <Tree contract="title-with-end-action">
-                <Heading props={{ content: props.label, level: 3 }} />
-                {end}
-            </Tree>
-            {props.isFrameless === true ? children : (
-                <Tree contract="bounded-content-card">{children}</Tree>
+        <div data-component="SurfaceCard" {...sectionNodeProps}>
+            <Tree contract={labelContract} render={labelRow} />
+            {props.isFrameless === true ? (
+                <Tree contract={contract} render={render} />
+            ) : (
+                <Card>
+                    <Card.Content {...cardNodeProps} data-component="SurfaceCardBody">
+                        <ContractContent contract={contract} render={render} />
+                    </Card.Content>
+                </Card>
             )}
-        </Tree>
+        </div>
     )
 }
 

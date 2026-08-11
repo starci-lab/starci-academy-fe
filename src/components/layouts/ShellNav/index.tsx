@@ -87,24 +87,25 @@ export const ShellNav = () => {
     }))
 
     return (
-        <_ShellNav
-            props={{
-                brand: t("brand"),
-                routes,
-                signInLabel: t("signIn"),
-                themeLabel: isDark ? t("themeLight") : t("themeDark"),
-                isDark,
-                localeLabel: t("locale"),
-                searchPlaceholder: t("searchPlaceholder"),
-                searchLabel: t("search"),
-                searchShortcut: t("searchShortcut"),
-                cartLabel: t("cart"),
-                accountLabel: t("account"),
-            }}
-            on={{ openSignIn, toggleTheme: () => setTheme(isDark ? "light" : "dark"), toggleLocale }}
-        >
+        <>
+            <_ShellNav
+                props={{
+                    brand: t("brand"),
+                    routes,
+                    signInLabel: t("signIn"),
+                    themeLabel: isDark ? t("themeLight") : t("themeDark"),
+                    isDark,
+                    localeLabel: t("locale"),
+                    searchPlaceholder: t("searchPlaceholder"),
+                    searchLabel: t("search"),
+                    searchShortcut: t("searchShortcut"),
+                    cartLabel: t("cart"),
+                    accountLabel: t("account"),
+                }}
+                on={{ openSignIn, toggleTheme: () => setTheme(isDark ? "light" : "dark"), toggleLocale }}
+            />
             <SignInOverlay isOpen={isOpen} onDismiss={dismiss} />
-        </_ShellNav>
+        </>
     )
 }
 

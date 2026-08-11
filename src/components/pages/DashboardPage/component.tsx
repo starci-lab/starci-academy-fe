@@ -10,6 +10,7 @@ import { StreakStrip } from "@/components/blocks/dashboard/StreakStrip"
 import { WeeklyGoals } from "@/components/blocks/dashboard/WeeklyGoals"
 import { MyCoursesProgress } from "@/components/blocks/dashboard/MyCoursesProgress"
 import type { IconName } from "@/components/leaves/Icon"
+import { defineContractComponent, defineContractProjection, defineLeafComponent } from "@/components/contracts/props"
 
 /**
  * PAGE - `DashboardPage`, presentational half.
@@ -76,22 +77,19 @@ export type DashboardPageActions = {
  * @param input - {@link DashboardPageProps}
  */
 export const _DashboardPage = (input: DashboardPageProps & { readonly on?: DashboardPageActions }) => {
-    const tabs = (
-        <Tree contract="underlined-tab-strip">
-            {input.props.tabs.map((tab) => (
-                <NavLink
-                    key={tab.id}
-                    props={{
-                        href: tab.href,
-                        label: tab.label,
-                        icon: tab.icon,
-                        isCurrent: tab.isCurrent,
-                        kind: "tab",
-                    }}
-                />
-            ))}
-        </Tree>
-    )
+    const tabs = defineContractComponent("underlined-tab-strip", {
+        tab: input.props.tabs.map((tab) => defineLeafComponent("nav-link", { kind: "tab" }, () => (
+            <NavLink
+                props={{
+                    href: tab.href,
+                    label: tab.label,
+                    icon: tab.icon,
+                    isCurrent: tab.isCurrent,
+                    kind: "tab",
+                }}
+            />
+        ))),
+    })
 
     /**
      * The rail is drawn in BOTH states, because the shortcuts on it need no session: they are
@@ -103,57 +101,71 @@ export const _DashboardPage = (input: DashboardPageProps & { readonly on?: Dashb
      * they reach for once they have decided to move. Putting the destinations above the standing
      * makes the column answer a question nobody asked yet.
      */
-    const rail = (
-        <Tree contract="stacked-sections">
-            {input.state === "signedIn" ? <IdentityRail /> : null}
-            <QuickActions />
-        </Tree>
-    )
+    const rail = defineContractComponent("stacked-sections", {
+        section: [
+            ...(input.state === "signedIn"
+                ? [defineContractProjection("label-row-over-card", () => <IdentityRail />)]
+                : []),
+            defineContractProjection("label-row-over-card", () => <QuickActions />),
+        ],
+    })
 
     if (input.state === "signedOut") {
         return (
-            <Tree contract="heading-over-body">
-                {tabs}
-                <Tree contract="title-with-end-action">
-                    <Heading props={{ content: input.props.title, level: 1 }} />
-                </Tree>
-                <Tree contract="rail-then-main">
-                    {rail}
-                    <EmptyNotice
-                        props={{ icon: "signIn", message: input.props.message, actionLabel: input.props.signInLabel }}
-                        on={{ act: input.on?.signIn }}
-                    />
-                </Tree>
-            </Tree>
+            <Tree
+                contract="heading-over-body"
+                render={defineContractComponent("heading-over-body", {
+                    heading: tabs,
+                    body: defineContractComponent("title-with-end-action", {
+                        title: defineLeafComponent("heading", {}, () => (
+                            <Heading props={{ content: input.props.title, level: 1 }} />
+                        )),
+                    }),
+                    continuation: defineContractComponent("rail-then-main", {
+                        rail,
+                        main: defineContractComponent("centred-empty-notice", {
+                            notice: defineLeafComponent("empty-notice", {}, () => (
+                                <EmptyNotice
+                                    props={{ icon: "signIn", message: input.props.message, actionLabel: input.props.signInLabel }}
+                                    on={{ act: input.on?.signIn }}
+                                />
+                            )),
+                        }),
+                    }),
+                })}
+            />
         )
     }
 
     return (
-        <Tree contract="heading-over-body">
-            {tabs}
-            <Tree contract="title-with-end-action">
-                <Heading props={{ content: input.props.title, level: 1 }} />
-                <Button
-                    props={{ label: input.props.signOutLabel, variant: "ghost", size: "sm", icon: "signIn" }}
-                    on={{ press: input.on?.signOut }}
-                />
-            </Tree>
-            <Tree contract="rail-then-main">
-                {rail}
-                {/*
-                  * READ IN THE ORDER A DAY IS SPENT: what to do now, how the run is going, what
-                  * the week is aiming at, then what is already under way. Each block owns its own
-                  * request, so they land out of step - which is the deliberate trade, because one
-                  * flag between them would make the fastest wait on the slowest.
-                  */}
-                <Tree contract="stacked-sections">
-                    <DailyQuest />
-                    <StreakStrip />
-                    <WeeklyGoals />
-                    <MyCoursesProgress />
-                </Tree>
-            </Tree>
-        </Tree>
+        <Tree
+            contract="heading-over-body"
+            render={defineContractComponent("heading-over-body", {
+                heading: tabs,
+                body: defineContractComponent("title-with-end-action", {
+                    title: defineLeafComponent("heading", {}, () => (
+                        <Heading props={{ content: input.props.title, level: 1 }} />
+                    )),
+                    end: defineLeafComponent("button", {}, () => (
+                        <Button
+                            props={{ label: input.props.signOutLabel, variant: "ghost", size: "sm", icon: "signIn" }}
+                            on={{ press: input.on?.signOut }}
+                        />
+                    )),
+                }),
+                continuation: defineContractComponent("rail-then-main", {
+                    rail,
+                    main: defineContractComponent("stacked-sections", {
+                        section: [
+                            defineContractProjection("label-row-over-card", () => <DailyQuest />),
+                            defineContractProjection("label-row-over-card", () => <StreakStrip />),
+                            defineContractProjection("label-row-over-card", () => <WeeklyGoals />),
+                            defineContractProjection("label-row-over-card", () => <MyCoursesProgress />),
+                        ],
+                    }),
+                }),
+            })}
+        />
     )
 }
 

@@ -1,5 +1,6 @@
-import type { ReactNode } from "react"
-import { contractSpec, type ContractKey } from "@/components/contracts"
+import { Fragment } from "react"
+import { contractNodeProps, contractSpec, type ContractKey } from "@/components/contracts"
+import type { ContractComponent, LeafComponent } from "@/components/contracts/props"
 
 /**
  * BRANCH - `Tree`: the smallest branch there is. It draws ONE registry node.
@@ -16,14 +17,41 @@ import { contractSpec, type ContractKey } from "@/components/contracts"
  */
 
 /** Props for {@link Tree}. */
-export interface TreeProps {
+export interface TreeProps<K extends ContractKey> {
     /**
      * The registry key. This is the ONLY layout decision an author makes: it fixes the node's
      * classes and, through the key's own name, what belongs inside it.
      */
-    contract: ContractKey
-    /** The nodes and leaves that go inside, assembled by whoever is calling. */
-    children?: ReactNode
+    contract: K
+    /** Named content whose metadata and source body satisfy this exact contract. */
+    render: ContractComponent<NoInfer<K>>
+}
+
+/** Props for rendering only a contract's validated content inside a branch-owned host. */
+export interface ContractContentProps<K extends ContractKey> {
+    contract: K
+    render: ContractComponent<NoInfer<K>>
+}
+
+/** Render validated slots without choosing or opening their host. */
+export const ContractContent = <const K extends ContractKey>({ contract, render }: ContractContentProps<K>) => {
+    if (render.slots === undefined) return <>{render()}</>
+    const spec = contractSpec(contract)
+    const slots = render.slots
+    return Object.keys(spec.children).flatMap((slot) => {
+        const value = slots[slot as keyof typeof slots]
+        const values: ReadonlyArray<unknown> = Array.isArray(value)
+            ? value
+            : value === undefined ? [] : [value]
+        return values.map((component: unknown, index: number) => {
+            const child = component as ContractComponent<ContractKey> | LeafComponent<string, Readonly<Record<never, never>>>
+            if (child.meta.shape === "contract") {
+                const contractChild = child as ContractComponent<ContractKey>
+                return <Tree key={`${slot}-${index}`} contract={contractChild.meta.contract} render={contractChild} />
+            }
+            return <Fragment key={`${slot}-${index}`}>{child()}</Fragment>
+        })
+    })
 }
 
 /**
@@ -31,17 +59,14 @@ export interface TreeProps {
  *
  * @param props - {@link TreeProps}
  */
-export const Tree = ({ contract, children }: TreeProps) => {
-    const spec = contractSpec(contract)
+export const Tree = <const K extends ContractKey>({ contract, render }: TreeProps<K>) => {
+    const nodeProps = contractNodeProps(contract)
     return (
         <div
-            data-tier="branch"
             data-component="Tree"
-            data-node={contract}
-            data-why={spec.why}
-            className={spec.classes.join(" ")}
+            {...nodeProps}
         >
-            {children}
+            <ContractContent contract={contract} render={render} />
         </div>
     )
 }

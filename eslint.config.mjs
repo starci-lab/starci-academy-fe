@@ -81,6 +81,7 @@ export default defineConfig([
             "starci-fe/no-structural-host-outside-registry-frame": "error",
             "starci-fe/no-heading-element-outside-heading-atom": "error",
             "starci-fe/registry-explain-is-a-reason": "error",
+            "starci-fe/registry-children-are-typed": "error",
             // The registry folder holds two layers with opposite rules: SHAPES is generic and
             // capped, CHAINS name real compositions and are not. These two keep that difference
             // from eroding - the first because a value import there would invert the tier order
@@ -93,6 +94,7 @@ export default defineConfig([
             // Public contracts - no component hands a caller a CSS door.
             "starci-fe/no-per-part-classname-prop": "error",
             "starci-fe/no-public-classname-prop": "error",
+            "starci-fe/no-children-slot-outside-shell": "error",
             "starci-fe/no-public-frame-css-props": "error",
             "starci-fe/no-css-door-type-laundering": "error",
             // The double cast turns type checking OFF at the seam where it is worth most. The

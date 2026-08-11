@@ -1,4 +1,4 @@
-import { useRef, type FormEvent, type ReactNode } from "react"
+import { useRef, type FormEvent } from "react"
 import { Tree } from "@/components/branches/Tree"
 import { Button } from "@/components/leaves/Button"
 import { Checkbox } from "@/components/leaves/Checkbox"
@@ -8,6 +8,7 @@ import { Heading } from "@/components/leaves/Heading"
 import { Text } from "@/components/leaves/Text"
 import { TextLink } from "@/components/leaves/TextLink"
 import { KeycloakIdentityProvider } from "@/modules/api/graphql/mutations/types/auth"
+import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
 /**
  * BLOCK - `AuthenticationPanel`, presentational half.
@@ -149,23 +150,24 @@ const EMPTY_VALUES = { email: "", password: "", otp: "" }
 export const _AuthenticationPanel = (
     input: AuthenticationPanelProps & {
         readonly on?: AuthenticationPanelActions
-        readonly children?: ReactNode
     },
 ) => {
     const values = useRef({ ...EMPTY_VALUES })
 
     /** The name of the surface, over the line that says what it is for. */
-    const header = (
-        <Tree contract="centred-title-pair">
+    const header = defineContractComponent("centred-title-pair", {
+        title: defineLeafComponent("heading", {}, () => (
             <span id={AUTHENTICATION_PANEL_TITLE_ID}>
                 <Heading props={{ content: input.props.title, level: 2 }} />
             </span>
+        )),
+        description: defineLeafComponent("text", { size: "sm" }, () => (
             <Text props={{ content: input.props.subtitle, size: "sm", tone: "muted" }} />
-        </Tree>
-    )
+        )),
+    })
 
     /** The one sentence, announced when it is a refusal and merely shown when it is not. */
-    const status = input.props.statusMessage === "" ? null : (
+    const status = input.props.statusMessage === "" ? undefined : defineLeafComponent("text", {}, () => (
         <Text
             props={{
                 content: input.props.statusMessage,
@@ -174,19 +176,29 @@ export const _AuthenticationPanel = (
                 live: input.props.isError ? "assertive" : "polite",
             }}
         />
-    )
+    ))
 
     if (input.state === "done") {
         return (
-            <Tree contract="centred-page-column">
-                {input.children}
-                {header}
-                <Tree contract="centred-title-pair">
-                    <Heading props={{ content: input.props.doneTitle, level: 3 }} />
-                    <Text props={{ content: input.props.doneHint, tone: "muted", size: "sm" }} />
-                </Tree>
-                {status}
-            </Tree>
+            <Tree
+                contract="centred-page-column"
+                render={defineContractComponent("centred-page-column", {
+                    header,
+                    body: [
+                        defineContractComponent("centred-title-pair", {
+                            title: defineLeafComponent("heading", {}, () => (
+                                <Heading props={{ content: input.props.doneTitle, level: 3 }} />
+                            )),
+                            description: defineLeafComponent("text", { size: "sm" }, () => (
+                                <Text props={{ content: input.props.doneHint, tone: "muted", size: "sm" }} />
+                            )),
+                        }),
+                        ...(status === undefined ? [] : [defineContractComponent("stacked-peer-controls", {
+                            control: [status],
+                        })]),
+                    ],
+                })}
+            />
         )
     }
 
@@ -196,42 +208,61 @@ export const _AuthenticationPanel = (
             input.on?.submitCode?.({ otp: values.current.otp })
         }
         return (
-            <Tree contract="centred-page-column">
-                {input.children}
-                {header}
-                <form onSubmit={submit}>
-                    <Tree contract="stacked-peer-controls">
-                        <Field
-                            props={{
-                                id: CODE_ID,
-                                name: "otp",
-                                kind: "code",
-                                label: input.props.codeLabel,
-                                placeholder: input.props.codePlaceholder,
-                                hint: input.props.codeHint,
-                                disabled: input.props.isPending,
-                            }}
-                            on={{ change: (value) => { values.current.otp = value } }}
-                        />
-                        {status}
-                        <Button
-                            props={{
-                                label: input.props.submitLabel,
-                                variant: "primary",
-                                type: "submit",
-                                disabled: input.props.isPending,
-                            }}
-                        />
-                    </Tree>
-                </form>
-                <Tree contract="spread-choice-row">
-                    <TextLink props={{ label: input.props.resendLabel }} on={{ press: input.on?.resend }} />
-                    <TextLink
-                        props={{ label: input.props.useAnotherEmailLabel }}
-                        on={{ press: () => input.on?.changeMode?.("signIn") }}
-                    />
-                </Tree>
-            </Tree>
+            <Tree
+                contract="centred-page-column"
+                render={defineContractComponent("centred-page-column", {
+                    header,
+                    body: [
+                        defineLeafComponent("form", {}, () => (
+                            <form onSubmit={submit}>
+                                <Tree
+                                    contract="stacked-peer-controls"
+                                    render={defineContractComponent("stacked-peer-controls", {
+                                        control: [
+                                            defineLeafComponent("field", {}, () => (
+                                                <Field
+                                                    props={{
+                                                        id: CODE_ID,
+                                                        name: "otp",
+                                                        kind: "code",
+                                                        label: input.props.codeLabel,
+                                                        placeholder: input.props.codePlaceholder,
+                                                        hint: input.props.codeHint,
+                                                        disabled: input.props.isPending,
+                                                    }}
+                                                    on={{ change: (value) => { values.current.otp = value } }}
+                                                />
+                                            )),
+                                            ...(status === undefined ? [] : [status]),
+                                            defineLeafComponent("button", {}, () => (
+                                                <Button
+                                                    props={{
+                                                        label: input.props.submitLabel,
+                                                        variant: "primary",
+                                                        type: "submit",
+                                                        disabled: input.props.isPending,
+                                                    }}
+                                                />
+                                            )),
+                                        ],
+                                    })}
+                                />
+                            </form>
+                        )),
+                        defineContractComponent("spread-choice-row", {
+                            choice: defineLeafComponent("text-link", {}, () => (
+                                <TextLink props={{ label: input.props.resendLabel }} on={{ press: input.on?.resend }} />
+                            )),
+                            exit: defineLeafComponent("text-link", {}, () => (
+                                <TextLink
+                                    props={{ label: input.props.useAnotherEmailLabel }}
+                                    on={{ press: () => input.on?.changeMode?.("signIn") }}
+                                />
+                            )),
+                        }),
+                    ],
+                })}
+            />
         )
     }
 
@@ -244,94 +275,129 @@ export const _AuthenticationPanel = (
     }
 
     return (
-        <Tree contract="centred-page-column">
-            {input.children}
-            {header}
-            <Tree contract="stacked-peer-controls">
-                <Button
-                    props={{ label: input.props.oauthGoogle, variant: "outline", icon: "google", disabled: input.props.isPending }}
-                    on={{ press: () => input.on?.oauthPress?.(KeycloakIdentityProvider.Google) }}
-                />
-                <Button
-                    props={{ label: input.props.oauthGithub, variant: "outline", icon: "github", disabled: input.props.isPending }}
-                    on={{ press: () => input.on?.oauthPress?.(KeycloakIdentityProvider.Github) }}
-                />
-                {input.props.devSignInLabel === undefined ? null : (
-                    <Button
-                        props={{
-                            label: input.props.devSignInLabel,
-                            variant: "ghost",
-                            icon: "signedIn",
-                            disabled: input.props.isPending,
-                        }}
-                        on={{ press: input.on?.devSignInPress }}
-                    />
-                )}
-            </Tree>
-            <Divider props={{ label: input.props.orLabel }} />
-            <form onSubmit={submit}>
-                <Tree contract="stacked-peer-controls">
-                    <Field
-                        props={{
-                            id: EMAIL_ID,
-                            name: "email",
-                            kind: "email",
-                            label: input.props.emailLabel,
-                            placeholder: input.props.emailPlaceholder,
-                            disabled: input.props.isPending,
-                        }}
-                        on={{ change: (value) => { values.current.email = value } }}
-                    />
-                    <Field
-                        props={{
-                            id: PASSWORD_ID,
-                            name: "password",
-                            kind: "password",
-                            label: input.props.passwordLabel,
-                            placeholder: input.props.passwordPlaceholder,
-                            hint: input.props.passwordHint === "" ? undefined : input.props.passwordHint,
-                            revealLabel: input.props.revealLabel,
-                            hideLabel: input.props.hideLabel,
-                            disabled: input.props.isPending,
-                        }}
-                        on={{ change: (value) => { values.current.password = value } }}
-                    />
-                    <Tree contract="spread-choice-row">
-                        {input.props.mode === "signUp" ? (
-                            <Checkbox
-                                props={{ label: input.props.agreeToTerms, isSelected: input.props.hasAgreedToTerms }}
-                                on={{ change: (agreed) => input.on?.changeAgreedToTerms?.(agreed) }}
+        <Tree
+            contract="centred-page-column"
+            render={defineContractComponent("centred-page-column", {
+                header,
+                body: [
+                    defineContractComponent("stacked-peer-controls", {
+                        control: [
+                            defineLeafComponent("button", {}, () => (
+                                <Button
+                                    props={{ label: input.props.oauthGoogle, variant: "outline", icon: "google", disabled: input.props.isPending }}
+                                    on={{ press: () => input.on?.oauthPress?.(KeycloakIdentityProvider.Google) }}
+                                />
+                            )),
+                            defineLeafComponent("button", {}, () => (
+                                <Button
+                                    props={{ label: input.props.oauthGithub, variant: "outline", icon: "github", disabled: input.props.isPending }}
+                                    on={{ press: () => input.on?.oauthPress?.(KeycloakIdentityProvider.Github) }}
+                                />
+                            )),
+                            ...(input.props.devSignInLabel === undefined ? [] : [
+                                defineLeafComponent("button", {}, () => (
+                                    <Button
+                                        props={{
+                                            label: input.props.devSignInLabel!,
+                                            variant: "ghost",
+                                            icon: "signedIn",
+                                            disabled: input.props.isPending,
+                                        }}
+                                        on={{ press: input.on?.devSignInPress }}
+                                    />
+                                )),
+                            ]),
+                        ],
+                    }),
+                    defineLeafComponent("divider", {}, () => (
+                        <Divider props={{ label: input.props.orLabel }} />
+                    )),
+                    defineLeafComponent("form", {}, () => (
+                        <form onSubmit={submit}>
+                            <Tree
+                                contract="stacked-peer-controls"
+                                render={defineContractComponent("stacked-peer-controls", {
+                                    control: [
+                                        defineLeafComponent("field", {}, () => (
+                                            <Field
+                                                props={{
+                                                    id: EMAIL_ID,
+                                                    name: "email",
+                                                    kind: "email",
+                                                    label: input.props.emailLabel,
+                                                    placeholder: input.props.emailPlaceholder,
+                                                    disabled: input.props.isPending,
+                                                }}
+                                                on={{ change: (value) => { values.current.email = value } }}
+                                            />
+                                        )),
+                                        defineLeafComponent("field", {}, () => (
+                                            <Field
+                                                props={{
+                                                    id: PASSWORD_ID,
+                                                    name: "password",
+                                                    kind: "password",
+                                                    label: input.props.passwordLabel,
+                                                    placeholder: input.props.passwordPlaceholder,
+                                                    hint: input.props.passwordHint === "" ? undefined : input.props.passwordHint,
+                                                    revealLabel: input.props.revealLabel,
+                                                    hideLabel: input.props.hideLabel,
+                                                    disabled: input.props.isPending,
+                                                }}
+                                                on={{ change: (value) => { values.current.password = value } }}
+                                            />
+                                        )),
+                                        defineContractComponent("spread-choice-row", {
+                                            choice: defineLeafComponent("checkbox", {}, () => (
+                                                input.props.mode === "signUp" ? (
+                                                    <Checkbox
+                                                        props={{ label: input.props.agreeToTerms, isSelected: input.props.hasAgreedToTerms }}
+                                                        on={{ change: (agreed) => input.on?.changeAgreedToTerms?.(agreed) }}
+                                                    />
+                                                ) : (
+                                                    <Checkbox
+                                                        props={{ label: input.props.rememberMeLabel, isSelected: input.props.rememberMe }}
+                                                        on={{ change: (remember) => input.on?.changeRememberMe?.(remember) }}
+                                                    />
+                                                )
+                                            )),
+                                            exit: defineLeafComponent("text-link", {}, () => (
+                                                <TextLink
+                                                    props={{ label: input.props.forgotPassword }}
+                                                    on={{ press: () => input.on?.changeMode?.("forgotPassword") }}
+                                                />
+                                            )),
+                                        }),
+                                        ...(status === undefined ? [] : [status]),
+                                        defineLeafComponent("button", {}, () => (
+                                            <Button
+                                                props={{
+                                                    label: input.props.submitLabel,
+                                                    variant: "primary",
+                                                    type: "submit",
+                                                    disabled: input.props.isPending || isBlockedByTerms,
+                                                }}
+                                            />
+                                        )),
+                                    ],
+                                })}
                             />
-                        ) : (
-                            <Checkbox
-                                props={{ label: input.props.rememberMeLabel, isSelected: input.props.rememberMe }}
-                                on={{ change: (remember) => input.on?.changeRememberMe?.(remember) }}
-                            />
-                        )}
+                        </form>
+                    )),
+                ],
+                footer: defineContractComponent("centred-prompt-row", {
+                    prompt: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                        <Text props={{ content: input.props.promptQuestion, size: "sm", tone: "muted" }} />
+                    )),
+                    action: defineLeafComponent("text-link", {}, () => (
                         <TextLink
-                            props={{ label: input.props.forgotPassword }}
-                            on={{ press: () => input.on?.changeMode?.("forgotPassword") }}
+                            props={{ label: input.props.promptAction }}
+                            on={{ press: () => input.on?.changeMode?.(input.props.mode === "signIn" ? "signUp" : "signIn") }}
                         />
-                    </Tree>
-                    {status}
-                    <Button
-                        props={{
-                            label: input.props.submitLabel,
-                            variant: "primary",
-                            type: "submit",
-                            disabled: input.props.isPending || isBlockedByTerms,
-                        }}
-                    />
-                </Tree>
-            </form>
-            <Tree contract="centred-prompt-row">
-                <Text props={{ content: input.props.promptQuestion, size: "sm", tone: "muted" }} />
-                <TextLink
-                    props={{ label: input.props.promptAction }}
-                    on={{ press: () => input.on?.changeMode?.(input.props.mode === "signIn" ? "signUp" : "signIn") }}
-                />
-            </Tree>
-        </Tree>
+                    )),
+                }),
+            })}
+        />
     )
 }
 

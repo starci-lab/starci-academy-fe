@@ -1,5 +1,7 @@
-import type { ReactNode } from "react"
-import { ModalShell } from "@/components/leaves/ModalShell"
+import { ModalShell } from "@/components/shells/ModalShell"
+import { Tree } from "@/components/branches/Tree"
+import type { ContractKey } from "@/components/contracts"
+import type { ContractComponent } from "@/components/contracts/props"
 
 /**
  * OVERLAY - `SignInOverlay`, presentational half.
@@ -14,16 +16,16 @@ import { ModalShell } from "@/components/leaves/ModalShell"
  * thing only a covering surface can: the way out.
  *
  * IT DOES NOT TOUCH THE VENDOR. The focus trap, the backdrop, the placement and the scroll lock
- * are `ModalShell`'s, wrapped once at the leaf tier - which is what stops two surfaces disagreeing
+ * are `ModalShell`'s, wrapped once at the shell tier - which is what stops two surfaces disagreeing
  * about how a modal behaves.
  */
 
 /** Props for {@link _SignInOverlay}. */
-export type SignInOverlayProps = {
+export type SignInOverlayProps<K extends ContractKey> = {
     /** Whether the surface is on screen. Owned by whoever mounts it, never by the surface. */
     readonly isOpen: boolean
-    /** What the surface covers the page in order to show. */
-    readonly children?: ReactNode
+    /** Typed branch mounted inside the otherwise content-agnostic modal shell. */
+    readonly render: ContractComponent<K>
     /** Every way out: the close control, Escape, the backdrop, and a successful sign-in. */
     readonly onDismiss: () => void
 }
@@ -33,9 +35,9 @@ export type SignInOverlayProps = {
  *
  * @param input - {@link SignInOverlayProps}
  */
-export const _SignInOverlay = (input: SignInOverlayProps) => (
+export const _SignInOverlay = <const K extends ContractKey>(input: SignInOverlayProps<K>) => (
     <ModalShell isOpen={input.isOpen} size="sm" onDismiss={input.onDismiss}>
-        {input.children}
+        <Tree contract={input.render.meta.contract} render={input.render} />
     </ModalShell>
 )
 

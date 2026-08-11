@@ -27,6 +27,7 @@ test("isGovernedFile covers product source and exempts the frame and the twin te
   assert.equal(isGovernedFile("D:/repo/src/components/blocks/example/Example/index.tsx"), true)
   assert.equal(isGovernedFile("D:\\repo\\src\\app\\dashboard\\page.tsx"), true)
   assert.equal(isGovernedFile("D:/repo/src/components/branches/Tree/index.tsx"), false)
+  assert.equal(isGovernedFile("D:/repo/src/components/branches/SurfaceCard/index.tsx"), false)
   assert.equal(isGovernedFile("D:/repo/src/components/blocks/example/Example/index.test.tsx"), false)
   assert.equal(isGovernedFile("D:/repo/plugins/eslint/index.mjs"), false)
 })

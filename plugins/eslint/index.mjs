@@ -18,7 +18,7 @@ import {
   noVietnameseInSourceAuthoring,
 } from "./authoring.mjs"
 import { noRuntimeNamespace } from "./namespaces.mjs"
-import { noPublicClassNameProp } from "./public-contracts.mjs"
+import { noChildrenSlotOutsideShell, noPublicClassNameProp } from "./public-contracts.mjs"
 import {
   noHeadingElementOutsideHeadingAtom,
   noStructuralHostOutsideRegistryFrame,
@@ -30,6 +30,7 @@ import {
   noHandWrittenRegistryAttrs,
   noLiteralStructuralClass,
   noUnregisteredTreeKey,
+  registryChildrenAreTyped,
   registryExplainIsAReason,
 } from "./registry-rules.mjs"
 
@@ -663,6 +664,7 @@ export default {
     "no-structural-host-outside-registry-frame": noStructuralHostOutsideRegistryFrame,
     "no-heading-element-outside-heading-atom": noHeadingElementOutsideHeadingAtom,
     "registry-explain-is-a-reason": registryExplainIsAReason,
+    "registry-children-are-typed": registryChildrenAreTyped,
     // -- how the registry FOLDER itself is written: two layers, opposite rules --
     // -- token scale --
     "no-fractional-spacing": noFractionalSpacing,
@@ -671,6 +673,7 @@ export default {
     // -- public contracts --
     "no-per-part-classname-prop": noPerPartClassNameProp,
     "no-public-classname-prop": noPublicClassNameProp,
+    "no-children-slot-outside-shell": noChildrenSlotOutsideShell,
     "no-public-frame-css-props": noPublicFrameCssProps,
     "no-css-door-type-laundering": noCssDoorTypeLaundering,
     "no-double-cast": noDoubleCast,

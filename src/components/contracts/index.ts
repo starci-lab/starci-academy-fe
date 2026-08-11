@@ -44,10 +44,67 @@ export type LayoutClassName =
     | "md:[&>*:first-child]:self-start" | "md:[&>*:first-child]:max-h-rail"
     | "md:[&>*:first-child]:overflow-y-auto"
 
+/** Literal values a contract may require from a child component's data props. */
+export type ContractPropValue = string | number | boolean | null
+
+/** A child appears once unless it explicitly declares a repeated run and its resting count. */
+export type ContractChildCardinality =
+    | { readonly repeats?: false, readonly restingCount?: never }
+    | { readonly repeats: true, readonly restingCount: number }
+
+/** One named child slot: either a leaf identity or another closed contract identity. */
+export type ContractChildSpec = ContractChildCardinality & {
+    readonly leaf?: string | ReadonlyArray<string>
+    readonly contract?: string | ReadonlyArray<string>
+    readonly props?: Readonly<Record<string, ContractPropValue>>
+    readonly optional?: boolean
+}
+
+type ChildProps<S> = S extends { readonly props?: infer P }
+    ? P extends Readonly<Record<string, ContractPropValue>> ? P : Readonly<Record<never, never>>
+    : Readonly<Record<never, never>>
+
+type ContractChild<S> = S extends { readonly contract: infer K }
+    ? (K extends ReadonlyArray<infer A> ? A : K) extends infer C extends ContractKey
+        ? import("@/components/contracts/props").ContractComponent<C>
+        : never
+    : never
+
+type LeafChild<S> = S extends { readonly leaf: infer N }
+    ? (N extends ReadonlyArray<infer A> ? A : N) extends infer L extends string
+        ? import("@/components/contracts/props").LeafComponent<L, ChildProps<S>>
+        : never
+    : never
+
+type OneChild<S> = ContractChild<S> | LeafChild<S>
+
+type ChildValue<S> = S extends { readonly repeats: true }
+    ? ReadonlyArray<OneChild<S>>
+    : OneChild<S>
+
+type RequiredChildNames<K extends ContractKey> = {
+    [S in keyof (typeof CONTRACTS)[K]["children"]]:
+        (typeof CONTRACTS)[K]["children"][S] extends { readonly optional: true } ? never : S
+}[keyof (typeof CONTRACTS)[K]["children"]]
+
+type OptionalChildNames<K extends ContractKey> = Exclude<
+    keyof (typeof CONTRACTS)[K]["children"],
+    RequiredChildNames<K>
+>
+
+/** The exact named render record admitted by one contract key. */
+export type ChildrenOf<K extends ContractKey> = {
+    readonly [S in RequiredChildNames<K>]: ChildValue<(typeof CONTRACTS)[K]["children"][S]>
+} & {
+    readonly [S in OptionalChildNames<K>]?: ChildValue<(typeof CONTRACTS)[K]["children"][S]>
+}
+
 /** One registry entry: a node's own classes, and why what it holds sits that way. */
 export interface ContractSpec {
     /** The class string of the node itself. Not a prop, not reachable by a caller. */
     readonly classes: ReadonlyArray<LayoutClassName>
+    /** Named child grammar. No anonymous `children` hole exists in a contract. */
+    readonly children: Readonly<Record<string, ContractChildSpec>>
     /**
      * Why the children of this node sit the way they do, in one sentence.
      *
@@ -76,106 +133,266 @@ const buildContracts = <const T extends { readonly [K in keyof T]: ContractSpec 
 export const CONTRACTS = buildContracts({
     "nav-over-body-page": {
         classes: ["mx-auto", "flex", "min-h-screen", "w-full", "max-w-app-lg", "flex-col", "gap-6", "px-4", "py-6"],
+        children: {
+            navigation: { contract: "brand-links-then-tools-bar" },
+            body: { leaf: "page" },
+        },
         why: "The navigation stays a sibling of the routed body rather than a parent of it, so a route change repaints the body without tearing the nav down - and the measure is set here because a reading column running the full width of a desktop screen cannot be scanned at all.",
     },
     "title-with-end-action": {
         classes: ["flex", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-4"],
+        children: {
+            title: { leaf: "heading" },
+            end: { leaf: ["button", "see-more-link"], optional: true },
+        },
         why: "The control sits at the far end of the title's line so the eye finds the name first and the action second, and it drops under the title rather than squeezing it when the line runs out.",
     },
     "title-with-baseline-fact": {
         classes: ["flex", "flex-row", "flex-wrap", "items-baseline", "gap-2"],
+        children: {
+            title: { leaf: "heading" },
+            fact: { leaf: "text", props: { size: "sm", tone: "muted" } },
+        },
         why: "The fact reads as part of the heading sentence, so it sits on the title's baseline and wraps under it instead of pushing the title narrow.",
     },
     "heading-over-body": {
         classes: ["flex", "flex-col", "gap-4"],
+        children: {
+            heading: { contract: ["underlined-tab-strip", "title-with-end-action"] },
+            body: { contract: ["title-with-end-action", "rail-then-main"] },
+            continuation: { contract: "rail-then-main", optional: true },
+        },
         why: "The seam here is the only thing telling a reader that the content below belongs to this heading and not to the one above it.",
     },
     "stacked-sections": {
         classes: ["flex", "flex-col", "gap-4"],
+        children: {
+            section: { contract: "label-row-over-card", repeats: true, restingCount: 0 },
+        },
         why: "Sections read as separate objects only while the space between them is larger than the space inside any of them.",
     },
     "body-with-fixed-aside": {
         classes: ["flex", "flex-col", "gap-8", "md:flex-row", "md:items-start", "md:[&>*:first-child]:min-w-0", "md:[&>*:first-child]:grow", "md:[&>*:last-child]:w-72", "md:[&>*:last-child]:shrink-0"],
+        children: {
+            body: { leaf: "streak-week-run" },
+            aside: { leaf: "stat-row" },
+        },
         why: "The aside drops underneath at a narrow width instead of halving the room the body needs, and it is pinned rather than proportional because a supporting column that shrinks with the window stops being readable before the body does.",
     },
     "label-row-over-card": {
         classes: ["flex", "flex-col", "gap-3"],
+        children: {
+            label: { contract: ["title-with-end-action", "title-with-baseline-fact"] },
+            body: { contract: "$content" },
+        },
         why: "The label is held OUTSIDE the surface it names, so a section whose content is itself a set of cards never draws a card inside a card - and the seam is tighter than the seam between sections, because the label and the surface under it are one object.",
     },
-    "bounded-content-card": {
+    "empty-notice-card": {
         classes: ["flex", "flex-col", "gap-4", "rounded-2xl", "bg-surface", "p-4", "shadow-surface"],
-        why: "The inset and the raised ground are the whole of what makes a run of content read as one bounded object, now that the name of it sits above rather than within.",
+        children: {
+            notice: { leaf: "empty-notice" },
+        },
+        why: "The recovery notice needs one bounded ground beneath the section label so its message and way out read as the section's answer rather than as another section beside it.",
+    },
+    "resume-item-card": {
+        classes: ["flex", "flex-col", "gap-4", "rounded-2xl", "bg-surface", "p-4", "shadow-surface"],
+        children: {
+            kind: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            title: { leaf: "text", props: { size: "sm", weight: "medium" } },
+            resume: { leaf: "see-more-link", optional: true },
+        },
+        why: "The kind, title and way back into one lesson share a bounded ground because none identifies the resumable item without the other two.",
+    },
+    "daily-quest-card": {
+        classes: ["flex", "flex-col", "gap-4", "rounded-2xl", "bg-surface", "p-4", "shadow-surface"],
+        children: {
+            tasks: { contract: "stacked-peer-controls" },
+            outcome: { leaf: ["text", "button"] },
+        },
+        why: "The day's task run and its reward outcome share a bounded ground because the outcome only has meaning as the result of that run.",
+    },
+    "weekly-goals-card": {
+        classes: ["flex", "flex-col", "gap-4", "rounded-2xl", "bg-surface", "p-4", "shadow-surface"],
+        children: {
+            goals: { contract: "stacked-peer-controls" },
+            reset: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+        },
+        why: "The week's goal rows and rollover sentence share a bounded ground because the date qualifies the whole run rather than any one goal.",
+    },
+    "course-progress-card": {
+        classes: ["flex", "flex-col", "gap-4", "rounded-2xl", "bg-surface", "p-4", "shadow-surface"],
+        children: {
+            rows: { contract: "progress-row-stack" },
+        },
+        why: "The course progress rows share one bounded ground because they are peer measures of the same enrolled set rather than separate cards.",
+    },
+    "streak-summary-card": {
+        classes: ["flex", "flex-col", "gap-4", "rounded-2xl", "bg-surface", "p-4", "shadow-surface"],
+        children: {
+            summary: { contract: "body-with-fixed-aside" },
+        },
+        why: "The seven-day run and its standing figure share one bounded ground because the figure is the result of the run beside it.",
+    },
+    "progress-row-stack": {
+        classes: ["flex", "flex-col", "gap-4"],
+        children: {
+            row: { leaf: "labelled-progress-row", repeats: true, restingCount: 3 },
+        },
+        why: "Progress rows repeat down one column so their labels and figures can be compared without each row pretending to be a separate section.",
     },
     "glyph-title-fact-row": {
         classes: ["flex", "flex-row", "items-center", "gap-3", "[&>*:nth-child(2)]:min-w-0", "[&>*:nth-child(2)]:grow"],
+        children: {
+            glyph: { leaf: "icon", props: { size: "sm" } },
+            title: { leaf: "text", props: { size: "md", tone: "default" } },
+            fact: { leaf: "text", props: { size: "sm", tone: "muted" } },
+        },
         why: "The glyph identifies the row faster than its name does, so it leads the line and the fact trails it - and the name between them takes the slack, because a long one must clip rather than push the figure off the end of the row.",
     },
     "glyph-body-action-row": {
         classes: ["flex", "flex-row", "items-center", "gap-3", "rounded-xl", "px-4", "py-3"],
+        children: {
+            glyph: { leaf: "icon", props: { size: "sm" } },
+            body: { leaf: "text" },
+            action: { leaf: ["button", "see-more-link"] },
+        },
         why: "A row a reader can act on needs its own inset so the press target is the row and not the words inside it.",
     },
     "label-value-row": {
         classes: ["flex", "flex-row", "flex-wrap", "items-baseline", "justify-between", "gap-3"],
+        children: {
+            label: { leaf: "text", props: { size: "sm" } },
+            value: { leaf: "text", props: { size: "sm" } },
+        },
         why: "The label and its figure sit at opposite ends of one line so a column of them reads as a table without being one, and they share a baseline so the figure does not float against its own name.",
     },
     "label-over-figure-tile": {
         classes: ["flex", "flex-col", "gap-2", "rounded-2xl", "bg-surface", "p-4", "shadow-surface"],
+        children: {
+            label: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            figure: { leaf: "text" },
+        },
         why: "The label reads first and small, the figure second and large, because a reader scanning a row of these is comparing figures and needs the names only to know which is which.",
     },
     "two-column-grid": {
         classes: ["grid", "grid-cols-1", "gap-4", "sm:grid-cols-2"],
+        children: {
+            card: { contract: "resume-item-card", repeats: true, restingCount: 3 },
+        },
         why: "Two columns is the widest a set of peer objects can go before the eye stops reading them as a set, and one column below that width because a half-width card holds nothing.",
     },
     "label-field-hint": {
         classes: ["flex", "flex-col", "gap-2"],
+        children: {
+            label: { leaf: "label" },
+            field: { leaf: ["input", "field"] },
+            hint: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+        },
         why: "The hint belongs under the control it explains rather than beside the label, because a reader reaches the hint after failing at the control and not before trying it.",
     },
     "form-column": {
         classes: ["flex", "w-full", "max-w-sm", "flex-col", "gap-6"],
+        children: {
+            field: { contract: "label-field-hint", repeats: true, restingCount: 3 },
+            submit: { leaf: "button" },
+        },
         why: "A form is read one control at a time, so the measure is narrow on purpose and the seam between controls is wider than the seam inside any of them.",
     },
     "brand-links-then-tools-bar": {
         classes: ["flex", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-4", "px-4", "py-3"],
+        children: {
+            navigation: { contract: "inline-nav-links" },
+            tools: { contract: "inline-tool-row" },
+        },
         why: "The mark and the routes read left because that is where a reader looks to learn where they are; the tools read right because that is where they look to change something - and the bar wraps rather than letting either group fall off a narrow screen.",
     },
     "inline-nav-links": {
         classes: ["flex", "flex-row", "flex-wrap", "items-center", "gap-6"],
+        children: {
+            brand: { leaf: "link", props: { emphasis: "brand" } },
+            route: { leaf: "nav-link", props: { kind: "route" }, repeats: true, restingCount: 0 },
+        },
         why: "Route names sit further apart than words in a sentence, because each is a separate destination and a reader must be able to aim at one without hitting its neighbour.",
     },
     "inline-tool-row": {
         classes: ["flex", "flex-row", "items-center", "gap-2"],
+        children: {
+            search: { leaf: "search-box" },
+            tool: { leaf: "icon-button", repeats: true, restingCount: 0 },
+            signIn: { leaf: "button", props: { size: "sm", variant: "primary" } },
+        },
         why: "Icon controls sit tighter than named routes: they are a set of tools rather than a set of destinations, and the tight seam is what makes them read as one group.",
     },
     "underlined-tab-strip": {
         classes: ["flex", "flex-row", "flex-wrap", "items-center", "gap-6", "px-4"],
+        children: {
+            tab: { leaf: "nav-link", props: { kind: "tab" }, repeats: true, restingCount: 0 },
+        },
         why: "Tabs share the bar's inset so the selected one lines up under the route that led here, and they wrap as a whole rather than letting one choice drop away from the set it belongs to.",
     },
     "rail-then-main": {
         classes: ["flex", "flex-col", "gap-8", "md:flex-row", "md:items-start", "md:[&>*:first-child]:w-72", "md:[&>*:first-child]:shrink-0", "md:[&>*:first-child]:sticky", "md:[&>*:first-child]:top-6", "md:[&>*:first-child]:self-start", "md:[&>*:first-child]:max-h-rail", "md:[&>*:first-child]:overflow-y-auto", "md:[&>*:last-child]:min-w-0", "md:[&>*:last-child]:grow"],
+        children: {
+            rail: { contract: "stacked-sections" },
+            main: { contract: ["stacked-sections", "centred-empty-notice"] },
+        },
         why: "The rail is pinned in width and STAYS while the column beside it scrolls, because it holds who the reader is and where they can go - facts that do not stop being true a screenful down - and a rail that shrank with the window would clip its own labels before the content beside it became hard to read. Below the breakpoint it moves above rather than halving the column, where sticking it would cost a phone most of its screen.",
     },
     "centred-page-column": {
         classes: ["mx-auto", "flex", "w-full", "max-w-sm", "flex-col", "gap-6", "py-6"],
+        children: {
+            header: { contract: "centred-title-pair" },
+            body: {
+                contract: ["stacked-peer-controls", "centred-title-pair", "spread-choice-row"],
+                leaf: ["form", "divider"],
+                repeats: true,
+                restingCount: 0,
+            },
+            footer: { contract: ["spread-choice-row", "centred-prompt-row"], optional: true },
+        },
         why: "A surface read one control at a time is centred and narrow on purpose: a form that runs the width of a desktop screen makes the eye travel between a label and the box it names.",
     },
     "centred-title-pair": {
         classes: ["flex", "flex-col", "gap-2", "items-center", "text-center"],
+        children: {
+            title: { leaf: "heading" },
+            description: { leaf: "text", props: { size: "sm" } },
+        },
         why: "The supporting line sits under the title rather than beside it, because it explains the title rather than qualifying it - and both are centred so the pair reads as the surface's own name rather than as the first row of its content.",
     },
     "stacked-peer-controls": {
         classes: ["flex", "flex-col", "gap-3", "[&>*]:w-full"],
+        children: {
+            control: {
+                contract: "spread-choice-row",
+                leaf: ["button", "field", "labelled-progress-row", "quick-action-row", "text"],
+                repeats: true,
+                restingCount: 3,
+            },
+        },
         why: "Controls of the same kind repeat down one column, and the seam between them is tighter than the seam between groups, so a reader can tell a run of peers from two separate decisions.",
     },
     "spread-choice-row": {
         classes: ["flex", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-3"],
+        children: {
+            choice: { leaf: ["checkbox", "text-link"] },
+            exit: { leaf: "text-link" },
+        },
         why: "A choice and the way out of it are pushed to opposite ends of one line, because they are peers that a reader picks BETWEEN rather than a label and the thing it names.",
     },
     "centred-prompt-row": {
         classes: ["flex", "flex-row", "flex-wrap", "items-center", "justify-center", "gap-2"],
+        children: {
+            prompt: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            action: { leaf: "text-link" },
+        },
         why: "A question and its answer read as one sentence, so they share a line and are centred together - split across two lines they read as two separate offers.",
     },
     "centred-empty-notice": {
         classes: ["flex", "flex-col", "items-center", "gap-3", "rounded-2xl", "bg-surface", "p-6", "text-center", "shadow-surface"],
+        children: {
+            notice: { leaf: "empty-notice" },
+        },
         why: "An empty region still has to offer a way out, so the recovery action is part of this node rather than something a caller remembers to add beside it.",
     },
 })
@@ -189,6 +406,17 @@ export type ContractKey = keyof typeof CONTRACTS
  * @param name - The registry key to read.
  */
 export const contractSpec = (name: ContractKey): ContractSpec => CONTRACTS[name]
+
+/** Resolve one contract into the props its branch places on the real layout node. */
+export const contractNodeProps = (name: ContractKey) => {
+    const spec = contractSpec(name)
+    return {
+        "data-tier": "branch",
+        "data-node": name,
+        "data-why": spec.why,
+        className: spec.classes.join(" "),
+    }
+}
 
 /** Every registry key, in declaration order, so gates and tests can walk the vocabulary. */
 export const CONTRACT_KEYS: ReadonlyArray<ContractKey> = Object.keys(CONTRACTS) as Array<ContractKey>

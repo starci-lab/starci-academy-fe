@@ -369,3 +369,72 @@ export const registryExplainIsAReason = {
     }
   },
 }
+
+/** The registry child grammar has at least one closed identity per slot and one honest repetition shape. */
+export const registryChildrenAreTyped = {
+  meta: {
+    type: "problem",
+    docs: { description: "Require named leaf/contract child slots, literal prop constraints, and paired repeat metadata." },
+    schema: [],
+    messages: {
+      missing: "Registry entry `{{key}}` has no named `children` grammar.",
+      empty: "Registry entry `{{key}}` declares no child slots; an empty object hides the same information as omitting `children`.",
+      identity: "Child slot `{{slot}}` must declare at least one closed identity: `leaf`, `contract`, or both.",
+      resting: "Repeated child slot `{{slot}}` must declare numeric `restingCount`; it is the loading cardinality, not the live length.",
+      strayResting: "Child slot `{{slot}}` has `restingCount` without `repeats: true`.",
+      literal: "Child slot `{{slot}}` prop constraints must be literal values; runtime data belongs to the render component.",
+    },
+  },
+  create(context) {
+    const file = normalizePath(context.filename || context.getFilename())
+    if (!isRegistryFile(file)) return {}
+    return {
+      Property(node) {
+        const entryObject = node.value
+        const tableObject = node.parent
+        const call = tableObject && tableObject.parent
+        if (!entryObject || entryObject.type !== "ObjectExpression") return
+        if (!call || call.type !== "CallExpression" || call.callee?.name !== "buildContracts") return
+        const key = propertyName(node) || "this entry"
+        const childrenProperty = entryObject.properties.find((property) => propertyName(property) === "children")
+        if (!childrenProperty || childrenProperty.type !== "Property" || childrenProperty.value.type !== "ObjectExpression") {
+          context.report({ node, messageId: "missing", data: { key } })
+          return
+        }
+        const slots = childrenProperty.value.properties.filter((property) => property.type === "Property")
+        if (slots.length === 0) {
+          context.report({ node: childrenProperty, messageId: "empty", data: { key } })
+          return
+        }
+        for (const slotProperty of slots) {
+          const slot = propertyName(slotProperty) || "unknown"
+          if (!slotProperty.value || slotProperty.value.type !== "ObjectExpression") continue
+          const fields = new Map(slotProperty.value.properties
+            .filter((property) => property.type === "Property")
+            .map((property) => [propertyName(property), property]))
+          const identities = ["leaf", "contract"].filter((name) => fields.has(name))
+          if (identities.length === 0) {
+            context.report({ node: slotProperty, messageId: "identity", data: { slot } })
+          }
+          const repeats = fields.get("repeats")
+          const resting = fields.get("restingCount")
+          const repeatsTrue = repeats?.value?.type === "Literal" && repeats.value.value === true
+          if (repeatsTrue && !(resting?.value?.type === "Literal" && typeof resting.value.value === "number")) {
+            context.report({ node: slotProperty, messageId: "resting", data: { slot } })
+          }
+          if (!repeatsTrue && resting) {
+            context.report({ node: resting, messageId: "strayResting", data: { slot } })
+          }
+          const props = fields.get("props")
+          if (props?.value?.type === "ObjectExpression") {
+            for (const constraint of props.value.properties) {
+              if (constraint.type !== "Property" || constraint.value.type !== "Literal") {
+                context.report({ node: constraint, messageId: "literal", data: { slot } })
+              }
+            }
+          }
+        }
+      },
+    }
+  },
+}

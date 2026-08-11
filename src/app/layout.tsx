@@ -3,6 +3,7 @@ import type { ReactNode } from "react"
 import { getLocale, getMessages, getTranslations } from "next-intl/server"
 import { ShellNav } from "@/components/layouts/ShellNav"
 import { Tree } from "@/components/branches/Tree"
+import { defineContractComponent, defineContractProjection, defineLeafComponent } from "@/components/contracts/props"
 import { AppProviders } from "./providers"
 import "./globals.css"
 
@@ -57,10 +58,16 @@ const RootLayout = async ({ children }: RootLayoutProps) => {
         <html lang={locale} suppressHydrationWarning>
             <body>
                 <AppProviders locale={locale} messages={messages}>
-                    <Tree contract="nav-over-body-page">
-                        <ShellNav />
-                        {children}
-                    </Tree>
+                    <Tree
+                        contract="nav-over-body-page"
+                        render={defineContractComponent("nav-over-body-page", {
+                            navigation: defineContractProjection(
+                                "brand-links-then-tools-bar",
+                                () => <ShellNav />,
+                            ),
+                            body: defineLeafComponent("page", {}, () => children),
+                        })}
+                    />
                 </AppProviders>
             </body>
         </html>

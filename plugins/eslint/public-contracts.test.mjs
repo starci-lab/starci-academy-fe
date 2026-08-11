@@ -2,7 +2,7 @@
 import test from "node:test"
 import { RuleTester } from "eslint"
 import tsParser from "@typescript-eslint/parser"
-import { noPublicClassNameProp } from "./public-contracts.mjs"
+import { noChildrenSlotOutsideShell, noPublicClassNameProp } from "./public-contracts.mjs"
 
 const tester = new RuleTester({
   languageOptions: {
@@ -64,6 +64,33 @@ test("no-public-classname-prop closes every public CSS door", () => {
         filename: "D:/repo/src/components/blocks/example/Example.tsx",
         code: "export interface ExampleProps extends WithClassNames<\"root\"> { tone: string }",
         errors: [{ messageId: "withClassNames" }],
+      },
+    ],
+  })
+})
+
+test("no-children-slot-outside-shell reserves the untyped hole for covering shells", () => {
+  tester.run("no-children-slot-outside-shell", noChildrenSlotOutsideShell, {
+    valid: [
+      {
+        filename: "D:/repo/src/components/shells/ModalShell/index.tsx",
+        code: "type ModalShellProps = { children?: ReactNode }",
+      },
+      {
+        filename: "D:/repo/src/components/branches/Tree/index.tsx",
+        code: "type TreeProps<K> = { contract: K; render: ContractComponent<K> }",
+      },
+    ],
+    invalid: [
+      {
+        filename: "D:/repo/src/components/shells/PopoverShell/index.tsx",
+        code: "type PopoverShellProps = { children?: ReactNode }",
+        errors: [{ messageId: "children" }],
+      },
+      {
+        filename: "D:/repo/src/components/branches/SurfaceCard/index.tsx",
+        code: "type SurfaceCardProps = { children?: ReactNode }",
+        errors: [{ messageId: "children" }],
       },
     ],
   })

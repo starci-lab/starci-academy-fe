@@ -2,9 +2,9 @@
 
 import { useTranslations } from "next-intl"
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { Tree } from "@/components/branches/Tree"
 import { QuickActionRow } from "@/components/leaves/QuickActionRow"
 import type { IconName } from "@/components/leaves/Icon"
+import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
 /**
  * BLOCK - `QuickActions`: the rail of shortcuts beside the reading column.
@@ -37,11 +37,12 @@ const ACTIONS: ReadonlyArray<{ id: string, href: string, icon: IconName }> = [
 export const QuickActions = () => {
     const t = useTranslations("shell")
     return (
-        <SurfaceCard props={{ label: t("quickActions") }}>
-            <Tree contract="stacked-peer-controls">
-                {ACTIONS.map((action) => (
+        <SurfaceCard
+            props={{ label: t("quickActions") }}
+            contract="stacked-peer-controls"
+            render={defineContractComponent("stacked-peer-controls", {
+                control: ACTIONS.map((action) => defineLeafComponent("quick-action-row", {}, () => (
                     <QuickActionRow
-                        key={action.id}
                         props={{
                             id: action.id,
                             href: action.href,
@@ -49,9 +50,9 @@ export const QuickActions = () => {
                             label: t(`actions.${action.id}`),
                         }}
                     />
-                ))}
-            </Tree>
-        </SurfaceCard>
+                ))),
+            })}
+        />
     )
 }
 

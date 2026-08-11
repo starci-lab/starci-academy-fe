@@ -1,4 +1,5 @@
 import type { ReactNode } from "react"
+import type { ChildrenOf, ContractKey, ContractPropValue } from "@/components/contracts"
 
 /**
  * THE SLOT SHAPES, as types rather than as a convention.
@@ -50,14 +51,79 @@ export type LeafProps<D extends ComponentData, A extends ComponentActions = Comp
     readonly isLoading?: boolean
 }
 
+/** Source identity carried by a leaf implementation, separate from its runtime data. */
+export type LeafComponentMeta<N extends string, P extends Readonly<Record<string, ContractPropValue>>> = {
+    readonly shape: "leaf"
+    readonly name: N
+    readonly props: P
+}
+
+/** A closed leaf render whose identity and contract-relevant literals survive import boundaries. */
+export type LeafComponent<N extends string, P extends Readonly<Record<string, ContractPropValue>>> = {
+    (): ReactNode
+    readonly meta: LeafComponentMeta<N, P>
+}
+
+/** Close runtime data over one leaf while exposing only the literals the contract constrains. */
+export const defineLeafComponent = <
+    const N extends string,
+    const P extends Readonly<Record<string, ContractPropValue>>,
+>(
+        name: N,
+        props: P,
+        render: () => ReactNode,
+    ): LeafComponent<N, P> => Object.assign(render, {
+        meta: { shape: "leaf", name, props } as const,
+    })
+
+/** Source identity carried by every render function admitted by a contract branch. */
+export type ContractComponentMeta<K extends ContractKey> = {
+    readonly shape: "contract"
+    readonly contract: K
+}
+
 /**
- * A BRANCH's props. Same three, plus the one thing that makes it a branch: it assembles, so it
- * takes what goes inside.
+ * A named, contract-bound render function.
+ *
+ * The metadata is deliberately part of the value type. A bare or inline arrow has no metadata and
+ * therefore cannot cross a branch's `render` slot; a component branded for another key cannot be
+ * widened into the requested one either.
  */
-export type BranchProps<D extends ComponentData, A extends ComponentActions = ComponentActions> = {
-    readonly props: D
-    readonly on?: A
-    readonly children?: ReactNode
+export type ContractComponent<K extends ContractKey> = {
+    (): ReactNode
+    readonly meta: ContractComponentMeta<K>
+    readonly slots?: ChildrenOf<K>
+}
+
+/**
+ * Bind one exact named slot record to the contract whose child grammar it implements.
+ *
+ * `ChildrenOf<K>` makes missing, extra, repeated, wrong-identity and wrong-literal slots fail at
+ * the builder call; the returned component preserves the key and record across branch boundaries.
+ */
+export const defineContractComponent = <const K extends ContractKey>(
+    contract: K,
+    slots: ChildrenOf<K>,
+): ContractComponent<K> => Object.assign(
+        () => null,
+        {
+            meta: { shape: "contract", contract } as const,
+            slots,
+        },
+    )
+
+/** Brand the complete node produced by a branch that owns wrappers a contract cannot express. */
+export const defineContractProjection = <const K extends ContractKey>(
+    contract: K,
+    render: () => ReactNode,
+): ContractComponent<K> => Object.assign(render, {
+        meta: { shape: "contract", contract } as const,
+    })
+
+/** A branch that projects one typed contract component into its own wrapper mechanics. */
+export type ContractBranchProps<K extends ContractKey> = {
+    readonly contract: K
+    readonly render: ContractComponent<NoInfer<K>>
     readonly isLoading?: boolean
 }
 

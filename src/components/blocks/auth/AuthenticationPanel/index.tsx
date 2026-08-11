@@ -1,6 +1,5 @@
 "use client"
 
-import type { ReactNode } from "react"
 import { useTranslations } from "next-intl"
 import { useAuthPanel } from "@/hooks/auth/useAuthPanel"
 import { useDevSession } from "@/hooks/auth/useDevSession"
@@ -74,8 +73,6 @@ const toStatus = (
 export type AuthenticationPanelConnectedProps = {
     /** Called once the access token is stored, so a surface can close or route away. */
     readonly onSignedIn?: () => void
-    /** What the host surface hangs on the title line - a close control, or nothing. */
-    readonly children?: ReactNode
 }
 
 /**
@@ -83,7 +80,7 @@ export type AuthenticationPanelConnectedProps = {
  *
  * @param input - {@link AuthenticationPanelConnectedProps}
  */
-export const AuthenticationPanel = ({ onSignedIn, children }: AuthenticationPanelConnectedProps = {}) => {
+export const AuthenticationPanel = ({ onSignedIn }: AuthenticationPanelConnectedProps = {}) => {
     const t = useTranslations("auth")
     const panel = useAuthPanel({ onSignedIn })
     const dev = useDevSession({ onSignedIn })
@@ -122,9 +119,7 @@ export const AuthenticationPanel = ({ onSignedIn, children }: AuthenticationPane
                 state="done"
                 props={{ ...frame, doneTitle: t(`${mode}.doneTitle`), doneHint: t(`${mode}.doneHint`) }}
                 on={on}
-            >
-                {children}
-            </_AuthenticationPanel>
+            />
         )
     }
 
@@ -144,9 +139,7 @@ export const AuthenticationPanel = ({ onSignedIn, children }: AuthenticationPane
                     useAnotherEmailLabel: t("shared.useAnotherEmail"),
                 }}
                 on={on}
-            >
-                {children}
-            </_AuthenticationPanel>
+            />
         )
     }
 
@@ -179,9 +172,7 @@ export const AuthenticationPanel = ({ onSignedIn, children }: AuthenticationPane
                 devSignInLabel: dev.isAvailable ? t("shared.devSignIn") : undefined,
             }}
             on={on}
-        >
-            {children}
-        </_AuthenticationPanel>
+        />
     )
 }
 

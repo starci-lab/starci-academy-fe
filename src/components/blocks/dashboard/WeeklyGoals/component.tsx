@@ -1,9 +1,9 @@
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { Tree } from "@/components/branches/Tree"
 import { LabelledProgressRow } from "@/components/leaves/LabelledProgressRow"
 import { EmptyNotice } from "@/components/leaves/EmptyNotice"
 import { Text } from "@/components/leaves/Text"
 import type { LabelledProgressRowData } from "@/components/leaves/LabelledProgressRow"
+import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
 /**
  * BLOCK - `WeeklyGoals`, presentational half.
@@ -79,12 +79,11 @@ const RESTING_ROWS: ReadonlyArray<LabelledProgressRowData> = [
 export const _WeeklyGoals = (input: WeeklyGoalsProps & { readonly on?: WeeklyGoalsActions }) => {
     if (input.state === "failed") {
         return (
-            <SurfaceCard props={{ label: input.props.label }}>
-                <EmptyNotice
+            <SurfaceCard props={{ label: input.props.label }} contract="empty-notice-card"
+                render={defineContractComponent("empty-notice-card", { notice: defineLeafComponent("empty-notice", {}, () => <EmptyNotice
                     props={{ icon: "league", message: input.props.message, actionLabel: input.props.retryLabel }}
                     on={{ act: input.on?.retry }}
-                />
-            </SurfaceCard>
+                />) })} />
         )
     }
 
@@ -93,9 +92,13 @@ export const _WeeklyGoals = (input: WeeklyGoalsProps & { readonly on?: WeeklyGoa
             <SurfaceCard
                 props={{ label: input.props.label, seeMoreLabel: input.props.editLabel }}
                 on={{ seeMore: input.on?.edit }}
-            >
-                <EmptyNotice props={{ icon: "league", message: input.props.prompt }} />
-            </SurfaceCard>
+                contract="empty-notice-card"
+                render={defineContractComponent("empty-notice-card", {
+                    notice: defineLeafComponent("empty-notice", {}, () => (
+                        <EmptyNotice props={{ icon: "league", message: input.props.prompt }} />
+                    )),
+                })}
+            />
         )
     }
 
@@ -112,16 +115,22 @@ export const _WeeklyGoals = (input: WeeklyGoalsProps & { readonly on?: WeeklyGoa
             }}
             on={{ seeMore: input.on?.edit }}
             isLoading={isLoading}
-        >
-            <Tree contract="stacked-peer-controls">
-                {(input.state === "ready" ? input.props.rows : RESTING_ROWS).map((row) => (
-                    <LabelledProgressRow key={row.id} props={row} isLoading={isLoading} />
-                ))}
-            </Tree>
-            {input.state === "ready" && input.props.resetLine !== undefined ? (
-                <Text props={{ content: input.props.resetLine, size: "sm", tone: "muted" }} />
-            ) : null}
-        </SurfaceCard>
+            contract="weekly-goals-card"
+            render={defineContractComponent("weekly-goals-card", {
+                goals: defineContractComponent("stacked-peer-controls", {
+                    control: (input.state === "ready" ? input.props.rows : RESTING_ROWS).map((row) => (
+                        defineLeafComponent("labelled-progress-row", {}, () => (
+                            <LabelledProgressRow props={row} isLoading={isLoading} />
+                        ))
+                    )),
+                }),
+                ...(input.state === "ready" && input.props.resetLine !== undefined ? {
+                    reset: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                        <Text props={{ content: input.props.resetLine, size: "sm", tone: "muted" }} />
+                    )),
+                } : {}),
+            })}
+        />
     )
 }
 

@@ -13,12 +13,13 @@ import { dirname, join } from "node:path"
 import test from "node:test"
 import { RuleTester } from "eslint"
 import tsParser from "@typescript-eslint/parser"
-import { readRegistry } from "./registry.mjs"
+import { parseKeys, readRegistry } from "./registry.mjs"
 import {
   noClassCompositionOutsideRegistry,
   noHandWrittenRegistryAttrs,
   noLiteralStructuralClass,
   noUnregisteredTreeKey,
+  registryChildrenAreTyped,
   registryExplainIsAReason,
 } from "./registry-rules.mjs"
 
@@ -29,6 +30,55 @@ const tester = new RuleTester({
     sourceType: "module",
     parserOptions: { ecmaFeatures: { jsx: true } },
   },
+})
+
+test("parseKeys stops at the balanced contract table", () => {
+  const source = `
+const first = buildContracts({
+    "node-key": { children: { compound: { contract: "nested-key" } } },
+})
+const unrelated = {
+    "compound-message-id": { value: true },
+}
+`
+  assert.deepEqual(parseKeys(source), ["node-key"])
+})
+
+test("registry-children-are-typed closes identity, literal-prop and repetition holes", () => {
+  tester.run("registry-children-are-typed", registryChildrenAreTyped, {
+    valid: [
+      {
+        filename: REGISTRY,
+        code: "buildContracts({ card: { classes: [], children: { row: { leaf: 'text', props: { size: 'sm' }, repeats: true, restingCount: 6 } }, why: 'A sufficiently long reason lives here because this fixture exercises only the child schema.' } })",
+      },
+      {
+        filename: REGISTRY,
+        code: "buildContracts({ card: { classes: [], children: { body: { leaf: ['form'], contract: ['field-stack'], repeats: true, restingCount: 0 } }, why: 'A named slot may admit a closed union across tiers without admitting arbitrary markup.' } })",
+      },
+    ],
+    invalid: [
+      {
+        filename: REGISTRY,
+        code: "buildContracts({ card: { classes: [], why: 'A sufficiently long reason lives here because this fixture exercises only the child schema.' } })",
+        errors: [{ messageId: "missing" }],
+      },
+      {
+        filename: REGISTRY,
+        code: "buildContracts({ card: { classes: [], children: { row: { repeats: true, restingCount: 2 } }, why: 'A sufficiently long reason lives here because this fixture exercises only the child schema.' } })",
+        errors: [{ messageId: "identity" }],
+      },
+      {
+        filename: REGISTRY,
+        code: "buildContracts({ card: { classes: [], children: { row: { leaf: 'text', repeats: true } }, why: 'A sufficiently long reason lives here because this fixture exercises only the child schema.' } })",
+        errors: [{ messageId: "resting" }],
+      },
+      {
+        filename: REGISTRY,
+        code: "buildContracts({ card: { classes: [], children: { row: { leaf: 'text', restingCount: 6 } }, why: 'A sufficiently long reason lives here because this fixture exercises only the child schema.' } })",
+        errors: [{ messageId: "strayResting" }],
+      },
+    ],
+  })
 })
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "../..")
@@ -152,7 +202,7 @@ test("no-unregistered-tree-key answers an invented key with the keys that exist"
       },
       {
         filename: inRepo("src/components/blocks/example/Example/index.tsx"),
-        code: "const spec = contractSpec(\"bounded-content-card\")",
+        code: "const spec = contractSpec(\"empty-notice-card\")",
       },
     ],
     invalid: [

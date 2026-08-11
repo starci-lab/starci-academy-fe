@@ -2,6 +2,7 @@
 
 import { useCallback, useRef } from "react"
 import { AuthenticationPanel } from "@/components/blocks/auth/AuthenticationPanel"
+import { defineContractProjection } from "@/components/contracts/props"
 import { _SignInOverlay } from "./component"
 
 /**
@@ -36,14 +37,18 @@ export const SignInOverlay = ({ isOpen, onDismiss }: SignInOverlayConnectedProps
     }, [])
 
     return (
-        <_SignInOverlay isOpen={isOpen} onDismiss={onDismiss}>
-            {/*
-              * Mounted only while the surface is open, not merely hidden with it. The panel runs
-              * the auth machine, and a second copy of it - with a second copy of every field id -
-              * sat in the document of a page that already showed the panel.
-              */}
-            {isOpen ? <AuthenticationPanel onSignedIn={onSignedIn} /> : null}
-        </_SignInOverlay>
+        <_SignInOverlay
+            isOpen={isOpen}
+            onDismiss={onDismiss}
+            render={defineContractProjection("centred-page-column", () => (
+                /*
+                 * Mounted only while the surface is open, not merely hidden with it. The panel
+                 * runs the auth machine, and a second copy of every field id must not remain in
+                 * the document behind a closed surface.
+                 */
+                isOpen ? <AuthenticationPanel onSignedIn={onSignedIn} /> : null
+            ))}
+        />
     )
 }
 

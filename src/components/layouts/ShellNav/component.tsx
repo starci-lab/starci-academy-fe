@@ -1,10 +1,10 @@
-import type { ReactNode } from "react"
 import { Tree } from "@/components/branches/Tree"
 import { Link } from "@/components/leaves/Link"
 import { NavLink } from "@/components/leaves/NavLink"
 import { IconButton } from "@/components/leaves/IconButton"
 import { Button } from "@/components/leaves/Button"
 import { SearchBox } from "@/components/leaves/SearchBox"
+import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
 /**
  * LAYOUT - `ShellNav`, presentational half.
@@ -73,8 +73,6 @@ export type ShellNavProps = {
     readonly props: ShellNavData
     /** What it reports. */
     readonly on?: ShellNavActions
-    /** The dialog that hangs off the bar, mounted by whoever owns whether it is open. */
-    readonly children?: ReactNode
 }
 
 /** Where the mark takes the reader. */
@@ -86,49 +84,62 @@ const HOME_HREF = "/dashboard"
  * @param input - {@link ShellNavProps}
  */
 export const _ShellNav = (input: ShellNavProps) => (
-    <Tree contract="brand-links-then-tools-bar">
-        <Tree contract="inline-nav-links">
-            <Link props={{ href: HOME_HREF, label: input.props.brand, icon: "brand", emphasis: "brand" }} />
-            {input.props.routes.map((route) => (
-                <NavLink
-                    key={route.id}
-                    props={{ href: route.href, label: route.label, isCurrent: route.isCurrent, kind: "route" }}
-                />
-            ))}
-        </Tree>
-        <Tree contract="inline-tool-row">
-            <SearchBox
-                props={{
-                    placeholder: input.props.searchPlaceholder,
-                    label: input.props.searchLabel,
-                    shortcut: input.props.searchShortcut,
-                }}
-            />
-            <IconButton
-                props={{ icon: "cart", label: input.props.cartLabel }}
-            />
-            <IconButton
-                props={{ icon: "account", label: input.props.accountLabel }}
-            />
-            <IconButton
-                props={{ icon: "locale", label: input.props.localeLabel }}
-                on={{ press: input.on?.toggleLocale }}
-            />
-            <IconButton
-                props={{
-                    icon: input.props.isDark ? "light" : "dark",
-                    label: input.props.themeLabel,
-                    isActive: input.props.isDark,
-                }}
-                on={{ press: input.on?.toggleTheme }}
-            />
-            <Button
-                props={{ label: input.props.signInLabel, variant: "primary", size: "sm", icon: "signIn" }}
-                on={{ press: input.on?.openSignIn }}
-            />
-        </Tree>
-        {input.children}
-    </Tree>
+    <Tree
+        contract="brand-links-then-tools-bar"
+        render={defineContractComponent("brand-links-then-tools-bar", {
+            navigation: defineContractComponent("inline-nav-links", {
+                brand: defineLeafComponent("link", { emphasis: "brand" }, () => (
+                    <Link props={{ href: HOME_HREF, label: input.props.brand, icon: "brand", emphasis: "brand" }} />
+                )),
+                route: input.props.routes.map((route) => defineLeafComponent("nav-link", { kind: "route" }, () => (
+                    <NavLink
+                        props={{ href: route.href, label: route.label, isCurrent: route.isCurrent, kind: "route" }}
+                    />
+                ))),
+            }),
+            tools: defineContractComponent("inline-tool-row", {
+                search: defineLeafComponent("search-box", {}, () => (
+                    <SearchBox
+                        props={{
+                            placeholder: input.props.searchPlaceholder,
+                            label: input.props.searchLabel,
+                            shortcut: input.props.searchShortcut,
+                        }}
+                    />
+                )),
+                tool: [
+                    defineLeafComponent("icon-button", {}, () => (
+                        <IconButton props={{ icon: "cart", label: input.props.cartLabel }} />
+                    )),
+                    defineLeafComponent("icon-button", {}, () => (
+                        <IconButton props={{ icon: "account", label: input.props.accountLabel }} />
+                    )),
+                    defineLeafComponent("icon-button", {}, () => (
+                        <IconButton
+                            props={{ icon: "locale", label: input.props.localeLabel }}
+                            on={{ press: input.on?.toggleLocale }}
+                        />
+                    )),
+                    defineLeafComponent("icon-button", {}, () => (
+                        <IconButton
+                            props={{
+                                icon: input.props.isDark ? "light" : "dark",
+                                label: input.props.themeLabel,
+                                isActive: input.props.isDark,
+                            }}
+                            on={{ press: input.on?.toggleTheme }}
+                        />
+                    )),
+                ],
+                signIn: defineLeafComponent("button", { size: "sm", variant: "primary" }, () => (
+                    <Button
+                        props={{ label: input.props.signInLabel, variant: "primary", size: "sm", icon: "signIn" }}
+                        on={{ press: input.on?.openSignIn }}
+                    />
+                )),
+            }),
+        })}
+    />
 )
 
 /** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */

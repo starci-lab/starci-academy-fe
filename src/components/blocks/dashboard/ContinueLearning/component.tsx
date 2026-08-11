@@ -1,9 +1,9 @@
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { Tree } from "@/components/branches/Tree"
 import { Text } from "@/components/leaves/Text"
 import { SeeMoreLink } from "@/components/leaves/SeeMoreLink"
 import { EmptyNotice } from "@/components/leaves/EmptyNotice"
 import type { IconName } from "@/components/leaves/Icon"
+import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
 /**
  * BLOCK - `ContinueLearning`, presentational half.
@@ -98,16 +98,19 @@ export const _ContinueLearning = (
 ) => {
     if (input.state === "onboarding" || input.state === "empty" || input.state === "failed") {
         return (
-            <SurfaceCard props={{ label: input.props.label }}>
-                <EmptyNotice
-                    props={{
-                        icon: "course",
-                        message: input.props.message,
-                        actionLabel: input.props.actionLabel,
-                    }}
-                    on={{ act: input.on?.act }}
-                />
-            </SurfaceCard>
+            <SurfaceCard props={{ label: input.props.label }} contract="empty-notice-card"
+                render={defineContractComponent("empty-notice-card", {
+                    notice: defineLeafComponent("empty-notice", {}, () => (
+                        <EmptyNotice
+                            props={{
+                                icon: "course",
+                                message: input.props.message,
+                                actionLabel: input.props.actionLabel,
+                            }}
+                            on={{ act: input.on?.act }}
+                        />
+                    )),
+                })} />
         )
     }
 
@@ -123,47 +126,49 @@ export const _ContinueLearning = (
         items: ReadonlyArray<ResumeItem | undefined>,
         resumeLabel: string | undefined,
         isLoading: boolean,
-    ) => (
-        <Tree contract="two-column-grid">
-            {items.map((item, index) => (
-                <Tree key={item?.id ?? `resting-${index}`} contract="bounded-content-card">
-                    <Text
-                        props={{ content: item?.kindLabel, icon: item?.icon, size: "sm", tone: "muted" }}
-                        isLoading={isLoading}
+    ) => defineContractComponent("two-column-grid", {
+        card: items.map((item) => defineContractComponent("resume-item-card", {
+            kind: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                <Text
+                    props={{ content: item?.kindLabel, icon: item?.icon, size: "sm", tone: "muted" }}
+                    isLoading={isLoading}
+                />
+            )),
+            title: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
+                <Text
+                    props={{ content: item?.title, size: "sm", weight: "medium" }}
+                    isLoading={isLoading}
+                />
+            )),
+            // A resting card has no destination yet, so it has no dead way out.
+            ...(item === undefined || resumeLabel === undefined ? {} : {
+                resume: defineLeafComponent("see-more-link", {}, () => (
+                    <SeeMoreLink
+                        props={{ label: resumeLabel }}
+                        on={{ press: () => input.on?.resume?.(item.id) }}
                     />
-                    <Text
-                        props={{ content: item?.title, size: "sm", weight: "medium" }}
-                        isLoading={isLoading}
-                    />
-                    {/*
-                      * The way out is drawn only once there is somewhere to go. A resting card
-                      * leaves the place empty rather than shimmering a control: a target that
-                      * arrives before its destination is one a reader presses and learns nothing
-                      * from.
-                      */}
-                    {item === undefined || resumeLabel === undefined ? null : (
-                        <SeeMoreLink
-                            props={{ label: resumeLabel }}
-                            on={{ press: () => input.on?.resume?.(item.id) }}
-                        />
-                    )}
-                </Tree>
-            ))}
-        </Tree>
-    )
+                )),
+            }),
+        })),
+    })
 
     if (input.state === "pending") {
         return (
-            <SurfaceCard props={{ label: input.props.label, isFrameless: true }} isLoading>
-                {run(Array.from({ length: RESTING_ITEMS }, () => undefined), undefined, true)}
-            </SurfaceCard>
+            <SurfaceCard
+                props={{ label: input.props.label, isFrameless: true }}
+                contract="two-column-grid"
+                render={run(Array.from({ length: RESTING_ITEMS }, () => undefined), undefined, true)}
+                isLoading
+            />
         )
     }
 
     return (
-        <SurfaceCard props={{ label: input.props.label, isFrameless: true }}>
-            {run(input.props.items, input.props.resumeLabel, false)}
-        </SurfaceCard>
+        <SurfaceCard
+            props={{ label: input.props.label, isFrameless: true }}
+            contract="two-column-grid"
+            render={run(input.props.items, input.props.resumeLabel, false)}
+        />
     )
 }
 
