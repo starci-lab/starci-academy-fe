@@ -244,7 +244,7 @@ export const CONTRACTS = buildContracts({
         why: "The day's task run and its reward outcome share a bounded ground because the outcome only has meaning as the result of that run.",
     },
     "daily-quest-list": {
-        classes: ["overflow-hidden"],
+        classes: ["overflow-hidden", "divide-y"],
         children: {
             task: { leaf: "task-progress-row", repeats: true, restingCount: 5 },
         },
@@ -461,6 +461,27 @@ export const CONTRACTS = buildContracts({
 
 /** Every key in the registry. A key not in this union is a compile error at the call site. */
 export type ContractKey = keyof typeof CONTRACTS
+
+/** Slot names whose contract entry declares a repeated run. */
+type RepeatedSlotNames<K extends ContractKey> = {
+    [S in keyof (typeof CONTRACTS)[K]["children"]]:
+        (typeof CONTRACTS)[K]["children"][S] extends { readonly repeats: true } ? S : never
+}[keyof (typeof CONTRACTS)[K]["children"]]
+
+/**
+ * Contracts a joined-list surface may host: a separated root made only from repeated slots.
+ * The class and cardinality are both checked so a grid or a mixed header/list node cannot enter.
+ */
+export type JoinedListContractKey = {
+    [K in ContractKey]:
+        "divide-y" extends (typeof CONTRACTS)[K]["classes"][number]
+            ? [RepeatedSlotNames<K>] extends [never]
+                ? never
+                : Exclude<keyof (typeof CONTRACTS)[K]["children"], RepeatedSlotNames<K>> extends never
+                    ? K
+                    : never
+            : never
+}[ContractKey]
 
 /**
  * Read one entry, widened to the shared shape.

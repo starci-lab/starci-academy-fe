@@ -1,4 +1,4 @@
-import type { ReactNode } from "react"
+import type { ComponentType, ReactNode } from "react"
 import type { ChildrenOf, ContractKey, ContractPropValue } from "@/components/contracts"
 
 /**
@@ -96,23 +96,62 @@ export type ContractProjection<K extends ContractKey> = {
     readonly project: () => ReactNode
 }
 
-/** Checked contract content, either as named slots or as one branch-owned projection. */
-export type ContractComponent<K extends ContractKey> = ContractSlots<K> | ContractProjection<K>
+/** A real component type whose runtime input remains separate from its contract identity. */
+export type ContractRenderComponent<
+    K extends ContractKey,
+    P,
+> = ComponentType<P> & {
+    readonly kind: "component"
+    readonly meta: ContractComponentMeta<K>
+}
+
+/** Checked bound content used by Tree and aggregate contract projections. */
+export type BoundContractComponent<K extends ContractKey> = ContractSlots<K> | ContractProjection<K>
 
 /**
- * Bind one exact named slot record to the contract whose child grammar it implements.
+ * One contract identity with either bound slots or a real component input.
  *
- * `ChildrenOf<K>` makes missing, extra, repeated, wrong-identity and wrong-literal slots fail at
- * the builder call; the returned content preserves the key and record across branch boundaries.
+ * Omitting `P` selects the bound lane used by Tree. Supplying `P` selects the component-type lane
+ * used by a host that passes runtime `props` without closing them into slot callbacks.
  */
-export const defineContractComponent = <const K extends ContractKey>(
-    contract: K,
-    slots: ChildrenOf<K>,
-): ContractSlots<K> => ({
-        kind: "slots",
+export type ContractComponent<
+    K extends ContractKey,
+    P = undefined,
+> = [P] extends [undefined]
+    ? BoundContractComponent<K>
+    : ContractRenderComponent<K, P>
+
+/** The two supported builder calls: checked bound slots, or a real component type. */
+type DefineContractComponent = {
+    <const K extends ContractKey>(contract: K, slots: ChildrenOf<K>): ContractSlots<K>
+    <
+        const K extends ContractKey,
+        P,
+    >(
+        contract: K,
+        render: ComponentType<P>,
+    ): ContractRenderComponent<K, P>
+}
+
+/**
+ * Bind either checked named slots or one real component type to an exact contract identity.
+ *
+ * The component overload keeps runtime `props` outside the contract metadata. A host can therefore
+ * pass changing data into a stable component type without rebuilding a forest of closed callbacks.
+ */
+export const defineContractComponent = ((contract: ContractKey, input: unknown) => {
+    if (typeof input === "function") {
+        return Object.assign(input, {
+            kind: "component" as const,
+            meta: { shape: "contract", contract } as const,
+        })
+    }
+    return {
+        kind: "slots" as const,
         meta: { shape: "contract", contract } as const,
-        slots,
-    })
+        slots: input,
+    }
+}) as DefineContractComponent
 
 /** Brand the complete node produced by a branch that owns wrappers a contract cannot express. */
 export const defineContractProjection = <const K extends ContractKey>(

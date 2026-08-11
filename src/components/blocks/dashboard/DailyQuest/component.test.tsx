@@ -65,8 +65,11 @@ describe("_DailyQuest", () => {
         )
         expect(container.querySelectorAll("[data-component=\"TaskProgressRow\"]")).toHaveLength(2)
         expect(container.querySelectorAll("[data-component=\"SurfaceListCardSurface\"]")).toHaveLength(1)
-        expect(container.querySelector("[data-component=\"SurfaceListCardBody\"]")?.getAttribute("data-node"))
-            .toBe("daily-quest-list")
+        const body = container.querySelector("[data-component=\"SurfaceListCardBody\"]")
+        expect(body?.getAttribute("data-node")).toBe("daily-quest-list")
+        expect(body?.className).toContain("divide-y")
+        expect(container.querySelector("[data-component=\"TaskProgressRow\"]")?.className)
+            .not.toContain("after:")
         expect(container.querySelector("[data-node=\"title-with-end-action\"]")).toBeNull()
     })
 

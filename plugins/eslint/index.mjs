@@ -18,7 +18,11 @@ import {
   noVietnameseInSourceAuthoring,
 } from "./authoring.mjs"
 import { noRuntimeNamespace } from "./namespaces.mjs"
-import { noChildrenSlotOutsideShell, noPublicClassNameProp } from "./public-contracts.mjs"
+import {
+  noChildrenSlotOutsideShell,
+  noPublicClassNameProp,
+  noSurfaceListItemsSlot,
+} from "./public-contracts.mjs"
 import {
   noHeadingElementOutsideHeadingAtom,
   noStructuralHostOutsideRegistryFrame,
@@ -679,6 +683,7 @@ export default {
     "no-per-part-classname-prop": noPerPartClassNameProp,
     "no-public-classname-prop": noPublicClassNameProp,
     "no-children-slot-outside-shell": noChildrenSlotOutsideShell,
+    "no-surface-list-items-slot": noSurfaceListItemsSlot,
     "no-public-frame-css-props": noPublicFrameCssProps,
     "no-css-door-type-laundering": noCssDoorTypeLaundering,
     "no-double-cast": noDoubleCast,

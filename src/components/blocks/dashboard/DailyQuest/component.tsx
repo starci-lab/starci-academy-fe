@@ -1,9 +1,18 @@
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
+import {
+    SurfaceListCard,
+    type SurfaceListCardActions,
+} from "@/components/branches/SurfaceListCard"
+import { ContractContent } from "@/components/branches/Tree"
 import { TaskProgressRow } from "@/components/leaves/TaskProgressRow"
 import { EmptyNotice } from "@/components/leaves/EmptyNotice"
+import { CONTRACTS } from "@/components/contracts"
 import type { LabelledProgressRowData } from "@/components/leaves/LabelledProgressRow"
-import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
+import {
+    defineContractComponent,
+    defineLeafComponent,
+    type LeafProps,
+} from "@/components/contracts/props"
 
 /**
  * BLOCK - `DailyQuest`, presentational half.
@@ -60,14 +69,54 @@ export type DailyQuestActions = {
     readonly claim?: () => void
 }
 
-/** How many rows the resting shape stands in for, so the card does not resize when they land. */
-const RESTING_ROWS: ReadonlyArray<LabelledProgressRowData> = [
-    { id: "resting-1" },
-    { id: "resting-2" },
-    { id: "resting-3" },
-    { id: "resting-4" },
-    { id: "resting-5" },
-]
+/** Runtime props consumed by the named daily-quest contract component. */
+export type DailyQuestContentData = {
+    /** The already-resolved section name read by the surface host. */
+    readonly label: string
+    /** The whole-list result drawn below the joined surface. */
+    readonly description?: string
+    /** The whole-list action label drawn below the joined surface. */
+    readonly actionLabel?: string
+    /** Rows in server order; empty while the contract's resting count owns the shape. */
+    readonly tasks: ReadonlyArray<LabelledProgressRowData>
+}
+
+/** Fixed component input for {@link DailyQuestContent}. */
+export type DailyQuestContentProps = LeafProps<DailyQuestContentData, SurfaceListCardActions>
+
+/** How many copies the contract requires while the repeated slot is resting. */
+const RESTING_COUNT = CONTRACTS["daily-quest-list"].children.task.restingCount
+
+/** Turn daily-quest props into the repeated leaf slot required by the contract. */
+const DailyQuestContentView = ({ props, isLoading = false }: DailyQuestContentProps) => {
+    const tasks: ReadonlyArray<LabelledProgressRowData> = isLoading
+        ? Array.from({ length: RESTING_COUNT }, (_, index) => ({
+            id: `resting-${index}`,
+        }))
+        : props.tasks
+
+    return (
+        <ContractContent
+            contract="daily-quest-list"
+            render={defineContractComponent("daily-quest-list", {
+                task: tasks.map((task) => defineLeafComponent("task-progress-row", {}, () => (
+                    <TaskProgressRow
+                        props={{
+                            id: task.id,
+                            title: task.title,
+                            fact: task.percentText,
+                            isComplete: task.percent === 100,
+                        }}
+                        isLoading={isLoading}
+                    />
+                ))),
+            })}
+        />
+    )
+}
+
+/** Stable component type branded for the exact list contract it implements. */
+const DailyQuestContent = defineContractComponent("daily-quest-list", DailyQuestContentView)
 
 /**
  * Render the day's quest.
@@ -96,8 +145,6 @@ export const _DailyQuest = (input: DailyQuestProps & { readonly on?: DailyQuestA
     }
 
     const isLoading = input.state === "pending"
-    const tasks = input.state === "pending" ? RESTING_ROWS : input.props.tasks
-
     return (
         <SurfaceListCard
             props={{
@@ -106,22 +153,11 @@ export const _DailyQuest = (input: DailyQuestProps & { readonly on?: DailyQuestA
                     ? input.props.rewardLine
                     : input.state === "claimed" ? input.props.claimedLine : undefined,
                 actionLabel: input.state === "claimable" ? input.props.claimLabel : undefined,
+                tasks: input.state === "pending" ? [] : input.props.tasks,
             }}
             on={{ act: input.on?.claim }}
             contract="daily-quest-list"
-            render={defineContractComponent("daily-quest-list", {
-                task: tasks.map((task) => defineLeafComponent("task-progress-row", {}, () => (
-                    <TaskProgressRow
-                        props={{
-                            id: task.id,
-                            title: task.title,
-                            fact: task.percentText,
-                            isComplete: task.percent === 100,
-                        }}
-                        isLoading={isLoading}
-                    />
-                ))),
-            })}
+            render={DailyQuestContent}
             isLoading={isLoading}
         />
     )

@@ -2,7 +2,11 @@
 import test from "node:test"
 import { RuleTester } from "eslint"
 import tsParser from "@typescript-eslint/parser"
-import { noChildrenSlotOutsideShell, noPublicClassNameProp } from "./public-contracts.mjs"
+import {
+  noChildrenSlotOutsideShell,
+  noPublicClassNameProp,
+  noSurfaceListItemsSlot,
+} from "./public-contracts.mjs"
 
 const tester = new RuleTester({
   languageOptions: {
@@ -91,6 +95,24 @@ test("no-children-slot-outside-shell reserves the untyped hole for covering shel
         filename: "D:/repo/src/components/branches/SurfaceCard/index.tsx",
         code: "type SurfaceCardProps = { children?: ReactNode }",
         errors: [{ messageId: "children" }],
+      },
+    ],
+  })
+})
+
+test("no-surface-list-items-slot keeps runtime collections inside named props", () => {
+  tester.run("no-surface-list-items-slot", noSurfaceListItemsSlot, {
+    valid: [
+      {
+        filename: "D:/repo/src/components/blocks/dashboard/DailyQuest/component.tsx",
+        code: "import { SurfaceListCard } from \"@/components/branches/SurfaceListCard\"\nexport const DailyQuest = () => <SurfaceListCard contract=\"daily-quest-list\" render={Content} props={{ label, tasks }} />",
+      },
+    ],
+    invalid: [
+      {
+        filename: "D:/repo/src/components/blocks/dashboard/DailyQuest/component.tsx",
+        code: "import { SurfaceListCard as List } from \"@/components/branches/SurfaceListCard\"\nexport const DailyQuest = () => <List contract=\"daily-quest-list\" render={Content} props={{ label }} items={tasks} />",
+        errors: [{ messageId: "items" }],
       },
     ],
   })
