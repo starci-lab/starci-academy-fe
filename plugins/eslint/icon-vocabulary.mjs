@@ -3,8 +3,8 @@
 /** Forward-slash form so Windows and POSIX paths obey the same boundary. */
 const normalizePath = (filename) => String(filename || "").replace(/\\/g, "/")
 
-/** The only folder allowed to name concrete glyph components. */
-const ICON_LEAF = "/src/components/leaves/Icon/"
+/** The only module allowed to name concrete glyph components. */
+const ICON_MODULE = "/src/components/leaves/Icon/index.tsx"
 
 /** Known general-purpose glyph package roots, matched through subpaths. */
 const GLYPH_PACKAGES = [
@@ -14,7 +14,14 @@ const GLYPH_PACKAGES = [
   "react-icons",
   "@tabler/icons",
   "@fortawesome/",
+  "@mui/icons-material",
+  "@fluentui/react-icons",
+  "iconsax-react",
+  "react-feather",
 ]
+
+/** Package-name signal for a glyph catalogue not yet listed explicitly. */
+const GLYPH_PACKAGE_NAME = /(?:icon|glyph|lucide|feather|tabler|fortawesome)/i
 
 /** The exact Heroicon families selected for heading/leading and chip roles. */
 const ALLOWED_HEROICON_FAMILIES = new Set([
@@ -25,7 +32,9 @@ const ALLOWED_HEROICON_FAMILIES = new Set([
 /** True when an import reaches any known glyph package, including a subpath. */
 const isGlyphPackage = (source) => {
   const value = typeof source === "string" ? source : ""
-  return GLYPH_PACKAGES.some((root) => value === root || value.startsWith(root))
+  const isExternalPackage = value !== "" && !value.startsWith(".") && !value.startsWith("@/")
+  return GLYPH_PACKAGES.some((root) => value === root || value.startsWith(root)) ||
+    (isExternalPackage && GLYPH_PACKAGE_NAME.test(value))
 }
 
 /** Callers name meanings; only the Icon leaf names vendor glyphs. */
@@ -41,7 +50,7 @@ export const noVendorIconOutsideIconLeaf = {
   },
   create(context) {
     const file = normalizePath(context.filename || context.getFilename())
-    if (!file.includes("/src/") || file.includes(ICON_LEAF)) return {}
+    if (!file.includes("/src/") || file.endsWith(ICON_MODULE)) return {}
     return {
       ImportDeclaration(node) {
         const source = node.source && node.source.value
@@ -65,7 +74,7 @@ export const heroiconsFamiliesAreClosed = {
   },
   create(context) {
     const file = normalizePath(context.filename || context.getFilename())
-    if (!file.includes(ICON_LEAF)) return {}
+    if (!file.endsWith(ICON_MODULE)) return {}
     return {
       ImportDeclaration(node) {
         const source = node.source && node.source.value

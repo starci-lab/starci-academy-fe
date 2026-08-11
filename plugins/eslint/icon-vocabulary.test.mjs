@@ -13,6 +13,7 @@ const tester = new RuleTester({
 })
 
 const ICON = "D:/repo/src/components/leaves/Icon/index.tsx"
+const BRANDS = "D:/repo/src/components/leaves/Icon/brands.tsx"
 const OTHER = "D:/repo/src/components/leaves/SeeMoreLink/index.tsx"
 
 test("only the Icon leaf names glyph packages", () => {
@@ -30,6 +31,26 @@ test("only the Icon leaf names glyph packages", () => {
       {
         filename: OTHER,
         code: "import { XIcon } from \"@phosphor-icons/react/dist/ssr\"",
+        errors: [{ messageId: "vendor" }],
+      },
+      {
+        filename: BRANDS,
+        code: "import { GoogleIcon } from \"@heroicons/react/24/outline\"",
+        errors: [{ messageId: "vendor" }],
+      },
+      {
+        filename: OTHER,
+        code: "import Home from \"@mui/icons-material/Home\"",
+        errors: [{ messageId: "vendor" }],
+      },
+      {
+        filename: OTHER,
+        code: "import { Home } from \"iconsax-react\"",
+        errors: [{ messageId: "vendor" }],
+      },
+      {
+        filename: OTHER,
+        code: "import { Home } from \"some-glyph-catalogue\"",
         errors: [{ messageId: "vendor" }],
       },
     ],
