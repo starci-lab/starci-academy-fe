@@ -89,7 +89,7 @@ export const Button = ({ props, on, isLoading = false }: ButtonProps) => {
             onPress={on?.press}
             className={isLoading ? RESTING_CLASSES : undefined}
         >
-            {props.icon === undefined || isLoading ? null : <Icon props={{ name: props.icon, size: "sm" }} />}
+            {props.icon === undefined || isLoading ? null : <Icon props={{ name: props.icon, role: "chip" }} />}
             {props.label}
         </HeroButton>
     )

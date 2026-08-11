@@ -1,36 +1,66 @@
 import {
-    ArrowClockwiseIcon,
+    AcademicCapIcon,
+    ArrowPathIcon,
     ArrowRightIcon,
-    BookBookmarkIcon,
-    CheckCircleIcon,
-    CoinIcon,
-    EnvelopeSimpleIcon,
-    FireIcon,
-    BookmarkSimpleIcon,
+    ArrowRightOnRectangleIcon,
     BellIcon,
+    BookmarkIcon,
+    BookOpenIcon,
     BriefcaseIcon,
-    CodeIcon,
-    CompassIcon,
+    CheckCircleIcon,
+    CircleStackIcon,
+    ClipboardDocumentCheckIcon,
+    CodeBracketIcon,
+    EnvelopeIcon,
+    FireIcon,
+    HomeIcon,
+    LanguageIcon,
+    LockClosedIcon,
     MagnifyingGlassIcon,
-    ShoppingCartSimpleIcon,
-    UserCircleIcon,
-    GraduationCapIcon,
-    HouseIcon,
-    ListChecksIcon,
+    MapIcon,
     MoonIcon,
+    PaperAirplaneIcon,
+    ShieldCheckIcon,
+    ShoppingCartIcon,
+    SparklesIcon,
     SunIcon,
     TrophyIcon,
-    TranslateIcon,
-    UsersThreeIcon,
-    LockKeyIcon,
-    PaperPlaneTiltIcon,
-    ShieldCheckIcon,
-    SignInIcon,
-    SparkleIcon,
-    XIcon,
-} from "@phosphor-icons/react"
-import type { Icon as PhosphorIcon } from "@phosphor-icons/react"
-import type { ReactElement } from "react"
+    UserCircleIcon,
+    UserGroupIcon,
+    XMarkIcon,
+} from "@heroicons/react/24/outline"
+import {
+    AcademicCapIcon as AcademicCapSolidIcon,
+    ArrowPathIcon as ArrowPathSolidIcon,
+    ArrowRightIcon as ArrowRightSolidIcon,
+    ArrowRightEndOnRectangleIcon as ArrowRightOnRectangleSolidIcon,
+    BellIcon as BellSolidIcon,
+    BookmarkIcon as BookmarkSolidIcon,
+    BookOpenIcon as BookOpenSolidIcon,
+    BriefcaseIcon as BriefcaseSolidIcon,
+    CheckCircleIcon as CheckCircleSolidIcon,
+    CircleStackIcon as CircleStackSolidIcon,
+    ClipboardDocumentCheckIcon as ClipboardDocumentCheckSolidIcon,
+    CodeBracketIcon as CodeBracketSolidIcon,
+    EnvelopeIcon as EnvelopeSolidIcon,
+    FireIcon as FireSolidIcon,
+    HomeIcon as HomeSolidIcon,
+    LanguageIcon as LanguageSolidIcon,
+    LockClosedIcon as LockClosedSolidIcon,
+    MagnifyingGlassIcon as MagnifyingGlassSolidIcon,
+    MapIcon as MapSolidIcon,
+    MoonIcon as MoonSolidIcon,
+    PaperAirplaneIcon as PaperAirplaneSolidIcon,
+    ShieldCheckIcon as ShieldCheckSolidIcon,
+    ShoppingCartIcon as ShoppingCartSolidIcon,
+    SparklesIcon as SparklesSolidIcon,
+    SunIcon as SunSolidIcon,
+    TrophyIcon as TrophySolidIcon,
+    UserCircleIcon as UserCircleSolidIcon,
+    UserGroupIcon as UserGroupSolidIcon,
+    XMarkIcon as XMarkSolidIcon,
+} from "@heroicons/react/16/solid"
+import type { ComponentType, SVGProps } from "react"
 import { GithubMark, GoogleMark } from "./brands"
 import type { LeafProps } from "@/components/contracts/props"
 
@@ -42,7 +72,7 @@ import type { LeafProps } from "@/components/contracts/props"
  * the screen where the streak stops looking like the streak. Here the caller names the MEANING and
  * this file owns the glyph.
  *
- * WHY THE SET IS CLOSED. Phosphor ships several thousand glyphs, and a product that can reach all
+ * WHY THE SET IS CLOSED. Heroicons ships a large glyph catalogue, and a product that can reach all
  * of them has no iconography, it has a search box.
  *
  * COLOUR IS NOT A PROP. The glyph draws in `currentColor`, so it inherits whatever `text-*` the
@@ -58,65 +88,79 @@ export type IconName =
     | "light" | "dark" | "locale" | "google" | "github"
     | "search" | "cart" | "notification" | "account" | "saved" | "talents" | "jobs" | "practice"
 
-/** The two steps. A third size is a decision nobody can make consistently across screens. */
-export type IconSize = "sm" | "md"
+/** The two native Heroicon roles used by the product. */
+export type IconRole = "heading" | "leading" | "chip"
 
 /** What this leaf draws. A `type`, not an `interface` - only an alias satisfies the data fence. */
 export type IconData = {
     /** What this icon means. The glyph follows from it. */
     readonly name: IconName
-    /** The step. `sm` sits beside body text, `md` leads a row or an empty state. */
-    readonly size?: IconSize
-    /** The solid cut instead of the outline, for a glyph carrying emphasis rather than labelling. */
-    readonly isEmphasised?: boolean
+    /** `heading` is 24px outline; `leading` is 20px outline; `chip` is 16px micro. */
+    readonly role?: IconRole
 }
 
 /** Props for {@link Icon}. Three fixed slots, no fourth - see {@link LeafProps}. */
 export type IconProps = LeafProps<IconData>
 
 /**
- * The meaning-to-glyph map. The only file in the repository that names a Phosphor icon.
+ * The meaning-to-glyph map. The only file in the repository that names a Heroicon.
  *
- * Two entries are NOT Phosphor: a provider mark has to be the provider own, in its own colours,
+ * Two entries are NOT Heroicons: a provider mark has to be the provider own, in its own colours,
  * because that is what a reader recognises before they read anything.
  */
-const GLYPHS: Record<IconName, PhosphorIcon | (() => ReactElement)> = {
-    brand: GraduationCapIcon,
-    streak: FireIcon,
-    credit: SparkleIcon,
-    reward: CoinIcon,
-    course: BookBookmarkIcon,
-    email: EnvelopeSimpleIcon,
-    password: LockKeyIcon,
-    code: ShieldCheckIcon,
-    signedIn: CheckCircleIcon,
-    signIn: SignInIcon,
-    close: XIcon,
-    next: ArrowRightIcon,
-    retry: ArrowClockwiseIcon,
-    send: PaperPlaneTiltIcon,
-    home: HouseIcon,
-    explore: CompassIcon,
-    community: UsersThreeIcon,
-    league: TrophyIcon,
-    review: ListChecksIcon,
-    light: SunIcon,
-    dark: MoonIcon,
-    locale: TranslateIcon,
-    search: MagnifyingGlassIcon,
-    cart: ShoppingCartSimpleIcon,
-    notification: BellIcon,
-    account: UserCircleIcon,
-    saved: BookmarkSimpleIcon,
-    talents: UserCircleIcon,
-    jobs: BriefcaseIcon,
-    practice: CodeIcon,
-    google: GoogleMark,
-    github: GithubMark,
+type GlyphComponent = ComponentType<SVGProps<SVGSVGElement>>
+
+/** Native Heroicon drawings for the two product roles. */
+type GlyphCuts = { readonly heading: GlyphComponent, readonly leading: GlyphComponent, readonly chip: GlyphComponent }
+
+/** Pair the normal and subject cuts without exposing either component to a caller. */
+const cuts = (outline: GlyphComponent, chip: GlyphComponent): GlyphCuts => ({
+    heading: outline,
+    leading: outline,
+    chip,
+})
+
+const GLYPHS: Record<IconName, GlyphCuts> = {
+    brand: cuts(AcademicCapIcon, AcademicCapSolidIcon),
+    streak: cuts(FireIcon, FireSolidIcon),
+    credit: cuts(SparklesIcon, SparklesSolidIcon),
+    reward: cuts(CircleStackIcon, CircleStackSolidIcon),
+    course: cuts(BookOpenIcon, BookOpenSolidIcon),
+    email: cuts(EnvelopeIcon, EnvelopeSolidIcon),
+    password: cuts(LockClosedIcon, LockClosedSolidIcon),
+    code: cuts(ShieldCheckIcon, ShieldCheckSolidIcon),
+    signedIn: cuts(CheckCircleIcon, CheckCircleSolidIcon),
+    signIn: cuts(ArrowRightOnRectangleIcon, ArrowRightOnRectangleSolidIcon),
+    close: cuts(XMarkIcon, XMarkSolidIcon),
+    next: cuts(ArrowRightIcon, ArrowRightSolidIcon),
+    retry: cuts(ArrowPathIcon, ArrowPathSolidIcon),
+    send: cuts(PaperAirplaneIcon, PaperAirplaneSolidIcon),
+    home: cuts(HomeIcon, HomeSolidIcon),
+    explore: cuts(MapIcon, MapSolidIcon),
+    community: cuts(UserGroupIcon, UserGroupSolidIcon),
+    league: cuts(TrophyIcon, TrophySolidIcon),
+    review: cuts(ClipboardDocumentCheckIcon, ClipboardDocumentCheckSolidIcon),
+    light: cuts(SunIcon, SunSolidIcon),
+    dark: cuts(MoonIcon, MoonSolidIcon),
+    locale: cuts(LanguageIcon, LanguageSolidIcon),
+    search: cuts(MagnifyingGlassIcon, MagnifyingGlassSolidIcon),
+    cart: cuts(ShoppingCartIcon, ShoppingCartSolidIcon),
+    notification: cuts(BellIcon, BellSolidIcon),
+    account: cuts(UserCircleIcon, UserCircleSolidIcon),
+    saved: cuts(BookmarkIcon, BookmarkSolidIcon),
+    talents: cuts(UserGroupIcon, UserGroupSolidIcon),
+    jobs: cuts(BriefcaseIcon, BriefcaseSolidIcon),
+    practice: cuts(CodeBracketIcon, CodeBracketSolidIcon),
+    google: cuts(GoogleMark, GoogleMark),
+    github: cuts(GithubMark, GithubMark),
 }
 
-/** Diameter per step, plus the shrink that stops a glyph being squeezed inside a flex row. */
-const SIZE_CLASSES = { sm: "size-4 shrink-0", md: "size-5 shrink-0" } as const
+/** Each role keeps the diameter its Heroicon drawing was authored for. */
+const ROLE_CLASSES = {
+    heading: "size-6 shrink-0",
+    leading: "size-5 shrink-0",
+    chip: "size-4 shrink-0",
+} as const
 
 /**
  * Draw one meaning as a glyph.
@@ -124,13 +168,10 @@ const SIZE_CLASSES = { sm: "size-4 shrink-0", md: "size-5 shrink-0" } as const
  * @param input - {@link IconProps}
  */
 export const Icon = ({ props }: IconProps) => {
-    const Glyph = GLYPHS[props.name]
-    return (
-        <Glyph
-            className={SIZE_CLASSES[props.size ?? "sm"]}
-            weight={props.isEmphasised === true ? "fill" : "regular"}
-        />
-    )
+    const glyph = GLYPHS[props.name]
+    const role = props.role ?? "chip"
+    const Glyph = glyph[role]
+    return <Glyph aria-hidden className={ROLE_CLASSES[role]} />
 }
 
 /** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */

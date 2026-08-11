@@ -1,5 +1,5 @@
-import { CaretRightIcon } from "@phosphor-icons/react/dist/ssr"
 import { Link as HeroLink, skeletonVariants } from "@heroui/react"
+import { Icon } from "@/components/leaves/Icon"
 import type { LeafProps } from "@/components/contracts/props"
 
 /**
@@ -38,8 +38,8 @@ export type SeeMoreLinkProps = LeafProps<SeeMoreLinkData, SeeMoreLinkActions>
 /** The line: never wraps, never grows, and carries the hover group the caret rides. */
 const LINE_CLASSES = "group inline-flex w-fit shrink-0 cursor-pointer items-center gap-1 text-sm font-semibold text-accent-soft-foreground no-underline"
 
-/** Scaled against the font size, not the line box, so it reads as a glyph and not as a button. */
-const CARET_CLASSES = "size-3.5 shrink-0 transition-[translate] group-hover:translate-x-1"
+/** The hover movement belongs to the cluster; the glyph keeps the icon vocabulary's small step. */
+const CARET_CLASSES = "shrink-0 transition-[translate] group-hover:translate-x-1"
 
 /** The resting shape - the same line box with the glyphs out. */
 const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({
@@ -69,7 +69,7 @@ export const SeeMoreLink = ({ props, on, isLoading = false }: SeeMoreLinkProps) 
     const inside = (
         <>
             {props.label ?? ""}
-            <CaretRightIcon aria-hidden className={CARET_CLASSES} weight="bold" />
+            <span className={CARET_CLASSES}><Icon props={{ name: "next" }} /></span>
         </>
     )
 

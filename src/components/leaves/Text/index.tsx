@@ -91,7 +91,7 @@ export const Text = ({ props, isLoading = false }: TextProps) => {
             aria-live={live === "off" ? undefined : live}
             className={isLoading ? RESTING_CLASSES : (showsIcon ? WITH_ICON_CLASSES : undefined)}
         >
-            {showsIcon && props.icon !== undefined ? <Icon props={{ name: props.icon, size: "sm" }} /> : null}
+            {showsIcon && props.icon !== undefined ? <Icon props={{ name: props.icon, role: "chip" }} /> : null}
             {props.content ?? ""}
         </Typography.Paragraph>
     )

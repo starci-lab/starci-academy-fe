@@ -46,7 +46,7 @@ export const QuickActionRow = ({ props }: QuickActionRowProps) => (
         href={props.href}
         className={ROW_CLASSES}
     >
-        <Icon props={{ name: props.icon, size: "md" }} />
+        <Icon props={{ name: props.icon, role: "leading" }} />
         {props.label}
     </HeroLink>
 )

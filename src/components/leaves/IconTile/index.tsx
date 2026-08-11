@@ -68,7 +68,7 @@ export const IconTile = ({ props, isLoading = false }: IconTileProps) => {
             aria-hidden={isLoading ? true : undefined}
             className={[BASE_CLASSES, SIZE_CLASSES[size], isLoading ? RESTING_CLASSES : TONE_CLASSES[tone]].join(" ")}
         >
-            {isLoading ? null : <Icon props={{ name: props.icon, size, isEmphasised: true }} />}
+            {isLoading ? null : <Icon props={{ name: props.icon, role: size === "md" ? "heading" : "chip" }} />}
         </span>
     )
 }

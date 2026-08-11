@@ -32,7 +32,7 @@ const LABEL_CLASSES = "inline-flex items-center gap-2 text-sm font-medium"
  */
 export const Label = ({ props }: LabelProps) => (
     <label data-tier="leaf" data-component="Label" htmlFor={props.htmlFor} className={LABEL_CLASSES}>
-        {props.icon === undefined ? null : <Icon props={{ name: props.icon, size: "sm" }} />}
+        {props.icon === undefined ? null : <Icon props={{ name: props.icon, role: "chip" }} />}
         {props.content}
     </label>
 )

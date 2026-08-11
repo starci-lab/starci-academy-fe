@@ -50,7 +50,7 @@ export const ExtendedTabs = ({ props, on }: ExtendedTabsProps) => (
                             aria-controls={`dashboard-panel-${tab.id}`}
                         >
                             <span className="flex items-center gap-2">
-                                <Icon props={{ name: tab.icon, size: "md" }} />
+                                <Icon props={{ name: tab.icon, role: "leading" }} />
                                 <span className="hidden md:inline">{tab.label}</span>
                             </span>
                             <Tabs.Indicator />

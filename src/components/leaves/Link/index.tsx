@@ -78,7 +78,7 @@ export const Link = ({ props }: LinkProps) => (
     >
         {props.emphasis === "brand" ? <BrandLockup label={props.label} /> : (
             <>
-                {props.icon === undefined ? null : <Icon props={{ name: props.icon, size: "sm" }} />}
+                {props.icon === undefined ? null : <Icon props={{ name: props.icon, role: "chip" }} />}
                 {props.label}
             </>
         )}

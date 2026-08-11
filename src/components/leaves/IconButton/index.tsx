@@ -50,7 +50,7 @@ export const IconButton = ({ props, on }: IconButtonProps) => (
         aria-label={props.label}
         onPress={on?.press}
     >
-        <Icon props={{ name: props.icon, size: "md" }} />
+        <Icon props={{ name: props.icon, role: "leading" }} />
     </HeroButton>
 )
 

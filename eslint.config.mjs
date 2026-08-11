@@ -82,6 +82,10 @@ export default defineConfig([
             "starci-fe/no-heading-element-outside-heading-atom": "error",
             "starci-fe/registry-explain-is-a-reason": "error",
             "starci-fe/registry-children-are-typed": "error",
+            // Heroicons is closed by meaning and role: 24 outline for heading/leading,
+            // 16 solid micro for chip, and no glyph package outside the Icon leaf.
+            "starci-fe/no-vendor-icon-outside-icon-leaf": "error",
+            "starci-fe/heroicons-families-are-closed": "error",
             // The registry folder holds two layers with opposite rules: SHAPES is generic and
             // capped, CHAINS name real compositions and are not. These two keep that difference
             // from eroding - the first because a value import there would invert the tier order

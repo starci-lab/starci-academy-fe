@@ -59,7 +59,7 @@ export const SearchBox = ({ props, on }: SearchBoxProps) => (
             on?.search?.(field instanceof HTMLInputElement ? field.value : "")
         }}
     >
-        <Icon props={{ name: "search", size: "sm" }} />
+        <Icon props={{ name: "search", role: "chip" }} />
         <HeroInput
             name="q"
             type="search"

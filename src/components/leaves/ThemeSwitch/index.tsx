@@ -30,7 +30,7 @@ export const ThemeSwitch = ({ props, on }: ThemeSwitchProps) => (
                 <Switch.Control>
                     <Switch.Thumb>
                         <Switch.Icon>
-                            <Icon props={{ name: isSelected ? "dark" : "light", size: "md" }} />
+                            <Icon props={{ name: isSelected ? "dark" : "light", role: "leading" }} />
                         </Switch.Icon>
                     </Switch.Thumb>
                 </Switch.Control>

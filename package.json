@@ -16,9 +16,9 @@
     },
     "dependencies": {
         "@apollo/client": "^4.1.6",
+        "@heroicons/react": "^2.2.0",
         "@heroui/react": "^3.2.1",
         "@heroui/styles": "^3.2.1",
-        "@phosphor-icons/react": "^2.1.10",
         "graphql": "^16.14.1",
         "next": "16.1.6",
         "next-intl": "^4.13.5",

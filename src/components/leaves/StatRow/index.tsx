@@ -41,7 +41,7 @@ const ROW_CLASSES = "flex flex-row items-center gap-3 px-2 py-2 [&>*:nth-child(2
  */
 export const StatRow = ({ props, isLoading = false }: StatRowProps) => (
     <div data-tier="leaf" data-component="StatRow" className={ROW_CLASSES}>
-        <Icon props={{ name: props.icon, size: "md" }} />
+        <Icon props={{ name: props.icon, role: "leading" }} />
         <Text props={{ content: props.label, size: "sm" }} />
         <Text props={{ content: props.value, size: "sm", tone: "muted" }} isLoading={isLoading} />
     </div>

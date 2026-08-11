@@ -99,7 +99,7 @@ export const Field = ({ props, on, isLoading = false }: FieldProps) => {
     return (
         <div data-tier="leaf" data-component="Field" className={FIELD_CLASSES}>
             <label htmlFor={props.id} className={LABEL_CLASSES}>
-                {kind.icon === undefined ? null : <Icon props={{ name: kind.icon, size: "sm" }} />}
+                {kind.icon === undefined ? null : <Icon props={{ name: kind.icon, role: "chip" }} />}
                 {props.label}
             </label>
             <div className={BOX_CLASSES}>

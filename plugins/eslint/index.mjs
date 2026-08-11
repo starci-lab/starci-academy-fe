@@ -26,6 +26,7 @@ import {
 import { noCssDoorTypeLaundering } from "./css-door-laundering.mjs"
 import { noDoubleCast } from "./double-cast.mjs"
 import { connectedBlockHasPresentationalTwin } from "./connected-block-twins.mjs"
+import { heroiconsFamiliesAreClosed, noVendorIconOutsideIconLeaf } from "./icon-vocabulary.mjs"
 import {
   noClassCompositionOutsideRegistry,
   noHandWrittenRegistryAttrs,
@@ -666,6 +667,9 @@ export default {
     "no-heading-element-outside-heading-atom": noHeadingElementOutsideHeadingAtom,
     "registry-explain-is-a-reason": registryExplainIsAReason,
     "registry-children-are-typed": registryChildrenAreTyped,
+    // -- one closed glyph vocabulary --
+    "no-vendor-icon-outside-icon-leaf": noVendorIconOutsideIconLeaf,
+    "heroicons-families-are-closed": heroiconsFamiliesAreClosed,
     // -- how the registry FOLDER itself is written: two layers, opposite rules --
     // -- token scale --
     "no-fractional-spacing": noFractionalSpacing,
