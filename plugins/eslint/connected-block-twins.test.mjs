@@ -1,6 +1,8 @@
 /** Regression tests for the mandatory connected/presentational block split. */
+import assert from "node:assert/strict"
+import path from "node:path"
 import test from "node:test"
-import { RuleTester } from "eslint"
+import { Linter, RuleTester } from "eslint"
 import tsParser from "@typescript-eslint/parser"
 import { connectedBlockHasPresentationalTwin } from "./connected-block-twins.mjs"
 
@@ -90,4 +92,42 @@ test("connected blocks cannot bypass their exact pure twin", () => {
       },
     ],
   })
+})
+
+test("inline ESLint config cannot silence the twin boundary", () => {
+  const linter = new Linter({ configType: "flat" })
+  const messages = linter.verify(
+    `
+      /* eslint-disable starci-fe/connected-block-has-presentational-twin */
+      import { useTranslations } from "next-intl"
+      export const CreditStatRow = () => {
+        const t = useTranslations("identity")
+        return <StatRow props={{ label: t("credit") }} />
+      }
+    `,
+    {
+      files: ["**/*.tsx"],
+      languageOptions: {
+        parser: tsParser,
+        ecmaVersion: 2022,
+        sourceType: "module",
+        parserOptions: { ecmaFeatures: { jsx: true } },
+      },
+      linterOptions: { noInlineConfig: true },
+      plugins: {
+        "starci-fe": {
+          rules: { "connected-block-has-presentational-twin": connectedBlockHasPresentationalTwin },
+        },
+      },
+      rules: { "starci-fe/connected-block-has-presentational-twin": "error" },
+    },
+    path.join(process.cwd(), "src/components/blocks/dashboard/CreditStatRow/index.tsx"),
+  )
+
+  const boundary = messages.find(
+    (message) => message.ruleId === "starci-fe/connected-block-has-presentational-twin",
+  )
+  assert.ok(boundary, JSON.stringify(messages))
+  assert.equal(boundary?.severity, 2)
+  assert.equal(boundary?.messageId, "missing")
 })

@@ -124,6 +124,13 @@ export default defineConfig([
         },
     },
     {
+        // A connected block and its pure twin are an architectural boundary, not a local lint
+        // preference. Inline config is disabled in both halves so neither `eslint-disable` nor
+        // `eslint-enable` can turn that boundary off. There is deliberately no allowlist.
+        files: ["src/components/blocks/**/{index,component}.tsx"],
+        linterOptions: { noInlineConfig: true },
+    },
+    {
         // The enforcement layer is source too: English-only, no emoji, named parameter types.
         files: ["plugins/eslint/**/*.{js,mjs,cjs}"],
         plugins: { "starci-fe": starciFe },
