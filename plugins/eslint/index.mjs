@@ -30,6 +30,11 @@ import {
 import { noCssDoorTypeLaundering } from "./css-door-laundering.mjs"
 import { noDoubleCast } from "./double-cast.mjs"
 import { connectedBlockHasPresentationalTwin } from "./connected-block-twins.mjs"
+import {
+  fieldInputUsesSecondaryVariant,
+  modalShellPassesContentDirectly,
+  noSurfaceBranchInOverlay,
+} from "./surface-policy.mjs"
 import { heroiconsFamiliesAreClosed, noVendorIconOutsideIconLeaf } from "./icon-vocabulary.mjs"
 import {
   noClassCompositionOutsideRegistry,
@@ -684,6 +689,9 @@ export default {
     "no-public-classname-prop": noPublicClassNameProp,
     "no-children-slot-outside-shell": noChildrenSlotOutsideShell,
     "no-surface-list-items-slot": noSurfaceListItemsSlot,
+    "modal-shell-passes-content-directly": modalShellPassesContentDirectly,
+    "field-input-uses-secondary-variant": fieldInputUsesSecondaryVariant,
+    "no-surface-branch-in-overlay": noSurfaceBranchInOverlay,
     "no-public-frame-css-props": noPublicFrameCssProps,
     "no-css-door-type-laundering": noCssDoorTypeLaundering,
     "no-double-cast": noDoubleCast,

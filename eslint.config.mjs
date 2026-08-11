@@ -100,6 +100,9 @@ export default defineConfig([
             "starci-fe/no-public-classname-prop": "error",
             "starci-fe/no-children-slot-outside-shell": "error",
             "starci-fe/no-surface-list-items-slot": "error",
+            "starci-fe/modal-shell-passes-content-directly": "error",
+            "starci-fe/field-input-uses-secondary-variant": "error",
+            "starci-fe/no-surface-branch-in-overlay": "error",
             "starci-fe/no-public-frame-css-props": "error",
             "starci-fe/no-css-door-type-laundering": "error",
             // The double cast turns type checking OFF at the seam where it is worth most. The

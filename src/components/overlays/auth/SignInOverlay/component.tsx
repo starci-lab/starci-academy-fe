@@ -36,7 +36,7 @@ export type SignInOverlayProps<K extends ContractKey> = {
  * @param input - {@link SignInOverlayProps}
  */
 export const _SignInOverlay = <const K extends ContractKey>(input: SignInOverlayProps<K>) => (
-    <ModalShell isOpen={input.isOpen} size="sm" onDismiss={input.onDismiss}>
+    <ModalShell isOpen={input.isOpen} size="xs" onDismiss={input.onDismiss}>
         <Tree contract={input.render.meta.contract} render={input.render} />
     </ModalShell>
 )

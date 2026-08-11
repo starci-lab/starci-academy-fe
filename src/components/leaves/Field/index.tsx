@@ -114,6 +114,7 @@ export const Field = ({ props, on, isLoading = false }: FieldProps) => {
                     aria-invalid={props.isInvalid === true ? true : undefined}
                     aria-describedby={props.hint === undefined ? undefined : `${props.id}-hint`}
                     fullWidth
+                    variant="secondary"
                     className={isLoading ? RESTING_CLASSES : undefined}
                     onChange={(event) => on?.change?.(event.target.value)}
                 />

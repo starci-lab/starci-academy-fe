@@ -10,7 +10,7 @@ import { Modal } from "@heroui/react"
  */
 
 /** How wide the surface is allowed to get. */
-export type ModalShellSize = "sm" | "md" | "lg"
+export type ModalShellSize = "xs" | "sm" | "md" | "lg"
 
 /** Props for {@link ModalShell}. */
 export type ModalShellProps = {
@@ -36,7 +36,7 @@ export const ModalShell = (input: ModalShellProps) => (
             <Modal.Container size={input.size ?? "md"} placement="center">
                 <Modal.Dialog data-tier="shell" data-component="ModalShell">
                     <Modal.CloseTrigger />
-                    <Modal.Body>{input.children}</Modal.Body>
+                    {input.children}
                 </Modal.Dialog>
             </Modal.Container>
         </Modal.Backdrop>
