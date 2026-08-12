@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "task": "public-profile-cluster",
+  "deliveryMode": "batch",
+  "primaryScope": "layout",
+  "subordinateScopes": ["page", "block"],
+  "sharedDecisions": [
+    "Legacy profile routes and source bind parity.",
+    "Identity rail and route tabs persist across profile navigation.",
+    "ProfileHero is a frameless identity rail; no card surface may be added.",
+    "Blocks own independent request and state lifetimes.",
+    "CTA precedence is edit, hire, then follow; share is secondary.",
+    "Settings, private CV editor and pinned-project management are out of scope."
+  ],
+  "workItems": [
+    {"id":"route-profile-redirect","target":"/profile","primaryScope":"page","subordinateScopes":[],"dependsOn":[],"ownerBoundary":"canonical signed-in redirect","fileBoundary":["src/app/profile/page.tsx","src/components/pages/ProfileRedirectPage"],"approvedCaseId":"case-parity-a","states":["restoring","redirect"]},
+    {"id":"layout-public-profile","target":"/profile/[username]/**","primaryScope":"layout","subordinateScopes":["block"],"dependsOn":[],"ownerBoundary":"profile situation, identity and route chrome","fileBoundary":["src/app/profile/[username]/layout.tsx","src/components/layouts/PublicProfileLayout","src/components/blocks/profile"],"approvedCaseId":"case-parity-a","states":["loading","not-found","locked","visitor","owner"]},
+    {"id":"page-profile-overview","target":"/profile/[username]","primaryScope":"page","subordinateScopes":["block"],"dependsOn":["layout-public-profile"],"ownerBoundary":"overview evidence order","fileBoundary":["src/components/pages/ProfileOverviewPage","src/components/blocks/profile/overview"],"approvedCaseId":"case-parity-a","states":["loading","partial","empty","failed","ready"]},
+    {"id":"page-profile-projects","target":"/profile/[username]/projects and detail","primaryScope":"page","subordinateScopes":["block"],"dependsOn":["layout-public-profile"],"ownerBoundary":"project proof and roadmap order","fileBoundary":["src/components/pages/ProfileProjectsPage","src/components/pages/ProfileProjectRoadmapPage","src/components/blocks/profile/projects"],"approvedCaseId":"case-parity-a","states":["loading","empty","failed","ready","detail-missing"]},
+    {"id":"page-profile-challenges","target":"/profile/[username]/challenges/**","primaryScope":"page","subordinateScopes":["block"],"dependsOn":["layout-public-profile"],"ownerBoundary":"challenge proof list and detail hierarchy","fileBoundary":["src/components/pages/ProfileChallengesPage","src/components/pages/ProfileChallengeManagePage","src/components/pages/ProfileChallengeSubmissionPage","src/components/blocks/profile/challenges"],"approvedCaseId":"case-parity-a","states":["loading","empty","failed","ready","detail-missing"]},
+    {"id":"page-profile-skills","target":"/profile/[username]/skills/**","primaryScope":"page","subordinateScopes":["block"],"dependsOn":["layout-public-profile"],"ownerBoundary":"coding evidence and solution hierarchy","fileBoundary":["src/components/pages/ProfileSkillsPage","src/components/pages/ProfileCodingProblemPage","src/components/blocks/profile/skills"],"approvedCaseId":"case-parity-a","states":["loading","empty","failed","ready","detail-missing"]},
+    {"id":"page-profile-activity","target":"/profile/[username]/activity","primaryScope":"page","subordinateScopes":["block"],"dependsOn":["layout-public-profile"],"ownerBoundary":"achievements before activity","fileBoundary":["src/components/pages/ProfileActivityPage","src/components/blocks/profile/activity"],"approvedCaseId":"case-parity-a","states":["loading","empty","failed","ready"]},
+    {"id":"page-profile-public-cv","target":"/profile/[username]/cv","primaryScope":"page","subordinateScopes":["block"],"dependsOn":["layout-public-profile"],"ownerBoundary":"public CV read-only states","fileBoundary":["src/components/pages/ProfilePublicCvPage","src/components/blocks/profile/cv"],"approvedCaseId":"case-parity-a","states":["loading","empty","not-compiled","failed","ready"]}
+  ],
+  "mode": "migration",
+  "approvedCaseId": "case-parity-a",
+  "parityBaseline": "D:/Repositories/starci-academy public profile route and component source",
+  "evidence": [
+    {"claim":"Legacy profile hierarchy and behavior are binding.","source":"D:/Repositories/starci-academy","sourceClass":"legacy","confidence":"proven"},
+    {"claim":"Profile, proof, activity and CV capabilities exist.","source":"D:/Repositories/starci-academy-backend","sourceClass":"backend","confidence":"proven"},
+    {"claim":"Target FE has no profile implementation yet.","source":"D:/Repositories/starci-academy-fe/src","sourceClass":"component","confidence":"proven"},
+    {"claim":"case-parity-a is approved.","source":"user message 2026-08-12","sourceClass":"user","confidence":"proven"}
+  ],
+  "unknowns": ["Authenticated legacy pixel render remains a browser verification risk."],
+  "decisions": ["Implement case-parity-a without redesign.","Keep out-of-scope authenticated management journeys separate."],
+  "rejectedDirections": ["single long portfolio story","metric-first dashboard"],
+  "blockTree": "PublicProfileLayout\n├── ProfileTabs\n└── profile-tabs-over-body\n    ├── ProfileHero\n    └── Routed Profile*Page\n        └── connected evidence blocks",
+  "contracts": [
+    {"key":"profile-tabs-over-body","why":"Profile route chrome stays above identity and evidence body.","evidence":"approved proposal"},
+    {"key":"rail-then-main","why":"Identity keeps stable reading width and stacks first on narrow screens.","evidence":"src/components/contracts/index.ts"},
+    {"key":"stacked-sections","why":"Independent evidence sections retain major seams.","evidence":"src/components/contracts/index.ts"}
+  ],
+  "vocabularyProposals": [
+    {"tier":"layout","name":"PublicProfileLayout","decision":"new","target":null,"targetPath":null,"publicApi":{"props":{"body":"ContractComponent"},"on":{}},"apiDelta":{"propsAdded":[],"onAdded":[]},"affectedCallers":[],"compatibility":"new route owner","tests":["state priority","tab gating","responsive stacking"],"evidence":["legacy PublicProfileLayout"],"reasonForDecision":"No current layout owns persistent profile chrome.","reasonAlternativesFail":"Dashboard layout owns a different domain."},
+    {"tier":"block","name":"ProfileHero","decision":"new","target":null,"targetPath":null,"publicApi":{"props":{"user":"resolved profile facts","action":"resolved contextual action"},"on":{"primary":"function","share":"function"}},"apiDelta":{"propsAdded":[],"onAdded":[]},"affectedCallers":[],"compatibility":"new block","tests":["CTA precedence","loading geometry"],"evidence":["legacy ProfileHero"],"reasonForDecision":"Compact ProfileRow cannot express full identity proof.","reasonAlternativesFail":"Extending ProfileRow changes its defining sentence."}
+  ],
+  "states": [
+    {"id":"layout-loading","scenario":"profile unresolved","viewport":"desktop","theme":"light","expected":"profile skeleton without not-found flash"},
+    {"id":"visitor-ready","scenario":"public unlocked profile","viewport":"desktop","theme":"light","expected":"gated tabs, identity rail and evidence panel"},
+    {"id":"mobile-ready","scenario":"public unlocked profile","viewport":"mobile","theme":"light","expected":"identity stacks before evidence and tab glyphs remain"},
+    {"id":"locked","scenario":"locked profile viewed by visitor","viewport":"desktop","theme":"light","expected":"minimal identity and Browse content recovery"}
+  ]
+}

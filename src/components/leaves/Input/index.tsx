@@ -1,4 +1,8 @@
+"use client"
+
+import { useState } from "react"
 import { Input as HeroInput, skeletonVariants } from "@heroui/react"
+import { Icon } from "@/components/leaves/Icon"
 import type { LeafProps } from "@/components/contracts/props"
 
 /**
@@ -14,7 +18,7 @@ import type { LeafProps } from "@/components/contracts/props"
  */
 
 /** What is being typed. Not the HTML type - that is this file's business. */
-export type InputKind = "email" | "password" | "code" | "text"
+export type InputKind = "email" | "password" | "newPassword" | "code" | "text"
 
 /** What this leaf draws. A `type`, not an `interface` - only an alias satisfies the data fence. */
 export type InputData = {
@@ -24,12 +28,20 @@ export type InputData = {
     readonly name: string
     /** What is being typed. */
     readonly kind?: InputKind
+    /** Example shown while the box is empty. */
+    readonly placeholder?: string
     /** What it starts with, for an uncontrolled box. */
     readonly defaultValue?: string
     /** Blocks typing - a request already on its way. */
     readonly disabled?: boolean
     /** Marks the box as refused, so the message beside it is announced with it. */
     readonly isInvalid?: boolean
+    /** Id of supporting copy that describes this control. */
+    readonly describedBy?: string
+    /** Accessible name of the password reveal control while hidden. */
+    readonly revealLabel?: string
+    /** Accessible name of the password reveal control while visible. */
+    readonly hideLabel?: string
 }
 
 /** What typing in it does. */
@@ -45,6 +57,7 @@ export type InputProps = LeafProps<InputData, InputActions>
 const KINDS = {
     email: { type: "email", autoComplete: "email", inputMode: "email" },
     password: { type: "password", autoComplete: "current-password", inputMode: "text" },
+    newPassword: { type: "password", autoComplete: "new-password", inputMode: "text" },
     code: { type: "text", autoComplete: "one-time-code", inputMode: "numeric" },
     text: { type: "text", autoComplete: "off", inputMode: "text" },
 } as const
@@ -54,31 +67,53 @@ const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({
     className: "h-10 w-full",
 })
 
+/** The box and its intrinsic reveal affordance share one control boundary. */
+const BOX_CLASSES = "relative flex flex-row items-center"
+
+/** The reveal sits inside the input's own inset. */
+const REVEAL_CLASSES = "absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer text-muted"
+
 /**
  * Draw a box to type into.
  *
  * @param input - {@link InputProps}
  */
 export const Input = ({ props, on, isLoading = false }: InputProps) => {
+    const [isRevealed, setIsRevealed] = useState(false)
     const kind = KINDS[props.kind ?? "text"]
+    const isSecret = (props.kind ?? "text") === "password" || props.kind === "newPassword"
+    const revealLabel = isRevealed ? props.hideLabel : props.revealLabel
     return (
-        <HeroInput
-            data-tier="leaf"
-            data-component="Input"
-            data-kind={props.kind ?? "text"}
-            data-loading={isLoading ? "true" : "false"}
-            id={props.id}
-            name={props.name}
-            type={kind.type}
-            autoComplete={kind.autoComplete}
-            inputMode={kind.inputMode}
-            defaultValue={props.defaultValue}
-            disabled={props.disabled === true || isLoading}
-            aria-invalid={props.isInvalid === true ? true : undefined}
-            fullWidth
-            className={isLoading ? RESTING_CLASSES : undefined}
-            onChange={(event) => on?.change?.(event.target.value)}
-        />
+        <span data-tier="leaf" data-component="Input" className={BOX_CLASSES}>
+            <HeroInput
+                data-kind={props.kind ?? "text"}
+                data-loading={isLoading ? "true" : "false"}
+                id={props.id}
+                name={props.name}
+                type={isSecret && isRevealed ? "text" : kind.type}
+                autoComplete={kind.autoComplete}
+                inputMode={kind.inputMode}
+                defaultValue={props.defaultValue}
+                placeholder={props.placeholder}
+                disabled={props.disabled === true || isLoading}
+                aria-invalid={props.isInvalid === true ? true : undefined}
+                aria-describedby={props.describedBy}
+                fullWidth
+                variant="secondary"
+                className={isLoading ? RESTING_CLASSES : undefined}
+                onChange={(event) => on?.change?.(event.target.value)}
+            />
+            {!isSecret || revealLabel === undefined ? null : (
+                <button
+                    type="button"
+                    aria-label={revealLabel}
+                    className={REVEAL_CLASSES}
+                    onClick={() => setIsRevealed(!isRevealed)}
+                >
+                    <Icon props={{ name: isRevealed ? "hidePassword" : "revealPassword", role: "chip" }} />
+                </button>
+            )}
+        </span>
     )
 }
 

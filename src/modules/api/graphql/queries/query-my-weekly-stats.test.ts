@@ -53,9 +53,9 @@ describe("queryMyWeeklyStatsMap", () => {
         expect(documentText).toContain("active")
     })
 
-    it("selects nothing the payload type does not declare", () => {
-        for (const unread of ["weeklyGoalLessons", "streakFreezes"]) {
-            expect(documentText).not.toContain(unread)
+    it("selects the dashboard figures shared by streak and freeze surfaces", () => {
+        for (const field of ["xp", "lessons", "weeklyGoalLessons", "streakFreezes"]) {
+            expect(documentText).toContain(field)
         }
     })
 

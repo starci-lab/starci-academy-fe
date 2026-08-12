@@ -31,6 +31,7 @@ describe("authentication screen", () => {
 
         const page = container.querySelector("[data-node='centred-authentication-page']")
         const card = page?.querySelector("[data-component='SurfaceFormCard']")
+        expect(page?.classList.contains("min-h-screen")).toBe(true)
         expect(card?.querySelector("[data-part='panel']")?.textContent).toBe("Authentication")
     })
 

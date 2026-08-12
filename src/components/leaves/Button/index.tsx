@@ -1,4 +1,4 @@
-import { Button as HeroButton, skeletonVariants } from "@heroui/react"
+import { Button as HeroButton, skeletonVariants, Spinner } from "@heroui/react"
 import { Icon, type IconName } from "@/components/leaves/Icon"
 import type { LeafProps } from "@/components/contracts/props"
 
@@ -9,8 +9,9 @@ import type { LeafProps } from "@/components/contracts/props"
  * and its real width is the width of its label. A skeleton drawn without one would be a different
  * size from the control it stands in for, and the row would jump the moment data landed.
  *
- * `disabled` IS NOT `isLoading`. `disabled` is a request already on its way; `isLoading` is
- * nothing here yet. A control reading the two as one goes dead on every focus revalidation.
+ * `disabled`, `isPending` AND `isLoading` ARE THREE DIFFERENT FACTS. `disabled` means the action is
+ * unavailable before a press. `isPending` means this exact action is running and draws a spinner.
+ * `isLoading` is the shared data-loading slot and draws the same skeleton state as every leaf.
  */
 
 /**
@@ -22,7 +23,10 @@ import type { LeafProps } from "@/components/contracts/props"
  */
 export type ButtonVariant = "primary" | "secondary" | "outline" | "ghost"
 
-/** Control heights. Two, because a third is a size nobody can pick consistently. */
+/**
+ * Control heights. `sm` belongs inside a row or compact cluster; `md` anchors a standalone action.
+ * Size follows placement, independently of visual priority.
+ */
 export type ButtonSize = "sm" | "md"
 
 /** What pressing the button means to the form around it. */
@@ -34,14 +38,16 @@ export type ButtonData = {
     readonly label: string
     /** Which of the three appearances this press target wears. */
     readonly variant?: ButtonVariant
-    /** The control height. */
+    /** The control height selected from placement, never from variant or label length. */
     readonly size?: ButtonSize
     /** Form semantics. Defaults to `button` so a stray control cannot submit by accident. */
     readonly type?: ButtonType
     /** The meaning drawn before the label. It inherits the label's colour, never its own. */
     readonly icon?: IconName
-    /** Blocks the press and dims the control - a request already on its way. */
+    /** Blocks the press because the action is unavailable before it starts. */
     readonly disabled?: boolean
+    /** The action is already running; block another press and show progress in this control. */
+    readonly isPending?: boolean
 }
 
 /** What pressing it does. Handlers travel apart from data: a function is not a `DataValue`. */
@@ -59,11 +65,8 @@ const VARIANTS = { primary: "primary", secondary: "secondary", outline: "outline
 /** The size step, as the vendor names it. */
 const SIZES = { sm: "sm", md: "md" } as const
 
-/**
- * The resting shape. The label goes transparent rather than being removed, because its width is
- * what the row was laid out around.
- */
-const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({
+/** Data-loading paint shared with the other leaves; action progress uses a spinner instead. */
+const LOADING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({
     className: "select-none text-transparent",
 })
 
@@ -75,6 +78,7 @@ const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({
 export const Button = ({ props, on, isLoading = false }: ButtonProps) => {
     const variant = props.variant ?? "secondary"
     const size = props.size ?? "md"
+    const isPending = props.isPending === true
     return (
         <HeroButton
             data-tier="leaf"
@@ -82,15 +86,18 @@ export const Button = ({ props, on, isLoading = false }: ButtonProps) => {
             data-variant={variant}
             data-size={size}
             data-loading={isLoading ? "true" : "false"}
+            data-action-pending={isPending ? "true" : "false"}
             type={props.type ?? "button"}
             variant={VARIANTS[variant]}
             size={SIZES[size]}
-            isDisabled={props.disabled === true || isLoading}
+            isDisabled={props.disabled === true || isLoading || isPending}
             onPress={on?.press}
-            className={isLoading ? RESTING_CLASSES : undefined}
+            className={isLoading ? LOADING_CLASSES : "relative"}
         >
-            {props.icon === undefined || isLoading ? null : <Icon props={{ name: props.icon, role: "chip" }} />}
-            {props.label}
+            {isLoading ? null : isPending ? <Spinner size="sm" className="absolute" aria-hidden="true" /> : (
+                props.icon === undefined ? null : <Icon props={{ name: props.icon, role: "chip" }} />
+            )}
+            <span className={isPending ? "invisible" : undefined}>{props.label}</span>
         </HeroButton>
     )
 }

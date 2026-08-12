@@ -1,0 +1,539 @@
+{
+  "version": 1,
+  "status": "direction-selected",
+  "task": "dashboard-courses-community-legacy-parity",
+  "deliveryMode": "batch",
+  "mode": "migration",
+  "parityBaseline": {
+    "repository": "D:/Repositories/starci-academy",
+    "route": "/vi/dashboard?tab=courses and /vi/dashboard?tab=community",
+    "render": "C:/Users/Hi/AppData/Local/Temp/codex-clipboard-81f8b14a-7810-4f4b-bb53-42f84b995229.png",
+    "binding": "Legacy source and rendered output bind behavior, hierarchy, density, state policy and interaction. New-FE canon only translates ownership, contracts, vendor boundaries, loading and internal navigation."
+  },
+  "sharedDecisions": [
+    {
+      "id": "shared-dashboard-frame",
+      "decision": "Keep the existing authenticated DashboardPage, dashboard rail and persistent ShellNav unchanged; only replace the Courses partial branch and Community unavailable branch with parity block sequences.",
+      "reason": "The screenshot and current DashboardPage prove both tabs share the same rail-then-main frame and tab navigation."
+    },
+    {
+      "id": "shared-independent-landing",
+      "decision": "Every product block owns its own query and pending/empty/failed/ready state; the page never aggregates loading.",
+      "reason": "Legacy blocks self-fetch and PAGE-3/BLOCK-8 require independent landing."
+    },
+    {
+      "id": "shared-order",
+      "decision": "Courses reads My courses -> Courses for you -> Upcoming live sessions. Community reads Weekly league -> Top learners.",
+      "reason": "The named legacy tab sources fix this order with gap-6 between major blocks."
+    },
+    {
+      "id": "shared-navigation",
+      "decision": "All internal destinations are reported as actions and executed with router.push; opaque global ids use resolveRoute where available.",
+      "reason": "This is the current new-FE navigation boundary and preserves the legacy destination without passing internal href through pure data."
+    },
+    {
+      "id": "shared-visual-translation",
+      "decision": "Preserve legacy information and icon meanings while using the closed Heroicon vocabulary and semantic tokens of starci-academy-fe; top-three rank numbers may use accent text instead of legacy Phosphor medal glyphs unless preview proves an approved Heroicon-equivalent vocabulary addition.",
+      "reason": "Migration parity binds meaning, while new-FE icon canon forbids caller-selected vendor glyphs."
+    }
+  ],
+  "workItems": [
+    {
+      "id": "page-dashboard-tab-orchestration",
+      "target": "/dashboard?tab=courses and /dashboard?tab=community",
+      "primaryScope": "page",
+      "subordinateScopes": ["DashboardPage selected-tab branch", "dashboard courses main contract", "dashboard community main contract"],
+      "dependsOn": ["block-my-courses-progress", "block-recommended-courses", "block-upcoming-livestreams", "block-weekly-league", "block-top-learners"],
+      "ownerBoundary": "Own tab selection, exact block reading order and rail/main composition only; own no block query, copy or action state.",
+      "sourceBoundary": [
+        "D:/Repositories/starci-academy-fe/src/components/pages/DashboardPage/component.tsx",
+        "D:/Repositories/starci-academy/src/components/pages/DashboardPage/CoursesTab/index.tsx",
+        "D:/Repositories/starci-academy/src/components/pages/DashboardPage/CommunityTab/index.tsx"
+      ],
+      "stateInventory": [
+        { "state": "route-entry-courses", "status": "required", "evidence": "DashboardPage accepts tab=courses and legacy mounts the three course blocks lazily in that branch." },
+        { "state": "route-entry-community", "status": "required", "evidence": "DashboardPage accepts tab=community; current FE shows unavailable, while legacy mounts two leaderboard blocks." },
+        { "state": "authenticated-entry", "status": "covered-by-parent", "evidence": "DashboardPage connected half already restores the session and redirects signed-out viewers." },
+        { "state": "page-orchestration-loading", "status": "not-applicable", "evidence": "The page owns no product request; blocks land independently." },
+        { "state": "partial-availability", "status": "required", "evidence": "Five independent authenticated queries can settle at different times or self-hide independently." },
+        { "state": "full-content", "status": "required", "evidence": "Legacy source provides populated arrangements for every block." },
+        { "state": "page-level-failure", "status": "not-applicable", "evidence": "Failures belong to the block that owns the request." },
+        { "state": "desktop-mobile", "status": "covered-by-parent", "evidence": "The existing dashboard-rail-then-main contract owns the responsive frame; preview must combine it with both tab branches." },
+        { "state": "light-dark", "status": "covered-by-parent", "evidence": "Shell/theme owns mode; screenshot proves dark only, so preview must render both themes without changing block ownership." }
+      ]
+    },
+    {
+      "id": "block-my-courses-progress",
+      "target": "MyCoursesProgress",
+      "primaryScope": "block",
+      "subordinateScopes": ["course progress joined list", "course progress row", "segmented progress and legend"],
+      "dependsOn": [],
+      "ownerBoundary": "Own the myCourses request, course-row mapping, trial/enrolled state, route resolution and block landing states.",
+      "sourceBoundary": [
+        "D:/Repositories/starci-academy-fe/src/components/blocks/dashboard/MyCoursesProgress",
+        "D:/Repositories/starci-academy/src/components/pages/DashboardPage/CoursesTab/MyCoursesProgress",
+        "D:/Repositories/starci-academy-backend/src/features/api/core/graphql/queries/dashboard/my-courses"
+      ],
+      "stateInventory": [
+        { "state": "loading", "status": "required", "evidence": "Legacy uses two resting rows; static section label stays visible." },
+        { "state": "empty", "status": "required", "evidence": "myCourses returns an honest empty array when the viewer has no joined courses." },
+        { "state": "populated", "status": "required", "evidence": "Screenshot shows three rows with thumbnail, trial state, percent, segmented bar and dimension legend." },
+        { "state": "recoverable-error", "status": "required", "evidence": "Authenticated network failure is possible and legacy exposes retry." },
+        { "state": "terminal-unavailable-error", "status": "not-applicable", "evidence": "Session denial is handled by the page; no separate permanent block denial is proven." },
+        { "state": "pending-action", "status": "required", "evidence": "A whole-row route resolution can be in flight and must lock only that row." },
+        { "state": "disabled-action", "status": "required", "evidence": "resolveRoute may return no path; the row must then remain non-routable." },
+        { "state": "optimistic-stale", "status": "not-applicable", "evidence": "This block has no write; cached rows may remain during SWR revalidation without a new tree." },
+        { "state": "keyboard-focus", "status": "required", "evidence": "Each ready course row is one whole-row press target." }
+      ]
+    },
+    {
+      "id": "block-recommended-courses",
+      "target": "RecommendedCourses",
+      "primaryScope": "block",
+      "subordinateScopes": ["recommended course joined list", "price and discount facts"],
+      "dependsOn": [],
+      "ownerBoundary": "Own the recommendedCourses request, localized discount reason, currency formatting, course destination and hide-on-empty policy.",
+      "sourceBoundary": [
+        "D:/Repositories/starci-academy/src/components/pages/DashboardPage/RecommendedCourses",
+        "D:/Repositories/starci-academy-backend/src/features/api/core/graphql/queries/dashboard/recommended-courses"
+      ],
+      "stateInventory": [
+        { "state": "loading", "status": "required", "evidence": "Legacy rests as three recommendation rows and keeps the static title visible." },
+        { "state": "empty", "status": "required", "evidence": "Backend returns items=[] when every course is owned or none qualifies; legacy hides the whole block." },
+        { "state": "populated", "status": "required", "evidence": "Screenshot shows two qualifying rows; backend default limit is three." },
+        { "state": "recoverable-error", "status": "required", "evidence": "Legacy renders retry when no cached recommendation exists." },
+        { "state": "terminal-unavailable-error", "status": "not-applicable", "evidence": "Authentication is page-owned and no permanent recommendation denial is proven." },
+        { "state": "pending-action", "status": "not-applicable", "evidence": "Selection is navigation, not a mutation; normal navigation feedback is route-owned." },
+        { "state": "disabled-action", "status": "not-applicable", "evidence": "Every returned recommendation carries a displayId; destination convention remains an implementation assumption." },
+        { "state": "optimistic-stale", "status": "not-applicable", "evidence": "No write occurs in this block." },
+        { "state": "keyboard-focus", "status": "required", "evidence": "Each row is a single internal course destination." }
+      ]
+    },
+    {
+      "id": "block-upcoming-livestreams",
+      "target": "UpcomingLivestreamCard",
+      "primaryScope": "block",
+      "subordinateScopes": ["upcoming session nested joined list", "relative and absolute time row"],
+      "dependsOn": [],
+      "ownerBoundary": "Own the myUpcomingLivestreams request, defensive time ordering, locale formatting, course route resolution and hide-on-empty policy.",
+      "sourceBoundary": [
+        "D:/Repositories/starci-academy/src/components/pages/DashboardPage/UpcomingLivestreamCard",
+        "D:/Repositories/starci-academy-backend/src/features/api/core/graphql/queries/dashboard/my-upcoming-livestreams"
+      ],
+      "stateInventory": [
+        { "state": "loading", "status": "required", "evidence": "Legacy keeps a three-row shape while the authenticated query resolves." },
+        { "state": "empty", "status": "required", "evidence": "Courses with no non-overridable schedule produce []; legacy hides the block." },
+        { "state": "populated", "status": "required", "evidence": "Backend returns up to three soonest concrete weekly occurrences by default." },
+        { "state": "recoverable-error", "status": "required", "evidence": "Legacy exposes retry when the initial query fails." },
+        { "state": "terminal-unavailable-error", "status": "not-applicable", "evidence": "Authentication is page-owned." },
+        { "state": "pending-action", "status": "required", "evidence": "Opaque course globalId is resolved on row activation; only the activated row should lock." },
+        { "state": "disabled-action", "status": "required", "evidence": "resolveRoute can answer path=null." },
+        { "state": "optimistic-stale", "status": "not-applicable", "evidence": "The block performs no write." },
+        { "state": "keyboard-focus", "status": "required", "evidence": "Each session row opens its course destination." }
+      ]
+    },
+    {
+      "id": "block-weekly-league",
+      "target": "LeagueCard",
+      "primaryScope": "block",
+      "subordinateScopes": ["viewer standing", "ranked cohort joined list", "pinned self row"],
+      "dependsOn": [],
+      "ownerBoundary": "Own the myLeague request, countdown, top-five slice, viewer percentile, pinned self logic, rank movement and navigation outcomes.",
+      "sourceBoundary": [
+        "D:/Repositories/starci-academy/src/components/pages/DashboardPage/LeagueCard",
+        "D:/Repositories/starci-academy-backend/src/features/api/core/graphql/queries/league/my-league",
+        "D:/Repositories/starci-academy-backend/src/tests/e2e/league-season.e2e-spec.ts"
+      ],
+      "stateInventory": [
+        { "state": "loading", "status": "required", "evidence": "Legacy rests the standing header plus five cohort rows while preserving the known title." },
+        { "state": "empty", "status": "required", "evidence": "Legacy defines a placement hint for entries=[] even though backend normally lazily places a viewer." },
+        { "state": "populated", "status": "required", "evidence": "Backend returns tier, deadline, rank movement and a ranked cohort." },
+        { "state": "recoverable-error", "status": "required", "evidence": "Network failure is real; legacy currently conflates null/error with loading, which conflicts with BLOCK-8 and must be an explicit preview state." },
+        { "state": "terminal-unavailable-error", "status": "not-applicable", "evidence": "Authentication denial is page-owned." },
+        { "state": "pending-action", "status": "required", "evidence": "Profile-route or see-more route resolution may be in flight; only the selected target locks." },
+        { "state": "disabled-action", "status": "required", "evidence": "A null username/global route result cannot become an invented URL." },
+        { "state": "optimistic-stale", "status": "not-applicable", "evidence": "League preview has no write." },
+        { "state": "keyboard-focus", "status": "required", "evidence": "See-more and routable identity rows are interactive." }
+      ]
+    },
+    {
+      "id": "block-top-learners",
+      "target": "TopLearners",
+      "primaryScope": "block",
+      "subordinateScopes": ["global standing", "ranked identity joined list", "follow row action", "pinned self row"],
+      "dependsOn": ["backend-global-leaderboard-follow-state"],
+      "ownerBoundary": "Own the globalLeaderboard request, top-five slice, self-row, route outcomes and per-user follow mutation/rollback.",
+      "sourceBoundary": [
+        "D:/Repositories/starci-academy/src/components/pages/DashboardPage/TopLearners",
+        "D:/Repositories/starci-academy-backend/src/features/api/core/graphql/queries/league/global-leaderboard",
+        "D:/Repositories/starci-academy-backend/src/features/api/core/graphql/mutations/follows/set-follow",
+        "D:/Repositories/starci-academy-backend/src/tests/e2e/league-season.e2e-spec.ts"
+      ],
+      "stateInventory": [
+        { "state": "loading", "status": "required", "evidence": "Legacy rests the standing header plus five ranked rows." },
+        { "state": "empty", "status": "required", "evidence": "Legacy defines a no-leaders message." },
+        { "state": "populated", "status": "required", "evidence": "Backend returns top 50 plus viewer rank and points; preview uses top five plus optional pinned self." },
+        { "state": "recoverable-error", "status": "required", "evidence": "Network failure is real; legacy lacks a settled error branch, which conflicts with BLOCK-8." },
+        { "state": "terminal-unavailable-error", "status": "not-applicable", "evidence": "Authentication is page-owned." },
+        { "state": "pending-action", "status": "required", "evidence": "Follow/unfollow locks only the affected stranger row and preserves list geometry." },
+        { "state": "disabled-action", "status": "required", "evidence": "The viewer's own row has no follow action; unroutable identity remains non-pressable." },
+        { "state": "optimistic-stale", "status": "required", "evidence": "Follow state changes optimistically and rolls back when setFollow fails." },
+        { "state": "keyboard-focus", "status": "required", "evidence": "Profile rows, see-more and follow controls must preserve independent accessible targets." }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "claim": "The request is planning-only for Courses and Community in starci-academy-fe, using starci-academy as legacy truth.",
+      "source": "Current user instruction and starci-fe-design-plan invocation",
+      "sourceClass": "user-intent",
+      "confidence": "high",
+      "allowedUse": "Select batch migration mode and forbid production edits.",
+      "unknowns": []
+    },
+    {
+      "claim": "Courses visibly renders the dashboard frame, three enrolled course rows and two recommendation rows in dark desktop state.",
+      "source": "C:/Users/Hi/AppData/Local/Temp/codex-clipboard-81f8b14a-7810-4f4b-bb53-42f84b995229.png",
+      "sourceClass": "legacy-render",
+      "confidence": "high",
+      "allowedUse": "Bind visible order, density, grouping, labels and populated desktop dark-state relationships only.",
+      "unknowns": ["No upcoming livestream is visible", "No mobile/light/loading/error state is shown"]
+    },
+    {
+      "claim": "Courses has exactly three independently fetching blocks in order: MyCoursesProgress, RecommendedCourses, UpcomingLivestreamCard.",
+      "source": "D:/Repositories/starci-academy/src/components/pages/DashboardPage/CoursesTab/index.tsx",
+      "sourceClass": "legacy-source",
+      "confidence": "high",
+      "allowedUse": "Bind Courses page reading order and request ownership.",
+      "unknowns": []
+    },
+    {
+      "claim": "Community has exactly two blocks in order: weekly league then top learners; changelog is explicitly excluded.",
+      "source": "D:/Repositories/starci-academy/src/components/pages/DashboardPage/CommunityTab/index.tsx",
+      "sourceClass": "legacy-source",
+      "confidence": "high",
+      "allowedUse": "Bind Community page reading order and scope.",
+      "unknowns": ["Authenticated Community render was not observed"]
+    },
+    {
+      "claim": "myCourses already exposes thumbnail, three progress dimensions, overall percent and trial/enrolled state.",
+      "source": "D:/Repositories/starci-academy-backend/src/features/api/core/graphql/queries/dashboard/my-courses/graphql-types/response.ts",
+      "sourceClass": "backend-api",
+      "confidence": "high",
+      "allowedUse": "Prove full legacy course row can be rendered without backend work.",
+      "unknowns": []
+    },
+    {
+      "claim": "The current new-FE MyCourses query deliberately selects only globalId, label and completionPercent and anticipates a fuller document variant.",
+      "source": "D:/Repositories/starci-academy-fe/src/modules/api/graphql/queries/query-my-courses.ts",
+      "sourceClass": "current-fe-source",
+      "confidence": "high",
+      "allowedUse": "Plan Query2 rather than overload or conditionally mutate Query1.",
+      "unknowns": []
+    },
+    {
+      "claim": "recommendedCourses excludes owned courses, sorts by popularity/recency and returns checkout-consistent loyalty pricing with a default limit of three.",
+      "source": "D:/Repositories/starci-academy-backend/src/features/api/core/graphql/queries/dashboard/recommended-courses",
+      "sourceClass": "backend-behavior",
+      "confidence": "high",
+      "allowedUse": "Prove recommendation order, prices, discount copy inputs and empty behavior.",
+      "unknowns": []
+    },
+    {
+      "claim": "myUpcomingLivestreams returns the soonest concrete occurrences across enrolled courses, auth-only, default three and hard cap twenty.",
+      "source": "D:/Repositories/starci-academy-backend/src/features/api/core/graphql/queries/dashboard/my-upcoming-livestreams/my-upcoming-livestreams.resolver.ts",
+      "sourceClass": "backend-behavior",
+      "confidence": "high",
+      "allowedUse": "Prove row time data, ordering, limit and hide-on-empty state.",
+      "unknowns": []
+    },
+    {
+      "claim": "myLeague lazily places a never-seen authenticated viewer into Bronze and returns ranked weekly cohort data.",
+      "source": "D:/Repositories/starci-academy-backend/src/tests/e2e/league-season.e2e-spec.ts and my-league resolver",
+      "sourceClass": "backend-test",
+      "confidence": "high",
+      "allowedUse": "Prove league population, auth and rank data; retain empty only because legacy defines it and backend may still return an empty cohort edge case.",
+      "unknowns": []
+    },
+    {
+      "claim": "globalLeaderboard returns top users plus the viewer's own rank and points but not current follow relation.",
+      "source": "D:/Repositories/starci-academy-backend/src/features/api/core/graphql/queries/league/global-leaderboard/graphql-types/response.ts",
+      "sourceClass": "backend-api",
+      "confidence": "high",
+      "allowedUse": "Prove ranked list/self-row and identify the follow-state enabler.",
+      "unknowns": ["Current follow state is absent"]
+    },
+    {
+      "claim": "setFollow expects the raw users.id, while leaderboard rows expose opaque global ids.",
+      "source": "D:/Repositories/starci-academy-backend/src/features/api/core/graphql/mutations/follows/set-follow/set-follow.resolver.ts and legacy TopLearners/index.tsx",
+      "sourceClass": "backend-behavior",
+      "confidence": "high",
+      "allowedUse": "Require a new-FE global-id decoder before invoking setFollow; do not pass the opaque id directly.",
+      "unknowns": []
+    },
+    {
+      "claim": "The current dashboard main can only render one simplified courses block and renders Community as unavailable.",
+      "source": "D:/Repositories/starci-academy-fe/src/components/pages/DashboardPage/component.tsx",
+      "sourceClass": "current-fe-source",
+      "confidence": "high",
+      "allowedUse": "Define the precise page orchestration gap.",
+      "unknowns": []
+    },
+    {
+      "claim": "SurfaceCard and SurfaceListCard already own external labels, optional facts/actions, joined-list padding and nested border/no-shadow projection.",
+      "source": "D:/Repositories/starci-academy-fe/src/components/branches/SurfaceCard and SurfaceListCard plus contract why entries",
+      "sourceClass": "ui-grammar",
+      "confidence": "high",
+      "allowedUse": "Reuse these branches for all five blocks; contracts still need honest row recipes.",
+      "unknowns": []
+    },
+    {
+      "claim": "Authenticated Community runtime could not be inspected because the available browser redirected to login and no connected Chrome session existed.",
+      "source": "Read-only browser inspection on 2026-08-12",
+      "sourceClass": "runtime-observation",
+      "confidence": "high",
+      "allowedUse": "Mark Community visual runtime as unverified and require preview comparison; do not infer visible details absent from source.",
+      "unknowns": ["Computed spacing, wrapping and light/mobile Community render"]
+    }
+  ],
+  "unknowns": [
+    {
+      "id": "unknown-community-render",
+      "question": "What is the exact authenticated Community render at desktop/mobile and light/dark?",
+      "impact": "Source fixes behavior and structure, but computed geometry and wrapping cannot be claimed verified.",
+      "resolutionOwner": "design-preview via authenticated legacy capture or user-provided screenshots"
+    },
+    {
+      "id": "unknown-course-detail-route",
+      "question": "Will the new FE course detail route use /courses/:displayId, /courses/:slug or resolveRoute for recommendation rows?",
+      "impact": "RecommendedCourses has displayId but no globalId; the preview can prove interaction placement, while apply must bind the approved route convention.",
+      "resolutionOwner": "frontend routing owner before apply"
+    },
+    {
+      "id": "unknown-course-row-resting-count",
+      "question": "Should strict parity keep the legacy two-row MyCourses skeleton while the current new-FE contract rests three rows?",
+      "impact": "The chosen count changes first-load height; parity evidence favors two and the contract must be frozen in preview.",
+      "resolutionOwner": "design-preview"
+    },
+    {
+      "id": "unknown-leaderboard-error-copy",
+      "question": "Which exact localized retry copy should weekly league and top learners use?",
+      "impact": "Legacy source omits a settled error branch, while canon requires honest failure handling.",
+      "resolutionOwner": "product/i18n owner during preview"
+    },
+    {
+      "id": "unknown-living-seed",
+      "question": "Does the development review account have deterministic recommendations, livestreams, weekly cohort, global leaders, self-below-top and followed/unfollowed variants?",
+      "impact": "Without these rows, runtime parity and state verification cannot close.",
+      "resolutionOwner": "backend seed owner before apply verification"
+    }
+  ],
+  "businessCapabilities": [
+    { "capability": "enrolled course progress", "classification": "reuse", "evidence": "myCourses query and progress projection expose all legacy fields." },
+    { "capability": "personalized course recommendations and loyalty prices", "classification": "reuse", "evidence": "recommendedCourses service/query already exists and is auth-guarded." },
+    { "capability": "upcoming livestream occurrences", "classification": "reuse", "evidence": "myUpcomingLivestreams query computes and sorts concrete occurrences." },
+    { "capability": "weekly league standing", "classification": "reuse", "evidence": "myLeague query plus e2e test prove lazy placement and ranking." },
+    { "capability": "global leaderboard and viewer standing", "classification": "reuse", "evidence": "globalLeaderboard query plus e2e test prove top list and self standing." },
+    { "capability": "follow/unfollow", "classification": "reuse", "evidence": "setFollow mutation already enforces idempotent relation writes and side effects." },
+    { "capability": "leaderboard initial following state", "classification": "additive-enabler", "evidence": "Existing user_follows relation proves the truth, but globalLeaderboard does not expose it." },
+    { "capability": "course/community redesign", "classification": "out-of-scope", "evidence": "User named legacy as baseline and did not request invention." }
+  ],
+  "preliminaryDirections": [
+    {
+      "id": "direction-parity",
+      "thesis": "Restore the two legacy Dashboard journeys so a signed-in learner can understand current learning commitments or competitive standing without leaving the dashboard.",
+      "primaryCta": "Courses: open the most relevant course row; Community: open the full leaderboard. Row-level follow remains subordinate.",
+      "successCondition": "At the same viewport and data state, block order, grouping, copy intent, density and interactions match legacy, with differences limited to documented canon translations.",
+      "readingOrder": [
+        "Shared identity/quick-action rail",
+        "Courses: My courses",
+        "Courses: Courses for you",
+        "Courses: Upcoming live sessions when non-empty",
+        "Community: Weekly league",
+        "Community: Top learners"
+      ],
+      "tradeoffs": [
+        "Preserves legacy density rather than simplifying course progress to one generic bar.",
+        "Keeps five independent request lifetimes, so partial availability is visible by design.",
+        "Requires new contract vocabulary and four FE query ports but no broad backend redesign.",
+        "Community visual parity remains provisional until authenticated preview evidence exists."
+      ],
+      "legacyDivergence": [
+        "Internal navigation uses router.push/actions rather than internal href data.",
+        "Heroicon semantic vocabulary replaces direct Phosphor imports; top-three rank treatment uses approved semantic tokens.",
+        "League and TopLearners gain explicit recoverable error states because real failures cannot remain an endless skeleton under current canon.",
+        "TopLearners uses truthful initial following state only if the additive field is approved."
+      ],
+      "adversarialCritique": {
+        "verdict": "keep",
+        "risks": [
+          "A generic LabelledProgressRow would erase thumbnail, trial status and dimension legend and therefore fail visible parity.",
+          "Reusing WhoToFollow for Community would change the product from competition to discovery.",
+          "A shared all-tab loading state would violate independent block ownership and cause unnecessary layout delay.",
+          "Rendering follow as always-false would lie about existing relationships."
+        ],
+        "smallestRepairs": [
+          "Use honest course and ranked-user list contracts.",
+          "Keep block-specific queries and states.",
+          "Approve the additive following field or omit follow toggling until truthful state is available."
+        ]
+      }
+    }
+  ],
+  "recommendedPreviewDirections": ["direction-parity"],
+  "blockTrees": [
+    {
+      "id": "courses-tree",
+      "tree": "DashboardPage(page) -> dashboard-courses-main -> MyCoursesProgress(block) + RecommendedCourses(block) + UpcomingLivestreamCard(block); each block -> SurfaceCard or SurfaceListCard(branch) -> contract-bound rows -> leaves"
+    },
+    {
+      "id": "community-tree",
+      "tree": "DashboardPage(page) -> dashboard-community-main -> LeagueCard(block) + TopLearners(block); each block -> SurfaceCard(branch) -> standing contract + nested SurfaceListCard(branch) -> ranked rows -> leaves"
+    }
+  ],
+  "contracts": [
+    {
+      "id": "reuse-dashboard-frame",
+      "verdict": "reuse",
+      "targets": ["dashboard-rail-then-main", "dashboard-rail", "label-row-over-card", "title-with-end-action", "title-with-baseline-fact"],
+      "reason": "Their names, children, seams and why match the persistent rail and named page sections."
+    },
+    {
+      "id": "new-dashboard-tab-mains",
+      "verdict": "new-contracts",
+      "targets": ["dashboard-courses-main", "dashboard-community-main"],
+      "children": "Courses repeats exactly three label-row-over-card block projections; Community repeats exactly two.",
+      "resting": "No page-level skeleton; child blocks rest independently.",
+      "reason": "Current dashboard-main why and resting count are overview-specific; using it for two different tab stories would make the contract reason false."
+    },
+    {
+      "id": "new-course-progress-grammar",
+      "verdict": "new-contracts",
+      "targets": ["course-progress-list", "course-progress-row", "course-progress-heading", "segmented-progress-track", "progress-dimension-legend"],
+      "children": "Joined list repeats course rows; each row owns thumbnail, title/trial/percent line, segmented track and three legend facts.",
+      "resting": "Two direct rows; static label remains visible and unresolved values rest in the same leaves.",
+      "reason": "Existing course-progress-card/LabelledProgressRow owns only label, percent and one bar and cannot honestly express the legacy row."
+    },
+    {
+      "id": "new-recommendation-grammar",
+      "verdict": "new-contracts",
+      "targets": ["recommended-course-list", "recommended-course-row", "price-discount-line"],
+      "children": "Joined list repeats whole-row destinations with thumbnail beside title, optional description, price facts, savings and optional reason.",
+      "resting": "Three rows; no fabricated prices, savings or reason copy.",
+      "reason": "No current contract owns commerce facts in a course recommendation row."
+    },
+    {
+      "id": "new-upcoming-live-grammar",
+      "verdict": "new-contracts",
+      "targets": ["upcoming-livestream-card", "upcoming-livestream-list", "upcoming-livestream-row"],
+      "children": "One story surface may contain one nested joined list of up to three session rows; each row owns livestream mark, title/subtitle and trailing relative+absolute time.",
+      "resting": "Three rows inside the same nested list geometry.",
+      "reason": "The outer story plus nested list is the narrow surface-in-surface exception already owned by SurfaceListCard nested mode."
+    },
+    {
+      "id": "new-leaderboard-grammar",
+      "verdict": "new-contracts",
+      "targets": ["leaderboard-card", "leaderboard-standing-row", "ranked-user-list", "ranked-user-row", "ranked-user-ellipsis-row"],
+      "children": "Story surface owns optional standing followed by one nested joined list of five ranked identities and optional ellipsis+self rows.",
+      "resting": "Known title plus one standing row and five ranked rows.",
+      "reason": "League and TopLearners require the same structural relationship and differ only in block-owned trailing meaning."
+    }
+  ],
+  "vocabularyProposals": [
+    {
+      "id": "my-courses-query-2",
+      "kind": "public-api-extension",
+      "target": "src/modules/api/graphql/queries/query-my-courses.ts and types/my-courses.ts",
+      "semanticMeaning": "Full dashboard course-progress selection.",
+      "propsDelta": "Add QueryMyCourses.Query2 selecting thumbnailUrl, contentCompleted/contentTotal, challengeCompleted/challengeTotal, completed/total and isEnrolled alongside existing fields; add matching row type fields.",
+      "onDelta": "none",
+      "placement": "MyCoursesProgress connected block requests Query2; Query1 remains unchanged for narrow callers.",
+      "absenceDefault": "Nullable thumbnail remains absent; counters stay numeric including 0/0; isEnrolled drives trial badge.",
+      "precedence": "Query variant chosen by the caller; no conditional selection inside one document.",
+      "affectedCallers": ["MyCoursesProgress"],
+      "compatibility": "Additive FE document variant; existing Query1 callers and backend schema remain unchanged.",
+      "tests": ["document field selection", "variant dispatch", "full row type fixture"]
+    },
+    {
+      "id": "port-four-query-families",
+      "kind": "new-fe-integration",
+      "target": "GraphQL query/type files and SWR hooks for recommendedCourses, myUpcomingLivestreams, myLeague and globalLeaderboard",
+      "semanticMeaning": "Expose existing backend capabilities to their owning blocks.",
+      "propsDelta": "Typed response data exactly matching selected backend fields; no UI fixtures in production.",
+      "onDelta": "SWR mutate for retry only.",
+      "placement": "One hook per connected block.",
+      "absenceDefault": "Preserve null/[] distinctions documented by each operation.",
+      "precedence": "Cached data survives background revalidation errors; initial error selects failed state.",
+      "affectedCallers": ["RecommendedCourses", "UpcomingLivestreamCard", "LeagueCard", "TopLearners"],
+      "compatibility": "Frontend-only additive files over existing auth-guarded operations.",
+      "tests": ["document shape", "auth client", "abort signal", "response extraction", "SWR key isolation"]
+    },
+    {
+      "id": "global-id-decoder",
+      "kind": "new-fe-utility",
+      "target": "src/modules/utils/global-id.ts",
+      "semanticMeaning": "Decode an opaque Global ID only where a legacy raw-id mutation still requires it.",
+      "propsDelta": "fromGlobalId(value) -> { entityName, id } | null, preserving colon-safe payload behavior from legacy.",
+      "onDelta": "none",
+      "placement": "TopLearners decodes userGlobalId immediately before setFollow; routing continues to treat the value as opaque.",
+      "absenceDefault": "Malformed values return null and must not be sent as raw ids.",
+      "precedence": "Use decoded id; no fallback to the opaque input for mutation.",
+      "affectedCallers": ["TopLearners"],
+      "compatibility": "Additive utility with no existing caller changes.",
+      "tests": ["valid user global id", "payload containing colon", "malformed input"]
+    },
+    {
+      "id": "livestream-icon-meaning",
+      "kind": "public-vocabulary-extension",
+      "target": "src/components/leaves/Icon/icon.md and Icon/index.tsx",
+      "semanticMeaning": "Upcoming/live video session.",
+      "propsDelta": "Add IconName livestream mapped to Heroicons VideoCameraIcon in heading/leading/chip cuts.",
+      "onDelta": "none",
+      "placement": "UpcomingLivestreamCard heading and session row mark only where legacy uses the video-camera meaning.",
+      "absenceDefault": "No icon when the block is hidden; unresolved rows keep geometry without announcing a mark.",
+      "precedence": "Reuse one meaning at all placements; callers cannot pass glyph components.",
+      "affectedCallers": ["UpcomingLivestreamCard"],
+      "compatibility": "Additive closed-union member.",
+      "tests": ["icon map parity", "role size", "duplicate glyph policy"]
+    },
+    {
+      "id": "status-dot-leaf",
+      "kind": "new-leaf",
+      "target": "src/components/leaves/StatusDot",
+      "semanticMeaning": "A tiny non-text legend mark carrying accent/success/warning/danger status tone.",
+      "propsDelta": "props { tone: semantic tone, label: accessible meaning }; isLoading owns its resting anatomy.",
+      "onDelta": "none",
+      "placement": "Course progress dimension legend; not a decorative section icon.",
+      "absenceDefault": "Never rendered without a resolved legend label in ready state.",
+      "precedence": "Tone is semantic; no raw color/class API.",
+      "affectedCallers": ["MyCoursesProgress"],
+      "compatibility": "Additive primitive.",
+      "tests": ["semantic tone mapping", "accessible label", "loading hidden from assistive technology"]
+    }
+  ],
+  "backendEnablerProposals": [
+    {
+      "id": "backend-global-leaderboard-follow-state",
+      "classification": "additive-enabler",
+      "uiNeed": "TopLearners must render Follow versus Following truthfully before the viewer acts.",
+      "operationKind": "additive GraphQL read field",
+      "currentEvidence": "UserFollowEntity already stores the authenticated viewer -> ranked user relation; setFollow already preserves its invariant and authorization. globalLeaderboard entries currently omit it.",
+      "apiDelta": "Add non-null Boolean isFollowing to GlobalLeaderboardEntryData and populate it for each returned entry relative to the authenticated viewer; own row is false and still receives no action.",
+      "applicationPath": "GlobalLeaderboardResolver/LeagueService read projection batches following ids for the returned top list; avoid one query per row.",
+      "authorization": "Keep KeycloakAuthGraphQLGuard; expose only the asking viewer's relation to already-visible leaderboard users.",
+      "compatibility": "Backward-compatible additive field; existing queries need not select it.",
+      "tests": [
+        "e2e returns true for followed leader and false for unfollowed leader",
+        "own row remains non-actionable",
+        "unauthenticated query remains denied",
+        "resolver/service avoids N+1 relation queries"
+      ],
+      "rejectedAlternatives": [
+        "Initialize all rows as not-following: visually plausible but false.",
+        "Issue one follow-status query per row: avoidable N+1 and no such operation is currently proven.",
+        "Remove follow action: breaks named legacy behavior."
+      ],
+      "escalationTrigger": "If exposing relation state requires a new permission, lifecycle, durable projection or cross-service infrastructure, reclassify as backend-design."
+    }
+  ]
+}

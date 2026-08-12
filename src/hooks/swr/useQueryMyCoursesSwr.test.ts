@@ -19,6 +19,7 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock("../../modules/api/graphql/queries/query-my-courses", () => ({
+    QueryMyCourses: { Query2: "query2" },
     queryMyCourses: mocks.queryMyCourses,
 }))
 
@@ -64,11 +65,11 @@ describe("useQueryMyCoursesSwr", () => {
         await waitFor(() => expect(result.current.data).toEqual(rows))
     })
 
-    it("sends no arguments, because the query declares none", async () => {
+    it("selects the full dashboard query variant without request variables", async () => {
         const { result } = renderHook(() => useQueryMyCoursesSwr(), { wrapper })
         await waitFor(() => expect(result.current.data).toEqual(rows))
         expect(mocks.queryMyCourses).toHaveBeenCalledTimes(1)
-        expect(mocks.queryMyCourses.mock.calls[0][0]).toBeUndefined()
+        expect(mocks.queryMyCourses.mock.calls[0][0]).toEqual({ query: "query2" })
     })
 
     it("keeps an empty enrolment as an empty array rather than as null", async () => {

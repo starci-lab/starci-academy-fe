@@ -14,5 +14,9 @@ describe("_StreakStatRow", () => {
         const { container } = render(<_StreakStatRow state="pending" props={{ label: "Streak" }} />)
         expect(container.querySelector("[data-component=\"Text\"][data-loading=\"true\"]")).toBeTruthy()
     })
-})
 
+    it("hides a settled missing figure instead of calling a signed-in reader a guest", () => {
+        const { container } = render(<_StreakStatRow state="empty" />)
+        expect(container).toBeEmptyDOMElement()
+    })
+})

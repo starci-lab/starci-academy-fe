@@ -31,21 +31,26 @@ icon leaf selects the outline or micro drawing from the role.
 | `streak` | Learning streak | `FireIcon` | Fire is the established continuous-streak metaphor |
 | `credit` | AI credit/quota | `BoltIcon` | A bolt reads as consumable AI power, distinct from rewards |
 | `reward` | Rewards and gift points | `GiftIcon` | A gift names the thing received rather than its numeric balance |
-| `course` | Courses and lessons | `BookOpenIcon` | An open book names study content and course browsing |
+| `course` | Courses and content | `BookOpenIcon` | An open book names study content and course browsing |
 | `email` | Email identity | `EnvelopeIcon` | The envelope is the direct address/message metaphor |
 | `password` | Password field | `LockClosedIcon` | A closed lock names protected credentials |
+| `revealPassword` | Reveal a masked password | `EyeIcon` | An open eye names making the currently hidden secret visible |
+| `hidePassword` | Hide a visible password | `EyeSlashIcon` | A crossed eye names returning a visible secret to its masked state |
 | `code` | Verification/security code | `ShieldCheckIcon` | The checked shield distinguishes verification from programming |
-| `signedIn` | Successful authentication | `CheckCircleIcon` | A checked circle is a completed state, not the sign-in action |
+| `complete` | Completed/successful state | `CheckCircleIcon` | A checked circle names completion across authentication, quests and progress without tying the glyph to one feature |
+| `pending` | Incomplete/pending progress | `CircleIcon` | The unfinished state is the exact empty twin of completion: keep Heroicons' outer `CheckCircleIcon` path and remove only its inner check |
 | `signIn` | Enter account/session | `ArrowRightOnRectangleIcon` | The arrow entering a boundary names session entry |
 | `signUp` | Create an account | `UserPlusIcon` | A person with a plus names account creation |
 | `close` | Dismiss/close | `XMarkIcon` | The conventional close mark has one unambiguous action |
 | `next` | Continue/go forward | `ArrowRightIcon` | A forward arrow names progression without implying login |
+| `disclosure` | Open the profile/details named by a row | `ChevronRightIcon` | A chevron denotes disclosure into the row's own destination, not a generic forward action |
 | `retry` | Retry/refresh failed work | `ArrowPathIcon` | The circular path names repeating the same operation |
 | `send` | Send/submit message | `PaperAirplaneIcon` | The paper plane is reserved for outbound communication |
 | `home` | Dashboard overview | `HomeIcon` | Home is the stable entry point to the learner dashboard |
 | `explore` | Explore/discover catalogue | `GlobeAltIcon` | A globe names discovery beyond the current collection |
 | `community` | Learner community | `UserGroupIcon` | A group names an existing community, distinct from finding talent |
 | `league` | Leaderboard and competition | `TrophyIcon` | A trophy names ranking and competitive achievement |
+| `livestream` | Upcoming/live video session | `VideoCameraIcon` | A video camera names a scheduled live learning session without borrowing the generic course mark |
 | `review` | Review assigned work | `ClipboardDocumentCheckIcon` | A checked clipboard names a review queue and completed checks |
 | `light` | Light theme | `SunIcon` | The sun is the light-theme state |
 | `dark` | Dark theme | `MoonIcon` | The moon is the dark-theme state |
@@ -63,6 +68,12 @@ icon leaf selects the outline or micro drawing from the role.
 | `practice` | Programming/code practice | `CodeBracketIcon` | Code brackets name programming without reusing verification code |
 
 ## Selection procedure
+
+Repeated metrics, goals, kind labels, streak captions and compact facts stay text-led when the
+legacy reference is text-led. Do not decorate `Content`, a streak count or each goal with its
+feature icon. Tiny inline glyphs are reserved for generic state or action meanings that are
+actually present in the reference, such as complete, failed, close or disclosure. Navigation,
+named entry points and large empty-region headings may retain their reference-backed feature icon.
 
 1. Find the product feature in the mapping table.
 2. Reuse its `IconName`; never import the listed Heroicon at the call site.

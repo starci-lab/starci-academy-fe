@@ -1,6 +1,6 @@
 import useSWR from "swr"
 import { useViewerKey } from "../auth/useViewerKey"
-import { queryMyCourses } from "../../modules/api/graphql/queries/query-my-courses"
+import { QueryMyCourses, queryMyCourses } from "../../modules/api/graphql/queries/query-my-courses"
 import { type MyCourseRow } from "../../modules/api/graphql/queries/types/my-courses"
 
 /**
@@ -27,7 +27,7 @@ export const useQueryMyCoursesSwr = () => {
     return useSWR<Array<MyCourseRow> | null>(
         viewer === undefined ? null : [...QUERY_MY_COURSES_SWR_KEY, viewer],
         async () => {
-            const result = await queryMyCourses()
+            const result = await queryMyCourses({ query: QueryMyCourses.Query2 })
             return result.data?.myCourses?.data ?? null
         },
     )

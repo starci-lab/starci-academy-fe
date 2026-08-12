@@ -36,7 +36,7 @@ test("connected blocks cannot bypass their exact pure twin", () => {
         code: "export const QuickActions = ({ props }) => <ActionList props={props} />",
       },
       {
-        filename: "D:/repo/src/components/leaves/StatRow/index.tsx",
+        filename: "D:/repo/src/components/composites/StatRow/index.tsx",
         code: "export const StatRow = ({ props }) => <div>{props.value}</div>",
       },
     ],
@@ -46,7 +46,7 @@ test("connected blocks cannot bypass their exact pure twin", () => {
         code: `
           import { useTranslations } from "next-intl"
           import { useQueryMyAiQuotaSwr } from "@/hooks"
-          import { StatRow } from "@/components/leaves/StatRow"
+          import { StatRow } from "@/components/composites/StatRow"
           export const CreditStatRow = () => {
             const t = useTranslations("identity")
             const quota = useQueryMyAiQuotaSwr()

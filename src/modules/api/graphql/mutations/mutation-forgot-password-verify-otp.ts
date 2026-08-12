@@ -50,7 +50,7 @@ export const mutationForgotPasswordVerifyOtp = async ({
     signal,
     debug,
 }: MutationParams<MutationForgotPasswordVerifyOtp, ForgotPasswordVerifyOtpRequest>) => {
-    const apollo = createApolloClient({ headers, signal, debug })
+    const apollo = createApolloClient({ headers, signal, debug, withCredentials: true })
     return apollo.mutate<MutationForgotPasswordVerifyOtpResponse>({
         mutation: mutationForgotPasswordVerifyOtpMap[mutation],
         variables: { request },

@@ -3,14 +3,14 @@ import {
     SurfaceListCard,
     type SurfaceListCardActions,
 } from "@/components/branches/SurfaceListCard"
-import { ContractContent } from "@/components/branches/Tree"
-import { TaskProgressRow } from "@/components/leaves/TaskProgressRow"
-import { EmptyNotice } from "@/components/leaves/EmptyNotice"
+import { Tree } from "@/components/branches/Tree"
+import { TaskProgressRow } from "@/components/composites/TaskProgressRow"
+import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { CONTRACTS } from "@/components/contracts"
-import type { LabelledProgressRowData } from "@/components/leaves/LabelledProgressRow"
+import type { LabelledProgressRowData } from "@/components/composites/LabelledProgressRow"
 import {
+    defineCompositeComponent,
     defineContractComponent,
-    defineLeafComponent,
     type LeafProps,
 } from "@/components/contracts/props"
 
@@ -96,10 +96,10 @@ const DailyQuestContentView = ({ props, isLoading = false }: DailyQuestContentPr
         : props.tasks
 
     return (
-        <ContractContent
+        <Tree
             contract="daily-quest-list"
             render={defineContractComponent("daily-quest-list", {
-                task: tasks.map((task) => defineLeafComponent("task-progress-row", {}, () => (
+                task: tasks.map((task) => defineCompositeComponent("task-progress-row", {}, () => (
                     <TaskProgressRow
                         props={{
                             id: task.id,
@@ -127,7 +127,7 @@ export const _DailyQuest = (input: DailyQuestProps & { readonly on?: DailyQuestA
     if (input.state === "failed") {
         return (
             <SurfaceCard props={{ label: input.props.label }} contract="empty-notice-card"
-                render={defineContractComponent("empty-notice-card", { notice: defineLeafComponent("empty-notice", {}, () => <EmptyNotice
+                render={defineContractComponent("empty-notice-card", { notice: defineCompositeComponent("empty-notice", {}, () => <EmptyNotice
                     props={{ icon: "review", message: input.props.message, actionLabel: input.props.retryLabel }}
                     on={{ act: input.on?.retry }}
                 />) })} />
@@ -137,7 +137,7 @@ export const _DailyQuest = (input: DailyQuestProps & { readonly on?: DailyQuestA
         return (
             <SurfaceCard props={{ label: input.props.label }} contract="empty-notice-card"
                 render={defineContractComponent("empty-notice-card", {
-                    notice: defineLeafComponent("empty-notice", {}, () => (
+                    notice: defineCompositeComponent("empty-notice", {}, () => (
                         <EmptyNotice props={{ icon: "review", message: input.props.message }} />
                     )),
                 })} />

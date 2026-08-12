@@ -20,6 +20,7 @@ vi.mock("../clients/create-apollo-client", () => ({
 
 /** The document text of the only variant, as it would be printed onto the wire. */
 const documentText = print(queryMyCoursesMap[QueryMyCourses.Query1])
+const dashboardDocumentText = print(queryMyCoursesMap[QueryMyCourses.Query2])
 
 beforeEach(() => {
     mocks.query.mockReset()
@@ -53,6 +54,13 @@ describe("queryMyCoursesMap", () => {
 
     it("takes no arguments at all", () => {
         expect(documentText).not.toContain("$request")
+    })
+
+    it("keeps the full dashboard selection in a separate additive variant", () => {
+        expect(dashboardDocumentText).toContain("query MyCoursesDashboard")
+        for (const field of ["thumbnailUrl", "contentCompleted", "contentTotal", "challengeCompleted", "challengeTotal", "completed", "total", "isEnrolled"]) {
+            expect(dashboardDocumentText).toContain(field)
+        }
     })
 })
 

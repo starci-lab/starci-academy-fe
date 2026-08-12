@@ -22,6 +22,7 @@ import {
   noChildrenSlotOutsideShell,
   noPublicClassNameProp,
   noSurfaceListItemsSlot,
+  sourceTierMarkerMatchesFolder,
 } from "./public-contracts.mjs"
 import {
   noHeadingElementOutsideHeadingAtom,
@@ -33,9 +34,11 @@ import { connectedBlockHasPresentationalTwin } from "./connected-block-twins.mjs
 import {
   accountControlOwnsDropdown,
   authOverlayOwnsSingleContentHost,
-  fieldInputUsesSecondaryVariant,
+  checkboxKeepsCompoundAnatomy,
+  inputUsesSecondaryVariant,
   fieldLabelIsTextOnly,
   modalShellOwnsScrollBody,
+  noInternalStarciHref,
   noSurfaceBranchInOverlay,
   textLinkUsesHeroLink,
 } from "./surface-policy.mjs"
@@ -105,11 +108,12 @@ function attrStringLiteral(node) {
 }
 
 // -- shared tier map - derive tier from FILE PATH, not contents --
-// vocabulary: atoms/frames/composites (wrap vendor + compose leaves; no layout/data decisions).
+// vocabulary: leaves/branches/composites/shells (intrinsic values, checked structure, fixed
+// arrangements and content-agnostic vendor mechanics; no domain decisions).
 // sentence: blocks/pages/layouts/overlays (compose sentences; do not draw shapes or fetch).
 // Anything OUTSIDE `src/components/**` (app routes, hooks, modules) is NOT a component tier -
 // each rule using this helper says in its comment whether it skips that scope.
-const VOCAB_TIER_DIRS = new Set(["leaves", "branches", "contracts"])
+const VOCAB_TIER_DIRS = new Set(["leaves", "branches", "composites", "shells", "contracts"])
 const SENTENCE_TIER_DIRS = new Set(["blocks", "pages", "layouts", "overlays"])
 
 /** "vocabulary" | "sentence" | null (null = outside src/components/** or unknown tier dir). */
@@ -693,9 +697,12 @@ export default {
     "no-public-classname-prop": noPublicClassNameProp,
     "no-children-slot-outside-shell": noChildrenSlotOutsideShell,
     "no-surface-list-items-slot": noSurfaceListItemsSlot,
+    "source-tier-marker-matches-folder": sourceTierMarkerMatchesFolder,
     "modal-shell-owns-scroll-body": modalShellOwnsScrollBody,
-    "field-input-uses-secondary-variant": fieldInputUsesSecondaryVariant,
+    "input-uses-secondary-variant": inputUsesSecondaryVariant,
     "field-label-is-text-only": fieldLabelIsTextOnly,
+    "checkbox-keeps-compound-anatomy": checkboxKeepsCompoundAnatomy,
+    "no-internal-starci-href": noInternalStarciHref,
     "no-surface-branch-in-overlay": noSurfaceBranchInOverlay,
     "text-link-uses-hero-link": textLinkUsesHeroLink,
     "account-control-owns-dropdown": accountControlOwnsDropdown,

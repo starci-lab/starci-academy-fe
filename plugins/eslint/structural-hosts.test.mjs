@@ -28,6 +28,7 @@ test("isGovernedFile covers product source and exempts the frame and the twin te
   assert.equal(isGovernedFile("D:\\repo\\src\\app\\dashboard\\page.tsx"), true)
   assert.equal(isGovernedFile("D:/repo/src/components/branches/Tree/index.tsx"), false)
   assert.equal(isGovernedFile("D:/repo/src/components/branches/SurfaceCard/index.tsx"), false)
+  assert.equal(isGovernedFile("D:/repo/src/components/composites/StatRow/index.tsx"), true)
   assert.equal(isGovernedFile("D:/repo/src/components/blocks/example/Example/index.test.tsx"), false)
   assert.equal(isGovernedFile("D:/repo/plugins/eslint/index.mjs"), false)
 })
@@ -78,6 +79,16 @@ test("no-structural-host-outside-registry-frame sends a bare div back to the reg
         filename: "D:/repo/src/app/dashboard/page.tsx",
         code: "export const Page = () => <main><Body /></main>",
         errors: [{ messageId: "host", data: { tag: "main" } }],
+      },
+      {
+        filename: "D:/repo/src/components/composites/ActivityRow/index.tsx",
+        code: "export const ActivityRow = () => <article><Body /></article>",
+        errors: [{ messageId: "host", data: { tag: "article" } }],
+      },
+      {
+        filename: "D:/repo/src/components/composites/StreakWeekRun/index.tsx",
+        code: "export const StreakWeekRun = () => <ul><Day /></ul>",
+        errors: [{ messageId: "host", data: { tag: "ul" } }],
       },
     ],
   })

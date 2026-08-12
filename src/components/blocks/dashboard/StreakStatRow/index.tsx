@@ -23,14 +23,11 @@ export const StreakStatRow = () => {
     // reports `isLoading` again each time, so a row reading the flag alone shimmers for as long as
     // the backend is unreachable - which is exactly what a signed-out reader sees.
     const hasFailed = weekly.error !== undefined && weekly.error !== null
-    const isLoading = !weekly.data && !hasFailed && weekly.isLoading === true
-    const value = hasFailed || !weekly.data
-        ? t("empty")
-        : t("days", { count: weekly.data.streak ?? 0 })
-
+    const isLoading = weekly.data === undefined && !hasFailed
     if (isLoading) return <_StreakStatRow state="pending" props={{ label: t("streak") }} />
+    if (hasFailed || !weekly.data) return <_StreakStatRow state="empty" />
 
-    return <_StreakStatRow state="settled" props={{ label: t("streak"), value }} />
+    return <_StreakStatRow state="settled" props={{ label: t("streak"), value: t("days", { count: weekly.data.streak ?? 0 }) }} />
 }
 
 /** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */

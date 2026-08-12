@@ -73,6 +73,11 @@ describe("mutationExchangeCodeForToken", () => {
         expect(mocks.createApolloClient.mock.calls[0][0]).not.toHaveProperty("withAuth", true)
     })
 
+    it("accepts the refresh and CSRF cookies established by the exchange", async () => {
+        await mutationExchangeCodeForToken({ request })
+        expect(mocks.createApolloClient.mock.calls[0][0]).toHaveProperty("withCredentials", true)
+    })
+
     it("passes the abort signal and extra headers through to the client", async () => {
         const controller = new AbortController()
         await mutationExchangeCodeForToken({ request, signal: controller.signal, headers: { "X-Locale": "en" } })

@@ -6,6 +6,7 @@ import {
   noChildrenSlotOutsideShell,
   noPublicClassNameProp,
   noSurfaceListItemsSlot,
+  sourceTierMarkerMatchesFolder,
 } from "./public-contracts.mjs"
 
 const tester = new RuleTester({
@@ -73,12 +74,16 @@ test("no-public-classname-prop closes every public CSS door", () => {
   })
 })
 
-test("no-children-slot-outside-shell reserves the untyped hole for covering shells", () => {
+test("no-children-slot-outside-shell reserves untyped holes for the closed shell set", () => {
   tester.run("no-children-slot-outside-shell", noChildrenSlotOutsideShell, {
     valid: [
       {
         filename: "D:/repo/src/components/shells/ModalShell/index.tsx",
         code: "type ModalShellProps = { children?: ReactNode }",
+      },
+      {
+        filename: "D:/repo/src/components/shells/DropdownShell/index.tsx",
+        code: "type DropdownShellProps = { children?: ReactNode }",
       },
       {
         filename: "D:/repo/src/components/branches/Tree/index.tsx",
@@ -113,6 +118,33 @@ test("no-surface-list-items-slot keeps runtime collections inside named props", 
         filename: "D:/repo/src/components/blocks/dashboard/DailyQuest/component.tsx",
         code: "import { SurfaceListCard as List } from \"@/components/branches/SurfaceListCard\"\nexport const DailyQuest = () => <List contract=\"daily-quest-list\" render={Content} props={{ label }} items={tasks} />",
         errors: [{ messageId: "items" }],
+      },
+    ],
+  })
+})
+
+test("source-tier-marker-matches-folder closes the cluster-leaf naming escape", () => {
+  tester.run("source-tier-marker-matches-folder", sourceTierMarkerMatchesFolder, {
+    valid: [
+      {
+        filename: "D:/repo/src/components/leaves/Button/index.tsx",
+        code: "export const meta = { shape: 'leaf', world: 'pure' } as const",
+      },
+      {
+        filename: "D:/repo/src/components/composites/StatRow/index.tsx",
+        code: "export const meta = { shape: 'composite', world: 'pure' } as const",
+      },
+    ],
+    invalid: [
+      {
+        filename: "D:/repo/src/components/composites/LabelledProgressRow/index.tsx",
+        code: "export const meta = { shape: 'leaf', world: 'pure' } as const",
+        errors: [{ messageId: "mismatch" }],
+      },
+      {
+        filename: "D:/repo/src/components/leaves/Text/index.tsx",
+        code: "export const Text = () => null",
+        errors: [{ messageId: "missing" }],
       },
     ],
   })

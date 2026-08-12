@@ -13,7 +13,7 @@
  * whether a wrapper was needed; the registry answers all three, so the rules that policed
  * the guessing had nothing left to police.
  */
-import { isRegistryFile, normalizePath, readRegistry } from "./registry.mjs"
+import { isCompositeFile, isRegistryFile, normalizePath, readRegistry } from "./registry.mjs"
 
 /** A twin test may build fixture markup by hand; product source may not. */
 const isTestFile = (file) => /\.(?:test|spec)\.(?:ts|tsx|js|jsx|mjs|cjs)$/.test(file)
@@ -138,7 +138,7 @@ export const noLiteralStructuralClass = {
   },
   create(context) {
     const file = normalizePath(context.filename || context.getFilename())
-    if (!isSourceFile(file) || isRegistryFile(file) || isTestFile(file) || isLeafFile(file) || isBranchHostFile(file)) return {}
+    if (!isSourceFile(file) || isRegistryFile(file) || isTestFile(file) || isLeafFile(file) || isCompositeFile(file) || isBranchHostFile(file)) return {}
     return {
       JSXAttribute(node) {
         if (!isClassAttribute(node)) return
@@ -377,12 +377,12 @@ export const registryExplainIsAReason = {
 export const registryChildrenAreTyped = {
   meta: {
     type: "problem",
-    docs: { description: "Require named leaf/contract child slots, literal prop constraints, and paired repeat metadata." },
+    docs: { description: "Require named leaf/composite/contract child slots, literal prop constraints, and paired repeat metadata." },
     schema: [],
     messages: {
       missing: "Registry entry `{{key}}` has no named `children` grammar.",
       empty: "Registry entry `{{key}}` declares no child slots; an empty object hides the same information as omitting `children`.",
-      identity: "Child slot `{{slot}}` must declare at least one closed identity: `leaf`, `contract`, or both.",
+      identity: "Child slot `{{slot}}` must declare at least one closed identity: `leaf`, `composite`, or `contract`.",
       resting: "Repeated child slot `{{slot}}` must declare numeric `restingCount`; it is the loading cardinality, not the live length.",
       strayResting: "Child slot `{{slot}}` has `restingCount` without `repeats: true`.",
       literal: "Child slot `{{slot}}` prop constraints must be literal values; runtime data belongs to the render component.",
@@ -415,7 +415,7 @@ export const registryChildrenAreTyped = {
           const fields = new Map(slotProperty.value.properties
             .filter((property) => property.type === "Property")
             .map((property) => [propertyName(property), property]))
-          const identities = ["leaf", "contract"].filter((name) => fields.has(name))
+          const identities = ["leaf", "composite", "contract"].filter((name) => fields.has(name))
           if (identities.length === 0) {
             context.report({ node: slotProperty, messageId: "identity", data: { slot } })
           }

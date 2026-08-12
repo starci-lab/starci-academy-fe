@@ -1,4 +1,4 @@
-import { Chip, skeletonVariants } from "@heroui/react"
+import { skeletonVariants } from "@heroui/react"
 import type { LeafProps } from "@/components/contracts/props"
 
 /**
@@ -27,8 +27,8 @@ export type DayCellData = {
 /** Props for {@link DayCell}. Three fixed slots, no fourth - see {@link LeafProps}. */
 export type DayCellProps = LeafProps<DayCellData>
 
-/** Stacks the dot over its letter. */
-const BASE_CLASSES = "flex flex-col items-center"
+/** Stacks the plain circle over its letter. */
+const BASE_CLASSES = "flex flex-col items-center gap-1"
 
 /** The resting shape - same chip, glyphs out. */
 const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({
@@ -49,15 +49,15 @@ export const DayCell = ({ props, isLoading = false }: DayCellProps) => (
         data-loading={isLoading ? "true" : "false"}
         className={BASE_CLASSES}
     >
-        <Chip
-            color={props.active === true ? "accent" : "default"}
-            variant={props.active === true ? "primary" : "secondary"}
-            size="sm"
-            aria-hidden={isLoading ? true : undefined}
-            className={isLoading ? RESTING_CLASSES : undefined}
-        >
+        <span
+            aria-hidden="true"
+            className={isLoading
+                ? `size-6 shrink-0 rounded-full ${RESTING_CLASSES}`
+                : `size-6 shrink-0 rounded-full ${props.active === true ? "bg-accent/80" : "bg-muted/20"}`}
+        />
+        <span data-part="weekday" className="text-xs text-muted">
             {props.weekday ?? ""}
-        </Chip>
+        </span>
         <span data-part="date" className="sr-only">
             {props.title ?? ""}
         </span>

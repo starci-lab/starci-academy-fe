@@ -1,85 +1,64 @@
+import { CONTRACTS } from "@/components/contracts"
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { LabelledProgressRow, type LabelledProgressRowData } from "@/components/leaves/LabelledProgressRow"
-import { EmptyNotice } from "@/components/leaves/EmptyNotice"
-import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
+import { SurfaceListCard, type SurfaceListCardData } from "@/components/branches/SurfaceListCard"
+import { Tree } from "@/components/branches/Tree"
+import { CourseProgressRow, type CourseProgressRowData } from "@/components/composites/CourseProgressRow"
+import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { defineCompositeComponent, defineContractComponent, type LeafProps } from "@/components/contracts/props"
 
-/**
- * BLOCK - `MyCoursesProgress`, presentational half.
- *
- * THE STATE PICKS THE TREE. `empty` and `failed` draw a notice with a way out; `pending` and
- * `ready` draw the same list, one of them resting. A situation that did not change the tree would
- * be props.
- *
- * THE LIST IS A LEAF'S BUSINESS, not the registry's. `LabelledProgressRow` keeps its own count and
- * its own keys; the contract here supplies only the seam between rows.
- */
-
-/** How many resting rows are drawn, so the resting card has the height of a real one. */
-const RESTING_ROWS: ReadonlyArray<LabelledProgressRowData> = [
-    { id: "resting-0" },
-    { id: "resting-1" },
-    { id: "resting-2" },
-]
-
-/** What the card carries in EVERY state. */
-export type MyCoursesFrame = {
-    /** The already-resolved name of the region. */
-    readonly label: string
+/** Resolved frame and rows for enrolled-course progress. */
+export type MyCoursesProgressData = SurfaceListCardData & {
+    readonly rows: ReadonlyArray<CourseProgressRowData>
+    readonly emptyMessage?: string
+    readonly errorMessage?: string
+    readonly retryLabel?: string
+}
+/** Retry and per-course navigation actions. */
+export type MyCoursesProgressActions = { readonly [key: string]: (() => void) | undefined }
+/** Situation-discriminated props for enrolled-course progress. */
+export type MyCoursesProgressProps = {
+    readonly state: "pending" | "empty" | "failed" | "ready"
+    readonly props: MyCoursesProgressData
+    readonly on?: MyCoursesProgressActions
 }
 
-/** Props for {@link _MyCoursesProgress}, discriminated by the situation. */
-export type MyCoursesProgressProps =
-    | { readonly state: "pending"; readonly props: MyCoursesFrame }
-    | { readonly state: "empty"; readonly props: MyCoursesFrame & { readonly message: string; readonly retryLabel: string } }
-    | { readonly state: "failed"; readonly props: MyCoursesFrame & { readonly message: string; readonly retryLabel: string } }
-    | {
-        readonly state: "ready"
-        readonly props: MyCoursesFrame & {
-            readonly count: string
-            readonly rows: ReadonlyArray<LabelledProgressRowData>
-        }
-    }
-
-/** What the block reports. */
-export type MyCoursesProgressActions = {
-    /** Called when the reader asks for the list again. */
-    readonly retry?: () => void
+const COUNT = CONTRACTS["course-progress-list"].children.course.restingCount
+const CourseListView = ({ props, on, isLoading = false }: LeafProps<MyCoursesProgressData, MyCoursesProgressActions>) => {
+    const rows = isLoading ? Array.from({ length: COUNT }, (_, index): CourseProgressRowData => ({
+        id: `resting-${index}`,
+        dimensions: [
+            { id: "content", label: "", completed: 0, total: 0, percent: 0, tone: "accent" },
+            { id: "challenge", label: "", completed: 0, total: 0, percent: 0, tone: "success" },
+            { id: "milestone", label: "", completed: 0, total: 0, percent: 0, tone: "warning" },
+        ],
+    })) : props.rows
+    return <Tree contract="course-progress-list" render={defineContractComponent("course-progress-list", {
+        course: rows.map((row) => defineCompositeComponent("course-progress-row", {}, () => (
+            <CourseProgressRow props={row} on={{ open: on?.[`open:${row.id}`] }} isLoading={isLoading} />
+        ))),
+    })} />
 }
+const CourseList = defineContractComponent("course-progress-list", CourseListView)
 
-/**
- * Render the list.
- *
- * @param input - {@link MyCoursesProgressProps}
- */
-export const _MyCoursesProgress = (input: MyCoursesProgressProps & { readonly on?: MyCoursesProgressActions }) => {
+/** Draw enrolled-course progress, keeping every request outcome local to the block. */
+export const _MyCoursesProgress = (input: MyCoursesProgressProps) => {
     if (input.state === "empty" || input.state === "failed") {
-        return (
-            <SurfaceCard props={{ label: input.props.label }} contract="empty-notice-card"
-                render={defineContractComponent("empty-notice-card", {
-                    notice: defineLeafComponent("empty-notice", {}, () => <EmptyNotice
-                        props={{ icon: "course", message: input.props.message, actionLabel: input.props.retryLabel }}
-                        on={{ act: input.on?.retry }}
-                    />),
-                })} />
-        )
+        const message = input.state === "empty" ? input.props.emptyMessage : input.props.errorMessage
+        return <SurfaceCard props={{ label: input.props.label }} contract="empty-notice-card" render={defineContractComponent("empty-notice-card", {
+            notice: defineCompositeComponent("empty-notice", {}, () => <EmptyNotice
+                props={{ icon: "course", message: message ?? "", actionLabel: input.props.retryLabel }}
+                on={{ act: input.on?.retry }}
+            />),
+        })} />
     }
-    const isLoading = input.state === "pending"
-    const rows = input.state === "ready" ? input.props.rows : RESTING_ROWS
-    return (
-        <SurfaceCard
-            props={{ label: input.props.label, fact: input.state === "ready" ? input.props.count : undefined }}
-            contract="course-progress-card"
-            render={defineContractComponent("course-progress-card", {
-                rows: defineContractComponent("progress-row-stack", {
-                    row: rows.map((row) => defineLeafComponent("labelled-progress-row", {}, () => (
-                        <LabelledProgressRow props={row} isLoading={isLoading} />
-                    ))),
-                }),
-            })}
-            isLoading={isLoading}
-        />
-    )
+    return <SurfaceListCard
+        contract="course-progress-list"
+        render={CourseList}
+        props={input.props}
+        on={input.on}
+        isLoading={input.state === "pending"}
+    />
 }
 
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
+/** Source-level ownership marker. */
 export const meta = { world: "pure", domain: "courses" } as const

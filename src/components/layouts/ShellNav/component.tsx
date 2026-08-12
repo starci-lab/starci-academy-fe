@@ -2,7 +2,7 @@ import { Tree } from "@/components/branches/Tree"
 import { Link } from "@/components/leaves/Link"
 import { NavLink } from "@/components/leaves/NavLink"
 import { IconButton } from "@/components/leaves/IconButton"
-import { AccountMenu } from "@/components/leaves/AccountMenu"
+import { AccountMenu } from "@/components/blocks/auth/AccountMenu"
 import { PressableInputLike } from "@/components/leaves/PressableInputLike"
 import { ThemeSwitch } from "@/components/leaves/ThemeSwitch"
 import { ExtendedTabs } from "@/components/leaves/ExtendedTabs"
@@ -12,7 +12,6 @@ import { defineContractComponent, defineLeafComponent } from "@/components/contr
 /** One destination in the primary navbar row. */
 export type ShellNavRoute = {
     readonly id: string
-    readonly href: string
     readonly label: string
     readonly isCurrent?: boolean
 }
@@ -46,6 +45,7 @@ export type ShellNavData = {
 export type ShellNavActions = {
     readonly openSignIn?: () => void
     readonly openSignUp?: () => void
+    readonly navigate?: (id: string) => void
     readonly selectTab?: (key: string) => void
     readonly openSearch?: () => void
     readonly toggleTheme?: () => void
@@ -58,8 +58,6 @@ export type ShellNavProps = {
     readonly on?: ShellNavActions
 }
 
-const HOME_HREF = "/dashboard"
-
 /** Draw the primary navbar and its optional page-tab bottom layer as one landmark. */
 export const _ShellNav = (input: ShellNavProps) => (
     <Tree
@@ -68,11 +66,17 @@ export const _ShellNav = (input: ShellNavProps) => (
             primary: defineContractComponent("brand-links-then-tools-bar", {
                 navigation: defineContractComponent("inline-nav-links", {
                     brand: defineLeafComponent("link", { emphasis: "brand" }, () => (
-                        <Link props={{ href: HOME_HREF, label: input.props.brand, emphasis: "brand" }} />
+                        <Link
+                            props={{ label: input.props.brand, emphasis: "brand" }}
+                            on={{ press: () => input.on?.navigate?.("dashboard") }}
+                        />
                     )),
                     routes: defineContractComponent("inline-route-links", {
                         route: input.props.routes.map((route) => defineLeafComponent("nav-link", { kind: "route" }, () => (
-                            <NavLink props={{ href: route.href, label: route.label, isCurrent: route.isCurrent, kind: "route" }} />
+                            <NavLink
+                                props={{ label: route.label, isCurrent: route.isCurrent, kind: "route" }}
+                                on={{ press: () => input.on?.navigate?.(route.id) }}
+                            />
                         ))),
                     }),
                 }),

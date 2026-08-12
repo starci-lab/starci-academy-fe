@@ -1,0 +1,10 @@
+"use client"
+import { useState } from "react"
+import { useLocale, useTranslations } from "next-intl"
+import { useRouter } from "next/navigation"
+import { useQueryMyUpcomingLivestreamsSwr, useQueryResolveRouteSwr } from "@/hooks"
+import { _UpcomingLivestreamCard } from "./component"
+/** Fetch, sort and route the viewer's upcoming live sessions. */
+export const UpcomingLivestreamCard = () => { const t = useTranslations("courses.upcoming"); const locale = useLocale(); const router = useRouter(); const query = useQueryMyUpcomingLivestreamsSwr(); const route = useQueryResolveRouteSwr(); const [pending, setPending] = useState<string>(); const rows = [...(query.data ?? [])].sort((a,b) => Date.parse(a.nextStartAt)-Date.parse(b.nextStartAt)).slice(0,3).map((item) => ({ id: `${item.courseGlobalId}-${item.nextStartAt}`, routeId: item.courseGlobalId, title: item.sessionTitle ?? item.courseTitle, subtitle: item.sessionTitle ? item.courseTitle : undefined, time: new Date(item.nextStartAt).toLocaleString(locale, { dateStyle: "medium", timeStyle: "short" }), isPending: pending === item.courseGlobalId })); const props = { label: t("heading"), rows, errorMessage: t("failed"), retryLabel: t("retry") }; if(query.error !== undefined && query.data === undefined) return <_UpcomingLivestreamCard state="failed" props={props} on={{ retry: () => { void query.mutate() } }} />; if(query.data === undefined) return <_UpcomingLivestreamCard state="pending" props={props} />; if(rows.length === 0) return <_UpcomingLivestreamCard state="hidden" props={props} />; return <_UpcomingLivestreamCard state="ready" props={props} on={Object.fromEntries(rows.map((row) => [`open:${row.id}`, async () => { setPending(row.routeId); try { const result = await route.trigger({ globalId: row.routeId }); const path = result.data?.resolveRoute?.data?.path; if(path) router.push(path.startsWith(`/${locale}/`) ? path : `/${locale}${path}`) } finally { setPending(undefined) } }]))} /> }
+/** Source-level ownership marker. */
+export const meta = { world: "connected", domain: "courses" } as const

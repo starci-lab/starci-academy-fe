@@ -284,3 +284,18 @@ body {
     border: none !important;
     padding: calc(var(--spacing) * 4) !important;
 }
+
+/*
+ * A joined-list surface owns its inset row by row so each divider reaches both card edges. The
+ * generic Card inset above is intentionally important, therefore this semantic exception must
+ * win at the same cascade strength; a p-0 utility on the element cannot do that by itself.
+ */
+.card[data-component="SurfaceListCardSurface"] {
+    padding: 0 !important;
+}
+
+/* A joined list nested in a larger story keeps its boundary but cannot claim a second elevation. */
+.card[data-component="SurfaceListCardSurface"][data-surface-context="nested"] {
+    border: 1px solid var(--border) !important;
+    box-shadow: none !important;
+}

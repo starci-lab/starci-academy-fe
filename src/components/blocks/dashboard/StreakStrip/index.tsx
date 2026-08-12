@@ -1,6 +1,7 @@
 "use client"
 
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
+import { useRouter } from "next/navigation"
 import { useQueryMyWeeklyStatsSwr } from "@/hooks"
 import { type MyWeeklyStatsDay } from "@/modules/api/graphql/queries/types/my-weekly-stats"
 import { _StreakStrip } from "./component"
@@ -31,6 +32,26 @@ const WEEKDAY_FORMAT = new Intl.DateTimeFormat(DATE_LOCALE, { weekday: "narrow",
 const DATE_FORMAT = new Intl.DateTimeFormat(DATE_LOCALE, { dateStyle: "medium", timeZone: "UTC" })
 
 /**
+ * Keep the settled zero-activity state shaped like a real week even if an incomplete payload omits
+ * its day array. The backend normally supplies these seven dates; this fallback protects the visual
+ * contract instead of turning missing optional content into a different tree.
+ */
+const emptyWeek = (): ReadonlyArray<DayCellData> => {
+    const today = new Date()
+    return Array.from({ length: 7 }, (_unused, index) => {
+        const date = new Date(today)
+        date.setUTCDate(today.getUTCDate() - (6 - index))
+        const isoDate = date.toISOString().slice(0, 10)
+        return {
+            id: isoDate,
+            active: false,
+            weekday: WEEKDAY_FORMAT.format(date),
+            title: DATE_FORMAT.format(date),
+        }
+    })
+}
+
+/**
  * Resolve one payload day into a rendered column.
  *
  * @param day - One day of the payload.
@@ -50,6 +71,8 @@ const toStripDay = (day: MyWeeklyStatsDay): DayCellData => {
  */
 export const StreakStrip = () => {
     const t = useTranslations("streak")
+    const locale = useLocale()
+    const router = useRouter()
     const weekly = useQueryMyWeeklyStatsSwr()
     const stats = weekly.data
     const label = t("heading")
@@ -67,26 +90,34 @@ export const StreakStrip = () => {
         )
     }
 
-    const readoutLabel = t("currentLabel")
-    if (!stats && weekly.isLoading === true) {
-        return <_StreakStrip state="pending" props={{ label, readout: { label: readoutLabel } }} />
+    const onLearn = () => router.push(`/${locale}/courses`)
+    if (stats === undefined) {
+        return (
+            <_StreakStrip
+                state="pending"
+                props={{ label, message: t("empty"), actionLabel: t("action") }}
+                on={{ learn: onLearn }}
+            />
+        )
     }
 
-    const days = (stats?.days ?? []).map(toStripDay)
+    const days = stats?.days.map(toStripDay) ?? emptyWeek()
     const streak = stats?.streak ?? 0
-    if (!stats || (streak === 0 && !days.some((day) => day.active === true))) {
-        return <_StreakStrip state="empty" props={{ label, message: t("empty") }} />
-    }
 
     return (
         <_StreakStrip
             state="ready"
             props={{
                 label,
-                record: t("longest", { count: stats.longestStreak ?? 0 }),
+                streak,
+                record: t("longest", { count: stats?.longestStreak ?? 0 }),
                 days,
-                readout: { label: readoutLabel, value: t("current", { count: streak }) },
+                current: t("current", { count: streak }),
+                emptyMessage: t("empty"),
+                actionLabel: t("action"),
+                nudge: t("nudge"),
             }}
+            on={{ learn: onLearn }}
         />
     )
 }

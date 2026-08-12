@@ -29,13 +29,13 @@ import { setSessionToken } from "./useSessionToken"
  * "sign in" to "create an account" carry a half-answered challenge across with them; here the
  * mode is part of the state, so changing it is what resets the flow.
  *
- * WHY THE MODE DECIDES THE SECOND FIELD RATHER THAN A THIRD ONE EXISTING. The three init
+ * WHY THE SERVER PAYLOAD STILL HAS ONE SECRET. The three init
  * operations were read off the running schema: `signInInit(email, password)`,
  * `signUpInit(email, password)` - its `username`, `firstName` and `lastName` are optional and this
  * form does not ask for them - and `forgotPasswordInit(email, newPassword)`. All three take an
- * address and one secret, so the form has two boxes in every mode and the mode only changes what
- * the second one is CALLED. A separate "new password" field would be a second control for a value
- * the server takes in the same position.
+ * address and one secret. Sign up repeats that secret in the pure form so the reader can confirm
+ * it, but only the canonical password crosses into this hook and the API payload. The repeated box
+ * is validation UI, not a second server field.
  *
  * WHY NO COPY LIVES HERE. This hook never produces a sentence. It surfaces the server's own
  * message and error code plus one fact the server cannot know - whether the request reached a
@@ -110,6 +110,8 @@ export interface AuthPanelState {
     sentCount: number
     /** Whether the reader has accepted the terms. Only ever gates the sign-up mode. */
     hasAgreedToTerms: boolean
+    /** Whether the sign-in session should be remembered when persistence is available. */
+    rememberMe: boolean
     /** True while the details or the code are in flight. */
     isPending: boolean
     /** True while a resend is in flight. Separate, so the resend control can speak for itself. */
@@ -126,6 +128,8 @@ export interface AuthPanelState {
     onChangeMode: (mode: AuthMode) => void
     /** Record whether the reader has accepted the terms. */
     onChangeAgreedToTerms: (agreed: boolean) => void
+    /** Record whether the reader asked for a remembered sign-in. */
+    onChangeRememberMe: (remember: boolean) => void
     /** Leave for the identity provider's own sign-in page. */
     onOauthPress: (provider: KeycloakIdentityProvider) => void
 }
@@ -146,6 +150,8 @@ interface AuthPanelRecord {
     sentCount: number
     /** Whether the reader has accepted the terms. */
     hasAgreedToTerms: boolean
+    /** Whether the reader asked for a remembered sign-in. */
+    rememberMe: boolean
     /** True while the details or the code are in flight. */
     isPending: boolean
     /** True while a resend is in flight. */
@@ -175,6 +181,7 @@ const INITIAL: AuthPanelRecord = {
     step: "details",
     sentCount: 0,
     hasAgreedToTerms: false,
+    rememberMe: false,
     isPending: false,
     isResending: false,
 }
@@ -262,7 +269,7 @@ const RESEND_BY_MODE: Record<AuthMode, (challengeId: string) => Promise<Challeng
  */
 const toKeycloakRedirect = (provider: KeycloakIdentityProvider): string => {
     const api = new URL(apiEnv().graphql.url)
-    const url = new URL(`/keycloak/${provider}/redirect`, api.origin)
+    const url = new URL(`/api/v1/keycloak/${provider}/redirect`, api.origin)
     url.searchParams.set("redirect_uri", window.location.href)
     return url.toString()
 }
@@ -474,6 +481,10 @@ export const useAuthPanel = ({ initialMode = "signIn", onSignedIn }: UseAuthPane
         setRecord((previous) => ({ ...previous, hasAgreedToTerms: agreed }))
     }, [])
 
+    const onChangeRememberMe = useCallback((remember: boolean) => {
+        setRecord((previous) => ({ ...previous, rememberMe: remember }))
+    }, [])
+
     const onOauthPress = useCallback((provider: KeycloakIdentityProvider) => {
         writeStoredProvider(provider)
         window.location.assign(toKeycloakRedirect(provider))
@@ -486,6 +497,7 @@ export const useAuthPanel = ({ initialMode = "signIn", onSignedIn }: UseAuthPane
         onResend,
         onChangeMode,
         onChangeAgreedToTerms,
+        onChangeRememberMe,
         onOauthPress,
     }
 }

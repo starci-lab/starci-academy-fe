@@ -1,7 +1,8 @@
-import { StatRow } from "@/components/leaves/StatRow"
+import { StatRow } from "@/components/composites/StatRow"
 
 /** Props for the pure credit row, discriminated at the connected boundary. */
 export type CreditStatRowProps =
+    | { readonly state: "empty" }
     | { readonly state: "pending"; readonly props: { readonly label: string } }
     | {
         readonly state: "settled"
@@ -9,7 +10,7 @@ export type CreditStatRowProps =
     }
 
 /** Render the credit row without reading request or locale state. */
-export const _CreditStatRow = (input: CreditStatRowProps) => (
+export const _CreditStatRow = (input: CreditStatRowProps) => input.state === "empty" ? null : (
     <StatRow
         props={{
             icon: "credit",
@@ -22,4 +23,3 @@ export const _CreditStatRow = (input: CreditStatRowProps) => (
 
 /** Source-level tier marker for the presentational block half. */
 export const meta = { world: "pure", domain: "identity" } as const
-

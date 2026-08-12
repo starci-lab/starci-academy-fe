@@ -1,0 +1,48 @@
+/** @vitest-environment jsdom */
+import { afterEach, describe, expect, it, vi } from "vitest"
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import { Checkbox } from "."
+
+afterEach(cleanup)
+
+describe("Checkbox", () => {
+    it("renders the HeroUI control and indicator and reports the new value", () => {
+        const change = vi.fn()
+        const { container } = render(
+            <Checkbox props={{ label: "Remember me", isSelected: false }} on={{ change }} />,
+        )
+
+        expect(container.querySelector("[data-slot='checkbox-control']")).toBeTruthy()
+        expect(container.querySelector("[data-slot^='checkbox-default-indicator']")).toBeTruthy()
+        const content = container.querySelector<HTMLElement>("[data-slot='checkbox-content']")
+        if (content === null) throw new Error("checkbox content is missing")
+        expect(content.contains(container.querySelector("[data-slot='checkbox-control']"))).toBe(true)
+        fireEvent.click(screen.getByRole("checkbox", { name: "Remember me" }))
+        expect(change).toHaveBeenCalledWith(true)
+    })
+
+    it("keeps legal destinations as links inside the clickable label sentence", () => {
+        const follow = vi.fn()
+        render(
+            <Checkbox
+                props={{
+                    label: "I agree to the terms and privacy policy",
+                    isSelected: false,
+                    labelParts: [
+                        { kind: "text", content: "I agree to the " },
+                        { kind: "link", id: "terms", label: "Terms" },
+                        { kind: "text", content: " and " },
+                        { kind: "link", id: "privacy", label: "Privacy Policy" },
+                    ],
+                }}
+                on={{ follow }}
+            />,
+        )
+
+        const terms = screen.getByRole("link", { name: "Terms" })
+        expect(terms.getAttribute("href")).toBeNull()
+        expect(screen.getByRole("link", { name: "Privacy Policy" }).getAttribute("href")).toBeNull()
+        fireEvent.click(terms)
+        expect(follow).toHaveBeenCalledWith("terms")
+    })
+})

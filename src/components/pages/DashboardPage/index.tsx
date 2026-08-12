@@ -3,9 +3,9 @@
 import { useEffect } from "react"
 import { useTranslations } from "next-intl"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useSessionRefresh } from "@/hooks/auth/useSessionRefresh"
 import { useSessionToken } from "@/hooks/auth/useSessionToken"
-import { _DashboardPage, type DashboardTab } from "./component"
-import type { IconName } from "@/components/leaves/Icon"
+import { _DashboardPage } from "./component"
 
 /**
  * PAGE - `DashboardPage`, connected half.
@@ -15,42 +15,29 @@ import type { IconName } from "@/components/leaves/Icon"
  */
 
 /** The sections of the dashboard, in reading order. */
-const TABS: ReadonlyArray<{ id: string, icon: IconName, href: string }> = [
-    { id: "overview", icon: "home", href: "/dashboard?tab=overview" },
-    { id: "explore", icon: "explore", href: "/dashboard?tab=explore" },
-    { id: "courses", icon: "course", href: "/dashboard?tab=courses" },
-    { id: "community", icon: "community", href: "/dashboard?tab=community" },
-]
+const TAB_IDS = ["overview", "explore", "courses", "community"] as const
 
 /**
  * Resolve the session and draw the dashboard.
  */
 export const DashboardPage = () => {
     const t = useTranslations("dashboard")
-    const tShell = useTranslations("shell")
     const token = useSessionToken()
+    const session = useSessionRefresh()
     const router = useRouter()
     const searchParams = useSearchParams()
     const requestedTab = searchParams.get("tab")
-    const selectedTab = TABS.some((tab) => tab.id === requestedTab) ? requestedTab! : "overview"
-
-    const tabs: ReadonlyArray<DashboardTab> = TABS.map((tab) => ({
-        id: tab.id,
-        icon: tab.icon,
-        href: tab.href,
-        label: tShell(`tabs.${tab.id}`),
-        isCurrent: tab.id === selectedTab,
-    }))
+    const selectedTab = TAB_IDS.some((id) => id === requestedTab) ? requestedTab! : "overview"
 
     useEffect(() => {
-        if (token === undefined) router.replace("/authentication")
-    }, [router, token])
+        if (!session.isRestoring && token === undefined) router.replace("/authentication")
+    }, [router, session.isRestoring, token])
 
-    if (token === undefined) return null
+    if (session.isRestoring || token === undefined) return null
 
     return (
         <_DashboardPage
-            props={{ tabs, selectedTab, unavailableMessage: t("unavailable") }}
+            props={{ selectedTab, unavailableMessage: t("unavailable") }}
         />
     )
 }

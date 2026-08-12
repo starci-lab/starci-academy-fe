@@ -1,8 +1,10 @@
 import { Card } from "@heroui/react"
+import { Tree } from "@/components/branches/Tree"
 import { Heading } from "@/components/leaves/Heading"
 import { Text } from "@/components/leaves/Text"
 import { Button } from "@/components/leaves/Button"
-import { contractNodeProps, type JoinedListContractKey } from "@/components/contracts"
+import type { JoinedListContractKey } from "@/components/contracts"
+import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 import type {
     ContractRenderComponent,
     DataValue,
@@ -13,8 +15,14 @@ import type {
 export type SurfaceListCardData = {
     readonly [key: string]: DataValue
     readonly label: string
+    /** A supporting status or figure at the end of the list label line. */
+    readonly fact?: string
     readonly description?: string
     readonly actionLabel?: string
+    /** A list bounded inside another surface uses an outline, never a second elevation. */
+    readonly isNested?: boolean
+    /** The enclosing surface already names this list; keep the name as data without drawing it twice. */
+    readonly isLabelHidden?: boolean
 }
 
 /** The optional whole-list action reported below the joined surface. */
@@ -45,23 +53,41 @@ export const SurfaceListCard = <
     D extends SurfaceListCardData,
     A extends SurfaceListCardActions = SurfaceListCardActions,
 >(input: SurfaceListCardProps<K, D, A>) => {
-    const { props, on, contract, render, isLoading = false } = input
-    const listNodeProps = contractNodeProps(contract)
+    const { props, on, render, isLoading = false } = input
     const Content = render
     const surfaceProps: SurfaceListCardData = props
+    const label = surfaceProps.fact === undefined ? (
+        <Heading props={{ content: surfaceProps.label, level: 3 }} />
+    ) : (
+        <Tree
+            contract="label-with-muted-fact-row"
+            render={defineContractComponent("label-with-muted-fact-row", {
+                label: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
+                    <Text props={{ content: surfaceProps.label, size: "sm", weight: "semibold" }} isLoading={isLoading} />
+                )),
+                fact: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                    <Text props={{ content: surfaceProps.fact, size: "xs", tone: "muted" }} isLoading={isLoading} />
+                )),
+            })}
+        />
+    )
 
     return (
         <div data-component="SurfaceListCard" className="flex flex-col gap-3">
-            <Heading props={{ content: surfaceProps.label, level: 3 }} />
-            <Card data-component="SurfaceListCardSurface">
-                <Card.Content {...listNodeProps} data-component="SurfaceListCardBody">
+            {surfaceProps.isLabelHidden === true ? null : label}
+            <Card
+                className="p-0"
+                data-component="SurfaceListCardSurface"
+                data-surface-context={surfaceProps.isNested === true ? "nested" : "page"}
+            >
+                <Card.Content className="p-0" data-component="SurfaceListCardBody">
                     <Content props={props} on={on} isLoading={isLoading} />
                 </Card.Content>
             </Card>
-            {surfaceProps.actionLabel !== undefined && on?.act !== undefined ? (
-                <Button props={{ label: surfaceProps.actionLabel, size: "sm", variant: "primary" }} on={{ press: on.act }} />
+            {surfaceProps.actionLabel !== undefined && (isLoading || on?.act !== undefined) ? (
+                <Button props={{ label: surfaceProps.actionLabel, size: "sm", variant: "primary" }} on={{ press: on?.act }} isLoading={isLoading} />
             ) : surfaceProps.description === undefined ? null : (
-                <Text props={{ content: surfaceProps.description, size: "sm", tone: "muted" }} isLoading={isLoading} />
+                <Text props={{ content: surfaceProps.description, size: "xs", tone: "muted" }} isLoading={isLoading} />
             )}
         </div>
     )

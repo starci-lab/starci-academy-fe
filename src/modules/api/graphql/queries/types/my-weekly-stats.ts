@@ -27,6 +27,14 @@ export interface MyWeeklyStatsData {
     streak: number
     /** Longest run of consecutive active days ever reached. */
     longestStreak: number
+    /** XP earned during the rolling seven-day window. */
+    xp: number
+    /** Lessons read during the rolling seven-day window. */
+    lessons: number
+    /** The learner's chosen weekly lesson target, or null when unset. */
+    weeklyGoalLessons: number | null
+    /** Streak freezes currently owned. */
+    streakFreezes: number
     /** The last seven calendar days, oldest first. */
     days: Array<MyWeeklyStatsDay>
 }

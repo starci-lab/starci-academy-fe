@@ -18,16 +18,16 @@ import { _QuickActions } from "./component"
  */
 
 /** The shortcuts, in the order a reader reaches for them. */
-const ACTIONS: ReadonlyArray<{ id: string, href: string, icon: IconName }> = [
-    { id: "course", href: "/courses", icon: "course" },
-    { id: "review", href: "/review", icon: "review" },
-    { id: "practice", href: "/practice", icon: "practice" },
-    { id: "league", href: "/league", icon: "league" },
-    { id: "saved", href: "/saved", icon: "saved" },
-    { id: "rewards", href: "/rewards", icon: "reward" },
-    { id: "blog", href: "/blog", icon: "blog" },
-    { id: "talents", href: "/talents", icon: "talents" },
-    { id: "jobs", href: "/jobs", icon: "jobs" },
+const ACTIONS: ReadonlyArray<{ id: string, path: string, icon: IconName }> = [
+    { id: "course", path: "/courses", icon: "course" },
+    { id: "review", path: "/review", icon: "review" },
+    { id: "practice", path: "/practice", icon: "practice" },
+    { id: "league", path: "/league", icon: "league" },
+    { id: "saved", path: "/saved", icon: "saved" },
+    { id: "rewards", path: "/rewards", icon: "reward" },
+    { id: "blog", path: "/blog", icon: "blog" },
+    { id: "talents", path: "/talents", icon: "talents" },
+    { id: "jobs", path: "/jobs", icon: "jobs" },
 ]
 
 /**
@@ -49,7 +49,7 @@ export const QuickActions = () => {
             on={{
                 activate: (id) => {
                     const destination = ACTIONS.find((action) => action.id === id)
-                    if (destination !== undefined) router.push(destination.href)
+                    if (destination !== undefined) router.push(destination.path)
                 },
             }}
         />

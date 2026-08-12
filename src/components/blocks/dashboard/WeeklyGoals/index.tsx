@@ -5,13 +5,33 @@ import { useRouter } from "next/navigation"
 import { useQueryMyKpisSwr } from "@/hooks"
 import { type MyKpiItem } from "@/modules/api/graphql/queries/types/my-kpis"
 import { _WeeklyGoals } from "./component"
-import type { LabelledProgressRowData } from "@/components/leaves/LabelledProgressRow"
+import type { LabelledProgressRowData } from "@/components/composites/LabelledProgressRow"
+
+/** Stable display order: a weekly board is six known product metrics, never a server-sized list. */
+const KPI_ORDER: ReadonlyArray<MyKpiItem["key"]> = [
+    "lessons",
+    "studyDays",
+    "challenges",
+    "coding",
+    "flashcards",
+    "milestones",
+]
+
+/** Effective targets used until a learner customises a metric, matching the legacy dashboard. */
+const DEFAULT_KPI_TARGETS: Readonly<Record<MyKpiItem["key"], number>> = {
+    lessons: 5,
+    studyDays: 5,
+    challenges: 3,
+    coding: 3,
+    flashcards: 20,
+    milestones: 2,
+}
 
 /**
  * BLOCK - `WeeklyGoals`, connected half.
  *
- * It reads ONE request and settles ONE state. The distinction it owns is the one nothing
- * downstream can make: a week with no targets SET, versus a week that has not arrived.
+ * It reads ONE request and settles ONE state. Missing custom targets are resolved here to stable
+ * product defaults, so the pure half always receives the same six metrics in the same order.
  *
  * WHERE "HOW LONG LEFT" IS DECIDED. The server sends an instant; the arithmetic that turns it into
  * days and hours is here, and the words for those numbers are in the catalogue - because how many
@@ -24,18 +44,16 @@ const KPI_HREF = "/kpi"
 /**
  * Turn one metric into a row.
  *
- * Called only for metrics that HAVE a target - a caller passing an unset one would be asking for a
- * fraction with no denominator, which is the situation the `unset` state exists to draw instead.
- *
  * @param item - One metric of the payload.
  * @param label - The already-resolved name of that metric.
  */
-const toRow = (item: MyKpiItem, label: string): LabelledProgressRowData => {
-    const target = item.target ?? 0
+const toRow = (item: MyKpiItem | undefined, key: MyKpiItem["key"], label: string): LabelledProgressRowData => {
+    const target = item?.target ?? DEFAULT_KPI_TARGETS[key]
+    const current = item?.current ?? 0
     const percent = target > 0
-        ? Math.min(100, Math.max(0, Math.round((item.current / target) * 100)))
+        ? Math.min(100, Math.max(0, Math.round((current / target) * 100)))
         : 0
-    return { id: item.key, title: label, percent, percentText: `${item.current}/${target}` }
+    return { id: key, title: label, percent, percentText: `${current}/${target}` }
 }
 
 /**
@@ -84,27 +102,32 @@ export const WeeklyGoals = () => {
     }
 
     const data = kpis.data
-    if (!data && kpis.isLoading === true) {
+    if (data === undefined) {
         return <_WeeklyGoals state="pending" props={{ label }} />
     }
 
-    // A metric with no target is not a target of zero - it is one the reader has not chosen, and
-    // a week where none of them is chosen has nothing to be a fraction of.
-    const targeted = (data?.items ?? []).filter((item) => item.target !== null && item.target > 0)
-    if (targeted.length === 0) {
-        // `edit` matters MOST here, not least: this is the state whose whole content is an
-        // invitation to set a target, and an invitation with nowhere to go is just a complaint.
-        return (
-            <_WeeklyGoals
-                state="unset"
-                props={{ label, editLabel, prompt: t("prompt") }}
-                on={{ edit }}
-            />
-        )
-    }
-
-    const composite = data?.composite
+    const itemByKey = new Map((data?.items ?? []).map((item) => [item.key, item] as const))
+    const rows = KPI_ORDER.map((key) => toRow(itemByKey.get(key), key, t(`labels.${key}`)))
+    const completed = rows.filter((row) => (row.percent ?? 0) >= 100).length
+    const progress = KPI_ORDER.reduce((totals, key) => {
+        const item = itemByKey.get(key)
+        const target = item?.target ?? DEFAULT_KPI_TARGETS[key]
+        return {
+            current: totals.current + Math.min(item?.current ?? 0, target),
+            target: totals.target + target,
+        }
+    }, { current: 0, target: 0 })
+    const percent = progress.target > 0 ? Math.round((progress.current / progress.target) * 100) : 0
     const remaining = toRemaining(data?.resetAt ?? null)
+
+    const summary = t("summary", {
+        percent,
+        completed,
+        total: KPI_ORDER.length,
+    })
+    const reset = remaining === undefined
+        ? undefined
+        : t("resetIn", { days: remaining.days, hours: remaining.hours })
 
     return (
         <_WeeklyGoals
@@ -112,15 +135,8 @@ export const WeeklyGoals = () => {
             props={{
                 label,
                 editLabel,
-                rows: targeted.map((item) => toRow(item, t(`labels.${item.key}`))),
-                summary: t("summary", {
-                    percent: composite?.percent ?? 0,
-                    completed: composite?.completed ?? 0,
-                    total: composite?.total ?? targeted.length,
-                }),
-                resetLine: remaining === undefined
-                    ? undefined
-                    : t("resetIn", { days: remaining.days, hours: remaining.hours }),
+                rows,
+                summary: reset === undefined ? summary : `${summary} · ${reset}`,
             }}
             on={{ edit }}
         />

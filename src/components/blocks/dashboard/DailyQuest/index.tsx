@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl"
 import { useQueryMyDailyQuestSwr } from "@/hooks"
 import { type MyDailyQuestTask } from "@/modules/api/graphql/queries/types/my-daily-quest"
 import { _DailyQuest } from "./component"
-import type { LabelledProgressRowData } from "@/components/leaves/LabelledProgressRow"
+import type { LabelledProgressRowData } from "@/components/composites/LabelledProgressRow"
 
 /**
  * BLOCK - `DailyQuest`, connected half.
@@ -59,10 +59,10 @@ export const DailyQuest = () => {
     }
 
     const data = quest.data
-    if (!data && quest.isLoading === true) {
+    if (data === undefined) {
         return <_DailyQuest state="pending" props={{ label }} />
     }
-    if (!data || data.tasks.length === 0) {
+    if (data === null || data.tasks.length === 0) {
         return <_DailyQuest state="empty" props={{ label, message: t("empty") }} />
     }
 

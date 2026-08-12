@@ -6,51 +6,30 @@ import { _WeeklyGoals } from "./component"
 /**
  * What these tests guard.
  *
- * `unset` IS THE POINT OF THIS BLOCK. The server sends every metric whether or not a target was
- * chosen, so "no goals" never arrives as an empty list - it arrives as six rows with no
- * denominator. A block that rendered them anyway would tell a reader they had finished a week they
- * never started.
- *
- * THE SECOND TEST IS A BUG THAT SHIPPED. The `unset` state drew its invitation with no `on`
- * attached, so the one control on a card whose entire content is "go and set a target" led
- * nowhere. It type-checked, it rendered, and it was invisible to every other test.
+ * The board has six fixed product metrics. Loading and settled data keep that exact shape; missing
+ * custom targets are resolved by the connected half rather than replacing the board with a giant
+ * empty notice.
  */
 
 afterEach(cleanup)
 
 describe("_WeeklyGoals", () => {
-    it("invites the reader to set a target when none is set", () => {
-        render(
-            <_WeeklyGoals
-                state="unset"
-                props={{ label: "Weekly goals", editLabel: "Edit", prompt: "Set weekly targets" }}
-                on={{ edit: () => {} }}
-            />,
-        )
-        expect(screen.getByText("Set weekly targets")).toBeTruthy()
-    })
-
-    it("gives that invitation somewhere to go", () => {
-        const edit = vi.fn()
-        const { container } = render(
-            <_WeeklyGoals
-                state="unset"
-                props={{ label: "Weekly goals", editLabel: "Edit", prompt: "Set weekly targets" }}
-                on={{ edit }}
-            />,
-        )
-        const link = container.querySelector("[data-component=\"SeeMoreLink\"]")
-        expect(link).not.toBeNull()
-        expect(link?.textContent).toContain("Edit")
-    })
-
-    it("withholds the way out while the week is still resting", () => {
+    it("keeps six metric rows while the week is still resting", () => {
         const { container } = render(<_WeeklyGoals state="pending" props={{ label: "Weekly goals" }} />)
-        // A control that leads nowhere yet is worse than one that is not there.
+        expect(container.querySelectorAll("[data-component=\"LabelledProgressRow\"]")).toHaveLength(6)
+        expect(container.querySelectorAll(
+            "[data-component=\"LabelledProgressRow\"] [data-component=\"Text\"][data-loading=\"true\"]",
+        )).toHaveLength(12)
+        expect(container.querySelectorAll(
+            "[data-component=\"LabelledProgressRow\"] [data-component=\"Progress\"][data-loading=\"true\"]",
+        )).toHaveLength(6)
+        expect(container.querySelector(
+            "[data-component=\"LabelledProgressRow\"] [data-component=\"Icon\"]",
+        )).toBeNull()
         expect(container.querySelector("[data-component=\"SeeMoreLink\"]")).toBeNull()
     })
 
-    it("draws the week's own figure in the label line, not among the rows", () => {
+    it("draws the summary above the legacy two-column bordered grid", () => {
         const { container } = render(
             <_WeeklyGoals
                 state="ready"
@@ -58,16 +37,23 @@ describe("_WeeklyGoals", () => {
                     label: "Weekly goals",
                     editLabel: "Edit",
                     summary: "40% this week",
-                    rows: [{ id: "lessons", title: "Content", percent: 40, percentText: "2/5" }],
+                    rows: Array.from({ length: 6 }, (_unused, index) => ({
+                        id: `metric-${index}`,
+                        title: `Metric ${index}`,
+                        percent: 40,
+                        percentText: "2/5",
+                    })),
                 }}
                 on={{ edit: () => {} }}
             />,
         )
-        const labelLine = container.querySelector("[data-node=\"title-with-end-action\"]")
-        expect(labelLine?.textContent).toContain("Weekly goals")
-        // The summary is a fact ABOUT the set, so it must not queue up as a seventh metric.
+        const grid = container.querySelector("[data-node=\"bordered-goal-grid\"]")
+        expect(grid?.className).toContain("grid-cols-2")
+        expect(grid?.className).toContain("border")
+        expect(screen.getByText("40% this week")).toBeTruthy()
         const rows = container.querySelectorAll("[data-component=\"LabelledProgressRow\"]")
-        expect(rows).toHaveLength(1)
+        expect(rows).toHaveLength(6)
+        expect(grid?.querySelector("[data-component=\"Icon\"]")).toBeNull()
     })
 
     it("offers a way back when the week could not be read", () => {

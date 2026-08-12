@@ -9,9 +9,12 @@ import {
     BookOpenIcon,
     BriefcaseIcon,
     CheckCircleIcon,
+    ChevronRightIcon,
     ClipboardDocumentCheckIcon,
     CodeBracketIcon,
     EnvelopeIcon,
+    EyeIcon,
+    EyeSlashIcon,
     FireIcon,
     GiftIcon,
     GlobeAltIcon,
@@ -27,6 +30,7 @@ import {
     SparklesIcon,
     SunIcon,
     TrophyIcon,
+    VideoCameraIcon,
     UserCircleIcon,
     UserGroupIcon,
     UserPlusIcon,
@@ -43,9 +47,12 @@ import {
     BookOpenIcon as BookOpenSolidIcon,
     BriefcaseIcon as BriefcaseSolidIcon,
     CheckCircleIcon as CheckCircleSolidIcon,
+    ChevronRightIcon as ChevronRightSolidIcon,
     ClipboardDocumentCheckIcon as ClipboardDocumentCheckSolidIcon,
     CodeBracketIcon as CodeBracketSolidIcon,
     EnvelopeIcon as EnvelopeSolidIcon,
+    EyeIcon as EyeSolidIcon,
+    EyeSlashIcon as EyeSlashSolidIcon,
     FireIcon as FireSolidIcon,
     GiftIcon as GiftSolidIcon,
     GlobeAltIcon as GlobeAltSolidIcon,
@@ -61,6 +68,7 @@ import {
     SparklesIcon as SparklesSolidIcon,
     SunIcon as SunSolidIcon,
     TrophyIcon as TrophySolidIcon,
+    VideoCameraIcon as VideoCameraSolidIcon,
     UserCircleIcon as UserCircleSolidIcon,
     UserGroupIcon as UserGroupSolidIcon,
     UserPlusIcon as UserPlusSolidIcon,
@@ -90,9 +98,9 @@ import type { LeafProps } from "@/components/contracts/props"
 /** What an icon MEANS on these screens. The glyph that draws it is this file's business. */
 export type IconName =
     | "brand" | "streak" | "credit" | "reward" | "course"
-    | "email" | "password" | "code"
-    | "signedIn" | "signIn" | "signUp" | "close" | "next" | "retry" | "send"
-    | "home" | "explore" | "community" | "league" | "review"
+    | "email" | "password" | "revealPassword" | "hidePassword" | "code"
+    | "complete" | "pending" | "signIn" | "signUp" | "close" | "next" | "disclosure" | "retry" | "send"
+    | "home" | "explore" | "community" | "league" | "review" | "livestream"
     | "light" | "dark" | "locale" | "google" | "github"
     | "search" | "cart" | "notification" | "account" | "saved" | "blog" | "talents" | "jobs" | "practice"
 
@@ -118,6 +126,29 @@ export type IconProps = LeafProps<IconData>
  */
 type GlyphComponent = ComponentType<SVGProps<SVGSVGElement>>
 
+/**
+ * The unfinished twin of Heroicons' 24px outline CheckCircleIcon. Heroicons does not export an
+ * empty circle, so this keeps that glyph's outer path verbatim and removes only its inner check.
+ */
+const CircleIcon = (props: SVGProps<SVGSVGElement>) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth={1.5}
+        stroke="currentColor"
+        aria-hidden="true"
+        data-slot="icon"
+        {...props}
+    >
+        <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+        />
+    </svg>
+)
+
 /** Native Heroicon drawings for the two product roles. */
 type GlyphCuts = { readonly heading: GlyphComponent, readonly leading: GlyphComponent, readonly chip: GlyphComponent }
 
@@ -136,18 +167,23 @@ const GLYPHS: Record<IconName, GlyphCuts> = {
     course: cuts(BookOpenIcon, BookOpenSolidIcon),
     email: cuts(EnvelopeIcon, EnvelopeSolidIcon),
     password: cuts(LockClosedIcon, LockClosedSolidIcon),
+    revealPassword: cuts(EyeIcon, EyeSolidIcon),
+    hidePassword: cuts(EyeSlashIcon, EyeSlashSolidIcon),
     code: cuts(ShieldCheckIcon, ShieldCheckSolidIcon),
-    signedIn: cuts(CheckCircleIcon, CheckCircleSolidIcon),
+    complete: cuts(CheckCircleIcon, CheckCircleSolidIcon),
+    pending: cuts(CircleIcon, CircleIcon),
     signIn: cuts(ArrowRightOnRectangleIcon, ArrowRightOnRectangleSolidIcon),
     signUp: cuts(UserPlusIcon, UserPlusSolidIcon),
     close: cuts(XMarkIcon, XMarkSolidIcon),
     next: cuts(ArrowRightIcon, ArrowRightSolidIcon),
+    disclosure: cuts(ChevronRightIcon, ChevronRightSolidIcon),
     retry: cuts(ArrowPathIcon, ArrowPathSolidIcon),
     send: cuts(PaperAirplaneIcon, PaperAirplaneSolidIcon),
     home: cuts(HomeIcon, HomeSolidIcon),
     explore: cuts(GlobeAltIcon, GlobeAltSolidIcon),
     community: cuts(UserGroupIcon, UserGroupSolidIcon),
     league: cuts(TrophyIcon, TrophySolidIcon),
+    livestream: cuts(VideoCameraIcon, VideoCameraSolidIcon),
     review: cuts(ClipboardDocumentCheckIcon, ClipboardDocumentCheckSolidIcon),
     light: cuts(SunIcon, SunSolidIcon),
     dark: cuts(MoonIcon, MoonSolidIcon),
@@ -177,11 +213,17 @@ const ROLE_CLASSES = {
  *
  * @param input - {@link IconProps}
  */
-export const Icon = ({ props }: IconProps) => {
+export const Icon = ({ props, isLoading = false }: IconProps) => {
     const glyph = GLYPHS[props.name]
     const role = props.role ?? "chip"
     const Glyph = glyph[role]
-    return <Glyph aria-hidden className={ROLE_CLASSES[role]} />
+    if (isLoading) {
+        return <span aria-hidden="true" data-tier="leaf" data-component="Icon" className="size-5 shrink-0 animate-pulse rounded-full bg-default" />
+    }
+    const className = props.name === "complete"
+        ? `${ROLE_CLASSES[role]} text-success-soft-foreground`
+        : ROLE_CLASSES[role]
+    return <Glyph aria-hidden className={className} />
 }
 
 /** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */

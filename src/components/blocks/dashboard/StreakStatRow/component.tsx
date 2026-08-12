@@ -1,7 +1,8 @@
-import { StatRow } from "@/components/leaves/StatRow"
+import { StatRow } from "@/components/composites/StatRow"
 
 /** Props for the pure streak row, discriminated at the connected boundary. */
 export type StreakStatRowProps =
+    | { readonly state: "empty" }
     | { readonly state: "pending"; readonly props: { readonly label: string } }
     | {
         readonly state: "settled"
@@ -9,7 +10,7 @@ export type StreakStatRowProps =
     }
 
 /** Render the streak row without reading request or locale state. */
-export const _StreakStatRow = (input: StreakStatRowProps) => (
+export const _StreakStatRow = (input: StreakStatRowProps) => input.state === "empty" ? null : (
     <StatRow
         props={{
             icon: "streak",
@@ -22,4 +23,3 @@ export const _StreakStatRow = (input: StreakStatRowProps) => (
 
 /** Source-level tier marker for the presentational block half. */
 export const meta = { world: "pure", domain: "identity" } as const
-

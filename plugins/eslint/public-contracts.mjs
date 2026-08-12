@@ -149,19 +149,19 @@ export const noChildrenSlotOutsideShell = {
   meta: {
     type: "problem",
     docs: {
-      description: "Forbid public children slots outside ModalShell and DrawerShell; branches take typed contract renderers.",
+      description: "Forbid public children slots outside content-agnostic shells; branches take typed contract renderers.",
     },
     schema: [],
     messages: {
       children:
-        "`children` is an untyped hole and belongs only to ModalShell/DrawerShell, whose purpose is to ignore the interior shape. A branch must take `contract` plus `render: ContractComponent<K>` instead.",
+        "`children` is an untyped hole and belongs only to ModalShell/DrawerShell/DropdownShell, whose purpose is to ignore the interior shape. A branch must take `contract` plus `render: ContractComponent<K>` instead.",
     },
   },
   create(context) {
     const filename = String(context.filename || context.getFilename()).replace(/\\/g, "/")
     if (!filename.includes("/src/components/")) return {}
     if (filename.includes("/src/components/contracts/")) return {}
-    if (/\/src\/components\/shells\/(?:ModalShell|DrawerShell)\//.test(filename)) return {}
+    if (/\/src\/components\/shells\/(?:ModalShell|DrawerShell|DropdownShell)\//.test(filename)) return {}
     return {
       TSPropertySignature(node) {
         if (propertyName(node) === "children") context.report({ node, messageId: "children" })
@@ -204,6 +204,46 @@ export const noSurfaceListItemsSlot = {
             context.report({ node: attribute, messageId: "items" })
           }
         }
+      },
+    }
+  },
+}
+
+/** The source marker must tell the same tier truth as the folder that owns the component. */
+export const sourceTierMarkerMatchesFolder = {
+  meta: {
+    type: "problem",
+    docs: { description: "Require leaf/composite source markers to match their folder tier." },
+    schema: [],
+    messages: {
+      missing: "{{tier}} component index must export `meta` with `shape: \"{{tier}}\"`; the source tier must be machine-readable.",
+      mismatch: "This component lives in `{{tier}}/` but declares `shape: \"{{actual}}\"`. Fixed interior does not permit a composite to claim leaf identity.",
+    },
+  },
+  create(context) {
+    const file = String(context.filename || context.getFilename()).replace(/\\/g, "/")
+    const match = file.match(/\/src\/components\/(leaves|composites)\/[^/]+\/index\.tsx$/)
+    if (!match) return {}
+    const tier = match[1] === "leaves" ? "leaf" : "composite"
+    let found = false
+    const unwrap = (node) => node?.type === "TSAsExpression" ? node.expression : node
+    return {
+      VariableDeclarator(node) {
+        if (node.id?.type !== "Identifier" || node.id.name !== "meta") return
+        found = true
+        const value = unwrap(node.init)
+        if (value?.type !== "ObjectExpression") {
+          context.report({ node, messageId: "missing", data: { tier } })
+          return
+        }
+        const shape = value.properties.find((property) => propertyName(property) === "shape")
+        const actual = shape?.value?.type === "Literal" ? shape.value.value : undefined
+        if (actual !== tier) {
+          context.report({ node: shape ?? node, messageId: "mismatch", data: { tier, actual: String(actual) } })
+        }
+      },
+      "Program:exit"(node) {
+        if (!found) context.report({ node, messageId: "missing", data: { tier } })
       },
     }
   },

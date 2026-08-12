@@ -36,7 +36,7 @@ const LEVEL_CLASSES = {
     1: "text-xl font-semibold tracking-tight",
     2: "text-base font-semibold",
     3: "text-sm font-medium",
-    4: "text-xs font-medium",
+    4: "text-xs font-medium text-muted",
 } as const
 
 /** The resting shape - the same line box with the glyphs out. */

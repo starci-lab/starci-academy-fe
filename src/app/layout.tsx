@@ -1,24 +1,15 @@
 import type { Metadata } from "next"
 import type { ReactNode } from "react"
 import { getLocale, getMessages, getTranslations } from "next-intl/server"
-import { ShellNav } from "@/components/layouts/ShellNav"
-import { Tree } from "@/components/branches/Tree"
-import { defineContractComponent, defineContractProjection, defineLeafComponent } from "@/components/contracts/props"
 import { AppProviders } from "./providers"
 import "./globals.css"
 
 /**
- * The app shell.
+ * The app root.
  *
- * The shell is the one place the `page-shell` registry key is used, and it is used
- * for the reason the key states: the navigation is a SIBLING of the routed body, so
- * a route change repaints the body without tearing the nav down. Expressing that as
- * a key rather than as markup here means the relationship is checked by the type
- * system instead of being re-decided by whoever edits this file next.
- *
- * The bar itself is `layouts/ShellNav`, not markup written here: it holds the state that says
- * whether the sign-in overlay is open, and this file is a server component that cannot hold
- * state. The one thing this file adds around the whole tree is the vendor's context.
+ * Providers belong to every route; product navigation does not. The dashboard layout owns its
+ * navbar so `/authentication` remains a single-task screen with no route or account controls
+ * competing with the form.
  */
 
 /**
@@ -43,7 +34,7 @@ interface RootLayoutProps {
 }
 
 /**
- * Root layout: draws the shell node and puts the bar and the routed page inside it.
+ * Root layout: provide shared runtime context and leave route composition to nested layouts.
  *
  * @param props - The routed children to mount.
  */
@@ -58,16 +49,7 @@ const RootLayout = async ({ children }: RootLayoutProps) => {
         <html lang={locale} suppressHydrationWarning>
             <body>
                 <AppProviders locale={locale} messages={messages}>
-                    <Tree
-                        contract="nav-over-body-page"
-                        render={defineContractComponent("nav-over-body-page", {
-                            navigation: defineContractProjection(
-                                "double-navbar",
-                                () => <ShellNav />,
-                            ),
-                            body: defineLeafComponent("page", {}, () => children),
-                        })}
-                    />
+                    {children}
                 </AppProviders>
             </body>
         </html>

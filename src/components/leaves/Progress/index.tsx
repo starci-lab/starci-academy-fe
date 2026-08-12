@@ -35,26 +35,41 @@ const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({
  *
  * @param input - {@link ProgressProps}
  */
-export const Progress = ({ props, isLoading = false }: ProgressProps) => (
-    <ProgressBar
-        data-tier="leaf"
-        data-component="Progress"
-        data-loading={isLoading ? "true" : "false"}
-        aria-label={props.label}
-        value={isLoading ? 0 : (props.value ?? 0)}
-        minValue={0}
-        maxValue={100}
-        color="accent"
-        size="sm"
-        className={isLoading ? RESTING_CLASSES : BASE_CLASSES}
-    >
-        {isLoading ? null : (
+export const Progress = ({ props, isLoading = false }: ProgressProps) => {
+    // A resting bar is decoration, not a zero-valued measurement. Rendering the vendor progress
+    // primitive before its label exists makes React Aria announce an unnamed control and emit an
+    // accessibility warning; the inert span preserves the exact visual seam without lying.
+    if (isLoading) {
+        return (
+            <span
+                data-tier="leaf"
+                data-component="Progress"
+                data-loading="true"
+                aria-hidden
+                className={RESTING_CLASSES}
+            />
+        )
+    }
+
+    return (
+        <ProgressBar
+            data-tier="leaf"
+            data-component="Progress"
+            data-loading="false"
+            aria-label={props.label}
+            value={props.value ?? 0}
+            minValue={0}
+            maxValue={100}
+            color="accent"
+            size="sm"
+            className={BASE_CLASSES}
+        >
             <ProgressBar.Track>
                 <ProgressBar.Fill />
             </ProgressBar.Track>
-        )}
-    </ProgressBar>
-)
+        </ProgressBar>
+    )
+}
 
 /** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
 export const meta = { shape: "leaf", world: "pure" } as const

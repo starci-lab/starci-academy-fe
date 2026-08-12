@@ -1,87 +1,67 @@
 "use client"
 
-import { useTranslations } from "next-intl"
-import { useQueryMyCoursesSwr } from "@/hooks"
-import { type MyCourseRow } from "@/modules/api/graphql/queries/types/my-courses"
+import { useState } from "react"
+import { useLocale, useTranslations } from "next-intl"
+import { useRouter } from "next/navigation"
+import { useQueryMyCoursesSwr, useQueryResolveRouteSwr } from "@/hooks"
+import type { MyCourseRow } from "@/modules/api/graphql/queries/types/my-courses"
+import type { CourseProgressRowData } from "@/components/composites/CourseProgressRow"
 import { _MyCoursesProgress } from "./component"
-import type { LabelledProgressRowData } from "@/components/leaves/LabelledProgressRow"
 
-/**
- * BLOCK - `MyCoursesProgress`, connected half.
- *
- * It reads ONE request and settles ONE state. The distinction it owns is the one nothing
- * downstream can make: a list empty because the learner enrolled in nothing, versus a list empty
- * because the request has not come back.
- */
+const percent = (completed: number, total: number) => total <= 0 ? 0 : Math.min(100, Math.max(0, Math.round((completed / total) * 100)))
+const overall = (value: number) => Number.isFinite(value) ? Math.min(100, Math.max(0, Math.round(value))) : 0
 
-/**
- * Clamp a completion figure into the range a bar accepts. A payload reporting 104 percent is a bug
- * upstream, but it must not render as a bar wider than its own track.
- *
- * @param percent - The reported completion figure.
- */
-const clampPercent = (percent: number): number => {
-    if (!Number.isFinite(percent)) return 0
-    return Math.min(100, Math.max(0, Math.round(percent)))
+/** Resolve one full dashboard course payload into its pure row. */
+const toRow = (course: MyCourseRow, labels: { content: string; challenge: string; milestone: string; trial: string }): CourseProgressRowData => {
+    const contentCompleted = course.contentCompleted ?? 0
+    const contentTotal = course.contentTotal ?? 0
+    const challengeCompleted = course.challengeCompleted ?? 0
+    const challengeTotal = course.challengeTotal ?? 0
+    const milestoneCompleted = course.completed ?? 0
+    const milestoneTotal = course.total ?? 0
+    const completion = overall(course.completionPercent)
+    return {
+        id: course.globalId,
+        title: course.label,
+        percent: completion,
+        percentLabel: `${completion}%`,
+        isTrial: course.isEnrolled === false,
+        trialLabel: labels.trial,
+        dimensions: [
+            { id: "content", label: labels.content, completed: contentCompleted, total: contentTotal, percent: percent(contentCompleted, contentTotal), tone: "accent" },
+            { id: "challenge", label: labels.challenge, completed: challengeCompleted, total: challengeTotal, percent: percent(challengeCompleted, challengeTotal), tone: "success" },
+            { id: "milestone", label: labels.milestone, completed: milestoneCompleted, total: milestoneTotal, percent: percent(milestoneCompleted, milestoneTotal), tone: "warning" },
+        ],
+    }
 }
 
-/**
- * Resolve one payload course into a rendered row.
- *
- * @param course - One course of the payload.
- */
-const toRow = (course: MyCourseRow): LabelledProgressRowData => {
-    const percent = clampPercent(course.completionPercent)
-    return { id: course.globalId, title: course.label, percent, percentText: `${percent}%` }
-}
-
-/**
- * Fetch the enrolled courses and render them.
- */
+/** Fetch full course progress and own on-demand route resolution. */
 export const MyCoursesProgress = () => {
     const t = useTranslations("courses")
-    const enrolled = useQueryMyCoursesSwr()
-    const label = t("heading")
-    const retryLabel = t("retry")
-
-    // The way out of an empty list is SWR's own revalidation rather than a page reload, because
-    // the commonest reason this list is empty is a backend that answered before its data was
-    // there - and a reader should not have to throw the whole page away to ask again.
-    const retry = () => {
-        void enrolled.mutate()
-    }
-
-    if (enrolled.error !== undefined && enrolled.error !== null) {
-        return (
-            <_MyCoursesProgress
-                state="failed"
-                props={{ label, message: t("failed"), retryLabel }}
-                on={{ retry }}
-            />
-        )
-    }
-
-    const rows = (enrolled.data ?? []).map(toRow)
-    if (rows.length === 0 && enrolled.isLoading === true) {
-        return <_MyCoursesProgress state="pending" props={{ label }} />
-    }
-    if (rows.length === 0) {
-        return (
-            <_MyCoursesProgress
-                state="empty"
-                props={{ label, message: t("empty"), retryLabel }}
-                on={{ retry }}
-            />
-        )
-    }
-
-    return (
-        <_MyCoursesProgress
-            state="ready"
-            props={{ label, count: t("count", { count: rows.length }), rows }}
-        />
-    )
+    const locale = useLocale()
+    const router = useRouter()
+    const query = useQueryMyCoursesSwr()
+    const route = useQueryResolveRouteSwr()
+    const [pendingId, setPendingId] = useState<string>()
+    const retry = () => { void query.mutate() }
+    const rows = (query.data ?? []).map((course) => ({
+        ...toRow(course, { content: t("progress.content"), challenge: t("progress.challenge"), milestone: t("progress.milestone"), trial: t("trial") }),
+        isPending: pendingId === course.globalId,
+    }))
+    const props = { label: t("heading"), rows, emptyMessage: t("empty"), errorMessage: t("failed"), retryLabel: t("retry") }
+    if (query.error !== undefined && query.data === undefined) return <_MyCoursesProgress state="failed" props={props} on={{ retry }} />
+    if (query.data === undefined) return <_MyCoursesProgress state="pending" props={props} />
+    if (rows.length === 0) return <_MyCoursesProgress state="empty" props={props} on={{ retry }} />
+    const on = Object.fromEntries(rows.map((row) => [`open:${row.id}`, async () => {
+        setPendingId(row.id)
+        try {
+            const result = await route.trigger({ globalId: row.id })
+            const path = result.data?.resolveRoute?.data?.path
+            if (path !== null && path !== undefined) router.push(path.startsWith(`/${locale}/`) ? path : `/${locale}${path}`)
+        } finally { setPendingId(undefined) }
+    }]))
+    return <_MyCoursesProgress state="ready" props={props} on={on} />
 }
 
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
+/** Source-level ownership marker. */
 export const meta = { world: "connected", domain: "courses" } as const

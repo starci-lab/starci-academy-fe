@@ -14,6 +14,11 @@ export interface CreateApolloClientParams {
      * query starts failing for reasons nobody can see.
      */
     withAuth?: boolean
+    /**
+     * Include browser cookies. Defaults to the auth mode: authenticated requests must carry
+     * StarCi's `session_id` cookie as well as the bearer token, while anonymous requests do not.
+     */
+    withCredentials?: boolean
     /** Override the endpoint; defaults to the environment. */
     uri?: string
     /** Extra headers for every operation on this client. */
@@ -35,13 +40,15 @@ export interface CreateApolloClientParams {
  *    whole retry budget sharing one;
  * 3. bearer - as late as possible, so the token is read at send time and a chain built
  *    before sign-in still sends the token that exists when the request actually goes out;
- * 4. http - terminal, because it is the only link that talks to the network.
+ * 4. http - terminal, because it is the only link that talks to the network. In auth mode it
+ *    includes cookies too: StarCi's guard validates the bearer identity AND its `session_id`.
  *
  * Exported separately from the client so the chain can be asserted: a built `ApolloClient`
  * flattens its links and will not tell you which ones went in.
  */
 export const createLinkChain = ({
     withAuth = false,
+    withCredentials,
     uri,
     headers,
     signal,
@@ -50,7 +57,7 @@ export const createLinkChain = ({
     createRetryLink(),
     createTimeoutLink(),
     ...(withAuth ? [createAttachBearerTokenLink({ debug })] : []),
-    createHttpLink({ uri, headers, signal }),
+    createHttpLink({ uri, headers, signal, withCredentials: withCredentials ?? withAuth }),
 ]
 
 /**

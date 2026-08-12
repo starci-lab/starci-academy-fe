@@ -1,7 +1,8 @@
-import { StatRow } from "@/components/leaves/StatRow"
+import { StatRow } from "@/components/composites/StatRow"
 
 /** Props for the pure reward row, discriminated at the connected boundary. */
 export type RewardStatRowProps =
+    | { readonly state: "empty" }
     | { readonly state: "pending"; readonly props: { readonly label: string } }
     | {
         readonly state: "settled"
@@ -9,7 +10,7 @@ export type RewardStatRowProps =
     }
 
 /** Render the reward row without reading request or locale state. */
-export const _RewardStatRow = (input: RewardStatRowProps) => (
+export const _RewardStatRow = (input: RewardStatRowProps) => input.state === "empty" ? null : (
     <StatRow
         props={{
             icon: "reward",
@@ -22,4 +23,3 @@ export const _RewardStatRow = (input: RewardStatRowProps) => (
 
 /** Source-level tier marker for the presentational block half. */
 export const meta = { world: "pure", domain: "identity" } as const
-

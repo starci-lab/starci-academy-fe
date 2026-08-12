@@ -4,7 +4,8 @@ import { Tree } from "@/components/branches/Tree"
 import { StreakStatRow } from "@/components/blocks/dashboard/StreakStatRow"
 import { CreditStatRow } from "@/components/blocks/dashboard/CreditStatRow"
 import { RewardStatRow } from "@/components/blocks/dashboard/RewardStatRow"
-import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
+import { ProfileIdentityRow } from "@/components/blocks/dashboard/ProfileIdentityRow"
+import { defineCompositeComponent, defineContractComponent } from "@/components/contracts/props"
 
 /**
  * BLOCK - `IdentityRail`: the three standing figures, read as one rail.
@@ -22,13 +23,16 @@ import { defineContractComponent, defineLeafComponent } from "@/components/contr
 export const IdentityRail = () => {
     return (
         <Tree
-            contract="stacked-peer-controls"
-            render={defineContractComponent("stacked-peer-controls", {
-                control: [
-                    defineLeafComponent("stat-row", {}, () => <StreakStatRow />),
-                    defineLeafComponent("stat-row", {}, () => <CreditStatRow />),
-                    defineLeafComponent("stat-row", {}, () => <RewardStatRow />),
-                ],
+            contract="profile-over-stat-rows"
+            render={defineContractComponent("profile-over-stat-rows", {
+                profile: defineCompositeComponent("profile-row", {}, () => <ProfileIdentityRow />),
+                stats: defineContractComponent("stacked-stat-rows", {
+                    stat: [
+                        defineCompositeComponent("stat-row", {}, () => <StreakStatRow />),
+                        defineCompositeComponent("stat-row", {}, () => <CreditStatRow />),
+                        defineCompositeComponent("stat-row", {}, () => <RewardStatRow />),
+                    ],
+                }),
             })}
         />
     )

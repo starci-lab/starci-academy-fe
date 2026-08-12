@@ -21,6 +21,7 @@ vi.mock("../modules/api/graphql/clients/create-apollo-client", () => ({
 /** Every hook the app's blocks are entitled to import from `@/hooks`. */
 const EXPECTED = [
     "useQueryCoursesSwr",
+    "useQueryMeSwr",
     "useQueryPlatformStatsSwr",
     "useQueryMyCoursesSwr",
     "useQueryMyWeeklyStatsSwr",
@@ -30,6 +31,22 @@ const EXPECTED = [
     "useQueryMyKpisSwr",
     "useQueryMyLearnedLessonsSwr",
     "useQueryMyInProgressChallengesSwr",
+    "useQueryMyJobReadinessSwr",
+    "useQueryWeeklyChallengeSwr",
+    "useQueryMyContributionCalendarSwr",
+    "useQueryChangelogEntriesSwr",
+    "useMutateClaimWeeklyChallengeRewardSwr",
+    "useMutateRedeemRewardSwr",
+    "useMutateReactActivitySwr",
+    "useMutateSetFollowSwr",
+    "useQueryMyFeedSwr",
+    "useQueryTrendingContentsSwr",
+    "useQuerySuggestedUsersSwr",
+    "useQueryResolveRouteSwr",
+    "useQueryRecommendedCoursesSwr",
+    "useQueryMyUpcomingLivestreamsSwr",
+    "useQueryMyLeagueSwr",
+    "useQueryGlobalLeaderboardSwr",
 ]
 
 describe("hooks barrel", () => {
@@ -50,7 +67,7 @@ describe("hooks barrel", () => {
     })
 
     it("leaks no cache key, type or query module through the barrel", () => {
-        const leaked = Object.keys(hooks).filter((name) => !name.startsWith("useQuery"))
+        const leaked = Object.keys(hooks).filter((name) => !/^use(Query|Mutate)/.test(name))
         expect(leaked).toEqual([])
     })
 })

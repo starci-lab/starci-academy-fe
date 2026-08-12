@@ -31,11 +31,9 @@ export interface ApiEnv {
     /**
      * DEVELOPMENT BEARER TOKEN PASS-THROUGH - not a login flow.
      *
-     * This repository has no session, no Keycloak provider and no token refresh. When a
-     * query needs an authenticated viewer, the token is pasted into the environment and
-     * this value is attached verbatim as `authorization: Bearer <token>`. It exists so the
-     * authenticated path is provable end to end before a real session lands, and it must
-     * be replaced by a session-owned token getter when one exists.
+     * The live session token always wins. This fallback exists only so a developer can prove an
+     * authenticated operation without walking through sign-in; it is attached as
+     * `authorization: Bearer <token>` when the in-memory session is absent.
      *
      * `undefined` when unset, which is the normal case: the anonymous path is the default.
      */

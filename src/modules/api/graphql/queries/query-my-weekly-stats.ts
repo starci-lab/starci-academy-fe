@@ -20,6 +20,10 @@ const query1 = gql`
             data {
                 streak
                 longestStreak
+                xp
+                lessons
+                weeklyGoalLessons
+                streakFreezes
                 days {
                     date
                     active

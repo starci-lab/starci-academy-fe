@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest"
-import { ApolloClient, ApolloLink, HttpLink } from "@apollo/client"
+import { describe, expect, it, vi } from "vitest"
+import { ApolloClient, ApolloLink, gql, HttpLink } from "@apollo/client"
 import { RetryLink } from "@apollo/client/link/retry"
 import { createApolloClient, createLinkChain } from "./create-apollo-client"
 
@@ -35,6 +35,42 @@ describe("createLinkChain", () => {
     it("ends with the terminal link in both shapes", () => {
         expect(chainOf(createLinkChain()).at(-1)).toBe("HttpLink")
         expect(chainOf(createLinkChain({ withAuth: true })).at(-1)).toBe("HttpLink")
+    })
+
+    it("includes the session cookie whenever auth is asked for", async () => {
+        const fetchMock = vi.fn(async () => new Response(JSON.stringify({ data: { viewer: true } }), {
+            status: 200,
+            headers: { "content-type": "application/json" },
+        }))
+        vi.stubGlobal("fetch", fetchMock)
+
+        const client = createApolloClient({
+            withAuth: true,
+            uri: "https://api.example.com/graphql",
+        })
+        await client.query({ query: gql`query Viewer { viewer }` })
+
+        expect(fetchMock).toHaveBeenCalledWith(
+            "https://api.example.com/graphql",
+            expect.objectContaining({ credentials: "include" }),
+        )
+    })
+
+    it("lets an explicit anonymous cookie choice opt in", async () => {
+        const fetchMock = vi.fn(async () => new Response(JSON.stringify({ data: { viewer: true } }), {
+            status: 200,
+            headers: { "content-type": "application/json" },
+        }))
+        vi.stubGlobal("fetch", fetchMock)
+        const client = createApolloClient({
+            withCredentials: true,
+            uri: "https://api.example.com/graphql",
+        })
+        await client.query({ query: gql`query Viewer { viewer }` })
+        expect(fetchMock).toHaveBeenCalledWith(
+            "https://api.example.com/graphql",
+            expect.objectContaining({ credentials: "include" }),
+        )
     })
 
     it("builds a fresh chain on every call so no signal is shared between requests", () => {

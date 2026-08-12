@@ -1,4 +1,4 @@
-import { Typography, skeletonVariants } from "@heroui/react"
+import { skeletonVariants } from "@heroui/react"
 import { Icon, type IconName } from "@/components/leaves/Icon"
 import type { LeafProps } from "@/components/contracts/props"
 
@@ -14,10 +14,10 @@ import type { LeafProps } from "@/components/contracts/props"
  */
 
 /** Whether this is the content itself or a supporting fact beside it. */
-export type TextTone = "default" | "muted"
+export type TextTone = "default" | "muted" | "accent"
 
-/** The reading size. Two steps, because a third is a decision nobody makes consistently. */
-export type TextSize = "sm" | "md"
+/** The reading size. `xs` is reserved for supporting captions beneath primary content. */
+export type TextSize = "xs" | "sm" | "md"
 
 /** How firmly the words are set. */
 export type TextWeight = "normal" | "medium" | "semibold"
@@ -26,13 +26,11 @@ export type TextWeight = "normal" | "medium" | "semibold"
 export type TextLive = "off" | "polite" | "assertive"
 
 /** What this leaf draws. A `type`, not an `interface` - only an alias satisfies the data fence. */
-export type TextData = {
+type TextCommonData = {
+    /** Optional DOM identity used when another intrinsic control describes itself with this line. */
+    readonly id?: string
     /** The already-resolved copy. Absent while loading - the bar has its own measure. */
     readonly content?: string
-    /** Content itself, or a supporting fact beside it. */
-    readonly tone?: TextTone
-    /** The reading size. */
-    readonly size?: TextSize
     /** How firmly the words are set. */
     readonly weight?: TextWeight
     /** The meaning drawn ahead of the words. It inherits this line's colour, never its own. */
@@ -41,28 +39,53 @@ export type TextData = {
     readonly live?: TextLive
 }
 
+/**
+ * Twelve-pixel copy is supporting copy by definition, so its tone cannot be promoted independently.
+ * The union makes `size: "xs", tone: "default"` unrepresentable instead of relying on every caller
+ * to remember that size and tone express one rank.
+ */
+export type TextData = TextCommonData & (
+    | { readonly size: "xs"; readonly tone?: "muted" }
+    | { readonly size?: Exclude<TextSize, "xs">; readonly tone?: TextTone }
+)
+
 /** Props for {@link Text}. Three fixed slots, no fourth - see {@link LeafProps}. */
 export type TextProps = LeafProps<TextData>
 
-/** The tone, said once, as the vendor's own token rather than as a colour. */
-const TONE_COLORS = { default: "default", muted: "muted" } as const
-
-/** The size step, as the vendor names it. */
-const SIZE_STEPS = { sm: "sm", md: "base" } as const
-
 /**
  * The role a live line carries. `off` is not a live region at all, so it takes no role - a
- * paragraph claiming `role="status"` while saying nothing would announce every re-render.
+ * line claiming `role="status"` while saying nothing would announce every re-render.
  */
 const LIVE_ROLES = { off: undefined, polite: "status", assertive: "alert" } as const
 
-/** Keeps the glyph on the text baseline without the line learning it is in a row. */
-const WITH_ICON_CLASSES = "inline-flex items-center gap-2"
+/**
+ * The complete text recipe. A plain `div` owns the line box: `xs` is 12/16, `sm` is 14/20 and
+ * `md` is 16/24.
+ * Data variants keep every possible class literal visible to Tailwind without composing classes
+ * at a call site or allowing a typography vendor to silently replace the requested leading.
+ */
+const TEXT_CLASSES = [
+    "text-base leading-6 font-normal text-foreground",
+    "data-[size=xs]:text-xs data-[size=xs]:leading-4 data-[size=xs]:text-muted",
+    "data-[size=sm]:text-sm data-[size=sm]:leading-5",
+    "data-[tone=muted]:text-muted",
+    "data-[tone=accent]:text-accent-soft-foreground",
+    "data-[weight=medium]:font-medium data-[weight=semibold]:font-semibold",
+    "data-[icon=true]:inline-flex data-[icon=true]:items-center data-[icon=true]:gap-2",
+].join(" ")
 
 /** The resting shape - the same line box, wearing the vendor's skeleton, glyphs out. */
-const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({
-    className: "select-none text-transparent",
-})
+const RESTING_CLASSES = {
+    xs: skeletonVariants({ animationType: "shimmer" }).base({
+        className: "inline-block w-10 select-none rounded text-xs leading-4 text-muted text-transparent",
+    }),
+    sm: skeletonVariants({ animationType: "shimmer" }).base({
+        className: "inline-block w-12 select-none rounded text-sm leading-5 text-transparent",
+    }),
+    md: skeletonVariants({ animationType: "shimmer" }).base({
+        className: "inline-block w-40 max-w-full select-none rounded text-base leading-6 text-transparent",
+    }),
+} as const
 
 /**
  * Draw one line of copy.
@@ -70,30 +93,31 @@ const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({
  * @param input - {@link TextProps}
  */
 export const Text = ({ props, isLoading = false }: TextProps) => {
-    const tone = props.tone ?? "default"
     const size = props.size ?? "md"
+    const tone = size === "xs" ? "muted" : props.tone ?? "default"
+    const weight = props.weight ?? "normal"
     const live = props.live ?? "off"
     // The glyph drops while the line rests: the skeleton already covers the measure, and a glyph
     // shimmering beside it is a second thing to look at where there is nothing to read yet.
     const showsIcon = props.icon !== undefined && !isLoading
     return (
-        <Typography.Paragraph
+        <div
+            id={props.id}
             data-tier="leaf"
             data-component="Text"
             data-tone={tone}
             data-size={size}
+            data-weight={weight}
+            data-icon={showsIcon ? "true" : "false"}
             data-live={live}
             data-loading={isLoading ? "true" : "false"}
-            color={TONE_COLORS[tone]}
-            size={SIZE_STEPS[size]}
-            weight={props.weight ?? "normal"}
             role={LIVE_ROLES[live]}
             aria-live={live === "off" ? undefined : live}
-            className={isLoading ? RESTING_CLASSES : (showsIcon ? WITH_ICON_CLASSES : undefined)}
+            className={isLoading ? RESTING_CLASSES[size] : TEXT_CLASSES}
         >
             {showsIcon && props.icon !== undefined ? <Icon props={{ name: props.icon, role: "chip" }} /> : null}
-            {props.content ?? ""}
-        </Typography.Paragraph>
+            {isLoading ? "\u00a0" : props.content ?? ""}
+        </div>
     )
 }
 

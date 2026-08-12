@@ -19,8 +19,6 @@ export type NavLinkKind = "route" | "tab"
 
 /** What this leaf draws. A `type`, not an `interface` - only an alias satisfies the data fence. */
 export type NavLinkData = {
-    /** Where it goes. */
-    readonly href: string
     /** The already-resolved words. */
     readonly label: string
     /** The meaning drawn before the words, for a tab that carries one. */
@@ -31,8 +29,13 @@ export type NavLinkData = {
     readonly kind?: NavLinkKind
 }
 
+/** Internal route choice reported to the connected navigation owner. */
+export type NavLinkActions = {
+    readonly press?: () => void
+}
+
 /** Props for {@link NavLink}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type NavLinkProps = LeafProps<NavLinkData>
+export type NavLinkProps = LeafProps<NavLinkData, NavLinkActions>
 
 /** The set per kind, with the current one carrying its own weight and rule. */
 const KIND_CLASSES = {
@@ -51,7 +54,7 @@ const KIND_CLASSES = {
  *
  * @param input - {@link NavLinkProps}
  */
-export const NavLink = ({ props }: NavLinkProps) => {
+export const NavLink = ({ props, on }: NavLinkProps) => {
     const kind = KIND_CLASSES[props.kind ?? "route"]
     const isCurrent = props.isCurrent === true
     return (
@@ -60,7 +63,7 @@ export const NavLink = ({ props }: NavLinkProps) => {
             data-component="NavLink"
             data-kind={props.kind ?? "route"}
             data-current={isCurrent ? "true" : "false"}
-            href={props.href}
+            onPress={on?.press}
             aria-current={isCurrent ? "page" : undefined}
             className={isCurrent ? kind.current : kind.base}
         >

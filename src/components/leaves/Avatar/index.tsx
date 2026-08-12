@@ -1,11 +1,13 @@
+import { Avatar as DiceAvatar, Style } from "@dicebear/core"
+import lorelei from "@dicebear/styles/lorelei.json" with { type: "json" }
 import { Avatar as HeroAvatar, skeletonVariants } from "@heroui/react"
 import type { LeafProps } from "@/components/contracts/props"
 
 /**
  * LEAF - `Avatar`: the mark that says which person a row is about.
  *
- * INITIALS ARE DERIVED HERE, not passed in. A caller computing them would compute them slightly
- * differently on the next screen, and a person would have two marks.
+ * FALLBACK IDENTITY IS DERIVED HERE, not passed in. DiceBear receives the resolved name as a
+ * stable seed, so one person keeps one mark on every screen without a runtime HTTP request.
  */
 
 /** The three steps: beside a line, leading a row, or heading a profile. */
@@ -32,20 +34,19 @@ const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({
     className: "select-none text-transparent",
 })
 
+/** One local style definition serves every generated fallback. */
+const FALLBACK_STYLE = new Style(lorelei)
+
+/** The anonymous seed is deterministic too; rendering must never invent identity with random. */
+const ANONYMOUS_SEED = "StarCi"
+
 /**
- * The first letter of at most the first two words - enough to tell two people apart, short enough
- * to fit the smallest step.
+ * Build the local SVG data URI used when a profile picture is absent or cannot load.
  *
  * @param name - The person's resolved name.
  */
-const initialsOf = (name: string): string =>
-    name
-        .trim()
-        .split(/\s+/)
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((word) => word.slice(0, 1))
-        .join("")
+const fallbackAvatarOf = (name: string): string =>
+    new DiceAvatar(FALLBACK_STYLE, { seed: name.trim() || ANONYMOUS_SEED }).toDataUri()
 
 /**
  * Draw a person's mark.
@@ -56,6 +57,7 @@ export const Avatar = ({ props, isLoading = false }: AvatarProps) => {
     const size = props.size ?? "md"
     const name = props.name ?? ""
     const showsImage = props.src !== undefined && props.src !== "" && !isLoading
+    const fallbackSrc = isLoading ? undefined : fallbackAvatarOf(name)
     return (
         <HeroAvatar
             data-tier="leaf"
@@ -67,8 +69,17 @@ export const Avatar = ({ props, isLoading = false }: AvatarProps) => {
             color="accent"
             className={isLoading ? RESTING_CLASSES : undefined}
         >
-            {showsImage ? <HeroAvatar.Image src={props.src} alt={name} /> : null}
-            <HeroAvatar.Fallback>{isLoading ? "" : initialsOf(name)}</HeroAvatar.Fallback>
+            {!isLoading ? <HeroAvatar.Image src={showsImage ? props.src : fallbackSrc} alt={name} /> : null}
+            <HeroAvatar.Fallback>
+                {fallbackSrc !== undefined ? (
+                    <img
+                        data-avatar-fallback="dicebear-lorelei"
+                        className="size-full object-cover"
+                        src={fallbackSrc}
+                        alt={name}
+                    />
+                ) : null}
+            </HeroAvatar.Fallback>
         </HeroAvatar>
     )
 }

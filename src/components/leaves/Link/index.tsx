@@ -3,11 +3,10 @@ import { Icon, type IconName } from "@/components/leaves/Icon"
 import type { LeafProps } from "@/components/contracts/props"
 
 /**
- * LEAF - `Link`: text that takes the reader somewhere else.
+ * LEAF - `Link`: text that either reports internal navigation or opens an external destination.
  *
- * IT IS A LINK AND NOT A BUTTON WEARING ONE. A destination belongs in an `<a href>` so it can be
- * opened in a new tab, copied, and read out as a link - a control that navigates on press takes
- * all three away and gives nothing back.
+ * INTERNAL STARCHI ROUTES NEVER ENTER `href`. They are reported through `on.press`, and the
+ * connected owner calls `router.push`. Only an address outside StarCi may cross `externalHref`.
  */
 
 /** How loudly the link is set. `brand` is the mark that names the product. */
@@ -15,8 +14,8 @@ export type LinkEmphasis = "default" | "muted" | "brand"
 
 /** What this leaf draws. A `type`, not an `interface` - only an alias satisfies the data fence. */
 export type LinkData = {
-    /** Where it goes. */
-    readonly href: string
+    /** A destination outside StarCi. Internal paths are actions, never href data. */
+    readonly externalHref?: string
     /** The already-resolved words. Copy, so it never rests. */
     readonly label: string
     /** The meaning drawn before the words. It inherits the link's colour, never its own. */
@@ -25,8 +24,13 @@ export type LinkData = {
     readonly emphasis?: LinkEmphasis
 }
 
+/** Navigation action reported by an internal StarCi link. */
+export type LinkActions = {
+    readonly press?: () => void
+}
+
 /** Props for {@link Link}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type LinkProps = LeafProps<LinkData>
+export type LinkProps = LeafProps<LinkData, LinkActions>
 
 /** The set per emphasis. */
 const EMPHASIS_CLASSES = {
@@ -68,12 +72,13 @@ const BrandLockup = ({ label }: BrandLockupProps) => (
  *
  * @param input - {@link LinkProps}
  */
-export const Link = ({ props }: LinkProps) => (
+export const Link = ({ props, on }: LinkProps) => (
     <HeroLink
         data-tier="leaf"
         data-component="Link"
         data-emphasis={props.emphasis ?? "default"}
-        href={props.href}
+        href={props.externalHref}
+        onPress={on?.press}
         className={EMPHASIS_CLASSES[props.emphasis ?? "default"]}
     >
         {props.emphasis === "brand" ? <BrandLockup label={props.label} /> : (

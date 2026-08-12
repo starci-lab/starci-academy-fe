@@ -1,9 +1,8 @@
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { Text } from "@/components/leaves/Text"
 import { SeeMoreLink } from "@/components/leaves/SeeMoreLink"
-import { EmptyNotice } from "@/components/leaves/EmptyNotice"
-import type { IconName } from "@/components/leaves/Icon"
-import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
+import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { defineCompositeComponent, defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
 /**
  * BLOCK - `ContinueLearning`, presentational half.
@@ -35,12 +34,10 @@ import { defineContractComponent, defineLeafComponent } from "@/components/contr
 export type ResumeItem = {
     /** Identity of the item; the React key. */
     readonly id: string
-    /** The already-resolved lesson or challenge title. */
+    /** The already-resolved content or challenge title. */
     readonly title: string
     /** The already-resolved word for what kind of thing this is. */
     readonly kindLabel: string
-    /** The meaning drawn ahead of the kind. */
-    readonly icon: IconName
 }
 
 /** How many resting cards are drawn, so the resting section has the height of a real one. */
@@ -100,7 +97,7 @@ export const _ContinueLearning = (
         return (
             <SurfaceCard props={{ label: input.props.label }} contract="empty-notice-card"
                 render={defineContractComponent("empty-notice-card", {
-                    notice: defineLeafComponent("empty-notice", {}, () => (
+                    notice: defineCompositeComponent("empty-notice", {}, () => (
                         <EmptyNotice
                             props={{
                                 icon: "course",
@@ -126,17 +123,17 @@ export const _ContinueLearning = (
         items: ReadonlyArray<ResumeItem | undefined>,
         resumeLabel: string | undefined,
         isLoading: boolean,
-    ) => defineContractComponent("two-column-grid", {
+    ) => defineContractComponent("resume-card-grid", {
         card: items.map((item) => defineContractComponent("resume-item-card", {
             kind: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
                 <Text
-                    props={{ content: item?.kindLabel, icon: item?.icon, size: "sm", tone: "muted" }}
+                    props={{ content: item?.kindLabel, size: "sm", tone: "muted" }}
                     isLoading={isLoading}
                 />
             )),
-            title: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
+            title: defineLeafComponent("text", { size: "md", weight: "medium" }, () => (
                 <Text
-                    props={{ content: item?.title, size: "sm", weight: "medium" }}
+                    props={{ content: item?.title, size: "md", weight: "medium" }}
                     isLoading={isLoading}
                 />
             )),
@@ -156,7 +153,7 @@ export const _ContinueLearning = (
         return (
             <SurfaceCard
                 props={{ label: input.props.label, isFrameless: true }}
-                contract="two-column-grid"
+                contract="resume-card-grid"
                 render={run(Array.from({ length: RESTING_ITEMS }, () => undefined), undefined, true)}
                 isLoading
             />
@@ -166,7 +163,7 @@ export const _ContinueLearning = (
     return (
         <SurfaceCard
             props={{ label: input.props.label, isFrameless: true }}
-            contract="two-column-grid"
+            contract="resume-card-grid"
             render={run(input.props.items, input.props.resumeLabel, false)}
         />
     )

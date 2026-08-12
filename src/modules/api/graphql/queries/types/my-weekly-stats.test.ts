@@ -18,6 +18,10 @@ const day: MyWeeklyStatsDay = { date: "2026-08-03", active: true }
 const stats: MyWeeklyStatsData = {
     streak: 3,
     longestStreak: 11,
+    xp: 240,
+    lessons: 4,
+    weeklyGoalLessons: 5,
+    streakFreezes: 1,
     days: [day],
 }
 
@@ -39,8 +43,16 @@ describe("QueryMyWeeklyStatsResponse", () => {
 })
 
 describe("MyWeeklyStatsData", () => {
-    it("carries exactly the three fields the document selects", () => {
-        expect(Object.keys(stats)).toEqual(["streak", "longestStreak", "days"])
+    it("carries the shared streak, goal and freeze figures selected by the document", () => {
+        expect(Object.keys(stats)).toEqual([
+            "streak",
+            "longestStreak",
+            "xp",
+            "lessons",
+            "weeklyGoalLessons",
+            "streakFreezes",
+            "days",
+        ])
     })
 
     it("keeps a day as a calendar string the strip can parse as UTC midnight", () => {
@@ -52,6 +64,10 @@ describe("MyWeeklyStatsData", () => {
         const empty: MyWeeklyStatsData = {
             streak: 0,
             longestStreak: 0,
+            xp: 0,
+            lessons: 0,
+            weeklyGoalLessons: null,
+            streakFreezes: 0,
             days: [{ date: "2026-08-03", active: false }],
         }
         expect(empty.days.some((entry) => entry.active)).toBe(false)

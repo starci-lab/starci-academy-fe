@@ -13,10 +13,17 @@ import type { LeafProps } from "@/components/contracts/props"
  * possible target for a decision that is not the surface's main action.
  */
 
+/** The same two reading steps used by ordinary body copy. */
+export type TextLinkSize = "sm" | "md"
+
 /** What this leaf draws. A `type`, not an `interface` - only an alias satisfies the data fence. */
 export type TextLinkData = {
     /** The already-resolved words. */
     readonly label: string
+    /** The reading step, matched to the sentence this action completes. */
+    readonly size?: TextLinkSize
+    /** Whether this peer choice is selected. Omit outside a fixed choice set. */
+    readonly isSelected?: boolean
 }
 
 /** What pressing it does. */
@@ -28,6 +35,11 @@ export type TextLinkActions = {
 /** Props for {@link TextLink}. Three fixed slots, no fourth - see {@link LeafProps}. */
 export type TextLinkProps = LeafProps<TextLinkData, TextLinkActions>
 
+/** HeroUI Link owns interaction styling; this leaf adds only the house reading step. */
+const SIZE_CLASSES = { sm: "text-sm", md: "text-base" } as const
+const CHOICE_CLASSES = "rounded-full px-2 py-1"
+const SELECTED_CLASSES = "bg-accent-soft text-accent-soft-foreground"
+
 /**
  * Draw a word that acts.
  *
@@ -37,7 +49,11 @@ export const TextLink = ({ props, on }: TextLinkProps) => (
     <HeroLink
         data-tier="leaf"
         data-component="TextLink"
+        data-size={props.size ?? "md"}
+        data-selected={props.isSelected}
+        aria-current={props.isSelected === true ? "true" : undefined}
         onPress={on?.press}
+        className={`${SIZE_CLASSES[props.size ?? "md"]} ${props.isSelected === undefined ? "" : CHOICE_CLASSES} ${props.isSelected === true ? SELECTED_CLASSES : ""}`}
     >
         {props.label}
     </HeroLink>

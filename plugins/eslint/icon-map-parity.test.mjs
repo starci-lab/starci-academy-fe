@@ -36,3 +36,10 @@ test("different product meanings do not share one concrete glyph", () => {
     owners.set(glyph, meaning)
   }
 })
+
+test("pending is CheckCircleIcon with only the inner check removed", () => {
+  const circleBlock = iconSource.match(/const CircleIcon[\s\S]*?\n\)/)?.[0] ?? ""
+
+  assert.match(circleBlock, /M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z/)
+  assert.doesNotMatch(circleBlock, /M9 12\.75 11\.25 15 15 9\.75/)
+})

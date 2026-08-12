@@ -5,7 +5,7 @@ import type { LeafProps } from "@/components/contracts/props"
 /**
  * LEAF - `SearchBox`: the one field that lives in the bar.
  *
- * A CLUSTER LEAF - a glyph, a box and a keyboard hint - fixed everywhere and forever, so it owns
+ * One search control - its glyph and keyboard hint are intrinsic affordances, so it owns
  * the seam between them.
  *
  * THE SHORTCUT IS SHOWN, not merely bound. A reader who does not know the key never presses it, so

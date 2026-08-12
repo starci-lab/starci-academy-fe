@@ -51,7 +51,8 @@ export const mutationExchangeCodeForToken = async ({
     signal,
     debug,
 }: MutationParams<MutationExchangeCodeForToken, ExchangeCodeForTokenRequest>) => {
-    const apollo = createApolloClient({ headers, signal, debug })
+    // The response establishes the HttpOnly refresh session and its readable CSRF twin.
+    const apollo = createApolloClient({ headers, signal, debug, withCredentials: true })
     return apollo.mutate<MutationExchangeCodeForTokenResponse>({
         mutation: mutationExchangeCodeForTokenMap[mutation],
         variables: { request },

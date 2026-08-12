@@ -20,6 +20,9 @@ const STRUCTURAL_HOSTS = new Set([
   "footer",
   "aside",
   "nav",
+  "article",
+  "ul",
+  "ol",
 ])
 
 /**
@@ -40,11 +43,9 @@ const normalize = (filename) => String(filename || "").replace(/\\/g, "/")
 export const isRegistryFrameFile = (filename) => /\/src\/components\/branches\/(?:Tree|SurfaceCard|SurfaceAccordionCard|SurfaceListCard|SurfaceFormCard)\//.test(normalize(filename))
 
 /**
- * A LEAF - an atom, or a fixed cluster of atoms.
- *
- * A leaf owns its own interior, including the element it opens and the seam between its parts.
- * That interior is the same everywhere and forever, so there is nothing for the registry to tune
- * and nothing for this rule to send back to it.
+ * A LEAF is one intrinsic value/control and owns its fixed interior. A COMPOSITE is a fixed
+ * reusable arrangement of independently meaningful leaves, so its seams still belong to named
+ * registry nodes rendered through Tree.
  *
  * THIS EXEMPTION IS A FOLDER, so it is a POLICY boundary and not a type: anyone can escape the
  * rule by filing a component here. What keeps a region out is the question a reader asks - would
@@ -52,6 +53,7 @@ export const isRegistryFrameFile = (filename) => /\/src\/components\/branches\/(
  * the registry. No gate asks that question.
  */
 export const isLeafFile = (filename) => normalize(filename).includes("/src/components/leaves/")
+export const isCompositeFile = (filename) => normalize(filename).includes("/src/components/composites/")
 
 /** Product source under `src/`, excluding twin tests which build fixture markup by hand. */
 export const isGovernedFile = (filename) => {

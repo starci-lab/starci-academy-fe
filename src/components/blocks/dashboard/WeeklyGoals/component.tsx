@@ -1,20 +1,18 @@
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { LabelledProgressRow } from "@/components/leaves/LabelledProgressRow"
-import { EmptyNotice } from "@/components/leaves/EmptyNotice"
+import { LabelledProgressRow } from "@/components/composites/LabelledProgressRow"
+import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { Text } from "@/components/leaves/Text"
-import type { LabelledProgressRowData } from "@/components/leaves/LabelledProgressRow"
-import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
+import type { LabelledProgressRowData } from "@/components/composites/LabelledProgressRow"
+import { defineCompositeComponent, defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
 /**
  * BLOCK - `WeeklyGoals`, presentational half.
  *
  * The week's targets, how far into them the learner is, and when the week rolls over.
  *
- * `unset` IS A STATE, NOT AN EMPTY LIST, and this is the case the whole discrimination exists for.
- * The server sends every metric whether or not a target was chosen, so the rows are there either
- * way - what changes is that there is nothing to be a fraction OF. Drawing a target of zero
- * already met would tell a reader they had finished a week they never started; `unset` draws the
- * invitation instead, and it is a different tree.
+ * AN UNSET CUSTOM TARGET DOES NOT ERASE THE METRIC. The connected half resolves it to the product
+ * default, so this block always renders the same six comparable goals. A giant empty card would
+ * discard real weekly progress merely because the learner has not customised it yet.
  *
  * THE WEEK'S OWN FIGURE SITS IN THE LABEL LINE, not among the rows. It is a fact about the set
  * rather than a member of it, and a summary that queues up with the things it summarises gets read
@@ -41,18 +39,12 @@ export type WeeklyGoalsProps =
         readonly props: WeeklyGoalsFrame & { readonly message: string; readonly retryLabel: string }
     }
     | {
-        readonly state: "unset"
-        readonly props: WeeklyGoalsFrame & WeeklyGoalsExit & { readonly prompt: string }
-    }
-    | {
         readonly state: "ready"
         readonly props: WeeklyGoalsFrame & WeeklyGoalsExit & {
             /** One row per metric that has a target. */
             readonly rows: ReadonlyArray<LabelledProgressRowData>
-            /** The week as one sentence - percentage and the count met. */
+            /** The week as one sentence - percentage, count met and rollover. */
             readonly summary: string
-            /** When the week rolls over, as a sentence. Absent when the server sent no instant. */
-            readonly resetLine?: string
         }
     }
 
@@ -65,11 +57,10 @@ export type WeeklyGoalsActions = {
 }
 
 /** How many rows the resting shape stands in for, so the card does not resize when they land. */
-const RESTING_ROWS: ReadonlyArray<LabelledProgressRowData> = [
-    { id: "resting-1" },
-    { id: "resting-2" },
-    { id: "resting-3" },
-]
+const RESTING_ROWS: ReadonlyArray<LabelledProgressRowData> = Array.from(
+    { length: 6 },
+    (_unused, index) => ({ id: `resting-${index + 1}` }),
+)
 
 /**
  * Render the week.
@@ -80,25 +71,10 @@ export const _WeeklyGoals = (input: WeeklyGoalsProps & { readonly on?: WeeklyGoa
     if (input.state === "failed") {
         return (
             <SurfaceCard props={{ label: input.props.label }} contract="empty-notice-card"
-                render={defineContractComponent("empty-notice-card", { notice: defineLeafComponent("empty-notice", {}, () => <EmptyNotice
+                render={defineContractComponent("empty-notice-card", { notice: defineCompositeComponent("empty-notice", {}, () => <EmptyNotice
                     props={{ icon: "league", message: input.props.message, actionLabel: input.props.retryLabel }}
                     on={{ act: input.on?.retry }}
                 />) })} />
-        )
-    }
-
-    if (input.state === "unset") {
-        return (
-            <SurfaceCard
-                props={{ label: input.props.label, seeMoreLabel: input.props.editLabel }}
-                on={{ seeMore: input.on?.edit }}
-                contract="empty-notice-card"
-                render={defineContractComponent("empty-notice-card", {
-                    notice: defineLeafComponent("empty-notice", {}, () => (
-                        <EmptyNotice props={{ icon: "league", message: input.props.prompt }} />
-                    )),
-                })}
-            />
         )
     }
 
@@ -111,24 +87,28 @@ export const _WeeklyGoals = (input: WeeklyGoalsProps & { readonly on?: WeeklyGoa
                 // While resting there is nothing to lead anywhere yet, so the way out is withheld
                 // rather than drawn dead - a control that does nothing is worse than one not there.
                 seeMoreLabel: input.state === "ready" ? input.props.editLabel : undefined,
-                fact: input.state === "ready" ? input.props.summary : undefined,
             }}
             on={{ seeMore: input.on?.edit }}
             isLoading={isLoading}
             contract="weekly-goals-card"
             render={defineContractComponent("weekly-goals-card", {
-                goals: defineContractComponent("stacked-peer-controls", {
-                    control: (input.state === "ready" ? input.props.rows : RESTING_ROWS).map((row) => (
-                        defineLeafComponent("labelled-progress-row", {}, () => (
+                summary: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
+                    <Text
+                        props={{
+                            content: input.state === "ready" ? input.props.summary : undefined,
+                            size: "sm",
+                            weight: "medium",
+                        }}
+                        isLoading={isLoading}
+                    />
+                )),
+                goals: defineContractComponent("bordered-goal-grid", {
+                    goal: (input.state === "ready" ? input.props.rows : RESTING_ROWS).map((row) => (
+                        defineCompositeComponent("labelled-progress-row", {}, () => (
                             <LabelledProgressRow props={row} isLoading={isLoading} />
                         ))
                     )),
                 }),
-                ...(input.state === "ready" && input.props.resetLine !== undefined ? {
-                    reset: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                        <Text props={{ content: input.props.resetLine, size: "sm", tone: "muted" }} />
-                    )),
-                } : {}),
             })}
         />
     )

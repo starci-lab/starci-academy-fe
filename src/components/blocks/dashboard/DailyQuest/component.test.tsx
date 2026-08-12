@@ -28,10 +28,11 @@ describe("_DailyQuest", () => {
         const { container } = render(
             <_DailyQuest
                 state="open"
-                props={{ label: "Today's quest", tasks, rewardLine: "Complete every task to earn 20 pts" }}
+                props={{ label: "Today's quest", tasks, rewardLine: "Complete every task to earn 20 coins" }}
             />,
         )
-        expect(screen.getByText("Complete every task to earn 20 pts")).toBeTruthy()
+        expect(screen.getByText("Complete every task to earn 20 coins")).toBeTruthy()
+        expect(screen.getByText("Complete every task to earn 20 coins")).toHaveAttribute("data-size", "xs")
         expect(container.querySelector("button")).toBeNull()
     })
 
@@ -40,11 +41,11 @@ describe("_DailyQuest", () => {
         render(
             <_DailyQuest
                 state="claimable"
-                props={{ label: "Today's quest", tasks, rewardLine: "unused", claimLabel: "Claim 20 pts" }}
+                props={{ label: "Today's quest", tasks, rewardLine: "unused", claimLabel: "Claim 20 coins" }}
                 on={{ claim }}
             />,
         )
-        expect(screen.getByText("Claim 20 pts")).toBeTruthy()
+        expect(screen.getByText("Claim 20 coins")).toBeTruthy()
     })
 
     it("stops offering it once it has been taken", () => {
@@ -63,20 +64,58 @@ describe("_DailyQuest", () => {
         const { container } = render(
             <_DailyQuest state="open" props={{ label: "Today's quest", tasks, rewardLine: "x" }} />,
         )
-        expect(container.querySelectorAll("[data-component=\"TaskProgressRow\"]")).toHaveLength(2)
+        expect(container.querySelectorAll("[data-node=\"task-mark-title-fact-row\"]")).toHaveLength(2)
+        const surface = container.querySelector("[data-component=\"SurfaceListCardSurface\"]")
         expect(container.querySelectorAll("[data-component=\"SurfaceListCardSurface\"]")).toHaveLength(1)
+        expect(surface?.className).toContain("p-0")
         const body = container.querySelector("[data-component=\"SurfaceListCardBody\"]")
-        expect(body?.getAttribute("data-node")).toBe("daily-quest-list")
-        expect(body?.className).toContain("divide-y")
-        expect(container.querySelector("[data-component=\"TaskProgressRow\"]")?.className)
-            .not.toContain("after:")
+        expect(body?.className).toContain("p-0")
+        const list = container.querySelector("[data-node=\"daily-quest-list\"]")
+        expect(container.querySelectorAll("[data-node=\"daily-quest-list\"]")).toHaveLength(1)
+        expect(list?.className).toContain("divide-y")
+        expect(list?.className).toContain("divide-separator")
+        expect(list?.className).toContain("p-0")
+        expect(list?.className).toContain("[&>*]:px-4")
+        expect(list?.className).toContain("[&>*]:py-3")
+        expect(list?.className).toContain("[&>*:first-child]:pt-4")
+        expect(list?.className).toContain("[&>*:last-child]:pb-4")
+        expect(list?.querySelectorAll(":scope > [data-node=\"task-mark-title-fact-row\"]")).toHaveLength(2)
+        expect(container.querySelector("[data-node=\"task-mark-title-fact-row\"]")?.className).not.toMatch(/\bp-/)
+        expect(container.querySelector("[data-component=\"SurfaceListCard\"]")?.className).toContain("gap-3")
         expect(container.querySelector("[data-node=\"title-with-end-action\"]")).toBeNull()
+    })
+
+    it("uses the semantic completion icon only for completed tasks", () => {
+        const completedTasks = [
+            { id: "readContent", title: "Read content", percent: 100, percentText: "1/1" },
+            { id: "passChallenge", title: "Pass a challenge", percent: 0, percentText: "0/1" },
+        ]
+        const { container } = render(
+            <_DailyQuest state="open" props={{ label: "Today's quest", tasks: completedTasks, rewardLine: "x" }} />,
+        )
+        expect(container.querySelectorAll("svg.text-success-soft-foreground")).toHaveLength(1)
+        const pending = container.querySelector(
+            "[data-node=\"task-mark-title-fact-row\"]:not(:has(svg.text-success-soft-foreground))",
+        )
+        expect(pending).not.toBeNull()
+        expect(pending?.querySelector("svg")).not.toBeNull()
+        expect(pending?.className).not.toMatch(/border/)
     })
 
     it("keeps the card its own size while the day is still on its way", () => {
         const { container } = render(<_DailyQuest state="pending" props={{ label: "Today's quest" }} />)
         // Resting rows stand in for real ones so the card does not jump when they land.
-        expect(container.querySelectorAll("[data-component=\"TaskProgressRow\"]")).toHaveLength(5)
+        expect(container.querySelectorAll("[data-node=\"task-mark-title-fact-row\"]")).toHaveLength(5)
+        const restingTitles = container.querySelectorAll(
+            "[data-node=\"task-mark-title-fact-row\"] [data-component=\"Text\"][data-size=\"md\"][data-loading=\"true\"]",
+        )
+        const restingFacts = container.querySelectorAll(
+            "[data-node=\"task-mark-title-fact-row\"] [data-component=\"Text\"][data-size=\"xs\"][data-loading=\"true\"]",
+        )
+        expect(restingTitles).toHaveLength(5)
+        expect(restingFacts).toHaveLength(5)
+        expect(restingTitles[0]?.className).toContain("w-40")
+        expect(restingFacts[0]?.className).toContain("w-10")
     })
 
     it("offers a way back when the day could not be read", () => {

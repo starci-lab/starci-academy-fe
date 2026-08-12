@@ -49,7 +49,7 @@ export const mutationSignInVerifyOtp = async ({
     signal,
     debug,
 }: MutationParams<MutationSignInVerifyOtp, SignInVerifyOtpRequest>) => {
-    const apollo = createApolloClient({ headers, signal, debug })
+    const apollo = createApolloClient({ headers, signal, debug, withCredentials: true })
     return apollo.mutate<MutationSignInVerifyOtpResponse>({
         mutation: mutationSignInVerifyOtpMap[mutation],
         variables: { request },

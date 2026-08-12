@@ -1,18 +1,24 @@
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { StreakWeekRun } from "@/components/leaves/StreakWeekRun"
-import { StatRow } from "@/components/leaves/StatRow"
-import { EmptyNotice } from "@/components/leaves/EmptyNotice"
+import { StreakWeekRun } from "@/components/composites/StreakWeekRun"
+import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { Badge } from "@/components/leaves/Badge"
+import { Button } from "@/components/leaves/Button"
+import { Text } from "@/components/leaves/Text"
 import type { DayCellData } from "@/components/leaves/DayCell"
-import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
+import {
+    defineCompositeComponent,
+    defineContractComponent,
+    defineLeafComponent,
+} from "@/components/contracts/props"
 
 /**
  * BLOCK - `StreakStrip`, presentational half.
  *
- * The last seven days as a run of columns, beside the figure they add up to.
+ * The last seven days as a run of columns, beside the production prompt or compact streak result.
  *
- * THE STATE PICKS THE TREE, AND THAT IS ALL A STATE IS. `empty` and `failed` draw a notice;
- * `pending` and `ready` draw the same card, one of them resting. If a situation did not change the
- * tree it would be props, not state.
+ * THE STATE PICKS THE TREE, AND THAT IS ALL A STATE IS. `failed` draws a notice; `pending` and
+ * `ready` draw the same card, one of them resting. Zero activity is DATA for that same week, not a
+ * reason to replace seven days and their readout with a giant empty notice.
  *
  * `isLoading` IS WRITTEN HERE AND NOWHERE ABOVE. This is the seam: the block decides which tree a
  * situation deserves, and when the situation is "not settled yet" it picks the tree it would have
@@ -26,13 +32,6 @@ export type StreakStripFrame = {
 }
 
 /** The figure the week adds up to. */
-export type StreakStripReadout = {
-    /** What the figure is called. */
-    readonly label: string
-    /** The figure itself, already interpolated. */
-    readonly value?: string
-}
-
 /**
  * Props for {@link _StreakStrip}, discriminated by the situation.
  *
@@ -41,15 +40,21 @@ export type StreakStripReadout = {
  * than a comment.
  */
 export type StreakStripProps =
-    | { readonly state: "pending"; readonly props: StreakStripFrame & { readonly readout: StreakStripReadout } }
-    | { readonly state: "empty"; readonly props: StreakStripFrame & { readonly message: string } }
+    | {
+        readonly state: "pending"
+        readonly props: StreakStripFrame & { readonly message: string; readonly actionLabel: string }
+    }
     | { readonly state: "failed"; readonly props: StreakStripFrame & { readonly message: string; readonly retryLabel: string } }
     | {
         readonly state: "ready"
         readonly props: StreakStripFrame & {
+            readonly streak: number
             readonly record: string
             readonly days: ReadonlyArray<DayCellData>
-            readonly readout: StreakStripReadout
+            readonly current: string
+            readonly emptyMessage: string
+            readonly actionLabel: string
+            readonly nudge: string
         }
     }
 
@@ -57,6 +62,8 @@ export type StreakStripProps =
 export type StreakStripActions = {
     /** Called when the reader asks for the week again after a failure. */
     readonly retry?: () => void
+    /** Called when the reader starts content from the quiet-week prompt or today's nudge. */
+    readonly learn?: () => void
 }
 
 /**
@@ -69,46 +76,77 @@ export const _StreakStrip = (input: StreakStripProps & { readonly on?: StreakStr
     if (input.state === "failed") {
         return (
             <SurfaceCard props={{ label: input.props.label }} contract="empty-notice-card"
-                render={defineContractComponent("empty-notice-card", { notice: defineLeafComponent("empty-notice", {}, () => <EmptyNotice
+                render={defineContractComponent("empty-notice-card", { notice: defineCompositeComponent("empty-notice", {}, () => <EmptyNotice
                     props={{ icon: "streak", message: input.props.message, actionLabel: input.props.retryLabel }}
                     on={{ act: input.on?.retry }}
                 />) })} />
         )
     }
-    if (input.state === "empty") {
-        return (
-            <SurfaceCard props={{ label: input.props.label }} contract="empty-notice-card"
-                render={defineContractComponent("empty-notice-card", {
-                    notice: defineLeafComponent("empty-notice", {}, () => (
-                        <EmptyNotice props={{ icon: "streak", message: input.props.message }} />
-                    )),
-                })} />
-        )
-    }
     const isLoading = input.state === "pending"
+    const days = input.state === "ready" ? input.props.days : undefined
+    const hasActivity = input.state === "ready"
+        && (input.props.streak > 0 || input.props.days.some((day) => day.active === true))
+    const activeToday = input.state === "ready" && input.props.days.at(-1)?.active === true
+    // Legacy keeps the settled tree's active-side skeleton while the weekly stats are pending.
+    const showActiveCluster = isLoading || hasActivity
+    const promptMessage = input.state === "ready" ? input.props.emptyMessage : input.props.message
+
+    const outcome = showActiveCluster
+        ? defineContractComponent("streak-active-summary", {
+            current: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
+                <Text props={{ content: input.state === "ready" ? input.props.current : undefined, size: "sm", weight: "medium" }} isLoading={isLoading} />
+            )),
+            record: defineLeafComponent("badge", {}, () => (
+                <Badge props={{ content: input.state === "ready" ? input.props.record : "", tone: "accent" }} isLoading={isLoading} />
+            )),
+        })
+        : defineContractComponent("streak-empty-prompt", {
+            message: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                <Text
+                    props={{
+                        content: promptMessage,
+                        size: "sm",
+                        tone: "muted",
+                    }}
+                    isLoading={isLoading}
+                />
+            )),
+            action: defineLeafComponent("button", { size: "sm", variant: "primary" }, () => (
+                <Button
+                    props={{ label: input.props.actionLabel, size: "sm", variant: "primary" }}
+                    on={{ press: input.on?.learn }}
+                    isLoading={isLoading}
+                />
+            )),
+        })
+
     return (
         <SurfaceCard
-            props={{ label: input.props.label, fact: input.state === "ready" ? input.props.record : undefined }}
+            props={{ label: input.props.label }}
             contract="streak-summary-card"
             render={defineContractComponent("streak-summary-card", {
-                summary: defineContractComponent("body-with-fixed-aside", {
-                    body: defineLeafComponent("streak-week-run", {}, () => (
+                summary: defineContractComponent("streak-week-with-outcome", {
+                    week: defineCompositeComponent("streak-week-run", {}, () => (
                         <StreakWeekRun
-                            props={{ days: input.state === "ready" ? input.props.days : undefined }}
+                            props={{ days }}
                             isLoading={isLoading}
                         />
                     )),
-                    aside: defineLeafComponent("stat-row", {}, () => (
-                        <StatRow
-                            props={{
-                                icon: "streak",
-                                label: input.props.readout.label,
-                                value: input.props.readout.value,
-                            }}
-                            isLoading={isLoading}
-                        />
-                    )),
+                    outcome,
                 }),
+                ...(hasActivity && !activeToday && input.state === "ready" ? {
+                    nudge: defineContractComponent("streak-daily-nudge", {
+                        message: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
+                            <Text props={{ content: input.props.nudge, size: "sm", weight: "medium" }} />
+                        )),
+                        action: defineLeafComponent("button", { size: "sm", variant: "primary" }, () => (
+                            <Button
+                                props={{ label: input.props.actionLabel, size: "sm", variant: "primary" }}
+                                on={{ press: input.on?.learn }}
+                            />
+                        )),
+                    }),
+                } : {}),
             })}
             isLoading={isLoading}
         />

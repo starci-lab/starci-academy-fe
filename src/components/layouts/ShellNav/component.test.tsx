@@ -1,5 +1,5 @@
 /** @vitest-environment jsdom */
-import { afterEach, describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { _ShellNav } from "./component"
 
@@ -15,8 +15,8 @@ afterEach(cleanup)
 
 const props = {
     brand: "StarCi Academy",
-    routes: [{ id: "home", href: "/dashboard", label: "Home", isCurrent: true }],
-    tabs: [{ id: "overview", href: "/dashboard", label: "Overview", icon: "home" as const, isCurrent: true }],
+    routes: [{ id: "home", label: "Home", isCurrent: true }],
+    tabs: [{ id: "overview", label: "Overview", icon: "home" as const, isCurrent: true }],
     themeLabel: "Switch theme",
     isDark: false,
     localeLabel: "Change language",
@@ -33,6 +33,15 @@ const props = {
 } as const
 
 describe("_ShellNav", () => {
+    it("reports internal navigation without rendering href", () => {
+        const navigate = vi.fn()
+        render(<_ShellNav props={props} on={{ navigate }} />)
+        const home = screen.getByRole("link", { name: "Home" })
+        expect(home.getAttribute("href")).toBeNull()
+        fireEvent.click(home)
+        expect(navigate).toHaveBeenCalledWith("home")
+    })
+
     it("draws search as one press target rather than a text field", () => {
         render(<_ShellNav props={props} />)
         expect(screen.getByRole("button", { name: "Open search" })).toBeTruthy()

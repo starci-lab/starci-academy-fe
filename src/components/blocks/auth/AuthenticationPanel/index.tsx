@@ -1,6 +1,7 @@
 "use client"
 
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
+import { useRouter } from "next/navigation"
 import { useAuthPanel } from "@/hooks/auth/useAuthPanel"
 import type { AuthFailure } from "@/hooks/auth/useAuthPanel"
 import { _AuthenticationPanel, type AuthMode } from "./component"
@@ -83,6 +84,8 @@ export type AuthenticationPanelConnectedProps = {
  */
 export const AuthenticationPanel = ({ initialMode = "signIn", onSignedIn }: AuthenticationPanelConnectedProps = {}) => {
     const t = useTranslations("auth")
+    const locale = useLocale()
+    const router = useRouter()
     const panel = useAuthPanel({ initialMode, onSignedIn })
     const status = toStatus(t, panel)
     const mode = panel.mode
@@ -106,6 +109,8 @@ export const AuthenticationPanel = ({ initialMode = "signIn", onSignedIn }: Auth
         resend: panel.onResend,
         changeMode: (next: AuthMode) => panel.onChangeMode(next),
         changeAgreedToTerms: panel.onChangeAgreedToTerms,
+        changeRememberMe: panel.onChangeRememberMe,
+        openLegal: (kind: "terms" | "privacy") => router.push(`https://academy.starci.org/${locale}/${kind}`),
         oauthPress: panel.onOauthPress,
     }
 
@@ -146,12 +151,15 @@ export const AuthenticationPanel = ({ initialMode = "signIn", onSignedIn }: Auth
                 ...frame,
                 mode,
                 hasAgreedToTerms: panel.hasAgreedToTerms,
-                rememberMe: false,
+                rememberMe: panel.rememberMe,
                 emailLabel: t("shared.emailLabel"),
                 emailPlaceholder: t("shared.emailPlaceholder"),
                 passwordPlaceholder: t("shared.passwordPlaceholder"),
                 revealLabel: t("shared.revealPassword"),
                 hideLabel: t("shared.hidePassword"),
+                confirmPasswordLabel: t("signUp.confirmPasswordLabel"),
+                confirmPasswordPlaceholder: t("signUp.confirmPasswordPlaceholder"),
+                confirmPasswordMismatch: t("signUp.confirmPasswordMismatch"),
                 orLabel: t("shared.or"),
                 rememberMeLabel: t("shared.rememberMe"),
                 forgotPassword: t("shared.forgotPassword"),
@@ -161,6 +169,10 @@ export const AuthenticationPanel = ({ initialMode = "signIn", onSignedIn }: Auth
                 passwordHint: t(`${mode}.passwordHint`),
                 submitLabel: t(`${mode}.submitDetails`),
                 agreeToTerms: t("shared.agreeToTerms"),
+                agreeToTermsPrefix: t("shared.agreeToTermsPrefix"),
+                termsLabel: t("shared.termsLabel"),
+                andLabel: t("shared.andLabel"),
+                privacyLabel: t("shared.privacyLabel"),
                 oauthGoogle: t("shared.oauthGoogle"),
                 oauthGithub: t("shared.oauthGithub"),
             }}

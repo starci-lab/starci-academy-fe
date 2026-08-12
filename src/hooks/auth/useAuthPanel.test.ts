@@ -332,6 +332,16 @@ describe("useAuthPanel", () => {
         expect(result.current.step).toBe("details")
     })
 
+    it("keeps the remember-me choice as controlled auth state", () => {
+        const { result } = renderHook(() => useAuthPanel())
+        expect(result.current.rememberMe).toBe(false)
+        act(() => {
+            result.current.onChangeRememberMe(true)
+        })
+        expect(result.current.rememberMe).toBe(true)
+        expect(result.current.step).toBe("details")
+    })
+
     it("leaves for the provider, remembering which one so the callback can finish", () => {
         const assign = stubLocation({ search: "" })
         const { result } = renderHook(() => useAuthPanel())
@@ -340,7 +350,7 @@ describe("useAuthPanel", () => {
             result.current.onOauthPress(KeycloakIdentityProvider.Google)
         })
         const target = String(assign.mock.calls[0][0])
-        expect(target).toContain("/keycloak/google/redirect")
+        expect(target).toContain("/api/v1/keycloak/google/redirect")
         expect(target).toContain("redirect_uri=")
         expect(window.sessionStorage.getItem("starci.auth.oauth-provider")).toBe("google")
     })

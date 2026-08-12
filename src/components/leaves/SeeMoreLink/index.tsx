@@ -5,7 +5,7 @@ import type { LeafProps } from "@/components/contracts/props"
 /**
  * LEAF - `SeeMoreLink`: the way out of a section, drawn at the end of its label line.
  *
- * A CLUSTER LEAF - words and a caret - because the caret is not decoration a caller may drop. It is
+ * One link control - words and its intrinsic caret - because the caret is not decoration a caller may drop. It is
  * the only thing distinguishing this from the fact that would otherwise sit in the same place, and
  * a section header where a control and a count look alike is one a reader clicks by mistake.
  *
@@ -22,13 +22,11 @@ import type { LeafProps } from "@/components/contracts/props"
 export type SeeMoreLinkData = {
     /** The already-resolved words. Absent while loading. */
     readonly label?: string
-    /** Where it goes, when it is a destination rather than a thing that happens here. */
-    readonly href?: string
 }
 
-/** What following it does, when there is nowhere to go. */
+/** What following it does. Connected code owns any resulting route. */
 export type SeeMoreLinkActions = {
-    /** Called when the reader follows it. Ignored when {@link SeeMoreLinkData.href} is set. */
+    /** Called when the reader follows it. */
     readonly press?: () => void
 }
 
@@ -72,14 +70,6 @@ export const SeeMoreLink = ({ props, on, isLoading = false }: SeeMoreLinkProps) 
             <span className={CARET_CLASSES}><Icon props={{ name: "next" }} /></span>
         </>
     )
-
-    if (props.href !== undefined) {
-        return (
-            <a data-tier="leaf" data-component="SeeMoreLink" href={props.href} className={LINE_CLASSES}>
-                {inside}
-            </a>
-        )
-    }
 
     return (
         <HeroLink data-tier="leaf" data-component="SeeMoreLink" onPress={on?.press} className={LINE_CLASSES}>

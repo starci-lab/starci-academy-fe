@@ -15,14 +15,11 @@ export const RewardStatRow = () => {
     const wallet = useQueryMyRewardWalletSwr()
 
     const hasFailed = wallet.error !== undefined && wallet.error !== null
-    const isLoading = !wallet.data && !hasFailed && wallet.isLoading === true
-    const value = hasFailed || !wallet.data
-        ? t("empty")
-        : t("points", { balance: wallet.data.balance ?? 0 })
-
+    const isLoading = wallet.data === undefined && !hasFailed
     if (isLoading) return <_RewardStatRow state="pending" props={{ label: t("rewardPoints") }} />
+    if (hasFailed || !wallet.data) return <_RewardStatRow state="empty" />
 
-    return <_RewardStatRow state="settled" props={{ label: t("rewardPoints"), value }} />
+    return <_RewardStatRow state="settled" props={{ label: t("rewardPoints"), value: t("points", { balance: wallet.data.balance ?? 0 }) }} />
 }
 
 /** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */

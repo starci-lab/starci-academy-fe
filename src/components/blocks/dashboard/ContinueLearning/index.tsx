@@ -11,7 +11,7 @@ import { queryResolveRoute } from "@/modules/api/graphql/queries/query-resolve-r
 import type { MyResumeRefRow } from "@/modules/api/graphql/queries/types/my-resume"
 import { _ContinueLearning, type ResumeItem } from "./component"
 
-const MAX_ITEMS = 4
+const MAX_ITEMS = 3
 const MAX_CHALLENGES = 1
 
 /** Resolve the learner's latest work into the frameless resume-card section. */
@@ -53,15 +53,16 @@ export const ContinueLearning = () => {
         return <_ContinueLearning state="pending" props={{ label }} />
     }
 
-    const toItem = (kind: "lesson" | "challenge") => (row: MyResumeRefRow): ResumeItem => ({
+    // The API calls this entity a lesson; StarCi Academy calls it content in every reader-facing
+    // surface. Translate that vocabulary here before resolved copy crosses into the pure half.
+    const toItem = (kind: "content" | "challenge") => (row: MyResumeRefRow): ResumeItem => ({
         id: row.globalId,
         title: row.label,
         kindLabel: t(`continueLearning.kind.${kind}`),
-        icon: kind === "lesson" ? "course" : "practice",
     })
 
     const merged = [
-        ...lessons.data.map(toItem("lesson")),
+        ...lessons.data.map(toItem("content")),
         ...challenges.data.slice(0, MAX_CHALLENGES).map(toItem("challenge")),
     ]
     const seen = new Set<string>()
@@ -80,6 +81,10 @@ export const ContinueLearning = () => {
                 on={{ resume: onResume }}
             />
         )
+    }
+
+    if (courses.data === undefined && courses.error === undefined) {
+        return <_ContinueLearning state="pending" props={{ label }} />
     }
 
     const hasNoCourses = courses.data !== undefined && courses.data !== null && courses.data.length === 0

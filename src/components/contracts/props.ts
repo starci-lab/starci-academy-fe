@@ -19,7 +19,7 @@ import type { ChildrenOf, ContractKey, ContractPropValue } from "@/components/co
  * A function does not satisfy it, and that is the only thing stopping a component being smuggled
  * through `props` - which is why handlers travel in their own slot rather than beside the data.
  *
- * NOTE FOR AUTHORS: a leaf's data must be declared with `type`, not `interface`. TypeScript gives
+ * NOTE FOR AUTHORS: a leaf's or composite's data must be declared with `type`, not `interface`. TypeScript gives
  * an implicit index signature to a type alias and not to an interface, so an interface silently
  * fails this constraint. That is not a quirk to work around - it is the constraint doing its job.
  */
@@ -32,7 +32,7 @@ export type DataValue =
     | ReadonlyArray<DataValue>
     | { readonly [key: string]: DataValue }
 
-/** The shape any leaf's or branch's data must have: data all the way down. */
+/** The shape any leaf's, composite's or branch's data must have: data all the way down. */
 export type ComponentData = { readonly [key: string]: DataValue }
 
 /** The shape any component's handlers must have: functions, kept apart from the data. */
@@ -74,6 +74,44 @@ export const defineLeafComponent = <
         render: () => ReactNode,
     ): LeafComponent<N, P> => Object.assign(render, {
         meta: { shape: "leaf", name, props } as const,
+    })
+
+/**
+ * A COMPOSITE's props. The runtime lanes match a leaf, but the type is intentionally distinct:
+ * a composite fixes an arrangement of independently meaningful leaves rather than one intrinsic
+ * value or control. Closed does not mean freehand: its arrangement is still rendered through a
+ * typed Tree contract, never through raw structural markup. If a caller may supply the content,
+ * the component is a branch rather than a composite.
+ */
+export type CompositeProps<D extends ComponentData, A extends ComponentActions = ComponentActions> = {
+    readonly props: D
+    readonly on?: A
+    readonly isLoading?: boolean
+}
+
+/** Source identity carried by a reusable fixed composition. */
+export type CompositeComponentMeta<N extends string, P extends Readonly<Record<string, ContractPropValue>>> = {
+    readonly shape: "composite"
+    readonly name: N
+    readonly props: P
+}
+
+/** A closed composite render whose identity survives import boundaries. */
+export type CompositeComponent<N extends string, P extends Readonly<Record<string, ContractPropValue>>> = {
+    (): ReactNode
+    readonly meta: CompositeComponentMeta<N, P>
+}
+
+/** Close runtime data over one composite while exposing contract-relevant literals. */
+export const defineCompositeComponent = <
+    const N extends string,
+    const P extends Readonly<Record<string, ContractPropValue>>,
+>(
+        name: N,
+        props: P,
+        render: () => ReactNode,
+    ): CompositeComponent<N, P> => Object.assign(render, {
+        meta: { shape: "composite", name, props } as const,
     })
 
 /** Source identity carried by every contract value admitted by a contract branch. */

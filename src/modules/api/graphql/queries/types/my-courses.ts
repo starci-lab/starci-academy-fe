@@ -18,6 +18,14 @@ export interface MyCourseRow {
      * It is a whole number: the back end declares it `Int`, so no rounding happens here.
      */
     completionPercent: number
+    thumbnailUrl?: string | null
+    contentCompleted?: number
+    contentTotal?: number
+    challengeCompleted?: number
+    challengeTotal?: number
+    completed?: number
+    total?: number
+    isEnrolled?: boolean
 }
 
 /**

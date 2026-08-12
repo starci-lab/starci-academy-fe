@@ -55,6 +55,10 @@ test("registry-children-are-typed closes identity, literal-prop and repetition h
         filename: REGISTRY,
         code: "buildContracts({ card: { classes: [], children: { body: { leaf: ['form'], contract: ['field-stack'], repeats: true, restingCount: 0 } }, why: 'A named slot may admit a closed union across tiers without admitting arbitrary markup.' } })",
       },
+      {
+        filename: REGISTRY,
+        code: "buildContracts({ card: { classes: [], children: { row: { composite: 'stat-row' } }, why: 'A fixed reusable composition keeps a closed identity distinct from both a leaf and a contract branch.' } })",
+      },
     ],
     invalid: [
       {
@@ -121,6 +125,11 @@ test("no-literal-structural-class sends every structural node back to a registry
         // A named surface host owns its one fixed wrapper seam around checked contract content.
         filename: "D:/repo/src/components/branches/SurfaceListCard/index.tsx",
         code: "export const SurfaceListCard = () => <div className=\"flex flex-col gap-3\" />",
+      },
+      {
+        // A composite owns the stable seam among its independently meaningful leaves.
+        filename: "D:/repo/src/components/composites/LabelledProgressRow/index.tsx",
+        code: "export const LabelledProgressRow = () => <div className=\"flex flex-col gap-2\" />",
       },
     ],
     invalid: [

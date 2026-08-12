@@ -7,6 +7,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { SignInOverlay } from "@/components/overlays/auth/SignInOverlay"
 import { LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE } from "@/i18n/config"
 import { useSessionToken } from "@/hooks/auth/useSessionToken"
+import { useSessionRefresh } from "@/hooks/auth/useSessionRefresh"
 import { _ShellNav, type ShellNavRoute, type ShellNavTab } from "./component"
 import type { IconName } from "@/components/leaves/Icon"
 import type { AuthMode } from "@/components/blocks/auth/AuthenticationPanel/component"
@@ -23,24 +24,25 @@ import type { AuthMode } from "@/components/blocks/auth/AuthenticationPanel/comp
  */
 
 /** The routes the bar offers, as ids the catalogue names. */
-const ROUTES: ReadonlyArray<{ id: string, href: string }> = [
-    { id: "dashboard", href: "/dashboard" },
-    { id: "courses", href: "/courses" },
-    { id: "contact", href: "/contact" },
+const ROUTES: ReadonlyArray<{ id: string, path: string }> = [
+    { id: "dashboard", path: "/dashboard" },
+    { id: "courses", path: "/courses" },
+    { id: "contact", path: "/contact" },
 ]
 
 /** Dashboard tabs registered as the navbar's bottom layer. */
-const DASHBOARD_TABS: ReadonlyArray<{ id: string, href: string, icon: IconName }> = [
-    { id: "overview", href: "/dashboard?tab=overview", icon: "home" },
-    { id: "explore", href: "/dashboard?tab=explore", icon: "explore" },
-    { id: "courses", href: "/dashboard?tab=courses", icon: "course" },
-    { id: "community", href: "/dashboard?tab=community", icon: "community" },
+const DASHBOARD_TABS: ReadonlyArray<{ id: string, icon: IconName }> = [
+    { id: "overview", icon: "home" },
+    { id: "explore", icon: "explore" },
+    { id: "courses", icon: "course" },
+    { id: "community", icon: "community" },
 ]
 
 /**
  * Resolve the route, the theme and the language, and draw the bar.
  */
 export const ShellNav = () => {
+    useSessionRefresh()
     const t = useTranslations("shell")
     const locale = useLocale()
     const pathname = usePathname()
@@ -103,20 +105,25 @@ export const ShellNav = () => {
 
     const routes: ReadonlyArray<ShellNavRoute> = ROUTES.map((route) => ({
         id: route.id,
-        href: route.href,
         label: t(`routes.${route.id}`),
-        isCurrent: pathname === route.href,
+        isCurrent: route.id === "dashboard" ? pathname.startsWith("/dashboard") : pathname === route.path,
     }))
-    const tabs: ReadonlyArray<ShellNavTab> | undefined = pathname.startsWith("/dashboard")
+    const dashboardTabs: ReadonlyArray<ShellNavTab> | undefined = pathname.startsWith("/dashboard")
         ? DASHBOARD_TABS.map((tab) => ({
             ...tab,
             label: t(`tabs.${tab.id}`),
             isCurrent: tab.id === (searchParams.get("tab") ?? "overview"),
         }))
         : undefined
+    const tabs = dashboardTabs
 
     const selectTab = useCallback((key: string) => {
         router.replace(key === "overview" ? "/dashboard" : `/dashboard?tab=${key}`)
+    }, [router])
+
+    const navigate = useCallback((id: string) => {
+        const destination = ROUTES.find((route) => route.id === id)
+        if (destination !== undefined) router.push(destination.path)
     }, [router])
 
     return (
@@ -140,7 +147,7 @@ export const ShellNav = () => {
                     signUpLabel: t("signUp"),
                     isSignedIn: sessionToken !== undefined,
                 }}
-                on={{ openSignIn, openSignUp, selectTab, toggleTheme: () => setTheme(isDark ? "light" : "dark"), toggleLocale }}
+                on={{ openSignIn, openSignUp, navigate, selectTab, toggleTheme: () => setTheme(isDark ? "light" : "dark"), toggleLocale }}
             />
             <SignInOverlay isOpen={isOpen} initialMode={authMode} onDismiss={dismiss} />
         </>

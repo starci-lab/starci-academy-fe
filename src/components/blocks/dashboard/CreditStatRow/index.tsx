@@ -15,15 +15,12 @@ export const CreditStatRow = () => {
     const quota = useQueryMyAiQuotaSwr()
 
     const hasFailed = quota.error !== undefined && quota.error !== null
-    const isLoading = !quota.data && !hasFailed && quota.isLoading === true
+    const isLoading = quota.data === undefined && !hasFailed
     const credit = quota.data?.credit
-    const value = credit
-        ? t("creditOf", { remaining: credit.remainingWeek, limit: credit.limitWeek })
-        : t("empty")
-
     if (isLoading) return <_CreditStatRow state="pending" props={{ label: t("aiCredit") }} />
+    if (hasFailed || credit === undefined) return <_CreditStatRow state="empty" />
 
-    return <_CreditStatRow state="settled" props={{ label: t("aiCredit"), value }} />
+    return <_CreditStatRow state="settled" props={{ label: t("aiCredit"), value: t("creditOf", { remaining: credit.remainingWeek, limit: credit.limitWeek }) }} />
 }
 
 /** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */

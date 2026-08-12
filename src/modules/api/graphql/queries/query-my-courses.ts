@@ -26,6 +26,29 @@ const query1 = gql`
     }
 `
 
+const query2 = gql`
+    query MyCoursesDashboard {
+        myCourses {
+            success
+            message
+            error
+            data {
+                globalId
+                label
+                thumbnailUrl
+                contentCompleted
+                contentTotal
+                challengeCompleted
+                challengeTotal
+                completed
+                total
+                completionPercent
+                isEnrolled
+            }
+        }
+    }
+`
+
 /**
  * The document variants of this query.
  *
@@ -36,11 +59,14 @@ const query1 = gql`
 export enum QueryMyCourses {
     /** The progress-row selection: identity, title, completion. */
     Query1 = "query1",
+    /** Full dashboard row selection with all three progress dimensions. */
+    Query2 = "query2",
 }
 
 /** Every document this query can send, keyed by variant. */
 export const queryMyCoursesMap: Record<QueryMyCourses, DocumentNode> = {
     [QueryMyCourses.Query1]: query1,
+    [QueryMyCourses.Query2]: query2,
 }
 
 /** Fetches the asking learner's enrolled courses. Always sends the bearer token. */

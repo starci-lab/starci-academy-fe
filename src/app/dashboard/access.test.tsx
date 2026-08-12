@@ -22,6 +22,10 @@ vi.mock("@/hooks/auth/useSessionToken", () => ({
     setSessionToken: vi.fn(),
 }))
 
+vi.mock("@/hooks/auth/useSessionRefresh", () => ({
+    useSessionRefresh: () => ({ isRestoring: false }),
+}))
+
 vi.mock("@/components/pages/DashboardPage/component", () => ({
     _DashboardPage: () => <p data-part="dashboard">Dashboard</p>,
 }))

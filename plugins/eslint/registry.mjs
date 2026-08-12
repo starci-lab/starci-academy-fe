@@ -45,13 +45,13 @@ export const isRegistryFolderFile = (filename) =>
 /**
  * True when this file is a LEAF.
  *
- * A leaf owns its own interior - an atom or a fixed cluster of atoms - so it writes its own
- * structural classes and its own element. That interior is the same everywhere and forever, so
- * there is nothing for the registry to tune and nothing for these rules to send back to it. The
- * exemption is a folder, which makes it a policy boundary rather than a type; the numbering test
- * is what keeps a region out of it, and that test is read by a person.
+ * A leaf owns one intrinsic value or control. Fixed arrangements of multiple leaves belong to
+ * `composites/`; calling one a "cluster leaf" is not an exemption.
  */
 export const isLeafFile = (filename) => normalizePath(filename).includes("/src/components/leaves/")
+
+/** A fixed reusable arrangement owns its internal host and seams, but remains a distinct tier. */
+export const isCompositeFile = (filename) => normalizePath(filename).includes("/src/components/composites/")
 
 /** Walk up from a linted file to the registry; null when no registry sits above it. */
 export const findRegistryFile = (filename) => {

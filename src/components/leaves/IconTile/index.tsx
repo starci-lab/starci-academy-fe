@@ -16,7 +16,7 @@ import type { LeafProps } from "@/components/contracts/props"
 /** What the plate is saying about the thing it leads. */
 export type IconTileTone = "neutral" | "accent" | "success" | "warning" | "danger"
 
-/** Two steps: beside a line, or leading a row. */
+/** Two plate steps; the glyph inside remains the one fixed leading size. */
 export type IconTileSize = "sm" | "md"
 
 /** What this leaf draws. A `type`, not an `interface` - only an alias satisfies the data fence. */
@@ -68,7 +68,7 @@ export const IconTile = ({ props, isLoading = false }: IconTileProps) => {
             aria-hidden={isLoading ? true : undefined}
             className={[BASE_CLASSES, SIZE_CLASSES[size], isLoading ? RESTING_CLASSES : TONE_CLASSES[tone]].join(" ")}
         >
-            {isLoading ? null : <Icon props={{ name: props.icon, role: size === "md" ? "heading" : "chip" }} />}
+            {isLoading ? null : <Icon props={{ name: props.icon, role: "leading" }} />}
         </span>
     )
 }
