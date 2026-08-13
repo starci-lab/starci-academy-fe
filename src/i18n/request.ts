@@ -1,6 +1,6 @@
-import { cookies } from "next/headers"
 import { getRequestConfig } from "next-intl/server"
-import { LOCALE_COOKIE, toLocale } from "./config"
+import { hasLocale } from "next-intl"
+import { routing } from "./routing"
 
 /**
  * WHERE COPY COMES FROM, resolved once per request on the server.
@@ -10,15 +10,13 @@ import { LOCALE_COOKIE, toLocale } from "./config"
  * the connected half knows who is looking and hands the presentational half words, so the
  * presentational half can be rendered from a test with no locale, no request and no provider.
  *
- * THIS FILE IS SERVER-ONLY, because reading a cookie is. The vocabulary a client component needs -
- * the cookie name, the locale union - lives in `./config` so importing one constant does not drag
- * `next/headers` into the browser bundle.
- *
- * NO LOCALE ROUTING, DELIBERATELY AND STATED. The locale is read from a cookie rather than from a
- * `/[locale]/` segment. Routing is the better answer for a product that wants a Vietnamese URL to
- * be shareable and indexable, and it is a structural change to every route - so it is named here
- * as the next decision rather than half-built now.
+ * THE LOCALE COMES FROM THE ROUTE NOW. It used to be read from a cookie, and the note that stood
+ * here said routing was the better answer and the next decision to take - because a cookie is not
+ * in the link, so a Vietnamese page could not be shared, bookmarked or indexed as the page the
+ * reader actually saw. The `[lang]` segment is that decision, and the cookie has moved to the
+ * smaller job of remembering a returning reader's choice at `/`.
  */
+
 /**
  * The zone every date on the screen is written in.
  *
@@ -30,9 +28,9 @@ import { LOCALE_COOKIE, toLocale } from "./config"
  */
 const TIME_ZONE = "Asia/Ho_Chi_Minh"
 
-export default getRequestConfig(async () => {
-    const store = await cookies()
-    const locale = toLocale(store.get(LOCALE_COOKIE)?.value)
+export default getRequestConfig(async ({ requestLocale }) => {
+    const requested = await requestLocale
+    const locale = hasLocale(routing.locales, requested) ? requested : routing.defaultLocale
     return {
         locale,
         timeZone: TIME_ZONE,

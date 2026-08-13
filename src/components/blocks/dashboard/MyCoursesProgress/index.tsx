@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
-import { useRouter } from "next/navigation"
+import { useRouter } from "@/i18n/navigation"
 import { useQueryMyCoursesSwr, useQueryResolveRouteSwr } from "@/hooks"
 import type { MyCourseRow } from "@/modules/api/graphql/queries/types/my-courses"
 import type { CourseProgressRowData } from "@/components/composites/CourseProgressRow"

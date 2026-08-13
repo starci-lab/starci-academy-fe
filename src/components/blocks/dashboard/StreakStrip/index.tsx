@@ -1,7 +1,7 @@
 "use client"
 
 import { useLocale, useTranslations } from "next-intl"
-import { useRouter } from "next/navigation"
+import { useRouter } from "@/i18n/navigation"
 import { useQueryMyWeeklyStatsSwr } from "@/hooks"
 import { type MyWeeklyStatsDay } from "@/modules/api/graphql/queries/types/my-weekly-stats"
 import { _StreakStrip } from "./component"

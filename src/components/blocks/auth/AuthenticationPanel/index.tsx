@@ -1,7 +1,7 @@
 "use client"
 
 import { useLocale, useTranslations } from "next-intl"
-import { useRouter } from "next/navigation"
+import { useRouter } from "@/i18n/navigation"
 import { useAuthPanel } from "@/hooks/auth/useAuthPanel"
 import type { AuthFailure } from "@/hooks/auth/useAuthPanel"
 import { _AuthenticationPanel, type AuthMode } from "./component"

@@ -1,7 +1,8 @@
 "use client"
 
 import { useMemo } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useParams } from "next/navigation"
+import { useRouter } from "@/i18n/navigation"
 import { useTranslations } from "next-intl"
 import { useQueryMeSwr } from "@/hooks/swr/useQueryMeSwr"
 import { useQueryUserProfileSwr } from "@/hooks/swr/useQueryUserProfileSwr"

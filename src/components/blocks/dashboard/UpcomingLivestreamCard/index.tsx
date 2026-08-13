@@ -1,7 +1,7 @@
 "use client"
 import { useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
-import { useRouter } from "next/navigation"
+import { useRouter } from "@/i18n/navigation"
 import { useQueryMyUpcomingLivestreamsSwr, useQueryResolveRouteSwr } from "@/hooks"
 import { _UpcomingLivestreamCard } from "./component"
 /** Fetch, sort and route the viewer's upcoming live sessions. */

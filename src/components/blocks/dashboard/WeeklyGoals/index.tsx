@@ -1,7 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { useRouter } from "next/navigation"
+import { useRouter } from "@/i18n/navigation"
 import { useQueryMyKpisSwr } from "@/hooks"
 import { type MyKpiItem } from "@/modules/api/graphql/queries/types/my-kpis"
 import { _WeeklyGoals } from "./component"

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useTranslations } from "next-intl"
-import { useRouter } from "next/navigation"
+import { useRouter } from "@/i18n/navigation"
 import { useMutateSetFollowSwr, useQueryGlobalLeaderboardSwr, useQueryMeSwr } from "@/hooks"
 import { fromGlobalId } from "@/modules/utils/global-id"
 import { _TopLearners } from "./component"

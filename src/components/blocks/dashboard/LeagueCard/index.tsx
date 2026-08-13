@@ -1,7 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { useRouter } from "next/navigation"
+import { useRouter } from "@/i18n/navigation"
 import { useQueryMeSwr, useQueryMyLeagueSwr } from "@/hooks"
 import type { RankedUserVerdict } from "@/components/composites/RankedUserRow"
 import { _LeagueCard } from "./component"

@@ -1,6 +1,6 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import { useRouter } from "@/i18n/navigation"
 import { _AuthenticationPage } from "./component"
 
 /** Resolve authentication-route navigation and draw its pure page twin. */

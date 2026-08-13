@@ -1,6 +1,7 @@
 "use client"
 
-import { useParams, useRouter } from "next/navigation"
+import { useParams } from "next/navigation"
+import { useRouter } from "@/i18n/navigation"
 import { useQueryProfileEvidenceSwr } from "@/hooks/swr/useQueryProfileEvidenceSwr"
 import { useQueryUserProfileSwr } from "@/hooks/swr/useQueryUserProfileSwr"
 import { _ProfileCodingProblemPage, type CodingDetail } from "./component"

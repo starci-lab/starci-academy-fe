@@ -1,0 +1,80 @@
+import type { Metadata } from "next"
+import { notFound } from "next/navigation"
+import { getMessages, getTranslations, setRequestLocale } from "next-intl/server"
+import { hasLocale } from "next-intl"
+import { routing } from "@/i18n/routing"
+import { AppProviders } from "../providers"
+import "../globals.css"
+
+/**
+ * The locale shell: the one place that knows which language everything below it is in.
+ *
+ * It replaces a root layout that read the locale from a cookie. The difference is that the answer
+ * now comes from the ADDRESS, so two readers on two languages are on two URLs rather than on one
+ * URL that renders differently depending on who is asking - which is what made the Vietnamese page
+ * impossible to link to or to index.
+ */
+
+/**
+ * THIS APP IS NOT PRE-RENDERED, AND SAYING SO IS THE POINT.
+ *
+ * A `generateStaticParams` here looks like free performance and is not: it asks Next to build
+ * `/en/dashboard` and `/vi/dashboard` at compile time, and every screen behind this shell is
+ * session-gated - each one renders nothing at all until a token exists in the browser. So the
+ * prerender produces empty pages, and it fails while producing them, twice over: `useSearchParams`
+ * forces a client bailout that a prerendered page must wrap in Suspense, and next-intl reports
+ * ENVIRONMENT_FALLBACK because static rendering needs `setRequestLocale` in every page rather than
+ * once in the shell.
+ *
+ * Both are fixable. Neither is worth fixing to pre-build a blank screen.
+ */
+export const dynamic = "force-dynamic"
+
+/**
+ * Browser-level metadata for every route in this language.
+ *
+ * Resolved rather than declared, because the tab title and the description a search engine reads
+ * are copy like any other. A static object here would have been the one English sentence left in
+ * the app, and the one nobody would have noticed.
+ */
+export const generateMetadata = async ({ params }: LayoutProps<"/[lang]">): Promise<Metadata> => {
+    const { lang } = await params
+    if (!hasLocale(routing.locales, lang)) notFound()
+    setRequestLocale(lang)
+    const t = await getTranslations("app")
+    return { title: t("title"), description: t("description") }
+}
+
+/**
+ * Mount the shared runtime context for one language and leave composition to nested layouts.
+ *
+ * The props type is Next's own generated `LayoutProps<"/[lang]">` rather than a hand-written
+ * interface: the segment name and the shape of `params` are facts the router already knows, and a
+ * second declaration of them is one rename away from disagreeing with the folder it describes.
+ *
+ * @param props - The routed children and the language segment.
+ */
+const LocaleLayout = async ({ children, params }: LayoutProps<"/[lang]">) => {
+    const { lang } = await params
+    // A segment is reader-supplied text. An unknown language is a route that does not exist, not a
+    // request to fall back silently - falling back would serve English at a Vietnamese-looking URL
+    // and quietly make every such link wrong.
+    if (!hasLocale(routing.locales, lang)) notFound()
+    setRequestLocale(lang)
+    const messages = await getMessages()
+    return (
+        // `suppressHydrationWarning` is required by the theme switch and by nothing else: the
+        // provider writes the resolved theme onto this element before React hydrates, so the
+        // server's markup and the browser's first paint differ on purpose. Suppressing it here
+        // is narrow - it covers this element's own attributes, not the tree below it.
+        <html lang={lang} suppressHydrationWarning>
+            <body>
+                <AppProviders locale={lang} messages={messages}>
+                    {children}
+                </AppProviders>
+            </body>
+        </html>
+    )
+}
+
+export default LocaleLayout

@@ -1,6 +1,6 @@
 "use client"
 import { useLocale, useTranslations } from "next-intl"
-import { useRouter } from "next/navigation"
+import { useRouter } from "@/i18n/navigation"
 import { useQueryRecommendedCoursesSwr } from "@/hooks"
 import { _RecommendedCourses } from "./component"
 /** Fetch and resolve recommended courses for the dashboard. */

@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
+import { useRouter } from "@/i18n/navigation"
 import { useSessionRefresh } from "@/hooks/auth/useSessionRefresh"
 import { useSessionToken } from "@/hooks/auth/useSessionToken"
 import { useMutateSetFollowSwr, useQueryGlobalLeaderboardSwr, useQueryMeSwr, useQueryMyLeagueSwr } from "@/hooks"
