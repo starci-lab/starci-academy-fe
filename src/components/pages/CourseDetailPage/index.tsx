@@ -19,7 +19,13 @@ import type { CourseDetail, CourseModule } from "@/modules/api/graphql/queries/t
 
 /** Props the route hands down. */
 export interface CourseDetailPageProps {
-    /** The short human-facing identifier from the URL. */
+    /**
+     * The short human-facing identifier from the URL - `fullstack-mastery`.
+     *
+     * It must be the display id: the server resolves a course by that and, despite `CourseRequest`
+     * also declaring `id`, answers a primary-key lookup with COURSE_NOT_FOUND_EXCEPTION. A link
+     * built from `course.id` therefore reaches the not-found notice.
+     */
     displayId: string
 }
 

@@ -1,6 +1,6 @@
-import { ContractContent } from "@/components/branches/Tree"
-import { contractNodeProps, type ContractKey } from "@/components/contracts"
-import type { ContractComponent } from "@/components/contracts/props"
+import { ContractContent } from "~candidate/components/branches/Tree"
+import { contractNodeProps, type ContractKey } from "~candidate/components/contracts"
+import type { ContractComponent } from "~candidate/components/contracts/props"
 
 /** Props for a contract-owned row whose native host is a button. */
 export type PressableTreeProps<K extends ContractKey> = {

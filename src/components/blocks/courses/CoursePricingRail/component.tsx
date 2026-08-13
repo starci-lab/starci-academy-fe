@@ -111,7 +111,7 @@ export const _CoursePricingRail = (input: CoursePricingRailProps) => {
         original: input.props.originalPrice === undefined || isPricePending
             ? undefined
             : defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                <Text props={{ content: input.props.originalPrice, size: "xs", tone: "muted" }} />
+                <Text props={{ content: input.props.originalPrice, size: "xs", tone: "muted", isSuperseded: true }} />
             )),
         discount: input.props.discountLabel === undefined || isPricePending
             ? undefined

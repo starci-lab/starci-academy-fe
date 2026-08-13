@@ -283,6 +283,19 @@ body {
     ::after {
         border-color: var(--border);
     }
+
+    /*
+     * `type="search"` summons a clear button the user agent paints itself: a fixed mask this
+     * product cannot recolour, resize or reach from the `Icon` leaf, absent in Firefox, and
+     * therefore a control the design system does not own. Tailwind's preflight resets its sibling
+     * `::-webkit-search-decoration` and leaves this one alive, so the reset belongs here.
+     *
+     * `SearchBox` draws the replacement, which is why this may be removed rather than restyled.
+     */
+    input[type="search"]::-webkit-search-cancel-button {
+        -webkit-appearance: none;
+        appearance: none;
+    }
 }
 
 /*
@@ -305,6 +318,39 @@ body {
  */
 .card[data-component="SurfaceListCardSurface"] {
     padding: 0 !important;
+}
+
+/*
+ * A named-section surface now holds the entry's own node rather than wearing it, so the entry
+ * carries the inset and the card must carry none. Without this the two stack: the card keeps the
+ * important 16px above and the node adds its own inside it, and every card on the screen grows by
+ * one whole inset the day the branch stops wearing the node.
+ */
+.card[data-component="SurfaceCardSurface"],
+.card[data-component="SurfaceFormCard"] {
+    padding: 0 !important;
+}
+
+/*
+ * A press label is ruled with the SAME mark the vendor link uses, because the two sit in one card
+ * and stand for one promise. The vendor bakes `--separator-tertiary` at 1.5px into `.link`; naming
+ * a token from the scale instead gave the title a 91% hairline beside a link ruled at 85%, and the
+ * pair read as two different weights of underline. These are the vendor's own values rather than a
+ * new rung, which is why they are written here beside the other cascade exceptions.
+ */
+[data-press-label="true"] {
+    text-decoration-color: var(--separator-tertiary);
+    text-decoration-thickness: 1.5px;
+}
+
+/*
+ * Hovering a control INSIDE a press target is not hovering the press target. The label underlines
+ * to say "this whole surface opens something", and while the pointer is on a link that opens
+ * something else, that sentence is false: the reader is told two destinations answer one gesture.
+ * `:has()` is the only thing that can see a descendant's hover, so the exception lives here.
+ */
+[data-component="PressableSurface"]:has([data-component="TextLink"]:hover) [data-press-label="true"] {
+    text-decoration-line: none;
 }
 
 /* A joined list nested in a larger story keeps its boundary but cannot claim a second elevation. */

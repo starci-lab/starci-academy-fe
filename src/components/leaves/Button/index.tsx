@@ -42,8 +42,19 @@ export type ButtonData = {
     readonly size?: ButtonSize
     /** Form semantics. Defaults to `button` so a stray control cannot submit by accident. */
     readonly type?: ButtonType
-    /** The meaning drawn before the label. It inherits the label's colour, never its own. */
+    /** The meaning drawn beside the label. It inherits the label's colour, never its own. */
     readonly icon?: IconName
+    /**
+     * Which side the glyph sits on. `leading` is the default and stays the default: a glyph that
+     * NAMES the action belongs before the words, the way a provider mark or a retry arrow does.
+     *
+     * `trailing` is for a glyph that points at the CONSEQUENCE rather than naming the action - the
+     * forward arrow on "continue", which is about where the press takes you. Putting that one in
+     * front makes it read as decoration on the verb; putting it last makes it the direction the
+     * sentence ends in, which is why every call-to-action in the product's own catalogue draws it
+     * that way.
+     */
+    readonly iconPlacement?: "leading" | "trailing"
     /** Blocks the press because the action is unavailable before it starts. */
     readonly disabled?: boolean
     /** The action is already running; block another press and show progress in this control. */
@@ -71,6 +82,16 @@ const LOADING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({
 })
 
 /**
+ * The glyph travels a step on hover, and only when it trails.
+ *
+ * A leading glyph names the action and has nowhere to go; a trailing one points at where the press
+ * leads, so moving it that way is the control repeating its own promise rather than decoration. The
+ * distance is one step of the scale and `motion-reduce` removes it outright - a reader who has
+ * asked the system for less movement is not asking about this one control.
+ */
+const TRAILING_GLYPH_CLASSES = "transition-transform duration-200 ease-out group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
+
+/**
  * Draw a press target.
  *
  * @param input - {@link ButtonProps}
@@ -79,12 +100,23 @@ export const Button = ({ props, on, isLoading = false }: ButtonProps) => {
     const variant = props.variant ?? "secondary"
     const size = props.size ?? "md"
     const isPending = props.isPending === true
+    const placement = props.iconPlacement ?? "leading"
+    const glyph = isLoading || isPending || props.icon === undefined
+        ? null
+        : placement === "trailing"
+            ? (
+                <span className={TRAILING_GLYPH_CLASSES}>
+                    <Icon props={{ name: props.icon, role: "chip" }} />
+                </span>
+            )
+            : <Icon props={{ name: props.icon, role: "chip" }} />
     return (
         <HeroButton
             data-tier="leaf"
             data-component="Button"
             data-variant={variant}
             data-size={size}
+            data-icon-placement={placement}
             data-loading={isLoading ? "true" : "false"}
             data-action-pending={isPending ? "true" : "false"}
             type={props.type ?? "button"}
@@ -92,12 +124,14 @@ export const Button = ({ props, on, isLoading = false }: ButtonProps) => {
             size={SIZES[size]}
             isDisabled={props.disabled === true || isLoading || isPending}
             onPress={on?.press}
-            className={isLoading ? LOADING_CLASSES : "relative"}
+            // `group` so the trailing glyph can answer a hover on the whole control rather than on
+            // itself: a reader aiming at the words is hovering the button, not the arrow.
+            className={isLoading ? LOADING_CLASSES : "group relative"}
         >
-            {isLoading ? null : isPending ? <Spinner size="sm" className="absolute" aria-hidden="true" /> : (
-                props.icon === undefined ? null : <Icon props={{ name: props.icon, role: "chip" }} />
-            )}
+            {isPending ? <Spinner size="sm" className="absolute" aria-hidden="true" /> : null}
+            {placement === "leading" ? glyph : null}
             <span className={isPending ? "invisible" : undefined}>{props.label}</span>
+            {placement === "trailing" ? glyph : null}
         </HeroButton>
     )
 }

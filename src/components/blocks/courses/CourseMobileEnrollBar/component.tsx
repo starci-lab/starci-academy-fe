@@ -78,7 +78,7 @@ export const _CourseMobileEnrollBar = (input: CourseMobileEnrollBarProps) => {
                     original: input.props.originalPrice === undefined || isPricePending
                         ? undefined
                         : defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                            <Text props={{ content: input.props.originalPrice, size: "xs", tone: "muted" }} />
+                            <Text props={{ content: input.props.originalPrice, size: "xs", tone: "muted", isSuperseded: true }} />
                         )),
                     // No discount in the pinned bar. The rail is where a reader compares; the bar is
                     // where they act, and a saving they have already seen does not need repeating in

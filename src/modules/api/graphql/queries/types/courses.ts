@@ -41,6 +41,24 @@ export interface CourseRow {
      * rather than a loading one.
      */
     valuePropositions?: ReadonlyArray<CourseValueProposition>
+    /**
+     * Which pricing phase the course is selling in right now.
+     *
+     * Selected with the phases below because a price on its own cannot say whether it is a
+     * discount: the card needs the list price AND the price actually being charged, and only the
+     * phase says which of the rows is the second one.
+     */
+    currentPhase?: string
+    /** Every price this course has been or will be sold at, one row per phase. */
+    pricingPhases?: ReadonlyArray<CoursePricingPhase>
+}
+
+/** One phase price. `price` is null for a phase that has not been given one. */
+export interface CoursePricingPhase {
+    /** The phase this row prices. */
+    phase: string
+    /** The amount charged during it, or `null` when the phase carries no override. */
+    price?: number | null
 }
 
 /** One promise a course makes, as the catalog card lists it. */

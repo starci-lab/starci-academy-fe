@@ -31,6 +31,7 @@ const toRow = (course: MyCourseRow, labels: CourseProgressLabels): CourseProgres
     return {
         id: course.globalId,
         title: course.label,
+        cover: course.thumbnailUrl ?? null,
         percent: completion,
         percentLabel: `${completion}%`,
         isTrial: course.isEnrolled === false,

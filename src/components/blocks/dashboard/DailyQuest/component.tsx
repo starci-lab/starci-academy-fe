@@ -85,7 +85,7 @@ export type DailyQuestContentData = {
 export type DailyQuestContentProps = LeafProps<DailyQuestContentData, SurfaceListCardActions>
 
 /** How many copies the contract requires while the repeated slot is resting. */
-const RESTING_COUNT = CONTRACTS["daily-quest-list"].children.task.restingCount
+const RESTING_COUNT = CONTRACTS["marked-row-list"].children.row.restingCount
 
 /** Turn daily-quest props into the repeated leaf slot required by the contract. */
 const DailyQuestContentView = ({ props, isLoading = false }: DailyQuestContentProps) => {
@@ -97,9 +97,9 @@ const DailyQuestContentView = ({ props, isLoading = false }: DailyQuestContentPr
 
     return (
         <Tree
-            contract="daily-quest-list"
-            render={defineContractComponent("daily-quest-list", {
-                task: tasks.map((task) => defineCompositeComponent("task-progress-row", {}, () => (
+            contract="marked-row-list"
+            render={defineContractComponent("marked-row-list", {
+                row: tasks.map((task) => defineCompositeComponent("task-progress-row", {}, () => (
                     <TaskProgressRow
                         props={{
                             id: task.id,
@@ -116,7 +116,7 @@ const DailyQuestContentView = ({ props, isLoading = false }: DailyQuestContentPr
 }
 
 /** Stable component type branded for the exact list contract it implements. */
-const DailyQuestContent = defineContractComponent("daily-quest-list", DailyQuestContentView)
+const DailyQuestContent = defineContractComponent("marked-row-list", DailyQuestContentView)
 
 /** The situation this surface is in, plus the actions it exposes. */
 type DailyQuestInput = DailyQuestProps & { readonly on?: DailyQuestActions }
@@ -159,7 +159,7 @@ export const _DailyQuest = (input: DailyQuestInput) => {
                 tasks: input.state === "pending" ? [] : input.props.tasks,
             }}
             on={{ act: input.on?.claim }}
-            contract="daily-quest-list"
+            contract="marked-row-list"
             render={DailyQuestContent}
             isLoading={isLoading}
         />

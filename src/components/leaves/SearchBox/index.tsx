@@ -1,4 +1,7 @@
-import { Input as HeroInput } from "@heroui/react"
+"use client"
+
+import { useRef, useState } from "react"
+import { InputGroup } from "@heroui/react"
 import { Icon } from "@/components/leaves/Icon"
 import type { LeafProps } from "@/components/contracts/props"
 
@@ -15,6 +18,16 @@ import type { LeafProps } from "@/components/contracts/props"
  *
  * IT IS UNCONTROLLED like every other box. Search runs on submit, and a field that re-rendered the
  * whole bar on each keystroke would repaint the navigation while somebody typed.
+ *
+ * IT OWNS ITS CLEAR CONTROL, and that is a correction. `type="search"` summons one from the user
+ * agent, and this product cannot reach it: it is painted from a fixed mask, so it answers to no
+ * token, ignores the `Icon` leaf every other glyph comes from, and does not exist at all in
+ * Firefox. The reset lives in `globals.css`; the replacement lives here, where the field that owns
+ * the seam between its glyph and its hint can own this one too.
+ *
+ * WHETHER IT HAS TEXT IS THE ONLY THING THIS TRACKS. Not the query - the field still holds that,
+ * so nothing above re-renders as somebody types. The boolean flips twice in a search: once on the
+ * first character, once on the last one removed.
  */
 
 /** What this leaf draws. A `type`, not an `interface` - only an alias satisfies the data fence. */
@@ -23,6 +36,8 @@ export type SearchBoxData = {
     readonly placeholder: string
     /** The already-resolved accessible name. Read, never seen. */
     readonly label: string
+    /** The already-resolved name of the clear control. Read, never seen - it draws as a glyph. */
+    readonly clearLabel: string
     /** The keyboard shortcut, already written the way a reader would press it. */
     readonly shortcut?: string
 }
@@ -36,42 +51,97 @@ export type SearchBoxActions = {
 /** Props for {@link SearchBox}. Three fixed slots, no fourth - see {@link LeafProps}. */
 export type SearchBoxProps = LeafProps<SearchBoxData, SearchBoxActions>
 
-/** The glyph leads, the box takes the slack, the hint trails inside the same well. */
-const BOX_CLASSES = "flex flex-row items-center gap-2 rounded-full bg-default px-3 py-2 w-full max-w-xs"
-
 /** The hint is set as a key, not as a word. */
 const SHORTCUT_CLASSES = "shrink-0 rounded border px-2 py-1 text-xs text-muted"
 
 /**
+ * The clear control is a GLYPH, not a button with a ground.
+ *
+ * It stands inside the field's own well, and a filled pill in there reads as a second control
+ * sitting on the input rather than as part of it - which is what a tertiary `IconButton` drew. So
+ * the affordance is carried by weight alone: quiet until it is pointed at.
+ */
+const CLEAR_CLASSES =
+    "shrink-0 cursor-pointer text-muted opacity-60 transition-opacity hover:opacity-100 focus-visible:opacity-100"
+
+/**
  * Draw the search field.
+ *
+ * THE VENDOR OWNS THE WELL, and that is a correction. This leaf used to draw its own rounded,
+ * filled box and place a `HeroInput` inside it - and the input brings its own well, so the control
+ * rendered as a pill inside a pill, a glyph adrift in the outer one. The vendor already ships the
+ * shape this is: `InputGroup` is one control with a prefix and a suffix, so the glyph sits in the
+ * SAME well as the text instead of beside it.
  *
  * @param input - {@link SearchBoxProps}
  */
-export const SearchBox = ({ props, on }: SearchBoxProps) => (
-    <form
-        data-tier="leaf"
-        data-component="SearchBox"
-        role="search"
-        className={BOX_CLASSES}
-        onSubmit={(event) => {
-            event.preventDefault()
-            const field = event.currentTarget.elements.namedItem("q")
-            on?.search?.(field instanceof HTMLInputElement ? field.value : "")
-        }}
-    >
-        <Icon props={{ name: "search", role: "chip" }} />
-        <HeroInput
-            name="q"
-            type="search"
-            aria-label={props.label}
-            placeholder={props.placeholder}
-            fullWidth
-        />
-        {props.shortcut === undefined ? null : (
-            <kbd className={SHORTCUT_CLASSES}>{props.shortcut}</kbd>
-        )}
-    </form>
-)
+export const SearchBox = ({ props, on }: SearchBoxProps) => {
+    const formRef = useRef<HTMLFormElement>(null)
+    const [hasText, setHasText] = useState(false)
+
+    /** The field itself, read the same way submitting already reads it. */
+    const field = (): HTMLInputElement | null => {
+        const found = formRef.current?.elements.namedItem("q")
+        return found instanceof HTMLInputElement ? found : null
+    }
+
+    return (
+        <form
+            ref={formRef}
+            data-tier="leaf"
+            data-component="SearchBox"
+            role="search"
+            className="w-full max-w-xs"
+            onSubmit={(event) => {
+                event.preventDefault()
+                on?.search?.(field()?.value ?? "")
+            }}
+        >
+            <InputGroup fullWidth>
+                <InputGroup.Prefix>
+                    <Icon props={{ name: "search", role: "chip" }} />
+                </InputGroup.Prefix>
+                <InputGroup.Input
+                    name="q"
+                    type="search"
+                    aria-label={props.label}
+                    placeholder={props.placeholder}
+                    onChange={(event) => setHasText(event.target.value !== "")}
+                />
+                {/*
+                 * CLEARING SEARCHES AGAIN, because a box emptied over a filtered list leaves the
+                 * reader looking at results for a query that is no longer on screen. The keyboard
+                 * hint gives way to it rather than sitting beside it: a shortcut into a field
+                 * somebody is already typing in has nothing left to offer.
+                 */}
+                {hasText ? (
+                    <InputGroup.Suffix>
+                        <button
+                            type="button"
+                            className={CLEAR_CLASSES}
+                            aria-label={props.clearLabel}
+                            onClick={() => {
+                                const input = field()
+                                if (input !== null) {
+                                    input.value = ""
+                                    input.focus()
+                                }
+                                setHasText(false)
+                                on?.search?.("")
+                            }}
+                        >
+                            <Icon props={{ name: "close", role: "chip" }} />
+                        </button>
+                    </InputGroup.Suffix>
+                ) : props.shortcut === undefined ? null : (
+                    <InputGroup.Suffix>
+                        <kbd className={SHORTCUT_CLASSES}>{props.shortcut}</kbd>
+                    </InputGroup.Suffix>
+                )}
+            </InputGroup>
+        </form>
+    )
+}
 
 /** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
 export const meta = { shape: "leaf", world: "pure" } as const

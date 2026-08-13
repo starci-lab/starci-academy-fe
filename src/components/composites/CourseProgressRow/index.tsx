@@ -1,4 +1,4 @@
-import { PressableTree } from "@/components/branches/PressableTree"
+import { PressableSurface } from "@/components/branches/PressableSurface"
 import { Badge } from "@/components/leaves/Badge"
 import { IconTile } from "@/components/leaves/IconTile"
 import { Progress } from "@/components/leaves/Progress"
@@ -20,6 +20,8 @@ export type CourseProgressDimension = {
 export type CourseProgressRowData = {
     readonly id: string
     readonly title?: string
+    /** The course artwork drawn on the mark, when the course has any. */
+    readonly cover?: string | null
     readonly percent?: number
     readonly percentLabel?: string
     readonly trialLabel?: string
@@ -36,8 +38,8 @@ export type CourseProgressRowProps = CompositeProps<CourseProgressRowData, Cours
 /** Draw one whole-row course destination with three inspectable progress dimensions. */
 export const CourseProgressRow = ({ props, on, isLoading = false }: CourseProgressRowProps) => {
     const heading = defineContractComponent("course-progress-heading", {
-        title: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
-            <Text props={{ content: props.title, size: "sm", weight: "semibold" }} isLoading={isLoading} />
+        title: defineLeafComponent("text", { size: "md", weight: "semibold" }, () => (
+            <Text props={{ content: props.title, size: "md", weight: "semibold", isPressLabel: true }} isLoading={isLoading} />
         )),
         ...(props.isTrial === true && !isLoading ? {
             trial: defineLeafComponent("badge", {}, () => <Badge props={{ content: props.trialLabel, tone: "warning" }} />),
@@ -63,10 +65,12 @@ export const CourseProgressRow = ({ props, on, isLoading = false }: CourseProgre
     })
     const body = defineContractComponent("course-progress-body", { heading, progress, legend })
     const content = defineContractComponent("course-progress-row", {
-        mark: defineLeafComponent("icon-tile", {}, () => <IconTile props={{ icon: "course", tone: "accent", size: "md" }} isLoading={isLoading} />),
+        mark: defineLeafComponent("icon-tile", {}, () => (
+            <IconTile props={{ icon: "course", image: props.cover, tone: "accent", size: "md" }} isLoading={isLoading} />
+        )),
         body,
     })
-    return <PressableTree contract="course-progress-row" render={content} label={props.title ?? "Course"} press={on?.open} disabled={isLoading || props.isPending === true || props.isDisabled === true} />
+    return <PressableSurface contract="course-progress-row" hover="label" render={content} label={props.title ?? "Course"} press={on?.open} disabled={isLoading || props.isPending === true || props.isDisabled === true} />
 }
 
 /** Source-level tier marker. */

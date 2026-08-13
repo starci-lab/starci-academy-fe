@@ -58,7 +58,7 @@ const ProfileHistory = (input: ProfileSkillsPageProps) => {
     const rows = input.state === "pending" ? Array.from({ length: 3 }, (_, index): ProfileCodingHistory => ({ problemTitle: "", slug: `pending-${index}`, languages: [], firstSolvedAt: "" })) : input.props.history
     return <SurfaceCard props={{ label: "Solve history", fact: input.state === "ready" ? `${rows.length} results` : undefined }} contract="profile-toolbar-over-list" render={defineContractComponent("profile-toolbar-over-list", {
         toolbar: defineContractComponent("profile-search-filter-row", {
-            search: defineLeafComponent("search-box", {}, () => <SearchBox props={{ label: "Search solve history", placeholder: "Search solved problems" }} on={{ search: input.on?.search }} />),
+            search: defineLeafComponent("search-box", {}, () => <SearchBox props={{ label: "Search solve history", placeholder: "Search solved problems", clearLabel: "Clear search" }} on={{ search: input.on?.search }} />),
             filter: defineLeafComponent("button", {}, () => <Button props={{ label: input.props.filterLabel, size: "sm" }} on={{ press: input.on?.filter }} />),
         }),
         list: defineContractComponent("profile-evidence-list", {

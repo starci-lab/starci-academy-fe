@@ -11,6 +11,8 @@
  * whole data layer into its module graph.
  */
 
+export { useMutateAddToCartSwr } from "./swr/useMutateAddToCartSwr"
+export { useQueryCoursePricePreviewSwr } from "./swr/useQueryCoursePricePreviewSwr"
 export { useQueryCoursesSwr } from "./swr/useQueryCoursesSwr"
 export { useQueryCourseSwr } from "./swr/useQueryCourseSwr"
 export { useQueryPlatformStatsSwr } from "./swr/useQueryPlatformStatsSwr"

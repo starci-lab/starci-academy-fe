@@ -2,7 +2,7 @@ import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { Text } from "@/components/leaves/Text"
 import { SeeMoreLink } from "@/components/leaves/SeeMoreLink"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
-import { defineCompositeComponent, defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
+import { defineCompositeComponent, defineContractComponent, defineContractProjection, defineLeafComponent } from "@/components/contracts/props"
 
 /**
  * BLOCK - `ContinueLearning`, presentational half.
@@ -125,29 +125,34 @@ export const _ContinueLearning = (input: ContinueLearningInput) => {
         resumeLabel: string | undefined,
         isLoading: boolean,
     ) => defineContractComponent("resume-card-grid", {
-        card: items.map((item) => defineContractComponent("resume-item-card", {
-            kind: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                <Text
-                    props={{ content: item?.kindLabel, size: "sm", tone: "muted" }}
-                    isLoading={isLoading}
-                />
-            )),
-            title: defineLeafComponent("text", { size: "md", weight: "medium" }, () => (
-                <Text
-                    props={{ content: item?.title, size: "md", weight: "medium" }}
-                    isLoading={isLoading}
-                />
-            )),
-            // A resting card has no destination yet, so it has no dead way out.
-            ...(item === undefined || resumeLabel === undefined ? {} : {
-                resume: defineLeafComponent("see-more-link", {}, () => (
-                    <SeeMoreLink
-                        props={{ label: resumeLabel }}
-                        on={{ press: () => input.on?.resume?.(item.id) }}
+        // THE CARD'S GROUND IS THE BRANCH'S, NOT THE ENTRY'S. The item is one surface inside a
+        // frameless section, so the surface branch draws it here and the entry keeps only the way
+        // its three lines stand together.
+        card: items.map((item) => defineContractProjection("resume-item-card", () => (
+            <SurfaceCard contract="resume-item-card" render={defineContractComponent("resume-item-card", {
+                kind: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                    <Text
+                        props={{ content: item?.kindLabel, size: "sm", tone: "muted" }}
+                        isLoading={isLoading}
                     />
                 )),
-            }),
-        })),
+                title: defineLeafComponent("text", { size: "md", weight: "medium" }, () => (
+                    <Text
+                        props={{ content: item?.title, size: "md", weight: "medium" }}
+                        isLoading={isLoading}
+                    />
+                )),
+                // A resting card has no destination yet, so it has no dead way out.
+                ...(item === undefined || resumeLabel === undefined ? {} : {
+                    resume: defineLeafComponent("see-more-link", {}, () => (
+                        <SeeMoreLink
+                            props={{ label: resumeLabel }}
+                            on={{ press: () => input.on?.resume?.(item.id) }}
+                        />
+                    )),
+                }),
+            })} />
+        ))),
     })
 
     if (input.state === "pending") {

@@ -1,12 +1,18 @@
 import { CONTRACTS } from "@/components/contracts"
 import { Tree } from "@/components/branches/Tree"
+import { SurfaceListCard, type SurfaceListCardData } from "@/components/branches/SurfaceListCard"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { Badge } from "@/components/leaves/Badge"
 import { Heading } from "@/components/leaves/Heading"
 import { Icon } from "@/components/leaves/Icon"
 import { Text } from "@/components/leaves/Text"
 import { CurriculumModuleRow, type CurriculumLesson } from "@/components/leaves/CurriculumModuleRow"
-import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
+import {
+    defineContractComponent,
+    defineContractProjection,
+    defineLeafComponent,
+    type LeafProps,
+} from "@/components/contracts/props"
 import {
     CoursePricingRail,
     type CoursePricingRailData,
@@ -136,6 +142,71 @@ const RESTING = {
 }
 
 /**
+ * THE JOINED LISTS STAND ON A BRANCH-DRAWN SURFACE, NOT ON THEIR OWN PAINT.
+ *
+ * Both runs are separated lists whose entry names its own element - a `ul` of promises, an `ol` of
+ * modules - so the surface cannot come from `SurfaceCard`, which would put the ground on a `div` and
+ * take the list with it. `SurfaceListCard` keeps the entry's host inside the card, which is the
+ * whole reason it exists. The section above already names each run, so the label travels as data and
+ * is not drawn twice.
+ */
+
+/** What the promise run draws: the already-resolved claims, in the course's own order. */
+type CoursePromiseListData = SurfaceListCardData & {
+    readonly promises: ReadonlyArray<string>
+}
+
+/** What the curriculum run draws: the modules, in teaching order. */
+type CourseModuleListData = SurfaceListCardData & {
+    readonly modules: ReadonlyArray<CourseModule>
+}
+
+/** The unordered run of promises, drawn inside the surface branch's body. */
+const CoursePromiseListView = ({ props, isLoading = false }: LeafProps<CoursePromiseListData>) => (
+    <Tree
+        contract="course-promise-list"
+        render={defineContractComponent("course-promise-list", {
+            promise: props.promises.map((line) => defineContractComponent("course-promise-row", {
+                mark: defineLeafComponent("text", { size: "sm" }, () => (
+                    <Text props={{ icon: "complete", content: "", size: "sm", tone: "accent" }} />
+                )),
+                promise: defineLeafComponent("text", { size: "sm" }, () => (
+                    <Text props={{ content: line, size: "sm" }} isLoading={isLoading} />
+                )),
+            })),
+        })}
+    />
+)
+
+/** Stable component type branded for the exact promise contract it implements. */
+const CoursePromiseList = defineContractComponent("course-promise-list", CoursePromiseListView)
+
+/** The ordered run of modules, drawn inside the surface branch's body. */
+const CourseModuleListView = ({ props, isLoading = false }: LeafProps<CourseModuleListData>) => (
+    <Tree
+        contract="course-module-list"
+        render={defineContractComponent("course-module-list", {
+            module: props.modules.map((module) => defineContractComponent("course-module-row", {
+                module: defineLeafComponent("curriculum-module-row", {}, () => (
+                    <CurriculumModuleRow
+                        props={{
+                            title: module.title,
+                            levelLabel: module.levelLabel,
+                            previewLabel: module.previewLabel,
+                            lessons: module.lessons,
+                        }}
+                        isLoading={isLoading}
+                    />
+                )),
+            })),
+        })}
+    />
+)
+
+/** Stable component type branded for the exact curriculum contract it implements. */
+const CourseModuleList = defineContractComponent("course-module-list", CourseModuleListView)
+
+/**
  * Draw the course landing.
  *
  * @param input - {@link CourseDetailPageProps}
@@ -193,36 +264,35 @@ export const _CourseDetailPage = (input: CourseDetailPageProps) => {
                 title: defineLeafComponent("heading", {}, () => (
                     <Heading props={{ content: input.props.labels.valuePropsTitle, level: 2 }} />
                 )),
-                body: defineContractComponent("course-promise-list", {
-                    promise: valueProps.map((line) => defineContractComponent("course-promise-row", {
-                        mark: defineLeafComponent("text", { size: "sm" }, () => (
-                            <Text props={{ icon: "complete", content: "", size: "sm", tone: "accent" }} />
-                        )),
-                        promise: defineLeafComponent("text", { size: "sm" }, () => (
-                            <Text props={{ content: line, size: "sm" }} isLoading={isLoading} />
-                        )),
-                    })),
-                }),
+                body: defineContractProjection("course-promise-list", () => (
+                    <SurfaceListCard
+                        contract="course-promise-list"
+                        render={CoursePromiseList}
+                        props={{
+                            label: input.props.labels.valuePropsTitle,
+                            isLabelHidden: true,
+                            promises: valueProps,
+                        }}
+                        isLoading={isLoading}
+                    />
+                )),
             }),
             defineContractComponent("course-section", {
                 title: defineLeafComponent("heading", {}, () => (
                     <Heading props={{ content: input.props.labels.curriculumTitle, level: 2 }} />
                 )),
-                body: defineContractComponent("course-module-list", {
-                    module: modules.map((module) => defineContractComponent("course-module-row", {
-                        module: defineLeafComponent("curriculum-module-row", {}, () => (
-                            <CurriculumModuleRow
-                                props={{
-                                    title: module.title,
-                                    levelLabel: module.levelLabel,
-                                    previewLabel: module.previewLabel,
-                                    lessons: module.lessons,
-                                }}
-                                isLoading={isLoading}
-                            />
-                        )),
-                    })),
-                }),
+                body: defineContractProjection("course-module-list", () => (
+                    <SurfaceListCard
+                        contract="course-module-list"
+                        render={CourseModuleList}
+                        props={{
+                            label: input.props.labels.curriculumTitle,
+                            isLabelHidden: true,
+                            modules,
+                        }}
+                        isLoading={isLoading}
+                    />
+                )),
             }),
         ],
     })

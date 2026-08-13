@@ -12,7 +12,7 @@ const DailyQuestView = (input: DailyQuestContentProps) => {
 }
 
 /** The exact contract identity carried by the component type. */
-const dailyQuestContent = defineContractComponent("daily-quest-list", DailyQuestView)
+const dailyQuestContent = defineContractComponent("marked-row-list", DailyQuestView)
 
 /** Complete runtime data accepted by both the surface and its content component. */
 const dailyQuestProps: DailyQuestContentData = {
@@ -23,7 +23,7 @@ const dailyQuestProps: DailyQuestContentData = {
 /** The intended component-type lane compiles. */
 export const validSurfaceList = (
     <SurfaceListCard
-        contract="daily-quest-list"
+        contract="marked-row-list"
         render={dailyQuestContent}
         props={dailyQuestProps}
     />
@@ -35,8 +35,8 @@ const wrongContractContent = defineContractComponent("empty-notice-card", DailyQ
 /** Compile-time refusal fixture for a mismatched contract identity. */
 export const wrongContractSurfaceList = (
     <SurfaceListCard
-        contract="daily-quest-list"
-        // @ts-expect-error -- this component carries `empty-notice-card`, not `daily-quest-list`.
+        contract="marked-row-list"
+        // @ts-expect-error -- this component carries `empty-notice-card`, not `marked-row-list`.
         render={wrongContractContent}
         props={dailyQuestProps}
     />
@@ -45,7 +45,7 @@ export const wrongContractSurfaceList = (
 /** Compile-time refusal fixture for missing content data. */
 export const missingDataSurfaceList = (
     <SurfaceListCard
-        contract="daily-quest-list"
+        contract="marked-row-list"
         render={dailyQuestContent}
         // @ts-expect-error -- `DailyQuestContentData` requires the runtime task collection.
         props={{ label: "Today's quest" }}

@@ -2,12 +2,26 @@
 
 import { useMemo, useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
+import { CoursePriceOverlay } from "@/components/overlays/courses/CoursePriceOverlay"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryCoursesSwr, useQueryMyCoursesSwr } from "@/hooks"
 import { _CoursesCatalogPage, type CoursesCatalogPageState } from "./component"
 
 /** Courses per page. Three columns times three rows on a desktop grid. */
 const PAGE_SIZE = 9
+
+/** One phase row: what that phase charges, when it overrides the list price. */
+type CoursePhaseRow = {
+    readonly phase: string
+    readonly price?: number | null
+}
+
+/** The part of a catalog course {@link priceOf} reads - the list price and the phase ladder. */
+type PricedCourse = {
+    readonly originalPrice: number
+    readonly currentPhase?: string
+    readonly pricingPhases?: ReadonlyArray<CoursePhaseRow>
+}
 
 /**
  * The course catalog, connected.
@@ -42,6 +56,15 @@ export const CoursesCatalogPage = () => {
     const [query, setQuery] = useState("")
     const [page, setPage] = useState(1)
     const [view, setView] = useState<"grid" | "line">("grid")
+    /*
+     * WHICH COURSE IS EXPLAINING ITS PRICE IS THE PAGE'S STATE, not each card's.
+     *
+     * A card that held its own covering surface would put twenty focus traps and twenty backdrops
+     * in one document, and only one of them can ever be on screen. It is also not a card's business:
+     * a connected block renders its own pure twin and nothing else, and a summoned surface lives in
+     * `overlays/` where the next screen that needs one can find it.
+     */
+    const [pricedCourseId, setPricedCourseId] = useState<string | undefined>(undefined)
 
     const filters = useMemo(
         () => ({
@@ -64,31 +87,65 @@ export const CoursesCatalogPage = () => {
         [locale],
     )
 
-    const owned = (mine.data ?? []).map((course) => ({
-        id: course.globalId,
-        title: course.label,
-        cover: course.thumbnailUrl ?? null,
-        percent: course.completionPercent,
-        progressLabel: t("progress", { percent: course.completionPercent }),
-        progressAriaLabel: t("progressAria", { title: course.label }),
-        resumeLabel: t("resume"),
-    }))
+    // The owned group is a whole block with its own request and its own phrasing, so this page
+    // decides only WHETHER it appears. Resolving rows here would make the page a second reader of
+    // `myCourses`, free to disagree with the first about what a course's progress says.
+    const hasOwned = (mine.data ?? []).length > 0
 
-    const discover = (catalog.data?.data ?? []).map((course) => ({
-        id: course.id,
-        title: course.title,
-        cover: course.coverImageUrl ?? null,
-        enrolmentLabel: t("enrolment", { count: course.enrollmentCount }),
-        // The list document carries the LIST price only. A discounted price would need
-        // `coursePricePreview` per course, which this repository does not call anywhere yet, so no
-        // discount badge and no savings line are drawn rather than inventing either.
-        price: money.format(course.originalPrice),
-        promisesSummary: t("promises", { count: course.valuePropositions?.length ?? 0 }),
-        promises: [...(course.valuePropositions ?? [])]
-            .sort((left, right) => left.orderIndex - right.orderIndex)
-            .map((proposition) => proposition.text),
-        viewLabel: t("view"),
-    }))
+    /*
+     * A COURSE THE LEARNER OWNS IS NOT SOMETHING TO DISCOVER.
+     *
+     * The two answers are independent lists and the catalog query knows nothing about enrolment, so
+     * a course the learner is already taking came back in both groups: once under "in progress"
+     * with its meter, and again under "explore" with a price and a buy-shaped action. That is the
+     * exact confusion this direction was chosen to remove - the whole point of grouping by
+     * enrolment was that section membership answers "do I own this" so the reader never has to.
+     *
+     * Matched on `isEnrolled` as well as on identity, because the list carries the viewer's own
+     * enrolment flag and it is the cheaper, more direct answer when the owned list has not
+     * arrived yet.
+     */
+    /**
+     * What the course actually costs today, and what that saves against the list price.
+     *
+     * The phase row for `currentPhase` is the price being charged; `originalPrice` is what it is
+     * charged against. When the two agree - or the phase carries no override - there is no discount,
+     * so the struck price, the percentage and the savings sentence are all ABSENT rather than
+     * present-and-zero. An earlier revision printed the list price alone and silently dropped a
+     * 26 percent discount the product was actually running.
+     *
+     * This is the same computation the legacy catalog card makes. The loyalty price sits one layer
+     * above it in `coursePricePreview`, which needs a signed-in viewer, so it cannot be what a
+     * catalog open to guests prices from.
+     */
+    const priceOf = (course: PricedCourse) => {
+        const phasePrice = course.pricingPhases?.find((row) => row.phase === course.currentPhase)?.price
+        const payable = phasePrice ?? course.originalPrice
+        if (payable >= course.originalPrice) return { price: money.format(payable) }
+        const saved = course.originalPrice - payable
+        return {
+            price: money.format(payable),
+            originalPrice: money.format(course.originalPrice),
+            discountLabel: t("discount", { percent: Math.round((saved / course.originalPrice) * 100) }),
+            savingsLabel: t("savings", { amount: money.format(saved) }),
+        }
+    }
+
+    const ownedIds = new Set((mine.data ?? []).map((course) => course.globalId))
+    const discover = (catalog.data?.data ?? [])
+        .filter((course) => course.isEnrolled !== true && !ownedIds.has(course.id))
+        .map((course) => ({
+            id: course.id,
+            title: course.title,
+            cover: course.coverImageUrl ?? null,
+            enrolmentLabel: t("enrolment", { count: course.enrollmentCount }),
+            ...priceOf(course),
+            promisesSummary: t("promises", { count: course.valuePropositions?.length ?? 0 }),
+            promises: [...(course.valuePropositions ?? [])]
+                .sort((left, right) => left.orderIndex - right.orderIndex)
+                .map((proposition) => proposition.text),
+            viewLabel: t("view"),
+        }))
 
     const count = catalog.data?.count ?? 0
     const isSearching = query.trim() !== ""
@@ -127,58 +184,66 @@ export const CoursesCatalogPage = () => {
                 : {}
 
     return (
-        <_CoursesCatalogPage
-            state={state}
-            props={{
-                labels: {
-                    navHome: t("navHome"),
-                    navCourses: t("navCourses"),
-                    title: t("title"),
-                    searchPlaceholder: t("searchPlaceholder"),
-                    searchLabel: t("searchLabel"),
-                    viewLabel: t("viewLabel"),
-                    viewGrid: t("viewGrid"),
-                    viewLine: t("viewLine"),
-                    ownedTitle: t("ownedTitle"),
-                    discoverTitle: t("discoverTitle"),
-                    pageLabel: t("pageLabel"),
-                    previousPageLabel: t("previousPage"),
-                    nextPageLabel: t("nextPage"),
-                },
-                ...(count > 0 ? { countLabel: tCourses("count", { count }) } : {}),
-                query,
-                view,
-                owned,
-                discover,
-                page,
-                totalPages: Math.max(1, Math.ceil(count / PAGE_SIZE)),
-                ...notice,
-            }}
-            on={{
-                search: (next: string) => {
-                    setQuery(next)
-                    // A new search is a new list, so it starts at its own first page rather than
-                    // landing on page four of an answer that no longer exists.
-                    setPage(1)
-                },
-                goHome: () => router.push("/dashboard"),
-                changeView: (next: string) => setView(next === "line" ? "line" : "grid"),
-                changePage: setPage,
-                recover: () => {
-                    if (state === "failed") void catalog.mutate()
-                    else if (state === "filtered-empty") { setQuery(""); setPage(1) }
-                    else router.push("/dashboard")
-                },
-                ...Object.fromEntries(owned.map((course) => [
-                    `resume:${course.id}`,
-                    () => router.push(`/courses/${course.id}`),
-                ])),
-                ...Object.fromEntries(discover.map((course) => [
-                    `view:${course.id}`,
-                    () => router.push(`/courses/${course.id}`),
-                ])),
-            }}
-        />
+        <>
+            <_CoursesCatalogPage
+                state={state}
+                props={{
+                    labels: {
+                        navHome: t("navHome"),
+                        navCourses: t("navCourses"),
+                        title: t("title"),
+                        searchPlaceholder: t("searchPlaceholder"),
+                        searchLabel: t("searchLabel"),
+                        searchClearLabel: t("searchClearLabel"),
+                        viewLabel: t("viewLabel"),
+                        viewGrid: t("viewGrid"),
+                        viewLine: t("viewLine"),
+                        discoverTitle: t("discoverTitle"),
+                        pageLabel: t("pageLabel"),
+                        previousPageLabel: t("previousPage"),
+                        nextPageLabel: t("nextPage"),
+                    },
+                    ...(count > 0 ? { countLabel: tCourses("count", { count }) } : {}),
+                    query,
+                    view,
+                    hasOwned,
+                    discover,
+                    page,
+                    totalPages: Math.max(1, Math.ceil(count / PAGE_SIZE)),
+                    ...notice,
+                }}
+                on={{
+                    search: (next: string) => {
+                        setQuery(next)
+                        // A new search is a new list, so it starts at its own first page rather than
+                        // landing on page four of an answer that no longer exists.
+                        setPage(1)
+                    },
+                    goHome: () => router.push("/dashboard"),
+                    changeView: (next: string) => setView(next === "line" ? "line" : "grid"),
+                    changePage: setPage,
+                    recover: () => {
+                        if (state === "failed") void catalog.mutate()
+                        else if (state === "filtered-empty") { setQuery(""); setPage(1) }
+                        else router.push("/dashboard")
+                    },
+                    ...Object.fromEntries(discover.map((course) => [
+                        `view:${course.id}`,
+                        () => router.push(`/courses/${course.id}`),
+                    ])),
+                    ...Object.fromEntries(discover.map((course) => [
+                        `priceDetail:${course.id}`,
+                        () => setPricedCourseId(course.id),
+                    ])),
+                }}
+            />
+            <CoursePriceOverlay
+                courseId={pricedCourseId}
+                title={discover.find((course) => course.id === pricedCourseId)?.title}
+                isOpen={pricedCourseId !== undefined}
+                onDismiss={() => setPricedCourseId(undefined)}
+            />
+        </>
     )
 }
 

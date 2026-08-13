@@ -35,6 +35,28 @@ type TextCommonData = {
     readonly weight?: TextWeight
     /** The meaning drawn ahead of the words. It inherits this line's colour, never its own. */
     readonly icon?: IconName
+    /**
+     * Whether this figure no longer applies - a list price beside the one being charged.
+     *
+     * IT IS A FACT, NOT A DECORATION, which is why it is named for what it means rather than for
+     * the rule drawn through it. A struck price is the one place a reader accepts two prices at
+     * once, and without the rule the catalog printed two live numbers side by side and let the
+     * reader guess which one they owed.
+     */
+    readonly isSuperseded?: boolean
+    /**
+     * Whether this line is the LABEL of the press target that contains it.
+     *
+     * A whole row that navigates has no visible edge saying so, and a cursor change alone is a
+     * promise only a mouse can read. Underlining the label while the row is hovered is what a link
+     * does, said by the one line that names the destination - the rest of the row is evidence about
+     * it rather than the thing being opened.
+     *
+     * It is an OPT-IN, not a default for every line inside a button: two underlines racing on one
+     * hover is how a row stops naming one destination. The offset keeps the rule off the letters
+     * so a two-line title is still read as words rather than as struck-through text.
+     */
+    readonly isPressLabel?: boolean
     /** Whether a change to this line is announced, and how urgently. */
     readonly live?: TextLive
 }
@@ -72,6 +94,19 @@ const TEXT_CLASSES = [
     "data-[tone=accent]:text-accent-soft-foreground",
     "data-[weight=medium]:font-medium data-[weight=semibold]:font-semibold",
     "data-[icon=true]:inline-flex data-[icon=true]:items-center data-[icon=true]:gap-2",
+    "data-[superseded=true]:line-through",
+    /*
+     * The rule takes the colour of the words, held one step off the letters so a two-line title
+     * still reads as words rather than as struck-through text.
+     *
+     * IT NAMES NO COLOUR ON PURPOSE. The vendor link asks for `--separator-tertiary`, a variable
+     * this house never defines, so that declaration is invalid and the link's own underline falls
+     * back to `currentColor`. Naming a token here made the title's rule a hairline at 92% lightness
+     * beside a link ruled in ink - two underlines in one card claiming two different weights of the
+     * same promise. Inheriting is what makes them the same mark.
+     */
+    "data-[press-label=true]:underline-offset-4",
+    "data-[press-label=true]:group-hover:underline",
 ].join(" ")
 
 /** The resting shape - the same line box, wearing the vendor's skeleton, glyphs out. */
@@ -109,6 +144,8 @@ export const Text = ({ props, isLoading = false }: TextProps) => {
             data-size={size}
             data-weight={weight}
             data-icon={showsIcon ? "true" : "false"}
+            data-superseded={props.isSuperseded === true ? "true" : "false"}
+            data-press-label={props.isPressLabel === true ? "true" : "false"}
             data-live={live}
             data-loading={isLoading ? "true" : "false"}
             role={LIVE_ROLES[live]}

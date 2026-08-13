@@ -12,14 +12,9 @@ import {
     defineLeafComponent,
 } from "@/components/contracts/props"
 import { Pagination } from "@/components/leaves/Pagination"
-import {
-    _CourseCatalogCard,
-    type CourseCatalogCardData,
-} from "@/components/blocks/courses/CourseCatalogCard/component"
-import {
-    _EnrolledCourseCard,
-    type EnrolledCourseCardData,
-} from "@/components/blocks/courses/EnrolledCourseCard/component"
+import { CourseCatalogCard } from "@/components/blocks/courses/CourseCatalogCard"
+import { type CourseCatalogCardData } from "@/components/blocks/courses/CourseCatalogCard/component"
+import { MyCoursesProgress } from "@/components/blocks/dashboard/MyCoursesProgress"
 
 /**
  * PAGE - `CoursesCatalogPage`: the course catalog, grouped by whether the learner already owns it.
@@ -63,14 +58,14 @@ export type CoursesCatalogPageLabels = {
     readonly searchPlaceholder: string
     /** Accessible name for the search field. */
     readonly searchLabel: string
+    /** Accessible name for the control that empties the search field. */
+    readonly searchClearLabel: string
     /** Accessible name for the layout toggle. */
     readonly viewLabel: string
     /** Grid layout tab label. */
     readonly viewGrid: string
     /** Line layout tab label. */
     readonly viewLine: string
-    /** Owned-courses group title. */
-    readonly ownedTitle: string
     /** Discover group title. */
     readonly discoverTitle: string
     /** Accessible name for the pager. */
@@ -90,8 +85,8 @@ export type CoursesCatalogPageData = {
     readonly query?: string
     /** Which layout is selected. */
     readonly view?: "grid" | "line"
-    /** Owned courses. Empty collapses the group entirely rather than titling nothing. */
-    readonly owned?: ReadonlyArray<EnrolledCourseCardData>
+    /** Whether the learner owns any course at all, which is all this page decides about them. */
+    readonly hasOwned?: boolean
     /** Purchasable courses. */
     readonly discover?: ReadonlyArray<CourseCatalogCardData>
     /** 1-based showing page. */
@@ -133,7 +128,6 @@ const RESTING_COUNT = 3
 export const _CoursesCatalogPage = (input: CoursesCatalogPageProps) => {
     const labels = input.props.labels
     const isLoading = input.state === "pending"
-    const owned = input.props.owned ?? []
     const discover = input.props.discover ?? []
     const showsNotice =
         input.state === "empty" || input.state === "filtered-empty" || input.state === "failed"
@@ -166,22 +160,31 @@ export const _CoursesCatalogPage = (input: CoursesCatalogPageProps) => {
     })
 
     const toolbar = defineContractComponent("catalog-search-count-view-row", {
-        query: defineLeafComponent("search-box", {}, () => (
-            <SearchBox
-                props={{ placeholder: labels.searchPlaceholder, label: labels.searchLabel }}
-                on={{ search: input.on?.search }}
-            />
-        )),
-        ...(input.props.countLabel === undefined ? {} : {
-            count: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                <Text props={{ content: input.props.countLabel, size: "sm", tone: "muted" }} />
+        // THE COUNT BELONGS TO THE FIELD THAT PRODUCED IT. Standing at the far end of the row it
+        // read as a caption for the layout toggle beside it, and it arrived after first paint -
+        // which reflowed the row under a control that had already measured its own position.
+        search: defineContractComponent("catalog-query-with-count", {
+            query: defineLeafComponent("search-box", {}, () => (
+                <SearchBox
+                    props={{
+                        placeholder: labels.searchPlaceholder,
+                        label: labels.searchLabel,
+                        clearLabel: labels.searchClearLabel,
+                    }}
+                    on={{ search: input.on?.search }}
+                />
             )),
+            ...(input.props.countLabel === undefined ? {} : {
+                count: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                    <Text props={{ content: input.props.countLabel, size: "sm", tone: "muted" }} />
+                )),
+            }),
         }),
-        // `variant: "primary"` is the segmented pill, not the underline. `ChoiceTabs` defaults to
-        // `"secondary"`, which draws a filter underline, and an earlier revision took that default
-        // by omission. The legacy catalog and the legacy league page both pass `"primary"` here for
-        // the reason the legacy source states beside it: these tabs switch the WHOLE panel rather
-        // than filtering the list under them, and a segmented pill is what says so.
+        // `variant: "primary"` is the segmented pill, not the underline. `ChoiceTabs` defaults
+        // to `"secondary"`, which draws a filter underline, and an earlier revision took that
+        // default by omission. The legacy catalog and the legacy league page both pass
+        // `"primary"` here for the reason the legacy source states beside it: these tabs switch
+        // the WHOLE panel rather than filtering the list under them, and a pill says so.
         view: defineLeafComponent("choice-tabs", {}, () => (
             <ChoiceTabs
                 props={{
@@ -198,20 +201,20 @@ export const _CoursesCatalogPage = (input: CoursesCatalogPageProps) => {
         )),
     })
 
-    const ownedGroup = defineContractComponent("catalog-section-group", {
-        title: defineLeafComponent("heading", {}, () => (
-            <Heading props={{ content: labels.ownedTitle, level: 2 }} />
-        )),
-        grid: defineContractComponent("catalog-card-grid", {
-            course: owned.map((course) => defineContractProjection("enrolled-course-card", () => (
-                <_EnrolledCourseCard
-                    state={isLoading ? "pending" : "ready"}
-                    props={course}
-                    on={{ resume: input.on?.[`resume:${course.id}`] }}
-                />
-            ))),
-        }),
-    })
+    /*
+     * THE COURSES THE LEARNER OWNS ARE DRAWN BY THE BLOCK THE DASHBOARD ALREADY USES.
+     *
+     * This page once had a card of its own for them: cover, title, a single progress bar and a
+     * resume button. It was the same statement as `MyCoursesProgress` in a second handwriting -
+     * one bar where that block shows content, challenges and milestones as three, one button where
+     * that block makes the whole row the way back in. Two answers to "where did I stop" is one
+     * answer too many, and the reader met both in the same product.
+     *
+     * So the page states WHERE the group goes and the block states what it says. The page keeps no
+     * owned-course labels, no progress phrasing and no resume action, because it no longer draws
+     * any of them.
+     */
+    const ownedGroup = defineContractProjection("course-progress-list", () => <MyCoursesProgress />)
 
     const discoverGroup = defineContractComponent("catalog-section-group", {
         title: defineLeafComponent("heading", {}, () => (
@@ -219,22 +222,28 @@ export const _CoursesCatalogPage = (input: CoursesCatalogPageProps) => {
         )),
         grid: defineContractComponent("catalog-card-grid", {
             course: (isLoading ? restingCards : discover).map((course) => defineContractProjection("catalog-card", () => (
-                <_CourseCatalogCard
+                <CourseCatalogCard
                     state={isLoading ? "pending" : "ready"}
-                    props={course}
-                    on={{ view: input.on?.[`view:${course.id}`] }}
+                    course={course}
+                    onView={input.on?.[`view:${course.id}`]}
+                    onOpenPriceDetail={input.on?.[`priceDetail:${course.id}`]}
                 />
             ))),
         }),
     })
 
-    // The pager is omitted, not rested, while the total is unknown: a control that may never appear
-    // should not reserve a place by shimmering.
-    const showsPager =
-        !showsNotice &&
-        !isLoading &&
-        input.props.totalPages !== undefined &&
-        input.props.totalPages > 1
+    /*
+     * THE PAGER IS ALWAYS THERE ONCE THERE ARE RESULTS, even at one page.
+     *
+     * This is not an oversight and not a taste call - the legacy catalog carries the same decision
+     * beside the same control, recorded as the teacher's: do not hide the pager at or below one
+     * page, because the catalog's page boundary is part of what the surface promises and a control
+     * that appears the day a tenth course is published moves everything under it on that day.
+     *
+     * It stays omitted while the request is in flight and behind a notice, where there is no result
+     * set to bound: a control that may never appear should not reserve a place by shimmering.
+     */
+    const showsPager = !showsNotice && !isLoading && input.props.totalPages !== undefined
 
     return (
         <Tree
@@ -245,7 +254,7 @@ export const _CoursesCatalogPage = (input: CoursesCatalogPageProps) => {
                 // An absent group is an ABSENT SLOT, not a slot holding null. The entry marks both
                 // optional, so the owned group simply does not exist for a learner who owns nothing
                 // and neither group exists behind a notice.
-                ...(showsNotice || owned.length === 0 ? {} : { owned: ownedGroup }),
+                ...(showsNotice || input.props.hasOwned !== true ? {} : { owned: ownedGroup }),
                 ...(showsNotice ? {} : { discover: discoverGroup }),
                 ...(showsNotice ? {
                     notice: defineCompositeComponent("empty-notice", {}, () => (

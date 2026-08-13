@@ -1,3 +1,4 @@
+import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { Tree } from "@/components/branches/Tree"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { ContinueLearning } from "@/components/blocks/dashboard/ContinueLearning"
@@ -64,9 +65,9 @@ export const _DashboardPage = (input: DashboardPageProps) => {
             section: [defineContractProjection("explore-main", () => <ExploreTab />)],
         })
         : input.props.selectedTab === "courses"
-            ? defineContractProjection("dashboard-courses-main", () => <CoursesTab />)
+            ? defineContractProjection("dashboard-tab-main", () => <CoursesTab />)
             : input.props.selectedTab === "community"
-                ? defineContractProjection("dashboard-community-main", () => <CommunityTab />)
+                ? defineContractProjection("dashboard-tab-main", () => <CommunityTab />)
                 : input.props.selectedTab === "overview"
                     ? defineContractComponent("dashboard-main", {
                         section: [
@@ -80,11 +81,13 @@ export const _DashboardPage = (input: DashboardPageProps) => {
                             defineContractProjection("label-row-over-card", () => <ChangelogList />),
                         ],
                     })
-                    : defineContractComponent("centred-empty-notice", {
-                        notice: defineCompositeComponent("empty-notice", {}, () => (
-                            <EmptyNotice props={{ icon: input.props.selectedTab === "community" ? "community" : "explore", message: input.props.unavailableMessage }} />
-                        )),
-                    })
+                    : defineContractProjection("centred-empty-notice", () => (
+                        <SurfaceCard contract="centred-empty-notice" render={defineContractComponent("centred-empty-notice", {
+                            notice: defineCompositeComponent("empty-notice", {}, () => (
+                                <EmptyNotice props={{ icon: input.props.selectedTab === "community" ? "community" : "explore", message: input.props.unavailableMessage }} />
+                            )),
+                        })} />
+                    ))
 
     return (
         <Tree

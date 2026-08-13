@@ -33,6 +33,11 @@ const query1 = gql`
                         text
                         orderIndex
                     }
+                    currentPhase
+                    pricingPhases {
+                        phase
+                        price
+                    }
                 }
             }
         }

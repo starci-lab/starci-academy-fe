@@ -1,4 +1,4 @@
-import { Tree } from "@/components/branches/Tree"
+import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { LeaderboardStandingRow, type LeaderboardStandingRowData } from "@/components/composites/LeaderboardStandingRow"
 import { Button } from "@/components/leaves/Button"
 import { Progress } from "@/components/leaves/Progress"
@@ -53,7 +53,7 @@ export type StandingHeroCardProps = CompositeProps<StandingHeroCardData, Standin
 export const StandingHeroCard = ({ props, on, isLoading = false }: StandingHeroCardProps) => {
     const progress = props.progress
     return (
-        <Tree contract="standing-hero-card" render={defineContractComponent("standing-hero-card", {
+        <SurfaceCard contract="standing-hero-card" render={defineContractComponent("standing-hero-card", {
             standing: defineCompositeComponent("leaderboard-standing-row", {}, () => (
                 <LeaderboardStandingRow props={props.standing} isLoading={isLoading} />
             )),

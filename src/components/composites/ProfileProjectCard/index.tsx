@@ -1,5 +1,5 @@
-import { Tree } from "@/components/branches/Tree"
-import { PressableTree } from "@/components/branches/PressableTree"
+import { SurfaceCard } from "@/components/branches/SurfaceCard"
+import { PressableSurface } from "@/components/branches/PressableSurface"
 import { Badge } from "@/components/leaves/Badge"
 import { Text } from "@/components/leaves/Text"
 import { defineContractComponent, defineLeafComponent, type CompositeProps } from "@/components/contracts/props"
@@ -40,9 +40,14 @@ export const ProfileProjectCard = ({ props, on, isLoading = false }: ProfileProj
             }),
         }),
     })
+    /*
+     * ONE GRID, ONE KIND OF CARD. A project with a link is pressable and a project without one is
+     * not, but both are the same object standing on the same ground - so the surface comes from the
+     * same branch either way and only the press target differs.
+     */
     return on?.press === undefined
-        ? <Tree contract="profile-project-card" render={content} />
-        : <PressableTree contract="profile-project-card" render={content} label={props.title ?? "Project"} press={on.press} />
+        ? <SurfaceCard contract="profile-project-card" render={content} />
+        : <PressableSurface contract="profile-project-card" render={content} label={props.title ?? "Project"} press={on.press} isRaised />
 }
 
 /** Source-level tier marker. */

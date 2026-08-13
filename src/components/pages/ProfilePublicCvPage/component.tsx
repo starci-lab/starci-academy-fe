@@ -14,9 +14,11 @@ export type ProfilePublicCvPageProps = {
 
 const ReadyCv = (input: ProfilePublicCvPageProps) => <Tree contract="profile-cv-page" render={defineContractComponent("profile-cv-page", {
     ...(input.props.isSelf ? { action: defineLeafComponent("button", {}, () => <Button props={{ label: input.props.editLabel, variant: "secondary", icon: "review" }} on={{ press: input.on?.edit }} />) } : {}),
-    paper: defineContractComponent("profile-cv-paper", {
-        document: defineLeafComponent("profile-cv-document", {}, () => <ProfileCvDocument props={{ title: input.props.title, src: input.props.pdfUrl }} isLoading={input.state === "pending"} />),
-    }),
+    paper: defineContractProjection("profile-cv-paper", () => (
+        <SurfaceCard contract="profile-cv-paper" render={defineContractComponent("profile-cv-paper", {
+            document: defineLeafComponent("profile-cv-document", {}, () => <ProfileCvDocument props={{ title: input.props.title, src: input.props.pdfUrl }} isLoading={input.state === "pending"} />),
+        })} />
+    )),
 })} />
 
 const CvNotice = (input: ProfilePublicCvPageProps) => <Tree contract="empty-notice-card" render={defineContractComponent("empty-notice-card", {

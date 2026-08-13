@@ -1,4 +1,4 @@
-import { PressableTree } from "@/components/branches/PressableTree"
+import { PressableSurface } from "@/components/branches/PressableSurface"
 import { IconTile } from "@/components/leaves/IconTile"
 import { Text } from "@/components/leaves/Text"
 import { defineContractComponent, defineLeafComponent, type CompositeProps } from "@/components/contracts/props"
@@ -16,7 +16,7 @@ export const UpcomingLivestreamRow = ({ props, on, isLoading = false }: Composit
         mark: defineLeafComponent("icon-tile", {}, () => <IconTile props={{ icon: "livestream", tone: "accent", size: "md" }} isLoading={isLoading} />), body,
         time: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: props.time, size: "xs", tone: "muted" }} isLoading={isLoading} />),
     })
-    return <PressableTree contract="upcoming-livestream-row" render={content} label={props.title ?? "Livestream"} press={on?.open} disabled={isLoading || props.isPending === true} />
+    return <PressableSurface contract="upcoming-livestream-row" render={content} label={props.title ?? "Livestream"} press={on?.open} disabled={isLoading || props.isPending === true} />
 }
 /** Source-level tier marker. */
 export const meta = { shape: "composite", world: "pure" } as const

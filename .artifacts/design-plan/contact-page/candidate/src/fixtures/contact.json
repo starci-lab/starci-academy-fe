@@ -1,0 +1,79 @@
+{
+  "note": "Every contact fact here is read from starci-academy/src/resources/contact.ts at 9a1934231, except the Zalo destination - see zaloDerived. Copy is read from starci-academy/src/messages/vi.json.",
+  "zaloDerived": "zalo.me/0828678897 was derived from CONTACT_PHONE 0828678897 by the design run. Zalo appears nowhere in either repository.",
+  "labels": {
+    "navHome": "Trang chủ",
+    "navContact": "Liên hệ",
+    "title": "Liên hệ",
+    "intro": "StarCi do một người dựng nên, nên câu hỏi của bạn tới thẳng người làm ra nó. Chọn cách liên hệ nhanh nhất bên dưới, hoặc gửi tin nhắn.",
+    "responseTime": "Thường phản hồi trong vòng 24 giờ (giờ hỗ trợ T2–T6, 9:00–18:00)."
+  },
+  "channelsLabel": "Liên hệ trực tiếp",
+  "channels": [
+    { "id": "zalo", "mark": "send", "name": "Zalo", "handle": "0828678897", "label": "Mở Zalo với số 0828678897" },
+    { "id": "email", "mark": "email", "name": "Email", "handle": "cuongnvtse160875@gmail.com", "label": "Gửi email tới cuongnvtse160875@gmail.com" },
+    { "id": "facebook", "mark": "facebook", "name": "Facebook", "handle": "facebook.com/starci183", "label": "Mở Facebook của founder" },
+    { "id": "linkedin", "mark": "linkedin", "name": "LinkedIn", "handle": "in/stacy-nguyen", "label": "Mở LinkedIn của founder" }
+  ],
+  "form": {
+    "labels": {
+      "name": "Họ tên",
+      "namePlaceholder": "Nguyễn Văn A",
+      "email": "Email",
+      "emailPlaceholder": "ban@email.com",
+      "category": "Lý do liên hệ",
+      "message": "Nội dung",
+      "messagePlaceholder": "Chúng tôi có thể giúp gì cho bạn?",
+      "submit": "Gửi tin nhắn",
+      "submitting": "Đang gửi…"
+    },
+    "categories": [
+      { "id": "course_support", "label": "Hỗ trợ khoá học / tài khoản" },
+      { "id": "partnership", "label": "Hợp tác / tuyển dụng" },
+      { "id": "general", "label": "Câu hỏi chung" }
+    ],
+    "selectedCategory": "course_support",
+    "refusals": {
+      "name": "Vui lòng nhập họ tên.",
+      "email": "Email không hợp lệ.",
+      "message": "Vui lòng nhập nội dung."
+    },
+    "submitted": {
+      "outcomeMessage": "Đã gửi!",
+      "outcomeDescription": "Cảm ơn bạn. Chúng tôi sẽ phản hồi qua email sớm nhất có thể.",
+      "outcomeActionLabel": "Gửi tin khác"
+    },
+    "failed": {
+      "outcomeMessage": "Không gửi được tin nhắn. Vui lòng thử lại.",
+      "outcomeActionLabel": "Gửi tin nhắn"
+    }
+  },
+  "conversation": {
+    "labels": {
+      "founderName": "Stacy Nguyen",
+      "founderRole": "Founder · StarCi Academy",
+      "composerPlaceholder": "Viết tin nhắn…",
+      "composerLabel": "Nội dung tin nhắn gửi founder",
+      "send": "Gửi",
+      "sending": "Đang gửi…",
+      "retry": "Gửi lại"
+    },
+    "statusLabel": "Thường trả lời trong 24 giờ",
+    "messages": [
+      { "id": "m1", "content": "Chào bạn, mình là Stacy. Có gì cứ nhắn thẳng đây nhé.", "author": "other", "timeLabel": "Hôm qua 21:04" },
+      { "id": "m2", "content": "Em muốn hỏi khoá System Design còn giữ giá ưu đãi không ạ?", "author": "viewer", "timeLabel": "09:12" },
+      { "id": "m3", "content": "Còn nhé, phase hiện tại chạy tới hết tháng này.", "author": "other", "timeLabel": "09:31" }
+    ],
+    "pendingMessage": { "id": "m4", "content": "Dạ em cảm ơn thầy ạ.", "author": "viewer", "timeLabel": "09:33", "status": "pending" },
+    "failedMessage": { "id": "m4", "content": "Dạ em cảm ơn thầy ạ.", "author": "viewer", "timeLabel": "09:33", "status": "failed" },
+    "empty": {
+      "noticeMessage": "Chưa có tin nhắn nào.",
+      "noticeDescription": "Viết dòng đầu tiên bên dưới — tin nhắn tới thẳng founder."
+    },
+    "threadFailed": {
+      "noticeMessage": "Không đọc được cuộc trò chuyện.",
+      "noticeDescription": "Bốn kênh phía trên vẫn hoạt động bình thường.",
+      "noticeActionLabel": "Thử lại"
+    }
+  }
+}

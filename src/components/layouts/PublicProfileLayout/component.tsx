@@ -1,4 +1,5 @@
 import type { ComponentType } from "react"
+import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { Tree } from "@/components/branches/Tree"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { ProfileHero } from "@/components/blocks/profile/ProfileHero"
@@ -36,7 +37,7 @@ export const _PublicProfileLayout = (input: PublicProfileLayoutProps) => {
     const Body = input.body
     if (input.state === "failed") {
         return (
-            <Tree
+            <SurfaceCard
                 contract="centred-empty-notice"
                 render={defineContractComponent("centred-empty-notice", {
                     notice: defineCompositeComponent("empty-notice", {}, () => (
@@ -52,7 +53,7 @@ export const _PublicProfileLayout = (input: PublicProfileLayoutProps) => {
 
     if (input.state === "not-found") {
         return (
-            <Tree
+            <SurfaceCard
                 contract="centred-empty-notice"
                 render={defineContractComponent("centred-empty-notice", {
                     notice: defineCompositeComponent("empty-notice", {}, () => (
@@ -75,19 +76,21 @@ export const _PublicProfileLayout = (input: PublicProfileLayoutProps) => {
                             rail: defineContractComponent("profile-identity-rail", {
                                 hero: defineContractProjection("profile-hero-rail", () => <ProfileHero />),
                             }),
-                            main: defineContractComponent("centred-empty-notice", {
-                                notice: defineCompositeComponent("empty-notice", {}, () => (
-                                    <EmptyNotice
-                                        props={{
-                                            icon: "password",
-                                            message: input.props.lockedMessage,
-                                            description: input.props.lockedDescription,
-                                            actionLabel: input.props.browseLabel,
-                                        }}
-                                        on={{ act: input.on.browse }}
-                                    />
-                                )),
-                            }),
+                            main: defineContractProjection("centred-empty-notice", () => (
+                                <SurfaceCard contract="centred-empty-notice" render={defineContractComponent("centred-empty-notice", {
+                                    notice: defineCompositeComponent("empty-notice", {}, () => (
+                                        <EmptyNotice
+                                            props={{
+                                                icon: "password",
+                                                message: input.props.lockedMessage,
+                                                description: input.props.lockedDescription,
+                                                actionLabel: input.props.browseLabel,
+                                            }}
+                                            on={{ act: input.on.browse }}
+                                        />
+                                    )),
+                                })} />
+                            )),
                         }),
                     }),
                 }),

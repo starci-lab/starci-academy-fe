@@ -23,6 +23,16 @@ export type IconTileSize = "sm" | "md"
 export type IconTileData = {
     /** The meaning drawn on the plate. */
     readonly icon: IconName
+    /**
+     * The artwork of the thing this marks, when it has any.
+     *
+     * A COURSE HAS A FACE, and the plate is where a reader looks for it. Given one, the tile shows
+     * it and the glyph stands down: a book drawn beside twelve courses says only "course" twelve
+     * times, while the artwork says WHICH course before the title is read. Absent or failed, the
+     * glyph is still there, which is why this is one leaf rather than two that disagree about the
+     * plate's size, radius and fill.
+     */
+    readonly image?: string | null
     /** What the plate is saying. */
     readonly tone?: IconTileTone
     /** The step. */
@@ -45,7 +55,10 @@ const TONE_CLASSES = {
 const SIZE_CLASSES = { sm: "size-8 rounded-lg", md: "size-10 rounded-xl" } as const
 
 /** Centres the glyph and stops the plate being squeezed inside a row. */
-const BASE_CLASSES = "inline-flex shrink-0 items-center justify-center"
+const BASE_CLASSES = "inline-flex shrink-0 items-center justify-center overflow-hidden"
+
+/** Artwork fills the plate and is clipped by it, so the tile keeps one silhouette either way. */
+const IMAGE_CLASSES = "size-full object-cover"
 
 /** The resting shape - the plate at its real size, no glyph. */
 const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base()
@@ -58,17 +71,29 @@ const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base()
 export const IconTile = ({ props, isLoading = false }: IconTileProps) => {
     const tone = props.tone ?? "neutral"
     const size = props.size ?? "sm"
+    // The artwork replaces the fill as well as the glyph: a soft plate behind a photograph is a
+    // colour nobody sees, and it would tint the one pixel row where the image does not reach.
+    const showsImage = !isLoading && props.image !== undefined && props.image !== null && props.image !== ""
     return (
         <span
             data-tier="leaf"
             data-component="IconTile"
             data-tone={tone}
             data-size={size}
+            data-artwork={showsImage ? "true" : "false"}
             data-loading={isLoading ? "true" : "false"}
             aria-hidden={isLoading ? true : undefined}
-            className={[BASE_CLASSES, SIZE_CLASSES[size], isLoading ? RESTING_CLASSES : TONE_CLASSES[tone]].join(" ")}
+            className={[
+                BASE_CLASSES,
+                SIZE_CLASSES[size],
+                isLoading ? RESTING_CLASSES : showsImage ? "" : TONE_CLASSES[tone],
+            ].join(" ")}
         >
-            {isLoading ? null : <Icon props={{ name: props.icon, role: "leading" }} />}
+            {isLoading ? null : showsImage
+                // Decorative: the row states the course by name on the very next line, so a reader
+                // who cannot see the artwork gains nothing from hearing its file described.
+                ? <img src={props.image ?? ""} alt="" className={IMAGE_CLASSES} />
+                : <Icon props={{ name: props.icon, role: "leading" }} />}
         </span>
     )
 }

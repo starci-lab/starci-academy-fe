@@ -1,4 +1,4 @@
-import { PressableTree } from "@/components/branches/PressableTree"
+import { PressableSurface } from "@/components/branches/PressableSurface"
 import { Tree } from "@/components/branches/Tree"
 import { Badge } from "@/components/leaves/Badge"
 import { Icon } from "@/components/leaves/Icon"
@@ -44,7 +44,7 @@ export const EvidenceRow = ({ props, on, isLoading = false }: EvidenceRowProps) 
         } : {}),
     })
     return props.isPressable === true ? (
-        <PressableTree contract="evidence-title-subtitle-fact-row" render={content} label={props.title ?? ""} press={on?.press} />
+        <PressableSurface contract="evidence-title-subtitle-fact-row" render={content} label={props.title ?? ""} press={on?.press} />
     ) : (
         <Tree contract="evidence-title-subtitle-fact-row" render={content} />
     )

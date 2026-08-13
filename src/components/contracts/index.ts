@@ -37,6 +37,7 @@ export type LayoutClassName =
     | "border" | "border-b" | "border-separator" | "divide-y" | "divide-separator" | "bg-background"
     | "px-3" | "px-4" | "px-6" | "py-2" | "py-3" | "py-6" | "p-0" | "p-2" | "p-4" | "p-6"
     | "px-2" | "pl-4" | "cursor-pointer" | "text-left" | "text-foreground" | "hover:opacity-80"
+    | "group" | "active:opacity-70"
     | "rounded-xl" | "rounded-2xl" | "rounded-3xl"
     | "bg-surface" | "shadow-surface" | "text-center"
     | "inset-shadow-[2px_0_0_0_var(--success)]" | "inset-shadow-[2px_0_0_0_var(--danger)]"
@@ -53,6 +54,11 @@ export type LayoutClassName =
     | "[&>*]:px-4" | "[&>*]:py-3" | "[&>*]:p-2" | "[&>*]:p-3" | "[&>*]:border-separator"
     | "[&>*:nth-child(odd)]:border-r" | "[&>*:nth-child(-n+4)]:border-b"
     | "[&>*:first-child]:w-5" | "[&>*:first-child]:shrink-0"
+    // A catalog row reads left to right: what it looks like, what it is, what to do. The artwork
+    // is FIXED rather than proportional, because a thumbnail that grew with the viewport would
+    // make the title column narrower on a wider screen, and the trailing controls hold their own
+    // measure so the row does not end in a ragged edge down the list.
+    | "[&>*:first-child]:w-36" | "[&>*:last-child]:shrink-0"
     | "[&>*:first-child]:text-center" | "[&>*:first-child]:tabular-nums"
     | "[&>*:first-child]:pt-4" | "[&>*:last-child]:pb-4"
     // The end rows carry the surface's own radius. A verdict band is an inset shadow, so it
@@ -77,7 +83,7 @@ export type LayoutClassName =
     // The course detail page is the first right-hand rail and the first bottom-pinned bar in this
     // repository, which is why these read as gaps rather than omissions: every one is the mirror of a
     // member already present for the opposite child or the opposite edge.
-    | "[&>*:last-child]:min-w-0" | "[&>*:last-child]:grow"
+    | "[&>*:last-child]:min-w-0" | "[&>*:last-child]:grow" | "[&>*:last-child]:shrink-0"
     | "md:[&>*:last-child]:sticky" | "md:[&>*:last-child]:top-6"
     | "md:[&>*:last-child]:self-start" | "md:[&>*:last-child]:max-h-rail"
     | "md:[&>*:last-child]:overflow-y-auto"
@@ -107,10 +113,28 @@ type ChildProps<S> = S extends { readonly props?: infer P }
     ? P extends Readonly<Record<string, ContractPropValue>> ? P : Readonly<Record<never, never>>
     : Readonly<Record<never, never>>
 
+/**
+ * The one child an entry does NOT name: whatever its caller brought.
+ *
+ * A section fixes WHERE the content it holds sits and can never fix WHICH node that is - the same
+ * section holds a list on one screen and a grid on the next - so a literal key in that slot would be
+ * a lie in every use but one. The `$` says it is not a member of the vocabulary: nothing may be
+ * named this, and `contractSpec` never resolves it.
+ *
+ * IT HAD TO BE TYPED, not merely written. Left unknown to the types the slot resolved to `never`,
+ * which nothing can satisfy - so the only way to draw such a node was to copy its classes onto an
+ * element the branch opened itself, which drops the entry's `host` and is exactly the silent failure
+ * `only-the-frame-wears-a-node` reports. The rule and this type are the same fix: one refuses the
+ * imitation, the other leaves a lawful way to render the real thing.
+ */
+type CallerContent = "$content"
+
 type ContractChild<S> = S extends { readonly contract: infer K }
-    ? (K extends ReadonlyArray<infer A> ? A : K) extends infer C extends ContractKey
-        ? import("@/components/contracts/props").ContractComponent<C>
-        : never
+    ? [K extends ReadonlyArray<infer A> ? A : K] extends [CallerContent]
+        ? import("@/components/contracts/props").ContractComponent<ContractKey>
+        : (K extends ReadonlyArray<infer A> ? A : K) extends infer C extends ContractKey
+            ? import("@/components/contracts/props").ContractComponent<C>
+            : never
     : never
 
 type LeafChild<S> = S extends { readonly leaf: infer N }
@@ -235,7 +259,7 @@ export const CONTRACTS = buildContracts({
         why: "Authentication is the route's only task, so its one bounded form sits at the visual centre instead of inheriting the dashboard's rail-and-main reading order.",
     },
     "authentication-panel-card": {
-        classes: ["w-full", "max-w-sm"],
+        classes: ["w-full", "max-w-sm", "p-4"],
         children: {
             panel: { contract: "centred-page-column" },
         },
@@ -256,30 +280,6 @@ export const CONTRACTS = buildContracts({
             fact: { leaf: "text", props: { size: "sm", tone: "muted" } },
         },
         why: "The fact reads as part of the heading sentence, so it sits on the title's baseline and wraps under it instead of pushing the title narrow.",
-    },
-    "heading-over-body": {
-        classes: ["flex", "flex-col", "gap-3"],
-        children: {
-            heading: { contract: ["underlined-tab-strip", "title-with-end-action"] },
-            body: { contract: ["title-with-end-action", "rail-then-main"] },
-            continuation: { contract: "rail-then-main", optional: true },
-        },
-        why: "The seam here is the only thing telling a reader that the content below belongs to this heading and not to the one above it.",
-    },
-    "stacked-sections": {
-        classes: ["flex", "flex-col", "gap-6"],
-        children: {
-            section: { contract: "label-row-over-card", repeats: true, restingCount: 0 },
-        },
-        why: "Sections read as separate objects only while the space between them is larger than the space inside any of them.",
-    },
-    "dashboard-tabs-over-body": {
-        classes: ["flex", "w-full", "flex-col"],
-        children: {
-            tabs: { contract: "underlined-tab-strip" },
-            body: { contract: "dashboard-rail-then-main" },
-        },
-        why: "The section tabs sit flush beneath the global navigation while the dashboard body keeps its own centred measure, matching the product shell without making the page title a second navigation layer.",
     },
     "profile-tabs-over-body": {
         classes: ["flex", "w-full", "flex-col"],
@@ -334,12 +334,12 @@ export const CONTRACTS = buildContracts({
         why: "The two skill evidence families remain peer labelled sections: they stack for readable narrow cards and share one row only when both retain useful width.",
     },
     "profile-metric-ribbon": {
-        classes: ["grid", "grid-cols-2", "gap-3", "sm:grid-cols-4"],
+        classes: ["grid", "grid-cols-2", "gap-3", "p-4", "sm:grid-cols-4"],
         children: { metric: { composite: "profile-metric", repeats: true, restingCount: 4 } },
         why: "Four proof metrics scan as equal peers, using two readable columns when narrow and one complete ribbon once all four retain useful width.",
     },
     "profile-breakdown-stack": {
-        classes: ["flex", "flex-col", "gap-6"],
+        classes: ["flex", "flex-col", "gap-6", "p-4"],
         children: { breakdown: { contract: "profile-breakdown", repeats: true, restingCount: 3 } },
         why: "Difficulty, topic and language are independent evidence breakdowns whose shared vertical rhythm preserves their distinct labels and visuals.",
     },
@@ -373,7 +373,7 @@ export const CONTRACTS = buildContracts({
         why: "Achievements are equal proof cards that gain columns only as their name and rarity remain readable.",
     },
     "profile-achievement-card": {
-        classes: ["flex", "flex-col", "gap-2", "rounded-3xl", "bg-surface", "p-4", "shadow-surface"],
+        classes: ["flex", "flex-col", "gap-2", "p-4"],
         children: {
             mark: { leaf: "icon-tile" },
             name: { leaf: "text", props: { size: "sm", weight: "semibold" } },
@@ -382,7 +382,7 @@ export const CONTRACTS = buildContracts({
         why: "One achievement mark, name and rarity form a single earned-proof object rather than three detached facts.",
     },
     "profile-toolbar-over-list": {
-        classes: ["flex", "flex-col", "gap-3"],
+        classes: ["flex", "flex-col", "gap-3", "p-4"],
         children: { toolbar: { contract: "profile-search-filter-row" }, list: { contract: "profile-evidence-list" } },
         why: "Search and filters modify the proof list directly below, so their toolbar remains attached to that list rather than to the whole route.",
     },
@@ -397,7 +397,7 @@ export const CONTRACTS = buildContracts({
         why: "The owner-only action stays outside the read-only document surface so editing never appears to be part of the CV itself.",
     },
     "profile-cv-paper": {
-        classes: ["mx-auto", "w-full", "max-w-app-lg", "overflow-hidden", "rounded-3xl", "bg-surface", "shadow-surface"],
+        classes: ["mx-auto", "w-full", "max-w-app-lg", "overflow-hidden", "p-4"],
         children: { document: { leaf: "profile-cv-document" } },
         why: "The public CV has one bounded paper measure whose document remains readable without acquiring unrelated profile-card chrome.",
     },
@@ -407,7 +407,7 @@ export const CONTRACTS = buildContracts({
         why: "The back path, proof title and qualifier form one route-local orientation block before detailed evidence begins.",
     },
     "profile-coding-statement": {
-        classes: ["flex", "flex-col", "gap-3"],
+        classes: ["flex", "flex-col", "gap-3", "p-4"],
         children: { statement: { leaf: "text" }, tags: { contract: "profile-topic-chip-run", optional: true } },
         why: "The executable legacy exposes a problem statement and optional tags, not source code; these remain one honest coding-proof description before submission evidence.",
     },
@@ -420,7 +420,7 @@ export const CONTRACTS = buildContracts({
         why: "One route-local coding-proof header orients the reader before independently bounded statement and submission-evidence sections.",
     },
     "profile-proof-metrics": {
-        classes: ["grid", "grid-cols-2", "gap-3", "sm:grid-cols-4"],
+        classes: ["grid", "grid-cols-2", "gap-3", "p-4", "sm:grid-cols-4"],
         children: { metric: { contract: "profile-proof-metric", repeats: true, restingCount: 4 } },
         why: "Four standing metrics remain equal peers, using two readable columns when narrow and one complete proof ribbon once space permits.",
     },
@@ -435,7 +435,7 @@ export const CONTRACTS = buildContracts({
         why: "Pinned project proofs stack when narrow and become equal peer cards only when each retains readable title and description width.",
     },
     "profile-project-card": {
-        classes: ["flex", "flex-col", "gap-3", "rounded-2xl", "border", "border-separator", "bg-surface", "p-4"],
+        classes: ["flex", "flex-col", "gap-3", "p-4"],
         children: {
             badge: { leaf: "badge" },
             title: { leaf: "text", props: { size: "sm", weight: "semibold" } },
@@ -552,7 +552,7 @@ export const CONTRACTS = buildContracts({
         classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "flex-col", "gap-6", "px-6", "py-6", "md:flex-row", "md:items-start", "md:[&>*:first-child]:w-72", "md:[&>*:first-child]:shrink-0", "md:[&>*:last-child]:min-w-0", "md:[&>*:last-child]:grow"],
         children: {
             rail: { contract: "dashboard-rail" },
-            main: { contract: ["dashboard-main", "dashboard-courses-main", "dashboard-community-main", "centred-empty-notice"] },
+            main: { contract: ["dashboard-main", "dashboard-tab-main", "centred-empty-notice"] },
         },
         why: "The learner rail keeps the product's fixed 288px reading width beside a flexible main column, then stacks above it on a narrow screen without becoming a card or a sticky viewport of its own.",
     },
@@ -570,19 +570,12 @@ export const CONTRACTS = buildContracts({
         },
         why: "The production overview has eight product sections in a fixed reading order. They repeat at the product's 24px seam so each labelled surface reads as a separate part of the learner's overview rather than one long card; a refactor may not invent another section from data the product does not display.",
     },
-    "dashboard-courses-main": {
+    "dashboard-tab-main": {
         classes: ["flex", "min-w-0", "grow", "flex-col", "gap-6"],
         children: {
             section: { contract: "label-row-over-card", repeats: true, restingCount: 3 },
         },
-        why: "The three learning blocks keep their legacy reading order while settling independently, so the page orchestrates one course journey without owning any child request.",
-    },
-    "dashboard-community-main": {
-        classes: ["flex", "min-w-0", "grow", "flex-col", "gap-6"],
-        children: {
-            section: { contract: "label-row-over-card", repeats: true, restingCount: 2 },
-        },
-        why: "Weekly league and global standing are separate competition stories with independent request lifetimes, kept in one legacy-ordered community column.",
+        why: "A selected tab fills the main column with labelled sections that keep their legacy reading order and settle independently, so the tab orchestrates the order without owning any child request. Which sections a tab names is the tab's own content and not a second column shape.",
     },
     "label-row-over-card": {
         classes: ["flex", "flex-col", "gap-3"],
@@ -593,7 +586,7 @@ export const CONTRACTS = buildContracts({
         why: "The label is held OUTSIDE the surface it names, so a section whose content is itself a set of cards never draws a card inside a card; label and owned surface use the ordinary gap-3 seam while major sections remain farther apart.",
     },
     "empty-notice-card": {
-        classes: ["flex", "flex-col", "gap-3"],
+        classes: ["flex", "flex-col", "gap-3", "p-4"],
         children: {
             notice: { composite: "empty-notice" },
         },
@@ -610,7 +603,7 @@ export const CONTRACTS = buildContracts({
         why: "A mark appears only when the legacy product gives the absence a generic visual identity; the settled answer and optional recovery action keep one centred reading order either way.",
     },
     "resume-item-card": {
-        classes: ["flex", "flex-col", "gap-3", "rounded-3xl", "bg-surface", "p-4", "shadow-surface"],
+        classes: ["flex", "flex-col", "gap-3", "p-4"],
         children: {
             title: { leaf: "text", props: { size: "md", weight: "medium" } },
             kind: { leaf: "text", props: { size: "sm", tone: "muted" } },
@@ -618,16 +611,8 @@ export const CONTRACTS = buildContracts({
         },
         why: "The kind, title and way back into one content item share a bounded ground because none identifies the resumable item without the other two.",
     },
-    "daily-quest-card": {
-        classes: ["flex", "flex-col", "gap-3"],
-        children: {
-            tasks: { contract: "stacked-peer-controls" },
-            outcome: { leaf: ["text", "button"] },
-        },
-        why: "The day's task run and its reward outcome share a bounded ground because the outcome only has meaning as the result of that run.",
-    },
     "weekly-challenge-card": {
-        classes: ["flex", "flex-col", "gap-3"],
+        classes: ["flex", "flex-col", "gap-3", "p-4"],
         children: {
             title: { composite: "weekly-challenge-title" },
             status: { composite: "weekly-challenge-status" },
@@ -669,7 +654,7 @@ export const CONTRACTS = buildContracts({
         why: "Recent finishers are peers of one nested joined list: the full-width separators belong between rows, while avatar, username and relative time stay on each row.",
     },
     "job-readiness-card": {
-        classes: ["flex", "flex-col", "gap-3"],
+        classes: ["flex", "flex-col", "gap-3", "p-4"],
         children: {
             percentile: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
             metrics: { contract: "job-readiness-list" },
@@ -684,12 +669,12 @@ export const CONTRACTS = buildContracts({
         },
         why: "The scored readiness pillars are peers of one nested joined list, so one outlined surface and full-width rules preserve their shared result without adding a second shadow.",
     },
-    "daily-quest-list": {
+    "marked-row-list": {
         classes: ["overflow-hidden", "divide-y", "divide-separator", "p-0", "[&>*]:px-4", "[&>*]:py-3", "[&>*:first-child]:pt-4", "[&>*:last-child]:pb-4"],
         children: {
-            task: { composite: "task-progress-row", repeats: true, restingCount: 5 },
+            row: { composite: "task-progress-row", repeats: true, restingCount: 5 },
         },
-        why: "Today's tasks are peer rows of one joined list, so the surface is shared and a full-width rule - rather than card spacing - separates one target from the next.",
+        why: "Rows that each carry a completion mark are peers of one joined list, so a shared surface and a full-width rule - rather than card spacing - separate one row from the next, and the eye lands on the third row of two lists standing side by side at the same height. The mark is what makes them peers: something still to finish and something already true are one statement in two states, so the tick belongs to the row and is never re-drawn per list.",
     },
     "rank-title-row": {
         classes: ["flex", "flex-row", "items-center", "gap-2", "w-full", "[&>*:first-child]:w-5", "[&>*:first-child]:shrink-0", "[&>*:first-child]:text-center", "[&>*:first-child]:tabular-nums", "[&>*:nth-child(2)]:min-w-0", "[&>*:nth-child(2)]:grow"],
@@ -864,14 +849,14 @@ export const CONTRACTS = buildContracts({
         why: "The date and category are peer metadata for one update, so they share a compact line before the update title begins.",
     },
     "contribution-calendar-card": {
-        classes: ["flex", "flex-col", "gap-3"],
+        classes: ["flex", "flex-col", "gap-3", "p-4"],
         children: {
             calendar: { composite: "contribution-calendar" },
         },
         why: "The year choice, activity grid, intensity key and streak caption explain one another, so they stay in one bounded calendar surface rather than becoming four dashboard sections.",
     },
     "weekly-goals-card": {
-        classes: ["flex", "flex-col", "gap-3"],
+        classes: ["flex", "flex-col", "gap-3", "p-4"],
         children: {
             summary: { leaf: "text", props: { size: "sm", weight: "medium" } },
             goals: { contract: "bordered-goal-grid" },
@@ -885,13 +870,6 @@ export const CONTRACTS = buildContracts({
         },
         why: "Weekly goals are compact peer measures read across two columns. A full outer border and shared row and column seams keep all six cells one grid instead of six cards.",
     },
-    "course-progress-card": {
-        classes: ["flex", "flex-col", "gap-3"],
-        children: {
-            rows: { contract: "progress-row-stack" },
-        },
-        why: "The course progress rows share one bounded ground because they are peer measures of the same enrolled set rather than separate cards.",
-    },
     "course-progress-list": {
         classes: ["overflow-hidden", "divide-y", "divide-separator", "p-0", "[&>*]:px-4", "[&>*]:py-3", "[&>*:first-child]:pt-4", "[&>*:last-child]:pb-4"],
         children: {
@@ -900,12 +878,12 @@ export const CONTRACTS = buildContracts({
         why: "Enrolled courses are peers of one joined list; full-width separators preserve the legacy scan while each row keeps one whole-course destination.",
     },
     "course-progress-row": {
-        classes: ["flex", "w-full", "cursor-pointer", "flex-row", "items-center", "gap-4", "text-left", "text-foreground", "hover:opacity-80", "[&>*:nth-child(2)]:min-w-0", "[&>*:nth-child(2)]:grow"],
+        classes: ["flex", "w-full", "flex-row", "items-center", "gap-4", "[&>*:nth-child(2)]:min-w-0", "[&>*:nth-child(2)]:grow"],
         children: {
             mark: { leaf: "icon-tile" },
             body: { contract: "course-progress-body" },
         },
-        why: "The course mark identifies the destination while title, status, segmented progress and legend stay one readable body inside the same press target.",
+        why: "The course mark identifies the destination while title, status, segmented progress and legend stay one readable body inside the same press target. Hover is answered by the TITLE, which underlines like the link it stands for, so the row itself does not also dim - one gesture gets one answer, and the answer names what will open.",
     },
     "course-progress-body": {
         classes: ["flex", "min-w-0", "grow", "flex-col", "gap-3"],
@@ -919,11 +897,11 @@ export const CONTRACTS = buildContracts({
     "course-progress-heading": {
         classes: ["flex", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-2"],
         children: {
-            title: { leaf: "text", props: { size: "sm", weight: "semibold" } },
+            title: { leaf: "text", props: { size: "md", weight: "semibold" } },
             trial: { leaf: "badge", optional: true },
             percent: { leaf: "text", props: { size: "xs", tone: "muted" } },
         },
-        why: "The title owns the first reading position while optional trial truth and the overall percentage remain short trailing qualifiers on the same line.",
+        why: "The title owns the first reading position while optional trial truth and the overall percentage remain short trailing qualifiers on the same line. It is the NAME of the destination the whole row opens, so it reads at the step a name takes rather than at the step of the figures beside it.",
     },
     "segmented-progress-track": {
         classes: ["flex", "w-full", "flex-row", "items-center", "gap-1"],
@@ -953,14 +931,14 @@ export const CONTRACTS = buildContracts({
         why: "Recommendations are comparable course offers in one joined surface, so title, pricing and reason remain attached to each destination row.",
     },
     "recommended-course-row": {
-        classes: ["flex", "w-full", "cursor-pointer", "flex-row", "items-start", "gap-3", "text-left", "text-foreground", "hover:opacity-80", "[&>*:nth-child(2)]:min-w-0", "[&>*:nth-child(2)]:grow"],
+        classes: ["flex", "w-full", "flex-row", "items-start", "gap-3", "[&>*:nth-child(2)]:min-w-0", "[&>*:nth-child(2)]:grow"],
         children: { mark: { leaf: "icon-tile" }, body: { contract: "recommended-course-body" } },
         why: "The course mark leads one whole-row destination while its commerce facts stay in one flexible reading column.",
     },
     "recommended-course-body": {
         classes: ["flex", "min-w-0", "grow", "flex-col", "gap-1"],
-        children: { title: { leaf: "text", props: { size: "sm", weight: "semibold" } }, description: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true }, price: { contract: "price-discount-line" }, reason: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true } },
-        why: "Title, optional description, price and reason are one offer sentence ordered from identity to decision evidence.",
+        children: { title: { leaf: "text", props: { size: "md", weight: "semibold" } }, price: { contract: "price-discount-line" }, note: { contract: "price-note-row", optional: true }, reason: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true } },
+        why: "Title, price, what that price saves beside the way to see how it was reached, and why this course is being suggested at all: one offer sentence ordered from identity to decision evidence. It carries NO course description - a paragraph in a row a reader is scanning is the one thing they skip, and it pushed the price, the saving and the reason for both below the fold of the row.",
     },
     "price-discount-line": {
         classes: ["flex", "flex-row", "flex-wrap", "items-center", "gap-2"],
@@ -973,12 +951,12 @@ export const CONTRACTS = buildContracts({
         why: "Upcoming sessions are time-ordered peers in one joined list, with separators preserving a fast scan to the next occurrence.",
     },
     "upcoming-livestream-row": {
-        classes: ["flex", "w-full", "cursor-pointer", "flex-row", "items-center", "gap-3", "text-left", "text-foreground", "hover:opacity-80", "[&>*:nth-child(2)]:min-w-0", "[&>*:nth-child(2)]:grow"],
+        classes: ["flex", "w-full", "flex-row", "items-center", "gap-3", "[&>*:nth-child(2)]:min-w-0", "[&>*:nth-child(2)]:grow"],
         children: { mark: { leaf: "icon-tile" }, body: { contract: "evidence-title-over-subtitle" }, time: { leaf: "text", props: { size: "xs", tone: "muted" } } },
         why: "The live mark identifies the event, title owns the flexible middle and concrete timing stays visible at the trailing edge of the same destination row.",
     },
     "leaderboard-card": {
-        classes: ["flex", "flex-col", "gap-3"],
+        classes: ["flex", "flex-col", "gap-3", "p-4"],
         children: { standing: { composite: "leaderboard-standing-row", optional: true }, list: { contract: "ranked-user-list" } },
         why: "Viewer standing explains the ranked identities beneath it, so both share one competition surface while the joined list keeps its own separators.",
     },
@@ -988,7 +966,7 @@ export const CONTRACTS = buildContracts({
         why: "The rank artwork fixes the viewer's current place and the standing sentence sits directly against it, because the two are one statement; the body owns the spare width so an optional tier fact still settles at the far edge without the sentence drifting there when no fact exists.",
     },
     "standing-hero-card": {
-        classes: ["flex", "flex-col", "gap-5", "rounded-3xl", "bg-surface", "p-4"],
+        classes: ["flex", "flex-col", "gap-5", "p-4"],
         children: { standing: { composite: "leaderboard-standing-row" }, goal: { contract: "standing-goal-meter", optional: true }, action: { leaf: "button" } },
         why: "A standing that comes with a way to change it is one story: where the learner is, how far the next place is, and the single action that closes the gap.",
     },
@@ -1092,7 +1070,7 @@ export const CONTRACTS = buildContracts({
         why: "The optional movement or viewer qualifier stays directly beneath the learner name so both read as one identity while the row keeps its trailing comparison column.",
     },
     "streak-summary-card": {
-        classes: ["flex", "flex-col", "gap-4"],
+        classes: ["flex", "flex-col", "gap-4", "p-4"],
         children: {
             summary: { contract: "streak-week-with-outcome" },
             nudge: { contract: "streak-daily-nudge", optional: true },
@@ -1138,13 +1116,6 @@ export const CONTRACTS = buildContracts({
         },
         why: "When an existing streak is still idle today, its reminder and preserving action form one decision row beneath the week rather than another dashboard section.",
     },
-    "progress-row-stack": {
-        classes: ["flex", "flex-col", "gap-3"],
-        children: {
-            row: { composite: "labelled-progress-row", repeats: true, restingCount: 3 },
-        },
-        why: "Progress rows repeat down one column so their labels and figures can be compared without each row pretending to be a separate section.",
-    },
     "glyph-title-fact-row": {
         classes: ["flex", "flex-row", "items-center", "gap-2", "[&>*:nth-child(2)]:min-w-0", "[&>*:nth-child(2)]:grow"],
         children: {
@@ -1171,23 +1142,6 @@ export const CONTRACTS = buildContracts({
         },
         why: "The figure belongs to the label while the bar explains that pair, so the line stays directly above its measure.",
     },
-    "glyph-body-action-row": {
-        classes: ["flex", "flex-row", "items-center", "gap-2", "rounded-xl", "px-4", "py-3"],
-        children: {
-            glyph: { leaf: "icon", props: { size: "sm" } },
-            body: { leaf: "text" },
-            action: { leaf: ["button", "see-more-link"] },
-        },
-        why: "A row a reader can act on needs its own inset so the press target is the row and not the words inside it.",
-    },
-    "label-value-row": {
-        classes: ["flex", "flex-row", "flex-wrap", "items-baseline", "justify-between", "gap-2"],
-        children: {
-            label: { leaf: "text", props: { size: "sm" } },
-            value: { leaf: "text", props: { size: "sm" } },
-        },
-        why: "The label and its figure sit at opposite ends of one line so a column of them reads as a table without being one, and they share a baseline so the figure does not float against its own name.",
-    },
     "label-with-muted-fact-row": {
         classes: ["flex", "flex-row", "flex-wrap", "items-baseline", "justify-between", "gap-2"],
         children: {
@@ -1195,14 +1149,6 @@ export const CONTRACTS = buildContracts({
             fact: { leaf: "text", props: { size: "xs", tone: "muted" } },
         },
         why: "A joined list may qualify its own rows with a semibold label and a smaller muted fact on one baseline; without peer identities outside the list there is no reason to add a leading glyph.",
-    },
-    "label-over-figure-tile": {
-        classes: ["flex", "flex-col", "gap-3", "rounded-2xl", "bg-surface", "p-4", "shadow-surface"],
-        children: {
-            label: { leaf: "text", props: { size: "sm", tone: "muted" } },
-            figure: { leaf: "text" },
-        },
-        why: "The label reads first and small, the figure second and large, because a reader scanning a row of these is comparing figures and needs the names only to know which is which.",
     },
     "resume-card-grid": {
         classes: ["grid", "grid-cols-1", "gap-3", "sm:grid-cols-2", "lg:grid-cols-3"],
@@ -1219,14 +1165,6 @@ export const CONTRACTS = buildContracts({
             hint: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
         },
         why: "The hint belongs under the control it explains rather than beside the label, because a reader reaches the hint after failing at the control and not before trying it.",
-    },
-    "form-column": {
-        classes: ["flex", "w-full", "max-w-sm", "flex-col", "gap-3"],
-        children: {
-            field: { contract: "label-field-hint", repeats: true, restingCount: 3 },
-            submit: { leaf: "button" },
-        },
-        why: "A form is read one control at a time, so the measure is narrow on purpose and the seam between controls is wider than the seam inside any of them.",
     },
     "double-navbar": {
         classes: ["sticky", "top-0", "z-50", "w-full", "border-b", "border-separator", "bg-background"],
@@ -1282,14 +1220,6 @@ export const CONTRACTS = buildContracts({
             tabs: { leaf: "extended-tabs" },
         },
         why: "The original ExtendedTabs primitive owns the inset, compound tab anatomy and selected indicator as one typed run, so no caller can redraw one dashboard tab differently from its peers.",
-    },
-    "rail-then-main": {
-        classes: ["flex", "flex-col", "gap-6", "md:flex-row", "md:items-start", "md:[&>*:first-child]:w-72", "md:[&>*:first-child]:shrink-0", "md:[&>*:first-child]:sticky", "md:[&>*:first-child]:top-6", "md:[&>*:first-child]:self-start", "md:[&>*:first-child]:max-h-rail", "md:[&>*:first-child]:overflow-y-auto", "md:[&>*:last-child]:min-w-0", "md:[&>*:last-child]:grow"],
-        children: {
-            rail: { contract: "stacked-sections" },
-            main: { contract: ["stacked-sections", "centred-empty-notice"] },
-        },
-        why: "The rail is pinned in width and STAYS while the column beside it scrolls, because it holds who the reader is and where they can go - facts that do not stop being true a screenful down - and a rail that shrank with the window would clip its own labels before the content beside it became hard to read. Below the breakpoint it moves above rather than halving the column, where sticking it would cost a phone most of its screen.",
     },
     "centred-page-column": {
         classes: ["mx-auto", "flex", "w-full", "max-w-sm", "flex-col", "gap-6"],
@@ -1358,7 +1288,7 @@ export const CONTRACTS = buildContracts({
         why: "The person anchors the identity cluster before their three standing figures, and the profile-to-list seam is wider than the zero seam between rows because those are two groups.",
     },
     "profile-avatar-name-handle-disclosure-row": {
-        classes: ["flex", "w-full", "cursor-pointer", "flex-row", "items-center", "justify-between", "gap-3", "px-2", "py-2", "text-left", "text-foreground", "hover:opacity-80", "[&>*:nth-child(2)]:min-w-0", "[&>*:nth-child(2)]:grow"],
+        classes: ["flex", "w-full", "flex-row", "items-center", "justify-between", "gap-3", "px-2", "py-2", "[&>*:nth-child(2)]:min-w-0", "[&>*:nth-child(2)]:grow"],
         children: {
             avatar: { leaf: "avatar" },
             identity: { contract: "profile-name-over-handle" },
@@ -1391,7 +1321,7 @@ export const CONTRACTS = buildContracts({
         why: "A question and its answer read as one sentence, so they share a line and are centred together - split across two lines they read as two separate offers.",
     },
     "centred-empty-notice": {
-        classes: ["flex", "flex-col", "items-center", "gap-3", "rounded-2xl", "bg-surface", "p-4", "text-center", "shadow-surface"],
+        classes: ["flex", "flex-col", "items-center", "gap-3", "p-4", "text-center"],
         children: {
             notice: { composite: "empty-notice" },
         },
@@ -1407,7 +1337,7 @@ export const CONTRACTS = buildContracts({
         children: {
             header: { contract: "page-header-stack" },
             toolbar: { contract: "catalog-search-count-view-row" },
-            owned: { contract: "catalog-section-group", optional: true },
+            owned: { contract: "course-progress-list", optional: true },
             discover: { contract: "catalog-section-group", optional: true },
             notice: { composite: "empty-notice", optional: true },
             pager: { leaf: "pagination", optional: true },
@@ -1417,75 +1347,121 @@ export const CONTRACTS = buildContracts({
     "catalog-search-count-view-row": {
         classes: ["flex", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-3"],
         children: {
-            query: { leaf: "search-box" },
-            count: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+            search: { contract: "catalog-query-with-count" },
             view: { leaf: "choice-tabs" },
         },
-        why: "Query, result count and layout choice all narrow the same list, so they stay on one control row above it, wrapping rather than pushing the page wider than its viewport when the row runs out of room.",
+        why: "Typing narrows the list and the layout choice reshapes what typing left, so the row has two ends: the question and its answer on one side, the shape that answer is drawn in on the other.",
+    },
+    "catalog-query-with-count": {
+        classes: ["flex", "flex-row", "items-center", "gap-3", "[&>*:last-child]:shrink-0"],
+        children: {
+            query: { leaf: "search-box" },
+            count: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+        },
+        why: "How many results there are is a fact about what the query left, so it stands beside the field that produced it - parked at the far end of the row beside the layout toggle it reads as a caption for the control it is nearest, which is the wrong one. It is also what made the row reflow when the answer landed, moving a control that had already measured itself. The pair does NOT wrap: the field carries its own full-width fill, so a wrapping parent hands it the whole line and drops the count beneath it - which is the stacked pair this entry exists to prevent.",
     },
     "catalog-section-group": {
         classes: ["flex", "flex-col", "gap-3"],
         children: {
             title: { leaf: "heading" },
-            grid: { contract: "catalog-card-grid" },
+            // The slot admits EITHER arrangement because the group's own statement does not
+            // change with it: this is still a titled set of purchasable courses whether the
+            // reader is comparing them side by side or scanning them down a column.
+            grid: { contract: ["catalog-card-grid", "catalog-card-list"] },
         },
         why: "Owned and purchasable courses answer different questions, so each keeps its own titled group and one action meaning instead of forcing the reader to tell them apart card by card.",
     },
     "catalog-card-grid": {
         classes: ["grid", "grid-cols-1", "sm:grid-cols-2", "lg:grid-cols-3", "gap-4"],
         children: {
-            course: { contract: ["enrolled-course-card", "catalog-card"], repeats: true, restingCount: 3 },
+            course: { contract: "catalog-card", repeats: true, restingCount: 3 },
         },
-        why: "Catalog courses are interchangeable peers compared side by side, so they share one responsive measure rather than a single reading column. The slot names the two card kinds it accepts rather than opening to any content, because the grid holds owned cards in one group and purchasable cards in the other and nothing else belongs in either.",
+        why: "Catalog courses are interchangeable peers compared side by side, so they share one responsive measure rather than a single reading column. The slot names the one card kind it accepts rather than opening to any content: a course the learner already owns is not a card here at all, it is a row of the same joined list the dashboard already draws.",
     },
-    "enrolled-course-card": {
-        classes: ["flex", "flex-col", "gap-3", "rounded-3xl", "bg-surface", "p-4", "shadow-surface"],
+    "catalog-card-list": {
+        classes: ["flex", "flex-col", "gap-3"],
         children: {
-            row: { contract: "enrolled-course-row" },
-            action: { leaf: "button" },
+            course: { contract: "catalog-card-line", repeats: true, restingCount: 3 },
         },
-        why: "An owned course stands on the same ground as a purchasable one so the two groups read as one catalog, while its interior answers where the learner stopped instead of what it costs.",
+        why: "Scanning is the other question a catalog is asked: not which of these three, but which of these twenty. One reading column answers it, so the same courses stand as rows at the same seam the grid uses between its cells - and the row card, not this node, is what makes a full-width course readable at that measure.",
     },
-    "enrolled-course-row": {
-        classes: ["flex", "flex-row", "items-center", "gap-3"],
+    "catalog-card-line": {
+        classes: [
+            "flex", "flex-row", "items-center", "gap-4", "p-4",
+            "[&>*:first-child]:w-36", "[&>*:first-child]:shrink-0",
+            "[&>*:nth-child(2)]:min-w-0", "[&>*:nth-child(2)]:grow",
+            "[&>*:last-child]:shrink-0",
+        ],
         children: {
             cover: { leaf: "cover-image" },
-            body: { contract: "enrolled-course-body" },
+            body: { contract: "catalog-card-line-body" },
+            action: { contract: "catalog-card-action-row" },
         },
-        why: "The artwork identifies the course at a glance while its title and progress take the remaining width on the same baseline.",
+        why: "The same offer read across instead of down. It is a separate entry rather than the grid card under different classes because it does not hold the same things: at one course per row the promises list would set the row height by the longest course in the catalog, so the row states what it is and what it costs and leaves the claims to the card that has the depth for them.",
     },
-    "enrolled-course-body": {
-        classes: ["flex", "min-w-0", "grow", "flex-col", "gap-2"],
+    "catalog-card-line-body": {
+        classes: ["flex", "min-w-0", "grow", "flex-col", "gap-1"],
         children: {
-            title: { leaf: "heading" },
-            progress: { leaf: "progress" },
-            caption: { leaf: "text", props: { size: "xs" } },
+            heading: { contract: "catalog-card-heading-row" },
+            price: { contract: "catalog-price-group" },
         },
-        why: "An owned course answers where the learner stopped, so its title and progress stay in one flexible column beside the artwork.",
+        why: "In a row the name and the price are the whole statement, and they sit at the tightest seam because there is nothing between them to separate - the card's own rhythm is a rhythm between three parts, and holding it here would leave a gap the row has no third thing to fill.",
     },
     "catalog-card": {
-        classes: ["flex", "flex-col", "gap-3", "rounded-3xl", "bg-surface", "p-4", "shadow-surface"],
+        classes: ["flex", "grow", "flex-col", "gap-3", "p-4"],
         children: {
             cover: { leaf: "cover-image" },
             body: { contract: "catalog-card-body" },
-            action: { leaf: "button" },
+            action: { contract: "catalog-card-action-row" },
         },
-        why: "A purchasable course is one whole offer standing on its own ground, so the artwork that identifies it, the facts that price it and the one way in share a single raised surface rather than floating on the grid.",
+        why: "A purchasable course is one whole offer standing on its own ground, so the artwork that identifies it, the facts that price it and the two ways in share a single raised surface rather than floating on the grid. It fills its grid cell so that those ways in land on the same line across the row: a card that stops at its own content puts three buttons at three heights. It also FILLS the surface it now stands on: the branch draws the ground and this node lives inside it, so without growing it stops at its content and the row it belongs to stretches around it, and the reader reads that as three different kinds of offer rather than as one shorter list of promises.",
+    },
+    "course-price-detail-stack": {
+        classes: ["flex", "flex-col", "gap-4", "p-6"],
+        children: {
+            title: { leaf: "heading" },
+            reckoning: { contract: "stacked-stat-rows", optional: true },
+            notice: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+            reason: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+            forward: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+        },
+        why: "A price the reader is asked to check reads downward as one argument - what it is, what it is made of, why it is lower, and what changes if they wait - and it carries its own inset because the shell it sits in passes the interior through without arranging or padding it.",
+    },
+    "price-note-row": {
+        classes: ["flex", "flex-row", "flex-wrap", "items-center", "gap-2"],
+        children: {
+            fact: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
+            action: { leaf: "text-link", props: { size: "xs" } },
+        },
+        why: "What a price saves and the way to see how it was reached are one thought, so they share a line at the reserved caption step - both are supporting copy beneath the price itself, and a step larger the question outranked the answer it was asking about.",
+    },
+    "catalog-card-action-row": {
+        classes: ["flex", "flex-row", "items-center", "gap-2", "[&>*]:w-full"],
+        children: {
+            cart: { leaf: "button" },
+            open: { leaf: "button" },
+        },
+        why: "Taking the course now and reading about it first are peers at the foot of one offer, so they share a line and an equal measure - stacked, the second reads as a lesser afterthought of the first, and sized to their own words they draw a ragged edge across a row of cards.",
     },
     "catalog-card-body": {
-        classes: ["flex", "min-w-0", "flex-col", "gap-2"],
+        classes: ["flex", "min-w-0", "grow", "flex-col", "gap-3"],
         children: {
             heading: { contract: "catalog-card-heading-row" },
-            price: { contract: "price-discount-line" },
-            savings: { leaf: "text", props: { size: "xs" }, optional: true },
-            promises: { leaf: "value-proposition-disclosure" },
+            price: { contract: "catalog-price-group" },
+            promises: { contract: "marked-row-list" },
         },
-        why: "A purchasable course reads top to bottom as one decision - what it is, what it costs, what it promises, what to do - so its parts stack in that order at one rhythm.",
+        why: "A purchasable course reads top to bottom as one decision - what it is, what it costs, what it promises, what to do - so its parts stack in that order at the card's own rhythm. What it costs is ONE part rather than two, which is why the price group below holds the tighter seam and this level does not.",
+    },
+    "catalog-price-group": {
+        classes: ["flex", "flex-col", "gap-2"],
+        children: {
+            price: { contract: "price-discount-line" },
+            note: { contract: "price-note-row", optional: true },
+        },
+        why: "What the course costs and what that price saves are the same fact said twice, so they sit a step closer to each other than to the name above or the promises below - set at the card's rhythm they read as two separate answers.",
     },
     "catalog-card-heading-row": {
-        classes: [
-            "flex", "flex-row", "items-baseline", "justify-between", "gap-2",
-            "[&>*:first-child]:min-w-0", "[&>*:first-child]:grow",
+        classes: ["flex", "flex-row", "items-baseline", "justify-between", "gap-2", "[&>*:first-child]:min-w-0", "[&>*:first-child]:grow",
         ],
         children: {
             title: { leaf: "heading" },
@@ -1511,10 +1487,7 @@ export const CONTRACTS = buildContracts({
         why: "The trail back is a set of destinations rather than prose, so it is a nav a reader can jump to, and its crumbs and separators share one baseline instead of stacking.",
     },
     "main-then-rail": {
-        classes: [
-            "mx-auto", "w-full", "max-w-6xl", "px-6", "pb-6",
-            "flex", "flex-col", "gap-6", "md:flex-row", "md:items-start",
-            "md:[&>*:first-child]:min-w-0", "md:[&>*:first-child]:grow",
+        classes: ["mx-auto", "w-full", "max-w-6xl", "px-6", "pb-6", "flex", "flex-col", "gap-6", "md:flex-row", "md:items-start", "md:[&>*:first-child]:min-w-0", "md:[&>*:first-child]:grow",
             "md:[&>*:last-child]:w-72", "md:[&>*:last-child]:shrink-0",
             "md:[&>*:last-child]:sticky", "md:[&>*:last-child]:top-6",
             "md:[&>*:last-child]:self-start", "md:[&>*:last-child]:max-h-rail",
@@ -1571,7 +1544,7 @@ export const CONTRACTS = buildContracts({
     },
     "course-promise-list": {
         host: "ul",
-        classes: ["flex", "flex-col", "divide-y", "divide-separator", "overflow-hidden", "rounded-2xl", "bg-surface", "p-0", "[&>*]:px-4", "[&>*]:py-3"],
+        classes: ["flex", "flex-col", "divide-y", "divide-separator", "overflow-hidden", "p-0", "[&>*]:px-4", "[&>*]:py-3"],
         children: {
             promise: { contract: "course-promise-row", repeats: true, restingCount: 4 },
         },
@@ -1588,7 +1561,7 @@ export const CONTRACTS = buildContracts({
     },
     "course-module-list": {
         host: "ol",
-        classes: ["flex", "flex-col", "divide-y", "divide-separator", "overflow-hidden", "rounded-2xl", "bg-surface", "p-0", "[&>*]:px-4", "[&>*]:py-3"],
+        classes: ["flex", "flex-col", "divide-y", "divide-separator", "overflow-hidden", "p-0", "[&>*]:px-4", "[&>*]:py-3"],
         children: {
             module: { contract: "course-module-row", repeats: true, restingCount: 5 },
         },

@@ -13,8 +13,15 @@ import type { LeafProps } from "@/components/contracts/props"
  * possible target for a decision that is not the surface's main action.
  */
 
-/** The same two reading steps used by ordinary body copy. */
-export type TextLinkSize = "sm" | "md"
+/**
+ * The reading steps ordinary body copy uses, plus the reserved caption step.
+ *
+ * `xs` IS NOT A THIRD SIZE TO PICK FROM. It exists for the one relationship the type scale already
+ * reserves twelve pixels for: an action that belongs to a supporting caption and is read with it -
+ * "why this price?" beside "you save 4,250". Set a step larger than the fact it explains, the
+ * question outranks the answer, which is the rank backwards.
+ */
+export type TextLinkSize = "xs" | "sm" | "md"
 
 /** What this leaf draws. A `type`, not an `interface` - only an alias satisfies the data fence. */
 export type TextLinkData = {
@@ -36,7 +43,7 @@ export type TextLinkActions = {
 export type TextLinkProps = LeafProps<TextLinkData, TextLinkActions>
 
 /** HeroUI Link owns interaction styling; this leaf adds only the house reading step. */
-const SIZE_CLASSES = { sm: "text-sm", md: "text-base" } as const
+const SIZE_CLASSES = { xs: "text-xs", sm: "text-sm", md: "text-base" } as const
 const CHOICE_CLASSES = "rounded-full px-2 py-1"
 const SELECTED_CLASSES = "bg-accent-soft text-accent-soft-foreground"
 

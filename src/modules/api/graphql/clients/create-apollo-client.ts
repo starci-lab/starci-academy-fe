@@ -3,6 +3,7 @@ import { type GraphQLHeaders } from "../types"
 import { createRetryLink } from "./links/retry"
 import { createTimeoutLink } from "./links/timeout"
 import { createAttachBearerTokenLink } from "./links/bearer"
+import { createAttachLocaleLink } from "./links/locale"
 import { createHttpLink } from "./links/http"
 import { defaultOptions } from "./options"
 
@@ -56,6 +57,10 @@ export const createLinkChain = ({
 }: CreateApolloClientParams = {}): Array<ApolloLink> => [
     createRetryLink(),
     createTimeoutLink(),
+    // Unconditional, unlike the bearer link: a guest reads in a language too, and the course
+    // documents are stored per locale, so an anonymous request that declares none is served English
+    // regardless of the address the reader is on.
+    createAttachLocaleLink({ debug }),
     ...(withAuth ? [createAttachBearerTokenLink({ debug })] : []),
     createHttpLink({ uri, headers, signal, withCredentials: withCredentials ?? withAuth }),
 ]
