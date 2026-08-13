@@ -1,0 +1,71 @@
+{
+  "version": 2,
+  "task": "course-detail-page-v2",
+  "phase": "plan",
+  "status": "locked",
+  "trustRoot": "D:\\Repositories\\starci-academy-backend\\.claude",
+  "skill": {
+    "name": "starci-fe-design-plan",
+    "path": "D:\\Repositories\\starci-academy-backend\\.claude\\skills\\starci-fe-design-plan\\SKILL.md"
+  },
+  "targets": [
+    {
+      "role": "design-target",
+      "repo": "starci-academy-fe",
+      "gitRoot": "D:\\Repositories\\starci-academy-fe",
+      "branch": "main",
+      "worktree": "D:\\Repositories\\starci-academy-fe",
+      "head": "7aa4ba0",
+      "remote": "https://github.com/starci-lab/starci-academy-fe.git"
+    }
+  ],
+  "references": [
+    {
+      "role": "parity-baseline",
+      "repo": "starci-academy",
+      "gitRoot": "D:\\Repositories\\starci-academy",
+      "branch": "mtp",
+      "head": "9a1934231",
+      "purpose": "CourseDetailPage behind academy.starci.org/vi/courses/fullstack-mastery"
+    },
+    {
+      "role": "business-truth",
+      "repo": "starci-academy-backend",
+      "gitRoot": "D:\\Repositories\\starci-academy-backend",
+      "branch": "mtp",
+      "head": "06d06496",
+      "purpose": "course query by id or displayId, PricingPhaseEntity, ValuePropositionEntity"
+    },
+    {
+      "role": "superseded-run",
+      "path": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page",
+      "purpose": "The prior Plan and its unsealed Preview revision 1.0. Read-only evidence: its feasibility mapping predates ContractHostTag and is why this run exists."
+    }
+  ],
+  "artifactRoot": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page-v2",
+  "writeBoundary": [
+    "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page-v2"
+  ],
+  "readOnlyBoundary": [
+    "D:\\Repositories\\starci-academy-fe\\src",
+    "D:\\Repositories\\starci-academy-fe\\plugins\\eslint-canon",
+    "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page",
+    "D:\\Repositories\\starci-academy",
+    "D:\\Repositories\\starci-academy-backend"
+  ],
+  "runtime": {
+    "kind": "direction-lab",
+    "startPort": 8080,
+    "note": "8080-8093 were listening under other owners at detection; the shared server takes the first free port from 8080."
+  },
+  "evidence": [
+    "ContractHostTag exists and admits div, main, nav, ul, ol, form, section and aside; `details` is absent, so a disclosure still cannot be a contract host",
+    "The sticky family in LayoutClassName remains first-child only, so a right-hand sticky rail still widens the union by five members",
+    "No accordion branch exists in src/components/branches",
+    "src/resources does not exist in this repository; copy resolves through src/messages/{en,vi}.json under next-intl",
+    "The target still has no /courses/[displayId] route and no single-course GraphQL document"
+  ],
+  "inheritedFrom": null,
+  "supersedes": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page\\plan-record.json",
+  "detectedAt": "2026-08-13"
+}

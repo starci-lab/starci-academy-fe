@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "task": "landing-page",
+  "phase": "plan",
+  "status": "locked",
+  "trustRoot": "D:\\Repositories\\starci-academy-backend\\.claude",
+  "skill": {
+    "name": "starci-fe-design-plan",
+    "path": "D:\\Repositories\\starci-academy-backend\\.claude\\skills\\starci-fe-design-plan\\SKILL.md"
+  },
+  "targets": [
+    {
+      "role": "target",
+      "repo": "starci-academy-fe",
+      "gitRoot": "D:\\Repositories\\starci-academy-fe",
+      "branch": "main",
+      "worktree": "D:\\Repositories\\starci-academy-fe",
+      "head": "bc5a239",
+      "remote": "https://github.com/starci-lab/starci-academy-fe.git"
+    }
+  ],
+  "references": [
+    {
+      "role": "asset-and-anti-pattern",
+      "repo": "starci-academy",
+      "gitRoot": "D:\\Repositories\\starci-academy",
+      "branch": "mtp",
+      "head": "9a193423128efa1dc83f23ab0f79fb4ae66db847",
+      "purpose": "Source of the one visual to keep (blocks/marketing/MicroservicesScene) and of the composition the user asked to replace (pages/LandingPage)."
+    },
+    {
+      "role": "business-truth",
+      "repo": "starci-academy-backend",
+      "gitRoot": "D:\\Repositories\\starci-academy-backend",
+      "branch": "mtp",
+      "purpose": "platformStats and the unauthenticated course and public-profile reads."
+    }
+  ],
+  "artifactRoot": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\landing-page",
+  "writeBoundary": ["D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\landing-page"],
+  "readOnlyBoundary": [
+    "D:\\Repositories\\starci-academy-fe\\src",
+    "D:\\Repositories\\starci-academy",
+    "D:\\Repositories\\starci-academy-backend",
+    "D:\\Repositories\\starci-academy-backend\\.claude"
+  ],
+  "runtime": { "lab": { "startPort": 8080, "owner": "this-plan-run" } },
+  "evidence": [
+    "starci-academy/src/components/pages/LandingPage/HERO-CONTINUE.md names the hero right column as MicroservicesScene and records that three.js was removed on the user's call",
+    "starci-academy/src/components/pages/LandingPage/index.tsx carries anchors stats, courses, treasure, founder, faq plus LearnLoopScroll, KnowledgeGraph and TalentMarketplace",
+    "starci-academy-fe/src/modules/api/graphql/queries/query-platform-stats.ts is anonymous and returns totalLearners, totalLessons, totalCourses, totalBadgesEarned",
+    "starci-academy-fe has no landing route: src/app/[lang]/page.tsx redirects to /dashboard"
+  ],
+  "inheritedFrom": null,
+  "detectedAt": "2026-08-13"
+}

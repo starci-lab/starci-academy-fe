@@ -1,0 +1,812 @@
+{
+  "version": 3,
+  "task": "courses-catalog-page",
+  "caseId": "case-courses-catalog",
+  "directionId": "direction-enrollment-split",
+  "contextLock": "context-lock.preview.json",
+  "planRecord": "plan-record.json",
+  "approvedRevision": "1.10",
+  "approval": {
+    "kind": "confirmed-restated",
+    "restatement": "Thầy duyệt revision 1.10 thì em seal, rồi chạy Apply lại với xác nhận boundary thầy đã cho.",
+    "source": "duyệt",
+    "note": "Revision 1.10 was named back before the confirmation."
+  },
+  "preview": {
+    "revision": "1.10",
+    "lab": "preview-lab/index.html",
+    "url": "http://127.0.0.1:8086/",
+    "candidateUrl": "candidate/out/index.html"
+  },
+  "revisionHistory": [
+    {
+      "revision": "1.0",
+      "change": "First executable candidate for the selected direction",
+      "reason": "Built against the locked target's own leaves, contracts and tokens"
+    },
+    {
+      "revision": "1.1",
+      "change": "Owned-course progress moved from ratio 0..1 to percent 0..100, plus a visible completion caption",
+      "reason": "The bar drew 0.46% instead of 46% and announced aria-valuetext 0%; Progress.label is never drawn, so the figure appeared nowhere on screen"
+    },
+    {
+      "revision": "1.2",
+      "change": "Theme driven through next-themes; each state given its own URL",
+      "reason": "A hand-toggled wrapper class fought the provider's own class on <html>, so light mode rendered white cards on a dark page with unreadable section headings"
+    },
+    {
+      "revision": "1.3",
+      "change": "catalog-search-count-view-row gained flex-wrap; catalog-card-heading-row lets the course name shrink",
+      "reason": "At 390px the toolbar pushed the page wider than the viewport and the enrolment count was clipped by the card's rounded overflow"
+    },
+    {
+      "revision": "1.4",
+      "change": "View toggle passes variant primary",
+      "reason": "User review: it drew a filter underline. ChoiceTabs defaults to secondary and revision 1.3 took that default by omission; legacy passes primary because these tabs switch the whole panel"
+    },
+    {
+      "revision": "1.5",
+      "change": "Leading glyphs on the view toggle and one-line tab labels",
+      "reason": "User feedback that these controls should carry a leading icon. Two new icon meanings and one optional ChoiceTabs slot are proposed rather than applied"
+    },
+    {
+      "revision": "1.6",
+      "change": "ProposedTree replaced by a candidate-local Tree over a candidate-local contract registry; every card and page node became a registry key; comments rewritten to ASCII",
+      "reason": "ProposedTree took children, which is a hole belonging only to shells. The refactor was incomplete: CourseCatalogCard still imported the deleted branch and the registry declared neither catalog-card nor enrolled-course-card, so the build failed"
+    },
+    {
+      "revision": "1.7",
+      "change": "LayoutClassName imported from the locked registry instead of aliased to string; collision guard restored; dead contracts/proposed.ts deleted",
+      "reason": "The registry header claimed every class was a member of the locked union while the type allowed any string, and the guard that catches a proposed key landing upstream had been dropped. Both are now enforced by the build rather than by a comment"
+    },
+    {
+      "revision": "1.8",
+      "change": "Reworded one comment in CoverImage so it no longer contains the literal suppression token",
+      "reason": "The verifier now requires the candidate to pass the target canon lint. The only error was a comment EXPLAINING that the line carries no suppression: no-inline-lint-config matches the token in source text, so prose about a directive reads to it as a directive. Nothing rendered changed."
+    },
+    {
+      "revision": "1.9",
+      "change": "Declared integrationEdits for the six targets that cannot be byte copies",
+      "reason": "Apply detection proved the record treated every target as a byte copy while three are merges into shipped files and three need ~candidate specifiers rewritten to @/ on landing. Without the declaration the handoff gate reports six substituted and blocks. The candidate source is unchanged; only the record contract is."
+    },
+    {
+      "revision": "1.10",
+      "change": "The three components rewritten in the shipped idiom; the candidate scaffolding reduced to verbatim mirrors of three locked files; catalog-card-grid now names the two card kinds it accepts",
+      "reason": "Apply proved the record wrong twice. The candidate had invented a second tree builder taking an ORDERED ARRAY of nodes, which compiled and checked nothing - a wrong slot order, a missing slot or a leaf of the wrong kind all passed. LeagueCard and TopLearners already showed the answer. The scaffolding now only widens ContractKey; every signature is the locked one."
+    }
+  ],
+  "candidate": {
+    "root": "candidate",
+    "framework": "next 16.1.6, react 19.2.3, tailwind v4, heroui 3.2.4, statically exported",
+    "buildCommand": "npx next build",
+    "runtimeDifferences": [
+      "Production resolves the locale per request through the next-intl plugin; the candidate pins the fixture locale vi and imports the target's real src/messages/vi.json.",
+      "output: export with basePath /candidate/out, because the review lab is a static server."
+    ],
+    "build": {
+      "command": "npx next build",
+      "exitCode": 0,
+      "log": {
+        "path": "candidate/build.log",
+        "sha256": "67596271f85ddb2e8b208b5ec41b83786c4c8d9ee5ca1061b6499a454ab8b883"
+      }
+    },
+    "files": [
+      {
+        "path": "candidate/src/components/contracts/index.ts",
+        "targetPath": "src/components/contracts/index.ts",
+        "note": "Merge the eleven PROPOSED entries. price-discount-line is restated from the locked table and must not be written back. The collision guard and the restated-key assertion are candidate scaffolding and are not ported.",
+        "sha256": "16418a86f3d579a4eeb2c3879b5f80423e1c3284d1337d265235828ca6cc08af"
+      },
+      {
+        "path": "candidate/src/components/leaves/CoverImage/index.tsx",
+        "targetPath": "src/components/leaves/CoverImage/index.tsx",
+        "sha256": "bcb460b056c090de62c2abb16d698a3c27d7b20f4390fa64c5892c6d8b462af9"
+      },
+      {
+        "path": "candidate/src/components/leaves/Pagination/index.tsx",
+        "targetPath": "src/components/leaves/Pagination/index.tsx",
+        "sha256": "fe28289c5fbea48030f1c378bb166e3870f2913b2b95a341de6dcab582966a79"
+      },
+      {
+        "path": "candidate/src/components/leaves/ValuePropositionDisclosure/index.tsx",
+        "targetPath": "src/components/leaves/ValuePropositionDisclosure/index.tsx",
+        "sha256": "2a59b31a5ef36b2ff5050c1c6eb60cd7313733e57875f249950e24a3849d3eed"
+      },
+      {
+        "path": "candidate/src/components/leaves/ChoiceTabs/index.tsx",
+        "targetPath": "src/components/leaves/ChoiceTabs/index.tsx",
+        "note": "API extension: one optional per-tab icon slot plus whitespace-nowrap. Existing callers omit icon and are unaffected.",
+        "sha256": "f5da27b9ebb356c3c5927decec0bc2401da393e114b9a01fcc86837bb85040ed"
+      },
+      {
+        "path": "candidate/src/components/leaves/Icon/index.tsx",
+        "targetPath": "src/components/leaves/Icon/index.tsx",
+        "note": "Merge two IconName members and two GLYPHS rows. The feature table in Icon/icon.md and its canon mirror change in the same edit.",
+        "sha256": "d774517b6695901d1195c56d9a3a36c03a7f2dcf3346dd7978e6d86ca06a285b"
+      },
+      {
+        "path": "candidate/src/components/blocks/EnrolledCourseCard/component.tsx",
+        "targetPath": "src/components/blocks/courses/EnrolledCourseCard/component.tsx",
+        "sha256": "8a0c075a77ca15646b442bb16dacd97596e005a51a3f30e00166a1832122b5ac"
+      },
+      {
+        "path": "candidate/src/components/blocks/CourseCatalogCard/component.tsx",
+        "targetPath": "src/components/blocks/courses/CourseCatalogCard/component.tsx",
+        "sha256": "96cdf0b7f05738f23117d8605364574d7d46c74ab08d1e842de41b62a5673db9"
+      },
+      {
+        "path": "candidate/src/components/pages/CoursesCatalogPage/component.tsx",
+        "targetPath": "src/components/pages/CoursesCatalogPage/component.tsx",
+        "sha256": "02b1bd1c564d77323f59e3d6d1550552444310a00a78fd74a05cf49ad39521a6"
+      }
+    ],
+    "notPorted": [
+      "candidate/src/components/contracts/props.ts - the locked contracts/props.ts copied verbatim with its imports repointed. Not ported: production already has it.",
+      "candidate/src/components/branches/Tree/index.tsx - the locked Tree copied verbatim with its imports repointed. Not ported: production already has it.",
+      "candidate/src/fixtures/catalog.json - fixture.",
+      "candidate/app/** - the state matrix and its providers."
+    ],
+    "lint": {
+      "command": "npx eslint .artifacts/design-plan/courses-catalog-page/candidate/src",
+      "exitCode": 0,
+      "log": {
+        "path": "candidate/lint.log",
+        "sha256": "2770d3a6c9ef379ba5f6bbf1879a19446bb2f65cc7749a5f6db0796c6561a7cc"
+      },
+      "note": "Only the candidate SOURCE is linted. The target config ignores design artifacts by design and the harness under candidate/app is scratch; candidate/src is the half that ships."
+    }
+  },
+  "states": [
+    {
+      "stateId": "populated",
+      "ownerId": "CoursesCatalogPage",
+      "route": "/candidate/out/index.html?state=populated",
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "enrolled-learner",
+      "coverage": "rendered",
+      "viewport": {
+        "width": 1280,
+        "height": 1400,
+        "dpr": 1
+      },
+      "fixture": {
+        "path": "candidate/src/fixtures/catalog.json",
+        "sha256": "f7b8f6feef986e83cae91819622f1f0f31cffb7d180f4f84820698bf68b6dca1"
+      },
+      "screenshot": {
+        "path": "screenshots/populated.png",
+        "sha256": "291272bec16644992d26241c6b1ff6277774798b441eb3deacef66f14b60f5b3"
+      },
+      "componentTree": [
+        "CoursesCatalogPage",
+        "ChoiceTabs",
+        "EnrolledCourseCard",
+        "CourseCatalogCard",
+        "CoverImage",
+        "ValuePropositionDisclosure",
+        "Pagination"
+      ],
+      "contracts": [
+        "courses-catalog-page",
+        "catalog-search-count-view-row",
+        "catalog-section-group",
+        "catalog-card-grid",
+        "enrolled-course-row",
+        "enrolled-course-body",
+        "catalog-card-body",
+        "catalog-card-heading-row",
+        "price-discount-line"
+      ],
+      "props": [
+        "view=grid",
+        "countLabel=5 khóa học",
+        "owned=2",
+        "discover=3",
+        "page=1",
+        "totalPages=2"
+      ],
+      "tokens": [
+        "bg-background",
+        "bg-surface",
+        "bg-surface-secondary",
+        "text-foreground",
+        "text-muted",
+        "accent",
+        "success",
+        "separator"
+      ]
+    },
+    {
+      "stateId": "pending",
+      "ownerId": "CoursesCatalogPage",
+      "route": "/candidate/out/index.html?state=pending",
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "enrolled-learner",
+      "coverage": "rendered",
+      "viewport": {
+        "width": 1280,
+        "height": 1400,
+        "dpr": 1
+      },
+      "fixture": {
+        "path": "candidate/src/fixtures/catalog.json",
+        "sha256": "f7b8f6feef986e83cae91819622f1f0f31cffb7d180f4f84820698bf68b6dca1"
+      },
+      "screenshot": {
+        "path": "screenshots/pending.png",
+        "sha256": "2f01d83e8a94547f3902ebf85352086d1ffd34d0bb1b1b0b911c9b7959c67ac6"
+      },
+      "componentTree": [
+        "CoursesCatalogPage",
+        "ChoiceTabs",
+        "CourseCatalogCard",
+        "CoverImage"
+      ],
+      "contracts": [
+        "courses-catalog-page",
+        "catalog-search-count-view-row",
+        "catalog-section-group",
+        "catalog-card-grid",
+        "catalog-card-body"
+      ],
+      "props": [
+        "state=pending",
+        "restingCards=3"
+      ],
+      "tokens": [
+        "bg-background",
+        "bg-surface",
+        "skeleton-shimmer"
+      ]
+    },
+    {
+      "stateId": "no-owned-courses",
+      "ownerId": "CoursesCatalogPage",
+      "route": "/candidate/out/index.html?state=no-owned-courses",
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "learner-without-enrolment",
+      "coverage": "rendered",
+      "viewport": {
+        "width": 1280,
+        "height": 1400,
+        "dpr": 1
+      },
+      "fixture": {
+        "path": "candidate/src/fixtures/catalog.json",
+        "sha256": "f7b8f6feef986e83cae91819622f1f0f31cffb7d180f4f84820698bf68b6dca1"
+      },
+      "screenshot": {
+        "path": "screenshots/no-owned-courses.png",
+        "sha256": "431e1a5dabe631b127c739dad427e13e62e01f2fce94b8cdaf6310d5fc12e90e"
+      },
+      "componentTree": [
+        "CoursesCatalogPage",
+        "ChoiceTabs",
+        "CourseCatalogCard",
+        "Pagination"
+      ],
+      "contracts": [
+        "courses-catalog-page",
+        "catalog-search-count-view-row",
+        "catalog-section-group",
+        "catalog-card-grid"
+      ],
+      "props": [
+        "owned=0",
+        "discover=3"
+      ],
+      "tokens": [
+        "bg-background",
+        "bg-surface",
+        "text-foreground"
+      ]
+    },
+    {
+      "stateId": "no-discount",
+      "ownerId": "CourseCatalogCard",
+      "route": "/candidate/out/index.html?state=no-discount",
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "learner-without-enrolment",
+      "coverage": "rendered",
+      "viewport": {
+        "width": 1280,
+        "height": 1000,
+        "dpr": 1
+      },
+      "fixture": {
+        "path": "candidate/src/fixtures/catalog.json",
+        "sha256": "f7b8f6feef986e83cae91819622f1f0f31cffb7d180f4f84820698bf68b6dca1"
+      },
+      "screenshot": {
+        "path": "screenshots/no-discount.png",
+        "sha256": "11312896896e02206cbe49dcf30ba6e17dfb78e2ba195c4174595278db306aa9"
+      },
+      "componentTree": [
+        "CoursesCatalogPage",
+        "CourseCatalogCard",
+        "CoverImage",
+        "ValuePropositionDisclosure"
+      ],
+      "contracts": [
+        "courses-catalog-page",
+        "price-discount-line",
+        "catalog-card-body",
+        "catalog-card-heading-row"
+      ],
+      "props": [
+        "price=1.200.000₫",
+        "originalPrice=absent",
+        "discountLabel=absent",
+        "savingsLabel=absent"
+      ],
+      "tokens": [
+        "bg-surface",
+        "text-foreground",
+        "text-muted"
+      ]
+    },
+    {
+      "stateId": "filtered-empty",
+      "ownerId": "CoursesCatalogPage",
+      "route": "/candidate/out/index.html?state=filtered-empty",
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "enrolled-learner",
+      "coverage": "rendered",
+      "viewport": {
+        "width": 1280,
+        "height": 900,
+        "dpr": 1
+      },
+      "fixture": {
+        "path": "candidate/src/fixtures/catalog.json",
+        "sha256": "f7b8f6feef986e83cae91819622f1f0f31cffb7d180f4f84820698bf68b6dca1"
+      },
+      "screenshot": {
+        "path": "screenshots/filtered-empty.png",
+        "sha256": "38e4d87cefbb5c56738824139edbebd07f32fc629eb9bee00092f3f14432516f"
+      },
+      "componentTree": [
+        "CoursesCatalogPage",
+        "ChoiceTabs",
+        "EmptyNotice"
+      ],
+      "contracts": [
+        "courses-catalog-page",
+        "catalog-search-count-view-row",
+        "empty-notice-stack"
+      ],
+      "props": [
+        "noticeMessage=Không tìm thấy khóa học nào khớp với từ khóa.",
+        "noticeActionLabel=Xóa bộ lọc"
+      ],
+      "tokens": [
+        "bg-background",
+        "text-muted"
+      ]
+    },
+    {
+      "stateId": "empty",
+      "ownerId": "CoursesCatalogPage",
+      "route": "/candidate/out/index.html?state=empty",
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "enrolled-learner",
+      "coverage": "rendered",
+      "viewport": {
+        "width": 1280,
+        "height": 900,
+        "dpr": 1
+      },
+      "fixture": {
+        "path": "candidate/src/fixtures/catalog.json",
+        "sha256": "f7b8f6feef986e83cae91819622f1f0f31cffb7d180f4f84820698bf68b6dca1"
+      },
+      "screenshot": {
+        "path": "screenshots/empty.png",
+        "sha256": "4ee537ca72ad283e976337c0b4dcac1ffc11c182d7f20fc1948bbc41801bb992"
+      },
+      "componentTree": [
+        "CoursesCatalogPage",
+        "ChoiceTabs",
+        "EmptyNotice"
+      ],
+      "contracts": [
+        "courses-catalog-page",
+        "catalog-search-count-view-row",
+        "empty-notice-stack"
+      ],
+      "props": [
+        "noticeMessage=Chưa có khóa học nào để hiển thị.",
+        "noticeActionLabel=Khám phá lộ trình"
+      ],
+      "tokens": [
+        "bg-background",
+        "text-muted"
+      ]
+    },
+    {
+      "stateId": "failed",
+      "ownerId": "CoursesCatalogPage",
+      "route": "/candidate/out/index.html?state=failed",
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "enrolled-learner",
+      "coverage": "rendered",
+      "viewport": {
+        "width": 1280,
+        "height": 900,
+        "dpr": 1
+      },
+      "fixture": {
+        "path": "candidate/src/fixtures/catalog.json",
+        "sha256": "f7b8f6feef986e83cae91819622f1f0f31cffb7d180f4f84820698bf68b6dca1"
+      },
+      "screenshot": {
+        "path": "screenshots/failed.png",
+        "sha256": "643eaa882dab1b82f03b3c36d6374dce8a3aa52d9056d7c951d3c208ec502208"
+      },
+      "componentTree": [
+        "CoursesCatalogPage",
+        "ChoiceTabs",
+        "EmptyNotice"
+      ],
+      "contracts": [
+        "courses-catalog-page",
+        "catalog-search-count-view-row",
+        "empty-notice-stack"
+      ],
+      "props": [
+        "noticeMessage=Không tải được danh sách khóa học.",
+        "noticeActionLabel=Thử lại"
+      ],
+      "tokens": [
+        "bg-background",
+        "text-muted"
+      ]
+    },
+    {
+      "stateId": "populated-light",
+      "ownerId": "CoursesCatalogPage",
+      "route": "/candidate/out/index.html?state=populated&theme=light",
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "enrolled-learner",
+      "coverage": "rendered",
+      "viewport": {
+        "width": 1280,
+        "height": 1400,
+        "dpr": 1
+      },
+      "fixture": {
+        "path": "candidate/src/fixtures/catalog.json",
+        "sha256": "f7b8f6feef986e83cae91819622f1f0f31cffb7d180f4f84820698bf68b6dca1"
+      },
+      "screenshot": {
+        "path": "screenshots/populated-light.png",
+        "sha256": "030e7049d01ec776012e46e78842518ddb93fbc4e7e4863cb3f7552d88e782af"
+      },
+      "componentTree": [
+        "CoursesCatalogPage",
+        "ChoiceTabs",
+        "EnrolledCourseCard",
+        "CourseCatalogCard",
+        "CoverImage",
+        "Pagination"
+      ],
+      "contracts": [
+        "courses-catalog-page",
+        "catalog-trail-over-title",
+        "catalog-search-count-view-row",
+        "catalog-section-group",
+        "catalog-card-grid",
+        "enrolled-course-card",
+        "catalog-card",
+        "price-discount-line"
+      ],
+      "props": [
+        "theme=light",
+        "view=grid"
+      ],
+      "tokens": [
+        "bg-background",
+        "bg-surface",
+        "text-foreground",
+        "text-muted",
+        "accent"
+      ]
+    }
+  ],
+  "stateCoverage": [
+    {
+      "ownerId": "CoursesCatalogPage",
+      "state": "populated",
+      "coverage": "rendered",
+      "scenarioId": "populated",
+      "evidence": "Two titled groups, three catalog cards, two owned cards, pager present."
+    },
+    {
+      "ownerId": "CoursesCatalogPage",
+      "state": "skeleton",
+      "coverage": "rendered",
+      "scenarioId": "pending",
+      "evidence": "Three resting cards with data-state pending and shimmering covers; the disclosure and the pager are omitted rather than faked."
+    },
+    {
+      "ownerId": "CoursesCatalogPage",
+      "state": "empty",
+      "coverage": "rendered",
+      "scenarioId": "empty",
+      "evidence": "empty-notice-stack with the funnel action."
+    },
+    {
+      "ownerId": "CoursesCatalogPage",
+      "state": "filtered-empty",
+      "coverage": "rendered",
+      "scenarioId": "filtered-empty",
+      "evidence": "Filtered copy plus the clear action; the toolbar survives so the filter can be cleared."
+    },
+    {
+      "ownerId": "CoursesCatalogPage",
+      "state": "failed",
+      "coverage": "rendered",
+      "scenarioId": "failed",
+      "evidence": "empty-notice-stack with the retry action; zero cards and zero pager."
+    },
+    {
+      "ownerId": "CoursesCatalogPage",
+      "state": "light-theme",
+      "coverage": "rendered",
+      "scenarioId": "populated-light",
+      "evidence": "Light background, readable section headings, white cards, accent preserved."
+    },
+    {
+      "ownerId": "CoursesCatalogPage",
+      "state": "no-owned-courses",
+      "coverage": "rendered",
+      "scenarioId": "no-owned-courses",
+      "evidence": "One section group remains, titled Khám phá; the owned group collapses entirely rather than titling nothing."
+    },
+    {
+      "ownerId": "CourseCatalogCard",
+      "state": "no-discount",
+      "coverage": "rendered",
+      "scenarioId": "no-discount",
+      "evidence": "price-discount-line renders one child and no badge; the savings line is absent. Optional slots are omitted rather than emptied."
+    },
+    {
+      "ownerId": "CourseCatalogCard",
+      "state": "price-pending",
+      "coverage": "covered-by",
+      "scenarioId": "pending",
+      "evidence": "The resting card is the same tree with isLoading threaded to every leaf."
+    },
+    {
+      "ownerId": "CourseCatalogCard",
+      "state": "with-discount",
+      "coverage": "rendered",
+      "scenarioId": "populated",
+      "evidence": "Price, struck original price, discount badge and savings line all present."
+    },
+    {
+      "ownerId": "EnrolledCourseCard",
+      "state": "progress",
+      "coverage": "rendered",
+      "scenarioId": "populated",
+      "evidence": "Fill width 46%, aria-valuenow 46, aria-valuetext 46%, visible caption 46% hoàn thành, and a distinct assistive name so the sentence is not announced twice."
+    },
+    {
+      "ownerId": "EnrolledCourseCard",
+      "state": "zero-progress",
+      "coverage": "not-applicable",
+      "evidence": "A course at 0% is the same tree with value 0; the leaf clamps nothing and no separate owner state exists."
+    },
+    {
+      "ownerId": "ValuePropositionDisclosure",
+      "state": "closed",
+      "coverage": "rendered",
+      "scenarioId": "populated",
+      "evidence": "Native details, closed by default, summary reads the promise count."
+    },
+    {
+      "ownerId": "ValuePropositionDisclosure",
+      "state": "open",
+      "coverage": "covered-by",
+      "scenarioId": "populated",
+      "evidence": "Opening the native summary in the running candidate revealed three promise lines."
+    },
+    {
+      "ownerId": "ValuePropositionDisclosure",
+      "state": "loading",
+      "coverage": "covered-by",
+      "scenarioId": "pending",
+      "evidence": "The leaf renders null while loading rather than a disclosure that opens onto nothing."
+    },
+    {
+      "ownerId": "CoverImage",
+      "state": "fallback",
+      "coverage": "rendered",
+      "scenarioId": "populated",
+      "evidence": "Five token surfaces and zero img tags; the fixture's covers are null, which is the nullable schema state."
+    },
+    {
+      "ownerId": "CoverImage",
+      "state": "loading",
+      "coverage": "covered-by",
+      "scenarioId": "pending",
+      "evidence": "Three shimmering covers at the same aspect."
+    },
+    {
+      "ownerId": "CoverImage",
+      "state": "with-source",
+      "coverage": "not-applicable",
+      "evidence": "No production artwork was copied into the artifact; inventing a bitmap would claim a fidelity this phase has not earned. The leaf renders an img with object-cover when src is present."
+    },
+    {
+      "ownerId": "Pagination",
+      "state": "first-page",
+      "coverage": "rendered",
+      "scenarioId": "populated",
+      "evidence": "Two pages, page one active, previous disabled."
+    },
+    {
+      "ownerId": "Pagination",
+      "state": "hidden",
+      "coverage": "rendered",
+      "scenarioId": "failed",
+      "evidence": "Omitted entirely when the total is unknown, rather than shimmered."
+    },
+    {
+      "ownerId": "ChoiceTabs",
+      "state": "primary-with-icons",
+      "coverage": "rendered",
+      "scenarioId": "populated",
+      "evidence": "Segmented pill, one leading glyph per tab, labels on one line at 80px and 118px with no page overflow."
+    },
+    {
+      "ownerId": "CoursesCatalogPage",
+      "state": "light-theme",
+      "coverage": "rendered",
+      "scenarioId": "populated-light",
+      "evidence": "Light background, readable section headings, white cards, accent preserved."
+    },
+    {
+      "ownerId": "CoursesCatalogPage",
+      "state": "mobile",
+      "coverage": "not-applicable",
+      "evidence": "Verified live at a real 390px viewport (scrollWidth equals clientWidth equals 390; enrolment count whole at x=322) but deliberately NOT sealed: headless Chrome lays out at desktop width and crops, proven by a byte-identical capture before and after the responsive fix."
+    },
+    {
+      "ownerId": "CoursesCatalogPage",
+      "state": "keyboard-focus",
+      "coverage": "not-applicable",
+      "evidence": "Not exercised. Every interactive element is a locked leaf or a HeroUI primitive with its own focus ring; no candidate code overrides focus styling."
+    }
+  ],
+  "contracts": [
+    {
+      "key": "price-discount-line",
+      "decision": "reuse-unchanged",
+      "why": "The payable price leads while original price and discount qualify that same commerce fact on one wrapping line."
+    },
+    {
+      "key": "catalog-search-count-view-row",
+      "decision": "propose",
+      "why": "Query, result count and layout choice all narrow the same list, so they stay on one control row above it, wrapping rather than pushing the page wider than its viewport."
+    },
+    {
+      "key": "catalog-section-group",
+      "decision": "propose",
+      "why": "Owned and purchasable courses answer different questions, so each keeps its own titled group and one action meaning."
+    },
+    {
+      "key": "catalog-card-grid",
+      "decision": "propose",
+      "why": "Catalog courses are interchangeable peers compared side by side, so they share one responsive measure."
+    },
+    {
+      "key": "catalog-card-body",
+      "decision": "propose",
+      "why": "A purchasable course reads top to bottom as one decision at one rhythm."
+    },
+    {
+      "key": "catalog-card-heading-row",
+      "decision": "propose",
+      "why": "The course name leads while the enrolment count qualifies it from the end of the same line; the name yields width back as the card narrows so the count is never clipped."
+    },
+    {
+      "key": "enrolled-course-row",
+      "decision": "propose",
+      "why": "Artwork identifies the course while title and progress take the remaining width on one baseline."
+    },
+    {
+      "key": "enrolled-course-body",
+      "decision": "propose",
+      "why": "Title over progress in one flexible column beside the artwork."
+    }
+  ],
+  "apiProposals": [
+    {
+      "target": "src/components/leaves/ChoiceTabs/index.tsx",
+      "delta": "tabs[].icon?: IconName",
+      "absence": "absent by default; text-only behaviour unchanged",
+      "precedence": "the glyph leads, the label always still renders",
+      "callers": "every existing caller omits icon and is unaffected",
+      "tests": "no-icon renders no glyph; glyph precedes label; accessible name still comes from label"
+    },
+    {
+      "target": "src/components/leaves/ChoiceTabs/index.tsx",
+      "delta": "whitespace-nowrap on Tabs.Tab",
+      "reason": "the vendor gives every primary segment an equal fixed width with wrapping left on, so a two-word label broke onto a second line while the row had ~1000px spare"
+    },
+    {
+      "target": "src/components/leaves/Icon/index.tsx",
+      "delta": "IconName gains viewGrid and viewList; GLYPHS gains Squares2X2Icon and ListBulletIcon in their outline/solid cuts",
+      "documentation": "the feature table in src/components/leaves/Icon/icon.md and its mirror in .claude/fe/canon/patterns/icon.md change in the same edit, as that file requires"
+    }
+  ],
+  "backendEnablers": [],
+  "openQuestions": [
+    "pageNumber base: the backend documents PaginationPageFilters.pageNumber as 1-based while the legacy hook passes 0-based. The leaf speaks 1-based and the connected file must convert once, after this is settled against a live query.",
+    "This revision has no connected file: the page is driven by a fixture, not by useQueryCoursesSwr, and the courses document still has to select valuePropositions and price-phase data and expose search.",
+    "The target has no cart data layer, so no cart action is rendered; the discover card's action is Xem khóa học alone."
+  ],
+  "seal": {
+    "algorithm": "sha256",
+    "manifestSha256": "481925323e50802571fcf874ad0947d2bfc4fc3ba20205c5a5fda93eb256fcaf"
+  },
+  "integrationEdits": [
+    {
+      "targetPath": "src/components/contracts/index.ts",
+      "kind": "merge",
+      "reason": "The candidate registry is the LOCKED registry copied verbatim plus the eleven entries this case proposes, so the candidate could type-check the same slot names production will. Landing merges only those eleven; the rest of the file is already there and must not be written back.",
+      "expectedDelta": "eleven new entries, all verified absent from the locked registry at Apply detection"
+    },
+    {
+      "targetPath": "src/components/leaves/ChoiceTabs/index.tsx",
+      "kind": "merge",
+      "reason": "An API extension to a shipped leaf, not a replacement: one optional per-tab icon slot and whitespace-nowrap on the tab.",
+      "expectedDelta": "tabs[].icon?: IconName; every existing caller omits it and is unaffected"
+    },
+    {
+      "targetPath": "src/components/leaves/Icon/index.tsx",
+      "kind": "merge",
+      "reason": "Two rows into an existing map, plus the two glyph imports.",
+      "expectedDelta": "viewGrid -> Squares2X2Icon, viewList -> ListBulletIcon"
+    },
+    {
+      "targetPath": "src/components/blocks/courses/EnrolledCourseCard/component.tsx",
+      "kind": "specifier-rewrite",
+      "reason": "Four ~candidate/ specifiers become @/ specifiers. The alias exists only so the candidate could reach its own not-yet-merged registry and the owners it proposes; after the merge the same modules resolve through the normal path. No identifier, prop, contract key or JSX changes."
+    },
+    {
+      "targetPath": "src/components/blocks/courses/CourseCatalogCard/component.tsx",
+      "kind": "specifier-rewrite",
+      "reason": "Five ~candidate/ specifiers become @/ specifiers. The alias exists only so the candidate could reach its own not-yet-merged registry and the owners it proposes; after the merge the same modules resolve through the normal path. No identifier, prop, contract key or JSX changes."
+    },
+    {
+      "targetPath": "src/components/pages/CoursesCatalogPage/component.tsx",
+      "kind": "specifier-rewrite",
+      "reason": "Eight ~candidate/ specifiers become @/ specifiers. The alias exists only so the candidate could reach its own not-yet-merged registry and the owners it proposes; after the merge the same modules resolve through the normal path. No identifier, prop, contract key or JSX changes. The two sibling blocks additionally gain the courses/ path segment, because they land under blocks/courses/ while the candidate holds them at blocks/."
+    }
+  ],
+  "notMaterializedByGate": [
+    {
+      "path": "candidate/src/components/branches/Tree/index.tsx",
+      "reason": "the locked Tree bound to the candidate registry; once the eleven entries merge, every call site becomes the real Tree with no other edit"
+    },
+    {
+      "path": "candidate/src/fixtures/catalog.json",
+      "reason": "fixture"
+    },
+    {
+      "path": "candidate/app/**",
+      "reason": "state matrix and its providers"
+    }
+  ]
+}

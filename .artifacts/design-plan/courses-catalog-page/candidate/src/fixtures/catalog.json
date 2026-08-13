@@ -1,0 +1,105 @@
+{
+  "_comment": "Fixture for case-courses-catalog / direction-enrollment-split. Course titles, prices, enrolment counts and promise lines are transcribed from the user-supplied production render of academy.starci.org/vi/courses. Cover artwork is deliberately null so the CoverImage fallback state is the one under review: copying production bitmaps into an artifact would claim a fidelity this phase has not earned.",
+  "labels": {
+    "navHome": "Trang chủ",
+    "navCourses": "Khóa học",
+    "title": "Khóa học tiêu biểu",
+    "searchPlaceholder": "Tìm khóa học...",
+    "searchLabel": "Tìm khóa học",
+    "viewLabel": "Bố cục danh sách",
+    "viewGrid": "Lưới",
+    "viewLine": "Danh sách",
+    "ownedTitle": "Đang học",
+    "discoverTitle": "Khám phá",
+    "pageLabel": "Trang kết quả",
+    "previousPageLabel": "Trang trước",
+    "nextPageLabel": "Trang sau"
+  },
+  "countLabel": "5 khóa học",
+  "page": 1,
+  "totalPages": 2,
+  "owned": [
+    {
+      "id": "course-fullstack",
+      "title": "Fullstack Mastery",
+      "cover": null,
+      "percent": 46,
+      "progressLabel": "46% hoàn thành",
+      "progressAriaLabel": "Tiến độ hoàn thành khóa học Fullstack Mastery",
+      "resumeLabel": "Tiếp tục học"
+    },
+    {
+      "id": "course-system-design",
+      "title": "System Design Mastery",
+      "cover": null,
+      "percent": 12,
+      "progressLabel": "12% hoàn thành",
+      "progressAriaLabel": "Tiến độ hoàn thành khóa học System Design Mastery",
+      "resumeLabel": "Tiếp tục học"
+    }
+  ],
+  "discover": [
+    {
+      "id": "course-devops",
+      "title": "DevOps Mastery",
+      "cover": null,
+      "enrolmentLabel": "22 học viên",
+      "price": "1.487.500₫",
+      "originalPrice": "2.000.000₫",
+      "discountLabel": "−26%",
+      "savingsLabel": "Tiết kiệm 512.500₫",
+      "promisesSummary": "3 điểm nổi bật",
+      "promises": [
+        "Terraform-first: mọi hạ tầng viết bằng IaC, grounded từng argument theo Terraform Registry thật.",
+        "Thực chiến 4 cloud provider (AWS/GCP/Azure/DigitalOcean) với lab apply thật rồi destroy sạch.",
+        "Phủ trọn DevOps stack: Linux, Terraform, Docker, Kubernetes, CI/CD, GitOps, Observability, SRE."
+      ],
+      "viewLabel": "Xem khóa học"
+    },
+    {
+      "id": "course-ai-llm",
+      "title": "AI & LLM Mastery",
+      "cover": null,
+      "enrolmentLabel": "31 học viên",
+      "price": "1.487.500₫",
+      "originalPrice": "2.000.000₫",
+      "discountLabel": "−26%",
+      "savingsLabel": "Tiết kiệm 512.500₫",
+      "promisesSummary": "3 điểm nổi bật",
+      "promises": [
+        "Đi từ nền tảng transformer tới RAG và agent chạy thật.",
+        "Thực hành đánh giá chất lượng model thay vì chỉ gọi API.",
+        "Triển khai pipeline inference có đo đạc chi phí và độ trễ."
+      ],
+      "viewLabel": "Xem khóa học"
+    },
+    {
+      "id": "course-claude",
+      "title": "Claude Mastery",
+      "cover": null,
+      "enrolmentLabel": "18 học viên",
+      "price": "1.200.000₫",
+      "promisesSummary": "3 điểm nổi bật",
+      "promises": [
+        "Thiết kế prompt và tool cho tác vụ kỹ thuật thật.",
+        "Dựng agent nhiều bước có kiểm chứng đầu ra.",
+        "Đưa Claude vào quy trình review và migration của đội."
+      ],
+      "viewLabel": "Xem khóa học"
+    }
+  ],
+  "notices": {
+    "empty": {
+      "message": "Chưa có khóa học nào để hiển thị.",
+      "actionLabel": "Khám phá lộ trình"
+    },
+    "filteredEmpty": {
+      "message": "Không tìm thấy khóa học nào khớp với từ khóa.",
+      "actionLabel": "Xóa bộ lọc"
+    },
+    "failed": {
+      "message": "Không tải được danh sách khóa học.",
+      "actionLabel": "Thử lại"
+    }
+  }
+}

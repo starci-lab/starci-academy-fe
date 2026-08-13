@@ -1,0 +1,35 @@
+{
+  "note": "Resolved values mirroring the production render at academy.starci.org/vi/dashboard?tab=community. Locale vi, dark theme, authenticated owner persona cuongnvtse160875.",
+  "weekly": {
+    "label": "League tuần",
+    "seeMoreLabel": "Xem bảng xếp hạng",
+    "standing": {
+      "rank": 1,
+      "rankLabel": "Hạng #1",
+      "title": "Hạng #1 · top 100%",
+      "subtitle": "0 XP · Reset sau 2 ngày 18 giờ"
+    },
+    "rows": [
+      { "id": "w1", "rank": 1, "rankLabel": "Hạng #1", "name": "cuongnvtse160875 · Bạn", "avatar": null, "points": "0 XP", "rankDelta": 1, "movementLabel": "Tăng 1 hạng", "verdict": "success", "isMe": true },
+      { "id": "w2", "rank": 2, "rankLabel": "Hạng #2", "name": "lehoangan2003", "avatar": null, "points": "0 XP", "rankDelta": 0, "movementLabel": "Không đổi hạng" },
+      { "id": "w3", "rank": 3, "rankLabel": "Hạng #3", "name": "ngothimai98", "avatar": null, "points": "0 XP", "rankDelta": -2, "movementLabel": "Giảm 2 hạng", "verdict": "danger" }
+    ]
+  },
+  "global": {
+    "label": "Top học viên tuần",
+    "seeMoreLabel": "Xem bảng xếp hạng",
+    "standing": {
+      "rank": 4,
+      "rankLabel": "Hạng #4",
+      "title": "Hạng #4 toàn nền tảng",
+      "subtitle": "105 XP"
+    },
+    "rows": [
+      { "id": "g1", "rank": 1, "rankLabel": "Hạng #1", "name": "trannguyenndc2004", "avatar": null, "points": "480 XP", "followLabel": "Theo dõi", "followingLabel": "Đang theo dõi", "isFollowing": false },
+      { "id": "g2", "rank": 2, "rankLabel": "Hạng #2", "name": "betuanminh22032003", "avatar": null, "points": "400 XP", "followLabel": "Theo dõi", "followingLabel": "Đang theo dõi", "isFollowing": false },
+      { "id": "g3", "rank": 3, "rankLabel": "Hạng #3", "name": "truongnghia297", "avatar": null, "points": "190 XP", "followLabel": "Theo dõi", "followingLabel": "Đang theo dõi", "isFollowing": true },
+      { "id": "g4", "rank": 4, "rankLabel": "Hạng #4", "name": "cuongnvtse160875 · Bạn", "avatar": null, "points": "105 XP", "isMe": true },
+      { "id": "g5", "rank": 5, "rankLabel": "Hạng #5", "name": "phamthanhqb2005", "avatar": null, "points": "100 XP", "followLabel": "Theo dõi", "followingLabel": "Đang theo dõi", "isFollowing": false, "isPending": true }
+    ]
+  }
+}

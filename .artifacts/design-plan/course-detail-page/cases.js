@@ -1,0 +1,121 @@
+/**
+ * Review lab manifest — PREVIEW phase.
+ *
+ * The chrome renders the EXPORTED candidate through `candidateUrl` and refuses to embed it unless
+ * the proof it fetches matches `runtimeProof` below. There is deliberately no `html` and no `css`
+ * here: those belong to Plan's directional comparison, and a second implementation maintained beside
+ * the candidate is the thing this phase exists to stop.
+ */
+window.STARCI_REVIEW = {
+    title: "Course detail page — executable candidate, revision 1.0",
+    phase: "preview",
+    deliveryMode: "single",
+    mode: "migration",
+    caseId: "case-course-detail",
+    workItems: [{
+        id: "page-course-detail",
+        scope: "page",
+        target: "D:\\Repositories\\starci-academy-fe — new route /courses/[displayId]",
+    }],
+    evidence: [
+        { source: "plan-record.json", claim: "direction-parity-first was selected explicitly after the three directions were rendered; the user answered \"A\"." },
+        { source: "candidate build", claim: "npx next build exits 0 and emits a static export; the command, its exit code and the hashed log are recorded in the design record." },
+        { source: "candidate lint", claim: "npx eslint over the candidate source exits 0 under the target's own canon rules, which now reach .artifacts/**/candidate/src/**." },
+        { source: "starci-academy/.../CoursePricingRail/index.tsx", claim: "The rail is the only buy box on the page and the hero carries no price, which is the hierarchy this candidate reproduces." },
+        { source: "starci-academy-backend .../queries/courses/course/graphql-types/request.ts", claim: "CourseRequest accepts id or displayId, so the production slug resolves with no new backend field." },
+    ],
+    cases: [
+        {
+            id: "direction-parity-first",
+            title: "Course detail — parity-first landing",
+            thesis: "The narrative owns the flexible measure and the purchase decision keeps a sticky column at the trailing edge, from the top. The hero carries no price, because the rail is the only buy box and two of them would make a reader decide which is authoritative.",
+            distinction: "Revision 1.0 of the selected direction, rebuilt as executable StarCi source rather than carried over from the Plan mockup.",
+            states: [{
+                id: "populated",
+                label: "Populated · dark · desktop · vi",
+                stateId: "course-detail-populated-dark-desktop",
+                covers: ["page-course-detail:populated"],
+                candidateUrl: "candidate/out/index.html",
+                proofUrl: "candidate/out/.well-known/starci-preview-populated.json",
+                runtimeProof: {
+                    candidateDigest: "3f5f147862cef3445e836514ae3265caac9ee0a295fa2999325a5830cf7e9caf",
+                    stateId: "course-detail-populated-dark-desktop",
+                    fixtureSha256: "8fb0b2965e8af31abd5db23d045e96f751e49cd34a9980798f68b57869116fd6",
+                    runtimeFingerprint: "2508b3604c19f019731e8a41fa3e26c5d801323ed165653a5c29654aa088c0f8",
+                },
+            }],
+            blockTree: [
+                "CourseDetailPage (page)",
+                "└── Tree course-detail-page",
+                "    ├── Tree course-breadcrumb-row",
+                "    ├── Tree main-then-rail                    ← proposed",
+                "    │   ├── Tree course-narrative-column       ← proposed",
+                "    │   │   ├── Tree course-hero-heading       ← proposed",
+                "    │   │   ├── Tree course-stat-chip-run      ← proposed",
+                "    │   │   ├── Tree course-section > course-promise-list / course-promise-row",
+                "    │   │   └── Tree course-section > course-module-list > CurriculumModuleRow",
+                "    │   └── _CoursePricingRail (block)         ← proposed",
+                "    │       ├── CoverImage (leaf)              ← proposed, shared with the catalog run",
+                "    │       ├── Tree course-price-block > price-discount-line (locked)",
+                "    │       ├── Tree pricing-phase-ladder > pricing-phase-row",
+                "    │       ├── Button (locked leaf)",
+                "    │       └── Text (locked leaf)",
+                "    └── _CourseMobileEnrollBar (block)         ← proposed",
+            ].join("\n"),
+            contracts: [
+                { key: "price-discount-line", why: "LOCKED, reused verbatim. The payable price leads while original price and discount qualify that same commerce fact on one wrapping line." },
+                { key: "main-then-rail", why: "PROPOSED. The narrative owns the flexible measure while the purchase decision keeps a fixed sticky column at the trailing edge. It mirrors the locked rail-then-main rather than replacing it, because a left rail and a right rail are the same mechanics on opposite children." },
+                { key: "pricing-phase-ladder", why: "PROPOSED. The phases are one mutually exclusive ladder in which the open phase is the price and the others are the cost of waiting." },
+                { key: "course-stat-chip-run", why: "PROPOSED. A course's trust counts are compact peer facts that wrap together. Mechanically identical to profile-topic-chip-run and deliberately a separate key: a course's evidence is not a profile's topics." },
+                { key: "course-promise-list", why: "PROPOSED. Deliberately not profile-evidence-list, whose identical mechanics are named for a different domain." },
+                { key: "course-mobile-action-bar", why: "PROPOSED. Below the rail's breakpoint the purchase decision would scroll away entirely, so price and action pin to the bottom edge and step aside as soon as the rail can hold them." },
+            ],
+            stateCoverage: [
+                { ownerId: "page-course-detail", state: "populated", coverage: "rendered", scenarioId: "populated", evidence: "The default scenario in the candidate's own switcher." },
+                { ownerId: "CoursePricingRail", state: "price-pending", coverage: "covered-by", scenarioId: "populated", evidence: "Scenario control 'Price pending' in the rendered scene; the headline rests while every other value stays truthful." },
+                { ownerId: "CoursePricingRail", state: "guest-no-loyalty", coverage: "covered-by", scenarioId: "populated", evidence: "Scenario control 'Guest · no discount'." },
+                { ownerId: "CoursePricingRail", state: "no-phases", coverage: "covered-by", scenarioId: "populated", evidence: "Scenario control 'No phase ladder'; the ladder is omitted rather than emptied." },
+                { ownerId: "CoursePricingRail", state: "slots-scarcity", coverage: "covered-by", scenarioId: "populated", evidence: "Scenario control 'Scarcity line'." },
+                { ownerId: "course-stat-chip-run", state: "no-challenges", coverage: "covered-by", scenarioId: "populated", evidence: "Scenario control 'Fewer stats'." },
+                { ownerId: "page-course-detail", state: "skeleton", coverage: "covered-by", scenarioId: "populated", evidence: "Scenario control 'Skeleton'; section titles render as themselves because they are known before any request settles." },
+                { ownerId: "page-course-detail", state: "not-found", coverage: "covered-by", scenarioId: "populated", evidence: "Scenario control 'Not found'." },
+                { ownerId: "page-course-detail", state: "failed", coverage: "covered-by", scenarioId: "populated", evidence: "Scenario control 'Failed', which is the only notice carrying a retry action." },
+                { ownerId: "page-course-detail", state: "light-theme", coverage: "covered-by", scenarioId: "populated", evidence: "Theme toggle in the scene chrome, measured: body background moves from lab(1.554 0.171 -0.018) to lab(96.524 0.506 -0.054) and the class on <html> flips dark/light. The first version of this toggle held its own useState and wrote the class onto a wrapper div; the control flipped, the class appeared, and the background never moved, because every token resolves at the document root. The claim was false until it was measured." },
+                { ownerId: "page-course-detail", state: "mobile", coverage: "rendered", scenarioId: "populated", evidence: "Measured at 375x812. The rail stacks BELOW the narrative (rail top 1286 against main top 191) and takes the full 293px measure rather than the 288px column, because md:[&>*:last-child]:w-72 only binds above the breakpoint. document.documentElement.scrollWidth equals innerWidth, so nothing overflows sideways. Re-measured at 1280x900 to prove the other half: the rail returns to the right at left 951 against main 41, same row, 288px wide." },
+                { ownerId: "CourseMobileEnrollBar", state: "narrow-viewport", coverage: "rendered", scenarioId: "populated", evidence: "At 375px the bar computes position:sticky, bottom:0px, display:flex and sits at top 751 inside an 812px viewport. At 1280px the same node computes display:none, so md:hidden stands the second owner down as soon as the rail can hold the decision again. Both halves measured rather than asserted." },
+                { ownerId: "page-course-detail", state: "keyboard-focus", coverage: "rendered", scenarioId: "populated", evidence: "Real Tab keypresses, not programmatic focus - .focus() never sets :focus-visible and would have reported a false pass. Six focusable stops: four curriculum summaries and the rail CTA, with the pinned bar's CTA correctly unreachable at desktop because display:none removes it from the sequence. FINDING, NOT A BLOCKER: the focused control matches :focus-visible and carries react-aria's data-focus-visible, and NO RING IS DRAWN - outline-style resolves to none on both the element and its ::after, and the --focus token is defined but unused. The same measurement on the running product at localhost:3000/authentication returns the identical result on the locked Button leaf, so this candidate reproduces the product faithfully and the gap is product-wide and pre-existing." },
+                { ownerId: "CoursePricingRail", state: "enrolled-viewer", coverage: "not-applicable", evidence: "The candidate has no session; enrolment changes the CTA label, which the guest scenario already exercises as a label change rather than a different tree." },
+            ],
+            candidateFiles: [
+                { path: "candidate/src/components/contracts/index.ts", targetPath: "src/components/contracts/index.ts (merge the PROPOSED entries only)" },
+                { path: "candidate/src/components/branches/Tree/index.tsx", targetPath: "(none — scaffolding; the locked Tree serves once the keys are merged)" },
+                { path: "candidate/src/components/leaves/CoverImage/index.tsx", targetPath: "src/components/leaves/CoverImage/index.tsx" },
+                { path: "candidate/src/components/leaves/CurriculumModuleRow/index.tsx", targetPath: "src/components/leaves/CurriculumModuleRow/index.tsx" },
+                { path: "candidate/src/components/blocks/CoursePricingRail/component.tsx", targetPath: "src/components/blocks/courses/CoursePricingRail/component.tsx" },
+                { path: "candidate/src/components/blocks/CourseMobileEnrollBar/component.tsx", targetPath: "src/components/blocks/courses/CourseMobileEnrollBar/component.tsx" },
+                { path: "candidate/src/components/pages/CourseDetailPage/component.tsx", targetPath: "src/components/pages/CourseDetailPage/component.tsx" },
+                { path: "candidate/src/fixtures/course-detail.json", targetPath: "(fixture — not materialized)" },
+            ],
+            proposals: [
+                { decision: "new", tier: "leaf", name: "CoverImage", path: "src/components/leaves/CoverImage", note: "Byte-identical to the courses-catalog candidate's copy. Whichever run reaches Apply first owns the leaf; the second reuses it." },
+                { decision: "new", tier: "leaf", name: "CurriculumModuleRow", path: "src/components/leaves/CurriculumModuleRow", note: "A native details/summary disclosure. HeroUI 3.2.1 ships no Accordion, Collapsible or Disclosure, which was checked before the file was written." },
+                { decision: "new", tier: "block", name: "CoursePricingRail", path: "src/components/blocks/courses/CoursePricingRail" },
+                { decision: "new", tier: "block", name: "CourseMobileEnrollBar", path: "src/components/blocks/courses/CourseMobileEnrollBar" },
+                { decision: "extend", tier: "type", name: "LayoutClassName", api: "add md:[&>*:last-child]:sticky, :top-6, :self-start, :max-h-rail, :overflow-y-auto — the locked union carries the sticky family only in its first-child form", note: "The Plan record claimed this proposal widened nothing; that claim was wrong and is corrected in its amendments[0]." },
+                { decision: "extend", tier: "type", name: "LayoutClassName", api: "add bottom-0, border-t, md:hidden for the pinned bar — the union carries only top-* offsets and border-b, because nothing in the product had pinned to the bottom before" },
+            ],
+            backendEnablers: [],
+            assumptions: [
+                "The production render the user pointed at is the binding definition of this page.",
+                "The route keys on displayId, matching the production URL and the backend's CourseRequest.",
+            ],
+            unknowns: [
+                "PRODUCT-WIDE, FOUND HERE AND NOT CAUSED HERE: no visible keyboard focus ring. The locked Button leaf carries react-aria's data-focus-visible and matches :focus-visible, and nothing draws from either - outline-style resolves to none on the element and on its ::after, while the --focus token sits defined and unused. Measured identically on the running product at localhost:3000/authentication, so it is not this candidate's defect and not this revision's to repair. It is written down because it affects the page's single most important control and would otherwise be rediscovered.",
+                "pageNumber base: the backend documents PaginationPageFilters.pageNumber as 1-based while the legacy hook passes 0-based. It does not affect this page, and it does affect the catalog that links here.",
+                "The target has no single-course query yet; this candidate renders from a fixture, and the document that will feed it must carry the whole module tree for the trust chips.",
+                "Cart and checkout are absent from the target, so the CTA's destination beyond enrolment is unproven.",
+                "The presentational page takes ONE state for the whole screen. Production must settle the rail and the curriculum independently; that is the one runtime difference between this candidate and the page Apply will build, and it is recorded rather than hidden.",
+            ],
+        },
+    ],
+}

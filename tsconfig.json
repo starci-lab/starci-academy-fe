@@ -39,6 +39,7 @@
     "exclude": [
         "node_modules",
         "beref",
-        "backend-ref"
+        "backend-ref",
+        "plugins/eslint-canon"
     ]
 }

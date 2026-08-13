@@ -1,0 +1,51 @@
+[
+  {
+    "candidateDigest": "bcc52c4b3be528ad4a74ce149fd6cad814cc4f16dead7ac1bfcd6288eaf0fdcd",
+    "stateId": "failed",
+    "fixtureSha256": "8fb0b2965e8af31abd5db23d045e96f751e49cd34a9980798f68b57869116fd6",
+    "runtimeFingerprint": "37a5a68388c8230b7f2929528f8c47ab7fd8794afceac7bfc1bbd22f44411914",
+    "htmlFile": "state/failed.html"
+  },
+  {
+    "candidateDigest": "bcc52c4b3be528ad4a74ce149fd6cad814cc4f16dead7ac1bfcd6288eaf0fdcd",
+    "stateId": "no-ladder",
+    "fixtureSha256": "8fb0b2965e8af31abd5db23d045e96f751e49cd34a9980798f68b57869116fd6",
+    "runtimeFingerprint": "914f7f1ab459e68fad01566997b82f40885f5442f795e86cf85aa2e1aff27c1b",
+    "htmlFile": "state/no-ladder.html"
+  },
+  {
+    "candidateDigest": "bcc52c4b3be528ad4a74ce149fd6cad814cc4f16dead7ac1bfcd6288eaf0fdcd",
+    "stateId": "not-found",
+    "fixtureSha256": "8fb0b2965e8af31abd5db23d045e96f751e49cd34a9980798f68b57869116fd6",
+    "runtimeFingerprint": "54862ab1c93af0d0d520e3c306898729c202a4b38ffa68aaf98c04d90cca17a3",
+    "htmlFile": "state/not-found.html"
+  },
+  {
+    "candidateDigest": "bcc52c4b3be528ad4a74ce149fd6cad814cc4f16dead7ac1bfcd6288eaf0fdcd",
+    "stateId": "pending",
+    "fixtureSha256": "8fb0b2965e8af31abd5db23d045e96f751e49cd34a9980798f68b57869116fd6",
+    "runtimeFingerprint": "9e2075abe1e37945cfd9341112877310ea50266ee445b74f3b33007123405053",
+    "htmlFile": "state/pending.html"
+  },
+  {
+    "candidateDigest": "bcc52c4b3be528ad4a74ce149fd6cad814cc4f16dead7ac1bfcd6288eaf0fdcd",
+    "stateId": "price-pending",
+    "fixtureSha256": "8fb0b2965e8af31abd5db23d045e96f751e49cd34a9980798f68b57869116fd6",
+    "runtimeFingerprint": "5febad47a7912e0cfecf4d6e9d7427ac80904b0c4601ce2f007e7f06eb071436",
+    "htmlFile": "state/price-pending.html"
+  },
+  {
+    "candidateDigest": "bcc52c4b3be528ad4a74ce149fd6cad814cc4f16dead7ac1bfcd6288eaf0fdcd",
+    "stateId": "ready",
+    "fixtureSha256": "8fb0b2965e8af31abd5db23d045e96f751e49cd34a9980798f68b57869116fd6",
+    "runtimeFingerprint": "5c39412c5d83408bfddfc9368f024cacb5eee840577e856d28a9e77cd4ece45e",
+    "htmlFile": "state/ready.html"
+  },
+  {
+    "candidateDigest": "bcc52c4b3be528ad4a74ce149fd6cad814cc4f16dead7ac1bfcd6288eaf0fdcd",
+    "stateId": "ready-mobile",
+    "fixtureSha256": "8fb0b2965e8af31abd5db23d045e96f751e49cd34a9980798f68b57869116fd6",
+    "runtimeFingerprint": "5c39412c5d83408bfddfc9368f024cacb5eee840577e856d28a9e77cd4ece45e",
+    "htmlFile": "state/ready.html"
+  }
+]

@@ -171,6 +171,37 @@
             "clearFilter": "Clear filter",
             "failed": "Could not load the course list.",
             "retry": "Try again"
+        },
+        "detail": {
+            "navHome": "Home",
+            "navCourses": "Courses",
+            "valuePropsTitle": "What you will learn",
+            "curriculumTitle": "Course content",
+            "statLearners": "{count} Learners",
+            "statModules": "{count} Modules",
+            "statContents": "{count} Lessons",
+            "statHours": "{count} Hours",
+            "statChallenges": "{count} Exercises",
+            "previewCount": "{count} previews",
+            "phaseOpen": "Open now",
+            "savings": "Save {amount}",
+            "scarcity": "{count} seats left in the {phase} phase",
+            "enrolled": "{count} learners enrolled",
+            "enroll": "Enrol now",
+            "continue": "Continue learning",
+            "notFound": "This course could not be found.",
+            "failed": "The course could not be loaded.",
+            "retry": "Try again",
+            "tier": {
+                "foundation": "Foundation",
+                "intermediate": "Intermediate",
+                "advanced": "Advanced"
+            },
+            "phase": {
+                "pioneer": "Pioneer",
+                "earlyBird": "Early bird",
+                "regular": "Standard"
+            }
         }
     },
     "community": {

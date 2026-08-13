@@ -1,0 +1,194 @@
+{
+  "version": 2,
+  "task": "course-detail-page-v2",
+  "status": "direction-selected",
+  "contextLock": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page-v2\\context-lock.plan.json",
+  "caseId": "case-course-detail-v2",
+  "deliveryMode": "single",
+  "mode": "migration",
+  "renderStatus": "directional-not-apply-baseline",
+  "parityBaseline": "starci-academy CourseDetailPage at mtp/9a1934231, rendered in production at academy.starci.org/vi/courses/fullstack-mastery",
+  "supersedes": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page\\plan-record.json",
+  "workItems": [
+    {
+      "id": "page-course-detail",
+      "scope": "page",
+      "owns": "the /courses/[displayId] route, its hero and trust strip, its narrative sections and the single buy rail",
+      "target": "D:\\Repositories\\starci-academy-fe"
+    }
+  ],
+  "evidence": [
+    { "source": "src/components/contracts/index.ts", "claim": "ContractHostTag admits div, main, nav, ul, ol, form, section and aside. `details` is absent, so a disclosure cannot be a contract host and must be a leaf." },
+    { "source": "src/components/contracts/index.ts", "claim": "The sticky family in LayoutClassName exists only in its first-child form, so a right-hand sticky rail widens the union by five mirrored members." },
+    { "source": "src/components/contracts/index.ts", "claim": "routed-page-main already carries host: main, so the page landmark is a locked entry rather than anything this run proposes." },
+    { "source": "src/components/branches", "claim": "PressableTree, SurfaceCard, SurfaceFormCard, SurfaceListCard, SurfacePanel, Tree. There is still no accordion branch, and the Main branch a previous run proposed has been deleted." },
+    { "source": "src/messages/{en,vi}.json", "claim": "Copy resolves through next-intl and src/resources does not exist here, so no-second-language-in-source is already satisfied by the repository's habit and constrains no direction." },
+    { "source": "src/app", "claim": "No /courses/[displayId] route exists, and src/modules/api/graphql/queries holds no single-course document." },
+    { "source": "starci-academy-backend .../courses/course/graphql-types/request.ts", "claim": "CourseRequest accepts id OR displayId, so the production slug resolves with no new backend field." },
+    { "source": "starci-academy/src/hooks/useCourseTotals.ts", "claim": "The five trust chips are derived client-side by walking modules to contents to challenges and minutesRead; no backend counter is involved, but the page must fetch the whole module tree." },
+    { "source": "starci-academy/.../CoursePricingRail/index.tsx", "claim": "The rail is the only buy box and the hero deliberately carries no price or CTA." },
+    { "source": ".artifacts/design-plan/course-detail-page/plan-record.json", "claim": "The superseded run selected the same posture but mapped it before ContractHostTag existed, which is why its feasibility list names a Main branch that no longer exists." }
+  ],
+  "unknowns": [
+    "The target has no single-course query. The document that feeds this page must carry the whole module tree, because the five trust chips are derived from it rather than read from a counter.",
+    "Cart and checkout are absent from the target, so the CTA's destination beyond enrolment is unproven.",
+    "pageNumber base: the backend documents PaginationPageFilters.pageNumber as 1-based while the legacy hook passes 0-based. It does not affect this page and it does affect the catalog that links here.",
+    "Whether a buyer needs lesson-level detail before purchase. Direction A assumes yes because the named render discloses; direction B was offered precisely to make that assumption visible."
+  ],
+  "businessCapabilities": [
+    { "capability": "single course by id or displayId", "status": "exists server-side, absent from the target frontend", "source": "CourseRequest" },
+    { "capability": "pricing phases and the active phase", "status": "exists", "source": "PricingPhaseEntity via the course query" },
+    { "capability": "per-viewer loyalty price", "status": "exists server-side, not called by the target", "source": "coursePricePreview" },
+    { "capability": "value propositions", "status": "exists", "source": "ValuePropositionEntity" },
+    { "capability": "module and lesson tree with minutesRead and challenges", "status": "exists", "source": "course query relations" },
+    { "capability": "enrolment count and viewer enrolment flag", "status": "exists", "source": "CourseEntity" },
+    { "capability": "cart and checkout", "status": "absent from the target frontend", "source": "myCart exists server-side only" }
+  ],
+  "directions": [
+    {
+      "directionId": "direction-parity-semantic",
+      "posture": "parity-first",
+      "thesis": "Reproduce the production landing and let every region open the element it actually is: the page a main, each narrative block a section, both lists a ul and an ol, the buy box an aside. The curriculum discloses its lessons, as the named render does.",
+      "primaryCta": "The rail's single enrol or continue action",
+      "readingOrder": ["breadcrumb", "title and tagline", "trust chip strip", "what you will learn", "curriculum", "sticky buy rail alongside from the top"],
+      "tradeoffs": [
+        "Highest fidelity to the named render, and the only direction whose document semantics match what each region actually is.",
+        "Highest vocabulary cost: the one direction that adds a disclosure leaf, and it widens the class union for the right-hand rail and again for the pinned bar."
+      ],
+      "legacyDivergence": [],
+      "implementationFeasibility": {
+        "status": "mapped",
+        "existingOwners": ["Tree", "SurfaceCard", "SurfaceListCard", "Badge", "Button", "Text", "Heading", "Icon", "StatusDot", "EmptyNotice"],
+        "existingContracts": ["routed-page-main", "price-discount-line", "stacked-sections", "rail-then-main"],
+        "exactProposals": [
+          { "tier": "leaf", "name": "CurriculumModuleRow", "path": "src/components/leaves/CurriculumModuleRow", "api": "props { title, levelLabel?, previewLabel?, lessons?, isOpen? }", "reason": "`details` is not a ContractHostTag and no accordion branch exists, so the disclosure belongs to the tier that owns intrinsic controls." },
+          { "tier": "leaf", "name": "CoverImage", "path": "src/components/leaves/CoverImage", "api": "props { src: string | null, alt: string, ratio }", "reason": "No image owner exists at any tier, so coverImageUrl has nowhere to render." },
+          { "tier": "block", "name": "CoursePricingRail", "path": "src/components/blocks/courses/CoursePricingRail" },
+          { "tier": "block", "name": "CourseMobileEnrollBar", "path": "src/components/blocks/courses/CourseMobileEnrollBar", "reason": "Below the rail's breakpoint the rail stacks into the reading column and scrolls away; the named render answers that with a separate pinned bar." },
+          { "tier": "contract", "name": "main-then-rail", "api": "host div; mirrors rail-then-main onto the last child" },
+          { "tier": "contract", "name": "course-pricing-rail", "api": "host aside" },
+          { "tier": "contract", "name": "course-module-list", "api": "host ol" },
+          { "tier": "contract", "name": "course-promise-list", "api": "host ul" },
+          { "tier": "contract", "name": "course-hero", "api": "host section" },
+          { "tier": "contract", "name": "course-section", "api": "host section" },
+          { "tier": "contract", "name": "course-stat-chip-run", "api": "host ul" },
+          { "tier": "contract", "name": "course-breadcrumb-row", "api": "host nav" },
+          { "tier": "contract", "name": "pricing-phase-ladder" },
+          { "tier": "contract", "name": "course-mobile-action-bar" },
+          { "tier": "type", "name": "LayoutClassName", "api": "add md:[&>*:last-child]:sticky, :top-6, :self-start, :max-h-rail, :overflow-y-auto for the right rail, plus bottom-0, border-t and md:hidden for the pinned bar" },
+          { "tier": "type", "name": "ContractHostTag", "api": "add \"li\"", "reason": "FOUND DURING PREVIEW. The union admits ul and ol and not li, so a list container cannot legally hold its own items - assistive technology stops announcing the list and reads the rows as loose text. The two list hosts are unusable for the thing they are named after until this lands." }
+        ],
+        "unmappedAnatomy": []
+      },
+      "representativeSceneId": "direction-parity-semantic-default"
+    },
+    {
+      "directionId": "direction-semantic-flat",
+      "posture": "balanced",
+      "thesis": "Keep the production geometry and the same semantic hosts, and let the curriculum be exactly what a buyer decides on: module titles, their level and how many lessons are previewable. Lesson names arrive after enrolment.",
+      "primaryCta": "The rail's single enrol or continue action",
+      "readingOrder": ["breadcrumb", "title and tagline", "trust chip strip", "what you will learn", "curriculum as a plain ordered list", "sticky buy rail alongside"],
+      "tradeoffs": [
+        "One fewer owner and no interactive state anywhere in the curriculum, so the page has nothing to disclose, collapse or remember.",
+        "It drops information the named render shows, and whether that costs conversions is not answerable from source."
+      ],
+      "legacyDivergence": ["The curriculum does not disclose lessons, which the production render does."],
+      "implementationFeasibility": {
+        "status": "mapped",
+        "existingOwners": ["Tree", "SurfaceListCard", "Badge", "Button", "Text", "Heading", "EmptyNotice"],
+        "existingContracts": ["routed-page-main", "price-discount-line", "stacked-sections"],
+        "exactProposals": [
+          { "tier": "leaf", "name": "CoverImage", "path": "src/components/leaves/CoverImage" },
+          { "tier": "block", "name": "CoursePricingRail", "path": "src/components/blocks/courses/CoursePricingRail" },
+          { "tier": "contract", "name": "main-then-rail", "api": "host div" },
+          { "tier": "contract", "name": "course-module-list", "api": "host ol; rows are text only" },
+          { "tier": "contract", "name": "pricing-phase-ladder" },
+          { "tier": "type", "name": "LayoutClassName", "api": "add the five last-child sticky members" }
+        ],
+        "unmappedAnatomy": []
+      },
+      "representativeSceneId": "direction-semantic-flat-default"
+    },
+    {
+      "directionId": "direction-locked-left-rail",
+      "posture": "conservative",
+      "thesis": "Reuse the locked rail-then-main exactly as it is, take the semantic hosts that cost nothing, and accept the rail on the left. No governed type is widened anywhere.",
+      "primaryCta": "The left rail's single enrol or continue action",
+      "readingOrder": ["breadcrumb", "left buy rail", "title and tagline", "trust chips", "what you will learn", "curriculum"],
+      "tradeoffs": [
+        "The only direction that widens no governed type, so it is the cheapest thing to review and to ship.",
+        "Openly not parity: the rail is mirrored, the cover artwork is dropped, and below md the buy box precedes the course title."
+      ],
+      "legacyDivergence": [
+        "The rail sits on the left rather than the right.",
+        "The curriculum does not disclose lessons.",
+        "Below md the locked contract stacks rail-first, so the buy box appears before the title."
+      ],
+      "implementationFeasibility": {
+        "status": "mapped",
+        "existingOwners": ["Tree", "SurfaceListCard", "Badge", "Button", "Text", "Heading", "EmptyNotice"],
+        "existingContracts": ["rail-then-main", "routed-page-main", "price-discount-line", "stacked-sections"],
+        "exactProposals": [
+          { "tier": "block", "name": "CoursePricingRail", "path": "src/components/blocks/courses/CoursePricingRail" },
+          { "tier": "contract", "name": "course-pricing-rail", "api": "host aside" },
+          { "tier": "contract", "name": "pricing-phase-ladder" }
+        ],
+        "unmappedAnatomy": []
+      },
+      "representativeSceneId": "direction-locked-left-rail-default"
+    }
+  ],
+  "stateManifest": [
+    { "ownerId": "page-course-detail", "state": "populated", "coverage": "rendered-in-plan" },
+    { "ownerId": "page-course-detail", "state": "skeleton", "coverage": "deferred-to-preview" },
+    { "ownerId": "page-course-detail", "state": "not-found", "coverage": "deferred-to-preview" },
+    { "ownerId": "page-course-detail", "state": "failed", "coverage": "deferred-to-preview" },
+    { "ownerId": "page-course-detail", "state": "mobile", "coverage": "deferred-to-preview" },
+    { "ownerId": "page-course-detail", "state": "light-theme", "coverage": "deferred-to-preview" },
+    { "ownerId": "page-course-detail", "state": "keyboard-focus", "coverage": "deferred-to-preview" },
+    { "ownerId": "CurriculumModuleRow", "state": "no-lessons", "coverage": "deferred-to-preview" },
+    { "ownerId": "CurriculumModuleRow", "state": "open", "coverage": "deferred-to-preview" },
+    { "ownerId": "CoursePricingRail", "state": "price-pending", "coverage": "deferred-to-preview" },
+    { "ownerId": "CoursePricingRail", "state": "guest-no-loyalty", "coverage": "deferred-to-preview" },
+    { "ownerId": "CoursePricingRail", "state": "no-phases", "coverage": "deferred-to-preview" },
+    { "ownerId": "CoursePricingRail", "state": "slots-scarcity", "coverage": "deferred-to-preview" },
+    { "ownerId": "course-stat-chip-run", "state": "no-challenges", "coverage": "deferred-to-preview" },
+    { "ownerId": "CourseMobileEnrollBar", "state": "narrow-viewport", "coverage": "deferred-to-preview" }
+  ],
+  "directionLab": {
+    "path": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page-v2",
+    "url": "http://127.0.0.1:8094/",
+    "caseId": "case-course-detail-v2",
+    "directionIds": ["direction-parity-semantic", "direction-semantic-flat", "direction-locked-left-rail"]
+  },
+  "selectedDirectionId": "direction-parity-semantic",
+  "selectionKind": "explicit",
+  "selectionEvidence": "After the three directions were rendered and offered, the user answered \"A\", which is direction-parity-semantic.",
+  "defaultReason": null,
+  "blockTrees": [
+    {
+      "directionId": "direction-parity-semantic",
+      "tree": "CourseDetailPage (page)\n└── routed-page-main            host: main    (LOCKED)\n    ├── course-breadcrumb-row   host: nav     <- proposed\n    └── main-then-rail          host: div     <- proposed\n        ├── course-hero         host: section <- proposed\n        │   └── course-stat-chip-run  host: ul <- proposed\n        ├── course-section      host: section <- proposed\n        │   ├── course-promise-list   host: ul <- proposed\n        │   └── course-module-list    host: ol <- proposed\n        │       └── CurriculumModuleRow (leaf) <- proposed, opens <details>\n        └── course-pricing-rail host: aside   <- proposed\n            ├── CoverImage (leaf)             <- proposed\n            ├── price-discount-line (LOCKED)\n            └── pricing-phase-ladder          <- proposed"
+    }
+  ],
+  "contracts": [
+    { "key": "routed-page-main", "why": "LOCKED and already carries host: main. The routed page is the one region a reader came for, so it is the document's landmark.", "decision": "reuse" },
+    { "key": "price-discount-line", "why": "LOCKED. The payable price leads while original price and discount qualify that same commerce fact on one wrapping line.", "decision": "reuse" },
+    { "key": "rail-then-main", "why": "LOCKED. Carries the sticky mechanics on its FIRST child, which is why parity needs a mirror rather than this key.", "decision": "evidence-only" },
+    { "key": "main-then-rail", "why": "The narrative owns the flexible measure while the purchase decision keeps a fixed sticky column at the trailing edge.", "decision": "propose" },
+    { "key": "course-pricing-rail", "why": "host aside. The buy box is complementary to the narrative rather than part of it, which is what an aside means and what a screen reader announces.", "decision": "propose" },
+    { "key": "course-module-list", "why": "host ol. Modules are ordered - module three follows module two - and an ol says so to a reader who cannot see the numbering.", "decision": "propose" },
+    { "key": "course-promise-list", "why": "host ul. Unordered peers of one joined list; deliberately not profile-evidence-list, whose identical mechanics are named for a different domain.", "decision": "propose" },
+    { "key": "course-stat-chip-run", "why": "host ul. A course's trust counts are compact peer facts that wrap together; a course's evidence is not a profile's topics.", "decision": "propose" },
+    { "key": "pricing-phase-ladder", "why": "The phases are one mutually exclusive ladder in which the open phase is the price and the others are the cost of waiting.", "decision": "propose" },
+    { "key": "course-mobile-action-bar", "why": "Below the rail's breakpoint the purchase decision would scroll away entirely, so price and action pin to the bottom edge and step aside as soon as the rail can hold them.", "decision": "propose" }
+  ],
+  "vocabularyProposals": [
+    { "tier": "leaf", "name": "CurriculumModuleRow", "path": "src/components/leaves/CurriculumModuleRow", "api": "props { title, levelLabel?, previewLabel?, lessons?, isOpen? }", "absence": "a module with an empty lesson run renders as a plain row and invites no press", "reason": "`details` is not a ContractHostTag and there is no accordion branch." },
+    { "tier": "leaf", "name": "CoverImage", "path": "src/components/leaves/CoverImage", "api": "props { src: string | null, alt: string, ratio }", "absence": "renders a token fallback surface when src is null" },
+    { "tier": "block", "name": "CoursePricingRail", "path": "src/components/blocks/courses/CoursePricingRail" },
+    { "tier": "block", "name": "CourseMobileEnrollBar", "path": "src/components/blocks/courses/CourseMobileEnrollBar" },
+    { "tier": "type", "name": "LayoutClassName", "path": "src/components/contracts/index.ts", "api": "add md:[&>*:last-child]:sticky, :top-6, :self-start, :max-h-rail, :overflow-y-auto, plus bottom-0, border-t and md:hidden" }
+  ],
+  "backendEnablerProposals": []
+}

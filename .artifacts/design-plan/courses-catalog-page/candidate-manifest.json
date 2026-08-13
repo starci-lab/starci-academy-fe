@@ -1,0 +1,82 @@
+{
+  "revision": "1.1",
+  "candidateDigest": "f069ade46dc51f19f859ff5e74cce40614add9bfad9050c0dc7a84ce4bcdc3e5",
+  "fixtureSha256": "f7b8f6feef986e83cae91819622f1f0f31cffb7d180f4f84820698bf68b6dca1",
+  "buildLogSha256": "930d978b25533d6a0b002cfe387a919a05bf6981e91d5fee762ddf087848ff6c",
+  "runtimeFingerprint": "232f340768eb73fda7821a99a3142faa",
+  "fileCount": 18,
+  "files": [
+    {
+      "path": "candidate/app/globals.css",
+      "sha256": "813fb98deb7515d508ad3f6f1e23817662187b0d2e4d09cbfe2a53ac00280dff"
+    },
+    {
+      "path": "candidate/app/layout.tsx",
+      "sha256": "057d11e839736c8f93661d9298ec5d1945865b63aa62cc2101776d5528098f25"
+    },
+    {
+      "path": "candidate/app/page.tsx",
+      "sha256": "b686ed8af2df3e9c79c18e3eaffb7f6ba66296c0ce6280e8c1bec48b54faee3d"
+    },
+    {
+      "path": "candidate/app/providers.tsx",
+      "sha256": "da30f5cc2c2e4511a06b19f8de8de0a56e7be2b2dd3c75ac7f8b79b3cd987d42"
+    },
+    {
+      "path": "candidate/next-env.d.ts",
+      "sha256": "4e4da12aa061aac172fb1bcb48e9b6e4b293080d2f494327925fdba8f39632ac"
+    },
+    {
+      "path": "candidate/next.config.ts",
+      "sha256": "b63f0d2818e922c1b926c981afbf99617886bd648bdf4a781e6c2af2f2e063cd"
+    },
+    {
+      "path": "candidate/package.json",
+      "sha256": "a07e4f981a700877e453926e9e1e1bc4e84031e95725f821871107682d8a4850"
+    },
+    {
+      "path": "candidate/postcss.config.mjs",
+      "sha256": "3a04afa4310d307041460a81782c3dbff4c7551f88bb641d89cea8e1932d5378"
+    },
+    {
+      "path": "candidate/src/components/blocks/CourseCatalogCard/component.tsx",
+      "sha256": "de013f5c884a318f96a25cc45b90e4b1fef1fa77fa564e73865fe0876e9f85b1"
+    },
+    {
+      "path": "candidate/src/components/blocks/EnrolledCourseCard/component.tsx",
+      "sha256": "72e22312c6f69a0c6409cda3d035bd5249e93a0d602e95ba93d95bcf6a0c1880"
+    },
+    {
+      "path": "candidate/src/components/branches/ProposedTree/index.tsx",
+      "sha256": "ef23a3b0bbd3ab0c9f07fc8b9daa9d002f5c134bf33f7260a8d87a2829904f2c"
+    },
+    {
+      "path": "candidate/src/components/contracts/proposed.ts",
+      "sha256": "6f6c233dd609dc3bd946314f7c0711d4a158cc1e36ceb8401be932beefc78c26"
+    },
+    {
+      "path": "candidate/src/components/leaves/CoverImage/index.tsx",
+      "sha256": "02a9694693c61ec683bfec01f7b156dcca36d2d2dcbce3d922a425251e4b2d9b"
+    },
+    {
+      "path": "candidate/src/components/leaves/Pagination/index.tsx",
+      "sha256": "4211ba561e8dfb4197fd2b3af7b14674dd2711d47e20e99dabc38814b2c484b4"
+    },
+    {
+      "path": "candidate/src/components/leaves/ValuePropositionDisclosure/index.tsx",
+      "sha256": "c2f11bb584361501be9b9d97f6acb1ebbb60ede921b970da8c1af81bd2bd918a"
+    },
+    {
+      "path": "candidate/src/components/pages/CoursesCatalogPage/component.tsx",
+      "sha256": "002cc6a449d25c08527caae349b217d55d17f410641234536bd61cfb8034463c"
+    },
+    {
+      "path": "candidate/src/fixtures/catalog.json",
+      "sha256": "f7b8f6feef986e83cae91819622f1f0f31cffb7d180f4f84820698bf68b6dca1"
+    },
+    {
+      "path": "candidate/tsconfig.json",
+      "sha256": "9a28e01be5aa75998cbd7a439ab458ad7f9e6373bb4bc00af58dd3dd81eabb99"
+    }
+  ]
+}

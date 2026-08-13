@@ -1,0 +1,45 @@
+{
+  "note": "Resolved values mirroring the production render at academy.starci.org/vi/league. Locale vi, dark theme, authenticated owner persona cuongnvtse160875. The global progress numbers reproduce the legacy formula: 190 - 105 + 1 = 86.",
+  "pageTitle": "Bảng xếp hạng",
+  "tabWeekly": "Tuần này",
+  "tabGlobal": "Toàn cầu",
+  "meLabel": "Bạn",
+  "anonymousLabel": "Học viên ẩn danh",
+  "global": {
+    "standing": { "rank": 4, "rankLabel": "Hạng #4", "title": "Hạng #4 toàn nền tảng", "subtitle": "105 XP" },
+    "progress": { "ratio": 0.5526, "label": "Còn 86 XP nữa để lên hạng #3" },
+    "progressAccessibleLabel": "Tiến độ lên hạng #3",
+    "ctaLabel": "Vào khóa học kiếm XP",
+    "listLabel": "Bảng xếp hạng toàn cầu",
+    "podium": [
+      { "rank": 1, "username": "trannguyenndc2004", "avatar": null, "pointsLabel": "480 XP", "isMe": false },
+      { "rank": 2, "username": "betuanminh22032003", "avatar": null, "pointsLabel": "400 XP", "isMe": false },
+      { "rank": 3, "username": "truongnghia297", "avatar": null, "pointsLabel": "190 XP", "isMe": false }
+    ],
+    "rows": [
+      { "id": "p4", "rank": 4, "rankLabel": "Hạng #4", "name": "cuongnvtse160875 · Bạn", "avatar": null, "points": "105 XP", "isMe": true },
+      { "id": "p5", "rank": 5, "rankLabel": "Hạng #5", "name": "phamthanhqb2005", "avatar": null, "points": "100 XP", "followLabel": "Theo dõi", "followingLabel": "Đang theo dõi", "isFollowing": false },
+      { "id": "p6", "rank": 6, "rankLabel": "Hạng #6", "name": "tnh.t1k30.ht", "avatar": null, "points": "85 XP", "followLabel": "Theo dõi", "followingLabel": "Đang theo dõi", "isFollowing": false },
+      { "id": "p7", "rank": 7, "rankLabel": "Hạng #7", "name": "0911445220ab", "avatar": null, "points": "56 XP", "followLabel": "Theo dõi", "followingLabel": "Đang theo dõi", "isFollowing": false }
+    ]
+  },
+  "weekly": {
+    "standing": { "rank": 1, "rankLabel": "Hạng #1", "title": "Hạng #1 · top 100%", "subtitle": "0 XP · Reset sau 2 ngày 18 giờ" },
+    "progressAccessibleLabel": "Tiến độ thăng hạng",
+    "ctaLabel": "Vào khóa học kiếm XP",
+    "listLabel": "Cohort tuần này",
+    "podium": [
+      { "rank": 1, "username": "cuongnvtse160875", "avatar": null, "pointsLabel": "0 XP", "isMe": true },
+      { "rank": 2, "username": "lehoangan2003", "avatar": null, "pointsLabel": "0 XP", "isMe": false },
+      { "rank": 3, "username": "ngothimai98", "avatar": null, "pointsLabel": "0 XP", "isMe": false }
+    ],
+    "rows": [
+      { "id": "wp4", "rank": 4, "rankLabel": "Hạng #4", "name": "vuquanganh01", "avatar": null, "points": "0 XP", "rankDelta": 0, "movementLabel": "Không đổi hạng" },
+      { "id": "wp5", "rank": 5, "rankLabel": "Hạng #5", "name": "dothihuong22", "avatar": null, "points": "0 XP", "rankDelta": -1, "movementLabel": "Giảm 1 hạng", "verdict": "danger" }
+    ]
+  },
+  "selfBelowSlice": {
+    "ellipsisLabel": "còn 12 người",
+    "selfRow": { "id": "self", "rank": 18, "rankLabel": "Hạng #18", "name": "cuongnvtse160875 · Bạn", "avatar": null, "points": "105 XP", "isMe": true }
+  }
+}

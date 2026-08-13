@@ -1,0 +1,93 @@
+{
+  "_note": "Fixture for case-course-detail / direction-parity-first. Copy is the product's own Vietnamese, taken from the named production render; the figures are that course's real published figures. Cover artwork is null on purpose so the CoverImage fallback is what renders — the candidate must not embed production imagery.",
+  "labels": {
+    "navHome": "Trang chủ",
+    "navCourses": "Khóa học",
+    "valuePropsTitle": "Bạn sẽ học được gì",
+    "curriculumTitle": "Nội dung khóa học"
+  },
+  "title": "Fullstack Mastery",
+  "tagline": "Lộ trình học dạng module từ nền tảng đến triển khai thực tế.",
+  "stats": [
+    { "id": "learners", "label": "59 Học viên" },
+    { "id": "modules", "label": "23 Module" },
+    { "id": "lessons", "label": "95 Nội dung" },
+    { "id": "hours", "label": "33 Giờ học" },
+    { "id": "challenges", "label": "348 Bài thực hành" }
+  ],
+  "valueProps": [
+    "Lộ trình học dạng module từ nền tảng đến triển khai thực tế.",
+    "Bài giảng chất lượng cao, giải thích trực tiếp, không lan man.",
+    "Bài tập thực hành giúp nâng cao tư duy và kỹ năng engineering.",
+    "Review CV 1:1 và hỗ trợ phân phối CV đến network tuyển dụng."
+  ],
+  "modules": [
+    {
+      "id": "m1",
+      "title": "Nền tảng backend: Framework, vòng đời request, cấu hình và logging",
+      "levelLabel": "Nền tảng",
+      "previewLabel": "5 bài xem trước",
+      "lessons": [
+        { "id": "m1l1", "title": "Vòng đời một request", "isPreview": true },
+        { "id": "m1l2", "title": "Cấu hình theo môi trường", "isPreview": true },
+        { "id": "m1l3", "title": "Logging có cấu trúc" }
+      ]
+    },
+    {
+      "id": "m2",
+      "title": "Tích hợp Database & Caching",
+      "levelLabel": "Nền tảng",
+      "previewLabel": "6 bài xem trước",
+      "lessons": [
+        { "id": "m2l1", "title": "Chỉ mục và kế hoạch truy vấn", "isPreview": true },
+        { "id": "m2l2", "title": "Chiến lược cache và vô hiệu hóa" }
+      ]
+    },
+    {
+      "id": "m3",
+      "title": "REST API: Thiết kế & Tài liệu",
+      "levelLabel": "Nền tảng",
+      "previewLabel": "4 bài xem trước",
+      "lessons": [
+        { "id": "m3l1", "title": "Thiết kế tài nguyên và phiên bản", "isPreview": true }
+      ]
+    },
+    {
+      "id": "m4",
+      "title": "Xác thực & Phân quyền",
+      "levelLabel": "Nền tảng",
+      "previewLabel": "9 bài xem trước",
+      "lessons": [
+        { "id": "m4l1", "title": "Phiên đăng nhập và token" },
+        { "id": "m4l2", "title": "Phân quyền theo vai trò" }
+      ]
+    },
+    {
+      "id": "m5",
+      "title": "Server State với TanStack Query",
+      "levelLabel": "Nền tảng",
+      "previewLabel": "4 bài xem trước",
+      "lessons": []
+    }
+  ],
+  "rail": {
+    "coverUrl": null,
+    "title": "Fullstack Mastery",
+    "price": "1.275.000₫",
+    "originalPrice": "1.500.000₫",
+    "discountLabel": "−15%",
+    "savingsLabel": "Tiết kiệm 225.000₫",
+    "phases": [
+      { "id": "standard", "name": "Tiêu chuẩn", "value": "Đang mở", "isActive": true },
+      { "id": "pioneer", "name": "Tiên phong", "value": "1.000.000₫" },
+      { "id": "early", "name": "Sớm", "value": "1.250.000₫" }
+    ],
+    "ctaLabel": "Tiếp tục học",
+    "enrolmentLabel": "59 người đã đăng ký"
+  },
+  "scarcityLabel": "Còn 12 suất ở phase Tiêu chuẩn",
+  "notices": {
+    "notFound": { "message": "Không tìm thấy khóa học này." },
+    "failed": { "message": "Không tải được khóa học.", "actionLabel": "Thử lại" }
+  }
+}

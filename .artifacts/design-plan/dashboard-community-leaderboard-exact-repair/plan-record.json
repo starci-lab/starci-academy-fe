@@ -1,0 +1,102 @@
+{
+  "version": 1,
+  "task": "dashboard-community-leaderboard-exact-repair",
+  "status": "direction-selected",
+  "deliveryMode": "batch",
+  "mode": "exact-repair",
+  "parityBaseline": {
+    "repository": "D:\\Repositories\\starci-academy",
+    "render": "C:\\Users\\Hi\\AppData\\Local\\Temp\\codex-clipboard-5710a673-00ec-492a-b693-f5c0e2ad4a4a.png"
+  },
+  "sharedDecisions": [
+    "Section title and View leaderboard remain outside the outer card.",
+    "Standing hero and nested bordered/no-shadow ranked list share one outer story surface.",
+    "Rank 1/2/3 use Iconify Fluent Emoji place medals; every rank 4+ uses the Iconify Fluent Emoji trophy.",
+    "Viewer row is accented, labeled Bạn and never receives a follow action."
+  ],
+  "workItems": [
+    {
+      "id": "block-weekly-league-exact-repair",
+      "target": "Dashboard Community / LeagueCard",
+      "primaryScope": "block",
+      "subordinateScopes": ["branch", "composite", "leaf", "contracts"],
+      "dependsOn": ["shared-rank-list-vocabulary"],
+      "ownerBoundary": "weekly standing, cohort, rank movement, countdown and pinned viewer row",
+      "sourceBoundary": ["src/components/blocks/dashboard/LeagueCard"],
+      "stateInventory": [
+        {"state":"loading","status":"required","evidence":"independent myLeague request"},
+        {"state":"empty","status":"required","evidence":"unplaced learner state"},
+        {"state":"populated","status":"required","evidence":"legacy runtime"},
+        {"state":"recoverable-error","status":"required","evidence":"block failed state"},
+        {"state":"pending-action","status":"not-applicable","evidence":"no mutation"},
+        {"state":"keyboard-focus","status":"required","evidence":"section and profile navigation"}
+      ]
+    },
+    {
+      "id": "block-top-learners-exact-repair",
+      "target": "Dashboard Community / TopLearners",
+      "primaryScope": "block",
+      "subordinateScopes": ["branch", "composite", "leaf", "contracts"],
+      "dependsOn": ["shared-rank-list-vocabulary"],
+      "ownerBoundary": "global standing, top-five users, follow state/action and pinned viewer row",
+      "sourceBoundary": ["src/components/blocks/dashboard/TopLearners"],
+      "stateInventory": [
+        {"state":"loading","status":"required","evidence":"independent globalLeaderboard request"},
+        {"state":"empty","status":"required","evidence":"explicit no-leaders state"},
+        {"state":"populated","status":"required","evidence":"legacy runtime"},
+        {"state":"recoverable-error","status":"required","evidence":"block failed state"},
+        {"state":"pending-action","status":"required","evidence":"setFollow mutation"},
+        {"state":"optimistic-stale","status":"required","evidence":"follow rollback"},
+        {"state":"disabled-action","status":"required","evidence":"viewer has no follow action"},
+        {"state":"keyboard-focus","status":"required","evidence":"section, profile and follow actions"}
+      ]
+    }
+  ],
+  "evidence": [
+    {"claim":"legacy hierarchy and density are binding","source":"user screenshot plus named legacy source","confidence":"high"},
+    {"claim":"rank artwork mapping","source":"user refinement plus legacy rankBadge.tsx","confidence":"high"}
+  ],
+  "unknowns": ["Exact computed pixels require Preview tuning at the supplied effective viewport."],
+  "businessCapabilities": [
+    {"capability":"weekly standings","classification":"reuse"},
+    {"capability":"global standings","classification":"reuse"},
+    {"capability":"follow state/action","classification":"reuse"}
+  ],
+  "preliminaryDirections": [
+    {
+      "id":"direction-exact-legacy-parity",
+      "thesis":"Restore the supplied legacy competition hierarchy exactly rather than flattening it.",
+      "primaryCta":"View leaderboard",
+      "readingOrder":["section heading/action","standing hero","nested ranked list","optional pinned viewer row"],
+      "tradeoffs":["requires contract and closed rank-artwork vocabulary repair"],
+      "legacyDivergence":["Explicit user refinement makes every rank 4+ visible as a trophy."],
+      "representativeStateIds":["community-populated-dark-desktop"],
+      "remainingPreviewStateIds":["weekly-loading","weekly-empty","weekly-failed","global-loading","global-empty","global-failed","follow-pending","follow-rollback","mobile","light","keyboard-focus"]
+    }
+  ],
+  "directionLab": {
+    "path":"D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\dashboard-community-leaderboard-exact-repair",
+    "url":"http://127.0.0.1:8084/",
+    "caseIds":["direction-exact-legacy-parity"]
+  },
+  "recommendedPreviewDirections":["direction-exact-legacy-parity"],
+  "selectedDirection":"direction-exact-legacy-parity",
+  "selectionEvidence":"User requested ‘rồi chạy skills preview đi’ after refining Iconify medal/trophy mapping.",
+  "blockTrees":["CommunityTab > LeagueCard/TopLearners > SurfaceCard > standing + nested SurfaceListCard"],
+  "contracts":["leaderboard-card","weekly-leaderboard-standing","global-leaderboard-standing","ranked-user-list","ranked-user-row","ranked-user-ellipsis-row"],
+  "vocabularyProposals":[
+    {
+      "target":"src/components/leaves/RankMark",
+      "semanticMeaning":"closed @iconify/react Fluent Emoji rank artwork",
+      "propsDelta":"rank + placement + accessibleLabel",
+      "onDelta":"none",
+      "placement":"standing and row fixed rank slot",
+      "absenceDefault":"1/2/3 medals; 4+ trophy",
+      "precedence":"numeric rank retained in accessible label",
+      "affectedCallers":["LeagueCard","TopLearners"],
+      "compatibility":"new closed owner",
+      "tests":["exact ID map","rank 4+ trophy","no caller Iconify import"]
+    }
+  ],
+  "backendEnablerProposals":[]
+}

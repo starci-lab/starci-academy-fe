@@ -1,0 +1,134 @@
+{
+  "version": 1,
+  "task": "whole-public-profile-strict-parity-v2",
+  "status": "direction-selected",
+  "deliveryMode": "batch",
+  "mode": "migration",
+  "parityBaseline": "D:/Repositories/starci-academy public profile routes and mounted Profile* components",
+  "sharedDecisions": [
+    "Reuse the global StarCi shell unchanged.",
+    "Keep profile tabs above a frameless identity rail and routed evidence body.",
+    "Preserve legacy page order, state ownership, progressive disclosure and responsive relationships.",
+    "Do not add identity cards, page-local navbar variants, outer red-box wrappers or invented metrics.",
+    "Treat nullable API fields at the connected boundary.",
+    "Keep Contributions distinct from the Activity tab.",
+    "Never expose source code on public coding proof."
+  ],
+  "workItems": [
+    {
+      "id": "layout-public-profile",
+      "target": "/profile/[username]/**",
+      "primaryScope": "layout",
+      "subordinateScopes": ["block"],
+      "dependsOn": [],
+      "ownerBoundary": "screen priority, profile tabs, identity rail, routed body and contextual actions",
+      "sourceBoundary": ["D:/Repositories/starci-academy/src/components/layouts/PublicProfileLayout", "D:/Repositories/starci-academy/src/components/blocks/profile/ProfileHero"],
+      "stateInventory": [
+        {"state":"loading","status":"required","evidence":"legacy layout priority"},
+        {"state":"not-found","status":"required","evidence":"legacy layout priority"},
+        {"state":"locked visitor","status":"required","evidence":"legacy layout priority"},
+        {"state":"ready visitor","status":"required","evidence":"tab gating and follow behavior"},
+        {"state":"ready owner","status":"required","evidence":"all tabs and edit action"},
+        {"state":"narrow","status":"required","evidence":"RailShell stacks rail first"}
+      ]
+    },
+    {
+      "id": "page-profile-overview",
+      "target": "/profile/[username]",
+      "primaryScope": "page",
+      "subordinateScopes": ["block"],
+      "dependsOn": ["layout-public-profile"],
+      "ownerBoundary": "readiness, courses, contributions and two skill snapshots in legacy order",
+      "sourceBoundary": ["D:/Repositories/starci-academy/src/components/pages/ProfileOverviewPage"],
+      "stateInventory": [{"state":"per-block pending/error/empty/ready","status":"required","evidence":"legacy blocks self-fetch independently"}]
+    },
+    {
+      "id": "page-profile-projects",
+      "target": "/profile/[username]/projects/**",
+      "primaryScope": "page",
+      "subordinateScopes": ["block", "overlay"],
+      "dependsOn": ["layout-public-profile"],
+      "ownerBoundary": "pinned grid, verified capstone list and roadmap detail",
+      "sourceBoundary": ["D:/Repositories/starci-academy/src/components/pages/ProfileProjectsPage", "D:/Repositories/starci-academy/src/components/pages/ProfileProjectRoadmapPage"],
+      "stateInventory": [{"state":"owner/visitor empty, partial/error, ready, detail missing","status":"required","evidence":"legacy per-section policy"}]
+    },
+    {
+      "id": "page-profile-challenges",
+      "target": "/profile/[username]/challenges/**",
+      "primaryScope": "page",
+      "subordinateScopes": ["block"],
+      "dependsOn": ["layout-public-profile"],
+      "ownerBoundary": "metrics, Stats, course-grouped submissions and two detail tiers",
+      "sourceBoundary": ["D:/Repositories/starci-academy/src/components/pages/ProfileChallengesPage", "D:/Repositories/starci-academy/src/components/pages/ProfileChallengeManagePage", "D:/Repositories/starci-academy/src/components/pages/ProfileChallengeSubmissionPage"],
+      "stateInventory": [{"state":"pending/empty/error/ready/course-filter/detail-missing","status":"required","evidence":"legacy route owners"}]
+    },
+    {
+      "id": "page-profile-skills",
+      "target": "/profile/[username]/skills/**",
+      "primaryScope": "page",
+      "subordinateScopes": ["block"],
+      "dependsOn": ["layout-public-profile"],
+      "ownerBoundary": "conditional metrics, Stats, solve history and public coding proof",
+      "sourceBoundary": ["D:/Repositories/starci-academy/src/components/pages/ProfileSkillsPage", "D:/Repositories/starci-academy/src/components/pages/ProfileCodingProblemPage"],
+      "stateInventory": [{"state":"pending/empty/error/filtered-empty/detail missing/unsolved/solved","status":"required","evidence":"legacy coding flows"}]
+    },
+    {
+      "id": "page-profile-cv",
+      "target": "/profile/[username]/cv",
+      "primaryScope": "page",
+      "subordinateScopes": ["block"],
+      "dependsOn": ["layout-public-profile"],
+      "ownerBoundary": "public A4 PDF states and owner edit exit",
+      "sourceBoundary": ["D:/Repositories/starci-academy/src/components/pages/ProfilePublicCvPage"],
+      "stateInventory": [{"state":"pending/absent/uncompiled/error/ready","status":"required","evidence":"legacy explicit branches"}]
+    },
+    {
+      "id": "page-profile-activity",
+      "target": "/profile/[username]/activity",
+      "primaryScope": "page",
+      "subordinateScopes": ["block"],
+      "dependsOn": ["layout-public-profile"],
+      "ownerBoundary": "achievement wall then chronological activity feed",
+      "sourceBoundary": ["D:/Repositories/starci-academy/src/components/pages/ProfileActivityPage"],
+      "stateInventory": [{"state":"pending/empty/error/ready/paginating","status":"required","evidence":"legacy independent blocks"}]
+    }
+  ],
+  "evidence": [
+    {"claim":"Legacy profile hierarchy and behavior are binding.","source":"D:/Repositories/starci-academy","sourceClass":"legacy","confidence":"proven","allowedUse":"parity baseline","unknowns":[]},
+    {"claim":"Mounted Fullstack data contains 23 modules, 95 content, 348 challenges, 20 milestones and 100 tasks.","source":"local PostgreSQL after full mount seed","sourceClass":"backend","confidence":"proven","allowedUse":"real profile state","unknowns":[]},
+    {"claim":"The target account has 1 pin, 8 reads, 3 passed challenges, 3 accepted coding problems, 2 project tasks and 14 activities.","source":"scripts/seed-profile-test-data.mjs verification","sourceClass":"seed","confidence":"proven","allowedUse":"local review state","unknowns":[]},
+    {"claim":"Current Projects crashes on nullable techStack.","source":"localhost runtime ProfileProjectsPage/component.tsx:33","sourceClass":"render","confidence":"proven","allowedUse":"rejection risk","unknowns":[]}
+  ],
+  "unknowns": ["Seeded account has no public compiled CV.", "Exact mobile and dark pixel parity remains a Preview browser gate."],
+  "businessCapabilities": ["public identity and visibility", "course progress", "pinned and capstone projects", "graded challenge proof", "coding proof", "contributions", "achievements and activity", "public CV"],
+  "preliminaryDirections": [
+    {
+      "id": "strict-parity",
+      "thesis": "Reuse the unchanged global shell and port the legacy public profile system without page-local reinterpretation.",
+      "primaryCta": "Edit profile for owner; Hire when eligible; otherwise Follow",
+      "readingOrder": ["global shell", "profile tabs", "frameless identity rail", "active route evidence"],
+      "tradeoffs": ["Retains legacy density and route count", "Requires replacing generic current page compositions rather than tuning their spacing"],
+      "legacyDivergence": [],
+      "representativeStateIds": ["seeded-owner"],
+      "remainingPreviewStateIds": ["layout-loading", "not-found", "locked", "visitor", "mobile", "per-block-error", "per-block-empty", "detail-missing", "cv-uncompiled"]
+    }
+  ],
+  "directionLab": {
+    "path": "D:/Repositories/starci-academy-fe/.artifacts/profile-section-strict-parity-v2",
+    "url": "http://127.0.0.1:8085/",
+    "caseIds": ["strict-parity"]
+  },
+  "recommendedPreviewDirections": ["strict-parity"],
+  "selectedDirection": "strict-parity",
+  "selectionEvidence": "User: nguyên trang thì 1 hướng thôi; repeated instruction to respect legacy absolutely.",
+  "blockTrees": ["ExistingGlobalShell > PublicProfileLayout > ProfileTabsBar + RailShell(ProfileHero, routed Profile*Page)"],
+  "contracts": [
+    {"key":"profile-tabs-over-body","why":"Profile route chrome stays above identity and evidence."},
+    {"key":"rail-then-main","why":"Frameless identity rail stacks before flexible evidence on narrow screens."},
+    {"key":"stacked-sections","why":"Independent evidence blocks retain major seams and request lifetimes."},
+    {"key":"label-row-over-card","why":"Section label sits outside one bounded surface."},
+    {"key":"activity-feed-list","why":"Chronological activity peers remain grouped; contributions stay separate."}
+  ],
+  "vocabularyProposals": [],
+  "backendEnablerProposals": []
+}

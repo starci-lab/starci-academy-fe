@@ -1,0 +1,184 @@
+{
+  "version": 1,
+  "task": "whole-public-profile-strict-parity-v2",
+  "planRecord": "D:/Repositories/starci-academy-fe/.artifacts/profile-section-strict-parity-v2/plan-record.json",
+  "contextLock": "D:/Repositories/starci-academy-fe/.artifacts/profile-section-strict-parity-v2/context-lock.preview.json",
+  "deliveryMode": "batch",
+  "mode": "migration",
+  "approvedCaseId": "strict-parity",
+  "approval": {
+    "source": "Explicit user approval on 2026-08-12: 'ok dứt apply'",
+    "retainedTraits": [
+      "Unchanged global StarCi shell",
+      "One profile navigation above one rail-and-main body",
+      "Frameless identity rail",
+      "Legacy block order, density, grouping and route ownership",
+      "Contributions distinct from Activity",
+      "Public coding proof without source code"
+    ],
+    "rejectedTraits": [
+      "Page-local navbar variants",
+      "Identity card chrome",
+      "Extra outer cards or red-box wrappers",
+      "Invented metrics, labels, behavior or seed truth",
+      "Reinterpreting profile pages independently from the legacy system"
+    ]
+  },
+  "parityBaseline": "D:/Repositories/starci-academy public profile routes and mounted Profile* components at 9a193423128efa1dc83f23ab0f79fb4ae66db847",
+  "sharedDecisions": [
+    "Reuse the global StarCi shell unchanged.",
+    "Keep profile tabs above a frameless identity rail and routed evidence body.",
+    "Preserve legacy page order, state ownership, progressive disclosure and responsive relationships.",
+    "Treat nullable API fields at the connected boundary.",
+    "Keep Contributions distinct from the Activity tab.",
+    "Never expose or invent source code on public coding proof."
+  ],
+  "workItems": [
+    {
+      "id": "layout-public-profile",
+      "target": "/profile/[username]/**",
+      "primaryScope": "layout",
+      "subordinateScopes": ["block"],
+      "dependsOn": [],
+      "ownerBoundary": "Profile state priority, one tab bar, frameless identity rail, routed body and contextual owner/visitor actions.",
+      "fileBoundary": [
+        "src/app/profile/[username]/**",
+        "src/components/layouts/PublicProfileLayout/**",
+        "src/components/blocks/profile/ProfileHero/**",
+        "src/components/blocks/profile/ProfileTabs/**"
+      ],
+      "approvedCaseId": "strict-parity",
+      "stateCoverage": [
+        {"ownerId":"layout-public-profile","state":"ready owner","coverage":"rendered","scenarioId":"owner-populated","evidence":"Owner · populated"},
+        {"ownerId":"layout-public-profile","state":"ready visitor","coverage":"rendered","scenarioId":"visitor-gated-tabs","evidence":"Visitor · gated tabs"},
+        {"ownerId":"layout-public-profile","state":"follow pending/disabled","coverage":"rendered","scenarioId":"visitor-follow-pending","evidence":"Visitor · follow pending"},
+        {"ownerId":"layout-public-profile","state":"loading","coverage":"rendered","scenarioId":"layout-loading","evidence":"Layout · loading"},
+        {"ownerId":"layout-public-profile","state":"not found","coverage":"rendered","scenarioId":"layout-not-found","evidence":"Layout · not found"},
+        {"ownerId":"layout-public-profile","state":"locked visitor","coverage":"rendered","scenarioId":"layout-locked","evidence":"Layout · locked visitor"},
+        {"ownerId":"layout-public-profile","state":"narrow/mobile","coverage":"rendered","scenarioId":"layout-mobile","evidence":"Layout · mobile"}
+      ]
+    },
+    {
+      "id": "page-profile-overview",
+      "target": "/profile/[username]",
+      "primaryScope": "page",
+      "subordinateScopes": ["block"],
+      "dependsOn": ["layout-public-profile"],
+      "ownerBoundary": "Readiness, joined courses, contributions, challenge skills and practice skills in legacy order.",
+      "fileBoundary": ["src/components/pages/ProfileOverviewPage/**", "src/components/blocks/profile/overview/**"],
+      "approvedCaseId": "strict-parity",
+      "stateCoverage": [
+        {"ownerId":"profile-overview","state":"populated","coverage":"rendered","scenarioId":"owner-populated","evidence":"Owner · populated"},
+        {"ownerId":"profile-overview","state":"independent block loading/empty/error","coverage":"rendered","scenarioId":"overview-partial-error","evidence":"Overview · partial error preserves unaffected siblings"}
+      ]
+    },
+    {
+      "id": "page-profile-projects",
+      "target": "/profile/[username]/projects/**",
+      "primaryScope": "page",
+      "subordinateScopes": ["block"],
+      "dependsOn": ["layout-public-profile"],
+      "ownerBoundary": "Pinned projects, verified capstone work and roadmap detail with legacy owner/visitor empty policy.",
+      "fileBoundary": ["src/components/pages/ProfileProjectsPage/**", "src/components/pages/ProfileProjectRoadmapPage/**", "src/components/composites/ProfileProjectCard/**"],
+      "approvedCaseId": "strict-parity",
+      "stateCoverage": [
+        {"ownerId":"profile-projects","state":"populated","coverage":"rendered","scenarioId":"owner-populated","evidence":"Owner · populated"},
+        {"ownerId":"profile-projects","state":"owner empty","coverage":"rendered","scenarioId":"projects-owner-empty","evidence":"Projects · owner empty"},
+        {"ownerId":"profile-projects","state":"visitor empty/hidden","coverage":"covered-by","scenarioId":"visitor-gated-tabs","evidence":"Legacy hides settled-empty pinned block for visitors"},
+        {"ownerId":"profile-project-roadmap","state":"ready","coverage":"rendered","scenarioId":"project-roadmap","evidence":"Project · roadmap"},
+        {"ownerId":"profile-project-roadmap","state":"missing/error","coverage":"covered-by","scenarioId":"layout-not-found","evidence":"Shared route-local recovery anatomy"}
+      ]
+    },
+    {
+      "id": "page-profile-challenges",
+      "target": "/profile/[username]/challenges/**",
+      "primaryScope": "page",
+      "subordinateScopes": ["block"],
+      "dependsOn": ["layout-public-profile"],
+      "ownerBoundary": "Challenge strength, passed submissions, course filter and public proof detail tiers.",
+      "fileBoundary": ["src/components/pages/ProfileChallengesPage/**", "src/components/pages/ProfileChallengeManagePage/**", "src/components/pages/ProfileChallengeSubmissionPage/**"],
+      "approvedCaseId": "strict-parity",
+      "stateCoverage": [
+        {"ownerId":"profile-challenges","state":"ready/empty","coverage":"rendered","scenarioId":"owner-populated","evidence":"Owner · populated"},
+        {"ownerId":"profile-challenge-course","state":"filtered ready/empty","coverage":"rendered","scenarioId":"challenge-course","evidence":"Challenges · course"},
+        {"ownerId":"profile-challenge-proof","state":"ready","coverage":"rendered","scenarioId":"challenge-proof","evidence":"Challenges · proof"},
+        {"ownerId":"profile-challenges","state":"loading/error/detail missing","coverage":"covered-by","scenarioId":"overview-partial-error","evidence":"Shared independent pending/error and route recovery anatomy"}
+      ]
+    },
+    {
+      "id": "page-profile-skills",
+      "target": "/profile/[username]/skills/**",
+      "primaryScope": "page",
+      "subordinateScopes": ["block"],
+      "dependsOn": ["layout-public-profile"],
+      "ownerBoundary": "Conditional coding metrics, legacy stats, solve history and source-free public problem proof.",
+      "fileBoundary": ["src/components/pages/ProfileSkillsPage/**", "src/components/pages/ProfileDetailPage/**", "src/components/composites/ProfileMetric/**", "src/components/composites/ProfileSegment/**"],
+      "approvedCaseId": "strict-parity",
+      "stateCoverage": [
+        {"ownerId":"profile-skills","state":"ready/empty/filtered-empty","coverage":"rendered","scenarioId":"owner-populated","evidence":"Owner · populated"},
+        {"ownerId":"profile-coding-proof","state":"solved","coverage":"rendered","scenarioId":"skills-coding-proof","evidence":"Skills · coding proof; no source returned or rendered"},
+        {"ownerId":"profile-skills","state":"loading/error/unsolved/detail missing","coverage":"covered-by","scenarioId":"overview-partial-error","evidence":"Shared pending/error/empty and route recovery anatomy"}
+      ]
+    },
+    {
+      "id": "page-profile-cv",
+      "target": "/profile/[username]/cv",
+      "primaryScope": "page",
+      "subordinateScopes": ["block"],
+      "dependsOn": ["layout-public-profile"],
+      "ownerBoundary": "Public A4 CV states and owner edit exit.",
+      "fileBoundary": ["src/components/pages/ProfilePublicCvPage/**", "src/components/leaves/ProfileCvDocument/**"],
+      "approvedCaseId": "strict-parity",
+      "stateCoverage": [
+        {"ownerId":"profile-cv","state":"uncompiled/absent","coverage":"rendered","scenarioId":"cv-not-compiled","evidence":"CV · not compiled"},
+        {"ownerId":"profile-cv","state":"compiled PDF","coverage":"not-applicable","scenarioId":"none","evidence":"Locked seeded account has no authorized compiled public CV fixture"},
+        {"ownerId":"profile-cv","state":"loading/error","coverage":"covered-by","scenarioId":"overview-partial-error","evidence":"Shared independent pending/error anatomy"}
+      ]
+    },
+    {
+      "id": "page-profile-activity",
+      "target": "/profile/[username]/activity",
+      "primaryScope": "page",
+      "subordinateScopes": ["block"],
+      "dependsOn": ["layout-public-profile"],
+      "ownerBoundary": "Achievement wall followed by chronological grouped activity feed; contributions remain on Overview.",
+      "fileBoundary": ["src/components/pages/ProfileActivityPage/**", "src/components/composites/ProfileAchievement/**"],
+      "approvedCaseId": "strict-parity",
+      "stateCoverage": [
+        {"ownerId":"profile-activity","state":"ready/empty","coverage":"rendered","scenarioId":"owner-populated","evidence":"Owner · populated"},
+        {"ownerId":"profile-activity","state":"pagination pending","coverage":"rendered","scenarioId":"activity-pagination","evidence":"Activity · pagination"},
+        {"ownerId":"profile-activity","state":"loading/error","coverage":"covered-by","scenarioId":"overview-partial-error","evidence":"Shared independent pending/error anatomy"}
+      ]
+    }
+  ],
+  "evidence": [
+    {"claim":"Legacy profile hierarchy and behavior are binding.","source":"D:/Repositories/starci-academy","confidence":"proven"},
+    {"claim":"The mounted backend contains real Fullstack course and seeded public-profile evidence.","source":"D:/Repositories/starci-academy-backend local PostgreSQL and seed verification","confidence":"proven"},
+    {"claim":"All 15 preview scenarios render and the checked preview console has no errors.","source":"http://127.0.0.1:8085/","confidence":"proven"}
+  ],
+  "unknowns": [
+    "Compiled public-CV PDF needs a separate authorized fixture before that branch can receive browser parity evidence.",
+    "Exact light-theme token parity remains an Apply verification because the locked legacy evidence and selected profile theme are dark."
+  ],
+  "decisions": [
+    "Implement one coordinated profile system, not independently redesigned pages.",
+    "No backend enabler, vocabulary change or public API change is approved.",
+    "Pinned-project management overlay remains outside this batch."
+  ],
+  "rejectedDirections": ["Any direction that changes the global navbar, adds identity/card wrappers, splits profile navigation, or invents profile evidence."],
+  "blockTrees": ["ExistingGlobalShell > PublicProfileLayout > ProfileTabsBar + RailShell(ProfileHero, routed Profile*Page)"],
+  "contracts": [
+    {"key":"profile-tabs-over-body","why":"One profile navigation owns all profile routes."},
+    {"key":"rail-then-main","why":"Frameless identity rail and flexible evidence body preserve legacy hierarchy."},
+    {"key":"stacked-sections","why":"Independent blocks retain ordering and request lifetimes."},
+    {"key":"label-row-over-card","why":"Labels sit outside one bounded surface without extra wrappers."},
+    {"key":"activity-feed-list","why":"Chronological activity remains distinct from contributions."}
+  ],
+  "vocabularyProposals": [],
+  "backendEnablerProposals": [],
+  "preview": {
+    "path": "D:/Repositories/starci-academy-fe/.artifacts/profile-section-strict-parity-v2",
+    "url": "http://127.0.0.1:8085/",
+    "manifestCaseIds": ["strict-parity"]
+  }
+}

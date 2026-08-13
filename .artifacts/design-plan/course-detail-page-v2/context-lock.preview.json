@@ -1,0 +1,79 @@
+{
+  "version": 2,
+  "task": "course-detail-page-v2",
+  "phase": "preview",
+  "status": "locked",
+  "trustRoot": "D:\\Repositories\\starci-academy-backend\\.claude",
+  "skill": {
+    "name": "starci-fe-design-preview",
+    "path": "D:\\Repositories\\starci-academy-backend\\.claude\\skills\\starci-fe-design-preview\\SKILL.md"
+  },
+  "inheritedFrom": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page-v2\\context-lock.plan.json",
+  "targets": [
+    {
+      "role": "design-target",
+      "repo": "starci-academy-fe",
+      "gitRoot": "D:\\Repositories\\starci-academy-fe",
+      "branch": "main",
+      "worktree": "D:\\Repositories\\starci-academy-fe",
+      "head": "7aa4ba0",
+      "remote": "https://github.com/starci-lab/starci-academy-fe.git"
+    }
+  ],
+  "references": [
+    {
+      "role": "parity-baseline",
+      "repo": "starci-academy",
+      "gitRoot": "D:\\Repositories\\starci-academy",
+      "branch": "mtp",
+      "head": "9a1934231",
+      "purpose": "CourseDetailPage behind academy.starci.org/vi/courses/fullstack-mastery"
+    },
+    {
+      "role": "business-truth",
+      "repo": "starci-academy-backend",
+      "gitRoot": "D:\\Repositories\\starci-academy-backend",
+      "branch": "mtp",
+      "head": "06d06496",
+      "purpose": "course query by id or displayId, PricingPhaseEntity, ValuePropositionEntity"
+    },
+    {
+      "role": "superseded-run",
+      "path": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page",
+      "purpose": "Read-only. Its CoverImage proposal and its fixture are carried over unchanged; its Tree, blocks and page are NOT, because they predate the host tag."
+    }
+  ],
+  "artifactRoot": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page-v2",
+  "writeBoundary": [
+    "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page-v2"
+  ],
+  "readOnlyBoundary": [
+    "D:\\Repositories\\starci-academy-fe\\src",
+    "D:\\Repositories\\starci-academy-fe\\plugins\\eslint-canon",
+    "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page",
+    "D:\\Repositories\\starci-academy",
+    "D:\\Repositories\\starci-academy-backend"
+  ],
+  "drift": [
+    {
+      "field": "evidence[0]",
+      "planSaid": "ContractHostTag exists and admits div, main, nav, ul, ol, form, section and aside",
+      "nowTrue": "The type is named ContractHost, matches the canon template exactly, and admits eleven members: div, ul, ol, li, form, nav, main, section, header, footer, aside.",
+      "cause": "Writing these entries found that the union admitted ul and ol but not li, so a list row could only be a div - a ul whose children are not li stops being announced as a list. li was merged into the canon template and then into the repository registry before this candidate was written.",
+      "effect": "Enlarges what the direction can express; nothing selected in Plan is invalidated. Recorded rather than treated as a stop, because the Plan direction was chosen ON the claim that regions would name themselves, and this is that claim being made available."
+    },
+    {
+      "field": "evidence[1]",
+      "planSaid": "The sticky family in LayoutClassName remains first-child only, so a right-hand sticky rail still widens the union by five members",
+      "nowTrue": "Still true, and larger. Measured: the entries use 51 distinct classes, of which twelve are not union members - five sticky last-child members, two last-child grow members, three for the pinned bar, and pt-6 / pb-6.",
+      "cause": "Measured with a bracket-aware scan of the entries rather than by eye; an earlier regex count said three because it stopped at the ] inside md:[&>*:last-child]:sticky. pt-6 and pb-6 were added during revision 1.0 after the rendered mobile state showed the pinned bar lifting 24px off the bottom edge at the end of the scroll.",
+      "effect": "The proposal is twelve members, not five. Every one mirrors a member already present for the opposite child or the opposite edge."
+    }
+  ],
+  "runtime": {
+    "kind": "review-lab",
+    "startPort": 8080,
+    "note": "Preview chrome frames the exported candidate through candidateUrl; it holds no HTML or CSS of its own."
+  },
+  "detectedAt": "2026-08-13"
+}

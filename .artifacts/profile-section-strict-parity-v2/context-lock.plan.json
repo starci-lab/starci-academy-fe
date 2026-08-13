@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "task": "whole-public-profile-strict-parity-v2",
+  "phase": "plan",
+  "status": "locked",
+  "trustRoot": "D:/Repositories/starci-academy-backend/.claude",
+  "skill": {"name":"starci-fe-design-plan","path":"D:/Repositories/starci-academy-backend/.claude/skills/starci-fe-design-plan/SKILL.md"},
+  "targets": [
+    {"role":"primary-target","repo":"starci-academy-fe","gitRoot":"D:/Repositories/starci-academy-fe","branch":"main","worktree":"D:/Repositories/starci-academy-fe","head":"8af51ee6cd78ea4a4eed0c4af27e49d77abc28b6","remote":"https://github.com/starci-lab/starci-academy-fe.git"}
+  ],
+  "references": [
+    {"role":"legacy-parity","repo":"starci-academy","gitRoot":"D:/Repositories/starci-academy","branch":"mtp","worktree":"D:/Repositories/starci-academy","head":"9a193423128efa1dc83f23ab0f79fb4ae66db847","remote":"https://github.com/starci-lab/starci-academy.git"},
+    {"role":"backend-evidence","repo":"starci-academy-backend","gitRoot":"D:/Repositories/starci-academy-backend","branch":"mtp","worktree":"D:/Repositories/starci-academy-backend","head":"06d06496e79efb5938f16faeb12ca49ecd15ad35","remote":"https://github.com/starci-lab/starci-academy-backend"}
+  ],
+  "artifactRoot": "D:/Repositories/starci-academy-fe/.artifacts/profile-section-strict-parity-v2",
+  "writeBoundary": ["D:/Repositories/starci-academy-fe/.artifacts/profile-section-strict-parity-v2"],
+  "readOnlyBoundary": ["D:/Repositories/starci-academy-fe/src", "D:/Repositories/starci-academy", "D:/Repositories/starci-academy-backend", "D:/Repositories/starci-academy-backend/.claude"],
+  "runtime": {"kind":"direction-lab","url":"http://127.0.0.1:8085/","port":8085,"pid":3492,"startPolicy":"first free port beginning at 8080"},
+  "evidence": ["user named starci-academy-fe target and starci-academy legacy", "git identity detection", "selected plan record"],
+  "inheritedFrom": null,
+  "detectedAt": "2026-08-12T20:20:00+07:00"
+}

@@ -1,0 +1,207 @@
+{
+  "version": 2,
+  "task": "course-detail-page",
+  "status": "direction-selected",
+  "contextLock": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page\\context-lock.plan.json",
+  "caseId": "case-course-detail",
+  "deliveryMode": "single",
+  "mode": "migration",
+  "renderStatus": "directional-not-apply-baseline",
+  "parityBaseline": "starci-academy CourseDetailPage at mtp/9a1934231, rendered in production at academy.starci.org/vi/courses/fullstack-mastery",
+  "workItems": [
+    {
+      "id": "page-course-detail",
+      "scope": "page",
+      "owns": "the /courses/[displayId] route, its hero and trust strip, its narrative sections and the single buy rail",
+      "target": "D:\\Repositories\\starci-academy-fe",
+      "note": "Net-new: no route, no single-course query and no course-detail component exists in the target."
+    }
+  ],
+  "evidence": [
+    { "source": "starci-academy-fe/src/app", "claim": "The target has no /courses/[slug] route; its router holds authentication, dashboard and profile only." },
+    { "source": "starci-academy-fe/src grep for query-course and coursePricePreview", "claim": "The target has no single-course query and no price-preview call; only the paginated list query exists." },
+    { "source": "starci-academy-backend .../queries/courses/course/graphql-types/request.ts", "claim": "CourseRequest accepts id OR displayId, so the production slug fullstack-mastery resolves with no new backend field." },
+    { "source": "starci-academy/.../CourseDetailPage/component.tsx", "claim": "The legacy page is one grid from the top: hero at cols 1-2 row 1, pricing rail at col 3 spanning rows 1-2, narrative at cols 1-2 row 2, plus a mobile-only sticky enroll bar." },
+    { "source": "starci-academy/.../CoursePricingRail/index.tsx", "claim": "The rail is the only buy box on the page — cover, headline price with one discount, one scarcity line, phase ladder, CTA cluster, enrolled-count proof — and the hero deliberately carries no price or CTA." },
+    { "source": "starci-academy/src/hooks/useCourseTotals.ts", "claim": "The five trust chips are derived client-side by walking modules to contents to challenges and minutesRead, so the page must fetch the whole module tree but needs no backend counter." },
+    { "source": "starci-academy-fe/src/components/contracts/index.ts", "claim": "rail-then-main exists and already carries sticky, top-6, max-h-rail and overflow-y-auto, but it sizes and sticks its FIRST child, so unchanged reuse places the rail on the left." },
+    { "source": "starci-academy-fe/src/components/branches", "claim": "The target's branches are PressableTree, SurfaceCard, SurfaceFormCard, SurfaceListCard, SurfacePanel and Tree. There is no accordion branch." },
+    { "source": "starci-academy-fe/src/components/contracts/index.ts", "claim": "profile-topic-chip-run is a badge run with exactly the trust strip's mechanics but is domain-named for profile." },
+    { "source": "starci-academy-fe/src/components/contracts/index.ts LayoutClassName union", "claim": "md:[&>*:last-child]:w-72, md:[&>*:last-child]:shrink-0, md:[&>*:first-child]:min-w-0 and md:[&>*:first-child]:grow are all members, so a mirrored right-rail contract is typeable without widening the class vocabulary." }
+  ],
+  "unknowns": [
+    "The target must add a single-course query carrying the full module tree before any of this renders; this Plan does not size that document.",
+    "The legacy curriculum discloses through ModuleAccordionItem, but the target has no accordion branch. Whether the curriculum discloses or stays a flat list is an open decision inside the selected direction.",
+    "Cart and checkout are absent from the target, so the CTA's destination beyond enrolment is unproven.",
+    "Whether the mobile sticky enroll bar is reproduced as a second owner or folded into the rail."
+  ],
+  "businessCapabilities": [
+    { "capability": "single course by id or displayId", "status": "exists server-side, absent from the target frontend", "source": "CourseRequest" },
+    { "capability": "pricing phases and the active phase", "status": "exists", "source": "PricingPhaseEntity via the course query" },
+    { "capability": "per-viewer loyalty price", "status": "exists server-side, not called by the target", "source": "coursePricePreview" },
+    { "capability": "value propositions", "status": "exists", "source": "ValuePropositionEntity" },
+    { "capability": "prerequisites", "status": "exists", "source": "PrerequisiteEntity" },
+    { "capability": "module and lesson tree with minutesRead and challenges", "status": "exists", "source": "course query relations; the trust chips are derived from it client-side" },
+    { "capability": "enrolment count and viewer enrolment flag", "status": "exists", "source": "CourseEntity" },
+    { "capability": "cart and checkout", "status": "absent from the target frontend", "source": "myCart exists server-side only" }
+  ],
+  "directions": [
+    {
+      "directionId": "direction-parity-first",
+      "posture": "parity-first",
+      "thesis": "Reproduce the named production landing: narrative on the left, one sticky buy rail on the right that owns every commerce fact, and a hero that deliberately carries no price.",
+      "primaryCta": "The rail's single enrol or continue action",
+      "readingOrder": ["breadcrumb", "title and tagline", "trust chip strip", "what you will learn", "curriculum", "sticky buy rail alongside from the top"],
+      "tradeoffs": [
+        "The buy decision lives in exactly one place and follows the reader down a long curriculum.",
+        "It needs a mirrored layout contract and the most new vocabulary of the three directions."
+      ],
+      "legacyDivergence": [],
+      "implementationFeasibility": {
+        "status": "partial",
+        "existingOwners": ["SurfaceCard", "SurfaceListCard", "SurfacePanel", "Tree", "Badge", "Button", "Text", "Heading", "IconTile", "Divider", "EmptyNotice"],
+        "existingContracts": ["price-discount-line", "stacked-sections", "rail-then-main", "heading-over-body"],
+        "exactProposals": [
+          { "tier": "contract", "name": "main-then-rail", "api": "classes mirror rail-then-main onto the last child: md:[&>*:last-child]:w-72, md:[&>*:last-child]:shrink-0, md:[&>*:last-child]:sticky, md:[&>*:last-child]:top-6, md:[&>*:last-child]:self-start, md:[&>*:last-child]:max-h-rail, md:[&>*:last-child]:overflow-y-auto, md:[&>*:first-child]:min-w-0, md:[&>*:first-child]:grow", "note": "CORRECTED during Preview — see amendments[0]. The width and grow classes are already members of the locked LayoutClassName union, but the STICKY family exists only in its first-child form, so this proposal widens the union by five members." },
+          { "tier": "contract", "name": "pricing-phase-ladder" },
+          { "tier": "contract", "name": "course-stat-chip-run" },
+          { "tier": "leaf", "name": "CoverImage", "path": "src/components/leaves/CoverImage", "note": "Shared with the courses-catalog run; whichever ships first owns it." },
+          { "tier": "block", "name": "CoursePricingRail", "path": "src/components/blocks/courses/CoursePricingRail" },
+          { "tier": "contract", "name": "price-discount-line", "api": "add optional savings slot: { leaf: 'text', props: { size: 'xs', tone: 'muted' }, optional: true }" }
+        ],
+        "unmappedAnatomy": [
+          "curriculum disclosure — the legacy module accordion has no branch in the target, and whether the curriculum discloses at all is still an open product decision",
+          "mobile sticky enroll bar — no owner exists and the direction has not settled whether it is one"
+        ]
+      },
+      "representativeSceneId": "direction-parity-first-default"
+    },
+    {
+      "directionId": "direction-decision-band",
+      "posture": "balanced",
+      "thesis": "Promote price, phase ladder and CTA into one full-width band directly under the hero so a single owner serves every viewport and the separate mobile enroll bar disappears.",
+      "primaryCta": "The band's single enrol or continue action",
+      "readingOrder": ["breadcrumb", "title and tagline", "trust chip strip", "decision band", "what you will learn", "curriculum"],
+      "tradeoffs": [
+        "One commerce owner instead of a rail plus a mobile bar that must agree with each other.",
+        "A reader deep in a 23-module curriculum has no visible call to action, which is the job the sticky rail was doing."
+      ],
+      "legacyDivergence": [
+        "No rail at all; commerce interrupts the narrative once, directly under the hero.",
+        "The legacy mobile-only sticky enroll bar is removed rather than reproduced."
+      ],
+      "implementationFeasibility": {
+        "status": "partial",
+        "existingOwners": ["SurfaceCard", "SurfaceListCard", "Tree", "Badge", "Button", "Text", "Heading", "Divider", "EmptyNotice"],
+        "existingContracts": ["stacked-sections", "price-discount-line"],
+        "exactProposals": [
+          { "tier": "contract", "name": "course-decision-band" },
+          { "tier": "contract", "name": "pricing-phase-ladder" },
+          { "tier": "contract", "name": "course-stat-chip-run" },
+          { "tier": "leaf", "name": "CoverImage", "path": "src/components/leaves/CoverImage" },
+          { "tier": "block", "name": "CourseDecisionBand", "path": "src/components/blocks/courses/CourseDecisionBand" }
+        ],
+        "unmappedAnatomy": ["curriculum disclosure — same missing accordion branch as direction A"]
+      },
+      "representativeSceneId": "direction-decision-band-default"
+    },
+    {
+      "directionId": "direction-locked-rail",
+      "posture": "conservative",
+      "thesis": "Ship inside the locked vocabulary: reuse rail-then-main exactly as it is, accept the rail on the left, and render both value propositions and curriculum as plain joined lists.",
+      "primaryCta": "The left rail's single enrol or continue action",
+      "readingOrder": ["breadcrumb", "left buy rail", "title and tagline", "trust chip strip", "what you will learn", "curriculum"],
+      "tradeoffs": [
+        "Adds no layout vocabulary and no sticky mechanics of its own.",
+        "Openly not parity: mirrored rail, no cover artwork in the rail, savings line dropped."
+      ],
+      "legacyDivergence": [
+        "The buy rail sits on the left rather than the right.",
+        "No cover artwork inside the rail.",
+        "The savings sentence is dropped because no savings slot is proposed.",
+        "Below md the locked contract stacks rail-first, so the buy box appears before the course title."
+      ],
+      "implementationFeasibility": {
+        "status": "partial",
+        "existingOwners": ["SurfaceCard", "SurfaceListCard", "Tree", "Badge", "Button", "Text", "Heading", "Divider", "EmptyNotice"],
+        "existingContracts": ["rail-then-main", "stacked-sections", "price-discount-line"],
+        "exactProposals": [
+          { "tier": "contract", "name": "pricing-phase-ladder" },
+          { "tier": "contract", "name": "course-stat-chip-run" },
+          { "tier": "block", "name": "CoursePricingRail", "path": "src/components/blocks/courses/CoursePricingRail" }
+        ],
+        "unmappedAnatomy": ["curriculum disclosure — same missing accordion branch as direction A"]
+      },
+      "representativeSceneId": "direction-locked-rail-default"
+    }
+  ],
+  "stateManifest": [
+    { "ownerId": "page-course-detail", "state": "populated", "coverage": "rendered-in-plan" },
+    { "ownerId": "page-course-detail", "state": "skeleton", "coverage": "deferred-to-preview" },
+    { "ownerId": "page-course-detail", "state": "not-found", "coverage": "deferred-to-preview" },
+    { "ownerId": "page-course-detail", "state": "failed", "coverage": "deferred-to-preview" },
+    { "ownerId": "page-course-detail", "state": "mobile", "coverage": "deferred-to-preview" },
+    { "ownerId": "page-course-detail", "state": "light-theme", "coverage": "deferred-to-preview" },
+    { "ownerId": "page-course-detail", "state": "keyboard-focus", "coverage": "deferred-to-preview" },
+    { "ownerId": "CoursePricingRail", "state": "price-pending", "coverage": "deferred-to-preview" },
+    { "ownerId": "CoursePricingRail", "state": "guest-no-loyalty", "coverage": "deferred-to-preview" },
+    { "ownerId": "CoursePricingRail", "state": "no-phases", "coverage": "deferred-to-preview" },
+    { "ownerId": "CoursePricingRail", "state": "slots-scarcity", "coverage": "deferred-to-preview" },
+    { "ownerId": "CoursePricingRail", "state": "enrolled-viewer", "coverage": "deferred-to-preview" },
+    { "ownerId": "course-stat-chip-run", "state": "no-challenges", "coverage": "deferred-to-preview" },
+    { "ownerId": "course-stat-chip-run", "state": "zero-enrolment", "coverage": "deferred-to-preview" }
+  ],
+  "directionLab": {
+    "path": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page",
+    "url": "http://127.0.0.1:8085/",
+    "caseId": "case-course-detail",
+    "directionIds": ["direction-parity-first", "direction-decision-band", "direction-locked-rail"]
+  },
+  "selectedDirectionId": "direction-parity-first",
+  "selectionKind": "explicit",
+  "selectionEvidence": "After the three directions were rendered and offered, the user answered \"A\", which is direction-parity-first.",
+  "defaultReason": null,
+  "blockTrees": [
+    {
+      "directionId": "direction-parity-first",
+      "tree": "CourseDetailPage (page)\n└── main-then-rail                    ← proposed (mirror of locked rail-then-main)\n    ├── course-narrative-column\n    │   ├── course-hero-heading\n    │   ├── course-stat-chip-run      ← proposed\n    │   ├── SurfaceListCard (exists) · value propositions\n    │   └── SurfaceListCard (exists) · curriculum modules\n    └── CoursePricingRail (block)     ← proposed\n        ├── cover-image (leaf)        ← proposed\n        ├── price-discount-line (exists, + savings slot)\n        ├── pricing-phase-ladder      ← proposed\n        ├── button (leaf, exists)\n        └── text (leaf, exists)"
+    }
+  ],
+  "contracts": [
+    { "key": "price-discount-line", "why": "The payable price leads while original price and discount qualify that same commerce fact on one wrapping line.", "decision": "reuse-and-extend" },
+    { "key": "rail-then-main", "why": "A narrow persistent column beside the flexible main measure, already carrying the sticky mechanics — but it owns its FIRST child, which is why parity needs a mirror rather than this key.", "decision": "evidence-only" },
+    { "key": "main-then-rail", "why": "The narrative owns the flexible measure while the purchase decision keeps a fixed sticky column at the trailing edge.", "decision": "propose" },
+    { "key": "pricing-phase-ladder", "why": "The phases are one mutually exclusive ladder where the open phase is the price and the others are the cost of waiting, so they read as one control rather than separate facts.", "decision": "propose" },
+    { "key": "course-stat-chip-run", "why": "A course's trust counts are compact peer facts that wrap together; mechanically identical to profile-topic-chip-run but not the same domain.", "decision": "propose" }
+  ],
+  "vocabularyProposals": [
+    { "tier": "contract", "name": "main-then-rail", "path": "src/components/contracts/index.ts", "api": "classes: flex, flex-col, gap-6, md:flex-row, md:items-start, md:[&>*:first-child]:min-w-0, md:[&>*:first-child]:grow, md:[&>*:last-child]:w-72, md:[&>*:last-child]:shrink-0, md:[&>*:last-child]:sticky, md:[&>*:last-child]:top-6, md:[&>*:last-child]:self-start, md:[&>*:last-child]:max-h-rail, md:[&>*:last-child]:overflow-y-auto", "note": "CORRECTED during Preview — see amendments[0]. This proposal DOES widen the locked LayoutClassName union, by the five last-child sticky members." },
+    { "tier": "type", "name": "LayoutClassName", "path": "src/components/contracts/index.ts", "api": "add md:[&>*:last-child]:sticky, md:[&>*:last-child]:top-6, md:[&>*:last-child]:self-start, md:[&>*:last-child]:max-h-rail, md:[&>*:last-child]:overflow-y-auto", "reason": "The locked union carries the sticky family only in its first-child form, so a right-hand sticky rail is currently unrepresentable. Widening is the smallest correct change: the mirrored members describe the same mechanics on the opposite child." },
+    { "tier": "contract", "name": "pricing-phase-ladder", "path": "src/components/contracts/index.ts" },
+    { "tier": "contract", "name": "course-stat-chip-run", "path": "src/components/contracts/index.ts" },
+    { "tier": "leaf", "name": "CoverImage", "path": "src/components/leaves/CoverImage", "api": "props { src: string | null, alt: string, ratio: '16/9' }", "absence": "renders a token fallback surface when src is null", "note": "Also proposed by the courses-catalog run; the two must not create two owners." },
+    { "tier": "block", "name": "CoursePricingRail", "path": "src/components/blocks/courses/CoursePricingRail", "reason": "The single buy box owns every commerce fact on the page, which is one relationship no existing block holds." }
+  ],
+  "backendEnablerProposals": [],
+  "amendments": [
+    {
+      "id": "main-then-rail-widens-the-class-union",
+      "amendedAt": "preview",
+      "field": "directions[direction-parity-first].implementationFeasibility.exactProposals[main-then-rail] and vocabularyProposals[main-then-rail]",
+      "claimAsWritten": "Every class listed is already a member of the locked LayoutClassName union; the union is not widened.",
+      "correction": "False. The locked union at src/components/contracts/index.ts lines 50-52 carries md:[&>*:first-child]:sticky, :top-6, :self-start, :max-h-rail and :overflow-y-auto — the FIRST-child forms only. There is no last-child equivalent, so a right-hand sticky rail cannot be typed today. main-then-rail therefore widens the union by five mirrored members.",
+      "evidence": "grep of the LayoutClassName union and of rail-then-main at line 1139 in the locked target",
+      "consequenceForApply": "Apply must add five members to a governed type, not only a registry entry. The selected direction, its thesis and its reading order are unchanged; only the size of the vocabulary change grew.",
+      "reopensDirection": false
+    },
+    {
+      "id": "open-decisions-settled-at-preview",
+      "amendedAt": "preview",
+      "field": "directions[direction-parity-first].implementationFeasibility.unmappedAnatomy",
+      "correction": "Both unmapped items were put to the user before any candidate code was written, because the Plan recorded the first as an open PRODUCT decision. The user chose the disclosing accordion for the curriculum and a separate owner for the mobile enroll bar — parity on both.",
+      "evidence": "User selected \"Accordion bấm mở ra (parity)\" and \"Làm owner riêng (parity)\".",
+      "consequenceForApply": "Two further owners enter the proposal: a curriculum module disclosure leaf and a CourseMobileEnrollBar block.",
+      "reopensDirection": false
+    }
+  ]
+}

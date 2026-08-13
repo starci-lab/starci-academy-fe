@@ -1,0 +1,69 @@
+{
+  "version": 2,
+  "task": "courses-catalog-page",
+  "phase": "preview",
+  "status": "locked",
+  "trustRoot": "D:\\Repositories\\starci-academy-backend\\.claude",
+  "skill": {
+    "name": "starci-fe-design-preview",
+    "path": "D:\\Repositories\\starci-academy-backend\\.claude\\skills\\starci-fe-design-preview\\SKILL.md"
+  },
+  "inheritedFrom": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\courses-catalog-page\\context-lock.plan.json",
+  "planRecord": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\courses-catalog-page\\plan-record.json",
+  "caseId": "case-courses-catalog",
+  "selectedDirectionId": "direction-enrollment-split",
+  "targets": [
+    {
+      "role": "design-target",
+      "repo": "starci-academy-fe",
+      "gitRoot": "D:\\Repositories\\starci-academy-fe",
+      "branch": "main",
+      "worktree": "D:\\Repositories\\starci-academy-fe",
+      "head": "8af51ee",
+      "remote": "https://github.com/starci-lab/starci-academy-fe.git"
+    }
+  ],
+  "references": [
+    {
+      "role": "parity-baseline",
+      "repo": "starci-academy",
+      "gitRoot": "D:\\Repositories\\starci-academy",
+      "branch": "mtp",
+      "head": "9a1934231",
+      "purpose": "Legacy CourseCatalogPage behind academy.starci.org/vi/courses"
+    },
+    {
+      "role": "business-truth",
+      "repo": "starci-academy-backend",
+      "gitRoot": "D:\\Repositories\\starci-academy-backend",
+      "branch": "mtp",
+      "head": "06d06496",
+      "purpose": "CourseEntity, ValuePropositionEntity, CoursesRequest, myCourses"
+    }
+  ],
+  "artifactRoot": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\courses-catalog-page",
+  "candidateRoot": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\courses-catalog-page\\candidate",
+  "writeBoundary": [
+    "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\courses-catalog-page"
+  ],
+  "readOnlyBoundary": [
+    "D:\\Repositories\\starci-academy-fe\\src",
+    "D:\\Repositories\\starci-academy",
+    "D:\\Repositories\\starci-academy-backend",
+    "D:\\Repositories\\starci-academy-backend\\.claude"
+  ],
+  "runtime": {
+    "kind": "executable-candidate",
+    "framework": "next 16.1.6 / react 19.2.3 / tailwind v4 / heroui 3.2.1",
+    "moduleResolution": "candidate resolves node_modules by walking up to D:\\Repositories\\starci-academy-fe",
+    "startPolicy": "serve_preview.py from the trust root, first free port from 8080",
+    "planLabPort": 8083,
+    "planLabPid": 47184
+  },
+  "drift": {
+    "detected": false,
+    "comparedFields": ["trustRoot", "skill lineage", "target role", "gitRoot", "branch", "worktree", "head", "remote", "artifactRoot", "writeBoundary", "readOnlyBoundary"],
+    "note": "All three repositories match the Plan lock exactly at redetection."
+  },
+  "detectedAt": "2026-08-13"
+}

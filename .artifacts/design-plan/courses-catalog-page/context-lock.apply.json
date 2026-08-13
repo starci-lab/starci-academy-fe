@@ -1,0 +1,177 @@
+{
+  "version": 2,
+  "task": "courses-catalog-page",
+  "phase": "apply",
+  "status": "confirmed-attempted-reverted",
+  "trustRoot": "D:\\Repositories\\starci-academy-backend\\.claude",
+  "skill": {
+    "name": "starci-fe-design-apply",
+    "path": "D:\\Repositories\\starci-academy-backend\\.claude\\skills\\starci-fe-design-apply\\SKILL.md"
+  },
+  "inheritedFrom": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\courses-catalog-page\\context-lock.preview.json",
+  "designRecord": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\courses-catalog-page\\design-record.json",
+  "caseId": "case-courses-catalog",
+  "approvedRevision": "1.9",
+  "sealVerified": true,
+  "manifestSha256": "f8c5a81ce399a4d04d64e69b0b62bbf6418536405ba2c53b1913cb63a1bff3fb",
+  "targets": [
+    {
+      "role": "design-target",
+      "repo": "starci-academy-fe",
+      "gitRoot": "D:\\Repositories\\starci-academy-fe",
+      "branch": "main",
+      "worktree": "D:\\Repositories\\starci-academy-fe",
+      "head": "7aa4ba0",
+      "remote": "https://github.com/starci-lab/starci-academy-fe.git"
+    }
+  ],
+  "references": [
+    {
+      "role": "parity-baseline",
+      "repo": "starci-academy",
+      "head": "9a1934231",
+      "purpose": "legacy CourseCatalogPage behind academy.starci.org/vi/courses"
+    },
+    {
+      "role": "business-truth",
+      "repo": "starci-academy-backend",
+      "head": "06d06496",
+      "purpose": "CourseEntity, ValuePropositionEntity, CoursesRequest, myCourses"
+    },
+    {
+      "role": "trust",
+      "repo": "starci-trust",
+      "gitRoot": "D:\\Repositories\\starci-academy-backend\\.claude",
+      "purpose": "canon, skills, generated FE rule set - read-only in this phase"
+    }
+  ],
+  "artifactRoot": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\courses-catalog-page",
+  "proposedWriteBoundary": [
+    "src/components/contracts/index.ts",
+    "src/components/leaves/CoverImage/index.tsx",
+    "src/components/leaves/Pagination/index.tsx",
+    "src/components/leaves/ValuePropositionDisclosure/index.tsx",
+    "src/components/leaves/ChoiceTabs/index.tsx",
+    "src/components/leaves/Icon/index.tsx",
+    "src/components/leaves/Icon/icon.md",
+    "src/components/blocks/courses/EnrolledCourseCard/component.tsx",
+    "src/components/blocks/courses/CourseCatalogCard/component.tsx",
+    "src/components/pages/CoursesCatalogPage/component.tsx"
+  ],
+  "writeBoundaryNotYetConfirmed": false,
+  "readOnlyBoundary": [
+    "every other path in starci-academy-fe, including the nineteen files other sessions are editing",
+    "D:\\Repositories\\starci-academy",
+    "D:\\Repositories\\starci-academy-backend",
+    "D:\\Repositories\\starci-academy-backend\\.claude"
+  ],
+  "gates": {
+    "designRecord": {
+      "ok": true,
+      "manifestSha256": "a67bedd861e84346f560174180329f51ab8d969589579d1d484356c1c3385822"
+    },
+    "lintAdoption": {
+      "ok": true,
+      "missing": 0,
+      "nonError": 0,
+      "refusesInlineConfig": true,
+      "probe": "src/components/leaves/Text/index.tsx",
+      "note": "The one rule missing earlier, no-second-language-in-path, now resolves. The mirror was synced between the plan and this run."
+    },
+    "materialization": {
+      "note": "Not run yet - it is a handoff gate and every target is still absent by design."
+    }
+  },
+  "drift": {
+    "detected": false,
+    "comparedFields": [
+      "trustRoot",
+      "skill lineage",
+      "target role",
+      "gitRoot",
+      "branch",
+      "worktree",
+      "head",
+      "remote",
+      "artifactRoot"
+    ],
+    "note": "HEAD 7aa4ba0 is unchanged since the plan run. No reference head moved."
+  },
+  "targetPathState": {
+    "absent": [
+      "src/components/leaves/CoverImage/index.tsx",
+      "src/components/leaves/Pagination/index.tsx",
+      "src/components/leaves/ValuePropositionDisclosure/index.tsx",
+      "src/components/blocks/courses/EnrolledCourseCard/component.tsx",
+      "src/components/blocks/courses/CourseCatalogCard/component.tsx",
+      "src/components/pages/CoursesCatalogPage/component.tsx"
+    ],
+    "existingAndMerged": [
+      "src/components/contracts/index.ts",
+      "src/components/leaves/ChoiceTabs/index.tsx",
+      "src/components/leaves/Icon/index.tsx",
+      "src/components/leaves/Icon/icon.md"
+    ],
+    "collisionCheck": "All eleven proposed contract keys are absent from the locked registry right now, so the merge adds and never overwrites."
+  },
+  "hazards": [
+    {
+      "id": "dirty-merge-target",
+      "detail": "src/components/contracts/index.ts already carries 26 insertions and 2 deletions uncommitted from another session, and it is one of this case's merge targets. The merge adds eleven new keys and touches nothing existing, but the file is being edited concurrently and the resulting diff will not be this case alone."
+    },
+    {
+      "id": "shared-working-tree",
+      "detail": "Nineteen files under src/ are uncommitted from other sessions. None is a target here. Nothing may be committed on their behalf."
+    },
+    {
+      "id": "canon-mirror-is-read-only",
+      "detail": "The icon feature table requires its canon mirror at .claude/fe/canon/patterns/icon.md to change in the same edit. The trust tree is read-only in Apply, so that half cannot be written here. It must be raised rather than skipped silently."
+    }
+  ],
+  "productionWrites": "none",
+  "detectedAt": "2026-08-13",
+  "confirmation": {
+    "target": "D:\\Repositories\\starci-academy-fe",
+    "branchWorktree": "main / D:\\Repositories\\starci-academy-fe",
+    "writeBoundary": "exactly the ten files, nothing else",
+    "userWords": "target / branch-worktree / write boundary confirmed, then \"ok\"",
+    "exercised": true,
+    "note": "Confirmed for the ten files. The integrationEdits contract that blocked the first attempt is now declared in the sealed record at revision 1.9."
+  },
+  "blocked": true,
+  "blockingGate": "undeclared-integration-edits",
+  "attempt": {
+    "wrote": [
+      "contracts/index.ts (11 entries)",
+      "Icon/index.tsx (2 meanings)",
+      "icon.md (2 rows)",
+      "ChoiceTabs/index.tsx (icon slot)",
+      "CoverImage",
+      "Pagination",
+      "ValuePropositionDisclosure",
+      "EnrolledCourseCard",
+      "CourseCatalogCard",
+      "CoursesCatalogPage"
+    ],
+    "failedAt": "tsc --noEmit, 5 errors",
+    "reverted": true,
+    "revertMethod": "git checkout for the three files that were clean beforehand; a surgical removal of the eleven entries from contracts/index.ts because another session had it dirty; rm for the six created files",
+    "postRevertTypecheck": "2 errors, both pre-existing in plugins/eslint-canon/props.ts and owned by another session",
+    "netProductionChange": "none"
+  },
+  "blockingFinding": {
+    "id": "two-differences-the-record-never-declared",
+    "first": {
+      "error": "Module \"@/components/branches/Tree\" has no exported member defineContract (3 files)",
+      "cause": "The candidate Tree is scaffolding with a DIFFERENT API from the locked one: defineContract(key, [nodes]) against defineContractComponent(key, {namedSlots}). The record claimed every call site becomes the real Tree with no other edit. That claim is false - the call sites have to be rewritten to the locked builder.",
+      "ownership": "written by this session into the record"
+    },
+    "second": {
+      "error": "Cannot find module @/components/blocks/CourseCatalogCard/component (2 imports)",
+      "cause": "The blocks land at blocks/courses/X while the candidate holds them at blocks/X, so an intra-case import needs the courses/ segment inserted. The declared specifier-rewrite covered only the alias prefix.",
+      "ownership": "written by this session into the record"
+    },
+    "whyNotPatchedInPlace": "Both fixes change how the tree is built and how sibling modules are named, which is beyond the declared edit - integrationEdits says no identifier, prop, contract key or JSX changes. Adapting here is the substitution the seal exists to catch.",
+    "resolution": "Preview revision 1.10: either port a defineContract helper as a named new owner, or rebuild the three files on the locked defineContractComponent API, and widen the specifier-rewrite declaration to cover the blocks/courses/ path. Then re-approve, re-seal, and Apply again."
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "version": 2,
+  "task": "course-detail-page",
+  "phase": "preview",
+  "status": "locked-blocked-on-open-decisions",
+  "trustRoot": "D:\\Repositories\\starci-academy-backend\\.claude",
+  "skill": {
+    "name": "starci-fe-design-preview",
+    "path": "D:\\Repositories\\starci-academy-backend\\.claude\\skills\\starci-fe-design-preview\\SKILL.md"
+  },
+  "inheritedFrom": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page\\context-lock.plan.json",
+  "planRecord": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page\\plan-record.json",
+  "caseId": "case-course-detail",
+  "selectedDirectionId": "direction-parity-first",
+  "targets": [
+    {
+      "role": "design-target",
+      "repo": "starci-academy-fe",
+      "gitRoot": "D:\\Repositories\\starci-academy-fe",
+      "branch": "main",
+      "worktree": "D:\\Repositories\\starci-academy-fe",
+      "head": "8af51ee",
+      "remote": "https://github.com/starci-lab/starci-academy-fe.git"
+    }
+  ],
+  "references": [
+    {
+      "role": "parity-baseline",
+      "repo": "starci-academy",
+      "gitRoot": "D:\\Repositories\\starci-academy",
+      "branch": "mtp",
+      "head": "9a1934231",
+      "purpose": "CourseDetailPage behind academy.starci.org/vi/courses/fullstack-mastery"
+    },
+    {
+      "role": "business-truth",
+      "repo": "starci-academy-backend",
+      "gitRoot": "D:\\Repositories\\starci-academy-backend",
+      "branch": "mtp",
+      "head": "06d06496",
+      "purpose": "course query, PricingPhaseEntity, ValuePropositionEntity"
+    },
+    {
+      "role": "sibling-candidate",
+      "path": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\courses-catalog-page\\candidate",
+      "purpose": "Proven build harness and the shared CoverImage leaf. Read-only: this run reuses that leaf rather than authoring a second owner of the same shape, as both plan records require."
+    }
+  ],
+  "artifactRoot": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page",
+  "candidateRoot": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page\\candidate",
+  "writeBoundary": [
+    "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page"
+  ],
+  "readOnlyBoundary": [
+    "D:\\Repositories\\starci-academy-fe\\src",
+    "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\courses-catalog-page",
+    "D:\\Repositories\\starci-academy",
+    "D:\\Repositories\\starci-academy-backend",
+    "D:\\Repositories\\starci-academy-backend\\.claude"
+  ],
+  "runtime": {
+    "kind": "executable-candidate",
+    "framework": "next 16.1.6 / react 19.2.3 / tailwind v4 / heroui 3.2.1",
+    "moduleResolution": "candidate resolves node_modules by walking up to D:\\Repositories\\starci-academy-fe",
+    "startPolicy": "serve_preview.py from the trust root, first free port from 8080",
+    "planLabPort": 8085,
+    "planLabPid": 40936
+  },
+  "drift": {
+    "detected": false,
+    "comparedFields": ["trustRoot", "skill lineage", "target role", "gitRoot", "branch", "worktree", "head", "remote", "artifactRoot", "writeBoundary", "readOnlyBoundary"],
+    "note": "All three repositories match the Plan lock exactly at redetection."
+  },
+  "blockedOn": [
+    {
+      "id": "curriculum-disclosure",
+      "planField": "directions[direction-parity-first].implementationFeasibility.unmappedAnatomy[0]",
+      "why": "The Plan records this as an open PRODUCT decision, and the skill forbids Preview from inventing one. The legacy curriculum discloses through ModuleAccordionItem; the target has no accordion branch at any tier.",
+      "options": ["disclosing accordion (parity with legacy)", "flat joined list (what the selected Plan scene drew)"]
+    },
+    {
+      "id": "mobile-enroll-bar",
+      "planField": "directions[direction-parity-first].implementationFeasibility.unmappedAnatomy[1]",
+      "why": "Ownership is unsettled: the legacy page has a separate mobile-only sticky enroll bar, and the Plan did not decide whether it is a second owner or folded into the rail.",
+      "options": ["reproduce as a second owner (parity)", "fold into the rail", "omit for now"]
+    }
+  ],
+  "detectedAt": "2026-08-13"
+}

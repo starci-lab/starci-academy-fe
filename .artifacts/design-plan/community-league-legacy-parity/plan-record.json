@@ -1,0 +1,161 @@
+{
+  "version": 2,
+  "task": "community-league-legacy-parity",
+  "status": "direction-selected",
+  "contextLock": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\community-league-legacy-parity\\context-lock.plan.json",
+  "caseId": "case-community-league",
+  "deliveryMode": "batch",
+  "mode": "migration",
+  "renderStatus": "directional-not-apply-baseline",
+  "parityBaseline": "D:\\Repositories\\starci-academy (branch mtp, HEAD 9a193423128efa1dc83f23ab0f79fb4ae66db847) rendered at academy.starci.org/vi/dashboard?tab=community and academy.starci.org/vi/league",
+  "workItems": [
+    { "id": "block-weekly-league", "scope": "block", "target": "src/components/blocks/dashboard/LeagueCard", "owns": "weekly standing line, cohort rows, rank movement, pinned self row" },
+    { "id": "block-top-learners", "scope": "block", "target": "src/components/blocks/dashboard/TopLearners", "owns": "global standing line, top learners, follow control, pinned self row" },
+    { "id": "page-league", "scope": "page", "target": "src/app/league/page.tsx + src/components/pages/LeaguePage", "owns": "scope tabs, standing hero, podium, rank 4+ list, ellipsis, pinned self row" }
+  ],
+  "evidence": [
+    { "source": "academy.starci.org/vi/dashboard?tab=community (user screenshot)", "claim": "Standing line reads 'Hang #1 · top 100%'; subtitle carries '0 XP · Reset sau 2 ngay 18 gio' as one line; row trailing is a caret." },
+    { "source": "academy.starci.org/vi/league (user screenshot)", "claim": "Page has segmented Tuan nay/Toan cau tabs, standing hero with goal meter and climb CTA, a 2-1-3 podium, then rank 4+ rows." },
+    { "source": "starci-academy/src/components/pages/DashboardPage/LeagueCard/LeagueCardContent/index.tsx:76", "claim": "Percentile is FE-computed as Math.max(1, Math.ceil(rank / entries.length * 100)); there is no backend percentile field." },
+    { "source": "starci-academy/src/components/pages/DashboardPage/LeagueCard/LeagueCardContent/index.tsx:123-131", "claim": "Secondary line concatenates points and resetIn with days AND hours into one string." },
+    { "source": "starci-academy/src/components/pages/LeaguePage/index.tsx:86-99", "claim": "Page tabs are a primary segmented TabsCard that swaps the whole board; only the active board mounts." },
+    { "source": "starci-academy/src/components/pages/LeaguePage/GlobalBoard/index.tsx:97-135", "claim": "pointsToNext = above.points - myPoints + 1, ratio = myPoints / above.points, rendered only when the rank above is inside the fetched slice and myRank > 1." },
+    { "source": "starci-academy/src/components/pages/LeaguePage/GlobalBoard/component.tsx:273-283", "claim": "Podium takes entries.slice(0,3) and rank 4+ becomes a followable SurfaceCardList." },
+    { "source": "starci-academy/src/messages/vi.json dashboard.league", "claim": "Legacy unit string is '{count} XP' while the target FE ships '{count} diem'." },
+    { "source": "starci-academy-fe/src/modules/api/graphql/queries/query-my-league.ts:6", "claim": "The target already requests tier, weekEndAt, promoteCount and demoteCount and currently renders none of them." },
+    { "source": "starci-academy-fe/src/components/blocks/dashboard/LeagueCard/index.tsx:74", "claim": "seeMore pushes to /league, a route that does not exist in src/app, so the production control is a dead link." },
+    { "source": "starci-academy-backend/src/modules/bussiness/league/types.ts:140-167", "claim": "globalLeaderboard returns entries, myRank and myPoints only, with no total user count, so a global percentile is not derivable." }
+  ],
+  "unknowns": [
+    "Whether the percentile denominator should be the loaded cohort size or a server-side cohort capacity; the legacy formula is only correct while the full cohort is returned.",
+    "Whether the distinct generated avatars in the production render come from a legacy-only utility that the target does not yet carry.",
+    "Whether /league belongs at the bare path or under a locale segment, since the target has no locale routing today."
+  ],
+  "businessCapabilities": [
+    { "capability": "myLeague", "fields": "tier, weekEndAt, promoteCount, demoteCount, entries{userGlobalId,username,avatar,weekPoints,rank,rankDelta}", "sufficient": true },
+    { "capability": "globalLeaderboard", "fields": "entries{userGlobalId,username,avatar,points,rank,isFollowing}, myRank, myPoints", "sufficient": true },
+    { "capability": "setFollow", "fields": "userId, follow", "sufficient": true }
+  ],
+  "directions": [
+    {
+      "directionId": "direction-legacy-parity",
+      "posture": "parity-first",
+      "thesis": "Reproduce the named production render exactly and treat every current difference as drift to remove rather than a decision to defend.",
+      "primaryCta": "The quiet 'Xem bang xep hang' link on each dashboard section; on the page, the 'Vao khoa hoc kiem XP' climb CTA.",
+      "readingOrder": ["section label + action", "standing line with rank and percentile", "combined XP and reset subtitle", "ranked list", "optional pinned self row"],
+      "tradeoffs": ["The dashboard column stays as long as legacy, because two competition stories remain visible at once."],
+      "legacyDivergence": [],
+      "implementationFeasibility": {
+        "status": "mapped",
+        "existingOwners": ["SurfaceCard", "SurfaceListCard", "LeaderboardStandingRow", "RankedUserRow", "RankMark", "Avatar", "Text", "TextLink", "Button", "Badge", "ChoiceTabs", "Progress", "EmptyNotice", "IconTile"],
+        "existingContracts": ["dashboard-community-main", "label-row-over-card", "leaderboard-card", "leaderboard-standing-row", "ranked-user-list", "ranked-user-row", "ranked-user-row-success-verdict", "ranked-user-row-danger-verdict", "ranked-user-name-over-subtitle", "evidence-title-over-subtitle"],
+        "exactProposals": [
+          { "tier": "leaf", "name": "RankDeltaCaret", "path": "src/components/leaves/RankDeltaCaret/index.tsx", "api": "props: { delta: number | null }" },
+          { "tier": "composite", "name": "Podium", "path": "src/components/composites/Podium/index.tsx", "api": "props: { entries: Array<{ rank: number, username: string | null, avatar: string | null, pointsLabel: string, isMe: boolean }>, meLabel: string }" },
+          { "tier": "composite", "name": "StandingHeroCard", "path": "src/components/composites/StandingHeroCard/index.tsx", "api": "props: { badge?: ReactNode, rankLabel?: string, meta?: string, progress?: { ratio: number, label: string }, ctaLabel: string }, on: { cta: () => void }" },
+          { "tier": "contract", "name": "ranked-user-ellipsis-row", "path": "src/components/contracts/index.ts", "api": "children: { label: { leaf: 'text' } }" },
+          { "tier": "page", "name": "LeaguePage", "path": "src/components/pages/LeaguePage/index.tsx + src/app/league/page.tsx", "api": "no props; owns scope tab state" }
+        ],
+        "unmappedAnatomy": []
+      },
+      "representativeSceneId": "community"
+    },
+    {
+      "directionId": "direction-one-surface",
+      "posture": "balanced",
+      "thesis": "Keep every legacy element but stop telling the same competition story twice on the dashboard: one card whose scope switch matches the page tabs.",
+      "primaryCta": "The scope switch itself, then the section 'Xem bang xep hang' link.",
+      "readingOrder": ["section label + action", "scope switch", "standing line", "ranked list"],
+      "tradeoffs": ["The global board is one interaction away instead of always visible, which may reduce the follow actions that only happen on the visible Top learners card."],
+      "legacyDivergence": ["Legacy renders two stacked dashboard cards; this direction renders one scoped card."],
+      "implementationFeasibility": {
+        "status": "mapped",
+        "existingOwners": ["SurfaceCard", "SurfaceListCard", "LeaderboardStandingRow", "RankedUserRow", "RankMark", "ChoiceTabs"],
+        "existingContracts": ["label-row-over-card", "leaderboard-card", "ranked-user-list", "ranked-user-row"],
+        "exactProposals": [
+          { "tier": "contract", "name": "scoped-leaderboard-card", "path": "src/components/contracts/index.ts", "api": "children: { scope: { composite: 'choice-tabs' }, standing: { composite: 'leaderboard-standing-row', optional: true }, list: { contract: 'ranked-user-list' } }" },
+          { "tier": "leaf", "name": "RankDeltaCaret", "path": "src/components/leaves/RankDeltaCaret/index.tsx", "api": "props: { delta: number | null }" },
+          { "tier": "composite", "name": "Podium", "path": "src/components/composites/Podium/index.tsx", "api": "same as direction-legacy-parity" },
+          { "tier": "composite", "name": "StandingHeroCard", "path": "src/components/composites/StandingHeroCard/index.tsx", "api": "same as direction-legacy-parity" },
+          { "tier": "contract", "name": "ranked-user-ellipsis-row", "path": "src/components/contracts/index.ts", "api": "same as direction-legacy-parity" }
+        ],
+        "unmappedAnatomy": []
+      },
+      "representativeSceneId": "community"
+    },
+    {
+      "directionId": "direction-page-first",
+      "posture": "bold",
+      "thesis": "The dashboard answers where am I and what do I do next; every ranked identity moves to the page that exists to hold them.",
+      "primaryCta": "The 'Vao khoa hoc kiem XP' climb CTA on the dashboard strip.",
+      "readingOrder": ["standing line", "goal meter toward the next rank", "climb CTA"],
+      "tradeoffs": ["Removes a legacy capability from a surface the user did not ask to change; the learner cannot see who is around them without navigating."],
+      "legacyDivergence": ["The dashboard shows no ranked rows at all.", "TopLearners stops mounting on the dashboard, so row-level follow survives only on the page."],
+      "implementationFeasibility": {
+        "status": "mapped",
+        "existingOwners": ["SurfaceCard", "SurfaceListCard", "RankedUserRow", "RankMark", "ChoiceTabs", "Progress"],
+        "existingContracts": ["label-row-over-card", "ranked-user-list", "ranked-user-row"],
+        "exactProposals": [
+          { "tier": "composite", "name": "StandingHeroCard", "path": "src/components/composites/StandingHeroCard/index.tsx", "api": "props: { badge?, rankLabel?, meta?, progress?: { ratio, label }, legend?: string, ctaLabel }, on: { cta }" },
+          { "tier": "composite", "name": "Podium", "path": "src/components/composites/Podium/index.tsx", "api": "same as direction-legacy-parity" },
+          { "tier": "leaf", "name": "RankDeltaCaret", "path": "src/components/leaves/RankDeltaCaret/index.tsx", "api": "same as direction-legacy-parity" },
+          { "tier": "contract", "name": "ranked-user-ellipsis-row", "path": "src/components/contracts/index.ts", "api": "same as direction-legacy-parity" }
+        ],
+        "unmappedAnatomy": []
+      },
+      "representativeSceneId": "community"
+    }
+  ],
+  "stateManifest": [
+    { "ownerId": "block-weekly-league", "state": "populated", "coverage": "rendered", "scenarioId": "community" },
+    { "ownerId": "block-weekly-league", "state": "loading", "coverage": "deferred-to-preview" },
+    { "ownerId": "block-weekly-league", "state": "empty", "coverage": "deferred-to-preview" },
+    { "ownerId": "block-weekly-league", "state": "failed", "coverage": "deferred-to-preview" },
+    { "ownerId": "block-weekly-league", "state": "movement-up | movement-down | no-movement", "coverage": "deferred-to-preview" },
+    { "ownerId": "block-weekly-league", "state": "pinned-self-row", "coverage": "deferred-to-preview" },
+    { "ownerId": "block-top-learners", "state": "populated", "coverage": "rendered", "scenarioId": "community" },
+    { "ownerId": "block-top-learners", "state": "loading", "coverage": "deferred-to-preview" },
+    { "ownerId": "block-top-learners", "state": "empty", "coverage": "deferred-to-preview" },
+    { "ownerId": "block-top-learners", "state": "failed", "coverage": "deferred-to-preview" },
+    { "ownerId": "block-top-learners", "state": "following | not-following | pending | rollback", "coverage": "deferred-to-preview" },
+    { "ownerId": "block-top-learners", "state": "own-row-has-no-follow", "coverage": "deferred-to-preview" },
+    { "ownerId": "page-league", "state": "populated-weekly", "coverage": "rendered", "scenarioId": "league-page" },
+    { "ownerId": "page-league", "state": "populated-global", "coverage": "rendered", "scenarioId": "league-page" },
+    { "ownerId": "page-league", "state": "loading | empty | failed", "coverage": "deferred-to-preview" },
+    { "ownerId": "page-league", "state": "viewer-in-podium | viewer-in-rows | viewer-below-slice", "coverage": "deferred-to-preview" },
+    { "ownerId": "page-league", "state": "progress-absent-when-rank-1", "coverage": "deferred-to-preview" },
+    { "ownerId": "page-league", "state": "desktop | mobile | light | dark | keyboard-focus", "coverage": "deferred-to-preview" }
+  ],
+  "directionLab": {
+    "path": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\community-league-legacy-parity",
+    "url": "http://127.0.0.1:8082/",
+    "caseId": "case-community-league",
+    "directionIds": ["direction-legacy-parity", "direction-one-surface", "direction-page-first"]
+  },
+  "selectedDirectionId": "direction-legacy-parity",
+  "selectionKind": "explicit",
+  "selectionEvidence": "User answered 'ok preview'; because that named no direction, the binary re-ask required by the skill was issued and the user selected 'A · Legacy parity'.",
+  "defaultReason": null,
+  "blockTrees": [
+    "CommunityTab\n├── LeagueCard        -> label-row-over-card -> leaderboard-card\n│     ├── standing    rank + percentile · XP + reset countdown (one subtitle)\n│     └── ranked-user-list  medal | avatar | name | XP | RankDeltaCaret\n└── TopLearners       -> label-row-over-card -> leaderboard-card\n      ├── standing    global rank line · XP\n      └── ranked-user-list  medal | avatar | name | XP | follow control",
+    "LeaguePage (new)\n├── page header + breadcrumb\n├── ChoiceTabs (segmented)   Tuan nay | Toan cau\n└── WeeklyBoard | GlobalBoard\n      ├── StandingHeroCard  badge · rank line · meta · goal meter · climb CTA\n      ├── Podium            2 · 1 · 3\n      └── ranked-user-list  rank 4+ -> ellipsis -> pinned self row"
+  ],
+  "contracts": [
+    { "key": "dashboard-community-main", "why": "Weekly league and global standing are separate competition stories with independent request lifetimes, kept in one legacy-ordered community column." },
+    { "key": "label-row-over-card", "why": "Section label and its quiet end action stay outside the card the legacy render puts them above." },
+    { "key": "leaderboard-card", "why": "Viewer standing explains the ranked identities beneath it, so both share one competition surface while the joined list keeps its own separators." },
+    { "key": "leaderboard-standing-row", "why": "The rank artwork fixes the viewer's current place before the standing sentence while a short deadline or tier fact remains at the far edge." },
+    { "key": "ranked-user-list", "why": "Ranked identities are comparable peers in one joined list, so rank, identity, points and row action align across the board." },
+    { "key": "ranked-user-row", "why": "Rank artwork and avatar identify the learner, identity owns spare width, points stay comparable and one movement or follow outcome remains subordinate at the row end." },
+    { "key": "ranked-user-ellipsis-row", "why": "A pinned self row that is far from the fetched slice must announce the gap, because placing it directly under the last row asserts an adjacency that is false." }
+  ],
+  "vocabularyProposals": [
+    { "decision": "new", "tier": "leaf", "name": "RankDeltaCaret", "path": "src/components/leaves/RankDeltaCaret/index.tsx", "api": "props: { delta: number | null }", "meaning": "Signed rank movement as a caret plus magnitude; null renders the neutral placeholder.", "why": "The row trailing slot currently renders a full-sentence Badge, which the legacy render does not have and which pushes the XP column around.", "absence": "delta null or zero renders the neutral placeholder and no verdict inset", "precedence": "replaces the movement Badge in the ranked-user-row action slot", "callers": ["LeagueCard", "LeaguePage WeeklyBoard"], "compatibility": "additive leaf; the Badge path stays for non-movement uses", "tests": "positive, negative, zero and null" },
+    { "decision": "new", "tier": "composite", "name": "Podium", "path": "src/components/composites/Podium/index.tsx", "api": "props: { entries, meLabel }", "meaning": "Top-three dais with the champion centred and raised.", "why": "No existing owner expresses a non-list ranked arrangement.", "absence": "fewer than three entries renders only the present places", "precedence": "page-only; dashboard cards never render it", "callers": ["LeaguePage WeeklyBoard", "LeaguePage GlobalBoard"], "compatibility": "new owner, no existing caller affected", "tests": "2-1-3 ordering, viewer ring, fewer than three entries" },
+    { "decision": "new", "tier": "composite", "name": "StandingHeroCard", "path": "src/components/composites/StandingHeroCard/index.tsx", "api": "props: { badge?, rankLabel?, meta?, progress?, ctaLabel }, on: { cta }", "meaning": "Viewer standing plus goal meter plus the north-star CTA.", "why": "leaderboard-standing-row has no meter or CTA slot and must not grow one, because the dashboard card genuinely does not have those.", "absence": "progress omitted when the viewer is rank 1 or the rank above is outside the fetched slice", "precedence": "page-only", "callers": ["LeaguePage WeeklyBoard", "LeaguePage GlobalBoard"], "compatibility": "new owner", "tests": "with and without progress" },
+    { "decision": "extend", "tier": "composite", "name": "LeaderboardStandingRow", "path": "src/components/composites/LeaderboardStandingRow/index.tsx", "api": "no signature change", "meaning": "The caller composes XP and the reset countdown into the existing subtitle instead of splitting the countdown into the fact badge.", "why": "The legacy render shows one sentence; the current warning Badge is invented chrome.", "absence": "fact stays optional and unused on the weekly card", "precedence": "caller-side change only", "callers": ["LeagueCard", "TopLearners"], "compatibility": "no breaking change", "tests": "standing subtitle renders one combined sentence and no warning badge" },
+    { "decision": "reuse", "tier": "composite", "name": "ChoiceTabs", "path": "src/components/composites/ChoiceTabs", "api": "unchanged", "meaning": "Segmented two-option scope switch.", "why": "Already owns exactly this relationship.", "absence": "n/a", "precedence": "page-level", "callers": ["LeaguePage"], "compatibility": "unchanged", "tests": "existing" },
+    { "decision": "revise", "tier": "i18n", "name": "community namespace", "path": "src/messages/vi.json + en.json", "api": "points -> '{count} XP'; add rankLine with percent, resetIn with days and hours, globalRankLine, pointsToNext, climbCta, othersCount, pageTitle, tabWeekly, tabGlobal, promote, demote", "meaning": "Restore the legacy strings the production render shows.", "why": "The target currently ships 'diem', a day-only countdown and a rank line without percentile.", "absence": "n/a", "precedence": "replaces the current community strings", "callers": ["LeagueCard", "TopLearners", "LeaguePage"], "compatibility": "string-level change; both locales updated together", "tests": "locale parity test across en and vi" }
+  ],
+  "backendEnablerProposals": []
+}

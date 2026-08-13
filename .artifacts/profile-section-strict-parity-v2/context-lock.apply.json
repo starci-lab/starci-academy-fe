@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "task": "whole-public-profile-strict-parity-v2",
+  "phase": "apply",
+  "status": "awaiting-confirmation",
+  "approvedCaseId": "strict-parity",
+  "approvalEvidence": "Explicit user feedback on 2026-08-12: ok dứt apply",
+  "trustRoot": "D:/Repositories/starci-academy-backend/.claude",
+  "skill": {"name":"starci-fe-design-apply","path":"D:/Repositories/starci-academy-backend/.claude/skills/starci-fe-design-apply/SKILL.md"},
+  "targets": [
+    {"role":"primary-target","repo":"starci-academy-fe","gitRoot":"D:/Repositories/starci-academy-fe","branch":"main","worktree":"D:/Repositories/starci-academy-fe","head":"8af51ee6cd78ea4a4eed0c4af27e49d77abc28b6","remote":"https://github.com/starci-lab/starci-academy-fe.git"}
+  ],
+  "references": [
+    {"role":"legacy-parity","repo":"starci-academy","gitRoot":"D:/Repositories/starci-academy","branch":"mtp","worktree":"D:/Repositories/starci-academy","head":"9a193423128efa1dc83f23ab0f79fb4ae66db847","remote":"https://github.com/starci-lab/starci-academy.git"},
+    {"role":"backend-evidence","repo":"starci-academy-backend","gitRoot":"D:/Repositories/starci-academy-backend","branch":"mtp","worktree":"D:/Repositories/starci-academy-backend","head":"06d06496e79efb5938f16faeb12ca49ecd15ad35","remote":"https://github.com/starci-lab/starci-academy-backend"}
+  ],
+  "artifactRoot": "D:/Repositories/starci-academy-fe/.artifacts/profile-section-strict-parity-v2",
+  "writeBoundary": [
+    "D:/Repositories/starci-academy-fe/src/app/profile/[username]/**",
+    "D:/Repositories/starci-academy-fe/src/components/layouts/PublicProfileLayout/**",
+    "D:/Repositories/starci-academy-fe/src/components/blocks/profile/**",
+    "D:/Repositories/starci-academy-fe/src/components/pages/Profile*/**",
+    "D:/Repositories/starci-academy-fe/src/components/composites/Profile*/**",
+    "D:/Repositories/starci-academy-fe/src/components/leaves/ProfileCvDocument/**",
+    "D:/Repositories/starci-academy-fe/src/components/contracts/index.ts",
+    "D:/Repositories/starci-academy-fe/src/modules/api/graphql/queries/query-profile-evidence.ts",
+    "D:/Repositories/starci-academy-fe/src/modules/api/graphql/queries/types/profile-evidence.ts",
+    "D:/Repositories/starci-academy-fe/src/hooks/swr/useQueryProfileEvidenceSwr.ts",
+    "D:/Repositories/starci-academy-fe/messages/en.json",
+    "D:/Repositories/starci-academy-fe/messages/vi.json",
+    "D:/Repositories/starci-academy-fe/.artifacts/profile-section-strict-parity-v2"
+  ],
+  "readOnlyBoundary": [
+    "D:/Repositories/starci-academy",
+    "D:/Repositories/starci-academy-backend",
+    "D:/Repositories/starci-academy-backend/.claude",
+    "all other paths in D:/Repositories/starci-academy-fe"
+  ],
+  "forbidden": ["dependency changes", "generators", "backend mutations", "legacy mutations", "public API changes", "vocabulary changes", "unapproved owners or overlays"],
+  "runtime": {"kind":"review-lab","url":"http://127.0.0.1:8085/","port":8085,"pid":3492},
+  "drift": {"target":false,"legacy":false,"backend":false,"artifactBoundary":false,"note":"No repo, branch, HEAD, remote or worktree drift detected."},
+  "inheritedFrom": "D:/Repositories/starci-academy-fe/.artifacts/profile-section-strict-parity-v2/context-lock.preview.json",
+  "detectedAt": "2026-08-12T20:45:00+07:00"
+}

@@ -12,6 +12,7 @@
  */
 
 export { useQueryCoursesSwr } from "./swr/useQueryCoursesSwr"
+export { useQueryCourseSwr } from "./swr/useQueryCourseSwr"
 export { useQueryPlatformStatsSwr } from "./swr/useQueryPlatformStatsSwr"
 export { useQueryMyCoursesSwr } from "./swr/useQueryMyCoursesSwr"
 export { useQueryMyWeeklyStatsSwr } from "./swr/useQueryMyWeeklyStatsSwr"

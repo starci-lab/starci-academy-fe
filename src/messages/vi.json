@@ -171,6 +171,37 @@
             "clearFilter": "Xóa bộ lọc",
             "failed": "Không tải được danh sách khóa học.",
             "retry": "Thử lại"
+        },
+        "detail": {
+            "navHome": "Trang chủ",
+            "navCourses": "Khóa học",
+            "valuePropsTitle": "Bạn sẽ học được gì",
+            "curriculumTitle": "Nội dung khóa học",
+            "statLearners": "{count} Học viên",
+            "statModules": "{count} Module",
+            "statContents": "{count} Nội dung",
+            "statHours": "{count} Giờ học",
+            "statChallenges": "{count} Bài thực hành",
+            "previewCount": "{count} bài xem trước",
+            "phaseOpen": "Đang mở",
+            "savings": "Tiết kiệm {amount}",
+            "scarcity": "Còn {count} suất ở phase {phase}",
+            "enrolled": "{count} người đã đăng ký",
+            "enroll": "Đăng ký học",
+            "continue": "Tiếp tục học",
+            "notFound": "Không tìm thấy khóa học này.",
+            "failed": "Không tải được khóa học.",
+            "retry": "Thử lại",
+            "tier": {
+                "foundation": "Nền tảng",
+                "intermediate": "Trung cấp",
+                "advanced": "Nâng cao"
+            },
+            "phase": {
+                "pioneer": "Tiên phong",
+                "earlyBird": "Sớm",
+                "regular": "Tiêu chuẩn"
+            }
         }
     },
     "community": {

@@ -1,0 +1,859 @@
+{
+  "version": 3,
+  "task": "course-detail-page-v2",
+  "planRecord": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page-v2\\plan-record.json",
+  "contextLock": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page-v2\\context-lock.preview.json",
+  "caseId": "case-course-detail-v2",
+  "selectedDirectionId": "direction-parity-semantic",
+  "approvedRevision": "1.5",
+  "revisionHistory": [
+    {
+      "revision": "1.5",
+      "summary": "Record-only. The route target loses its [locale] folder, because the repository already prefixes the locale in middleware and its src/app is flat by design.",
+      "affected": [
+        "integrationEdits: src/app/courses/[displayId]/page.tsx"
+      ],
+      "retained": [
+        "No candidate source, fixture, screenshot, hash or state changed. 1.4's seal content is otherwise intact."
+      ],
+      "rejected": [
+        {
+          "trait": "Creating src/app/[locale]/courses/[displayId]/page.tsx",
+          "reason": "It would add a second mechanism for something middleware already does, and it would be the only route in the repository shaped that way. The production build lists /[lang]/courses, /[lang]/dashboard and /[lang]/authentication - all from flat folders."
+        },
+        {
+          "trait": "Leaving the earlier drift note standing",
+          "reason": "It said the repository has no [locale] segment. That was true of the folder tree and false of the URL, and it was written as though it were about the URL - which is what a decision was then taken on. Two further claims rested on it and are withdrawn: that the baseline URL needed a new segment, and that a locale migration would break the Keycloak redirect URI."
+        }
+      ],
+      "evidence": "src/i18n/routing.ts defines locales and defaultLocale; src/middleware.ts exports createMiddleware(routing) with matcher /((?!api|_next|_vercel|.*\\..*).*); next build --webpack lists every page route under /[lang]/."
+    },
+    {
+      "revision": "1.4",
+      "summary": "The candidate's Tree shim is removed. With the seventeen entries merged into the locked registry, ContractKey admits them, so the candidate imports the production branch, registry, props and page - and is checked by production's own types instead of a looser copy.",
+      "affected": [
+        "src/components/blocks/courses/CoursePricingRail/component.tsx",
+        "src/components/blocks/courses/CourseMobileEnrollBar/component.tsx",
+        "src/components/pages/CourseDetailPage/component.tsx"
+      ],
+      "retained": [
+        "Every contract, every host, every reading order and every state from 1.3. The anatomy did not move."
+      ],
+      "rejected": [
+        {
+          "trait": "Keeping the shim and fixing the price line by hand",
+          "reason": "The shim accepted a bare ReactNode in a slot, so it checked neither leaf identity nor declared props - the price-line mismatch was the FIRST such defect, not the only possible one, and patching it would have left the rest to surface one file at a time. Removing the shim turns every remaining mismatch into a compile error in one pass."
+        },
+        {
+          "trait": "Adding an eighteenth entry so the approved price size survived",
+          "reason": "price-discount-line is LOCKED and already says what a price line looks like. A course page that redefines the shared price line is how two pages stop showing prices the same way. The visual moves to what the locked entry declares."
+        }
+      ],
+      "visualChanges": [
+        "The payable price is `sm` semibold, not `md`. The locked price-discount-line declares size sm; 1.3 drew md only because the shim did not check.",
+        "The discount is a Badge, not accent-toned text. The locked entry declares `discount: { leaf: \"badge\" }`.",
+        "The struck original price now carries tone muted, as the locked entry declares.",
+        "The pinned mobile bar shows no discount at all: the rail is where a reader compares and the bar is where they act."
+      ],
+      "evidence": "Repository tsc --noEmit exit 0 and eslint src exit 0 with the three files landed; candidate tsc and next build --webpack both exit 0 while importing @/components/branches/Tree and the real registry."
+    },
+    {
+      "revision": "1.3",
+      "summary": "Record-only. Three ported files are declared as integration edits; no candidate source, fixture, screenshot or state changed.",
+      "affected": [
+        "src/components/blocks/courses/CoursePricingRail/component.tsx",
+        "src/components/blocks/courses/CourseMobileEnrollBar/component.tsx",
+        "src/components/pages/CourseDetailPage/component.tsx"
+      ],
+      "retained": [
+        "Every rendered state, every hash and every screenshot is exactly 1.2's."
+      ],
+      "rejected": [
+        {
+          "trait": "Applying with the three ports undeclared",
+          "reason": "verify_apply_materialization compares landed bytes to the sealed hash and reports an undeclared difference as a substitution, because it cannot tell an alias rewrite from a component swapped for a similar one. Blocking there and declaring afterwards would be a permission written by the party it excuses."
+        },
+        {
+          "trait": "Rewriting the candidate to import @/ so the files land byte-identical",
+          "reason": "It cannot compile. ContractKey is closed over the entries on disk, so the locked Tree refuses a proposed key until the merge lands - which is the whole reason the candidate carries a shim."
+        }
+      ],
+      "evidence": "CurriculumModuleRow and CoverImage import only @/ and are expected to land byte-identical; only these three resolve ~candidate/*."
+    },
+    {
+      "revision": "1.2",
+      "summary": "One repair and one settled question, both raised by the Apply lock's redetection before any production file was written. Neither changes a pixel: the candidate adopts production's own CoverImage, and the [locale] route segment is confirmed as intended rather than assumed.",
+      "affected": [
+        "src/components/leaves/CoverImage/index.tsx",
+        "integrationEdits: src/app/[locale]/courses/[displayId]/page.tsx"
+      ],
+      "retained": [
+        "Every rendered state is byte-identical to 1.1 except CoverImage's comment text; the design was not touched."
+      ],
+      "rejected": [
+        {
+          "trait": "Materializing the sealed CoverImage over production's",
+          "reason": "The courses-catalog run had already landed this leaf, and production's copy is the NEWER one: it records that naming the ESLint directive in a comment trips the gate, because the rule matches the token in source text and prose about a suppression reads to it exactly like a suppression. The seal carried the older wording. Writing it would have undone another approved run's repair under a seal that says it was reviewed - so the candidate adopts production's file instead, making materialization a verified no-op."
+        },
+        {
+          "trait": "Dropping the [locale] segment to match the repository's flat routes",
+          "reason": "Apply raised it as drift because no other route in this repository carries [locale]; the user answered that the segment is intended, so the production URL /vi/courses/fullstack-mastery is reproduced. The alternative offered - moving api, authentication, courses, dashboard, league and profile under [locale] - was declined as a whole-repository migration that belongs to its own Plan run, not to this Apply."
+        },
+        {
+          "trait": "Silently writing the route to whichever path existed",
+          "reason": "Either direction would have been an undeclared target, which is the substitution the seal exists to prevent. The question was settled here, in Preview, where a path is still reviewable."
+        },
+        {
+          "trait": "Dropping CoverImage from candidate.files",
+          "reason": "Keeping it means the materialization verifier compares production against an approved hash and confirms they match. Removing it would leave the leaf unchecked at exactly the moment it was found to be the risky one."
+        }
+      ],
+      "evidence": "Production and candidate CoverImage now hash to bcb460b056c090de62c2abb16d698a3c27d7b20f4390fa64c5892c6d8b462af9. src/app holds api, authentication, courses, dashboard, league, profile - no [locale] segment exists."
+    },
+    {
+      "revision": "1.1",
+      "summary": "One parity repair, found by looking at the 375px screenshot rather than at the code: the curriculum row's title now truncates to one line and its level badge and preview count share a wrapping meta group.",
+      "affected": [
+        "src/components/leaves/CurriculumModuleRow/index.tsx"
+      ],
+      "retained": [
+        "Everything else in 1.0, unchanged. Desktop renders identically; the six desktop documents differ only by the leaf's class strings."
+      ],
+      "rejected": [
+        {
+          "trait": "Sealing 1.0 with the title wrapping freely",
+          "reason": "At 375px the level badge and preview count are shrink-0, so a wrapping title was left about 130px and a sixty-character module name broke over five lines. The named baseline truncates the title and wraps the meta - checked in starci-academy ModuleAccordionItem, which sets `truncate` on the title and `flex-wrap` on the chip cluster. Keeping the wrap would have been an invention sealed as parity."
+        },
+        {
+          "trait": "Hiding the preview count below md",
+          "reason": "It would have read better and it is not what the baseline does. The baseline keeps both chips and lets them wrap, so the count stays available on the viewport where a learner is deciding whether a module is worth opening."
+        }
+      ],
+      "evidence": "Mobile document height fell from 1576px to 1376px at 375x812, and scrollWidth stayed 375 with zero overflowing elements."
+    },
+    {
+      "revision": "1.0",
+      "summary": "The selected direction rebuilt as executable StarCi source against the current registry: 17 contract entries, 2 leaves, 2 blocks, 1 page, 7 rendered states.",
+      "affected": [
+        "src/components/contracts/index.ts",
+        "src/components/leaves/CurriculumModuleRow/index.tsx",
+        "src/components/blocks/CoursePricingRail/component.tsx",
+        "src/components/blocks/CourseMobileEnrollBar/component.tsx",
+        "src/components/pages/CourseDetailPage/component.tsx"
+      ],
+      "retained": [
+        "The named production render's reading order and anatomy, unchanged: breadcrumb, hero heading, trust chips, promises, curriculum, and a single right-hand buy rail.",
+        "The hero carries no price and no action; the rail is the only buy box.",
+        "CoverImage and the fixture, carried over verbatim from the superseded run."
+      ],
+      "rejected": [
+        {
+          "trait": "Porting the superseded run's Tree, blocks and page",
+          "reason": "They predate the host tag and were built around a Main branch that no longer exists. Reusing them would have reviewed the wrong architecture."
+        },
+        {
+          "trait": "Widening ContractHost locally to admit `li`",
+          "reason": "The union admitted `ul` and `ol` but not `li`, so a list row could only be a div. Fixed at the canon template and then in the repository registry, because a local widening would have made the candidate pass while the target stayed broken."
+        },
+        {
+          "trait": "Giving course-mobile-action-bar an `aside` host to match the rail",
+          "reason": "The rail already claims the complementary region for this page's commerce. Announcing a second one on the single viewport where only the pinned copy is reachable is worse than announcing none."
+        },
+        {
+          "trait": "A `role` field on ContractSpec",
+          "reason": "The role a ul needs is the one a ul already has. It is written once in the frame rather than becoming a per-entry decision that an entry could get wrong."
+        }
+      ]
+    }
+  ],
+  "deliveryMode": "single",
+  "mode": "migration",
+  "parityBaseline": "starci-academy @ mtp 9a1934231 - CourseDetailPage behind academy.starci.org/vi/courses/fullstack-mastery",
+  "workItems": [
+    {
+      "id": "page-course-detail",
+      "scope": "page",
+      "owns": "the /courses/[displayId] route, its hero and trust strip, its narrative sections and the single buy rail",
+      "target": "D:\\Repositories\\starci-academy-fe"
+    }
+  ],
+  "evidence": [
+    {
+      "source": "plan-record.json",
+      "claim": "direction-parity-semantic was selected explicitly after the three directions were rendered; the user answered \"A\"."
+    },
+    {
+      "source": "logs/candidate-build.log",
+      "claim": "next build --webpack exits 0 and emits a static export with one route per rendered state."
+    },
+    {
+      "source": "logs/candidate-lint.log",
+      "claim": "eslint over the candidate exits 0 under the target's own canon rules, which reach .artifacts/**/candidate/**."
+    },
+    {
+      "source": "candidate/out/.well-known/starci-preview-semantics.json",
+      "claim": "Elements are read out of the EXPORTED HTML by a stack-walking scan, not asserted. Zero ul/ol nodes have a non-li direct child across all six documents."
+    },
+    {
+      "source": "src/components/contracts/index.ts (locked, read-only)",
+      "claim": "Exactly one locked entry declares a host today - routed-page-main. Every other host here is proposed in this run, so no host was inherited unchecked."
+    },
+    {
+      "source": "measured in the rendered candidate at 375x812",
+      "claim": "The pinned bar is 375px wide and sits flush to the viewport bottom at scrollY 0, 600 and at the end of the document."
+    },
+    {
+      "source": "measured in the rendered candidate at desktop width",
+      "claim": "The rail computes position: sticky at 288px wide on the trailing edge; the pinned bar computes display: none."
+    },
+    {
+      "source": "node_modules/@heroui/react 3.2.4",
+      "claim": "HeroUI ships no Accordion, Collapsible or Disclosure, and src/components/branches has no accordion branch. Both checked, which is why CurriculumModuleRow is a leaf owning a native details element."
+    },
+    {
+      "source": "starci-academy-backend .../queries/courses/course/graphql-types/request.ts",
+      "claim": "CourseRequest accepts id or displayId, so the production slug resolves with no new backend field."
+    }
+  ],
+  "unknowns": [
+    "Whether the production course query returns pricing phases in ladder order or requires client sorting. The candidate renders the fixture's order as given.",
+    "Whether a course can publish zero value propositions. The candidate renders the promise section unconditionally; if the empty case exists it is a Fidelity Fix, not a redesign.",
+    "The en catalogue is untouched. Every rendered state declares locale vi, so nothing here claims the English copy fits these measures."
+  ],
+  "decisions": [
+    "The page frame carries no horizontal inset and no bottom padding so the pinned bar reaches both edges and rests flush. The measure moves to course-breadcrumb-row and main-then-rail, and main-then-rail closes the page's bottom space.",
+    "CurriculumModuleRow is a leaf, not a contract. ContractHost does not admit `details` and should not: a disclosure is an intrinsic control with its own open state, not a shape that holds other shapes.",
+    "A module with no lessons renders flat rather than as a disclosure. An empty disclosure invites a press that opens onto nothing, which reads as broken rather than empty.",
+    "not-found offers no recovery action and failed does. There is no retry that could change a not-found answer, and an action that cannot help is worse than none.",
+    "The pinned bar shows the rail's resolved price string rather than deriving its own, so the two can never disagree - including while pending, when both rest.",
+    "Resting run lengths are read from each entry's restingCount rather than written in the page, so a skeleton cannot keep claiming five modules after the entry settles on three.",
+    "Tree emits role=\"list\" for ul and ol hosts. Tailwind preflight sets list-style: none, and Safari answers that by dropping the element from the accessibility tree - so the list the entry just claimed is announced as loose text."
+  ],
+  "candidate": {
+    "root": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page-v2\\candidate",
+    "framework": "Next.js 16.1.6 (webpack), React 19, Tailwind v4, HeroUI 3.2.4 - resolved from the target's own node_modules",
+    "buildCommand": "npx next build --webpack",
+    "build": {
+      "command": "npx next build --webpack",
+      "exitCode": 0,
+      "log": {
+        "path": "logs/candidate-build.log",
+        "sha256": "3ac35f643d4bc58f3193a3884fd8ec64f6f4103b8e1908eff3d0f414e72ea0b1"
+      }
+    },
+    "lint": {
+      "command": "npx eslint .artifacts/design-plan/course-detail-page-v2/candidate",
+      "exitCode": 0,
+      "log": {
+        "path": "logs/candidate-lint.log",
+        "sha256": "3d3b67e5f571cbc6e69d5c036af6274e55ee037074709ced2911bcba19c78f21"
+      }
+    },
+    "files": [
+      {
+        "path": "candidate/src/components/leaves/CoverImage/index.tsx",
+        "targetPath": "src/components/leaves/CoverImage/index.tsx",
+        "sha256": "bcb460b056c090de62c2abb16d698a3c27d7b20f4390fa64c5892c6d8b462af9"
+      },
+      {
+        "path": "candidate/src/components/leaves/CurriculumModuleRow/index.tsx",
+        "targetPath": "src/components/leaves/CurriculumModuleRow/index.tsx",
+        "sha256": "c4753e195d6abfdd72ef443977a8a5fb94bba5bc23172b1f06f2103fe951f59b"
+      },
+      {
+        "path": "candidate/src/components/blocks/CoursePricingRail/component.tsx",
+        "targetPath": "src/components/blocks/courses/CoursePricingRail/component.tsx",
+        "sha256": "34ddda7e4e9717bed3ed9ecbe2a3392989323c75dd1937d5189fc4a16aa15eb0"
+      },
+      {
+        "path": "candidate/src/components/blocks/CourseMobileEnrollBar/component.tsx",
+        "targetPath": "src/components/blocks/courses/CourseMobileEnrollBar/component.tsx",
+        "sha256": "a13dbabd8cde5c5b48e8af3ae304127d31177d088553c1ac31f5d3a74f5f1421"
+      },
+      {
+        "path": "candidate/src/components/pages/CourseDetailPage/component.tsx",
+        "targetPath": "src/components/pages/CourseDetailPage/component.tsx",
+        "sha256": "41a8afce23d59c81c6c43dace97e3e5877e44649b3abff2b6d54cb8a5be80afd"
+      }
+    ]
+  },
+  "states": [
+    {
+      "stateId": "ready",
+      "ownerId": "page-course-detail",
+      "route": "/state/ready",
+      "viewport": {
+        "width": 1280,
+        "height": 800,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "visitor",
+      "fixture": {
+        "path": "candidate/src/fixtures/course-detail.json",
+        "sha256": "8fb0b2965e8af31abd5db23d045e96f751e49cd34a9980798f68b57869116fd6"
+      },
+      "screenshot": {
+        "path": "screens/ready.png",
+        "sha256": "5b7b1efcb71b8444843b2e4ad3d32e2e20e03fa833b46ac4b445af7cddb2cd9e"
+      },
+      "coverage": "rendered",
+      "componentTree": [
+        "Tree routed-page-main -> main (locked)",
+        "_CourseDetailPage -> Tree course-detail-page -> div",
+        "Tree course-breadcrumb-row -> nav",
+        "Tree main-then-rail -> div",
+        "Tree course-hero -> section",
+        "Tree course-hero-heading -> div; Tree course-stat-chip-run -> ul; Tree course-stat-chip -> li",
+        "Tree course-section -> section (x2)",
+        "course-promise-list -> ul; course-promise-row -> li",
+        "course-module-list -> ol; course-module-row -> li; CurriculumModuleRow -> details/summary",
+        "_CoursePricingRail -> Tree course-pricing-rail -> aside",
+        "CoverImage; course-price-block -> div; price-discount-line -> div (locked); pricing-phase-ladder -> ol; pricing-phase-row -> li; Button; Text",
+        "_CourseMobileEnrollBar -> Tree course-mobile-action-bar -> div (display: none at this viewport)"
+      ],
+      "contracts": [
+        "routed-page-main",
+        "course-detail-page",
+        "course-breadcrumb-row",
+        "main-then-rail",
+        "course-hero",
+        "course-hero-heading",
+        "course-stat-chip-run",
+        "course-stat-chip",
+        "course-section",
+        "course-promise-list",
+        "course-promise-row",
+        "course-module-list",
+        "course-module-row",
+        "course-pricing-rail",
+        "course-price-block",
+        "price-discount-line",
+        "pricing-phase-ladder",
+        "pricing-phase-row",
+        "course-mobile-action-bar"
+      ],
+      "props": [
+        "_CourseDetailPage state=ready",
+        "_CoursePricingRail state=ready",
+        "_CourseMobileEnrollBar state=ready",
+        "CurriculumModuleRow isLoading=false, lessons present on modules 1-4 and absent on module 5"
+      ],
+      "tokens": [
+        "bg-background",
+        "bg-surface",
+        "divide-separator",
+        "text-foreground",
+        "text-muted",
+        "text-accent",
+        "max-w-6xl",
+        "max-h-rail"
+      ]
+    },
+    {
+      "stateId": "ready-mobile",
+      "ownerId": "page-course-detail",
+      "route": "/state/ready",
+      "viewport": {
+        "width": 375,
+        "height": 812,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "visitor",
+      "fixture": {
+        "path": "candidate/src/fixtures/course-detail.json",
+        "sha256": "8fb0b2965e8af31abd5db23d045e96f751e49cd34a9980798f68b57869116fd6"
+      },
+      "screenshot": {
+        "path": "screens/ready-mobile.png",
+        "sha256": "beb8b5c6880fa9987c1198678d6a8a6c736069db3aaff4ba25263b009764e038"
+      },
+      "coverage": "rendered",
+      "componentTree": [
+        "Same exported document as `ready`, below the rail's breakpoint.",
+        "Tree course-pricing-rail -> aside, position: static, stacked into the reading column at 327px",
+        "Tree course-mobile-action-bar -> div, position: sticky, 375px wide, flush to the viewport bottom at every scroll position"
+      ],
+      "contracts": [
+        "course-detail-page",
+        "main-then-rail",
+        "course-pricing-rail",
+        "course-mobile-action-bar",
+        "price-discount-line"
+      ],
+      "props": [
+        "_CourseMobileEnrollBar state=ready, price and originalPrice are the rail's own resolved strings"
+      ],
+      "tokens": [
+        "bg-background",
+        "border-separator",
+        "z-40"
+      ]
+    },
+    {
+      "stateId": "price-pending",
+      "ownerId": "page-course-detail",
+      "route": "/state/price-pending",
+      "viewport": {
+        "width": 1280,
+        "height": 800,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "visitor",
+      "fixture": {
+        "path": "candidate/src/fixtures/course-detail.json",
+        "sha256": "8fb0b2965e8af31abd5db23d045e96f751e49cd34a9980798f68b57869116fd6"
+      },
+      "screenshot": {
+        "path": "screens/price-pending.png",
+        "sha256": "9eede55c2d0509a8123ea1b20cc3dbd8541e01786b7a013150d45ef7279017cc"
+      },
+      "coverage": "rendered",
+      "componentTree": [
+        "Identical tree to `ready`.",
+        "price-discount-line: price rests; original price and discount are withheld rather than shown beside a resting number",
+        "course-price-block: savings withheld; scarcity, ladder, action and proof render as themselves"
+      ],
+      "contracts": [
+        "course-pricing-rail",
+        "course-price-block",
+        "price-discount-line",
+        "pricing-phase-ladder",
+        "course-mobile-action-bar"
+      ],
+      "props": [
+        "_CoursePricingRail state=price-pending",
+        "_CourseMobileEnrollBar state=price-pending"
+      ],
+      "tokens": [
+        "bg-surface",
+        "text-muted"
+      ]
+    },
+    {
+      "stateId": "no-ladder",
+      "ownerId": "page-course-detail",
+      "route": "/state/no-ladder",
+      "viewport": {
+        "width": 1280,
+        "height": 800,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "visitor",
+      "fixture": {
+        "path": "candidate/src/fixtures/course-detail.json",
+        "sha256": "8fb0b2965e8af31abd5db23d045e96f751e49cd34a9980798f68b57869116fd6"
+      },
+      "screenshot": {
+        "path": "screens/no-ladder.png",
+        "sha256": "2d87317429d80000cc917b2b7449b5904988ea9f4482b045112b57be81712713"
+      },
+      "coverage": "rendered",
+      "componentTree": [
+        "Identical tree to `ready` minus pricing-phase-ladder, which is omitted entirely rather than rendered empty.",
+        "course-pricing-rail keeps cover, price, action and proof in order with no gap where the ladder was"
+      ],
+      "contracts": [
+        "course-pricing-rail",
+        "course-price-block",
+        "price-discount-line"
+      ],
+      "props": [
+        "_CoursePricingRail state=ready with phases: [], savingsLabel and scarcityLabel absent"
+      ],
+      "tokens": [
+        "bg-surface",
+        "gap-4"
+      ]
+    },
+    {
+      "stateId": "pending",
+      "ownerId": "page-course-detail",
+      "route": "/state/pending",
+      "viewport": {
+        "width": 1280,
+        "height": 800,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "visitor",
+      "fixture": {
+        "path": "candidate/src/fixtures/course-detail.json",
+        "sha256": "8fb0b2965e8af31abd5db23d045e96f751e49cd34a9980798f68b57869116fd6"
+      },
+      "screenshot": {
+        "path": "screens/pending.png",
+        "sha256": "44bb72784a7c36649b6dae2ebb9a66a55183ec28fd0b48d60cae1c87fe4594cc"
+      },
+      "coverage": "rendered",
+      "componentTree": [
+        "Same tree as `ready`. Run lengths come from each entry's restingCount: 5 chips, 4 promises, 5 modules.",
+        "CurriculumModuleRow renders flat with no details element, because a resting module has no lessons to disclose"
+      ],
+      "contracts": [
+        "course-stat-chip-run",
+        "course-stat-chip",
+        "course-promise-list",
+        "course-module-list",
+        "course-module-row"
+      ],
+      "props": [
+        "_CourseDetailPage state=pending",
+        "every leaf receives isLoading=true"
+      ],
+      "tokens": [
+        "bg-surface",
+        "text-muted"
+      ]
+    },
+    {
+      "stateId": "not-found",
+      "ownerId": "page-course-detail",
+      "route": "/state/not-found",
+      "viewport": {
+        "width": 1280,
+        "height": 800,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "visitor",
+      "fixture": {
+        "path": "candidate/src/fixtures/course-detail.json",
+        "sha256": "8fb0b2965e8af31abd5db23d045e96f751e49cd34a9980798f68b57869116fd6"
+      },
+      "screenshot": {
+        "path": "screens/not-found.png",
+        "sha256": "e43a24dc74ab2c2c08b805ec7128a4080acfdb1b1eff937a6f256037b88d4e46"
+      },
+      "coverage": "rendered",
+      "componentTree": [
+        "Tree routed-page-main -> main",
+        "EmptyNotice (locked composite) with icon course and NO action label"
+      ],
+      "contracts": [
+        "routed-page-main",
+        "empty-notice-stack"
+      ],
+      "props": [
+        "_CourseDetailPage state=not-found, noticeActionLabel deliberately not passed"
+      ],
+      "tokens": [
+        "text-muted"
+      ]
+    },
+    {
+      "stateId": "failed",
+      "ownerId": "page-course-detail",
+      "route": "/state/failed",
+      "viewport": {
+        "width": 1280,
+        "height": 800,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "visitor",
+      "fixture": {
+        "path": "candidate/src/fixtures/course-detail.json",
+        "sha256": "8fb0b2965e8af31abd5db23d045e96f751e49cd34a9980798f68b57869116fd6"
+      },
+      "screenshot": {
+        "path": "screens/failed.png",
+        "sha256": "5c254da39f19743a92c332fdbef056c20920230f1abf09d90c6d3147a5e15ac5"
+      },
+      "coverage": "rendered",
+      "componentTree": [
+        "Tree routed-page-main -> main",
+        "EmptyNotice (locked composite) with icon course and a retry action"
+      ],
+      "contracts": [
+        "routed-page-main",
+        "empty-notice-stack"
+      ],
+      "props": [
+        "_CourseDetailPage state=failed, on.retry wired"
+      ],
+      "tokens": [
+        "text-muted"
+      ]
+    }
+  ],
+  "integrationEdits": [
+    {
+      "targetPath": "src/components/branches/Tree/index.tsx",
+      "reason": "Emit role=\"list\" when the entry's host is ul or ol. Tailwind preflight sets list-style: none on every list and Safari answers by dropping the element from the accessibility tree, so the list the entry claims is announced as loose text. The candidate proves this in its own Tree shim; the locked frame needs the same three lines."
+    },
+    {
+      "targetPath": "src/components/contracts/index.ts",
+      "reason": "The candidate file is MERGED into the locked registry, not written over it: 17 entries are added and LayoutClassName gains twelve members. Everything already in the locked file stays."
+    },
+    {
+      "targetPath": "src/app/courses/[displayId]/page.tsx",
+      "reason": "The route does not exist in the target. Apply creates it together with the single-course GraphQL document and its SWR hook; the candidate has no request pipeline and drives its states from a fixture. The folder carries NO locale segment because the locale is not in the folder: src/middleware.ts runs next-intl's middleware over every non-api, non-asset path and prefixes it, so this file is served at /vi/courses/<displayId> - the production baseline URL - with src/app staying flat exactly as every other route in this repository does."
+    },
+    {
+      "targetPath": "src/components/pages/CourseDetailPage/index.tsx",
+      "reason": "The connected half does not exist in the candidate. The candidate page takes one settled situation, while production settles the rail and the curriculum independently."
+    },
+    {
+      "targetPath": "src/messages/vi.json",
+      "reason": "The candidate reads resolved Vietnamese strings from its fixture. Apply moves them into the catalogue under a courses.detail namespace and the connected half resolves them through useTranslations."
+    }
+  ],
+  "stateCoverage": [
+    {
+      "ownerId": "page-course-detail",
+      "state": "ready",
+      "coverage": "rendered",
+      "scenarioId": "ready"
+    },
+    {
+      "ownerId": "page-course-detail",
+      "state": "ready-narrow",
+      "coverage": "rendered",
+      "scenarioId": "ready-mobile"
+    },
+    {
+      "ownerId": "page-course-detail",
+      "state": "price-pending",
+      "coverage": "rendered",
+      "scenarioId": "price-pending"
+    },
+    {
+      "ownerId": "page-course-detail",
+      "state": "no-ladder",
+      "coverage": "rendered",
+      "scenarioId": "no-ladder"
+    },
+    {
+      "ownerId": "page-course-detail",
+      "state": "pending",
+      "coverage": "rendered",
+      "scenarioId": "pending"
+    },
+    {
+      "ownerId": "page-course-detail",
+      "state": "not-found",
+      "coverage": "rendered",
+      "scenarioId": "not-found"
+    },
+    {
+      "ownerId": "page-course-detail",
+      "state": "failed",
+      "coverage": "rendered",
+      "scenarioId": "failed"
+    },
+    {
+      "ownerId": "page-course-detail",
+      "state": "module-with-lessons-open",
+      "coverage": "covered-by",
+      "scenarioId": "ready",
+      "evidence": "Modules 1-4 in the ready state render as details/summary; the fixture leaves them closed at rest and the control is the browser's own."
+    },
+    {
+      "ownerId": "page-course-detail",
+      "state": "module-without-lessons",
+      "coverage": "covered-by",
+      "scenarioId": "ready",
+      "evidence": "Module 5 in the fixture has no lessons and renders flat - visible in the same document as the disclosing rows."
+    },
+    {
+      "ownerId": "page-course-detail",
+      "state": "enrolled-viewer",
+      "coverage": "not-applicable",
+      "evidence": "The rail's action label is a resolved string passed in by the connected half; the presentational rail has no enrolment concept and cannot differ by persona. Whether an enrolled viewer sees a different label is a connected-half decision Apply makes against the backend, not a tree this candidate can render."
+    },
+    {
+      "ownerId": "page-course-detail",
+      "state": "en locale",
+      "coverage": "not-applicable",
+      "evidence": "The candidate pins locale vi and imports the target's real vi catalogue; it has no request pipeline to resolve a second locale. Recorded as a difference rather than claimed as coverage."
+    }
+  ],
+  "blockTrees": [
+    "Tree routed-page-main -> <main> (locked)",
+    "  _CourseDetailPage (page)",
+    "    Tree course-detail-page -> <div>",
+    "      Tree course-breadcrumb-row -> <nav>",
+    "      Tree main-then-rail -> <div>",
+    "        Tree course-hero -> <section>",
+    "          Tree course-hero-heading -> <div>",
+    "          Tree course-stat-chip-run -> <ul> > course-stat-chip -> <li> > Badge",
+    "          Tree course-section -> <section> > course-promise-list <ul> > course-promise-row <li>",
+    "          Tree course-section -> <section> > course-module-list <ol> > course-module-row <li> > CurriculumModuleRow <details>",
+    "        _CoursePricingRail -> Tree course-pricing-rail -> <aside>",
+    "          CoverImage; course-price-block > price-discount-line (locked); pricing-phase-ladder <ol> > pricing-phase-row <li>; Button; Text",
+    "      _CourseMobileEnrollBar -> Tree course-mobile-action-bar -> <div>"
+  ],
+  "contracts": [
+    {
+      "key": "routed-page-main",
+      "status": "locked",
+      "why": "Reused verbatim. The only entry in the repository that declares a host today; every rendered state opens exactly one."
+    },
+    {
+      "key": "price-discount-line",
+      "status": "locked",
+      "why": "Reused verbatim by both the rail and the pinned bar, so the two can never disagree about what the course costs."
+    },
+    {
+      "key": "course-detail-page",
+      "status": "proposed",
+      "why": "Carries no horizontal inset and no bottom padding, so the pinned bar reaches both edges of a phone and rests flush on its bottom edge."
+    },
+    {
+      "key": "course-breadcrumb-row",
+      "status": "proposed",
+      "host": "nav",
+      "why": "The trail back is a set of destinations rather than prose, so it is a nav a reader can jump to."
+    },
+    {
+      "key": "main-then-rail",
+      "status": "proposed",
+      "why": "Mirrors the locked rail-then-main on the opposite child. A left rail and a right rail are the same mechanics and neither should be expressed by reordering content. It also closes the page's bottom space, which the frame cannot do without lifting the pinned bar off its edge."
+    },
+    {
+      "key": "course-hero",
+      "status": "proposed",
+      "host": "section",
+      "why": "What the course is, promises and contains is one continuous argument addressed to one reader."
+    },
+    {
+      "key": "course-hero-heading",
+      "status": "proposed",
+      "why": "The course name and the sentence qualifying it are read as a unit before any evidence or price."
+    },
+    {
+      "key": "course-stat-chip-run",
+      "status": "proposed",
+      "host": "ul",
+      "why": "Unordered peer facts that wrap together. Deliberately not profile-topic-chip-run: identical mechanics, different domain."
+    },
+    {
+      "key": "course-stat-chip",
+      "status": "proposed",
+      "host": "li",
+      "why": "Exists only to be the list item. Added after the exported HTML showed the ul holding spans - the run had been claiming a length nothing could count."
+    },
+    {
+      "key": "course-section",
+      "status": "proposed",
+      "host": "section",
+      "why": "A named region is its heading and the body that heading introduces; the name travels with the content to anything navigating by region."
+    },
+    {
+      "key": "course-promise-list",
+      "status": "proposed",
+      "host": "ul",
+      "why": "Promises are unordered peers of one joined list. Deliberately not profile-evidence-list, whose identical mechanics are named for a different domain."
+    },
+    {
+      "key": "course-promise-row",
+      "status": "proposed",
+      "host": "li",
+      "why": "The affirmative mark leads the sentence it affirms, and the sentence owns the remaining width so it wraps under itself rather than under the mark."
+    },
+    {
+      "key": "course-module-list",
+      "status": "proposed",
+      "host": "ol",
+      "why": "Modules are ORDERED: module three follows module two and cannot be read first, so an ol says the sequence to a reader who cannot see the numbering."
+    },
+    {
+      "key": "course-module-row",
+      "status": "proposed",
+      "host": "li",
+      "why": "A details element cannot be an ol's child and leave the sequence intact. Separating them also puts the list's padding on the item, so an open module's lessons stay inside the same inset as its title."
+    },
+    {
+      "key": "course-pricing-rail",
+      "status": "proposed",
+      "host": "aside",
+      "why": "The buy box is complementary to the narrative rather than part of it, which is what an aside means and what assistive technology announces."
+    },
+    {
+      "key": "course-price-block",
+      "status": "proposed",
+      "why": "The payable price, what it saves and what is running out are one claim about cost, so they sit tighter to each other than to the ladder below."
+    },
+    {
+      "key": "pricing-phase-ladder",
+      "status": "proposed",
+      "host": "ol",
+      "why": "The open phase is the price and the ones after it are the cost of waiting, so the sequence IS the meaning."
+    },
+    {
+      "key": "pricing-phase-row",
+      "status": "proposed",
+      "host": "li",
+      "why": "One phase states its availability and its price on a single baseline. The mark keeps a fixed slot whether or not this phase is open, which is what keeps the names aligned."
+    },
+    {
+      "key": "course-mobile-action-bar",
+      "status": "proposed",
+      "why": "Deliberately NO host. The rail already claims the complementary region for this page's commerce; announcing a second one on the single viewport where only the pinned copy is reachable would be worse than announcing none."
+    }
+  ],
+  "vocabularyProposals": [
+    {
+      "kind": "type-union",
+      "target": "LayoutClassName",
+      "delta": [
+        "[&>*:last-child]:min-w-0",
+        "[&>*:last-child]:grow",
+        "md:[&>*:last-child]:sticky",
+        "md:[&>*:last-child]:top-6",
+        "md:[&>*:last-child]:self-start",
+        "md:[&>*:last-child]:max-h-rail",
+        "md:[&>*:last-child]:overflow-y-auto",
+        "bottom-0",
+        "border-t",
+        "md:hidden",
+        "pt-6",
+        "pb-6"
+      ],
+      "why": "Measured with a bracket-aware scan: the entries use 51 distinct classes and twelve are not in the 117-member union. Every one mirrors a member already present for the opposite child or the opposite edge - the union holds all five sticky members for first-child, and holds top-0, border-b, hidden and py-6. Nothing in this repository has had a right-hand rail or a bottom-pinned bar before, which is why nobody noticed."
+    },
+    {
+      "kind": "new-leaf",
+      "target": "src/components/leaves/CurriculumModuleRow",
+      "why": "A native details disclosure. It is a leaf and not a contract because ContractHost does not admit `details` and should not: a disclosure is an intrinsic control with its own open state. HeroUI 3.2.4 ships no Accordion, Collapsible or Disclosure and the repository has no accordion branch - both checked."
+    },
+    {
+      "kind": "new-leaf",
+      "target": "src/components/leaves/CoverImage",
+      "why": "Carried over unchanged from the superseded run and shared with the catalog run. Same proposal, same target path."
+    },
+    {
+      "kind": "new-block-folder",
+      "target": "src/components/blocks/courses/",
+      "why": "CoursePricingRail and CourseMobileEnrollBar are the first blocks in a courses domain; the existing folders are auth, dashboard and profile."
+    }
+  ],
+  "backendEnablerProposals": [],
+  "preview": {
+    "path": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page-v2",
+    "url": "http://127.0.0.1:8096",
+    "caseId": "case-course-detail-v2",
+    "revision": "1.5"
+  },
+  "approval": {
+    "kind": "confirmed-restated",
+    "restatement": "Thầy duyệt revision 1.0 như đang hiển thị chứ? Có \"duyệt\" thì em mới viết và niêm design-record.json. - answered \"duyêht\". Revision 1.1 then repaired one parity divergence found in the 375px screenshot, and the instruction to carry that through to the seal was \"Lam tiep cai nay di, sao mai van khong approve dc\". Revision 1.2 then adopted production's own CoverImage and settled the [locale] route segment - both raised by the Apply lock before any production file was written. The instruction covering it was \"ok\" to a stated plan of \"1.2 then Apply\", and the routing answer was the explicit choice \"Chi route course detail\" from a question that also offered a whole-repository migration and a flat path. Revision 1.3 is record-only, made inside the same \"1.2 then Apply\" authorisation and against the same confirmed write boundary: it declares three ported files whose bytes cannot match the seal, and changes no candidate source. Revision 1.4 was authorised by \"ok\" to a stated plan that named its purpose exactly - drop the shim so every remaining mismatch becomes a compile error in one pass - and its visual consequences are listed in revisionHistory[0].visualChanges rather than left to be noticed. Revision 1.5 is record-only and CORRECTS an error of mine: the [locale] question was put to the user on a wrong reading of the repository, and the answer they gave - add the segment - is already what the repository does, in middleware rather than in folders.",
+    "source": "duyêht / Lam tiep cai nay di, sao mai van khong approve dc / ok (1.2 then Apply) / Chi route course detail / (1.3 record-only, same authorisation) / ok (1.4, drop the shim) / (1.5 record-only correction)",
+    "note": "Recorded as two utterances rather than one because they approve two different things: the first names revision 1.0 after it was restated back, the second instructs the seal to proceed after 1.1 was reported. Neither is presented as approval of the other, and the second is an instruction to continue rather than a fresh naming of 1.1 - which is exactly why the restatement above keeps both in full instead of paraphrasing them into one clean approval."
+  },
+  "seal": {
+    "algorithm": "sha256",
+    "manifestSha256": "46e4f9f01430f5a81e739371fd2af3cda2f5a2bd3435d1f01c1dd6183a18f019"
+  }
+}
