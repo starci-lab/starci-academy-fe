@@ -11,8 +11,16 @@ import { _MyCoursesProgress } from "./component"
 const percent = (completed: number, total: number) => total <= 0 ? 0 : Math.min(100, Math.max(0, Math.round((completed / total) * 100)))
 const overall = (value: number) => Number.isFinite(value) ? Math.min(100, Math.max(0, Math.round(value))) : 0
 
+/** The four already-translated dimension names a progress row is labelled with. */
+type CourseProgressLabels = {
+    readonly content: string
+    readonly challenge: string
+    readonly milestone: string
+    readonly trial: string
+}
+
 /** Resolve one full dashboard course payload into its pure row. */
-const toRow = (course: MyCourseRow, labels: { content: string; challenge: string; milestone: string; trial: string }): CourseProgressRowData => {
+const toRow = (course: MyCourseRow, labels: CourseProgressLabels): CourseProgressRowData => {
     const contentCompleted = course.contentCompleted ?? 0
     const contentTotal = course.contentTotal ?? 0
     const challengeCompleted = course.challengeCompleted ?? 0

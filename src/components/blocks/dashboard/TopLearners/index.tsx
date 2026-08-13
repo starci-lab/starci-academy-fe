@@ -36,15 +36,16 @@ export const TopLearners = () => {
         return {
             id: entry.userGlobalId,
             rank: entry.rank,
-            rankLabel: t("top.rank", { rank: entry.rank }),
+            rankLabel: t("top.rankLine", { rank: entry.rank }),
             name: isMe ? `${username} · ${t("you")}` : username,
             avatar: entry.avatar,
             points: t("points", { count: entry.points }),
             isFollowing: overrides.get(entry.userGlobalId) ?? entry.isFollowing,
             isPending: pending === entry.userGlobalId,
             isMe,
-            followLabel: t("follow"),
-            followingLabel: t("following"),
+            // No follow control on the dashboard. This card is a PREVIEW of the leaderboard - it
+            // exists so a learner sees where they stand without leaving the page - and a row of
+            // press targets turns a glance into a decision. Following belongs on the board itself.
         }
     })
     const props = {
@@ -52,8 +53,8 @@ export const TopLearners = () => {
         seeMoreLabel: t("seeMore"),
         standing: {
             rank: data?.myRank,
-            rankLabel: data ? t("top.rank", { rank: data.myRank }) : undefined,
-            title: t("top.rank", { rank: data?.myRank ?? 0 }),
+            rankLabel: data ? t("top.rankLine", { rank: data.myRank }) : undefined,
+            title: t("top.rankLine", { rank: data?.myRank ?? 0 }),
             subtitle: t("points", { count: data?.myPoints ?? 0 }),
         },
         rows,

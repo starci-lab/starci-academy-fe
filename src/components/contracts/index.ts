@@ -26,9 +26,9 @@
  */
 export type LayoutClassName =
     | "flex" | "grid" | "flex-col" | "flex-row" | "flex-wrap" | "overflow-hidden"
-    | "items-center" | "items-baseline" | "items-start"
+    | "items-center" | "items-baseline" | "items-start" | "items-end"
     | "justify-between" | "justify-center" | "[&>*]:w-full"
-    | "gap-0" | "gap-1" | "gap-2" | "gap-3" | "gap-4" | "gap-6" | "gap-8"
+    | "gap-0" | "gap-1" | "gap-2" | "gap-3" | "gap-4" | "gap-5" | "gap-6" | "gap-8"
     | "grid-cols-1" | "grid-cols-2" | "sm:grid-cols-2" | "sm:grid-cols-4" | "lg:grid-cols-3"
     | "md:flex" | "md:flex-row" | "md:items-start"
     | "@app-md:flex-row" | "@app-md:items-start" | "@app-md:gap-8" | "@app-md:w-72"
@@ -36,7 +36,7 @@ export type LayoutClassName =
     | "h-16" | "min-h-16" | "sticky" | "top-0" | "top-16" | "z-40" | "z-50"
     | "border" | "border-b" | "border-separator" | "divide-y" | "divide-separator" | "bg-background"
     | "px-3" | "px-4" | "px-6" | "py-2" | "py-3" | "py-6" | "p-0" | "p-2" | "p-4" | "p-6"
-    | "px-2" | "cursor-pointer" | "text-left" | "text-foreground" | "hover:opacity-80"
+    | "px-2" | "pl-4" | "cursor-pointer" | "text-left" | "text-foreground" | "hover:opacity-80"
     | "rounded-xl" | "rounded-2xl" | "rounded-3xl"
     | "bg-surface" | "shadow-surface" | "text-center"
     | "inset-shadow-[2px_0_0_0_var(--success)]" | "inset-shadow-[2px_0_0_0_var(--danger)]"
@@ -55,6 +55,36 @@ export type LayoutClassName =
     | "[&>*:first-child]:w-5" | "[&>*:first-child]:shrink-0"
     | "[&>*:first-child]:text-center" | "[&>*:first-child]:tabular-nums"
     | "[&>*:first-child]:pt-4" | "[&>*:last-child]:pb-4"
+    // The end rows carry the surface's own radius. A verdict band is an inset shadow, so it
+    // follows whatever radius its row has - and on a square end row it is sliced flat where the
+    // card curves away, instead of hooking around the corner the way the reference draws it.
+    | "[&>*:first-child]:rounded-t-3xl" | "[&>*:last-child]:rounded-b-3xl"
+    // The dais arranges its own places. Emitting them out of rank order would put the
+    // champion in the middle of the DOM too, so anyone reading in sequence hears second
+    // place first; the node re-orders what it draws and leaves the reading order alone.
+    | "[&>*:nth-child(1)]:order-2" | "[&>*:nth-child(2)]:order-1" | "[&>*:nth-child(3)]:order-3"
+    // A ranked row is five columns, not five things that happen to sit in a line. Wrapping made
+    // the score land in a different place on every row - a follow control is wider than a caret,
+    // and a viewer row has neither - so the one column a leaderboard exists to let you compare
+    // stopped being comparable. The track is declared once here and every row obeys it.
+    // The trailing tracks are FIXED, not `auto`. Each row is its own grid, so an `auto` track
+    // sizes to that row's own content - and a row with no follow control simply has no fifth
+    // column, which let `1fr` expand and pushed its score out of the column every other row keeps
+    // it in. Fixed widths are what make the scores line up ACROSS rows rather than within one.
+    | "grid-cols-[auto_auto_1fr_5rem_2.5rem]" | "[&>*]:grid-cols-[auto_auto_1fr_5rem_2.5rem_7rem]"
+    | "[&>*:nth-child(4)]:text-right"
+
+    // The course detail page is the first right-hand rail and the first bottom-pinned bar in this
+    // repository, which is why these read as gaps rather than omissions: every one is the mirror of a
+    // member already present for the opposite child or the opposite edge.
+    | "[&>*:last-child]:min-w-0" | "[&>*:last-child]:grow"
+    | "md:[&>*:last-child]:sticky" | "md:[&>*:last-child]:top-6"
+    | "md:[&>*:last-child]:self-start" | "md:[&>*:last-child]:max-h-rail"
+    | "md:[&>*:last-child]:overflow-y-auto"
+    | "bottom-0" | "border-t" | "md:hidden"
+    // py-6 is both at once, and both at once is exactly what a page with a bottom-pinned bar cannot
+    // use: padding under the last child lifts the bar off the edge it is pinned to.
+    | "pt-6" | "pb-6"
 
 /** Literal values a contract may require from a child component's data props. */
 export type ContractPropValue = string | number | boolean | null
@@ -118,10 +148,39 @@ export type ChildrenOf<K extends ContractKey> = {
     readonly [S in OptionalChildNames<K>]?: ChildValue<(typeof CONTRACTS)[K]["children"][S]>
 }
 
-/** One registry entry: a node's own classes, and why what it holds sits that way. */
+/**
+ * Elements an entry may name as its own host.
+ *
+ * A `<main>` is not a `<div>` with a class - it is the document's one main landmark, and a screen
+ * reader offers it as a destination. The same holds for `<nav>`, `<ul>` and `<form>`: each is a
+ * MEANING, and meaning belongs beside the classes and the children rather than in a second frame
+ * component per element. `Main` was exactly that second frame - it existed only to swap the tag, so
+ * every rule taught about `Tree` had to be taught about `Main` separately, and the rule that was not
+ * taught reported the landmark as a node with no key.
+ *
+ * `li` IS HERE BECAUSE `ul` AND `ol` WERE USELESS WITHOUT IT. The union admitted both containers and
+ * not the item, so a list entry had to be a `div` - which is invalid HTML and, worse, silent: a
+ * `<ul>` whose children are not `<li>` stops being announced as "list, 4 items" and is read as loose
+ * text instead. The two list hosts could not be used for the thing they are named after, and nothing
+ * failed, because a `div` is never wrong on its own.
+ *
+ * THE NAME AND THE MEMBERS BOTH COME FROM THE TRUST TREE. This union is SCAFFOLDING, which
+ * `sources/fe/contracts.ts` states is identical in every repository; only the entry table below is
+ * this repository's own. It had drifted on both counts - named `ContractHostTag` here and
+ * `ContractHost` there, carrying `main` and `ol` that canon lacked while missing the `li`, `header`
+ * and `footer` canon had. Neither list contained the other, so both were wrong and no import could
+ * report it. The missing members were merged into canon first and this file now takes that name and
+ * that list, because a renamed type is a divergence nothing checks.
+ */
+export type ContractHost =
+    | "div" | "ul" | "ol" | "li" | "form" | "nav" | "main" | "section" | "header" | "footer" | "aside"
+
+/** One registry entry: a node's own classes, the element it opens, and why what it holds sits that way. */
 export interface ContractSpec {
     /** The class string of the node itself. Not a prop, not reachable by a caller. */
     readonly classes: ReadonlyArray<LayoutClassName>
+    /** The element this node opens. Absent means `div` - a node with no meaning of its own. */
+    readonly host?: ContractHost
     /** Named child grammar. No anonymous `children` hole exists in a contract. */
     readonly children: Readonly<Record<string, ContractChildSpec>>
     /**
@@ -154,9 +213,19 @@ export const CONTRACTS = buildContracts({
         classes: ["flex", "min-h-screen", "w-full", "flex-col"],
         children: {
             navigation: { contract: "double-navbar" },
-            body: { leaf: "page" },
+            body: { contract: "routed-page-main" },
         },
         why: "The navigation stays a sibling of the routed body rather than a parent of it, so a route change repaints the body without tearing the nav down - and the measure is set here because a reading column running the full width of a desktop screen cannot be scanned at all.",
+    },
+    "routed-page-main": {
+        // The document's one main landmark. The key's name has said so all along; now the entry
+        // does, instead of a second frame component existing to swap the tag.
+        host: "main",
+        classes: ["flex", "min-w-0", "grow", "flex-col"],
+        children: {
+            page: { leaf: "page" },
+        },
+        why: "The routed page is the one region a reader came for, so it is the document's main landmark and can be skipped to past the navigation - and it takes the height the navbar leaves rather than deciding a measure of its own, because the page inside already owns that decision.",
     },
     "centred-authentication-page": {
         classes: ["flex", "min-h-screen", "w-full", "items-center", "justify-center", "p-6"],
@@ -914,29 +983,108 @@ export const CONTRACTS = buildContracts({
         why: "Viewer standing explains the ranked identities beneath it, so both share one competition surface while the joined list keeps its own separators.",
     },
     "leaderboard-standing-row": {
-        classes: ["flex", "flex-row", "items-center", "justify-between", "gap-3"],
-        children: { mark: { leaf: "rank-mark", props: { placement: "standing" } }, body: { contract: "evidence-title-over-subtitle" }, fact: { leaf: "badge", optional: true } },
-        why: "The rank artwork fixes the viewer's current place before the standing sentence while a short deadline or tier fact remains at the far edge.",
+        classes: ["flex", "flex-row", "items-center", "gap-3", "[&>*:nth-child(2)]:min-w-0", "[&>*:nth-child(2)]:grow"],
+        children: { mark: { leaf: "league-tile" }, body: { contract: "evidence-title-over-subtitle" }, fact: { leaf: "badge", optional: true } },
+        why: "The rank artwork fixes the viewer's current place and the standing sentence sits directly against it, because the two are one statement; the body owns the spare width so an optional tier fact still settles at the far edge without the sentence drifting there when no fact exists.",
+    },
+    "standing-hero-card": {
+        classes: ["flex", "flex-col", "gap-5", "rounded-3xl", "bg-surface", "p-4"],
+        children: { standing: { composite: "leaderboard-standing-row" }, goal: { contract: "standing-goal-meter", optional: true }, action: { leaf: "button" } },
+        why: "A standing that comes with a way to change it is one story: where the learner is, how far the next place is, and the single action that closes the gap.",
+    },
+    "standing-goal-meter": {
+        classes: ["flex", "flex-col", "gap-2"],
+        children: { label: { leaf: "text", props: { size: "xs", tone: "muted" } }, progress: { leaf: "progress" } },
+        why: "The distance still to cover is stated in words directly above the bar that measures it, because a bar on its own tells a learner how full something is and never what it would take to fill it.",
+    },
+    "podium": {
+        classes: ["flex", "flex-row", "items-end", "justify-center", "gap-4", "w-full", "[&>*:nth-child(1)]:order-2", "[&>*:nth-child(2)]:order-1", "[&>*:nth-child(3)]:order-3"],
+        children: { place: { composite: "podium-place", repeats: true, restingCount: 3 } },
+        why: "The top three are not comparable peers in a list — the champion is raised and centred because finishing first is the one fact this arrangement exists to state, and the dais order is the node's business so the places themselves stay in rank order for anyone reading them in sequence.",
+    },
+    "podium-place": {
+        classes: ["flex", "flex-col", "items-center", "gap-2"],
+        children: { mark: { leaf: "rank-mark", props: { placement: "row" } }, avatar: { leaf: "avatar" }, name: { leaf: "text" }, points: { leaf: "text", props: { size: "xs", tone: "muted" } }, step: { leaf: "podium-step" } },
+        why: "One finisher reads top-down as medal, face, name, score, then the step that fixes their place: the artwork names the award while the step height carries the ordering, so neither has to be read off the other.",
+    },
+    "league-page-column": {
+        // The same measure and inset the dashboard uses. The leaderboard is reached from there and
+        // returns there, so a second page width would make the chrome appear to shift on a
+        // navigation that did not change anything about where the reader is.
+        classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            header: { contract: "page-header-stack" },
+            scope: { contract: "scope-switch-row" },
+            board: { contract: "league-board-stack" },
+        },
+        why: "The board is one reading column: where the reader is and what this page is, which competition is being read, then that competition — so switching scope changes the answer beneath the question rather than moving the question.",
+    },
+    "scope-switch-row": {
+        // A row, so the switch takes the width of its two words. In the page column it was a
+        // direct child of a `flex-col`, which stretches its children - and a segmented control
+        // spanning the whole measure reads as a band the page is divided by rather than as one
+        // control the reader can press.
+        classes: ["flex", "flex-row"],
+        children: { tabs: { leaf: "choice-tabs" } },
+        why: "The scope switch is a control, not a divider: it is as wide as the choice it offers, so the page beneath it stays the thing being read rather than the thing being framed.",
+    },
+    "page-header-stack": {
+        classes: ["flex", "flex-col", "gap-3"],
+        children: {
+            trail: { leaf: "breadcrumbs", optional: true },
+            title: { leaf: "heading" },
+        },
+        why: "Where the reader came from is a smaller fact than where they are, so the trail sits above the title at its own scale rather than competing with it on one line.",
+    },
+    "league-board-stack": {
+        classes: ["flex", "flex-col", "gap-6"],
+        children: {
+            hero: { contract: "standing-hero-card" },
+            podium: { contract: "podium", optional: true },
+            list: { contract: "ranked-user-followable-list" },
+        },
+        why: "The viewer's own standing comes first because it is the only row they cannot find by scanning, then the three places that are not comparable to anything, then everyone who is.",
+    },
+    "ranked-user-followable-list": {
+        /*
+         * The same joined list, plus one track for the follow control.
+         *
+         * The width lives HERE rather than on the row because whether a board is followable is a
+         * property of the BOARD: the dashboard preview has no follow control anywhere and must not
+         * reserve a gutter for one, while every row of the leaderboard page needs the same reserved
+         * width whether or not that particular row happens to carry a button - the viewer's own row
+         * does not, and without the reserved track its score would sit further right than everyone
+         * else's. One override on the list keeps both facts in one place instead of forking every
+         * row contract in three.
+         */
+        classes: ["overflow-hidden", "divide-y", "divide-separator", "p-0", "[&>*]:px-4", "[&>*]:py-3", "[&>*:first-child]:pt-4", "[&>*:last-child]:pb-4", "[&>*:first-child]:rounded-t-3xl", "[&>*:last-child]:rounded-b-3xl", "[&>*]:grid-cols-[auto_auto_1fr_5rem_2.5rem_7rem]"],
+        children: { user: { composite: "ranked-user-row", repeats: true, restingCount: 5 } },
+        why: "A board a reader can act on reserves the same room for that action on every row, so the scores stay in one column whether or not a given learner can be followed.",
+    },
+    "ranked-user-ellipsis-row": {
+        classes: ["flex", "flex-row", "items-center", "justify-center", "gap-2", "py-2"],
+        children: { label: { leaf: "text", props: { size: "xs", tone: "muted" } } },
+        why: "A pinned self row far below the fetched slice must announce the gap, because placing it directly under the last row asserts an adjacency that is false.",
     },
     "ranked-user-list": {
-        classes: ["overflow-hidden", "divide-y", "divide-separator", "p-0", "[&>*]:px-4", "[&>*]:py-3", "[&>*:first-child]:pt-4", "[&>*:last-child]:pb-4"],
+        classes: ["overflow-hidden", "divide-y", "divide-separator", "p-0", "[&>*]:px-4", "[&>*]:py-3", "[&>*:first-child]:pt-4", "[&>*:last-child]:pb-4", "[&>*:first-child]:rounded-t-3xl", "[&>*:last-child]:rounded-b-3xl"],
         children: { user: { composite: "ranked-user-row", repeats: true, restingCount: 5 } },
         why: "Ranked identities are comparable peers in one joined list, so rank, identity, points and row action align across the board.",
     },
     "ranked-user-row": {
-        classes: ["flex", "w-full", "flex-row", "flex-wrap", "items-center", "gap-3", "[&>*:nth-child(3)]:min-w-0", "[&>*:nth-child(3)]:grow"],
-        children: { rank: { leaf: "rank-mark", props: { placement: "row" } }, avatar: { leaf: "avatar" }, identity: { contract: "ranked-user-name-over-subtitle" }, points: { leaf: "text", props: { size: "xs", tone: "muted" } }, action: { leaf: ["badge", "button"], optional: true } },
+        classes: ["grid", "w-full", "grid-cols-[auto_auto_1fr_5rem_2.5rem]", "items-center", "gap-3", "[&>*:nth-child(3)]:min-w-0", "[&>*:nth-child(4)]:text-right"],
+        children: { rank: { leaf: "rank-mark", props: { placement: "row" } }, avatar: { leaf: "avatar" }, identity: { contract: "ranked-user-name-over-subtitle" }, points: { leaf: "text", props: { size: "xs", tone: "muted" } }, movement: { leaf: ["rank-delta-caret", "badge", "text"] }, follow: { leaf: "button", optional: true } },
         why: "Rank artwork and avatar identify the learner, identity owns spare width, points stay comparable and one movement or follow outcome remains subordinate at the row end.",
     },
     "ranked-user-row-success-verdict": {
-        classes: ["flex", "w-full", "flex-row", "flex-wrap", "items-center", "gap-3", "rounded-2xl", "inset-shadow-[2px_0_0_0_var(--success)]", "[&>*:nth-child(3)]:min-w-0", "[&>*:nth-child(3)]:grow"],
-        children: { rank: { leaf: "rank-mark", props: { placement: "row" } }, avatar: { leaf: "avatar" }, identity: { contract: "ranked-user-name-over-subtitle" }, points: { leaf: "text", props: { size: "xs", tone: "muted" } }, action: { leaf: ["badge", "button"], optional: true } },
-        why: "The same comparable row keeps a two-pixel success signal inset on its left edge because positive movement belongs to this learner's data, not to the surrounding list.",
+        classes: ["grid", "w-full", "grid-cols-[auto_auto_1fr_5rem_2.5rem]", "items-center", "gap-3", "pl-4", "inset-shadow-[2px_0_0_0_var(--success)]", "[&>*:nth-child(3)]:min-w-0", "[&>*:nth-child(4)]:text-right"],
+        children: { rank: { leaf: "rank-mark", props: { placement: "row" } }, avatar: { leaf: "avatar" }, identity: { contract: "ranked-user-name-over-subtitle" }, points: { leaf: "text", props: { size: "xs", tone: "muted" } }, movement: { leaf: ["rank-delta-caret", "badge", "text"] }, follow: { leaf: "button", optional: true } },
+        why: "The same comparable row keeps a two-pixel success band inset on its left edge because positive movement belongs to this learner's data — and the band stays square, because the one border in this picture is the list's.",
     },
     "ranked-user-row-danger-verdict": {
-        classes: ["flex", "w-full", "flex-row", "flex-wrap", "items-center", "gap-3", "rounded-2xl", "inset-shadow-[2px_0_0_0_var(--danger)]", "[&>*:nth-child(3)]:min-w-0", "[&>*:nth-child(3)]:grow"],
-        children: { rank: { leaf: "rank-mark", props: { placement: "row" } }, avatar: { leaf: "avatar" }, identity: { contract: "ranked-user-name-over-subtitle" }, points: { leaf: "text", props: { size: "xs", tone: "muted" } }, action: { leaf: ["badge", "button"], optional: true } },
-        why: "The same comparable row keeps a two-pixel danger signal inset on its left edge because negative movement belongs to this learner's data, not to the surrounding list.",
+        classes: ["grid", "w-full", "grid-cols-[auto_auto_1fr_5rem_2.5rem]", "items-center", "gap-3", "pl-4", "inset-shadow-[2px_0_0_0_var(--danger)]", "[&>*:nth-child(3)]:min-w-0", "[&>*:nth-child(4)]:text-right"],
+        children: { rank: { leaf: "rank-mark", props: { placement: "row" } }, avatar: { leaf: "avatar" }, identity: { contract: "ranked-user-name-over-subtitle" }, points: { leaf: "text", props: { size: "xs", tone: "muted" } }, movement: { leaf: ["rank-delta-caret", "badge", "text"] }, follow: { leaf: "button", optional: true } },
+        why: "The same comparable row keeps a two-pixel danger band inset on its left edge because negative movement belongs to this learner's data — and the band stays square, because the one border in this picture is the list's.",
     },
     "ranked-user-name-over-subtitle": {
         classes: ["flex", "min-w-0", "flex-col", "gap-0"],
@@ -1248,6 +1396,258 @@ export const CONTRACTS = buildContracts({
             notice: { composite: "empty-notice" },
         },
         why: "An empty region still has to offer a way out, so the recovery action is part of this node rather than something a caller remembers to add beside it.",
+    },
+    "courses-catalog-page": {
+        // The same measure and inset the dashboard and the leaderboard use. A catalog reached from
+        // the navbar and returned to must not appear to shift the chrome, so the page width belongs
+        // to the product rather than to this page. An earlier revision carried no measure at all:
+        // the preview harness supplied padding the entry did not, so it looked correct until it
+        // finally had a route and rendered flush against the viewport edge.
+        classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            header: { contract: "page-header-stack" },
+            toolbar: { contract: "catalog-search-count-view-row" },
+            owned: { contract: "catalog-section-group", optional: true },
+            discover: { contract: "catalog-section-group", optional: true },
+            notice: { composite: "empty-notice", optional: true },
+            pager: { leaf: "pagination", optional: true },
+        },
+        why: "One toolbar narrows both groups at once, so it is a peer of them rather than something either group owns, and every region on the route keeps the same seam instead of choosing its own spacing.",
+    },
+    "catalog-search-count-view-row": {
+        classes: ["flex", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-3"],
+        children: {
+            query: { leaf: "search-box" },
+            count: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+            view: { leaf: "choice-tabs" },
+        },
+        why: "Query, result count and layout choice all narrow the same list, so they stay on one control row above it, wrapping rather than pushing the page wider than its viewport when the row runs out of room.",
+    },
+    "catalog-section-group": {
+        classes: ["flex", "flex-col", "gap-3"],
+        children: {
+            title: { leaf: "heading" },
+            grid: { contract: "catalog-card-grid" },
+        },
+        why: "Owned and purchasable courses answer different questions, so each keeps its own titled group and one action meaning instead of forcing the reader to tell them apart card by card.",
+    },
+    "catalog-card-grid": {
+        classes: ["grid", "grid-cols-1", "sm:grid-cols-2", "lg:grid-cols-3", "gap-4"],
+        children: {
+            course: { contract: ["enrolled-course-card", "catalog-card"], repeats: true, restingCount: 3 },
+        },
+        why: "Catalog courses are interchangeable peers compared side by side, so they share one responsive measure rather than a single reading column. The slot names the two card kinds it accepts rather than opening to any content, because the grid holds owned cards in one group and purchasable cards in the other and nothing else belongs in either.",
+    },
+    "enrolled-course-card": {
+        classes: ["flex", "flex-col", "gap-3", "rounded-3xl", "bg-surface", "p-4", "shadow-surface"],
+        children: {
+            row: { contract: "enrolled-course-row" },
+            action: { leaf: "button" },
+        },
+        why: "An owned course stands on the same ground as a purchasable one so the two groups read as one catalog, while its interior answers where the learner stopped instead of what it costs.",
+    },
+    "enrolled-course-row": {
+        classes: ["flex", "flex-row", "items-center", "gap-3"],
+        children: {
+            cover: { leaf: "cover-image" },
+            body: { contract: "enrolled-course-body" },
+        },
+        why: "The artwork identifies the course at a glance while its title and progress take the remaining width on the same baseline.",
+    },
+    "enrolled-course-body": {
+        classes: ["flex", "min-w-0", "grow", "flex-col", "gap-2"],
+        children: {
+            title: { leaf: "heading" },
+            progress: { leaf: "progress" },
+            caption: { leaf: "text", props: { size: "xs" } },
+        },
+        why: "An owned course answers where the learner stopped, so its title and progress stay in one flexible column beside the artwork.",
+    },
+    "catalog-card": {
+        classes: ["flex", "flex-col", "gap-3", "rounded-3xl", "bg-surface", "p-4", "shadow-surface"],
+        children: {
+            cover: { leaf: "cover-image" },
+            body: { contract: "catalog-card-body" },
+            action: { leaf: "button" },
+        },
+        why: "A purchasable course is one whole offer standing on its own ground, so the artwork that identifies it, the facts that price it and the one way in share a single raised surface rather than floating on the grid.",
+    },
+    "catalog-card-body": {
+        classes: ["flex", "min-w-0", "flex-col", "gap-2"],
+        children: {
+            heading: { contract: "catalog-card-heading-row" },
+            price: { contract: "price-discount-line" },
+            savings: { leaf: "text", props: { size: "xs" }, optional: true },
+            promises: { leaf: "value-proposition-disclosure" },
+        },
+        why: "A purchasable course reads top to bottom as one decision - what it is, what it costs, what it promises, what to do - so its parts stack in that order at one rhythm.",
+    },
+    "catalog-card-heading-row": {
+        classes: [
+            "flex", "flex-row", "items-baseline", "justify-between", "gap-2",
+            "[&>*:first-child]:min-w-0", "[&>*:first-child]:grow",
+        ],
+        children: {
+            title: { leaf: "heading" },
+            count: { leaf: "text", props: { size: "xs" } },
+        },
+        why: "The course name leads while its enrolment count qualifies it from the end of the same line, because the count is evidence about the name rather than a fact of its own. The name owns the spare width and yields it back as the card narrows, so the count stays whole instead of being clipped by the card's own rounded overflow.",
+    },
+    "course-detail-page": {
+        classes: ["flex", "min-w-0", "flex-col", "gap-4", "pt-6"],
+        children: {
+            breadcrumb: { contract: "course-breadcrumb-row" },
+            body: { contract: "main-then-rail" },
+            action: { contract: "course-mobile-action-bar", optional: true },
+        },
+        why: "The page frame carries NO horizontal inset and NO bottom padding, which is the one thing it is for: the pinned action bar beneath it must reach both edges of a phone and rest flush on its bottom edge. A frame that inset everything would leave the bar floating with the page's margin showing on either side, and one that padded its own bottom would lift the bar 24px off the edge at the end of the scroll - measured, not assumed. So the measure sits on the two children that want it and the body below owns the closing space.",
+    },
+    "course-breadcrumb-row": {
+        host: "nav",
+        classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "flex-row", "items-center", "gap-2", "px-6"],
+        children: {
+            crumb: { leaf: ["text", "icon"], repeats: true, restingCount: 3 },
+        },
+        why: "The trail back is a set of destinations rather than prose, so it is a nav a reader can jump to, and its crumbs and separators share one baseline instead of stacking.",
+    },
+    "main-then-rail": {
+        classes: [
+            "mx-auto", "w-full", "max-w-6xl", "px-6", "pb-6",
+            "flex", "flex-col", "gap-6", "md:flex-row", "md:items-start",
+            "md:[&>*:first-child]:min-w-0", "md:[&>*:first-child]:grow",
+            "md:[&>*:last-child]:w-72", "md:[&>*:last-child]:shrink-0",
+            "md:[&>*:last-child]:sticky", "md:[&>*:last-child]:top-6",
+            "md:[&>*:last-child]:self-start", "md:[&>*:last-child]:max-h-rail",
+            "md:[&>*:last-child]:overflow-y-auto",
+        ],
+        children: {
+            main: { contract: "course-hero" },
+            rail: { contract: "course-pricing-rail" },
+        },
+        why: "The narrative owns the flexible measure while the purchase decision keeps a fixed column at the trailing edge and follows the reader down a long curriculum. It mirrors the locked rail-then-main rather than replacing it, because a left rail and a right rail are the same mechanics on opposite children and neither should be expressed by reordering content. It also closes the page's bottom space, which the frame cannot do without lifting the pinned bar off the edge it is pinned to.",
+    },
+    "course-hero": {
+        host: "section",
+        classes: ["flex", "min-w-0", "flex-col", "gap-6"],
+        children: {
+            heading: { contract: "course-hero-heading" },
+            evidence: { contract: "course-stat-chip-run" },
+            section: { contract: "course-section", repeats: true, restingCount: 2 },
+        },
+        why: "What the course is, what it promises and what it contains are one continuous argument addressed to one reader, so they are a section rather than a run of unrelated boxes.",
+    },
+    "course-hero-heading": {
+        classes: ["flex", "flex-col", "gap-2"],
+        children: {
+            title: { leaf: "heading" },
+            tagline: { leaf: "text", props: { size: "sm" } },
+        },
+        why: "The course name and the one sentence that qualifies it are read as a unit before any evidence or price, which is the whole reason the hero carries no commerce.",
+    },
+    "course-stat-chip-run": {
+        host: "ul",
+        classes: ["flex", "flex-row", "flex-wrap", "gap-2"],
+        children: {
+            stat: { contract: "course-stat-chip", repeats: true, restingCount: 5 },
+        },
+        why: "A course's trust counts are unordered peer facts that wrap together, so they are a list a screen reader can announce a length for rather than a sentence it has to read whole. Mechanically identical to profile-topic-chip-run and deliberately a separate key: a course's evidence is not a profile's topics.",
+    },
+    "course-stat-chip": {
+        host: "li",
+        classes: ["flex"],
+        children: {
+            chip: { leaf: "badge" },
+        },
+        why: "One count is one item of that list. The entry exists ONLY to be the li: a ul whose children are spans is not a list to anything reading the document, so the run above it would have claimed a length nothing could count. It owns no spacing - the run owns the gap - and nothing else belongs here.",
+    },
+    "course-section": {
+        host: "section",
+        classes: ["flex", "flex-col", "gap-3"],
+        children: {
+            title: { leaf: "heading" },
+            body: { contract: ["course-promise-list", "course-module-list"] },
+        },
+        why: "A named region of the page is its heading and the body that heading introduces, which is what a section is for: the name travels with the content to anything navigating by region.",
+    },
+    "course-promise-list": {
+        host: "ul",
+        classes: ["flex", "flex-col", "divide-y", "divide-separator", "overflow-hidden", "rounded-2xl", "bg-surface", "p-0", "[&>*]:px-4", "[&>*]:py-3"],
+        children: {
+            promise: { contract: "course-promise-row", repeats: true, restingCount: 4 },
+        },
+        why: "A course's promises are unordered peers of one joined list, so full-width separators keep the scan continuous and no promise acquires a card of its own. Deliberately not profile-evidence-list, whose identical mechanics are named for a different domain.",
+    },
+    "course-promise-row": {
+        host: "li",
+        classes: ["flex", "flex-row", "items-start", "gap-3", "[&>*:last-child]:min-w-0", "[&>*:last-child]:grow"],
+        children: {
+            mark: { leaf: "text", props: { size: "sm" } },
+            promise: { leaf: "text", props: { size: "sm" } },
+        },
+        why: "The affirmative mark leads the sentence it affirms, and the sentence owns the remaining width so a long promise wraps under itself rather than under the mark.",
+    },
+    "course-module-list": {
+        host: "ol",
+        classes: ["flex", "flex-col", "divide-y", "divide-separator", "overflow-hidden", "rounded-2xl", "bg-surface", "p-0", "[&>*]:px-4", "[&>*]:py-3"],
+        children: {
+            module: { contract: "course-module-row", repeats: true, restingCount: 5 },
+        },
+        why: "Modules are ORDERED - module three follows module two and cannot be read first - so an ol says the sequence to a reader who cannot see the numbering. Each row owns whether it discloses its lessons, so the list never has to know.",
+    },
+    "course-module-row": {
+        host: "li",
+        classes: ["flex", "min-w-0", "flex-col"],
+        children: {
+            module: { leaf: "curriculum-module-row" },
+        },
+        why: "One module is one item of the ordered list, and the leaf inside it is a disclosure rather than a list item - a details element cannot be an ol's child and stay valid, and the browser stops counting the sequence the moment it is. Separating them also puts the list's own padding on the item, so an open module's lessons sit inside the same inset as its title instead of escaping it.",
+    },
+    "course-pricing-rail": {
+        host: "aside",
+        classes: ["flex", "flex-col", "gap-4"],
+        children: {
+            cover: { leaf: "cover-image" },
+            price: { contract: "course-price-block" },
+            ladder: { contract: "pricing-phase-ladder", optional: true },
+            action: { leaf: "button" },
+            proof: { leaf: "text", props: { size: "xs" }, optional: true },
+        },
+        why: "The buy box is complementary to the narrative rather than part of it, which is what an aside means and what assistive technology announces; artwork, price, ladder, action and proof are one decision read top to bottom.",
+    },
+    "course-price-block": {
+        classes: ["flex", "flex-col", "gap-1"],
+        children: {
+            line: { contract: "price-discount-line" },
+            savings: { leaf: "text", props: { size: "xs" }, optional: true },
+            scarcity: { leaf: "text", props: { size: "xs" }, optional: true },
+        },
+        why: "The payable price, what it saves and what is running out are one claim about cost, so they sit tighter to each other than to the ladder below them.",
+    },
+    "pricing-phase-ladder": {
+        host: "ol",
+        classes: ["flex", "flex-col", "gap-2"],
+        children: {
+            phase: { contract: "pricing-phase-row", repeats: true, restingCount: 3 },
+        },
+        why: "The phases are one ordered ladder in which the open phase is the price and the ones after it are the cost of waiting, so the sequence is the meaning and an ol carries it.",
+    },
+    "pricing-phase-row": {
+        host: "li",
+        classes: ["flex", "flex-row", "items-center", "gap-3", "[&>*:nth-child(2)]:min-w-0", "[&>*:nth-child(2)]:grow"],
+        children: {
+            mark: { leaf: ["status-dot", "text"] },
+            name: { leaf: "text", props: { size: "sm" } },
+            value: { leaf: "text", props: { size: "xs" } },
+        },
+        why: "One phase states its own availability and its own price on a single baseline, so the ladder can be scanned down its trailing edge. The mark keeps a fixed slot whether or not this phase is the open one, which is what keeps the names aligned.",
+    },
+    "course-mobile-action-bar": {
+        classes: ["sticky", "bottom-0", "z-40", "flex", "flex-row", "items-center", "justify-between", "gap-3", "border-t", "border-separator", "bg-background", "px-4", "py-3", "md:hidden"],
+        children: {
+            price: { contract: "price-discount-line" },
+            action: { leaf: "button" },
+        },
+        why: "Below the rail's breakpoint the purchase decision would scroll away entirely, so the price and its one action pin to the bottom edge and step aside as soon as the rail can hold them again.",
     },
 })
 

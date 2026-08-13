@@ -22,7 +22,7 @@ export const LeagueCard = () => {
     ].map((entry) => {
         const isMe = entry.userGlobalId === mine?.userGlobalId
         const movementLabel = entry.rankDelta === null || entry.rankDelta === 0
-            ? undefined
+            ? t("noMovement")
             : entry.rankDelta > 0
                 ? t("up", { count: entry.rankDelta })
                 : t("down", { count: Math.abs(entry.rankDelta) })
@@ -33,28 +33,45 @@ export const LeagueCard = () => {
         return {
             id: entry.userGlobalId,
             rank: entry.rank,
-            rankLabel: t("league.rank", { rank: entry.rank }),
+            rankLabel: t("league.rankLine", { rank: entry.rank, percent: 100 }),
             name: isMe ? `${username} · ${t("you")}` : username,
             avatar: entry.avatar,
-            subtitle: entry.rankDelta === null || entry.rankDelta === 0 ? t("noMovement") : movementLabel,
             points: t("points", { count: entry.weekPoints }),
+            // The caret reports the movement itself; the sentence survives as its label. A
+            // subtitle under every unmoved name would double each row for a fact the reference
+            // does not show.
+            rankDelta: entry.rankDelta,
             movementLabel,
             verdict,
             isMe,
         }
     })
-    const days = data
-        ? Math.max(0, Math.ceil((Date.parse(data.weekEndAt) - Date.now()) / 86400000))
-        : 0
+    // The cohort is the denominator: a percentile against anything else would be a different
+    // claim wearing the same "%" sign.
+    const percent = mine && entries.length > 0
+        ? Math.max(1, Math.ceil((mine.rank / entries.length) * 100))
+        : undefined
+    const remaining = data ? Math.max(0, Date.parse(data.weekEndAt) - Date.now()) : 0
+    const countdown = {
+        days: Math.floor(remaining / 86_400_000),
+        hours: Math.floor((remaining % 86_400_000) / 3_600_000),
+    }
     const props = {
         label: t("league.heading"),
         seeMoreLabel: t("seeMore"),
         standing: {
             rank: mine?.rank,
-            rankLabel: mine ? t("league.rank", { rank: mine.rank }) : undefined,
-            title: mine ? t("league.rank", { rank: mine.rank }) : t("league.unplaced"),
-            subtitle: mine ? t("points", { count: mine.weekPoints }) : t("league.empty"),
-            fact: data ? t("daysLeft", { count: days }) : undefined,
+            rankLabel: mine && percent !== undefined
+                ? t("league.rankLine", { rank: mine.rank, percent })
+                : undefined,
+            title: mine && percent !== undefined
+                ? t("league.rankLine", { rank: mine.rank, percent })
+                : t("league.unplaced"),
+            // Points and the reset deadline are ONE sentence about the same week. Splitting the
+            // countdown into a badge of its own made it look like a warning about something else.
+            subtitle: mine && data
+                ? `${t("points", { count: mine.weekPoints })} · ${t("resetIn", countdown)}`
+                : t("league.empty"),
         },
         rows,
         emptyMessage: t("league.empty"),

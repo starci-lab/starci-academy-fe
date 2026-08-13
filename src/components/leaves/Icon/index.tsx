@@ -31,6 +31,8 @@ import {
     SunIcon,
     TrophyIcon,
     VideoCameraIcon,
+    ListBulletIcon,
+    Squares2X2Icon,
     UserCircleIcon,
     UserGroupIcon,
     UserPlusIcon,
@@ -69,6 +71,8 @@ import {
     SunIcon as SunSolidIcon,
     TrophyIcon as TrophySolidIcon,
     VideoCameraIcon as VideoCameraSolidIcon,
+    ListBulletIcon as ListBulletSolidIcon,
+    Squares2X2Icon as Squares2X2SolidIcon,
     UserCircleIcon as UserCircleSolidIcon,
     UserGroupIcon as UserGroupSolidIcon,
     UserPlusIcon as UserPlusSolidIcon,
@@ -103,6 +107,7 @@ export type IconName =
     | "home" | "explore" | "community" | "league" | "review" | "livestream"
     | "light" | "dark" | "locale" | "google" | "github"
     | "search" | "cart" | "notification" | "account" | "saved" | "blog" | "talents" | "jobs" | "practice"
+    | "viewGrid" | "viewList"
 
 /** The two native Heroicon roles used by the product. */
 export type IconRole = "heading" | "leading" | "chip"
@@ -197,6 +202,8 @@ const GLYPHS: Record<IconName, GlyphCuts> = {
     talents: cuts(SparklesIcon, SparklesSolidIcon),
     jobs: cuts(BriefcaseIcon, BriefcaseSolidIcon),
     practice: cuts(CodeBracketIcon, CodeBracketSolidIcon),
+    viewGrid: cuts(Squares2X2Icon, Squares2X2SolidIcon),
+    viewList: cuts(ListBulletIcon, ListBulletSolidIcon),
     google: cuts(GoogleMark, GoogleMark),
     github: cuts(GithubMark, GithubMark),
 }

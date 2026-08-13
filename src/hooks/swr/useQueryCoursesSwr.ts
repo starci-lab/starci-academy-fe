@@ -19,6 +19,12 @@ export const QUERY_COURSES_SWR_KEY = "QUERY_COURSES_SWR"
  * on several surfaces at once: page two and page three are different keys, so they cache
  * separately and neither can overwrite the other. A key of the bare prefix would make every
  * pager on the page fight over one cache entry.
+ *
+ * SEARCH TRAVELS IN `filters` because that is where the server takes it: `PaginationPageFilters`
+ * carries `search` beside `pageNumber` and `limit`, so a caller narrowing the list and a caller
+ * paging through it are doing the same kind of thing to the same object. It is part of the key for
+ * the same reason the page number is - two searches are two answers, and one must not serve the
+ * other from cache.
  */
 export const useQueryCoursesSwr = ({ filters }: UseQueryCoursesSwrParams = {}) => {
     const request = { filters: filters ?? { sorts: defaultCoursesSorts } }

@@ -66,6 +66,8 @@ icon leaf selects the outline or micro drawing from the role.
 | `talents` | Talent discovery | `SparklesIcon` | Sparkles name exceptional ability without reusing account creation |
 | `jobs` | IT jobs | `BriefcaseIcon` | A briefcase names employment and vacancies |
 | `practice` | Programming/code practice | `CodeBracketIcon` | Code brackets name programming without reusing verification code |
+| `viewGrid` | Lay a collection out as a card grid | `Squares2X2Icon` | Four equal panes name an arrangement rather than the content being arranged |
+| `viewList` | Lay a collection out as compact rows | `ListBulletIcon` | A bulleted run of lines names row layout without borrowing the review clipboard |
 
 ## Selection procedure
 

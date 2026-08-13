@@ -48,10 +48,19 @@ const toExpiry = (t: Translate, expiresInSeconds?: number): string => {
  * @param t - The `auth` namespace.
  * @param panel - What the machine reports.
  */
-const toStatus = (
-    t: Translate,
-    panel: { isResending: boolean, isPending: boolean, step: string, sentCount: number, failure?: AuthFailure },
-): { message: string, isError: boolean } => {
+/** What the authentication machine reports about the attempt in flight. */
+type AuthPanelStatusInput = {
+    readonly isResending: boolean
+    readonly isPending: boolean
+    readonly step: string
+    readonly sentCount: number
+    readonly failure?: AuthFailure
+}
+
+/** One sentence about the attempt, and whether that sentence is a refusal. */
+type AuthPanelStatus = { readonly message: string, readonly isError: boolean }
+
+const toStatus = (t: Translate, panel: AuthPanelStatusInput): AuthPanelStatus => {
     if (panel.failure) {
         // The transport case deliberately does NOT say the details or the code were wrong, because
         // nobody knows that - the request never got an answer.

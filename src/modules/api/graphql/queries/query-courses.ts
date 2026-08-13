@@ -29,6 +29,10 @@ const query1 = gql`
                     originalPrice
                     enrollmentCount
                     isEnrolled
+                    valuePropositions {
+                        text
+                        orderIndex
+                    }
                 }
             }
         }

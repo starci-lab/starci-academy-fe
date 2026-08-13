@@ -32,6 +32,23 @@ export interface CourseRow {
      * is genuinely not enrolled, and the two must not render the same way.
      */
     isEnrolled?: boolean | null
+    /**
+     * The course's own promises, in the order it declares them.
+     *
+     * Selected because the catalog card shows them and nothing else in the payload does: the
+     * description is one paragraph of prose, while these are the discrete claims a reader
+     * compares between courses. Absent when a course has declared none, which is a real state
+     * rather than a loading one.
+     */
+    valuePropositions?: ReadonlyArray<CourseValueProposition>
+}
+
+/** One promise a course makes, as the catalog card lists it. */
+export interface CourseValueProposition {
+    /** The already-authored claim. */
+    text: string
+    /** Declaration order, so the card lists them the way the course wrote them. */
+    orderIndex: number
 }
 
 /** The paginated payload: the window of rows plus the total the window was cut from. */

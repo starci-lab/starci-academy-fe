@@ -118,12 +118,15 @@ const DailyQuestContentView = ({ props, isLoading = false }: DailyQuestContentPr
 /** Stable component type branded for the exact list contract it implements. */
 const DailyQuestContent = defineContractComponent("daily-quest-list", DailyQuestContentView)
 
+/** The situation this surface is in, plus the actions it exposes. */
+type DailyQuestInput = DailyQuestProps & { readonly on?: DailyQuestActions }
+
 /**
  * Render the day's quest.
  *
- * @param input - {@link DailyQuestProps}
+ * @param input - {@link DailyQuestInput}
  */
-export const _DailyQuest = (input: DailyQuestProps & { readonly on?: DailyQuestActions }) => {
+export const _DailyQuest = (input: DailyQuestInput) => {
     if (input.state === "failed") {
         return (
             <SurfaceCard props={{ label: input.props.label }} contract="empty-notice-card"

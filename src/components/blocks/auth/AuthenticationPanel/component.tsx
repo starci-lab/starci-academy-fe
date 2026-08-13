@@ -140,16 +140,17 @@ const CODE_ID = "authentication-code"
 /** What the form starts with. */
 const EMPTY_VALUES = { email: "", password: "", confirmPassword: "", otp: "" }
 
+/** The situation this panel is in, plus the actions it exposes. */
+type AuthenticationPanelInput = AuthenticationPanelProps & {
+    readonly on?: AuthenticationPanelActions
+}
+
 /**
  * Render the panel.
  *
- * @param input - {@link AuthenticationPanelProps}
+ * @param input - {@link AuthenticationPanelInput}
  */
-export const _AuthenticationPanel = (
-    input: AuthenticationPanelProps & {
-        readonly on?: AuthenticationPanelActions
-    },
-) => {
+export const _AuthenticationPanel = (input: AuthenticationPanelInput) => {
     const values = useRef({ ...EMPTY_VALUES })
     const [hasConfirmationMismatch, setHasConfirmationMismatch] = useState(false)
 

@@ -23,6 +23,17 @@ export type SurfaceListCardData = {
     readonly isNested?: boolean
     /** The enclosing surface already names this list; keep the name as data without drawing it twice. */
     readonly isLabelHidden?: boolean
+    /**
+     * The rows of THIS list carry data verdict bands on their leading edge.
+     *
+     * It owns the body's corner treatment and nothing else. A rounded body clips its first and
+     * last rows, so a straight two-pixel band at the top of the list gets shaved into a curve by
+     * the surface above it - and the list, not the row, is the only thing that can stop that.
+     *
+     * It cannot square the ROW. That radius lives on the row's own contract, and a branch reaching
+     * down to restyle a child would make this card the row's second owner.
+     */
+    readonly isVerdict?: boolean
 }
 
 /** The optional whole-list action reported below the joined surface. */
@@ -79,8 +90,12 @@ export const SurfaceListCard = <
                 className="p-0"
                 data-component="SurfaceListCardSurface"
                 data-surface-context={surfaceProps.isNested === true ? "nested" : "page"}
+                data-verdict={surfaceProps.isVerdict === true ? "true" : "false"}
             >
-                <Card.Content className="p-0" data-component="SurfaceListCardBody">
+                <Card.Content
+                    className={surfaceProps.isVerdict === true ? "rounded-none p-0" : "p-0"}
+                    data-component="SurfaceListCardBody"
+                >
                     <Content props={props} on={on} isLoading={isLoading} />
                 </Card.Content>
             </Card>

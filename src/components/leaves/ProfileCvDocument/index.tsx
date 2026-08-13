@@ -14,7 +14,7 @@ export const ProfileCvDocument = ({ props, isLoading = false }: ProfileCvDocumen
         title={props.title}
         src={isLoading ? undefined : props.src}
         aria-busy={isLoading ? true : undefined}
-        className="h-[80vh] min-h-[520px] w-full border-0"
+        className="h-document min-h-document w-full border-0"
     />
 )
 

@@ -62,12 +62,15 @@ const RESTING_ROWS: ReadonlyArray<LabelledProgressRowData> = Array.from(
     (_unused, index) => ({ id: `resting-${index + 1}` }),
 )
 
+/** The situation this surface is in, plus the actions it exposes. */
+type WeeklyGoalsInput = WeeklyGoalsProps & { readonly on?: WeeklyGoalsActions }
+
 /**
  * Render the week.
  *
- * @param input - {@link WeeklyGoalsProps}
+ * @param input - {@link WeeklyGoalsInput}
  */
-export const _WeeklyGoals = (input: WeeklyGoalsProps & { readonly on?: WeeklyGoalsActions }) => {
+export const _WeeklyGoals = (input: WeeklyGoalsInput) => {
     if (input.state === "failed") {
         return (
             <SurfaceCard props={{ label: input.props.label }} contract="empty-notice-card"

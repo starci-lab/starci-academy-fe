@@ -16,9 +16,7 @@ import { ApolloClient } from "@apollo/client"
  * defaults object to restate the policy.
  */
 declare module "@apollo/client" {
-    // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace ApolloClient {
-        // eslint-disable-next-line @typescript-eslint/no-namespace
         namespace DeclareDefaultOptions {
             /** The policy `client.query` runs under. */
             interface Query {

@@ -68,13 +68,37 @@ export const ContractContent = <const K extends ContractKey>({ contract, render 
  */
 export const Tree = <const K extends ContractKey>({ contract, render }: TreeProps<K>) => {
     const nodeProps = contractNodeProps(contract)
+    /*
+     * THE ENTRY NAMES THE ELEMENT, NOT THE CALLER. A `<main>` is the document's one main landmark
+     * and a `<nav>` is a destination; both are MEANING, and meaning belongs beside the classes and
+     * the children the key already fixes.
+     *
+     * The alternative was an `as` prop, and it is the wrong door: it hands the element back to the
+     * call site, which is the single decision `TreeProps` exists to refuse. It also scales the way
+     * this repository already paid for once - `Main` was a whole second frame whose only job was to
+     * swap the tag, so every rule taught about `Tree` had to be taught about `Main` too, and the one
+     * that was not reported the landmark as a node with no key.
+     */
+    const spec = contractSpec(contract)
+    const Host = spec.host ?? "div"
     return (
-        <div
+        <Host
             data-component="Tree"
             {...nodeProps}
+            /*
+             * A LIST HAS TO SAY IT IS ONE, TWICE. Tailwind's preflight sets `list-style: none` on
+             * every ul and ol, and Safari answers that by dropping the element from the
+             * accessibility tree entirely - so the list the entry just claimed is announced to
+             * VoiceOver as loose text, and a twenty-three module curriculum stops having a length.
+             *
+             * The role restores exactly what the entry already says and changes nothing else. It
+             * lives here rather than as a field on every list entry because it is not a decision an
+             * entry gets to make: a `ul` IS a list, and this only says so again.
+             */
+            role={spec.host === "ul" || spec.host === "ol" ? "list" : undefined}
         >
             <ContractContent contract={contract} render={render} />
-        </div>
+        </Host>
     )
 }
 

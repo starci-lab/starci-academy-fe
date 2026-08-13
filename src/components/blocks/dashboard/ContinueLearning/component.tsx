@@ -85,14 +85,15 @@ export type ContinueLearningActions = {
     readonly act?: () => void
 }
 
+/** The situation this surface is in, plus the actions it exposes. */
+type ContinueLearningInput = ContinueLearningProps & { readonly on?: ContinueLearningActions }
+
 /**
  * Render the section.
  *
- * @param input - {@link ContinueLearningProps}
+ * @param input - {@link ContinueLearningInput}
  */
-export const _ContinueLearning = (
-    input: ContinueLearningProps & { readonly on?: ContinueLearningActions },
-) => {
+export const _ContinueLearning = (input: ContinueLearningInput) => {
     if (input.state === "onboarding" || input.state === "empty" || input.state === "failed") {
         return (
             <SurfaceCard props={{ label: input.props.label }} contract="empty-notice-card"

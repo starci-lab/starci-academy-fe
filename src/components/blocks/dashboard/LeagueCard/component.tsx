@@ -99,6 +99,9 @@ export const _LeagueCard = (input: LeagueCardProps) => {
                 rows,
                 isNested: true,
                 isLabelHidden: true,
+                // Derived, not asserted: a hand-passed flag outlives the data that justified it,
+                // and the list would then keep square corners for bands nobody is drawing.
+                isVerdict: rows.some((row) => row.verdict !== undefined),
             }}
             on={input.on}
             isLoading={isLoading}

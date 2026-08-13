@@ -61,19 +61,51 @@
         },
         "explore": {
             "trending": "Trending content",
-            "whoToFollow": "Who to follow", "openToWork": "Open to work", "follow": "Follow", "followingState": "Following",
-            "scopeLabel": "Feed", "forYou": "For you", "following": "Following",
-            "categoryLabel": "Feed category", "all": "All", "courses": "Courses", "achievements": "Achievements", "people": "People",
-            "today": "Today", "yesterday": "Yesterday", "minutesAgo": "{count}m ago", "hoursAgo": "{count}h ago",
-            "react": "React", "reactions": { "like": "Like", "love": "Love", "haha": "Haha", "wow": "Wow", "sad": "Sad", "angry": "Angry" },
+            "whoToFollow": "Who to follow",
+            "openToWork": "Open to work",
+            "follow": "Follow",
+            "followingState": "Following",
+            "scopeLabel": "Feed",
+            "forYou": "For you",
+            "following": "Following",
+            "categoryLabel": "Feed category",
+            "all": "All",
+            "courses": "Courses",
+            "achievements": "Achievements",
+            "people": "People",
+            "today": "Today",
+            "yesterday": "Yesterday",
+            "minutesAgo": "{count}m ago",
+            "hoursAgo": "{count}h ago",
+            "react": "React",
+            "reactions": {
+                "like": "Like",
+                "love": "Love",
+                "haha": "Haha",
+                "wow": "Wow",
+                "sad": "Sad",
+                "angry": "Angry"
+            },
             "feedFailed": "Could not load your feed.",
-            "feedEmptyFiltered": "Nothing matches this feed filter.", "resetFilter": "Show all activity",
-            "feedEmptyPlatform": "There is no activity yet.", "feedEmptyPlatformDescription": "Browse content to start the first activity in your feed.", "browseCourses": "Browse courses",
-            "retry": "Try again", "loadMore": "Load more", "loadMoreFailed": "Could not load more activity. Your existing feed is still here.",
+            "feedEmptyFiltered": "Nothing matches this feed filter.",
+            "resetFilter": "Show all activity",
+            "feedEmptyPlatform": "There is no activity yet.",
+            "feedEmptyPlatformDescription": "Browse content to start the first activity in your feed.",
+            "browseCourses": "Browse courses",
+            "retry": "Try again",
+            "loadMore": "Load more",
+            "loadMoreFailed": "Could not load more activity. Your existing feed is still here.",
             "activity": {
-                "contentRead": "read", "lessonBookmarked": "bookmarked", "challengePassed": "passed",
-                "codingSolved": "solved", "milestonePassed": "completed", "milestonePassedGrouped": "completed {count} milestone tasks", "aiLabPassed": "completed",
-                "courseEnrolled": "joined", "discussionCommented": "commented on", "userFollowed": "followed"
+                "contentRead": "read",
+                "lessonBookmarked": "bookmarked",
+                "challengePassed": "passed",
+                "codingSolved": "solved",
+                "milestonePassed": "completed",
+                "milestonePassedGrouped": "completed {count} milestone tasks",
+                "aiLabPassed": "completed",
+                "courseEnrolled": "joined",
+                "discussionCommented": "commented on",
+                "userFollowed": "followed"
             }
         }
     },
@@ -110,12 +142,41 @@
             "heading": "Upcoming livestreams",
             "failed": "Could not load upcoming livestreams",
             "retry": "Try again"
+        },
+        "catalog": {
+            "navHome": "Home",
+            "navCourses": "Courses",
+            "title": "Featured courses",
+            "searchPlaceholder": "Search courses...",
+            "searchLabel": "Search courses",
+            "viewLabel": "List layout",
+            "viewGrid": "Grid",
+            "viewLine": "List",
+            "ownedTitle": "In progress",
+            "discoverTitle": "Explore",
+            "pageLabel": "Results page",
+            "previousPage": "Previous page",
+            "nextPage": "Next page",
+            "enrolment": "{count, plural, one {# learner} other {# learners}}",
+            "promises": "{count} highlights",
+            "savings": "Save {amount}",
+            "discount": "−{percent}%",
+            "resume": "Continue",
+            "view": "View course",
+            "progress": "{percent}% complete",
+            "progressAria": "Completion progress for {title}",
+            "empty": "There are no courses to show yet.",
+            "emptyAction": "Explore learning paths",
+            "filteredEmpty": "No course matches that search.",
+            "clearFilter": "Clear filter",
+            "failed": "Could not load the course list.",
+            "retry": "Try again"
         }
     },
     "community": {
         "anonymous": "Anonymous learner",
         "you": "You",
-        "points": "{count} points",
+        "points": "{count} XP",
         "seeMore": "View leaderboard",
         "retry": "Try again",
         "follow": "Follow",
@@ -124,8 +185,29 @@
         "up": "Up {count}",
         "down": "Down {count}",
         "noMovement": "No rank change",
-        "league": { "heading": "Weekly league", "rank": "Your rank · #{rank}", "unplaced": "Not placed yet", "empty": "Complete an activity to enter this week's league.", "failed": "Could not load your weekly league." },
-        "top": { "heading": "Top learners", "rank": "Global rank · #{rank}", "empty": "No learners are ranked yet.", "failed": "Could not load the global leaderboard." }
+        "league": {
+            "heading": "Weekly league",
+            "rank": "Your rank · #{rank}",
+            "unplaced": "Not placed yet",
+            "empty": "Complete an activity to enter this week's league.",
+            "failed": "Could not load your weekly league.",
+            "rankLine": "Rank #{rank} · top {percent}%"
+        },
+        "top": {
+            "heading": "Top learners this week",
+            "rank": "Global rank · #{rank}",
+            "empty": "No learners are ranked yet.",
+            "failed": "Could not load the global leaderboard.",
+            "rankLine": "Rank #{rank} platform-wide"
+        },
+        "resetIn": "Resets in {days}d {hours}h",
+        "othersCount": "{count} more",
+        "pointsToNext": "{points} XP more to reach rank #{rank}",
+        "climbCta": "Open a course and earn XP",
+        "pageTitle": "Leaderboard",
+        "tabWeekly": "This week",
+        "tabGlobal": "Global",
+        "breadcrumbHome": "Home"
     },
     "streak": {
         "heading": "Streak",
@@ -314,21 +396,71 @@
         "joined": "Joined {date}",
         "followers": "{count, plural, one {# follower} other {# followers}}",
         "following": "{count} following",
-        "actions": { "edit": "Edit profile", "hire": "Hire me", "follow": "Follow", "following": "Following", "share": "Share profile", "home": "Go home", "browse": "Browse content", "retry": "Try again" },
-        "tabs": { "label": "Profile sections", "overview": "Overview", "projects": "Projects", "challenges": "Challenges", "skills": "Skills", "cv": "CV", "activity": "Activity" },
+        "actions": {
+            "edit": "Edit profile",
+            "hire": "Hire me",
+            "follow": "Follow",
+            "following": "Following",
+            "share": "Share profile",
+            "home": "Go home",
+            "browse": "Browse content",
+            "retry": "Try again"
+        },
+        "tabs": {
+            "label": "Profile sections",
+            "overview": "Overview",
+            "projects": "Projects",
+            "challenges": "Challenges",
+            "skills": "Skills",
+            "cv": "CV",
+            "activity": "Activity"
+        },
         "evidence": {
             "error": "This evidence couldn't be loaded.",
-            "job-readiness": { "label": "Job readiness", "empty": "No job-readiness evidence yet." },
-            "courses": { "label": "Courses", "empty": "No joined courses yet." },
-            "contributions": { "label": "Learning activity", "empty": "No learning activity this year." },
-            "pinned-projects": { "label": "Pinned projects", "empty": "No pinned projects yet." },
-            "capstones": { "label": "Verified capstones", "empty": "No capstone progress yet." },
-            "solved-challenges": { "label": "Passed challenges", "empty": "No passed challenges yet." },
-            "challenge-strength": { "label": "Challenge strength", "empty": "No challenge standing yet." },
-            "coding-skills": { "label": "Coding breakdown", "empty": "No coding breakdown yet." },
-            "coding-history": { "label": "Solved problems", "empty": "No solved problems yet." },
-            "achievements": { "label": "Achievements", "empty": "No achievements yet." },
-            "activity": { "label": "Recent activity", "empty": "No public activity yet." }
+            "job-readiness": {
+                "label": "Job readiness",
+                "empty": "No job-readiness evidence yet."
+            },
+            "courses": {
+                "label": "Courses",
+                "empty": "No joined courses yet."
+            },
+            "contributions": {
+                "label": "Learning activity",
+                "empty": "No learning activity this year."
+            },
+            "pinned-projects": {
+                "label": "Pinned projects",
+                "empty": "No pinned projects yet."
+            },
+            "capstones": {
+                "label": "Verified capstones",
+                "empty": "No capstone progress yet."
+            },
+            "solved-challenges": {
+                "label": "Passed challenges",
+                "empty": "No passed challenges yet."
+            },
+            "challenge-strength": {
+                "label": "Challenge strength",
+                "empty": "No challenge standing yet."
+            },
+            "coding-skills": {
+                "label": "Coding breakdown",
+                "empty": "No coding breakdown yet."
+            },
+            "coding-history": {
+                "label": "Solved problems",
+                "empty": "No solved problems yet."
+            },
+            "achievements": {
+                "label": "Achievements",
+                "empty": "No achievements yet."
+            },
+            "activity": {
+                "label": "Recent activity",
+                "empty": "No public activity yet."
+            }
         },
         "overview": {
             "challengeSkills": "Skills from challenges",
@@ -339,7 +471,13 @@
             "languageBreakdown": "Languages · {list}",
             "streak": "{current}-day current streak · {longest}-day longest streak"
         },
-        "cv": { "label": "Public CV", "empty": "No public CV is available.", "pending": "This CV has not been compiled yet.", "open": "Open CV", "edit": "Manage CV" }
+        "cv": {
+            "label": "Public CV",
+            "empty": "No public CV is available.",
+            "pending": "This CV has not been compiled yet.",
+            "open": "Open CV",
+            "edit": "Manage CV"
+        }
     },
     "kpi": {
         "heading": "Weekly goals",

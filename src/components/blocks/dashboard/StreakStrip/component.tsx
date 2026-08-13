@@ -66,13 +66,15 @@ export type StreakStripActions = {
     readonly learn?: () => void
 }
 
+/** The situation this surface is in, plus the actions it exposes. */
+type StreakStripInput = StreakStripProps & { readonly on?: StreakStripActions }
+
 /**
  * Render the strip.
  *
- * @param input - {@link StreakStripProps}
- * @param on - {@link StreakStripActions}
+ * @param input - {@link StreakStripInput}
  */
-export const _StreakStrip = (input: StreakStripProps & { readonly on?: StreakStripActions }) => {
+export const _StreakStrip = (input: StreakStripInput) => {
     if (input.state === "failed") {
         return (
             <SurfaceCard props={{ label: input.props.label }} contract="empty-notice-card"

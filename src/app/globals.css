@@ -44,6 +44,19 @@
      * the bottom edge and the end of it becomes unreachable while the rail is stuck.
      */
     --max-height-rail: calc(100dvh - 3rem);
+
+    /*
+     * How tall an embedded document stands. A CV is read as a PAGE, not as a panel: it wants most
+     * of the viewport so a reader can take in a whole section without scrolling the frame and the
+     * page at once, and it wants a floor so a short laptop window does not squeeze it into a strip
+     * where nothing is legible.
+     *
+     * Named rather than written at the call site because `80vh` there is a value chosen once, for
+     * one screen - nobody searching the scale can find it, and it does not move when the scale
+     * moves. This is the "add one deliberately" half of that rule.
+     */
+    --height-document: 80dvh;
+    --min-height-document: 32.5rem;
 }
 
 /* Original StarCi secondary-tab skin: the navbar owns the only baseline. */

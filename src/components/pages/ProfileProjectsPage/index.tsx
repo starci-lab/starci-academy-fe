@@ -6,7 +6,14 @@ import { useQueryUserProfileSwr } from "@/hooks/swr/useQueryUserProfileSwr"
 import type { ProfileCapstone, ProfilePinnedProject } from "@/modules/api/graphql/queries/types/profile-evidence"
 import { _ProfileProjectsPage, type EvidenceState } from "./component"
 
-const stateOf = <T,>(query: { readonly data?: ReadonlyArray<T>; readonly error?: unknown; readonly isLoading: boolean }, waiting: boolean): EvidenceState<T> => ({
+/** The three things this page reads off any evidence query, whatever it fetched. */
+type EvidenceQuery<T> = {
+    readonly data?: ReadonlyArray<T>
+    readonly error?: unknown
+    readonly isLoading: boolean
+}
+
+const stateOf = <T,>(query: EvidenceQuery<T>, waiting: boolean): EvidenceState<T> => ({
     state: query.error ? "error" : query.isLoading || waiting ? "pending" : "ready",
     data: query.data ?? [],
 })

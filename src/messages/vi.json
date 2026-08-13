@@ -61,19 +61,51 @@
         },
         "explore": {
             "trending": "Nội dung nổi bật",
-            "whoToFollow": "Gợi ý theo dõi", "openToWork": "Sẵn sàng làm việc", "follow": "Theo dõi", "followingState": "Đang theo dõi",
-            "scopeLabel": "Bảng tin", "forYou": "Dành cho bạn", "following": "Đang theo dõi",
-            "categoryLabel": "Danh mục bảng tin", "all": "Tất cả", "courses": "Khóa học", "achievements": "Thành tích", "people": "Mọi người",
-            "today": "Hôm nay", "yesterday": "Hôm qua", "minutesAgo": "{count} phút trước", "hoursAgo": "{count} giờ trước",
-            "react": "Bày tỏ cảm xúc", "reactions": { "like": "Thích", "love": "Yêu thích", "haha": "Haha", "wow": "Wow", "sad": "Buồn", "angry": "Phẫn nộ" },
+            "whoToFollow": "Gợi ý theo dõi",
+            "openToWork": "Sẵn sàng làm việc",
+            "follow": "Theo dõi",
+            "followingState": "Đang theo dõi",
+            "scopeLabel": "Bảng tin",
+            "forYou": "Dành cho bạn",
+            "following": "Đang theo dõi",
+            "categoryLabel": "Danh mục bảng tin",
+            "all": "Tất cả",
+            "courses": "Khóa học",
+            "achievements": "Thành tích",
+            "people": "Mọi người",
+            "today": "Hôm nay",
+            "yesterday": "Hôm qua",
+            "minutesAgo": "{count} phút trước",
+            "hoursAgo": "{count} giờ trước",
+            "react": "Bày tỏ cảm xúc",
+            "reactions": {
+                "like": "Thích",
+                "love": "Yêu thích",
+                "haha": "Haha",
+                "wow": "Wow",
+                "sad": "Buồn",
+                "angry": "Phẫn nộ"
+            },
             "feedFailed": "Không thể tải bảng tin.",
-            "feedEmptyFiltered": "Không có hoạt động phù hợp bộ lọc này.", "resetFilter": "Xem tất cả hoạt động",
-            "feedEmptyPlatform": "Bảng tin chưa có hoạt động.", "feedEmptyPlatformDescription": "Khám phá nội dung để tạo hoạt động đầu tiên.", "browseCourses": "Khám phá khóa học",
-            "retry": "Thử lại", "loadMore": "Xem thêm", "loadMoreFailed": "Không thể tải thêm hoạt động. Bảng tin hiện tại vẫn được giữ nguyên.",
+            "feedEmptyFiltered": "Không có hoạt động phù hợp bộ lọc này.",
+            "resetFilter": "Xem tất cả hoạt động",
+            "feedEmptyPlatform": "Bảng tin chưa có hoạt động.",
+            "feedEmptyPlatformDescription": "Khám phá nội dung để tạo hoạt động đầu tiên.",
+            "browseCourses": "Khám phá khóa học",
+            "retry": "Thử lại",
+            "loadMore": "Xem thêm",
+            "loadMoreFailed": "Không thể tải thêm hoạt động. Bảng tin hiện tại vẫn được giữ nguyên.",
             "activity": {
-                "contentRead": "đã đọc", "lessonBookmarked": "đã lưu", "challengePassed": "đã vượt qua",
-                "codingSolved": "đã giải", "milestonePassed": "đã hoàn thành", "milestonePassedGrouped": "đã hoàn thành {count} milestone task", "aiLabPassed": "đã hoàn thành",
-                "courseEnrolled": "đã tham gia", "discussionCommented": "đã bình luận trong", "userFollowed": "đã theo dõi"
+                "contentRead": "đã đọc",
+                "lessonBookmarked": "đã lưu",
+                "challengePassed": "đã vượt qua",
+                "codingSolved": "đã giải",
+                "milestonePassed": "đã hoàn thành",
+                "milestonePassedGrouped": "đã hoàn thành {count} milestone task",
+                "aiLabPassed": "đã hoàn thành",
+                "courseEnrolled": "đã tham gia",
+                "discussionCommented": "đã bình luận trong",
+                "userFollowed": "đã theo dõi"
             }
         }
     },
@@ -110,12 +142,41 @@
             "heading": "Livestream sắp tới",
             "failed": "Không tải được lịch livestream sắp tới",
             "retry": "Thử lại"
+        },
+        "catalog": {
+            "navHome": "Trang chủ",
+            "navCourses": "Khóa học",
+            "title": "Khóa học tiêu biểu",
+            "searchPlaceholder": "Tìm khóa học...",
+            "searchLabel": "Tìm khóa học",
+            "viewLabel": "Bố cục danh sách",
+            "viewGrid": "Lưới",
+            "viewLine": "Danh sách",
+            "ownedTitle": "Đang học",
+            "discoverTitle": "Khám phá",
+            "pageLabel": "Trang kết quả",
+            "previousPage": "Trang trước",
+            "nextPage": "Trang sau",
+            "enrolment": "{count} học viên",
+            "promises": "{count} điểm nổi bật",
+            "savings": "Tiết kiệm {amount}",
+            "discount": "−{percent}%",
+            "resume": "Tiếp tục học",
+            "view": "Xem khóa học",
+            "progress": "{percent}% hoàn thành",
+            "progressAria": "Tiến độ hoàn thành khóa học {title}",
+            "empty": "Chưa có khóa học nào để hiển thị.",
+            "emptyAction": "Khám phá lộ trình",
+            "filteredEmpty": "Không tìm thấy khóa học nào khớp với từ khóa.",
+            "clearFilter": "Xóa bộ lọc",
+            "failed": "Không tải được danh sách khóa học.",
+            "retry": "Thử lại"
         }
     },
     "community": {
         "anonymous": "Học viên ẩn danh",
         "you": "Bạn",
-        "points": "{count} điểm",
+        "points": "{count} XP",
         "seeMore": "Xem bảng xếp hạng",
         "retry": "Thử lại",
         "follow": "Theo dõi",
@@ -124,8 +185,29 @@
         "up": "Tăng {count} hạng",
         "down": "Giảm {count} hạng",
         "noMovement": "Không đổi hạng",
-        "league": { "heading": "Giải đấu tuần", "rank": "Hạng của bạn · #{rank}", "unplaced": "Chưa vào giải đấu", "empty": "Hoàn thành một hoạt động để vào giải đấu tuần này.", "failed": "Không tải được giải đấu tuần." },
-        "top": { "heading": "Top học viên", "rank": "Hạng toàn cầu · #{rank}", "empty": "Chưa có học viên trên bảng xếp hạng.", "failed": "Không tải được bảng xếp hạng toàn cầu." }
+        "league": {
+            "heading": "League tuần",
+            "rank": "Hạng của bạn · #{rank}",
+            "unplaced": "Chưa vào giải đấu",
+            "empty": "Hoàn thành một hoạt động để vào giải đấu tuần này.",
+            "failed": "Không tải được giải đấu tuần.",
+            "rankLine": "Hạng #{rank} · top {percent}%"
+        },
+        "top": {
+            "heading": "Top học viên tuần",
+            "rank": "Hạng toàn cầu · #{rank}",
+            "empty": "Chưa có học viên trên bảng xếp hạng.",
+            "failed": "Không tải được bảng xếp hạng toàn cầu.",
+            "rankLine": "Hạng #{rank} toàn nền tảng"
+        },
+        "resetIn": "Reset sau {days} ngày {hours} giờ",
+        "othersCount": "còn {count} người",
+        "pointsToNext": "Còn {points} XP nữa để lên hạng #{rank}",
+        "climbCta": "Vào khóa học kiếm XP",
+        "pageTitle": "Bảng xếp hạng",
+        "tabWeekly": "Tuần này",
+        "tabGlobal": "Toàn cầu",
+        "breadcrumbHome": "Trang chủ"
     },
     "streak": {
         "heading": "Đã học",
@@ -314,21 +396,71 @@
         "joined": "Tham gia {date}",
         "followers": "{count} người theo dõi",
         "following": "Đang theo dõi {count}",
-        "actions": { "edit": "Sửa hồ sơ", "hire": "Mời hợp tác", "follow": "Theo dõi", "following": "Đang theo dõi", "share": "Chia sẻ hồ sơ", "home": "Về trang chủ", "browse": "Khám phá nội dung", "retry": "Thử lại" },
-        "tabs": { "label": "Các mục hồ sơ", "overview": "Tổng quan", "projects": "Dự án", "challenges": "Thử thách", "skills": "Kỹ năng", "cv": "CV", "activity": "Hoạt động" },
+        "actions": {
+            "edit": "Sửa hồ sơ",
+            "hire": "Mời hợp tác",
+            "follow": "Theo dõi",
+            "following": "Đang theo dõi",
+            "share": "Chia sẻ hồ sơ",
+            "home": "Về trang chủ",
+            "browse": "Khám phá nội dung",
+            "retry": "Thử lại"
+        },
+        "tabs": {
+            "label": "Các mục hồ sơ",
+            "overview": "Tổng quan",
+            "projects": "Dự án",
+            "challenges": "Thử thách",
+            "skills": "Kỹ năng",
+            "cv": "CV",
+            "activity": "Hoạt động"
+        },
         "evidence": {
             "error": "Không thể tải bằng chứng này.",
-            "job-readiness": { "label": "Mức sẵn sàng nghề nghiệp", "empty": "Chưa có dữ liệu sẵn sàng nghề nghiệp." },
-            "courses": { "label": "Khóa học", "empty": "Chưa tham gia khóa học nào." },
-            "contributions": { "label": "Hoạt động học tập", "empty": "Năm nay chưa có hoạt động học tập." },
-            "pinned-projects": { "label": "Dự án nổi bật", "empty": "Chưa ghim dự án nào." },
-            "capstones": { "label": "Capstone đã xác minh", "empty": "Chưa có tiến độ capstone." },
-            "solved-challenges": { "label": "Thử thách đã vượt qua", "empty": "Chưa vượt qua thử thách nào." },
-            "challenge-strength": { "label": "Năng lực thử thách", "empty": "Chưa có xếp hạng thử thách." },
-            "coding-skills": { "label": "Phân tích kỹ năng code", "empty": "Chưa có dữ liệu kỹ năng code." },
-            "coding-history": { "label": "Bài toán đã giải", "empty": "Chưa giải bài toán nào." },
-            "achievements": { "label": "Thành tựu", "empty": "Chưa có thành tựu." },
-            "activity": { "label": "Hoạt động gần đây", "empty": "Chưa có hoạt động công khai." }
+            "job-readiness": {
+                "label": "Mức sẵn sàng nghề nghiệp",
+                "empty": "Chưa có dữ liệu sẵn sàng nghề nghiệp."
+            },
+            "courses": {
+                "label": "Khóa học",
+                "empty": "Chưa tham gia khóa học nào."
+            },
+            "contributions": {
+                "label": "Hoạt động học tập",
+                "empty": "Năm nay chưa có hoạt động học tập."
+            },
+            "pinned-projects": {
+                "label": "Dự án nổi bật",
+                "empty": "Chưa ghim dự án nào."
+            },
+            "capstones": {
+                "label": "Capstone đã xác minh",
+                "empty": "Chưa có tiến độ capstone."
+            },
+            "solved-challenges": {
+                "label": "Thử thách đã vượt qua",
+                "empty": "Chưa vượt qua thử thách nào."
+            },
+            "challenge-strength": {
+                "label": "Năng lực thử thách",
+                "empty": "Chưa có xếp hạng thử thách."
+            },
+            "coding-skills": {
+                "label": "Phân tích kỹ năng code",
+                "empty": "Chưa có dữ liệu kỹ năng code."
+            },
+            "coding-history": {
+                "label": "Bài toán đã giải",
+                "empty": "Chưa giải bài toán nào."
+            },
+            "achievements": {
+                "label": "Thành tựu",
+                "empty": "Chưa có thành tựu."
+            },
+            "activity": {
+                "label": "Hoạt động gần đây",
+                "empty": "Chưa có hoạt động công khai."
+            }
         },
         "overview": {
             "challengeSkills": "Kỹ năng từ thử thách",
@@ -339,7 +471,13 @@
             "languageBreakdown": "Ngôn ngữ · {list}",
             "streak": "Chuỗi hiện tại {current} ngày · dài nhất {longest} ngày"
         },
-        "cv": { "label": "CV công khai", "empty": "Chưa có CV công khai.", "pending": "CV này chưa được biên soạn.", "open": "Mở CV", "edit": "Quản lý CV" }
+        "cv": {
+            "label": "CV công khai",
+            "empty": "Chưa có CV công khai.",
+            "pending": "CV này chưa được biên soạn.",
+            "open": "Mở CV",
+            "edit": "Quản lý CV"
+        }
     },
     "kpi": {
         "heading": "Mục tiêu tuần",

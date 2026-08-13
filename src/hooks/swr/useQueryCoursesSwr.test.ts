@@ -12,6 +12,9 @@ import { QUERY_COURSES_SWR_KEY, useQueryCoursesSwr } from "./useQueryCoursesSwr"
  * then serve page one for every page, which is the exact bug the key design here prevents.
  */
 
+/** The only part of a courses call these tests read: which page was asked for. */
+type PagedCoursesCall = { readonly request: { readonly filters: { readonly pageNumber?: number } } }
+
 const mocks = vi.hoisted(() => ({
     queryCourses: vi.fn(),
     defaultCoursesSorts: [{ by: "title", order: "ASC" }],
@@ -88,7 +91,7 @@ describe("useQueryCoursesSwr", () => {
         const sorts = [{ by: SortBy.Title, order: SortOrder.Asc }]
         const firstPage = { count: 2, data: [row] }
         const secondPage = { count: 2, data: [{ ...row, id: "course-2" }] }
-        mocks.queryCourses.mockImplementation(async (params: { request: { filters: { pageNumber?: number } } }) =>
+        mocks.queryCourses.mockImplementation(async (params: PagedCoursesCall) =>
             responseWith(params.request.filters.pageNumber === 1 ? secondPage : firstPage))
 
         const one = renderHook(
