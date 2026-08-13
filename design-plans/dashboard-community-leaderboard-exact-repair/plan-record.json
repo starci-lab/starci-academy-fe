@@ -1,0 +1,172 @@
+{
+  "version": 1,
+  "task": "dashboard-community-leaderboard-exact-repair",
+  "status": "direction-selected",
+  "deliveryMode": "batch",
+  "mode": "exact-repair",
+  "parityBaseline": {
+    "repository": "D:\\Repositories\\starci-academy",
+    "render": "C:\\Users\\Hi\\AppData\\Local\\Temp\\codex-clipboard-5710a673-00ec-492a-b693-f5c0e2ad4a4a.png",
+    "targetViewport": "desktop dark; browser viewport shown with DevTools reducing content width"
+  },
+  "sharedDecisions": [
+    "Section label and View leaderboard action stay outside the outer card.",
+    "Standing hero and a nested bordered/no-shadow joined list share one outer story surface.",
+    "Rank rows use Iconify Fluent Emoji medals for ranks 1-3 and the Fluent Emoji trophy for every rank 4+, followed by avatar, username, tabular XP and one subordinate trailing meaning.",
+    "The viewer row is accented, labeled as self and never receives a follow action."
+  ],
+  "workItems": [
+    {
+      "id": "block-weekly-league-exact-repair",
+      "target": "Dashboard Community / LeagueCard",
+      "primaryScope": "block",
+      "subordinateScopes": ["branch", "composite", "leaf", "contracts"],
+      "dependsOn": ["shared-rank-list-vocabulary"],
+      "ownerBoundary": "weekly standing, top cohort, rank movement, countdown and pinned viewer row",
+      "sourceBoundary": [
+        "D:\\Repositories\\starci-academy\\src\\components\\pages\\DashboardPage\\LeagueCard",
+        "D:\\Repositories\\starci-academy-fe\\src\\components\\blocks\\dashboard\\LeagueCard"
+      ],
+      "stateInventory": [
+        { "state": "loading", "status": "required", "evidence": "myLeague is an independent request; preserve hero plus five-row resting geometry" },
+        { "state": "empty", "status": "required", "evidence": "legacy connected block supports unplaced learners" },
+        { "state": "populated", "status": "required", "evidence": "supplied runtime screenshot" },
+        { "state": "recoverable-error", "status": "required", "evidence": "current block state union owns failed state" },
+        { "state": "pending-action", "status": "not-applicable", "evidence": "weekly card exposes navigation and profile links but no mutation" },
+        { "state": "keyboard-focus", "status": "required", "evidence": "section link and profile rows are interactive" }
+      ]
+    },
+    {
+      "id": "block-top-learners-exact-repair",
+      "target": "Dashboard Community / TopLearners",
+      "primaryScope": "block",
+      "subordinateScopes": ["branch", "composite", "leaf", "contracts"],
+      "dependsOn": ["shared-rank-list-vocabulary"],
+      "ownerBoundary": "global standing, top-five people, follow state/action and pinned viewer row",
+      "sourceBoundary": [
+        "D:\\Repositories\\starci-academy\\src\\components\\pages\\DashboardPage\\TopLearners",
+        "D:\\Repositories\\starci-academy-fe\\src\\components\\blocks\\dashboard\\TopLearners"
+      ],
+      "stateInventory": [
+        { "state": "loading", "status": "required", "evidence": "globalLeaderboard is an independent request" },
+        { "state": "empty", "status": "required", "evidence": "legacy pure block has an explicit no-leaders branch" },
+        { "state": "populated", "status": "required", "evidence": "supplied runtime screenshot" },
+        { "state": "recoverable-error", "status": "required", "evidence": "current block state union owns failed state" },
+        { "state": "pending-action", "status": "required", "evidence": "setFollow mutation prevents duplicate input" },
+        { "state": "optimistic-stale", "status": "required", "evidence": "follow action is optimistic and rolls back on failure" },
+        { "state": "disabled-action", "status": "required", "evidence": "viewer row has no follow action" },
+        { "state": "keyboard-focus", "status": "required", "evidence": "section link, profile links and follow controls are interactive" }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "claim": "The current render is visually divergent from the teacher's legacy leaderboard.",
+      "source": "two user-supplied screenshots",
+      "sourceClass": "product intent and rendered parity",
+      "confidence": "high",
+      "allowedUse": "bind the repair scope and visible hierarchy",
+      "unknowns": []
+    },
+    {
+      "claim": "Both legacy blocks use standing plus ranked list, top-five slicing and a pinned viewer row.",
+      "source": "starci-academy DashboardPage LeagueCard, TopLearners and LeaderboardListCard source",
+      "sourceClass": "named legacy source",
+      "confidence": "high",
+      "allowedUse": "bind behavior and state ownership",
+      "unknowns": []
+    },
+    {
+      "claim": "A nested joined list is the one allowed surface-in-surface exception.",
+      "source": "current FE SurfaceListCard nested mode and surface-in-surface canon",
+      "sourceClass": "UI grammar",
+      "confidence": "high",
+      "allowedUse": "translate the legacy inner bordered list",
+      "unknowns": []
+    },
+    {
+      "claim": "Rank 1, 2 and 3 use their place medals; every rank 4+ uses a trophy from the same Iconify Fluent Emoji family.",
+      "source": "current user instruction and legacy src/components/blocks/dashboard/rankBadge.tsx",
+      "sourceClass": "product intent plus named legacy source",
+      "confidence": "high",
+      "allowedUse": "bind the closed RankMark mapping",
+      "unknowns": []
+    }
+  ],
+  "unknowns": [
+    {
+      "question": "Exact computed pixel values of the deployed legacy runtime",
+      "impact": "Preview must tune tokens against the supplied screenshot at the same effective viewport.",
+      "owner": "design-preview"
+    },
+    {
+      "question": "Legacy source comment says the two standing arrangements are identical, but the supplied runtime visibly differs.",
+      "impact": "Use the current user-provided runtime for visual alignment and source for shared behavior.",
+      "owner": "resolved by current user instruction"
+    }
+  ],
+  "businessCapabilities": [
+    { "capability": "weekly standings and rank movement", "classification": "reuse", "evidence": "myLeague query already integrated" },
+    { "capability": "global standings and viewer rank", "classification": "reuse", "evidence": "globalLeaderboard query already integrated" },
+    { "capability": "follow state and action", "classification": "reuse", "evidence": "isFollowing and setFollow already integrated" }
+  ],
+  "preliminaryDirections": [
+    {
+      "id": "direction-exact-legacy-parity",
+      "thesis": "Restore the supplied legacy competition hierarchy exactly instead of reinterpreting it as a generic flat table.",
+      "primaryCta": "View leaderboard",
+      "readingOrder": ["section label and link", "viewer standing hero", "nested ranked list", "optional pinned viewer row"],
+      "tradeoffs": ["Requires revising current contracts and restoring rank artwork/avatars; deliberately adds no redesign."],
+      "legacyDivergence": [],
+      "representativeStateIds": ["community-populated-dark-desktop"],
+      "remainingPreviewStateIds": ["weekly-loading", "weekly-empty", "weekly-failed", "global-loading", "global-empty", "global-failed", "follow-pending", "follow-rollback", "mobile", "light", "keyboard-focus"]
+    }
+  ],
+  "directionLab": {
+    "path": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\dashboard-community-leaderboard-exact-repair",
+    "url": "http://127.0.0.1:8084/",
+    "caseIds": ["direction-exact-legacy-parity"]
+  },
+  "recommendedPreviewDirections": ["direction-exact-legacy-parity"],
+  "selectedDirection": "direction-exact-legacy-parity",
+  "selectionEvidence": "User requested ‘rồi chạy skills preview đi’ after refining the selected parity direction to Iconify Fluent Emoji medals for ranks 1-3 and trophy for rank 4+.",
+  "blockTrees": [
+    "CommunityTab > LeagueCard > SurfaceCard > weekly standing + nested SurfaceListCard",
+    "CommunityTab > TopLearners > SurfaceCard > global standing + nested SurfaceListCard"
+  ],
+  "contracts": [
+    { "key": "weekly-leaderboard-standing", "decision": "new", "why": "The weekly rank sentence stays beside its medal so it reads as the learner's current weekly identity." },
+    { "key": "global-leaderboard-standing", "decision": "new", "why": "The global rank summary occupies the opposite edge from the trophy to preserve the supplied legacy overview hierarchy." },
+    { "key": "leaderboard-card", "decision": "revise", "why": "The standing hero explains one nested joined cohort list inside the same story surface." },
+    { "key": "ranked-user-list", "decision": "revise", "why": "Rows remain direct separated peers inside SurfaceListCard nested mode." },
+    { "key": "ranked-user-row", "decision": "revise", "why": "Rank, avatar identity, XP and one trailing outcome align as one comparable row." },
+    { "key": "ranked-user-ellipsis-row", "decision": "new", "why": "A pinned viewer below the shown slice needs an explicit omitted-range seam without pretending to be a person row." }
+  ],
+  "vocabularyProposals": [
+    {
+      "target": "src/components/leaves/RankMark",
+      "semanticMeaning": "closed Iconify Fluent Emoji rank artwork: three place medals then trophy for rank 4+",
+      "propsDelta": "rank: number; placement: inline | tile; accessibleLabel: string",
+      "onDelta": "none",
+      "placement": "standing tile and fixed rank slot",
+      "absenceDefault": "rank is required; ranks 1-3 map to their place medal and every rank 4+ maps to trophy",
+      "precedence": "the numeric rank remains in the accessible label while the visible slot uses only the closed artwork map",
+      "affectedCallers": ["LeagueCard", "TopLearners"],
+      "compatibility": "new closed artwork leaf; no existing caller changes outside leaderboard",
+      "tests": ["rank 1-3 to exact medal IDs", "rank 4+ to trophy ID", "numeric accessible label", "no arbitrary Iconify ID", "no Iconify import outside RankMark"]
+    },
+    {
+      "target": "src/components/composites/RankedUserRow",
+      "semanticMeaning": "one comparable ranked identity row",
+      "propsDelta": "restore avatar, RankMark, isMe, XP and mutually exclusive movement/follow trailing data",
+      "onDelta": "open?: () => void; toggleFollow?: () => void",
+      "placement": "direct child of ranked-user-list",
+      "absenceDefault": "no trailing action for viewer row",
+      "precedence": "movement and follow are mutually exclusive",
+      "affectedCallers": ["LeagueCard", "TopLearners"],
+      "compatibility": "bounded to two existing callers",
+      "tests": ["avatar rendered", "medal/trophy alignment", "viewer accent/no follow", "movement/follow exclusivity", "loading geometry"]
+    }
+  ],
+  "backendEnablerProposals": []
+}

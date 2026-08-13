@@ -13,19 +13,31 @@ const tester = new RuleTester({
 })
 
 const ICON = "D:/repo/src/components/leaves/Icon/index.tsx"
+const RANK_MARK = "D:/repo/src/components/leaves/RankMark/index.tsx"
 const BRANDS = "D:/repo/src/components/leaves/Icon/brands.tsx"
 const OTHER = "D:/repo/src/components/leaves/SeeMoreLink/index.tsx"
 
-test("only the Icon leaf names glyph packages", () => {
+test("only Icon and the closed RankMark artwork leaf name glyph packages", () => {
   tester.run("no-vendor-icon-outside-icon-leaf", noVendorIconOutsideIconLeaf, {
     valid: [
       { filename: ICON, code: "import { HomeIcon } from \"@heroicons/react/24/outline\"" },
+      { filename: RANK_MARK, code: "import { Icon } from \"@iconify/react\"" },
       { filename: OTHER, code: "import { Icon } from \"@/components/leaves/Icon\"" },
     ],
     invalid: [
       {
         filename: OTHER,
         code: "import { XMarkIcon } from \"@heroicons/react/16/solid\"",
+        errors: [{ messageId: "vendor" }],
+      },
+      {
+        filename: RANK_MARK,
+        code: "import { TrophyIcon } from \"@heroicons/react/24/outline\"",
+        errors: [{ messageId: "vendor" }],
+      },
+      {
+        filename: OTHER,
+        code: "import { Icon } from \"@iconify/react\"",
         errors: [{ messageId: "vendor" }],
       },
       {

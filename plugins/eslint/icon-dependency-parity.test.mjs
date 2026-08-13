@@ -6,7 +6,7 @@ const manifest = JSON.parse(readFileSync(new URL("../../package.json", import.me
 const dependencyNames = Object.keys({ ...manifest.dependencies, ...manifest.devDependencies })
 const glyphDependency = /(?:icon|glyph|lucide|feather|tabler|fortawesome)/i
 
-test("Heroicons is the only glyph dependency in the repository", () => {
+test("Heroicons and the closed rank artwork package are the only glyph dependencies", () => {
   const glyphPackages = dependencyNames.filter((name) => glyphDependency.test(name)).sort()
-  assert.deepEqual(glyphPackages, ["@heroicons/react"])
+  assert.deepEqual(glyphPackages, ["@heroicons/react", "@iconify/react"])
 })

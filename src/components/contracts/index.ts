@@ -39,7 +39,9 @@ export type LayoutClassName =
     | "px-2" | "cursor-pointer" | "text-left" | "text-foreground" | "hover:opacity-80"
     | "rounded-xl" | "rounded-2xl" | "rounded-3xl"
     | "bg-surface" | "shadow-surface" | "text-center"
+    | "inset-shadow-[2px_0_0_0_var(--success)]" | "inset-shadow-[2px_0_0_0_var(--danger)]"
     | "[&>*:nth-child(2)]:min-w-0" | "[&>*:nth-child(2)]:grow"
+    | "[&>*:nth-child(3)]:min-w-0" | "[&>*:nth-child(3)]:grow"
     | "md:[&>*:first-child]:min-w-0" | "md:[&>*:first-child]:grow"
     | "[&>*:first-child]:min-w-0" | "[&>*:first-child]:grow"
     | "md:[&>*:last-child]:w-72" | "md:[&>*:last-child]:shrink-0"
@@ -913,8 +915,8 @@ export const CONTRACTS = buildContracts({
     },
     "leaderboard-standing-row": {
         classes: ["flex", "flex-row", "items-center", "justify-between", "gap-3"],
-        children: { mark: { leaf: "icon-tile" }, body: { contract: "evidence-title-over-subtitle" }, fact: { leaf: "badge", optional: true } },
-        why: "The league mark and standing sentence form the stable identity while a short deadline or tier fact remains at the far edge.",
+        children: { mark: { leaf: "rank-mark", props: { placement: "standing" } }, body: { contract: "evidence-title-over-subtitle" }, fact: { leaf: "badge", optional: true } },
+        why: "The rank artwork fixes the viewer's current place before the standing sentence while a short deadline or tier fact remains at the far edge.",
     },
     "ranked-user-list": {
         classes: ["overflow-hidden", "divide-y", "divide-separator", "p-0", "[&>*]:px-4", "[&>*]:py-3", "[&>*:first-child]:pt-4", "[&>*:last-child]:pb-4"],
@@ -922,9 +924,24 @@ export const CONTRACTS = buildContracts({
         why: "Ranked identities are comparable peers in one joined list, so rank, identity, points and row action align across the board.",
     },
     "ranked-user-row": {
-        classes: ["flex", "w-full", "flex-row", "items-center", "gap-3", "[&>*:nth-child(2)]:min-w-0", "[&>*:nth-child(2)]:grow"],
-        children: { rank: { leaf: "text", props: { size: "sm", weight: "semibold" } }, identity: { contract: "name-over-handle" }, points: { leaf: "text", props: { size: "xs", tone: "muted" } }, action: { leaf: "button", optional: true } },
-        why: "A fixed rank leads, identity owns spare width, points remain comparable and the optional follow action stays subordinate at the row end.",
+        classes: ["flex", "w-full", "flex-row", "flex-wrap", "items-center", "gap-3", "[&>*:nth-child(3)]:min-w-0", "[&>*:nth-child(3)]:grow"],
+        children: { rank: { leaf: "rank-mark", props: { placement: "row" } }, avatar: { leaf: "avatar" }, identity: { contract: "ranked-user-name-over-subtitle" }, points: { leaf: "text", props: { size: "xs", tone: "muted" } }, action: { leaf: ["badge", "button"], optional: true } },
+        why: "Rank artwork and avatar identify the learner, identity owns spare width, points stay comparable and one movement or follow outcome remains subordinate at the row end.",
+    },
+    "ranked-user-row-success-verdict": {
+        classes: ["flex", "w-full", "flex-row", "flex-wrap", "items-center", "gap-3", "rounded-2xl", "inset-shadow-[2px_0_0_0_var(--success)]", "[&>*:nth-child(3)]:min-w-0", "[&>*:nth-child(3)]:grow"],
+        children: { rank: { leaf: "rank-mark", props: { placement: "row" } }, avatar: { leaf: "avatar" }, identity: { contract: "ranked-user-name-over-subtitle" }, points: { leaf: "text", props: { size: "xs", tone: "muted" } }, action: { leaf: ["badge", "button"], optional: true } },
+        why: "The same comparable row keeps a two-pixel success signal inset on its left edge because positive movement belongs to this learner's data, not to the surrounding list.",
+    },
+    "ranked-user-row-danger-verdict": {
+        classes: ["flex", "w-full", "flex-row", "flex-wrap", "items-center", "gap-3", "rounded-2xl", "inset-shadow-[2px_0_0_0_var(--danger)]", "[&>*:nth-child(3)]:min-w-0", "[&>*:nth-child(3)]:grow"],
+        children: { rank: { leaf: "rank-mark", props: { placement: "row" } }, avatar: { leaf: "avatar" }, identity: { contract: "ranked-user-name-over-subtitle" }, points: { leaf: "text", props: { size: "xs", tone: "muted" } }, action: { leaf: ["badge", "button"], optional: true } },
+        why: "The same comparable row keeps a two-pixel danger signal inset on its left edge because negative movement belongs to this learner's data, not to the surrounding list.",
+    },
+    "ranked-user-name-over-subtitle": {
+        classes: ["flex", "min-w-0", "flex-col", "gap-0"],
+        children: { name: { leaf: ["text", "text-link"] }, subtitle: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true } },
+        why: "The optional movement or viewer qualifier stays directly beneath the learner name so both read as one identity while the row keeps its trailing comparison column.",
     },
     "streak-summary-card": {
         classes: ["flex", "flex-col", "gap-4"],

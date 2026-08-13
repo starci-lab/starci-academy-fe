@@ -6,6 +6,9 @@ const normalizePath = (filename) => String(filename || "").replace(/\\/g, "/")
 /** The only module allowed to name concrete glyph components. */
 const ICON_MODULE = "/src/components/leaves/Icon/index.tsx"
 
+/** Rank artwork is the one closed Fluent Emoji catalogue boundary. */
+const RANK_MARK_MODULE = "/src/components/leaves/RankMark/index.tsx"
+
 /** Known general-purpose glyph package roots, matched through subpaths. */
 const GLYPH_PACKAGES = [
   "@heroicons/",
@@ -50,11 +53,13 @@ export const noVendorIconOutsideIconLeaf = {
   },
   create(context) {
     const file = normalizePath(context.filename || context.getFilename())
-    if (!file.includes("/src/") || file.endsWith(ICON_MODULE)) return {}
+    if (!file.includes("/src/")) return {}
     return {
       ImportDeclaration(node) {
         const source = node.source && node.source.value
         if (!isGlyphPackage(source)) return
+        if (file.endsWith(ICON_MODULE)) return
+        if (file.endsWith(RANK_MARK_MODULE) && source === "@iconify/react") return
         context.report({ node, messageId: "vendor", data: { source } })
       },
     }
