@@ -1,6 +1,7 @@
 "use client"
 
 import { useLocale, useTranslations } from "next-intl"
+import { withoutLocale } from "@/modules/utils/localised-path"
 import { useRouter } from "@/i18n/navigation"
 import {
     useQueryMyCoursesSwr,
@@ -29,7 +30,7 @@ export const ContinueLearning = () => {
             const answer = await queryResolveRoute({ request: { globalId: id } })
             const path = answer.data?.resolveRoute?.data?.path
             if (path === undefined || path === null) return
-            router.push(`/${locale}${path}`)
+            router.push(withoutLocale(path, locale))
         })()
     }
 

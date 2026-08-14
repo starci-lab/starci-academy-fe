@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { withoutLocale } from "@/modules/utils/localised-path"
 import { useLocale, useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryMyCoursesSwr, useQueryResolveRouteSwr } from "@/hooks"
@@ -66,7 +67,7 @@ export const MyCoursesProgress = () => {
         try {
             const result = await route.trigger({ globalId: row.id })
             const path = result.data?.resolveRoute?.data?.path
-            if (path !== null && path !== undefined) router.push(path.startsWith(`/${locale}/`) ? path : `/${locale}${path}`)
+            if (path !== null && path !== undefined) router.push(withoutLocale(path, locale))
         } finally { setPendingId(undefined) }
     }]))
     return <_MyCoursesProgress state="ready" props={props} on={on} />

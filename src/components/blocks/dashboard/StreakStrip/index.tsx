@@ -1,6 +1,6 @@
 "use client"
 
-import { useLocale, useTranslations } from "next-intl"
+import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryMyWeeklyStatsSwr } from "@/hooks"
 import { type MyWeeklyStatsDay } from "@/modules/api/graphql/queries/types/my-weekly-stats"
@@ -71,7 +71,6 @@ const toStripDay = (day: MyWeeklyStatsDay): DayCellData => {
  */
 export const StreakStrip = () => {
     const t = useTranslations("streak")
-    const locale = useLocale()
     const router = useRouter()
     const weekly = useQueryMyWeeklyStatsSwr()
     const stats = weekly.data
@@ -90,7 +89,7 @@ export const StreakStrip = () => {
         )
     }
 
-    const onLearn = () => router.push(`/${locale}/courses`)
+    const onLearn = () => router.push("/courses")
     if (stats === undefined) {
         return (
             <_StreakStrip
