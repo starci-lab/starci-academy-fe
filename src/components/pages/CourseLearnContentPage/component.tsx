@@ -477,12 +477,14 @@ export const _CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
         ))),
     })
 
-    const sourceBody = input.props.sourceState === undefined || input.props.source === undefined
+    const sourceState = input.props.sourceState
+    const sourceData = input.props.source
+    const sourceBody = sourceState === undefined || sourceData === undefined
         ? undefined
-        : defineContractProjection("source-workspace-grid", () => (
+        : defineContractProjection("source-workspace-root", () => (
             <ContentSourceWorkspace
-                state={input.props.sourceState}
-                props={input.props.source}
+                state={sourceState}
+                props={sourceData}
                 on={input.on?.source}
             />
         ))

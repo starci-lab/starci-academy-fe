@@ -1,15 +1,17 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { setSessionToken } from "@/hooks/auth/useSessionToken"
-import { useGlobalAiChat } from "./context"
+import { useGlobalAiChat } from "@/modules/ai/global-ai-chat-context"
 import { GlobalAiChatLayout } from "."
+
+type FabMockProps = { readonly on?: { readonly press?: () => void } }
 
 let pathname = "/en/dashboard"
 
 vi.mock("@/i18n/navigation", () => ({ usePathname: () => pathname }))
 vi.mock("@/components/blocks/ai/StarCiAiFab/component", () => ({
-    StarCiAiFab: ({ on }: { readonly on?: { readonly press?: () => void } }) => (
-        <button type="button" onClick={on?.press}>Open AI</button>
+    StarCiAiFab: (input: FabMockProps) => (
+        <button type="button" onClick={input.on?.press}>Open AI</button>
     ),
 }))
 vi.mock("@/components/overlays/ai/StarCiAiDrawer", () => ({

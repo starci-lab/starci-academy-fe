@@ -33,8 +33,10 @@ export type StarCiAiChatState =
     | "tangentReady"
     | "contextCleared"
 
+/** The drawer body selected by its one finite disclosure row. */
 export type StarCiAiMode = "general" | "code" | "history"
 
+/** One render-ready learner or assistant entry in the ordered transcript. */
 export type StarCiAiTurn = {
     readonly id: string
     readonly role: "user" | "assistant"
@@ -44,6 +46,7 @@ export type StarCiAiTurn = {
     readonly isPartial?: boolean
 }
 
+/** One selectable persisted conversation summary in History mode. */
 export type StarCiAiSession = {
     readonly id: string
     readonly title: string
@@ -51,6 +54,7 @@ export type StarCiAiSession = {
     readonly isArchived?: boolean
 }
 
+/** Resolved locale copy consumed by the pure drawer body. */
 export type StarCiAiChatLabels = {
     readonly generalMode: string
     readonly codeMode: string
@@ -70,6 +74,7 @@ export type StarCiAiChatLabels = {
     readonly states: Readonly<Record<StarCiAiChatState, string>>
 }
 
+/** Closed render data for all chat, history, credit and context states. */
 export type StarCiAiChatData = {
     readonly labels: StarCiAiChatLabels
     readonly mode: StarCiAiMode
@@ -83,6 +88,7 @@ export type StarCiAiChatData = {
     readonly quotaLabel?: string
 }
 
+/** User intents emitted by the pure drawer body. */
 export type StarCiAiChatActions = {
     readonly selectMode?: (mode: StarCiAiMode) => void
     readonly selectSession?: (id: string) => void
@@ -98,6 +104,7 @@ export type StarCiAiChatActions = {
     readonly clearContext?: () => void
 }
 
+/** Pure chat input with state, resolved data and optional intents kept apart. */
 export type StarCiAiChatProps = {
     readonly state: StarCiAiChatState
     readonly props: StarCiAiChatData
@@ -133,13 +140,7 @@ export const _StarCiAiChat = (input: StarCiAiChatProps) => {
     const stateTurn: StarCiAiTurn | undefined = ["ready", "historyReady", "streaming"].includes(input.state)
         ? undefined
         : { id: `state-${input.state}`, role: "assistant", body: labels.states[input.state] }
-    const sessionTurns: ReadonlyArray<StarCiAiTurn> = input.props.sessions.map((session) => ({
-        id: session.id,
-        role: "assistant",
-        body: `${session.title}\n\n${session.updatedLabel}`,
-    }))
-    const turns = isHistory ? sessionTurns : input.props.turns
-    const renderedTurns = stateTurn === undefined ? turns : [...turns, stateTurn]
+    const renderedTurns = stateTurn === undefined ? input.props.turns : [...input.props.turns, stateTurn]
     const disablesComposer = input.state === "offline" || input.state === "reconnecting"
     const showsComposer = !isHistory && input.state !== "sessionsPending" && input.state !== "sessionsFailed"
     const showsSessionActions = isHistory && input.props.activeSessionId !== undefined
@@ -174,21 +175,40 @@ export const _StarCiAiChat = (input: StarCiAiChatProps) => {
                     context: isHistory || input.props.contextSummary === undefined
                         ? undefined
                         : defineContractComponent("starci-ai-context-stack", {
-                            context: [defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                            context: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
                                 <Text props={{ content: input.props.contextSummary, size: "xs" }} />
-                            ))],
+                            )),
+                            clear: input.props.selection === undefined
+                                ? undefined
+                                : defineLeafComponent("button", {}, () => (
+                                    <Button
+                                        props={{ label: labels.clearContext, variant: "ghost", size: "sm" }}
+                                        on={{ press: input.on?.clearContext }}
+                                    />
+                                )),
                         }),
                     chat: defineContractComponent("starci-ai-turn-list", {
-                        turn: renderedTurns.length === 0 && isLoading
-                            ? Array.from({ length: 4 }, (_unused, index) => defineLeafComponent("article", {}, () => (
-                                <Article key={`pending-${index}`} props={{}} isLoading />
-                            )))
-                            : renderedTurns.map((turn) => defineLeafComponent("article", {}, () => (
-                                <Article
-                                    key={turn.id}
-                                    props={{ body: turnMarkdown(turn, labels.partial) }}
+                        turn: isHistory && input.props.sessions.length > 0
+                            ? input.props.sessions.map((session) => defineLeafComponent("button", {}, () => (
+                                <Button
+                                    key={session.id}
+                                    props={{
+                                        label: `${session.title} · ${session.updatedLabel}`,
+                                        variant: session.id === input.props.activeSessionId ? "secondary" : "ghost",
+                                    }}
+                                    on={{ press: () => input.on?.selectSession?.(session.id) }}
                                 />
-                            ))),
+                            )))
+                            : renderedTurns.length === 0 && isLoading
+                                ? Array.from({ length: 4 }, (_unused, index) => defineLeafComponent("article", {}, () => (
+                                    <Article key={`pending-${index}`} props={{}} isLoading />
+                                )))
+                                : renderedTurns.map((turn) => defineLeafComponent("article", {}, () => (
+                                    <Article
+                                        key={turn.id}
+                                        props={{ body: turnMarkdown(turn, labels.partial) }}
+                                    />
+                                ))),
                     }),
                 })}
             />
@@ -275,6 +295,7 @@ export const _StarCiAiChat = (input: StarCiAiChatProps) => {
     )
 }
 
+/** Exhaustive fixture source for every state owned by the connected chat. */
 export const STARCI_AI_CHAT_STATES: ReadonlyArray<StarCiAiChatState> = [
     "sessionsPending", "sessionsFailed", "noSession", "historyPending", "historyReady", "searchEmpty",
     "historyFailed", "renaming", "archiving", "deleteConfirm", "ready", "streaming", "quotaPending",
@@ -282,4 +303,5 @@ export const STARCI_AI_CHAT_STATES: ReadonlyArray<StarCiAiChatState> = [
     "tangentReady", "contextCleared",
 ]
 
+/** Source-level ownership marker. */
 export const meta = { shape: "block", world: "pure", domain: "ai" } as const

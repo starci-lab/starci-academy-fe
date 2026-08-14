@@ -16,6 +16,13 @@ export type SandboxCodeSelection = {
 
 type UnknownRecord = Record<string, unknown>
 
+type PublicSandboxRepoUrlInput = {
+    readonly minioUrl: string
+    readonly bucket: string
+    readonly repoName: string
+    readonly githubDir: string
+}
+
 const isRecord = (value: unknown): value is UnknownRecord =>
     typeof value === "object" && value !== null && !Array.isArray(value)
 
@@ -39,17 +46,8 @@ export const sandboxRepoName = (githubBaseUrl: string): string => {
 }
 
 /** Build the public MinIO object URL used by non-premium legacy sandbox lessons. */
-export const publicSandboxRepoUrl = ({
-    minioUrl,
-    bucket,
-    repoName,
-    githubDir,
-}: {
-    readonly minioUrl: string
-    readonly bucket: string
-    readonly repoName: string
-    readonly githubDir: string
-}): string => `${minioUrl.replace(/\/$/, "")}/${bucket}/repo/${repoName}/${githubDir}.json`
+export const publicSandboxRepoUrl = (input: PublicSandboxRepoUrlInput): string =>
+    `${input.minioUrl.replace(/\/$/, "")}/${input.bucket}/repo/${input.repoName}/${input.githubDir}.json`
 
 /** Validate the JSON uploaded by RepoSynchronizerService and split package dependencies from files. */
 export const parseSandboxRepoSnapshot = (raw: unknown): SandboxRepoSnapshot => {

@@ -1,16 +1,23 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
 import {
     useContentAiStream,
     useMutateCreateContentAiSessionSwr,
+    useMutateDeleteContentAiSessionSwr,
+    useMutateRenameContentAiSessionSwr,
+    useMutateSetContentAiSessionArchivedSwr,
     useQueryContentAiHistorySwr,
     useQueryContentAiSessionsSwr,
     useQueryMyAiQuotaSwr,
 } from "@/hooks"
-import { useGlobalAiChat } from "@/components/layouts/GlobalAiChatLayout/context"
-import { buildContentAiQuestion, formatContentAiContextSummary } from "@/modules/ai/content-ai-selection-context"
+import { useGlobalAiChat } from "@/modules/ai/global-ai-chat-context"
+import {
+    buildContentAiQuestion,
+    formatContentAiContextSummary,
+    parseContentAiQuestion,
+} from "@/modules/ai/content-ai-selection-context"
 import {
     _StarCiAiChat,
     STARCI_AI_CHAT_STATES,
@@ -18,6 +25,11 @@ import {
     type StarCiAiMode,
     type StarCiAiTurn,
 } from "./component"
+
+type StarCiAiAttempt = {
+    readonly userId: string
+    readonly assistantId: string
+}
 
 /** Resolve persisted conversations, advisory credits and one authenticated stream into the pure chat. */
 export const StarCiAiChat = () => {
@@ -30,11 +42,19 @@ export const StarCiAiChat = () => {
     const [draftKey, setDraftKey] = useState(0)
     const [localTurns, setLocalTurns] = useState<ReadonlyArray<StarCiAiTurn>>([])
     const [terminalState, setTerminalState] = useState<StarCiAiChatState>()
+    const handledTangentVersion = useRef(owner.tangentVersion)
+    const failedAttempt = useRef<StarCiAiAttempt | undefined>(undefined)
     const sessions = useQueryContentAiSessionsSwr()
     const history = useQueryContentAiHistorySwr(activeSessionId)
     const quota = useQueryMyAiQuotaSwr()
     const createSession = useMutateCreateContentAiSessionSwr()
+    const renameSession = useMutateRenameContentAiSessionSwr()
+    const archiveSession = useMutateSetContentAiSessionArchivedSwr()
+    const deleteSession = useMutateDeleteContentAiSessionSwr()
     const stream = useContentAiStream()
+    const anchorRequest = useMemo(() => owner.anchor.scope === "global" || owner.anchor.id === undefined
+        ? { scope: "global" as const }
+        : { scope: owner.anchor.scope, [`${owner.anchor.scope}Id`]: owner.anchor.id }, [owner.anchor.id, owner.anchor.scope])
 
     useEffect(() => {
         if (activeSessionId === undefined && sessions.data?.sessions[0] !== undefined) {
@@ -46,12 +66,34 @@ export const StarCiAiChat = () => {
         if (owner.codeContext !== undefined) setMode("code")
     }, [owner.codeContext])
 
+    useEffect(() => {
+        if (owner.tangentVersion === handledTangentVersion.current) return
+        handledTangentVersion.current = owner.tangentVersion
+        let isCurrent = true
+        void createSession.trigger({ ...anchorRequest, archived: true }).then((created) => {
+            if (!isCurrent || created.id === null || created.id === undefined) return
+            setActiveSessionId(created.id)
+            setLocalTurns([])
+            setMode("code")
+            setTerminalState("tangentReady")
+            void sessions.mutate()
+        }).catch(() => {
+            if (isCurrent) setTerminalState("streamFailed")
+        })
+        return () => { isCurrent = false }
+    }, [owner.tangentVersion])
+
     const persistedTurns = useMemo<ReadonlyArray<StarCiAiTurn>>(
-        () => (history.data?.messages ?? []).map((turn, index) => ({
-            id: `persisted-${index}`,
-            role: turn.role,
-            body: turn.content,
-        })),
+        () => (history.data?.messages ?? []).map((turn, index) => {
+            const parsed = turn.role === "user" ? parseContentAiQuestion(turn.content) : undefined
+            return {
+                id: `persisted-${index}`,
+                role: turn.role,
+                body: parsed?.question ?? turn.content,
+                quote: parsed?.selection?.quote,
+                quoteLanguage: parsed?.quoteLanguage,
+            }
+        }),
         [history.data?.messages],
     )
     const turns = [...persistedTurns, ...localTurns]
@@ -68,17 +110,57 @@ export const StarCiAiChat = () => {
                         ? "noSession"
                         : stream.state === "reconnecting" || stream.state === "connecting"
                             ? "reconnecting"
-                            : stream.state === "failed" || stream.state === "idle"
+                            : stream.state === "failed"
                                 ? "offline"
-                                : quota.isLoading
-                                    ? "quotaPending"
-                                    : quota.data?.credit.remainingWeek === 0 ? "zeroPaidCredits" : "ready")
+                                : stream.state === "idle"
+                                    ? "reconnecting"
+                                    : quota.isLoading
+                                        ? "quotaPending"
+                                        : quota.data?.credit.remainingWeek === 0 ? "zeroPaidCredits" : "ready")
 
-    const anchorRequest = owner.anchor.scope === "global" || owner.anchor.id === undefined
-        ? { scope: "global" as const }
-        : { scope: owner.anchor.scope, [`${owner.anchor.scope}Id`]: owner.anchor.id }
+    const refreshSessions = async () => {
+        await sessions.mutate()
+        setTerminalState(undefined)
+    }
 
-    const send = async () => {
+    const renameActiveSession = async () => {
+        if (activeSessionId === undefined) return
+        const current = sessions.data?.sessions.find((session) => session.id === activeSessionId)
+        const title = window.prompt(t("actions.renamePrompt"), current?.title ?? "")
+        if (title === null) return
+        setTerminalState("renaming")
+        try {
+            await renameSession.trigger({ sessionId: activeSessionId, title: title.trim() })
+            await refreshSessions()
+        } catch {
+            setTerminalState("historyFailed")
+        }
+    }
+
+    const archiveActiveSession = async () => {
+        if (activeSessionId === undefined) return
+        setTerminalState("archiving")
+        try {
+            await archiveSession.trigger({ sessionId: activeSessionId, archived: true })
+            setActiveSessionId(undefined)
+            await refreshSessions()
+        } catch {
+            setTerminalState("historyFailed")
+        }
+    }
+
+    const deleteActiveSession = async () => {
+        if (activeSessionId === undefined) return
+        try {
+            await deleteSession.trigger({ sessionId: activeSessionId })
+            setActiveSessionId(undefined)
+            await refreshSessions()
+        } catch {
+            setTerminalState("historyFailed")
+        }
+    }
+
+    const send = async (discardedAttempt?: StarCiAiAttempt) => {
         if (draft.trim() === "") return
         setTerminalState(undefined)
         let sessionId = activeSessionId
@@ -90,20 +172,31 @@ export const StarCiAiChat = () => {
                 setActiveSessionId(sessionId)
             } catch { setTerminalState("streamFailed"); return }
         }
+        const attempt = crypto.randomUUID()
         const userTurn: StarCiAiTurn = {
-            id: `user-${Date.now()}`,
+            id: `user-${attempt}`,
             role: "user",
             body: draft.trim(),
             quote: owner.codeContext?.quote,
             quoteLanguage: owner.codeContext?.path?.split(".").pop(),
         }
-        const assistantId = `assistant-${Date.now()}`
-        setLocalTurns((current) => [...current, userTurn, { id: assistantId, role: "assistant", body: "", isPartial: true }])
+        const assistantId = `assistant-${attempt}`
+        const discardedIds = new Set(discardedAttempt === undefined
+            ? []
+            : [discardedAttempt.userId, discardedAttempt.assistantId])
+        failedAttempt.current = undefined
+        setLocalTurns((current) => [
+            ...current.filter((turn) => !discardedIds.has(turn.id)),
+            userTurn,
+            { id: assistantId, role: "assistant", body: "", isPartial: true },
+        ])
         stream.ask({
             sessionId,
             ...anchorRequest,
             question: buildContentAiQuestion(draft, owner.codeContext),
-            history: turns.map((turn) => ({ role: turn.role, content: turn.body })),
+            history: turns
+                .filter((turn) => !discardedIds.has(turn.id))
+                .map((turn) => ({ role: turn.role, content: turn.body })),
             onDelta: (delta) => setLocalTurns((current) => current.map((turn) => turn.id === assistantId ? { ...turn, body: `${turn.body}${delta}` } : turn)),
             onDone: (error) => {
                 if (error !== undefined) {
@@ -112,6 +205,10 @@ export const StarCiAiChat = () => {
                         : error === "SOCKET_DISCONNECTED"
                             ? "reconnecting"
                             : /quota|credit/iu.test(error) ? "quotaRejected" : "streamFailed"
+                    failedAttempt.current = { userId: userTurn.id, assistantId }
+                    if (next === "quotaRejected") {
+                        setLocalTurns((current) => current.filter((turn) => turn.id !== userTurn.id && turn.id !== assistantId))
+                    }
                     setTerminalState(next)
                     return
                 }
@@ -119,12 +216,23 @@ export const StarCiAiChat = () => {
                 setDraft("")
                 setDraftKey((key) => key + 1)
                 owner.clearCodeContext()
-                setTerminalState("contextCleared")
+                setTerminalState(undefined)
                 void quota.mutate()
-                void history.mutate()
-                void sessions.mutate()
+                void Promise.all([history.mutate(), sessions.mutate()]).then(() => {
+                    setLocalTurns([])
+                })
             },
         })
+    }
+
+    const retry = () => {
+        const discarded = failedAttempt.current
+        void send(discarded)
+    }
+
+    const clearContext = () => {
+        owner.clearCodeContext()
+        setTerminalState("contextCleared")
     }
 
     const labels = {
@@ -161,16 +269,27 @@ export const StarCiAiChat = () => {
             }}
             on={{
                 selectMode: setMode,
-                selectSession: setActiveSessionId,
+                selectSession: (id) => {
+                    setActiveSessionId(id)
+                    setLocalTurns([])
+                    setTerminalState(undefined)
+                    setMode("general")
+                },
                 changeDraft: setDraft,
                 send: () => void send(),
                 stop: stream.abort,
-                retry: () => void send(),
-                clearContext: owner.clearCodeContext,
+                retry,
+                clearContext,
+                rename: () => void renameActiveSession(),
+                archive: () => void archiveActiveSession(),
+                delete: () => setTerminalState("deleteConfirm"),
+                confirmDelete: () => void deleteActiveSession(),
+                cancelDelete: () => setTerminalState(undefined),
             }}
         />
     )
 }
 
 export * from "./component"
+/** Source-level ownership marker. */
 export const meta = { world: "connected", domain: "ai" } as const

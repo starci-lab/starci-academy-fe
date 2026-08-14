@@ -79,10 +79,20 @@ describe("_StarCiAiChat", () => {
     )
 
     it("history owns the body and hides chat context, quote and composer", () => {
-        const { container } = render(<_StarCiAiChat state="historyReady" props={{ ...props, mode: "history" }} />)
-        expect(screen.getByText("Async patterns")).toBeInTheDocument()
+        const selectSession = vi.fn()
+        const { container } = render(<_StarCiAiChat state="historyReady" props={{ ...props, mode: "history" }} on={{ selectSession }} />)
+        const session = screen.getByRole("button", { name: "Async patterns · Just now" })
+        fireEvent.click(session)
+        expect(selectSession).toHaveBeenCalledWith("session-1")
         expect(container.querySelector("[data-node=starci-ai-context-stack]")).toBeNull()
         expect(container.querySelector("[data-node=starci-ai-composer]")).toBeNull()
         expect(screen.queryByText("controller.abort()")).not.toBeInTheDocument()
+    })
+
+    it("clears selected grounding from the compact context row", () => {
+        const clearContext = vi.fn()
+        render(<_StarCiAiChat state="ready" props={props} on={{ clearContext }} />)
+        fireEvent.click(screen.getByRole("button", { name: "Clear context" }))
+        expect(clearContext).toHaveBeenCalledTimes(1)
     })
 })

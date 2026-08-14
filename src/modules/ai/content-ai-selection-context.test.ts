@@ -3,6 +3,7 @@ import {
     buildContentAiQuestion,
     formatContentAiContextSummary,
     normalizeContentAiSelection,
+    parseContentAiQuestion,
 } from "./content-ai-selection-context"
 
 describe("content-ai-selection-context", () => {
@@ -37,5 +38,34 @@ describe("content-ai-selection-context", () => {
         })
         expect(question).toContain("Source: src/useTodos.ts:20-20")
         expect(question).toContain("```ts\ncontroller.abort()\n```")
+    })
+})
+
+describe("parseContentAiQuestion", () => {
+    it("round-trips persisted code evidence into a visible quote", () => {
+        const persisted = buildContentAiQuestion("Why abort here?", {
+            kind: "code",
+            quote: "controller.abort()",
+            path: "src/useTodos.ts",
+            startLine: 20,
+            endLine: 20,
+        })
+        expect(parseContentAiQuestion(persisted)).toEqual({
+            question: "Why abort here?",
+            quoteLanguage: "ts",
+            selection: {
+                kind: "code",
+                quote: "controller.abort()",
+                path: "src/useTodos.ts",
+                startLine: 20,
+                endLine: 20,
+                runtimeError: undefined,
+            },
+        })
+    })
+
+    it("keeps malformed and legacy questions as plain text", () => {
+        const legacy = "Why does this work?"
+        expect(parseContentAiQuestion(legacy)).toEqual({ question: legacy })
     })
 })

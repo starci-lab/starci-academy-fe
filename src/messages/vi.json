@@ -476,6 +476,60 @@
             "announcement": "Thông báo"
         }
     },
+    "globalAi": {
+        "title": "StarCi AI",
+        "description": "Trợ giảng đồng hành trên toàn StarCi Academy.",
+        "modes": {
+            "general": "Chat chung",
+            "code": "Code coach",
+            "history": "Lịch sử"
+        },
+        "composer": {
+            "label": "Hỏi StarCi AI",
+            "placeholder": "Hỏi về bài học hoặc đoạn code đang chọn..."
+        },
+        "actions": {
+            "send": "Gửi",
+            "stop": "Dừng",
+            "retry": "Thử lại",
+            "clearContext": "Bỏ ngữ cảnh",
+            "rename": "Đổi tên",
+            "renamePrompt": "Tên conversation",
+            "archive": "Lưu trữ",
+            "delete": "Xóa",
+            "confirmDelete": "Xóa conversation",
+            "cancel": "Hủy"
+        },
+        "partial": "Answer đã dừng trước khi hoàn tất",
+        "untitled": "Conversation mới",
+        "quota": {
+            "unavailable": "Chưa tải được AI credits",
+            "remaining": "Còn {remaining} paid credits"
+        },
+        "states": {
+            "sessionsPending": "Đang tải conversations...",
+            "sessionsFailed": "Không tải được conversations.",
+            "noSession": "Hãy hỏi câu đầu tiên để tạo conversation.",
+            "historyPending": "Đang tải lịch sử conversation...",
+            "historyReady": "Chọn một conversation để tiếp tục.",
+            "searchEmpty": "Chưa có conversation trong ngữ cảnh này.",
+            "historyFailed": "Không tải được lịch sử conversation.",
+            "renaming": "Đang đổi tên conversation...",
+            "archiving": "Đang lưu trữ conversation...",
+            "deleteConfirm": "Xóa conversation này? Thao tác không thể hoàn tác.",
+            "ready": "StarCi AI đã sẵn sàng.",
+            "streaming": "StarCi AI đang trả lời...",
+            "quotaPending": "Đang tải số dư paid credits. Chat vẫn dùng được.",
+            "zeroPaidCredits": "Đã hết paid credits. Model miễn phí vẫn dùng được.",
+            "quotaRejected": "Lượt chạy này cần nhiều paid credits hơn số dư hiện tại.",
+            "offline": "StarCi AI đang offline. Draft của thầy vẫn được giữ.",
+            "reconnecting": "Đang kết nối lại StarCi AI...",
+            "streamFailed": "Answer dừng vì model gặp lỗi.",
+            "aborted": "Đã dừng answer. Phần đã nhận vẫn được giữ.",
+            "tangentReady": "Conversation code riêng đã sẵn sàng.",
+            "contextCleared": "Đã bỏ ngữ cảnh code; câu kế tiếp dùng ngữ cảnh bài học."
+        }
+    },
     "profile": {
         "notFound": "Không tìm thấy hồ sơ này.",
         "failed": "Không thể tải hồ sơ. Hãy kiểm tra kết nối và thử lại.",

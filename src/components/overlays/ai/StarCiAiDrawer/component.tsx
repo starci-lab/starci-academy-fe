@@ -1,8 +1,10 @@
 import type { ComponentType } from "react"
 import { DrawerShell, type DrawerShellPlacement } from "@/components/shells/DrawerShell"
 
+/** Overlay lifecycle independent from chat transport state. */
 export type StarCiAiDrawerState = "closed" | "pending" | "ready" | "failed"
 
+/** Resolved shell geometry and accessible copy for the AI overlay. */
 export type StarCiAiDrawerData = {
     readonly isOpen: boolean
     readonly placement: DrawerShellPlacement
@@ -10,6 +12,7 @@ export type StarCiAiDrawerData = {
     readonly description: string
 }
 
+/** Pure drawer input with the connected chat supplied as its mechanics body. */
 export type StarCiAiDrawerProps = {
     readonly state: StarCiAiDrawerState
     readonly props: StarCiAiDrawerData
@@ -32,4 +35,5 @@ export const _StarCiAiDrawer = (input: StarCiAiDrawerProps) => {
     )
 }
 
+/** Source-level ownership marker. */
 export const meta = { shape: "overlay", world: "pure", domain: "ai" } as const

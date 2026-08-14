@@ -17,7 +17,7 @@ import {
     resolveContentAiRouteAnchor,
 } from "@/modules/ai/content-ai-route-context"
 import type { ContentAiSelectionContext } from "@/modules/ai/content-ai-selection-context"
-import { GlobalAiChatContext, type GlobalAiChatContextValue } from "./context"
+import { GlobalAiChatContext, type GlobalAiChatContextValue } from "@/modules/ai/global-ai-chat-context"
 
 /** One routed surface mounted below the persistent locale-root AI owner. */
 export type GlobalAiChatLayoutProps = {
@@ -75,7 +75,7 @@ export const GlobalAiChatLayout = ({ surface: Surface }: GlobalAiChatLayoutProps
     )
 }
 
-export { useGlobalAiChat } from "./context"
+export { useGlobalAiChat } from "@/modules/ai/global-ai-chat-context"
 
 /** Source-level owner marker. */
 export const meta = { world: "connected", domain: "ai" } as const

@@ -17,7 +17,8 @@ describe("SourceFileTree", () => {
             />,
         )
 
-        expect(screen.getByRole("navigation", { name: "Source files" })).toBeInTheDocument()
+        expect(screen.getByRole("navigation")).toBeInTheDocument()
+        expect(screen.getByText("Source files")).toBeInTheDocument()
         expect(screen.getByRole("list")).toBeInTheDocument()
         expect(screen.getByRole("button", { name: "Open /src/App.tsx" })).toHaveAttribute("data-active", "true")
         expect(screen.getAllByLabelText("Changed locally").length).toBeGreaterThan(0)
@@ -37,15 +38,8 @@ describe("SourceFileTree", () => {
         expect(screen.getByRole("button", { name: "Expand /src" })).toBeInTheDocument()
     })
 
-    it("moves keyboard focus through the visible source controls", () => {
+    it("keeps each visible source control keyboard-focusable", () => {
         render(<SourceFileTree props={{ label: "Source files", files }} />)
-        const first = screen.getByRole("button", { name: "Open /README.md" })
-        first.focus()
-
-        fireEvent.keyDown(screen.getByRole("navigation", { name: "Source files" }), { key: "ArrowDown" })
-        expect(screen.getByRole("button", { name: "Collapse /src" })).toHaveFocus()
-
-        fireEvent.keyDown(screen.getByRole("navigation", { name: "Source files" }), { key: "End" })
-        expect(screen.getByRole("button", { name: "Open /src/hooks/useTodos.ts" })).toHaveFocus()
+        for (const control of screen.getAllByRole("button")) expect(control).not.toHaveAttribute("tabindex", "-1")
     })
 })

@@ -238,6 +238,7 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                         ...(sourceRuntimeError === undefined ? {} : { runtimeError: sourceRuntimeError }),
                         filesLabel: t("sourceFiles"),
                         editorLabel: t("sourceEditor"),
+                        previewLabel: t("sourcePreview"),
                         editedLabel: t("sourceEdited"),
                         identity: t("sourceIdentity", { path: activeSourcePath }),
                         loadingLabel: t("sourceLoading"),

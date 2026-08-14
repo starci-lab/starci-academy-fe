@@ -4,6 +4,7 @@ import { CodeBlock } from "@/components/leaves/CodeBlock"
 import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 import type { ContentAiSelectionContext } from "@/modules/ai/content-ai-selection-context"
 
+/** Render data for one valid source or prose selection action surface. */
 export type StarCiAiSelectionAskData = {
     readonly selection: ContentAiSelectionContext
     readonly appendLabel: string
@@ -12,12 +13,14 @@ export type StarCiAiSelectionAskData = {
     readonly position: { readonly x: number; readonly y: number }
 }
 
+/** Mutually exclusive intents emitted for the current selection. */
 export type StarCiAiSelectionAskActions = {
     readonly append?: () => void
     readonly tangent?: () => void
     readonly dismiss?: () => void
 }
 
+/** Hidden or ready projection of the transient selection surface. */
 export type StarCiAiSelectionAskProps =
     | { readonly state: "hidden"; readonly props?: undefined; readonly on?: undefined }
     | { readonly state: "ready"; readonly props: StarCiAiSelectionAskData; readonly on?: StarCiAiSelectionAskActions }
@@ -53,4 +56,5 @@ export const _StarCiAiSelectionAsk = (input: StarCiAiSelectionAskProps) => {
     )
 }
 
+/** Source-level ownership marker. */
 export const meta = { shape: "block", world: "pure", domain: "ai" } as const

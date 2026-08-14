@@ -1,16 +1,16 @@
-import { SandpackShell, type SandpackShellData } from "@/components/shells/SandpackShell"
+import { SandpackWorkspace, type SandpackWorkspaceData } from "@/components/branches/SandpackWorkspace"
 import { Tree } from "@/components/branches/Tree"
 import { Button } from "@/components/leaves/Button"
 import { StatusDot } from "@/components/leaves/StatusDot"
 import { Text } from "@/components/leaves/Text"
-import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
+import { defineContractComponent, defineContractProjection, defineLeafComponent } from "@/components/contracts/props"
 import type { SandboxCodeSelection } from "@/modules/code/sandbox-repo"
 
 /** Source workspace states owned independently from the article request. */
 export type ContentSourceWorkspaceState = "pending" | "ready" | "failed"
 
 /** Product copy and runtime data for the selected Source face. */
-export type ContentSourceWorkspaceData = SandpackShellData & {
+export type ContentSourceWorkspaceData = SandpackWorkspaceData & {
     readonly identity: string
     readonly loadingLabel: string
     readonly failedLabel: string
@@ -82,21 +82,26 @@ const toolbar = (
 
 /** Render source loading/failure or the editable Sandpack workspace. */
 export const ContentSourceWorkspace = ({ state, props, on }: ContentSourceWorkspaceProps) => (
-    <div data-component="ContentSourceWorkspace" data-state={state}>
-        <Tree contract="source-workspace-toolbar" render={toolbar(state, props, on)} />
-        {state === "ready" ? (
-            <SandpackShell
-                props={props}
-                on={{
-                    activateFile: on?.activateFile,
-                    updateFile: on?.updateFile,
-                    selectionChange: on?.selectCode,
-                    runtimeError: on?.runtimeError,
-                    reset: on?.reset,
-                }}
-            />
-        ) : null}
-    </div>
+    <Tree
+        contract="source-workspace-root"
+        render={defineContractComponent("source-workspace-root", {
+            toolbar: toolbar(state, props, on),
+            ...(state === "ready" ? {
+                workspace: defineContractProjection("source-workspace-grid", () => (
+                    <SandpackWorkspace
+                        props={props}
+                        on={{
+                            activateFile: on?.activateFile,
+                            updateFile: on?.updateFile,
+                            selectionChange: on?.selectCode,
+                            runtimeError: on?.runtimeError,
+                            reset: on?.reset,
+                        }}
+                    />
+                )),
+            } : {}),
+        })}
+    />
 )
 
 /** Source-level ownership marker. */

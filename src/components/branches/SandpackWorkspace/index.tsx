@@ -29,19 +29,20 @@ import {
 } from "@/modules/code/sandbox-repo"
 
 /** Runtime data owned by the Sandpack mechanics boundary. */
-export type SandpackShellData = {
+export type SandpackWorkspaceData = {
     readonly files: SandpackFiles
     readonly dependencies?: Readonly<Record<string, string>>
     readonly activePath: string
     readonly template?: SandpackPredefinedTemplate
     readonly filesLabel: string
     readonly editorLabel: string
+    readonly previewLabel: string
     readonly editedPaths?: ReadonlyArray<string>
     readonly editedLabel?: string
 }
 
 /** Events emitted from controlled editor and Sandpack runtime state. */
-export type SandpackShellActions = {
+export type SandpackWorkspaceActions = {
     readonly activateFile?: (path: string) => void
     readonly updateFile?: (path: string, code: string) => void
     readonly selectionChange?: (selection?: SandboxCodeSelection) => void
@@ -49,10 +50,10 @@ export type SandpackShellActions = {
     readonly reset?: () => void
 }
 
-/** Props for {@link SandpackShell}. */
-export type SandpackShellProps = {
-    readonly props: SandpackShellData
-    readonly on?: SandpackShellActions
+/** Props for {@link SandpackWorkspace}. */
+export type SandpackWorkspaceProps = {
+    readonly props: SandpackWorkspaceData
+    readonly on?: SandpackWorkspaceActions
 }
 
 const grammarFor = (path: string) => {
@@ -72,10 +73,12 @@ const runtimeErrorMessage = (error: unknown): string | undefined => {
     return String(error)
 }
 
-const SandpackRuntime = ({ props, on }: SandpackShellProps) => {
+const SandpackRuntime = (input: SandpackWorkspaceProps) => {
+    const data = input.props
+    const on = input.on
     const { sandpack } = useSandpack()
-    const activePath = normalizeSandboxPath(props.activePath)
-    const code = sandboxFileCode(props.files, activePath)
+    const activePath = normalizeSandboxPath(data.activePath)
+    const code = sandboxFileCode(data.files, activePath)
     const extensions = useMemo(() => [grammarFor(activePath), EditorView.lineWrapping], [activePath])
 
     useEffect(() => {
@@ -95,24 +98,24 @@ const SandpackRuntime = ({ props, on }: SandpackShellProps) => {
         <Tree
             contract="source-workspace-grid"
             render={defineContractComponent("source-workspace-grid", {
-                files: defineContractProjection("source-file-list", () => (
+                files: defineContractProjection("source-file-navigation", () => (
                     <SourceFileTree
                         props={{
-                            label: props.filesLabel,
-                            files: Object.keys(props.files).map((path) => ({
+                            label: data.filesLabel,
+                            files: Object.keys(data.files).map((path) => ({
                                 path,
-                                isEdited: props.editedPaths?.includes(path),
+                                isEdited: data.editedPaths?.includes(path),
                             })),
                             activePath,
-                            editedLabel: props.editedLabel,
+                            editedLabel: data.editedLabel,
                         }}
                         on={{ activate: activateFile }}
                     />
                 )),
-                editor: defineLeafComponent("code-editor", {}, () => (
-                    <div data-component="SandpackControlledEditor" className="min-h-80 min-w-0 overflow-auto">
+                editor: defineContractComponent("source-code-editor-frame", {
+                    editor: defineLeafComponent("code-editor", {}, () => (
                         <CodeMirror
-                            aria-label={props.editorLabel}
+                            aria-label={data.editorLabel}
                             value={code}
                             theme={vscodeDark}
                             height="100%"
@@ -138,11 +141,11 @@ const SandpackRuntime = ({ props, on }: SandpackShellProps) => {
                                 })
                             }}
                         />
-                    </div>
-                )),
+                    )),
+                }),
                 preview: defineLeafComponent("page", {}, () => (
                     <SandpackPreview
-                        aria-label="Sandbox preview"
+                        aria-label={data.previewLabel}
                         showNavigator={false}
                         showOpenInCodeSandbox={false}
                         showSandpackErrorOverlay
@@ -155,23 +158,21 @@ const SandpackRuntime = ({ props, on }: SandpackShellProps) => {
 }
 
 /** Sandpack provider with a custom controlled CodeMirror editor; no vendor DOM is inspected. */
-export const SandpackShell = ({ props, on }: SandpackShellProps) => (
-    <div data-component="SandpackShell" data-tier="shell">
-        <SandpackProvider
-            template={props.template ?? "react-ts"}
-            files={props.files}
-            customSetup={{ dependencies: { ...props.dependencies } }}
-            options={{
-                activeFile: normalizeSandboxPath(props.activePath),
-                recompileMode: "delayed",
-                recompileDelay: 600,
-                startRoute: "/?sandbox=1",
-            }}
-        >
-            <SandpackRuntime props={props} on={on} />
-        </SandpackProvider>
-    </div>
+export const SandpackWorkspace = (input: SandpackWorkspaceProps) => (
+    <SandpackProvider
+        template={input.props.template ?? "react-ts"}
+        files={input.props.files}
+        customSetup={{ dependencies: { ...input.props.dependencies } }}
+        options={{
+            activeFile: normalizeSandboxPath(input.props.activePath),
+            recompileMode: "delayed",
+            recompileDelay: 600,
+            startRoute: "/?sandbox=1",
+        }}
+    >
+        <SandpackRuntime props={input.props} on={input.on} />
+    </SandpackProvider>
 )
 
 /** Source-level tier marker for vendor sandbox mechanics. */
-export const meta = { shape: "shell", world: "pure" } as const
+export const meta = { shape: "branch", world: "pure" } as const

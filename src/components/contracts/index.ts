@@ -40,7 +40,7 @@ export type LayoutClassName =
     // column while the two are stacked, and BESIDE it once they are side by side.
     | "md:w-2/5" | "md:shrink-0" | "md:border-b-0" | "md:border-r"
     | "@app-md:flex-row" | "@app-md:items-start" | "@app-md:gap-8" | "@app-md:w-72"
-    | "mx-auto" | "min-h-screen" | "w-full" | "min-w-0" | "grow" | "flex-1" | "shrink-0" | "hidden" | "max-w-app-sm" | "max-w-app-md" | "max-w-app-lg" | "max-w-app-xl" | "max-w-6xl" | "max-w-sm" | "max-w-md" | "@container"
+    | "mx-auto" | "min-h-screen" | "min-h-80" | "w-full" | "min-w-0" | "grow" | "flex-1" | "shrink-0" | "hidden" | "overflow-auto" | "max-w-app-sm" | "max-w-app-md" | "max-w-app-lg" | "max-w-app-xl" | "max-w-6xl" | "max-w-sm" | "max-w-md" | "@container"
     | "h-16" | "min-h-16" | "sticky" | "top-0" | "top-16" | "z-40" | "z-50"
     | "border" | "border-b" | "border-separator" | "divide-y" | "divide-separator" | "bg-background"
     | "px-3" | "px-4" | "px-6" | "py-2" | "py-3" | "py-6" | "p-0" | "p-2" | "p-4" | "p-6" | "-mt-px"
@@ -1971,9 +1971,9 @@ export const CONTRACTS = buildContracts({
         children: {
             header: { contract: "page-header-stack" },
             faces: { contract: "dual-tabs-toolbar", optional: true },
-            body: { contract: ["content-reading-column", "centred-empty-notice"] },
+            body: { contract: ["content-reading-column", "centred-empty-notice", "source-workspace-root"] },
         },
-        why: "A content is read straight down one measure, so the page holds one column: the trail and the title, the faces this content actually has, the face that is open, and the ways on. The body slot admits the empty-notice surface as well as the article because a locked content replaces the reading rather than decorating it - the reader is told the same thing in the same place either way.",
+        why: "A content is read straight down one measure until its selected face replaces the body with the source workspace; locked and failed content still replace that same body slot rather than decorating it.",
     },
     /*
     /*
@@ -2670,6 +2670,134 @@ export const CONTRACTS = buildContracts({
             message: { leaf: "code-block", optional: true },
         },
         why: "The per-case marks are the summary and the compiler's own words are the detail, so the detail appears only for the one verdict that carries any.",
+    },
+    "global-ai-layout": {
+        classes: ["relative", "w-full"],
+        children: {
+            surface: { leaf: "page" },
+            selection: { contract: "selection-ai-actions", optional: true },
+            trigger: { contract: "floating-ai-trigger", optional: true },
+            drawer: { contract: "starci-ai-drawer-column", optional: true },
+        },
+        why: "The routed surface and its one persistent AI owner are siblings, so navigation can replace the lesson without replacing the active conversation.",
+    },
+    "floating-ai-trigger": {
+        classes: ["flex", "items-center", "gap-2"],
+        children: {
+            mark: { leaf: "starci-ai-mark" },
+            label: { leaf: "text" },
+            badge: { leaf: "badge", optional: true },
+        },
+        why: "The global AI mark, its accessible name and optional unread fact form one press target.",
+    },
+    "selection-ai-actions": {
+        classes: ["flex", "flex-col", "gap-2"],
+        children: {
+            quote: { leaf: "code-block" },
+            action: { leaf: "button", repeats: true, restingCount: 2 },
+        },
+        why: "The exact selected passage stays attached to the mutually exclusive active-chat and tangent actions.",
+    },
+    "starci-ai-drawer-column": {
+        classes: ["flex", "w-full", "grow", "flex-col"],
+        children: {
+            mode: { contract: "starci-ai-mode-row" },
+            context: { contract: "starci-ai-context-stack", optional: true },
+            chat: { contract: "starci-ai-turn-list" },
+        },
+        why: "Without this column the mode and grounding can scroll away from the transcript they qualify and leave the composer without visible context.",
+    },
+    "starci-ai-mode-row": {
+        classes: ["flex", "items-center", "gap-1"],
+        children: {
+            mode: { leaf: "button", repeats: true, restingCount: 3 },
+        },
+        why: "Without one finite row the three mutually exclusive drawer bodies can appear as unrelated actions and expose more than one owner at once.",
+    },
+    "starci-ai-context-stack": {
+        classes: ["flex", "min-w-0", "items-center", "gap-1", "overflow-hidden"],
+        children: {
+            context: { leaf: "text" },
+            clear: { leaf: "button", optional: true },
+        },
+        why: "Lesson, file and selected range remain one compact summary with an explicit way to release transient code grounding.",
+    },
+    "starci-ai-turn-list": {
+        classes: ["flex", "grow", "flex-col", "gap-3", "overflow-hidden"],
+        children: {
+            turn: { leaf: ["article", "button"], repeats: true, restingCount: 4 },
+        },
+        why: "Saved history remains selectable while conversation turns and the streaming tail stay one ordered announced transcript.",
+    },
+    "starci-ai-composer": {
+        classes: ["flex", "flex-col", "gap-2"],
+        children: {
+            selection: { leaf: "code-block", optional: true },
+            input: { leaf: "textarea" },
+            sendOrStop: { leaf: "button" },
+            quota: { leaf: "text", optional: true },
+        },
+        why: "Pinned code context, the draft, stream control and advisory credit display stay attached to the exact next ask.",
+    },
+    "source-workspace-root": {
+        classes: ["flex", "min-w-0", "flex-col", "gap-2"],
+        children: {
+            toolbar: { contract: "source-workspace-toolbar" },
+            workspace: { contract: "source-workspace-grid", optional: true },
+        },
+        why: "Snapshot identity and controls stay attached to the editor and preview they govern in every loading or failure state.",
+    },
+    "source-workspace-grid": {
+        classes: ["grid", "min-w-0", "grid-cols-1", "lg:grid-cols-3"],
+        children: {
+            files: { contract: "source-file-navigation" },
+            editor: { contract: "source-code-editor-frame" },
+            preview: { leaf: "page" },
+        },
+        why: "Explorer, editable snapshot and local runtime are peers on desktop and collapse in a defined order on narrow screens.",
+    },
+    "source-code-editor-frame": {
+        classes: ["min-h-80", "min-w-0", "overflow-auto"],
+        children: {
+            editor: { leaf: "code-editor" },
+        },
+        why: "The controlled source editor keeps a stable minimum work area while long files scroll inside their own column.",
+    },
+    "source-workspace-toolbar": {
+        classes: ["flex", "flex-wrap", "items-center", "justify-between", "gap-2"],
+        children: {
+            identity: { leaf: "text" },
+            action: { leaf: "button", repeats: true, restingCount: 2 },
+            status: { leaf: "status-dot", optional: true },
+        },
+        why: "Without this toolbar snapshot identity, reset actions and local-change status separate from the editor whose current state they control.",
+    },
+    "source-file-navigation": {
+        host: "nav",
+        classes: ["flex", "min-w-0", "flex-col", "gap-2"],
+        children: {
+            label: { leaf: "text" },
+            files: { contract: "source-file-list" },
+        },
+        why: "The explorer label names the file list before keyboard users traverse its disclosure and file controls.",
+    },
+    "source-file-list": {
+        host: "ul",
+        classes: ["flex", "min-w-0", "flex-col", "gap-1"],
+        children: {
+            file: { contract: "source-file-row", repeats: true, restingCount: 5 },
+        },
+        why: "Without this ordered explorer source paths lose their keyboard-readable sequence and active-file relationship before the editor.",
+    },
+    "source-file-row": {
+        host: "li",
+        classes: ["flex", "min-w-0", "items-center", "gap-2"],
+        children: {
+            disclosure: { leaf: "icon-button" },
+            name: { leaf: "text" },
+            status: { leaf: "status-dot", optional: true },
+        },
+        why: "Folder disclosure, path identity and edit status share one file-row press target.",
     },
     "testcase-chip-run": {
         classes: ["flex", "flex-row", "flex-wrap", "items-center", "gap-2"],

@@ -17,6 +17,7 @@ export type GlobalAiChatContextValue = {
     readonly startTangent: (context: ContentAiSelectionContext) => void
 }
 
+/** Shared context consumed by the persistent layout and its routed AI surfaces. */
 export const GlobalAiChatContext = createContext<GlobalAiChatContextValue | undefined>(undefined)
 
 /** Read the persistent global AI owner; using it outside the root is an architecture error. */

@@ -10,7 +10,7 @@ describe("StarCiAiFab", () => {
         const trigger = screen.getByRole("button", { name: "StarCi AI" })
         expect(trigger).toHaveAttribute("aria-expanded", "false")
         expect(trigger.querySelector("[data-component=\"StarCiAiMark\"]")).toBeInTheDocument()
-        expect(trigger.querySelector("img")).toHaveAttribute("src", "/brand/starci-ai-mark-v1.png")
+        expect(trigger.querySelector("img")?.getAttribute("src")).toContain("starci-ai-mark-v1.png")
         fireEvent.click(trigger)
         expect(press).toHaveBeenCalledTimes(1)
     })

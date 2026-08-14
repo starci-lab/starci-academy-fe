@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState, type KeyboardEvent } from "react"
+import { useMemo, useState } from "react"
 import { Tree } from "@/components/branches/Tree"
 import { IconButton } from "@/components/leaves/IconButton"
 import { StatusDot } from "@/components/leaves/StatusDot"
@@ -85,9 +85,12 @@ const sourceTreeNodes = (files: ReadonlyArray<SourceFileTreeFile>): ReadonlyArra
 }
 
 /** Draw a keyboard-traversable file explorer from stable snapshot paths. */
-export const SourceFileTree = ({ props, on, isLoading = false }: SourceFileTreeProps) => {
+export const SourceFileTree = (input: SourceFileTreeProps) => {
+    const data = input.props
+    const on = input.on
+    const isLoading = input.isLoading ?? false
     const [closedFolders, setClosedFolders] = useState<ReadonlySet<string>>(() => new Set())
-    const nodes = useMemo(() => sourceTreeNodes(props.files), [props.files])
+    const nodes = useMemo(() => sourceTreeNodes(data.files), [data.files])
     const visibleNodes = nodes.filter((node) => node.ancestors.every((path) => !closedFolders.has(path)))
 
     const toggleFolder = (path: string) => setClosedFolders((current) => {
@@ -97,30 +100,17 @@ export const SourceFileTree = ({ props, on, isLoading = false }: SourceFileTreeP
         return next
     })
 
-    const moveFocus = (event: KeyboardEvent<HTMLElement>) => {
-        if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return
-        const controls = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>("[data-component=IconButton]"))
-        if (controls.length === 0) return
-        const currentIndex = controls.indexOf(document.activeElement as HTMLButtonElement)
-        const nextIndex = event.key === "Home"
-            ? 0
-            : event.key === "End"
-                ? controls.length - 1
-                : event.key === "ArrowDown"
-                    ? Math.min(currentIndex + 1, controls.length - 1)
-                    : Math.max(currentIndex - 1, 0)
-        event.preventDefault()
-        controls[nextIndex]?.focus()
-    }
-
     return (
-        <nav aria-label={props.label} onKeyDown={moveFocus} data-component="SourceFileTree">
-            <Tree
-                contract="source-file-list"
-                render={defineContractComponent("source-file-list", {
+        <Tree
+            contract="source-file-navigation"
+            render={defineContractComponent("source-file-navigation", {
+                label: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
+                    <Text props={{ content: data.label, size: "sm", weight: "semibold" }} />
+                )),
+                files: defineContractComponent("source-file-list", {
                     file: visibleNodes.map((node) => {
                         const isFolderOpen = node.kind === "folder" && !closedFolders.has(node.path)
-                        const isActive = node.kind === "file" && normalizeSandboxPath(props.activePath ?? "") === node.path
+                        const isActive = node.kind === "file" && normalizeSandboxPath(data.activePath ?? "") === node.path
                         const controlLabel = node.kind === "folder"
                             ? `${isFolderOpen ? "Collapse" : "Expand"} ${node.path}`
                             : `Open ${node.path}`
@@ -154,16 +144,16 @@ export const SourceFileTree = ({ props, on, isLoading = false }: SourceFileTreeP
                             ...(node.isEdited ? {
                                 status: defineLeafComponent("status-dot", {}, () => (
                                     <StatusDot
-                                        props={{ tone: "warning", label: props.editedLabel ?? "Locally edited" }}
+                                        props={{ tone: "warning", label: data.editedLabel ?? "Locally edited" }}
                                         isLoading={isLoading}
                                     />
                                 )),
                             } : {}),
                         })
                     }),
-                })}
-            />
-        </nav>
+                }),
+            })}
+        />
     )
 }
 

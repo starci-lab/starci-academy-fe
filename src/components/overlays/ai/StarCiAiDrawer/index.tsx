@@ -3,7 +3,7 @@
 import { useCallback } from "react"
 import { useTranslations } from "next-intl"
 import { StarCiAiChat } from "@/components/blocks/ai/StarCiAiChat"
-import { useGlobalAiChat } from "@/components/layouts/GlobalAiChatLayout/context"
+import { useGlobalAiChat } from "@/modules/ai/global-ai-chat-context"
 import { _StarCiAiDrawer } from "./component"
 
 /** Resolve global owner state and responsive shell placement before drawing the pure overlay. */
@@ -27,4 +27,5 @@ export const StarCiAiDrawer = () => {
 }
 
 export * from "./component"
+/** Source-level ownership marker. */
 export const meta = { world: "connected", domain: "ai" } as const

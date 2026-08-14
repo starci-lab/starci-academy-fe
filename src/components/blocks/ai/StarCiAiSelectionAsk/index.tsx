@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
-import { useGlobalAiChat } from "@/components/layouts/GlobalAiChatLayout/context"
+import { useGlobalAiChat } from "@/modules/ai/global-ai-chat-context"
 import {
     normalizeContentAiSelection,
     type ContentAiSelectionContext,
@@ -78,4 +78,5 @@ export const StarCiAiSelectionAsk = () => {
 }
 
 export * from "./component"
+/** Source-level ownership marker. */
 export const meta = { world: "connected", domain: "ai" } as const

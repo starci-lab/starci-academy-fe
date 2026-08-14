@@ -476,6 +476,60 @@
             "announcement": "Announcement"
         }
     },
+    "globalAi": {
+        "title": "StarCi AI",
+        "description": "Your study assistant across StarCi Academy.",
+        "modes": {
+            "general": "General chat",
+            "code": "Code coach",
+            "history": "History"
+        },
+        "composer": {
+            "label": "Ask StarCi AI",
+            "placeholder": "Ask about this lesson or selected code..."
+        },
+        "actions": {
+            "send": "Send",
+            "stop": "Stop",
+            "retry": "Try again",
+            "clearContext": "Clear context",
+            "rename": "Rename",
+            "renamePrompt": "Conversation name",
+            "archive": "Archive",
+            "delete": "Delete",
+            "confirmDelete": "Delete conversation",
+            "cancel": "Cancel"
+        },
+        "partial": "Answer stopped before completion",
+        "untitled": "New conversation",
+        "quota": {
+            "unavailable": "AI credits unavailable",
+            "remaining": "{remaining} paid credits remaining"
+        },
+        "states": {
+            "sessionsPending": "Loading conversations...",
+            "sessionsFailed": "Conversations could not be loaded.",
+            "noSession": "Ask your first question to start a conversation.",
+            "historyPending": "Loading conversation history...",
+            "historyReady": "Choose a conversation to continue.",
+            "searchEmpty": "No conversations in this context yet.",
+            "historyFailed": "Conversation history could not be loaded.",
+            "renaming": "Renaming conversation...",
+            "archiving": "Archiving conversation...",
+            "deleteConfirm": "Delete this conversation? This cannot be undone.",
+            "ready": "StarCi AI is ready.",
+            "streaming": "StarCi AI is answering...",
+            "quotaPending": "Loading paid-credit balance. Chat remains available.",
+            "zeroPaidCredits": "No paid credits remain. Free models are still available.",
+            "quotaRejected": "This run required more paid credits than are available.",
+            "offline": "StarCi AI is offline. Your draft is preserved.",
+            "reconnecting": "Reconnecting to StarCi AI...",
+            "streamFailed": "The answer stopped because the model failed.",
+            "aborted": "Answer stopped. The received part is preserved.",
+            "tangentReady": "A separate code conversation is ready.",
+            "contextCleared": "Code context cleared; the next question uses the lesson context."
+        }
+    },
     "profile": {
         "notFound": "We couldn't find this profile.",
         "failed": "We couldn't load this profile. Check the connection and try again.",

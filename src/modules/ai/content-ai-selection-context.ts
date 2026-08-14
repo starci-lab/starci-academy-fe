@@ -11,9 +11,19 @@ export type ContentAiSelectionContext = {
     readonly runtimeError?: string
 }
 
+/** Untrusted selection data accepted at the normalization seam. */
 export type ContentAiSelectionInput = ContentAiSelectionContext
 
+/** A persisted user question split back into visible copy and its quoted grounding. */
+export type ParsedContentAiQuestion = {
+    readonly question: string
+    readonly selection?: ContentAiSelectionContext
+    readonly quoteLanguage?: string
+}
+
+/** Smallest excerpt that produces a useful grounded question. */
 export const CONTENT_AI_SELECTION_MIN = 3
+/** Largest excerpt retained in one grounded question. */
 export const CONTENT_AI_SELECTION_MAX = 600
 
 const finitePositiveInteger = (value?: number): number | undefined =>
@@ -67,4 +77,43 @@ export const buildContentAiQuestion = (question: string, selection?: ContentAiSe
         : `\nSource: ${selection.path}${selection.startLine === undefined ? "" : `:${selection.startLine}-${selection.endLine ?? selection.startLine}`}`
     const runtime = selection.runtimeError === undefined ? "" : `\nRuntime error:\n${selection.runtimeError}`
     return `${question.trim()}${location}\n\nQuoted selection:\n\`\`\`${language}\n${selection.quote}\n\`\`\`${runtime}`
+}
+
+/** Restore the visible quote from persisted questions while leaving legacy or malformed text intact. */
+export const parseContentAiQuestion = (content: string): ParsedContentAiQuestion => {
+    const marker = "\n\nQuoted selection:\n"
+    const markerIndex = content.lastIndexOf(marker)
+    if (markerIndex < 0) return { question: content }
+    const fenced = content.slice(markerIndex + marker.length).match(
+        /^```([^\n]*)\n([\s\S]*?)\n```(?:\nRuntime error:\n([\s\S]*))?$/u,
+    )
+    if (fenced === null) return { question: content }
+
+    let question = content.slice(0, markerIndex)
+    let path: string | undefined
+    let startLine: number | undefined
+    let endLine: number | undefined
+    const sourceIndex = question.lastIndexOf("\nSource: ")
+    if (sourceIndex >= 0) {
+        const source = question.slice(sourceIndex + "\nSource: ".length)
+        question = question.slice(0, sourceIndex)
+        const lines = source.match(/^(.*):(\d+)-(\d+)$/u)
+        path = lines?.[1] ?? source
+        startLine = lines === null ? undefined : Number(lines[2])
+        endLine = lines === null ? undefined : Number(lines[3])
+    }
+
+    const quoteLanguage = fenced[1] || undefined
+    return {
+        question,
+        quoteLanguage,
+        selection: {
+            kind: quoteLanguage === "text" ? "prose" : "code",
+            quote: fenced[2],
+            path,
+            startLine,
+            endLine,
+            runtimeError: fenced[3],
+        },
+    }
 }

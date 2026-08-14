@@ -3,9 +3,13 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { ContentSourceWorkspace, type ContentSourceWorkspaceData } from "./component"
 
-vi.mock("@/components/shells/SandpackShell", () => ({
-    SandpackShell: ({ on }: { on?: { updateFile?: (path: string, code: string) => void } }) => (
-        <button type="button" onClick={() => on?.updateFile?.("/src/App.tsx", "changed")}>Editor</button>
+type SandpackWorkspaceMockProps = {
+    readonly on?: { readonly updateFile?: (path: string, code: string) => void }
+}
+
+vi.mock("@/components/branches/SandpackWorkspace", () => ({
+    SandpackWorkspace: (input: SandpackWorkspaceMockProps) => (
+        <button type="button" onClick={() => input.on?.updateFile?.("/src/App.tsx", "changed")}>Editor</button>
     ),
 }))
 
@@ -22,12 +26,13 @@ const props: ContentSourceWorkspaceData = {
     activePath: "/src/App.tsx",
     filesLabel: "Source files",
     editorLabel: "Source editor",
+    previewLabel: "Sandbox preview",
 }
 
 describe("ContentSourceWorkspace", () => {
     it("keeps pending source separate from the article state", () => {
         const { container } = render(<ContentSourceWorkspace state="pending" props={props} />)
-        expect(container.querySelector("[data-state=pending]")).toBeTruthy()
+        expect(container.querySelector("[data-node=source-workspace-root]")).toBeTruthy()
         expect(screen.queryByRole("button", { name: "Editor" })).not.toBeInTheDocument()
     })
 

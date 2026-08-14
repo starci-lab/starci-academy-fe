@@ -180,6 +180,7 @@ describe("_CourseLearnContentPage", () => {
                         editedPaths: [],
                         filesLabel: "Files",
                         editorLabel: "Source",
+                        previewLabel: "Preview",
                         identity: "Lesson snapshot",
                         loadingLabel: "Loading source",
                         failedLabel: "Source failed",
@@ -195,7 +196,7 @@ describe("_CourseLearnContentPage", () => {
         )
 
         expect(container.querySelector("[data-component=Article]")).toBeNull()
-        expect(container.querySelector("[data-component=ContentSourceWorkspace]")).not.toBeNull()
+        expect(container.querySelector("[data-node=source-workspace-root]")).not.toBeNull()
         fireEvent.click(screen.getByText("Source"))
         expect(selectSource).toHaveBeenCalledTimes(1)
     })
