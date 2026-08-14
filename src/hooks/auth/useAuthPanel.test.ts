@@ -332,6 +332,27 @@ describe("useAuthPanel", () => {
         expect(result.current.step).toBe("details")
     })
 
+    it("completes an explicitly enabled local test sign-in without opening the code step",
+        async () => {
+            mocks.signInInit.mockResolvedValue(session("signInInit", "token-local"))
+            const onSignedIn = vi.fn()
+            const { result } = renderHook(() => useAuthPanel({ onSignedIn }))
+
+            await act(async () => {
+                result.current.onSubmitDetails({
+                    email: "test@starci.local",
+                    password: "secret",
+                })
+            })
+
+            await waitFor(() => expect(result.current.step).toBe("done"))
+            expect(result.current.challengeId).toBeUndefined()
+            expect(result.current.sentCount).toBe(0)
+            expect(getSessionToken()).toBe("token-local")
+            expect(onSignedIn).toHaveBeenCalledTimes(1)
+            expect(mocks.signInVerify).not.toHaveBeenCalled()
+        })
+
     it("keeps the remember-me choice as controlled auth state", () => {
         const { result } = renderHook(() => useAuthPanel())
         expect(result.current.rememberMe).toBe(false)

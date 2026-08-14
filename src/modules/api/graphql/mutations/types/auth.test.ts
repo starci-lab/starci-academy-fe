@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import {
+    isSignInSessionData,
     type MutationSignInInitResponse,
     type MutationSignInResendOtpResponse,
     type MutationSignInVerifyOtpResponse,
@@ -36,9 +37,26 @@ describe("MutationSignInInitResponse", () => {
                 data: { challengeId: "challenge-1", expiresInSeconds: 300 },
             },
         }
-        expect(response.signInInit.data?.challengeId).toBe("challenge-1")
-        expect(response.signInInit.data?.expiresInSeconds).toBe(300)
+        const data = response.signInInit.data
+        expect(data && "challengeId" in data && data.challengeId).toBe("challenge-1")
+        expect(data && "expiresInSeconds" in data && data.expiresInSeconds).toBe(300)
     })
+
+    it("nests a completed local test session under the same envelope",
+        () => {
+            const response: MutationSignInInitResponse = {
+                signInInit: {
+                    success: true,
+                    message: "ok",
+                    data: { accessToken: "token-local" },
+                },
+            }
+            const data = response.signInInit.data
+            expect(data && isSignInSessionData(data)).toBe(true)
+            if (data && isSignInSessionData(data)) {
+                expect(data.accessToken).toBe("token-local")
+            }
+        })
 
     it("describes a refusal with no challenge at all", () => {
         const response: MutationSignInInitResponse = {

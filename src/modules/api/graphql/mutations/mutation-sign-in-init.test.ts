@@ -53,8 +53,8 @@ describe("mutationSignInInitMap", () => {
         expect(documentText).toContain("expiresInSeconds")
     })
 
-    it("never asks for a token here - this step does not produce one", () => {
-        expect(documentText).not.toContain("accessToken")
+    it("selects the direct local test session result", () => {
+        expect(documentText).toContain("accessToken")
     })
 })
 

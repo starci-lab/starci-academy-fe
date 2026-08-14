@@ -10,17 +10,21 @@ import { mutationSignInVerifyOtp } from "@/modules/api/graphql/mutations/mutatio
 import { mutationSignUpInit } from "@/modules/api/graphql/mutations/mutation-sign-up-init"
 import { mutationSignUpResendOtp } from "@/modules/api/graphql/mutations/mutation-sign-up-resend-otp"
 import { mutationSignUpVerifyOtp } from "@/modules/api/graphql/mutations/mutation-sign-up-verify-otp"
-import { KeycloakIdentityProvider } from "@/modules/api/graphql/mutations/types/auth"
+import {
+    isSignInSessionData,
+    KeycloakIdentityProvider,
+} from "@/modules/api/graphql/mutations/types/auth"
 import type { GraphQLResponse } from "@/modules/api/graphql/types"
 import type {
     SignInChallengeData,
+    SignInInitData,
     SignInSessionData,
 } from "@/modules/api/graphql/mutations/types/auth"
 import { setSessionToken } from "./useSessionToken"
 
 /**
  * The WHOLE authentication panel as one state machine - three modes, two steps each, and the
- * OAuth hand-off, in one place.
+ * OAuth hand-off, plus the local test direct-session exception, in one place.
  *
  * WHY ONE MACHINE AND NOT THREE HOOKS. Sign in, sign up and password reset are the same journey
  * with three endings: each opens a CHALLENGE, puts a code in the reader's inbox, and trades that
@@ -163,6 +167,9 @@ interface AuthPanelRecord {
 /** A challenge envelope, whichever of the three init or resend operations produced it. */
 type ChallengeEnvelope = GraphQLResponse<SignInChallengeData> | undefined
 
+/** An init envelope can open an OTP challenge or complete the explicit local test sign-in. */
+type InitEnvelope = GraphQLResponse<SignInInitData> | undefined
+
 /** A session envelope, whichever of the three verify operations produced it. */
 type SessionEnvelope = GraphQLResponse<SignInSessionData> | undefined
 
@@ -210,7 +217,7 @@ const toFailure = (message?: string, code?: string): AuthFailure => ({
  * before any code exists, which is the server's design and the reason this form does not ask for
  * one later. The code then authorises a change that has already been described.
  */
-const INIT_BY_MODE: Record<AuthMode, (details: AuthDetails) => Promise<ChallengeEnvelope>> = {
+const INIT_BY_MODE: Record<AuthMode, (details: AuthDetails) => Promise<InitEnvelope>> = {
     signIn: async ({ email, password }: AuthDetails) => {
         const result = await mutationSignInInit({ request: { email, password } })
         return result.data?.signInInit
@@ -407,6 +414,10 @@ export const useAuthPanel = ({ initialMode = "signIn", onSignedIn }: UseAuthPane
                     settle(runId, { isPending: false, failure: toFailure(envelope?.message, envelope?.error) })
                     return
                 }
+                if (isSignInSessionData(envelope.data)) {
+                    onSession(runId, envelope.data.accessToken)
+                    return
+                }
                 settle(runId, {
                     step: "code",
                     email,
@@ -420,7 +431,7 @@ export const useAuthPanel = ({ initialMode = "signIn", onSignedIn }: UseAuthPane
             .catch(() => {
                 settle(runId, { isPending: false, failure: TRANSPORT_FAILURE })
             })
-    }, [settle])
+    }, [settle, onSession])
 
     const onSubmitCode = useCallback(({ otp }: AuthCode) => {
         const { mode, challengeId } = recordRef.current

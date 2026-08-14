@@ -7,7 +7,8 @@ import {
 } from "./types/auth"
 
 /**
- * Step one of signing in: hand over the credentials, get a challenge back.
+ * Step one of signing in: hand over credentials and receive either the ordinary challenge or
+ * the explicitly enabled local test session.
  *
  * The document selects the WHOLE envelope. A rejected password does not arrive here as a
  * transport error - it arrives as a 200 carrying `success: false` and a message meant for
@@ -27,6 +28,7 @@ const mutation1 = gql`
             data {
                 challengeId
                 expiresInSeconds
+                accessToken
             }
         }
     }
@@ -34,7 +36,7 @@ const mutation1 = gql`
 
 /** The document variants of this mutation. */
 export enum MutationSignInInit {
-    /** The full challenge selection. */
+    /** The full challenge/direct-session selection. */
     Mutation1 = "mutation1",
 }
 
@@ -43,7 +45,7 @@ export const mutationSignInInitMap: Record<MutationSignInInit, DocumentNode> = {
     [MutationSignInInit.Mutation1]: mutation1,
 }
 
-/** Opens a sign-in challenge for a set of credentials. Anonymous - no token is attached. */
+/** Starts sign-in for a set of credentials. Anonymous - no existing token is attached. */
 export const mutationSignInInit = async ({
     mutation = MutationSignInInit.Mutation1,
     request,

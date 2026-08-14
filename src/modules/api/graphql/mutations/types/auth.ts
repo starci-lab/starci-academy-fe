@@ -5,11 +5,11 @@ import { type GraphQLResponse } from "../../types"
  * spells them - every name below was read out of the live schema by introspection, never
  * guessed from the shape of the screen.
  *
- * THE FLOW THESE TYPES DESCRIBE. Signing in is two round trips, not one. `signInInit` takes
- * the credentials and answers with a CHALLENGE - an id and how long it lives - while the code
- * itself goes to the reader's inbox; `signInVerifyOtp` trades that challenge and the code for
- * an access token. `signInResendOtp` sends a fresh code for a challenge already open and
- * answers with a challenge again, which is why it shares the init response type on the wire.
+ * THE FLOW THESE TYPES DESCRIBE. Ordinary signing in is two round trips. `signInInit` takes
+ * the credentials and answers with a CHALLENGE, then `signInVerifyOtp` trades that challenge
+ * and code for an access token. One explicitly enabled local test identity may instead receive
+ * the access token from init; the union below makes the client handle that exception directly.
+ * `signInResendOtp` still answers only with a challenge.
  *
  * WHAT IS NOT HERE. The verify response carries an `accessToken` and NOTHING else: no refresh
  * token, no user, no expiry. Anything more that a session needs has to be asked for
@@ -38,10 +38,18 @@ export interface SignInChallengeData {
     expiresInSeconds: number
 }
 
+/** The two valid outcomes of sign-in init; mixed challenge/session data is not representable. */
+export type SignInInitData = SignInChallengeData | SignInSessionData
+
+/** Narrow a sign-in init result to the direct local test session branch. */
+export const isSignInSessionData = (data: SignInInitData): data is SignInSessionData => {
+    return "accessToken" in data
+}
+
 /** The response of `signInInit`, envelope included. */
 export interface MutationSignInInitResponse {
     /** The top-level field, wrapping the standard envelope. */
-    signInInit: GraphQLResponse<SignInChallengeData>
+    signInInit: GraphQLResponse<SignInInitData>
 }
 
 /** The challenge and the code the reader typed back. */
