@@ -9,15 +9,15 @@ const input = (): CourseMindMapPageProps => ({
         description: "Course concepts",
         searchLabel: "Search concepts",
         searchPlaceholder: "Type a keyword",
+        clearSearchLabel: "Clear search",
         emptyText: "No map",
         noResultsText: "No results",
         failedText: "Map failed",
         retryLabel: "Try again",
         openLabel: "Open content",
+        graphFact: "0 connections",
         nodes: [{ id: "node-1", label: "Containers", left: 50, top: 50, canOpen: true }],
-        edgeCount: 0,
         selectedId: "node-1",
-        query: "",
     },
     on: { search: vi.fn(), select: vi.fn(), openContent: vi.fn(), retry: vi.fn() },
 })
@@ -28,7 +28,8 @@ describe("_CourseMindMapPage", () => {
         render(<_CourseMindMapPage {...props} />)
 
         fireEvent.change(screen.getByRole("searchbox", { name: "Search concepts" }), { target: { value: "container" } })
-        fireEvent.click(screen.getAllByRole("button", { name: "Containers" })[0])
+        fireEvent.submit(screen.getByRole("search"))
+        fireEvent.click(screen.getByRole("link", { name: "Containers" }))
         fireEvent.click(screen.getByRole("button", { name: "Open content" }))
 
         expect(props.on.search).toHaveBeenCalledWith("container")

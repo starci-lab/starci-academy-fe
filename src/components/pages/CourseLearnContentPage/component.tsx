@@ -18,6 +18,11 @@ import {
     type ContentFaceTab,
     type ContentLanguageTab,
 } from "@/components/blocks/learn/ContentTabRow/component"
+import {
+    _ContentDiscussionPanel,
+    type ContentDiscussionPanelData,
+    type ContentDiscussionPanelState,
+} from "@/components/blocks/learn/ContentDiscussionPanel/component"
 import type { LearnMobileView } from "@/components/layouts/LearnShellLayout/component"
 import type { ReactionType } from "@/modules/api/graphql/queries/types/reactions"
 // Contract machinery through the candidate mirror, and only because `ContractKey` is closed over the
@@ -61,8 +66,8 @@ import {
  *
  * WHAT THIS REVISION DELIBERATELY DOES NOT DRAW, each recorded rather than dropped: the fade over a
  * locked preview (legacy's `LockedContentMask` - a new owner nobody has approved, so the preview is
- * simply short), the discussion thread, the inline advertisement, and the two desktop rails. Each is
- * its own case with its own states.
+ * simply short) and the inline advertisement. Discussion and both desktop rails are now explicit
+ * approved owners rather than native markup inside this page.
  */
 
 /** The situations the reader can be in. */
@@ -136,6 +141,11 @@ export type CourseLearnContentPageData = {
         readonly isPending?: boolean
         readonly labels: ReactionLabels
     }
+    /** Top-level lesson discussion, resolved independently from the article transport. */
+    readonly discussion?: {
+        readonly state: ContentDiscussionPanelState
+        readonly props: ContentDiscussionPanelData
+    }
     /** How far into the course the reader is, drawn at the top of the contents panel. */
     readonly courseProgress?: {
         readonly label: string
@@ -180,6 +190,9 @@ export type CourseLearnContentPageActions = {
     readonly selectLanguage?: (language: string) => void
     readonly changePage?: (page: number) => void
     readonly selectReaction?: (reaction: ReactionType | null) => void
+    readonly changeDiscussionDraft?: (value: string) => void
+    readonly submitDiscussion?: () => void
+    readonly retryDiscussion?: () => void
     readonly openContent?: (contentId: string) => void
     readonly act?: () => void
     readonly goCourse?: () => void
@@ -238,6 +251,7 @@ export const _CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
     const isLocked = input.state === "locked"
     const hasFailed = input.state === "failed"
     const faces = input.props.faces ?? []
+    const discussion = input.props.discussion
 
     const article = defineLeafComponent("article", {}, () => (
         <Article props={{ body: input.props.body }} isLoading={isLoading} />
@@ -321,6 +335,19 @@ export const _CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                             />
                         )),
                     })}
+                />
+            )),
+        }),
+        ...(discussion === undefined ? {} : {
+            discussion: defineContractProjection("content-discussion-panel", () => (
+                <_ContentDiscussionPanel
+                    state={discussion.state}
+                    props={discussion.props}
+                    on={{
+                        changeDraft: input.on?.changeDiscussionDraft,
+                        submit: input.on?.submitDiscussion,
+                        retry: input.on?.retryDiscussion,
+                    }}
                 />
             )),
         }),

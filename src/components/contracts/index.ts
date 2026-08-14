@@ -30,6 +30,7 @@ export type LayoutClassName =
     | "justify-between" | "justify-center" | "[&>*]:w-full"
     | "gap-1" | "gap-2" | "gap-3" | "gap-4" | "gap-6" | "gap-8"
     | "grid-cols-1" | "grid-cols-2" | "sm:grid-cols-2" | "sm:grid-cols-4" | "lg:grid-cols-3"
+    | "sm:flex-row" | "sm:items-start" | "sm:justify-between"
     | "md:flex" | "md:flex-row" | "md:items-start" | "md:gap-8"
     // A PROPORTIONAL split, which the union could not previously express. Every existing two-column
     // token is a FIXED rail (`md:[&>*:first-child]:w-72`), and 288px is a sidebar measure: a problem
@@ -46,7 +47,8 @@ export type LayoutClassName =
     | "px-2" | "pl-4" | "cursor-pointer" | "text-left" | "text-foreground" | "hover:opacity-80"
     | "group" | "active:opacity-70"
     | "rounded-xl" | "rounded-2xl" | "rounded-3xl"
-    | "bg-surface" | "shadow-surface" | "text-center"
+    | "bg-surface" | "bg-accent-soft" | "bg-success-soft" | "bg-warning-soft"
+    | "shadow-surface" | "text-center"
     | "inset-shadow-[2px_0_0_0_var(--success)]" | "inset-shadow-[2px_0_0_0_var(--danger)]"
     | "[&>*:nth-child(2)]:min-w-0" | "[&>*:nth-child(2)]:grow"
     | "[&>*:nth-child(3)]:min-w-0" | "[&>*:nth-child(3)]:grow"
@@ -442,8 +444,8 @@ export const CONTRACTS = buildContracts({
         children: {
             header: { contract: "page-header-stack" },
             description: { leaf: "text", props: { size: "sm", tone: "muted" } },
-            preparationTitle: { leaf: "heading" },
-            preparationStep: { leaf: "text", props: { size: "sm" }, repeats: true, restingCount: 3 },
+            preparationTitle: { leaf: "heading", optional: true },
+            preparationStep: { leaf: "text", props: { size: "sm" }, repeats: true, restingCount: 3, optional: true },
             pairingLabel: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
             pairingCode: { leaf: "text", props: { size: "sm", weight: "semibold" }, optional: true },
             status: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
@@ -536,6 +538,155 @@ export const CONTRACTS = buildContracts({
             action: { leaf: "button", repeats: true, restingCount: 2 },
         },
         why: "A persisted debrief moves from outcome to rubric, then from general strengths and gaps to question evidence, and closes with the next interview action so grading and recovery replace the evidence without changing the page owner.",
+    },
+    "course-learn-challenge-page": {
+        host: "main",
+        classes: ["mx-auto", "flex", "w-full", "max-w-app-md", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            header: { contract: "centred-title-pair" },
+            body: { contract: "stacked-peer-controls" },
+        },
+        why: "A challenge reads from its authored brief into one ordered run of deliverables and submission controls, so pending, editing, submitting, passed and failed states keep the same dedicated route identity.",
+    },
+    "course-learn-challenge-result-page": {
+        host: "main",
+        classes: ["mx-auto", "flex", "w-full", "max-w-app-md", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            header: { contract: "centred-title-pair" },
+            score: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+            body: { contract: "stacked-peer-controls" },
+        },
+        why: "A persisted challenge result keeps its score, scorer findings and retry-or-continue decision under one result identity, while loading and recovery replace only the evidence body.",
+    },
+    "flashcard-mode-tabs": {
+        host: "nav",
+        classes: ["flex", "flex-row", "gap-2", "border-b", "border-separator"],
+        children: {
+            tab: { leaf: "nav-link", props: { kind: "tab" }, repeats: true, restingCount: 2 },
+        },
+        why: "Review and quiz are two peer modes over the same flashcard capability, so their route actions share one tab row and the current mode remains a fact carried by each typed navigation leaf.",
+    },
+    "flashcard-review-due-card": {
+        classes: ["flex", "flex-col", "gap-3", "rounded-xl", "border", "border-separator", "p-4"],
+        children: {
+            title: { leaf: "heading" },
+            description: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            fact: { leaf: "text", props: { size: "sm", weight: "medium" } },
+            action: { leaf: "button", optional: true },
+        },
+        why: "The due queue is one resumable decision: its name and explanation establish the work, the count proves its size, and exactly one available start or resume action closes the card.",
+    },
+    "flashcard-review-deck-card": {
+        classes: ["flex", "flex-col", "gap-3", "rounded-xl", "border", "border-separator", "p-4"],
+        children: {
+            title: { leaf: "heading" },
+            description: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            facts: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            action: { leaf: "button" },
+        },
+        why: "Every deck is a comparable study offer whose identity, explanation and card counts are read before its one start action, so the complete sentence repeats as one typed card rather than loose page markup.",
+    },
+    "course-flashcards-review-page": {
+        host: "main",
+        classes: ["mx-auto", "flex", "w-full", "max-w-app-md", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            header: { contract: "centred-title-pair" },
+            modes: { contract: "flashcard-mode-tabs" },
+            due: { contract: "flashcard-review-due-card", optional: true },
+            stats: { contract: "centred-title-pair", optional: true },
+            decksTitle: { leaf: "heading", optional: true },
+            deck: { contract: "flashcard-review-deck-card", repeats: true, restingCount: 4, optional: true },
+            notice: { composite: "empty-notice", optional: true },
+        },
+        why: "The review overview keeps its identity and mode switch stable while pending, recovery and ready states replace only the study evidence: due work first, progress second, then the peer deck run.",
+    },
+    "flashcard-quiz-configuration": {
+        classes: ["flex", "flex-col", "gap-4", "rounded-xl", "border", "border-separator", "p-4"],
+        children: {
+            title: { leaf: "heading" },
+            fact: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            resume: { leaf: "button", optional: true },
+            modeLabel: { leaf: "text", props: { size: "sm", weight: "semibold" } },
+            mode: { leaf: "button", repeats: true, restingCount: 2 },
+            levelLabel: { leaf: "text", props: { size: "sm", weight: "semibold" } },
+            level: { leaf: "button", repeats: true, restingCount: 5 },
+            start: { leaf: "button" },
+        },
+        why: "Quiz setup is one ordered decision: session size and any resumable work precede mode and level choices, then one start action commits the selected configuration.",
+    },
+    "course-flashcards-quiz-page": {
+        host: "main",
+        classes: ["mx-auto", "flex", "w-full", "max-w-app-md", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            header: { contract: "centred-title-pair" },
+            modes: { contract: "flashcard-mode-tabs" },
+            configuration: { contract: "flashcard-quiz-configuration", optional: true },
+            notice: { composite: "empty-notice", optional: true },
+        },
+        why: "The quiz route keeps the shared flashcard identity and mode switch above one finite configuration surface, while empty or failed transport replaces only that setup decision.",
+    },
+    "flashcard-session-header": {
+        classes: ["flex", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-4", "border-b", "border-separator", "py-3"],
+        children: {
+            deck: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+            title: { leaf: "heading" },
+            leave: { leaf: "button" },
+        },
+        why: "The current deck qualifies the session title while leave remains the one route action at the opposite edge, so orientation and escape persist through every lifecycle state.",
+    },
+    "flashcard-session-card": {
+        classes: ["flex", "flex-1", "flex-col", "justify-center", "gap-6", "rounded-2xl", "border", "border-separator", "p-6"],
+        children: {
+            prompt: { leaf: "text", props: { size: "md", weight: "medium" } },
+            answer: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+        },
+        why: "One card is the session's focused reading surface: the prompt owns the available height and the revealed answer follows as supporting evidence without opening a second structural owner.",
+    },
+    "course-flashcard-session-page": {
+        host: "main",
+        classes: ["mx-auto", "flex", "min-h-screen", "w-full", "max-w-app-md", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            header: { contract: "flashcard-session-header" },
+            progress: { contract: "label-with-muted-fact-row", optional: true },
+            card: { contract: "flashcard-session-card", optional: true },
+            status: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+            action: { leaf: "button", repeats: true, restingCount: 4, optional: true },
+            notice: { composite: "empty-notice", optional: true },
+        },
+        why: "The live session preserves orientation before progress and one focused card, then exposes only the actions admitted by the current reveal and transport state; recovery replaces the card, never the page owner.",
+    },
+    "flashcard-result-stat": {
+        classes: ["flex", "flex-col", "gap-2", "rounded-xl", "border", "border-separator", "p-4"],
+        children: {
+            label: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            value: { leaf: "heading" },
+        },
+        why: "Each persisted result figure is one labelled measurement, so the quiet label precedes its stronger value and the same typed card repeats for score, reviewed cards, XP and duration.",
+    },
+    "flashcard-result-fact-row": {
+        classes: ["flex", "flex-row", "flex-wrap", "items-baseline", "justify-between", "gap-2", "rounded-xl", "p-4"],
+        children: {
+            label: { leaf: "text", props: { size: "sm", weight: "medium" } },
+            value: { leaf: "text", props: { size: "sm", tone: "muted" } },
+        },
+        why: "A breakdown grade or weak topic is read by comparing its name with one persisted value on the same baseline, so every result fact occupies the same two-part row.",
+    },
+    "course-flashcard-result-page": {
+        host: "main",
+        classes: ["mx-auto", "flex", "w-full", "max-w-app-md", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            mode: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            header: { contract: "centred-title-pair" },
+            stat: { contract: "flashcard-result-stat", repeats: true, restingCount: 4, optional: true },
+            nextDue: { contract: "centred-title-pair", optional: true },
+            breakdownTitle: { leaf: "heading", optional: true },
+            grade: { contract: "flashcard-result-fact-row", repeats: true, restingCount: 4, optional: true },
+            weakTopicsTitle: { leaf: "heading", optional: true },
+            weakTopic: { contract: "flashcard-result-fact-row", repeats: true, restingCount: 3, optional: true },
+            action: { leaf: "button", repeats: true, restingCount: 2, optional: true },
+            notice: { composite: "empty-notice", optional: true },
+        },
+        why: "A persisted flashcard result reads from route mode and outcome through comparable summary figures, optional due and diagnostic evidence, then closes with back and repeat actions; loading and failure keep the same identity.",
     },
     "nav-over-body-page": {
         classes: ["flex", "min-h-screen", "w-full", "flex-col"],
@@ -1675,10 +1826,41 @@ export const CONTRACTS = buildContracts({
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6"],
         children: {
             reactions: { contract: "content-reaction-card", optional: true },
+            discussion: { contract: "content-discussion-panel", optional: true },
             next: { contract: "content-next-list", optional: true },
             pager: { leaf: "pagination", optional: true },
         },
-        why: "What follows a content is a run of major blocks rather than parts of one: a reaction, where to go next, and the content's place in its module each stand alone, so they take the block seam rather than the group seam. The whole footer is absent on a locked content, because there is nothing to react to, discuss or page past yet.",
+        why: "What follows a content is a run of major blocks rather than parts of one: reactions, discussion, where to go next, and the content's place in its module each stand alone, so they take the block seam rather than the group seam. The whole footer is absent on a locked content, because there is nothing to react to, discuss or page past yet.",
+    },
+    "content-discussion-panel": {
+        host: "section",
+        classes: ["mx-auto", "flex", "w-full", "max-w-app-md", "flex-col", "gap-4", "p-4"],
+        children: {
+            title: { leaf: "heading" },
+            composer: { leaf: "textarea", optional: true },
+            submit: { leaf: "button", optional: true },
+            notice: { composite: "empty-notice", optional: true },
+            list: { contract: "content-discussion-list", optional: true },
+        },
+        why: "The lesson discussion keeps its heading, one top-level composer and the settled comment answer in one reading-width block, so submitting changes the action state without moving the thread away from the content it discusses.",
+    },
+    "content-discussion-list": {
+        host: "ul",
+        classes: ["flex", "w-full", "flex-col", "divide-y", "divide-separator"],
+        children: {
+            comment: { contract: "content-discussion-comment-row", repeats: true, restingCount: 3 },
+        },
+        why: "Top-level comments are peer responses to the same lesson, so they form one ordered list with a stable separator rather than unrelated cards competing with the article.",
+    },
+    "content-discussion-comment-row": {
+        host: "li",
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-2", "py-3"],
+        children: {
+            author: { leaf: "text", props: { size: "sm", weight: "semibold" } },
+            meta: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            body: { leaf: "text", props: { size: "sm" } },
+        },
+        why: "A comment is read as author, time-and-reply context, then body; keeping that order inside one list row prevents metadata from being mistaken for part of the authored response.",
     },
     "content-reaction-card": {
         classes: ["mx-auto", "flex", "w-full", "max-w-app-md", "flex-row", "items-center", "gap-3", "p-4", "[&>*:first-child]:grow"],
@@ -1942,19 +2124,17 @@ export const CONTRACTS = buildContracts({
     "course-detail-page": {
         classes: ["flex", "min-w-0", "flex-col", "gap-4", "pt-6"],
         children: {
-            breadcrumb: { contract: "course-breadcrumb-row" },
+            navigation: { contract: "course-section-navigation" },
             body: { contract: "main-then-rail" },
             action: { contract: "course-mobile-action-bar", optional: true },
         },
-        why: "The page frame carries NO horizontal inset and NO bottom padding, which is the one thing it is for: the pinned action bar beneath it must reach both edges of a phone and rest flush on its bottom edge. A frame that inset everything would leave the bar floating with the page's margin showing on either side, and one that padded its own bottom would lift the bar 24px off the edge at the end of the scroll - measured, not assumed. So the measure sits on the two children that want it and the body below owns the closing space.",
+        why: "The page begins with peer section navigation and carries no horizontal inset or bottom padding: the navigation and body own their readable measure while the pinned phone action still reaches both viewport edges and rests flush on the bottom edge.",
     },
-    "course-breadcrumb-row": {
+    "course-section-navigation": {
         host: "nav",
-        classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "flex-row", "items-center", "gap-2", "px-6"],
-        children: {
-            crumb: { leaf: ["text", "icon"], repeats: true, restingCount: 3 },
-        },
-        why: "The trail back is a set of destinations rather than prose, so it is a nav a reader can jump to, and its crumbs and separators share one baseline instead of stacking.",
+        classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "border-b", "border-separator", "px-6"],
+        children: { tabs: { leaf: "choice-tabs" } },
+        why: "The three controls move within one course document, so they share one navigation landmark and one full-width baseline above the narrative instead of masquerading as breadcrumb destinations.",
     },
     "main-then-rail": {
         classes: ["mx-auto", "w-full", "max-w-6xl", "px-6", "pb-6", "flex", "flex-col", "gap-6", "md:gap-8", "md:flex-row", "md:items-start", "md:[&>*:first-child]:min-w-0", "md:[&>*:first-child]:grow",
@@ -1974,34 +2154,61 @@ export const CONTRACTS = buildContracts({
         classes: ["flex", "min-w-0", "flex-col", "gap-6"],
         children: {
             heading: { contract: "course-hero-heading" },
-            evidence: { contract: "course-stat-chip-run" },
+            evidence: { contract: "course-signal-board" },
             section: { contract: "course-section", repeats: true, restingCount: 2 },
         },
-        why: "What the course is, what it promises and what it contains are one continuous argument addressed to one reader, so they are a section rather than a run of unrelated boxes.",
+        why: "What the course is, the evidence behind it and what follows are one conversion narrative: identity leads, a bounded signal board makes the proof scannable, and the detailed sections answer the proof in reading order.",
     },
     "course-hero-heading": {
-        classes: ["flex", "flex-col", "gap-2"],
+        classes: ["flex", "flex-col", "gap-4", "sm:flex-row", "sm:items-start", "sm:justify-between"],
+        children: {
+            identity: { contract: "course-hero-title-stack" },
+            rating: { contract: "course-hero-rating", optional: true },
+        },
+        why: "Course identity owns the flexible reading measure while the compact population rating sits at its end only when learners have actually reviewed the course; neither introduces a second commerce action.",
+    },
+    "course-hero-title-stack": {
+        classes: ["flex", "min-w-0", "grow", "flex-col", "gap-2"],
         children: {
             title: { leaf: "heading" },
             tagline: { leaf: "text", props: { size: "sm" } },
         },
-        why: "The course name and the one sentence that qualifies it are read as a unit before any evidence or price, which is the whole reason the hero carries no commerce.",
+        why: "The course name and its qualifying sentence are one identity statement and keep the flexible measure so a long technical description wraps before it squeezes the rating.",
     },
-    "course-stat-chip-run": {
-        host: "ul",
-        classes: ["flex", "flex-row", "flex-wrap", "gap-2"],
+    "course-hero-rating": {
+        classes: ["flex", "shrink-0", "flex-col", "items-center", "gap-1", "rounded-2xl", "bg-accent-soft", "p-4", "text-center"],
         children: {
-            stat: { contract: "course-stat-chip", repeats: true, restingCount: 5 },
+            score: { leaf: "heading" },
+            count: { leaf: "text", props: { size: "xs", tone: "muted" } },
         },
-        why: "A course's trust counts are unordered peer facts that wrap together, so they are a list a screen reader can announce a length for rather than a sentence it has to read whole. Mechanically identical to profile-topic-chip-run and deliberately a separate key: a course's evidence is not a profile's topics.",
+        why: "The mean and the population behind it are one compact proof object; it appears only for a rated course so zero is never mistaken for a verdict.",
     },
-    "course-stat-chip": {
-        host: "li",
-        classes: ["flex"],
+    "course-signal-board": {
+        classes: ["grid", "grid-cols-1", "gap-4", "sm:grid-cols-2", "lg:grid-cols-3"],
         children: {
-            chip: { leaf: "badge" },
+            signal: { contract: ["course-signal-card-accent", "course-signal-card-success", "course-signal-card-warning", "course-signal-card-neutral"], repeats: true, restingCount: 5 },
         },
-        why: "One count is one item of that list. The entry exists ONLY to be the li: a ul whose children are spans is not a list to anything reading the document, so the run above it would have claimed a length nothing could count. It owns no spacing - the run owns the gap - and nothing else belongs here.",
+        why: "Five course facts form one responsive board: primary conversion signals gain status-tinted surfaces while supporting inventory facts keep the neutral ground, so the eye finds the decision evidence before counting every unit.",
+    },
+    "course-signal-card-accent": {
+        classes: ["flex", "min-w-0", "flex-col", "gap-2", "rounded-2xl", "bg-accent-soft", "p-4"],
+        children: { label: { leaf: "text", props: { size: "xs", tone: "muted" } }, value: { leaf: "text", props: { size: "md", weight: "semibold" } } },
+        why: "The lead adoption signal receives the brand-soft ground without changing the semantic rank of its label and value.",
+    },
+    "course-signal-card-success": {
+        classes: ["flex", "min-w-0", "flex-col", "gap-2", "rounded-2xl", "bg-success-soft", "p-4"],
+        children: { label: { leaf: "text", props: { size: "xs", tone: "muted" } }, value: { leaf: "text", props: { size: "md", weight: "semibold" } } },
+        why: "Curriculum depth is affirmative evidence, so it takes the success-soft ground while remaining the same label-over-value sentence as its peers.",
+    },
+    "course-signal-card-warning": {
+        classes: ["flex", "min-w-0", "flex-col", "gap-2", "rounded-2xl", "bg-warning-soft", "p-4"],
+        children: { label: { leaf: "text", props: { size: "xs", tone: "muted" } }, value: { leaf: "text", props: { size: "md", weight: "semibold" } } },
+        why: "Time commitment needs attention before purchase, so it takes the warning-soft ground without being styled as an error.",
+    },
+    "course-signal-card-neutral": {
+        classes: ["flex", "min-w-0", "flex-col", "gap-2", "rounded-2xl", "p-4"],
+        children: { label: { leaf: "text", props: { size: "xs", tone: "muted" } }, value: { leaf: "text", props: { size: "md", weight: "semibold" } } },
+        why: "Supporting inventory evidence remains a real bounded card but yields chromatic priority to adoption, depth and time.",
     },
     "course-section": {
         host: "section",
@@ -2116,22 +2323,36 @@ export const CONTRACTS = buildContracts({
         host: "aside",
         classes: ["flex", "flex-col", "gap-4"],
         children: {
+            phase: { leaf: "badge", optional: true },
             cover: { leaf: "cover-image" },
             price: { contract: "course-price-block" },
-            ladder: { contract: "ordered-step-ladder", optional: true },
+            ladder: { contract: "course-pricing-phase-grid", optional: true },
             action: { leaf: "button" },
             proof: { leaf: "text", props: { size: "xs" }, optional: true },
         },
-        why: "The buy box is complementary to the narrative rather than part of it, which is what an aside means and what assistive technology announces; artwork, price, ladder, action and proof are one decision read top to bottom.",
+        why: "The buy box is complementary to the narrative: active phase, artwork, price, compact phase comparison, action and enrolment proof are one sticky decision read top to bottom.",
     },
     "course-price-block": {
         classes: ["flex", "flex-col", "gap-1"],
         children: {
             line: { contract: "price-discount-line" },
             savings: { leaf: "text", props: { size: "xs" }, optional: true },
-            scarcity: { leaf: "text", props: { size: "xs" }, optional: true },
+            scarcity: { leaf: "badge", optional: true },
         },
         why: "The payable price, what it saves and what is running out are one claim about cost, so they sit tighter to each other than to the ladder below them.",
+    },
+    "course-pricing-phase-grid": {
+        classes: ["grid", "grid-cols-1", "gap-2", "sm:grid-cols-2"],
+        children: { phase: { contract: "course-pricing-phase-card", repeats: true, restingCount: 3 } },
+        why: "The phase offers are peer comparisons rather than sequential instructions, so compact cards let a reader compare names and values without reading a false process ladder.",
+    },
+    "course-pricing-phase-card": {
+        classes: ["flex", "min-w-0", "flex-col", "gap-1", "rounded-xl", "border", "border-separator", "p-2"],
+        children: {
+            name: { leaf: ["text", "badge"] },
+            value: { leaf: "text", props: { size: "xs", tone: "muted" } },
+        },
+        why: "One phase is one compact offer: its name leads and the resolved price or open status qualifies it below, with the active phase using a badge rather than a second layout.",
     },
     "cart-line-list": {
         classes: [

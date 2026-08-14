@@ -1,4 +1,13 @@
+import { Tree } from "@/components/branches/Tree"
+import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { Button } from "@/components/leaves/Button"
 import { Heading } from "@/components/leaves/Heading"
+import { Text } from "@/components/leaves/Text"
+import {
+    defineCompositeComponent,
+    defineContractComponent,
+    defineLeafComponent,
+} from "@/components/contracts/props"
 import type { FlashcardSessionMode } from "@/modules/api/graphql/queries/query-my-in-progress-flashcard-session"
 
 /** Pure live-session states frozen by the approved A3 review. */
@@ -48,54 +57,96 @@ export type CourseFlashcardSessionPageProps = {
 /** Renders one focused review/quiz card and its finite lifecycle controls. */
 export const _CourseFlashcardSessionPage = (input: CourseFlashcardSessionPageProps) => {
     const { state, data, on } = input
+    const isLoading = state === "pending"
+    const settledFailure = state === "failed" || state === "expired"
+    const header = defineContractComponent("flashcard-session-header", {
+        deck: data.deckTitle === undefined
+            ? undefined
+            : defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                <Text props={{ content: data.deckTitle, size: "sm", tone: "muted" }} isLoading={isLoading} />
+            )),
+        title: defineLeafComponent("heading", {}, () => (
+            <Heading props={{ content: data.title, level: 1 }} isLoading={isLoading} />
+        )),
+        leave: defineLeafComponent("button", {}, () => (
+            <Button props={{ label: data.leaveLabel, variant: "outline" }} on={{ press: on.leave }} />
+        )),
+    })
+    const progress = settledFailure
+        ? undefined
+        : defineContractComponent("label-with-muted-fact-row", {
+            label: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
+                <Text props={{ content: data.progressText, size: "sm", weight: "semibold" }} isLoading={isLoading} />
+            )),
+            fact: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                <Text props={{ content: data.level ?? undefined, size: "xs" }} isLoading={isLoading} />
+            )),
+        })
+    const card = settledFailure
+        ? undefined
+        : defineContractComponent("flashcard-session-card", {
+            prompt: defineLeafComponent("text", { size: "md", weight: "medium" }, () => (
+                <Text props={{ content: data.prompt, size: "md", weight: "medium" }} isLoading={isLoading} />
+            )),
+            answer: data.answerVisible
+                ? defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                    <Text props={{ content: data.answer, size: "sm", tone: "muted" }} />
+                ))
+                : undefined,
+        })
+    const status = state === "syncing" || state === "completing"
+        ? defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+            <Text
+                props={{
+                    content: state === "syncing" ? data.syncingLabel : data.completingLabel,
+                    size: "sm",
+                    tone: "muted",
+                    live: "polite",
+                }}
+            />
+        ))
+        : undefined
+    const actions = state !== "active"
+        ? undefined
+        : !data.answerVisible
+            ? [defineLeafComponent("button", {}, () => (
+                <Button props={{ label: data.revealLabel, variant: "primary" }} on={{ press: on.reveal }} />
+            ))]
+            : data.mode === "review"
+                ? ([data.againLabel, data.hardLabel, data.goodLabel, data.easyLabel] as const).map((label, grade) => (
+                    defineLeafComponent("button", {}, () => (
+                        <Button props={{ label, variant: grade === 2 ? "primary" : "outline" }} on={{ press: () => on.rate(grade as 0 | 1 | 2 | 3) }} />
+                    ))
+                ))
+                : [
+                    defineLeafComponent("button", {}, () => (
+                        <Button props={{ label: data.incorrectLabel, variant: "outline" }} on={{ press: () => on.answerQuiz(false) }} />
+                    )),
+                    defineLeafComponent("button", {}, () => (
+                        <Button props={{ label: data.correctLabel, variant: "primary" }} on={{ press: () => on.answerQuiz(true) }} />
+                    )),
+                ]
+    const notice = settledFailure
+        ? defineCompositeComponent("empty-notice", {}, () => (
+            <EmptyNotice
+                props={{
+                    message: state === "expired" ? data.expiredText : data.failedText,
+                    actionLabel: data.retryLabel,
+                }}
+                on={{ act: on.retry }}
+            />
+        ))
+        : undefined
+
     return (
-        <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-6 px-4 py-6 @app-sm:px-6">
-            <header className="flex items-center justify-between gap-4 border-b border-default pb-4">
-                <div>
-                    <p className="text-sm text-muted">{data.deckTitle}</p>
-                    <Heading props={{ content: data.title, level: 1 }} />
-                </div>
-                <button type="button" className="rounded-lg border border-default px-3 py-2 text-sm font-medium" onClick={on.leave}>{data.leaveLabel}</button>
-            </header>
-            {state === "pending" ? (
-                <section aria-label={data.title} className="flex flex-1 flex-col gap-4 rounded-2xl border border-default bg-surface p-6">
-                    <div className="h-4 w-28 animate-pulse rounded bg-default-200" />
-                    <div className="h-28 animate-pulse rounded-xl bg-default-200" />
-                </section>
-            ) : state === "failed" || state === "expired" ? (
-                <section className="rounded-2xl border border-default bg-surface p-6">
-                    <p className="text-sm text-danger">{state === "expired" ? data.expiredText : data.failedText}</p>
-                    <button type="button" className="mt-4 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground" onClick={on.retry}>{data.retryLabel}</button>
-                </section>
-            ) : (
-                <section className="flex flex-1 flex-col gap-6 rounded-2xl border border-default bg-surface p-6">
-                    <div className="flex items-center justify-between gap-4 text-sm text-muted">
-                        <span>{data.progressText}</span>
-                        <span>{data.level}</span>
-                    </div>
-                    <article className="flex min-h-48 flex-1 flex-col justify-center gap-5 rounded-xl border border-default bg-background p-6">
-                        <p className="whitespace-pre-wrap text-lg font-medium">{data.prompt}</p>
-                        {data.answerVisible ? <p className="whitespace-pre-wrap border-t border-default pt-5 text-sm text-muted">{data.answer}</p> : null}
-                    </article>
-                    {state === "syncing" || state === "completing" ? (
-                        <p role="status" className="text-center text-sm text-muted">{state === "syncing" ? data.syncingLabel : data.completingLabel}</p>
-                    ) : !data.answerVisible ? (
-                        <button type="button" className="rounded-lg bg-accent px-4 py-3 text-sm font-semibold text-accent-foreground" onClick={on.reveal}>{data.revealLabel}</button>
-                    ) : data.mode === "review" ? (
-                        <div className="grid grid-cols-2 gap-3 @app-sm:grid-cols-4">
-                            {([data.againLabel, data.hardLabel, data.goodLabel, data.easyLabel] as const).map((label, grade) => (
-                                <button key={label} type="button" className="rounded-lg border border-default px-3 py-3 text-sm font-medium" onClick={() => on.rate(grade as 0 | 1 | 2 | 3)}>{label}</button>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-2 gap-3">
-                            <button type="button" className="rounded-lg border border-default px-3 py-3 text-sm font-medium" onClick={() => on.answerQuiz(false)}>{data.incorrectLabel}</button>
-                            <button type="button" className="rounded-lg bg-accent px-3 py-3 text-sm font-medium text-accent-foreground" onClick={() => on.answerQuiz(true)}>{data.correctLabel}</button>
-                        </div>
-                    )}
-                </section>
-            )}
-        </main>
+        <Tree contract="course-flashcard-session-page" render={defineContractComponent("course-flashcard-session-page", {
+            header,
+            progress,
+            card,
+            status,
+            action: actions,
+            notice,
+        })} />
     )
 }
 

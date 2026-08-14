@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryFoundationCategoriesSwr } from "@/hooks/swr/useQueryFoundationCategoriesSwr"
 import { _CourseFoundationsPage } from "./component"
@@ -10,6 +11,7 @@ export type CourseFoundationsPageProps = { readonly displayId: string }
 
 /** Connect the foundations hub route to the localized server category catalog. */
 export const CourseFoundationsPage = ({ displayId }: CourseFoundationsPageProps) => {
+    const t = useTranslations("learn.foundations")
     const router = useRouter()
     const [search, setSearch] = useState("")
     const query = useQueryFoundationCategoriesSwr({ search })
@@ -22,12 +24,13 @@ export const CourseFoundationsPage = ({ displayId }: CourseFoundationsPageProps)
         <_CourseFoundationsPage
             state={state}
             props={{
-                title: "Foundations",
-                description: "Build durable concepts before applying them in the playground.",
-                empty: "No foundation categories are available yet.",
-                failed: "The foundation catalog could not be loaded.",
-                retry: "Try again",
-                search: "Search foundation categories",
+                title: t("title"),
+                description: t("description"),
+                empty: t("empty"),
+                failed: t("failed"),
+                retry: t("retry"),
+                search: t("search"),
+                clearSearch: t("clearSearch"),
                 categories: query.data?.data ?? [],
             }}
             on={{

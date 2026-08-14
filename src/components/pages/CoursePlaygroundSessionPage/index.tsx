@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { usePlaygroundSession } from "@/components/layouts/PlaygroundSessionLayout"
 import { _CoursePlaygroundSessionPage, type CoursePlaygroundSessionState } from "./component"
@@ -10,6 +11,7 @@ export type CoursePlaygroundSessionPageProps = { readonly displayId: string; rea
 
 /** Consume the persistent session owner; only `step:verified` changes completed progress. */
 export const CoursePlaygroundSessionPage = ({ displayId, slug }: CoursePlaygroundSessionPageProps) => {
+    const t = useTranslations("learn.playground")
     const router = useRouter()
     const session = usePlaygroundSession()
     const [selectedOverride, setSelectedOverride] = useState<number | null>(null)
@@ -23,29 +25,30 @@ export const CoursePlaygroundSessionPage = ({ displayId, slug }: CoursePlaygroun
             : session.socketState === "reconnecting" ? "reconnecting"
                 : session.socketState !== "connected" || !session.agentConnected ? "connecting" : "live"
     const connectionText = state === "live"
-        ? "Agent connected"
+        ? t("session.agentConnected")
         : state === "reconnecting"
-            ? "Reconnecting..."
+            ? t("session.reconnecting")
             : state === "completed"
-                ? "Completed"
-                : "Waiting for agent..."
+                ? t("session.completed")
+                : t("session.waiting")
 
     return (
         <_CoursePlaygroundSessionPage
             state={state}
             props={{
-                title: session.playground?.title ?? "Playground",
+                title: session.playground?.title ?? t("title"),
                 steps,
                 selectedStepIndex,
                 passedStepIndexes: session.passedStepIndexes,
                 connectionText,
-                submitLabel: "Verify this step",
-                leaveLabel: "Setup",
-                retryLabel: "Try again",
-                completedTitle: "Playground completed",
-                completedText: "The server verified every step in this playground.",
-                failedText: "This playground session is unavailable. Return to setup and create a new session.",
-                stepLabel: "Step",
+                submitLabel: t("session.verify"),
+                leaveLabel: t("session.leave"),
+                retryLabel: t("retry"),
+                completedTitle: t("session.completedTitle"),
+                completedText: t("session.completedText"),
+                failedText: t("session.failed"),
+                stepLabel: t("session.step"),
+                passedLabel: t("session.passed"),
             }}
             on={{
                 step: (index) => setSelectedOverride(index),

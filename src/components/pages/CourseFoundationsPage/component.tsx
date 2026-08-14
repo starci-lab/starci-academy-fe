@@ -7,6 +7,8 @@ import { Text } from "@/components/leaves/Text"
 import { defineCompositeComponent, defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 import type { FoundationCategory } from "@/modules/api/graphql/queries/query-foundation-categories"
 
+type FoundationCategoryRow = Pick<FoundationCategory, "id" | "title" | "description">
+
 /** Resolved states, copy and actions for the pure foundations hub. */
 export type CourseFoundationsPageProps = {
     readonly state: "pending" | "ready" | "empty" | "failed"
@@ -26,7 +28,7 @@ export type CourseFoundationsPageProps = {
 /** Draw the live foundation category catalog in pending, ready, empty and failed states. */
 export const _CourseFoundationsPage = (input: CourseFoundationsPageProps) => {
     const loading = input.state === "pending"
-    const categories: ReadonlyArray<FoundationCategory> = loading && input.props.categories.length === 0
+    const categories: ReadonlyArray<FoundationCategoryRow> = loading && input.props.categories.length === 0
         ? Array.from({ length: 4 }, (_, index) => ({ id: `pending-${index}`, title: "", description: null }))
         : input.props.categories
     const notice = input.state === "empty" || input.state === "failed"

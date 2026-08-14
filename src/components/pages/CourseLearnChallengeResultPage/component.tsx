@@ -49,12 +49,6 @@ export const _CourseLearnChallengeResultPage = (input: CourseLearnChallengeResul
         ]
         : input.state === "pending"
             ? [
-                defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                    <Text
-                        props={{ content: input.props.scoreLine, size: "sm", tone: "muted" }}
-                        isLoading
-                    />
-                )),
                 defineLeafComponent("button", {}, () => (
                     <Button props={{ label: input.props.retryLabel }} isLoading />
                 )),
@@ -63,12 +57,6 @@ export const _CourseLearnChallengeResultPage = (input: CourseLearnChallengeResul
                 )),
             ]
             : [
-                defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                    <Text
-                        props={{ content: input.props.scoreLine, size: "sm", tone: "muted" }}
-                        isLoading={loading}
-                    />
-                )),
                 ...(input.props.shortFeedback === undefined ? [] : [
                     defineLeafComponent("text", {}, () => (
                         <Text props={{ content: input.props.shortFeedback }} isLoading={loading} />
@@ -107,8 +95,8 @@ export const _CourseLearnChallengeResultPage = (input: CourseLearnChallengeResul
 
     return (
         <Tree
-            contract="centred-page-column"
-            render={defineContractComponent("centred-page-column", {
+            contract="course-learn-challenge-result-page"
+            render={defineContractComponent("course-learn-challenge-result-page", {
                 header: defineContractComponent("centred-title-pair", {
                     title: defineLeafComponent("heading", {}, () => (
                         <Heading props={{ content: input.props.title, level: 1 }} isLoading={loading} />
@@ -117,7 +105,13 @@ export const _CourseLearnChallengeResultPage = (input: CourseLearnChallengeResul
                         <Text props={{ content: input.props.description, size: "sm" }} isLoading={loading} />
                     )),
                 }),
-                body: [defineContractComponent("stacked-peer-controls", { control: controls })],
+                score: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                    <Text
+                        props={{ content: input.props.scoreLine, size: "sm", tone: "muted" }}
+                        isLoading={loading}
+                    />
+                )),
+                body: defineContractComponent("stacked-peer-controls", { control: controls }),
             })}
         />
     )

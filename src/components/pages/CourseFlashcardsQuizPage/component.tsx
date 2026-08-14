@@ -1,4 +1,14 @@
+import { Tree } from "@/components/branches/Tree"
+import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { Button } from "@/components/leaves/Button"
 import { Heading } from "@/components/leaves/Heading"
+import { NavLink } from "@/components/leaves/NavLink"
+import { Text } from "@/components/leaves/Text"
+import {
+    defineCompositeComponent,
+    defineContractComponent,
+    defineLeafComponent,
+} from "@/components/contracts/props"
 
 /** Pure quiz-setup contract after configuration facts and actions resolve. */
 export type CourseFlashcardsQuizPageProps = {
@@ -44,44 +54,95 @@ export const _CourseFlashcardsQuizPage = (input: CourseFlashcardsQuizPageProps) 
     const state = input.state
     const data = input.props
     const on = input.on
+    const isLoading = state === "pending"
+    const levels = [
+        { id: null, label: data.allLevelsLabel },
+        { id: "junior", label: data.juniorLabel },
+        { id: "middle", label: data.middleLabel },
+        { id: "senior", label: data.seniorLabel },
+        { id: "staff", label: data.staffLabel },
+    ] as const
+    const header = defineContractComponent("centred-title-pair", {
+        title: defineLeafComponent("heading", {}, () => (
+            <Heading props={{ content: data.title, level: 1 }} isLoading={isLoading} />
+        )),
+        description: defineLeafComponent("text", { size: "sm" }, () => (
+            <Text props={{ content: data.subtitle, size: "sm", tone: "muted" }} isLoading={isLoading} />
+        )),
+    })
+    const modes = defineContractComponent("flashcard-mode-tabs", {
+        tab: [
+            defineLeafComponent("nav-link", { kind: "tab" }, () => (
+                <NavLink props={{ label: data.reviewLabel, kind: "tab" }} on={{ press: on.openReview }} />
+            )),
+            defineLeafComponent("nav-link", { kind: "tab" }, () => (
+                <NavLink props={{ label: data.quizLabel, kind: "tab", isCurrent: true }} />
+            )),
+        ],
+    })
+    const configuration = state === "ready" || state === "pending"
+        ? defineContractComponent("flashcard-quiz-configuration", {
+            title: defineLeafComponent("heading", {}, () => (
+                <Heading props={{ content: data.configurationTitle, level: 2 }} isLoading={isLoading} />
+            )),
+            fact: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                <Text props={{ content: `${data.cardCount} ${data.cardsLabel}`, size: "sm", tone: "muted" }} isLoading={isLoading} />
+            )),
+            resume: data.resumeSessionId === undefined
+                ? undefined
+                : defineLeafComponent("button", {}, () => (
+                    <Button props={{ label: data.resumeLabel, variant: "outline" }} on={{ press: () => on.resume(data.resumeSessionId ?? "") }} />
+                )),
+            modeLabel: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
+                <Text props={{ content: data.modeLabel, size: "sm", weight: "semibold" }} isLoading={isLoading} />
+            )),
+            mode: (["quick", "deep"] as const).map((mode) => defineLeafComponent("button", {}, () => (
+                <Button
+                    props={{
+                        label: mode === "quick" ? data.quickLabel : data.deepLabel,
+                        variant: data.selectedMode === mode ? "primary" : "outline",
+                    }}
+                    on={{ press: () => on.selectMode(mode) }}
+                    isLoading={isLoading}
+                />
+            ))),
+            levelLabel: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
+                <Text props={{ content: data.levelLabel, size: "sm", weight: "semibold" }} isLoading={isLoading} />
+            )),
+            level: levels.map((level) => defineLeafComponent("button", {}, () => (
+                <Button
+                    props={{
+                        label: level.label,
+                        variant: data.selectedLevel === level.id ? "primary" : "outline",
+                    }}
+                    on={{ press: () => on.selectLevel(level.id) }}
+                    isLoading={isLoading}
+                />
+            ))),
+            start: defineLeafComponent("button", {}, () => (
+                <Button props={{ label: data.startLabel, variant: "primary" }} on={{ press: on.start }} isLoading={isLoading} />
+            )),
+        })
+        : undefined
+    const notice = state === "failed" || state === "empty"
+        ? defineCompositeComponent("empty-notice", {}, () => (
+            <EmptyNotice
+                props={{
+                    message: state === "failed" ? data.failedText : data.emptyText,
+                    actionLabel: state === "failed" ? data.retryLabel : undefined,
+                }}
+                on={{ act: on.retry }}
+            />
+        ))
+        : undefined
+
     return (
-        <main className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-6 @app-sm:px-6">
-            <header className="flex flex-col gap-2">
-                <Heading props={{ content: data.title, level: 1 }} />
-                <p className="text-sm text-muted">{data.subtitle}</p>
-            </header>
-            <nav aria-label={data.title} className="flex gap-2 border-b border-default pb-2">
-                <button type="button" className="rounded-lg px-3 py-2 text-sm font-medium text-muted" onClick={on.openReview}>{data.reviewLabel}</button>
-                <span aria-current="page" className="rounded-lg bg-accent px-3 py-2 text-sm font-medium text-accent-foreground">{data.quizLabel}</span>
-            </nav>
-            {state === "pending" ? <div className="h-56 animate-pulse rounded-xl bg-default-200" /> : state === "failed" ? (
-                <section className="rounded-xl border border-default bg-surface p-5">
-                    <p className="text-sm text-danger">{data.failedText}</p>
-                    <button type="button" className="mt-4 rounded-lg bg-accent px-3 py-2 text-sm font-medium text-accent-foreground" onClick={on.retry}>{data.retryLabel}</button>
-                </section>
-            ) : state === "empty" ? <p className="rounded-xl border border-dashed border-default p-5 text-sm text-muted">{data.emptyText}</p> : (
-                <section className="flex flex-col gap-6 rounded-xl border border-default bg-surface p-5">
-                    <div>
-                        <Heading props={{ content: data.configurationTitle, level: 2 }} />
-                        <p className="mt-1 text-sm text-muted">{data.cardCount} {data.cardsLabel}</p>
-                    </div>
-                    {data.resumeSessionId === undefined ? null : <button type="button" className="rounded-lg border border-default px-4 py-2 text-sm font-medium" onClick={() => on.resume(data.resumeSessionId ?? "")}>{data.resumeLabel}</button>}
-                    <fieldset className="flex flex-col gap-3">
-                        <legend className="text-sm font-semibold">{data.modeLabel}</legend>
-                        <div className="flex flex-wrap gap-2">
-                            {(["quick", "deep"] as const).map((mode) => <button key={mode} type="button" aria-pressed={data.selectedMode === mode} className={`rounded-lg px-3 py-2 text-sm ${data.selectedMode === mode ? "bg-accent text-accent-foreground" : "border border-default"}`} onClick={() => on.selectMode(mode)}>{mode === "quick" ? data.quickLabel : data.deepLabel}</button>)}
-                        </div>
-                    </fieldset>
-                    <fieldset className="flex flex-col gap-3">
-                        <legend className="text-sm font-semibold">{data.levelLabel}</legend>
-                        <div className="flex flex-wrap gap-2">
-                            {([{ id: null, label: data.allLevelsLabel }, { id: "junior", label: data.juniorLabel }, { id: "middle", label: data.middleLabel }, { id: "senior", label: data.seniorLabel }, { id: "staff", label: data.staffLabel }] as const).map((level) => <button key={level.id ?? "all"} type="button" aria-pressed={data.selectedLevel === level.id} className={`rounded-lg px-3 py-2 text-sm ${data.selectedLevel === level.id ? "bg-accent text-accent-foreground" : "border border-default"}`} onClick={() => on.selectLevel(level.id)}>{level.label}</button>)}
-                        </div>
-                    </fieldset>
-                    <button type="button" className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground" onClick={on.start}>{data.startLabel}</button>
-                </section>
-            )}
-        </main>
+        <Tree contract="course-flashcards-quiz-page" render={defineContractComponent("course-flashcards-quiz-page", {
+            header,
+            modes,
+            configuration,
+            notice,
+        })} />
     )
 }
 

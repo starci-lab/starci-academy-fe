@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
 import { useQueryPlaygroundsSwr } from "@/hooks/swr/useQueryPlaygroundsSwr"
@@ -10,6 +11,7 @@ export type CoursePlaygroundPageProps = { readonly displayId: string }
 
 /** Resolve the course primary key, then read its live playground catalog. */
 export const CoursePlaygroundPage = ({ displayId }: CoursePlaygroundPageProps) => {
+    const t = useTranslations("learn.playground")
     const router = useRouter()
     const course = useQueryCourseSwr({ displayId })
     const playgrounds = useQueryPlaygroundsSwr(course.data?.id)
@@ -23,12 +25,12 @@ export const CoursePlaygroundPage = ({ displayId }: CoursePlaygroundPageProps) =
         <_CoursePlaygroundPage
             state={state}
             props={{
-                title: "Playground",
-                description: "Practice on your own machine with each step verified live.",
-                stepLabel: "guided steps",
-                emptyText: "This course has no playgrounds yet.",
-                failedText: "The playground catalog could not be loaded.",
-                retryLabel: "Try again",
+                title: t("title"),
+                description: t("description"),
+                stepLabel: t("stepLabel"),
+                emptyText: t("empty"),
+                failedText: t("failed"),
+                retryLabel: t("retry"),
                 playgrounds: rows,
             }}
             on={{

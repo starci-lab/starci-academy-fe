@@ -2,7 +2,6 @@ import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { Badge } from "@/components/leaves/Badge"
 import { Button } from "@/components/leaves/Button"
 import { CoverImage } from "@/components/leaves/CoverImage"
-import { StatusDot } from "@/components/leaves/StatusDot"
 import { Text } from "@/components/leaves/Text"
 import {
     defineContractComponent,
@@ -103,6 +102,7 @@ export type CoursePricingRailProps = {
 export const _CoursePricingRail = (input: CoursePricingRailProps) => {
     const isPricePending = input.state === "price-pending"
     const phases = input.props.phases ?? []
+    const activePhase = phases.find((phase) => phase.isActive === true)
 
     const priceLine = defineContractComponent("price-discount-line", {
         price: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
@@ -136,33 +136,26 @@ export const _CoursePricingRail = (input: CoursePricingRailProps) => {
                         )),
                     scarcity: input.props.scarcityLabel === undefined
                         ? undefined
-                        : defineLeafComponent("text", { size: "xs" }, () => (
-                            <Text props={{ content: input.props.scarcityLabel, size: "xs" }} />
+                        : defineLeafComponent("badge", {}, () => (
+                            <Badge props={{ content: input.props.scarcityLabel, tone: "warning" }} />
                         )),
                 }),
-                ladder: phases.length === 0 ? undefined : defineContractComponent("ordered-step-ladder", {
-                    step: phases.map((phase) => defineContractComponent("ordered-step-row", {
-                        // The mark means "this is the open phase", so only the open phase carries
-                        // one. StatusDot's tones are all affirmative and it requires an accessible
-                        // name, so there is no honest way to draw a dot for a phase that is not
-                        // open. The slot stays occupied by a resting line, which keeps the names
-                        // aligned down the ladder.
-                        mark: phase.isActive === true
-                            ? defineLeafComponent("status-dot", {}, () => (
-                                <StatusDot props={{ tone: "accent", label: phase.value }} />
+                phase: activePhase === undefined
+                    ? undefined
+                    : defineLeafComponent("badge", {}, () => (
+                        <Badge props={{ content: activePhase.name, tone: "accent" }} />
+                    )),
+                ladder: phases.length === 0 ? undefined : defineContractComponent("course-pricing-phase-grid", {
+                    phase: phases.map((phase) => defineContractComponent("course-pricing-phase-card", {
+                        name: phase.isActive === true
+                            ? defineLeafComponent("badge", {}, () => (
+                                <Badge props={{ content: phase.name, tone: "accent" }} />
                             ))
                             : defineLeafComponent("text", {}, () => (
-                                <Text props={{ content: "", size: "xs" }} />
+                                <Text props={{ content: phase.name, size: "sm", weight: "semibold" }} />
                             )),
-                        name: defineLeafComponent("text", { size: "sm" }, () => (
-                            <Text
-                                props={phase.isActive === true
-                                    ? { content: phase.name, size: "sm", tone: "accent", weight: "semibold" }
-                                    : { content: phase.name, size: "sm" }}
-                            />
-                        )),
-                        value: defineLeafComponent("text", { size: "xs" }, () => (
-                            <Text props={{ content: phase.value, size: "xs" }} />
+                        value: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                            <Text props={{ content: phase.value, size: "xs", tone: "muted" }} />
                         )),
                     })),
                 }),

@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryCourseMindMapSwr } from "@/hooks/swr/useQueryCourseMindMapSwr"
 import type { MindMapLink, MindMapNode } from "@/modules/api/graphql/queries/query-course-mind-map"
@@ -33,6 +34,7 @@ const targetFor = (displayId: string, node: MindMapNode): string | null => {
 
 /** Connect search and selection to the backend-computed graph without inventing nodes. */
 export const CourseMindMapPage = ({ displayId }: CourseMindMapPageProps) => {
+    const t = useTranslations("learn.mindMap")
     const router = useRouter()
     const graph = useQueryCourseMindMapSwr(displayId)
     const [query, setQuery] = useState("")
@@ -64,19 +66,19 @@ export const CourseMindMapPage = ({ displayId }: CourseMindMapPageProps) => {
         <_CourseMindMapPage
             state={state}
             props={{
-                title: "Concept map",
-                description: "Find and open the real course content connected to each concept.",
-                searchLabel: "Search concepts",
-                searchPlaceholder: "Type a keyword",
-                emptyText: "This course has no concept map yet.",
-                noResultsText: "No concepts match this search.",
-                failedText: "The concept map could not be loaded.",
-                retryLabel: "Try again",
-                openLabel: "Open content",
+                title: t("title"),
+                description: t("description"),
+                searchLabel: t("searchLabel"),
+                searchPlaceholder: t("searchPlaceholder"),
+                clearSearchLabel: t("clearSearch"),
+                emptyText: t("empty"),
+                noResultsText: t("noResults"),
+                failedText: t("failed"),
+                retryLabel: t("retry"),
+                openLabel: t("open"),
+                graphFact: t("connections", { count: graph.data?.edges.length ?? 0 }),
                 nodes,
-                edgeCount: graph.data?.edges.length ?? 0,
                 selectedId: activeId,
-                query,
             }}
             on={{
                 search: setQuery,

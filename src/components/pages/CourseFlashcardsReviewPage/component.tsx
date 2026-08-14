@@ -1,4 +1,14 @@
+import { Tree } from "@/components/branches/Tree"
+import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { Button } from "@/components/leaves/Button"
 import { Heading } from "@/components/leaves/Heading"
+import { NavLink } from "@/components/leaves/NavLink"
+import { Text } from "@/components/leaves/Text"
+import {
+    defineCompositeComponent,
+    defineContractComponent,
+    defineLeafComponent,
+} from "@/components/contracts/props"
 
 /** One settled deck row rendered by the review overview. */
 export type FlashcardReviewDeckRow = {
@@ -51,66 +61,119 @@ export const _CourseFlashcardsReviewPage = (input: CourseFlashcardsReviewPagePro
     const state = input.state
     const data = input.props
     const on = input.on
+    const isLoading = state === "pending"
+    const header = defineContractComponent("centred-title-pair", {
+        title: defineLeafComponent("heading", {}, () => (
+            <Heading props={{ content: data.title, level: 1 }} isLoading={isLoading} />
+        )),
+        description: defineLeafComponent("text", { size: "sm" }, () => (
+            <Text props={{ content: data.subtitle, size: "sm", tone: "muted" }} isLoading={isLoading} />
+        )),
+    })
+    const modes = defineContractComponent("flashcard-mode-tabs", {
+        tab: [
+            defineLeafComponent("nav-link", { kind: "tab" }, () => (
+                <NavLink props={{ label: data.reviewLabel, kind: "tab", isCurrent: true }} />
+            )),
+            defineLeafComponent("nav-link", { kind: "tab" }, () => (
+                <NavLink props={{ label: data.quizLabel, kind: "tab" }} on={{ press: on.openQuiz }} />
+            )),
+        ],
+    })
+    const notice = state === "failed" || state === "empty"
+        ? defineCompositeComponent("empty-notice", {}, () => (
+            <EmptyNotice
+                props={{
+                    message: state === "failed" ? data.failedText : data.emptyText,
+                    actionLabel: state === "failed" ? data.retryLabel : undefined,
+                }}
+                on={{ act: on.retry }}
+            />
+        ))
+        : undefined
+    const due = state === "ready"
+        ? defineContractComponent("flashcard-review-due-card", {
+            title: defineLeafComponent("heading", {}, () => (
+                <Heading props={{ content: data.dueTitle, level: 2 }} />
+            )),
+            description: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                <Text props={{ content: data.dueDescription, size: "sm", tone: "muted" }} />
+            )),
+            fact: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
+                <Text props={{ content: `${data.dueCount} ${data.dueLabel}`, size: "sm", weight: "medium" }} />
+            )),
+            action: data.resumeSessionId !== undefined
+                ? defineLeafComponent("button", {}, () => (
+                    <Button props={{ label: data.resumeLabel, variant: "primary" }} on={{ press: () => on.resume(data.resumeSessionId ?? "") }} />
+                ))
+                : data.dueCount === 0
+                    ? undefined
+                    : defineLeafComponent("button", {}, () => (
+                        <Button props={{ label: data.startLabel, variant: "primary" }} on={{ press: on.startDue }} />
+                    )),
+        })
+        : undefined
+    const stats = state === "ready"
+        ? defineContractComponent("centred-title-pair", {
+            title: defineLeafComponent("heading", {}, () => (
+                <Heading props={{ content: data.statsTitle, level: 2 }} />
+            )),
+            description: defineLeafComponent("text", { size: "sm" }, () => (
+                <Text props={{ content: `${data.streakText} · ${data.retentionText}`, size: "sm", tone: "muted" }} />
+            )),
+        })
+        : undefined
+    const decks = state === "pending"
+        ? Array.from({ length: 4 }, (_, index) => defineContractComponent("flashcard-review-deck-card", {
+            title: defineLeafComponent("heading", {}, () => (
+                <Heading props={{ content: data.decksTitle, level: 3 }} isLoading />
+            )),
+            description: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                <Text props={{ size: "sm", tone: "muted" }} isLoading />
+            )),
+            facts: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                <Text props={{ size: "xs" }} isLoading />
+            )),
+            action: defineLeafComponent("button", {}, () => (
+                <Button props={{ label: `${data.startLabel} ${index + 1}` }} isLoading />
+            )),
+        }))
+        : state === "ready"
+            ? data.decks.map((deck) => defineContractComponent("flashcard-review-deck-card", {
+                title: defineLeafComponent("heading", {}, () => (
+                    <Heading props={{ content: deck.title, level: 3 }} />
+                )),
+                description: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                    <Text props={{ content: deck.description, size: "sm", tone: "muted" }} />
+                )),
+                facts: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                    <Text
+                        props={{
+                            content: `${deck.cardCount} ${data.cardsLabel} · ${deck.dueCount} ${data.dueLabel} · ${deck.masteredCount} ${data.masteredLabel}`,
+                            size: "xs",
+                        }}
+                    />
+                )),
+                action: defineLeafComponent("button", {}, () => (
+                    <Button props={{ label: data.startLabel, variant: "primary" }} on={{ press: () => on.startDeck(deck.id) }} />
+                )),
+            }))
+            : undefined
+
     return (
-        <main className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-6 @app-sm:px-6">
-            <header className="flex flex-col gap-2">
-                <Heading props={{ content: data.title, level: 1 }} />
-                <p className="text-sm text-muted">{data.subtitle}</p>
-            </header>
-            <nav aria-label={data.title} className="flex gap-2 border-b border-default pb-2">
-                <span aria-current="page" className="rounded-lg bg-accent px-3 py-2 text-sm font-medium text-accent-foreground">{data.reviewLabel}</span>
-                <button type="button" className="rounded-lg px-3 py-2 text-sm font-medium text-muted" onClick={on.openQuiz}>{data.quizLabel}</button>
-            </nav>
-            {state === "pending" ? (
-                <section aria-label={data.decksTitle} className="grid gap-4 @app-sm:grid-cols-2">
-                    {[0, 1, 2, 3].map((item) => <div key={item} className="h-32 animate-pulse rounded-xl bg-default-200" />)}
-                </section>
-            ) : state === "failed" ? (
-                <section className="rounded-xl border border-default bg-surface p-5">
-                    <p className="text-sm text-danger">{data.failedText}</p>
-                    <button type="button" className="mt-4 rounded-lg bg-accent px-3 py-2 text-sm font-medium text-accent-foreground" onClick={on.retry}>{data.retryLabel}</button>
-                </section>
-            ) : state === "empty" ? (
-                <p className="rounded-xl border border-dashed border-default p-5 text-sm text-muted">{data.emptyText}</p>
-            ) : (
-                <>
-                    <section className="rounded-xl border border-default bg-surface p-5">
-                        <Heading props={{ content: data.dueTitle, level: 2 }} />
-                        <p className="mt-2 text-sm text-muted">{data.dueDescription}</p>
-                        <p className="mt-2 text-sm font-medium">{data.dueCount} {data.dueLabel}</p>
-                        {data.resumeSessionId === undefined ? (
-                            data.dueCount === 0 ? null : (
-                                <button type="button" className="mt-4 rounded-lg bg-accent px-3 py-2 text-sm font-medium text-accent-foreground" onClick={on.startDue}>{data.startLabel}</button>
-                            )
-                        ) : (
-                            <button type="button" className="mt-4 rounded-lg bg-accent px-3 py-2 text-sm font-medium text-accent-foreground" onClick={() => on.resume(data.resumeSessionId ?? "")}>{data.resumeLabel}</button>
-                        )}
-                    </section>
-                    <section className="rounded-xl border border-default bg-surface p-5">
-                        <Heading props={{ content: data.statsTitle, level: 2 }} />
-                        <div className="mt-3 flex flex-wrap gap-4 text-sm text-muted">
-                            <span>{data.streakText}</span>
-                            <span>{data.retentionText}</span>
-                        </div>
-                    </section>
-                    <section className="flex flex-col gap-4">
-                        <Heading props={{ content: data.decksTitle, level: 2 }} />
-                        <div className="grid gap-4 @app-sm:grid-cols-2">
-                            {data.decks.map((deck) => (
-                                <article key={deck.id} className="flex flex-col gap-3 rounded-xl border border-default bg-surface p-5">
-                                    <div>
-                                        <Heading props={{ content: deck.title, level: 3 }} />
-                                        <p className="mt-1 text-sm text-muted">{deck.description}</p>
-                                    </div>
-                                    <p className="text-xs text-muted">{deck.cardCount} {data.cardsLabel} · {deck.dueCount} {data.dueLabel} · {deck.masteredCount} {data.masteredLabel}</p>
-                                    <button type="button" className="mt-auto rounded-lg bg-accent px-3 py-2 text-sm font-medium text-accent-foreground" onClick={() => on.startDeck(deck.id)}>{data.startLabel}</button>
-                                </article>
-                            ))}
-                        </div>
-                    </section>
-                </>
-            )}
-        </main>
+        <Tree contract="course-flashcards-review-page" render={defineContractComponent("course-flashcards-review-page", {
+            header,
+            modes,
+            due,
+            stats,
+            decksTitle: state === "ready" || state === "pending"
+                ? defineLeafComponent("heading", {}, () => (
+                    <Heading props={{ content: data.decksTitle, level: 2 }} isLoading={isLoading} />
+                ))
+                : undefined,
+            deck: decks,
+            notice,
+        })} />
     )
 }
 

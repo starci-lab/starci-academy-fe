@@ -18,6 +18,25 @@ const labels: CourseLearnContentPageData["labels"] = {
     nextTitle: "Up next",
 }
 
+const discussion = {
+    state: "ready" as const,
+    props: {
+        labels: {
+            title: "Discussion",
+            composerLabel: "Comment",
+            placeholder: "Share a question",
+            submit: "Post comment",
+            submitting: "Posting",
+            empty: "No comments yet.",
+            failed: "Comments could not be loaded.",
+            retry: "Try again",
+        },
+        draft: "A question",
+        draftKey: 0,
+        comments: [{ id: "comment-1", author: "Ada", meta: "Today", body: "Helpful context" }],
+    },
+}
+
 describe("_CourseLearnContentPage", () => {
     it("shows one selected mobile panel and keeps all three panels on desktop", () => {
         const props: CourseLearnContentPageData = {
@@ -111,5 +130,22 @@ describe("_CourseLearnContentPage", () => {
 
         fireEvent.click(screen.getByText("Retry"))
         expect(act).toHaveBeenCalledTimes(1)
+    })
+
+    it("keeps the visible discussion inside the unlocked lesson footer", () => {
+        const submitDiscussion = vi.fn()
+        const { container } = render(
+            <_CourseLearnContentPage
+                state="ready"
+                props={{ labels, title: "Current lesson", body: "Lesson body", discussion }}
+                on={{ submitDiscussion }}
+            />,
+        )
+
+        expect(container.querySelector("[data-node=content-reader-footer]")).toBeTruthy()
+        expect(container.querySelector("[data-node=content-discussion-panel]")).toBeTruthy()
+        expect(screen.getByText("Helpful context")).toBeInTheDocument()
+        fireEvent.click(screen.getByRole("button", { name: "Post comment" }))
+        expect(submitDiscussion).toHaveBeenCalledTimes(1)
     })
 })

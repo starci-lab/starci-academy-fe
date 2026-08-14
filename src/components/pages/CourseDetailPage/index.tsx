@@ -1,8 +1,9 @@
 "use client"
+import { useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
 import { useQueryCourseReviewsSwr, useQueryCourseSwr } from "@/hooks"
-import { _CourseDetailPage } from "./component"
+import { _CourseDetailPage, type CourseDetailSection } from "./component"
 import type { CourseDetail, CourseModule } from "@/modules/api/graphql/queries/types/course"
 
 /**
@@ -46,6 +47,7 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
     const t = useTranslations("courses.detail")
     const locale = useLocale()
     const router = useRouter()
+    const [selectedSection, setSelectedSection] = useState<CourseDetailSection>("overview")
     const query = useQueryCourseSwr({ displayId: input.displayId })
     // The rating is a second request on purpose: it is public, shared by every reader and
     // invalidated by a different event than the course itself, so folding it into the course
@@ -54,8 +56,10 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
     const money = new Intl.NumberFormat(locale, { style: "currency", currency: "VND", maximumFractionDigits: 0 })
 
     const labels = {
-        navHome: t("navHome"),
-        navCourses: t("navCourses"),
+        sectionTabsLabel: t("sectionTabsLabel"),
+        overviewTab: t("overviewTab"),
+        curriculumTab: t("curriculumTab"),
+        reviewsTab: t("reviewsTab"),
         valuePropsTitle: t("valuePropsTitle"),
         curriculumTitle: t("curriculumTitle"),
         prerequisitesTitle: t("prerequisitesTitle"),
@@ -88,24 +92,59 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
     const hasDiscount = payable < course.originalPrice
     const discountPercent = hasDiscount ? Math.round((1 - payable / course.originalPrice) * 100) : 0
 
+    const selectSection = (section: CourseDetailSection) => {
+        setSelectedSection(section)
+        const sections = document.querySelectorAll<HTMLElement>("[data-node=\"course-section\"]")
+        const target = section === "overview"
+            ? document.querySelector<HTMLElement>("[data-node=\"course-hero-heading\"]")
+            : section === "curriculum" ? sections.item(2) : sections.item(3)
+        target?.scrollIntoView({ behavior: "smooth", block: "start" })
+    }
+
     return (
         <_CourseDetailPage
             state="ready"
             props={{
                 labels,
+                selectedSection,
                 title: course.title,
                 tagline: course.description,
                 stats: [
-                    { id: "learners", label: t("statLearners", { count: course.enrollmentCount }) },
-                    { id: "modules", label: t("statModules", { count: modules.length }) },
+                    {
+                        id: "learners",
+                        label: t("learnerSignalLabel"),
+                        value: t("statLearners", { count: course.enrollmentCount }),
+                        emphasis: "accent",
+                    },
+                    {
+                        id: "modules",
+                        label: t("moduleSignalLabel"),
+                        value: t("statModules", { count: modules.length }),
+                        emphasis: "success",
+                    },
                     // Counted from the contents themselves, NOT from `numContents`. The served
                     // schema exposes that field and returns zero for it on this query path, so the
                     // chip claimed no lessons beside a curriculum listing twenty-three modules.
                     // The rows are already selected for the hours chip; counting them is the same
                     // source answering the same question.
-                    { id: "contents", label: t("statContents", { count: sumContents(modules, () => 1) }) },
-                    { id: "hours", label: t("statHours", { count: Math.round(sumContents(modules, (content) => content.minutesRead) / 60) }) },
-                    { id: "challenges", label: t("statChallenges", { count: sumContents(modules, (content) => content.numChallenges) }) },
+                    {
+                        id: "hours",
+                        label: t("hourSignalLabel"),
+                        value: t("statHours", { count: Math.round(sumContents(modules, (content) => content.minutesRead) / 60) }),
+                        emphasis: "warning",
+                    },
+                    {
+                        id: "contents",
+                        label: t("contentSignalLabel"),
+                        value: t("statContents", { count: sumContents(modules, () => 1) }),
+                        emphasis: "neutral",
+                    },
+                    {
+                        id: "challenges",
+                        label: t("challengeSignalLabel"),
+                        value: t("statChallenges", { count: sumContents(modules, (content) => content.numChallenges) }),
+                        emphasis: "neutral",
+                    },
                 ],
                 valueProps: byOrder(course.valuePropositions ?? []).map((proposition) => proposition.text),
                 // Ordered by the backend and read that way here: a learner who lacks the first
@@ -163,7 +202,10 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
                     enrolmentLabel: t("enrolled", { count: course.enrollmentCount }),
                 },
             }}
-            on={{ act: () => { router.push(`/courses/${course.displayId}/learn`) } }}
+            on={{
+                act: () => { router.push(`/courses/${course.displayId}/learn`) },
+                selectSection,
+            }}
         />
     )
 }

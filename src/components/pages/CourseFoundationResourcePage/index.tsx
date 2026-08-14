@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryFoundationSwr } from "@/hooks/swr/useQueryFoundationSwr"
 import { _CourseFoundationResourcePage } from "./component"
@@ -9,6 +10,7 @@ export type CourseFoundationResourcePageProps = { readonly displayId: string; re
 
 /** Resolve a route resource identity and connect its follow-on playground action. */
 export const CourseFoundationResourcePage = ({ displayId, categoryId, foundationId }: CourseFoundationResourcePageProps) => {
+    const t = useTranslations("learn.foundations")
     const router = useRouter()
     const query = useQueryFoundationSwr({ displayId: foundationId })
     const state = query.error !== undefined ? "failed" : query.data === undefined ? "pending" : query.data === null ? "not-found" : "ready"
@@ -17,11 +19,12 @@ export const CourseFoundationResourcePage = ({ displayId, categoryId, foundation
             state={state}
             props={{
                 resource: query.data,
-                notFound: "This foundation resource could not be found.",
-                failed: "This foundation resource could not be loaded.",
-                retry: "Try again",
-                back: "Back to category",
-                openPlayground: "Practice in Playground",
+                titleFallback: t("resourceTitleFallback"),
+                notFound: t("resourceNotFound"),
+                failed: t("resourceFailed"),
+                retry: t("retry"),
+                back: t("back"),
+                openPlayground: t("openPlayground"),
             }}
             on={{
                 back: () => router.push(`/courses/${displayId}/learn/foundations/${categoryId}`),

@@ -38,8 +38,10 @@ afterEach(cleanup)
 describe("_CourseFlashcardsQuizPage", () => {
     it("selects the deep/staff configuration and starts the quiz", () => {
         const input = makeInput()
-        render(<_CourseFlashcardsQuizPage {...input} />)
+        const { container } = render(<_CourseFlashcardsQuizPage {...input} />)
 
+        expect(container.querySelector("[data-node=course-flashcards-quiz-page]")).toBeTruthy()
+        expect(container.querySelector("[data-node=flashcard-quiz-configuration]")).toBeTruthy()
         fireEvent.click(screen.getByRole("button", { name: "Deep" }))
         fireEvent.click(screen.getByRole("button", { name: "Staff" }))
         fireEvent.click(screen.getByRole("button", { name: "Start quiz" }))

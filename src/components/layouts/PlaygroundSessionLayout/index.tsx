@@ -1,6 +1,7 @@
 "use client"
 
 import { createContext, useCallback, useContext, useMemo, useState, type ComponentType } from "react"
+import { useTranslations } from "next-intl"
 import { useQueryPlaygroundSwr } from "@/hooks/swr/useQueryPlaygroundSwr"
 import { useMutateStartPlaygroundSessionSwr } from "@/hooks/swr/useMutateStartPlaygroundSessionSwr"
 import { usePlaygroundSocketIo } from "@/hooks/socketio/usePlaygroundSocketIo"
@@ -45,6 +46,7 @@ export type PlaygroundSessionLayoutProps = {
 
 /** Resolve the playground once and preserve its server session and relay socket across navigation. */
 export const PlaygroundSessionLayout = (input: PlaygroundSessionLayoutProps) => {
+    const t = useTranslations("learn.playground")
     const playground = useQueryPlaygroundSwr(input.slug)
     const startMutation = useMutateStartPlaygroundSessionSwr(playground.data?.id)
     const socket = usePlaygroundSocketIo()
@@ -96,7 +98,9 @@ export const PlaygroundSessionLayout = (input: PlaygroundSessionLayoutProps) => 
             <_PlaygroundSessionLayout
                 state={value.failed ? "failed" : value.isLoading ? "pending" : "ready"}
                 surface={input.surface}
-                failedLabel="The playground could not be loaded."
+                failedLabel={t("layoutFailed")}
+                retryLabel={t("retry")}
+                onRetry={value.retry}
             />
         </PlaygroundSessionContext.Provider>
     )

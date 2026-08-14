@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { usePlaygroundSession } from "@/components/layouts/PlaygroundSessionLayout"
 import { _CoursePlaygroundSetupPage, type CoursePlaygroundSetupState } from "./component"
@@ -9,6 +10,7 @@ export type CoursePlaygroundSetupPageProps = { readonly displayId: string; reado
 
 /** Bind the setup route to the slug layout's persistent query, mutation and socket owner. */
 export const CoursePlaygroundSetupPage = ({ displayId, slug }: CoursePlaygroundSetupPageProps) => {
+    const t = useTranslations("learn.playground")
     const router = useRouter()
     const session = usePlaygroundSession()
     const state: CoursePlaygroundSetupState = session.failed || session.startFailed
@@ -23,17 +25,17 @@ export const CoursePlaygroundSetupPage = ({ displayId, slug }: CoursePlaygroundS
             state={state}
             props={{
                 playground: session.playground,
-                titleFallback: "Playground",
-                preparationTitle: "Prepare your environment",
-                preparationSteps: ["Install the StarCi CLI", "Create a session and copy its pairing code", "Pair your machine with this session"],
-                startLabel: "Create playground session",
-                startingLabel: "Creating session...",
-                pairingLabel: "Pairing code",
-                waitingLabel: "Waiting for the agent on your machine to connect.",
-                readyLabel: "Agent connected. Your workspace is ready.",
-                enterLabel: "Enter workspace",
-                retryLabel: "Try again",
-                failedText: "The playground session could not be prepared.",
+                titleFallback: t("setup.titleFallback"),
+                preparationTitle: t("setup.preparationTitle"),
+                preparationSteps: [t("setup.installCli"), t("setup.createSession"), t("setup.pairMachine")],
+                startLabel: t("setup.start"),
+                startingLabel: t("setup.starting"),
+                pairingLabel: t("setup.pairing"),
+                waitingLabel: t("setup.waiting"),
+                readyLabel: t("setup.ready"),
+                enterLabel: t("setup.enter"),
+                retryLabel: t("retry"),
+                failedText: t("setup.failed"),
                 pairingCode: session.session?.pairingCode,
             }}
             on={{

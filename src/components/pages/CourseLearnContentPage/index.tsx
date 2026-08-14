@@ -1,12 +1,14 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryContentSwr } from "@/hooks/swr/useQueryContentSwr"
 import { useQueryModuleSwr } from "@/hooks/swr/useQueryModuleSwr"
 import { useQueryContentReactionsSwr } from "@/hooks/swr/useQueryContentReactionsSwr"
 import { useMutateReactContentSwr } from "@/hooks/swr/useMutateReactContentSwr"
+import { useQueryContentCommentsSwr } from "@/hooks/swr/useQueryContentCommentsSwr"
+import { useMutateSubmitContentCommentSwr } from "@/hooks/swr/useMutateSubmitContentCommentSwr"
 import { ReactionType } from "@/modules/api/graphql/queries/types/reactions"
 import { useLearnMobileView } from "@/components/layouts/LearnShellLayout"
 import {
@@ -72,14 +74,20 @@ const outlineOf = (body: string): Array<ContentOutlineEntry> => {
  */
 export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
     const t = useTranslations("learn.content")
+    const locale = useLocale()
     const reactionText = useTranslations("dashboard.explore.reactions")
     const router = useRouter()
     const content = useQueryContentSwr({ id: input.contentId })
     const module = useQueryModuleSwr({ id: input.moduleId })
     const reactions = useQueryContentReactionsSwr(input.contentId)
     const react = useMutateReactContentSwr()
+    const comments = useQueryContentCommentsSwr({ contentId: input.contentId })
+    const submitComment = useMutateSubmitContentCommentSwr()
     const { view } = useLearnMobileView()
     const [isMobile, setIsMobile] = useState(false)
+    const [discussionDraft, setDiscussionDraft] = useState("")
+    const [discussionDraftKey, setDiscussionDraftKey] = useState(0)
+    const [discussionError, setDiscussionError] = useState(false)
 
     useEffect(() => {
         const query = window.matchMedia("(max-width: 767px)")
@@ -110,6 +118,26 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
         () => [...(content.data?.challenges ?? [])].sort((first, second) => first.orderIndex - second.orderIndex),
         [content.data?.challenges],
     )
+    const discussionComments = useMemo(() => (comments.data?.comments ?? []).map((comment) => ({
+        id: comment.id,
+        author: comment.author.username,
+        meta: t("discussionMeta", {
+            date: new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(comment.createdAt)),
+            replies: comment.replyCount,
+        }),
+        body: comment.body,
+    })), [comments.data?.comments, locale, t])
+    const discussionFailed = discussionError || comments.error !== undefined || comments.data === null
+    const discussionPending = comments.data === undefined && comments.error === undefined
+    const discussionState = discussionFailed
+        ? "failed"
+        : discussionPending
+            ? "pending"
+            : submitComment.isMutating
+                ? "submitting"
+                : discussionComments.length === 0
+                    ? "empty"
+                    : "ready"
 
     const openContent = (id: string) => {
         router.push(`/courses/${input.displayId}/learn/content/modules/${input.moduleId}/contents/${id}`)
@@ -176,6 +204,24 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                         [ReactionType.Angry]: reactionText("angry"),
                     },
                 },
+                discussion: {
+                    state: discussionState,
+                    props: {
+                        labels: {
+                            title: t("discussionTitle"),
+                            composerLabel: t("discussionComposerLabel"),
+                            placeholder: t("discussionPlaceholder"),
+                            submit: t("discussionSubmit"),
+                            submitting: t("discussionSubmitting"),
+                            empty: t("discussionEmpty"),
+                            failed: t("discussionFailed"),
+                            retry: t("discussionRetry"),
+                        },
+                        draft: discussionDraft,
+                        draftKey: discussionDraftKey,
+                        comments: discussionComments,
+                    },
+                },
                 modules: module.data === null || module.data === undefined ? [] : [{
                     id: module.data.id,
                     title: module.data.title,
@@ -223,6 +269,27 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                         const next = result.data?.reactToContent?.data
                         if (next !== null && next !== undefined) void reactions.mutate(next, { revalidate: false })
                     })
+                },
+                changeDiscussionDraft: setDiscussionDraft,
+                submitDiscussion: () => {
+                    const body = discussionDraft.trim()
+                    if (body === "") return
+                    setDiscussionError(false)
+                    void submitComment.trigger({ contentId: input.contentId, parentCommentId: null, body })
+                        .then(async (result) => {
+                            if (result.data?.createComment?.success !== true) {
+                                setDiscussionError(true)
+                                return
+                            }
+                            setDiscussionDraft("")
+                            setDiscussionDraftKey((current) => current + 1)
+                            await comments.mutate()
+                        })
+                        .catch(() => setDiscussionError(true))
+                },
+                retryDiscussion: () => {
+                    setDiscussionError(false)
+                    void comments.mutate()
                 },
             }}
         />

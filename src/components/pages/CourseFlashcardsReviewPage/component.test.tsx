@@ -35,8 +35,10 @@ afterEach(cleanup)
 describe("_CourseFlashcardsReviewPage", () => {
     it("starts the cross-deck due session and a selected deck", () => {
         const input = makeInput()
-        render(<_CourseFlashcardsReviewPage {...input} />)
+        const { container } = render(<_CourseFlashcardsReviewPage {...input} />)
 
+        expect(container.querySelector("[data-node=course-flashcards-review-page]")).toBeTruthy()
+        expect(container.querySelectorAll("[data-node=flashcard-review-deck-card]")).toHaveLength(1)
         const startButtons = screen.getAllByRole("button", { name: "Start" })
         fireEvent.click(startButtons[0])
         fireEvent.click(startButtons[1])

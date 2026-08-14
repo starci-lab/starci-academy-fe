@@ -1,12 +1,12 @@
 import { CONTRACTS } from "@/components/contracts"
+import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { Tree } from "@/components/branches/Tree"
 import { SurfaceListCard, type SurfaceListCardData } from "@/components/branches/SurfaceListCard"
 import { _CoursePrerequisiteList, type CoursePrerequisite } from "@/components/blocks/courses/CoursePrerequisiteList/component"
 import { _CourseReviewBlock, type CourseReview } from "@/components/blocks/courses/CourseReviewBlock/component"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
-import { Badge } from "@/components/leaves/Badge"
+import { ChoiceTabs } from "@/components/leaves/ChoiceTabs"
 import { Heading } from "@/components/leaves/Heading"
-import { Icon } from "@/components/leaves/Icon"
 import { Text } from "@/components/leaves/Text"
 import { CurriculumModuleRow, type CurriculumLesson } from "@/components/leaves/CurriculumModuleRow"
 import {
@@ -55,9 +55,16 @@ import { CourseMobileEnrollBar } from "@/components/blocks/courses/CourseMobileE
 export type CourseStat = {
     /** Stable identity. */
     readonly id: string
-    /** The already-formatted evidence sentence. */
+    /** The short qualifier above the figure. */
     readonly label: string
+    /** The already-formatted evidence figure. */
+    readonly value: string
+    /** The visual rank this fact holds in the conversion board. */
+    readonly emphasis: "accent" | "success" | "warning" | "neutral"
 }
+
+/** The real sections the course-page tabs can reach. */
+export type CourseDetailSection = "overview" | "curriculum" | "reviews"
 
 /** One curriculum module. */
 export type CourseModule = {
@@ -75,10 +82,14 @@ export type CourseModule = {
 
 /** Every already-resolved string the page renders. */
 export type CourseDetailLabels = {
-    /** Breadcrumb root crumb. */
-    readonly navHome: string
-    /** Breadcrumb courses crumb. */
-    readonly navCourses: string
+    /** Accessible name for the section tabs. */
+    readonly sectionTabsLabel: string
+    /** Overview tab. */
+    readonly overviewTab: string
+    /** Curriculum tab. */
+    readonly curriculumTab: string
+    /** Reviews tab. */
+    readonly reviewsTab: string
     /** Promises section title. */
     readonly valuePropsTitle: string
     /** Curriculum section title. */
@@ -97,6 +108,8 @@ export type CourseDetailLabels = {
 export type CourseDetailPageData = {
     /** Every already-resolved string. */
     readonly labels: CourseDetailLabels
+    /** The section most recently selected from the page navigation. */
+    readonly selectedSection?: CourseDetailSection
     /** The course title. */
     readonly title?: string
     /** The one sentence qualifying the title. */
@@ -129,6 +142,8 @@ export type CourseDetailPageData = {
 export type CourseDetailPageActions = {
     /** The single buy action, shared by the rail and the pinned bar. */
     readonly act?: () => void
+    /** Move the reader to one real section on this page. */
+    readonly selectSection?: (section: CourseDetailSection) => void
     /** Recovery from the failed situation. */
     readonly retry?: () => void
 }
@@ -154,10 +169,41 @@ export type CourseDetailPageProps = {
  * skeleton would keep claiming five modules after the entry had settled on three.
  */
 const RESTING = {
-    stats: CONTRACTS["course-stat-chip-run"].children.stat.restingCount,
+    stats: CONTRACTS["course-signal-board"].children.signal.restingCount,
     promises: CONTRACTS["course-promise-list"].children.promise.restingCount,
     modules: CONTRACTS["course-module-list"].children.module.restingCount,
     prerequisites: CONTRACTS["course-prerequisite-list"].children.prerequisite.restingCount,
+}
+
+/** Draw one signal through the surface contract matching its approved emphasis. */
+const courseSignalCard = (stat: CourseStat, isLoading: boolean) => {
+    const slots = {
+        label: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+            <Text props={{ content: stat.label, size: "xs", tone: "muted" }} isLoading={isLoading} />
+        )),
+        value: defineLeafComponent("text", { size: "md", weight: "semibold" }, () => (
+            <Text props={{ content: stat.value, size: "md", weight: "semibold" }} isLoading={isLoading} />
+        )),
+    }
+
+    if (stat.emphasis === "accent") {
+        return defineContractProjection("course-signal-card-accent", () => (
+            <SurfaceCard contract="course-signal-card-accent" render={defineContractComponent("course-signal-card-accent", slots)} />
+        ))
+    }
+    if (stat.emphasis === "success") {
+        return defineContractProjection("course-signal-card-success", () => (
+            <SurfaceCard contract="course-signal-card-success" render={defineContractComponent("course-signal-card-success", slots)} />
+        ))
+    }
+    if (stat.emphasis === "warning") {
+        return defineContractProjection("course-signal-card-warning", () => (
+            <SurfaceCard contract="course-signal-card-warning" render={defineContractComponent("course-signal-card-warning", slots)} />
+        ))
+    }
+    return defineContractProjection("course-signal-card-neutral", () => (
+        <SurfaceCard contract="course-signal-card-neutral" render={defineContractComponent("course-signal-card-neutral", slots)} />
+    ))
 }
 
 /**
@@ -267,7 +313,12 @@ export const _CourseDetailPage = (input: CourseDetailPageProps) => {
     // carries no lessons, so it renders flat: a disclosure that opens onto nothing while loading is
     // a control offering to reveal something it does not have.
     const stats: ReadonlyArray<CourseStat> = isLoading
-        ? Array.from({ length: RESTING.stats }, (_unused, index) => ({ id: `resting-${index + 1}`, label: "" }))
+        ? Array.from({ length: RESTING.stats }, (_unused, index) => ({
+            id: `resting-${index + 1}`,
+            label: "",
+            value: "",
+            emphasis: (["accent", "success", "warning", "neutral", "neutral"] as const)[index] ?? "neutral",
+        }))
         : input.props.stats ?? []
     const valueProps: ReadonlyArray<string> = isLoading
         ? Array.from({ length: RESTING.promises }, () => "")
@@ -284,19 +335,27 @@ export const _CourseDetailPage = (input: CourseDetailPageProps) => {
 
     const hero = defineContractComponent("course-hero", {
         heading: defineContractComponent("course-hero-heading", {
-            title: defineLeafComponent("heading", {}, () => (
-                <Heading props={{ content: input.props.title, level: 1 }} isLoading={isLoading} />
-            )),
-            tagline: defineLeafComponent("text", { size: "sm" }, () => (
-                <Text props={{ content: input.props.tagline, size: "sm" }} isLoading={isLoading} />
-            )),
-        }),
-        evidence: defineContractComponent("course-stat-chip-run", {
-            stat: stats.map((stat) => defineContractComponent("course-stat-chip", {
-                chip: defineLeafComponent("badge", {}, () => (
-                    <Badge props={{ content: stat.label }} isLoading={isLoading} />
+            identity: defineContractComponent("course-hero-title-stack", {
+                title: defineLeafComponent("heading", {}, () => (
+                    <Heading props={{ content: input.props.title, level: 1 }} isLoading={isLoading} />
                 )),
-            })),
+                tagline: defineLeafComponent("text", { size: "sm" }, () => (
+                    <Text props={{ content: input.props.tagline, size: "sm" }} isLoading={isLoading} />
+                )),
+            }),
+            rating: isLoading || (input.props.reviewTotal ?? 0) === 0 || input.props.averageScore === undefined
+                ? undefined
+                : defineContractComponent("course-hero-rating", {
+                    score: defineLeafComponent("heading", {}, () => (
+                        <Heading props={{ content: input.props.averageScore?.toFixed(1), level: 2 }} />
+                    )),
+                    count: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                        <Text props={{ content: input.props.labels.reviewCount, icon: "star", size: "xs", tone: "muted" }} />
+                    )),
+                }),
+        }),
+        evidence: defineContractComponent("course-signal-board", {
+            signal: stats.map((stat) => courseSignalCard(stat, isLoading)),
         }),
         section: [
             defineContractComponent("course-section", {
@@ -374,18 +433,21 @@ export const _CourseDetailPage = (input: CourseDetailPageProps) => {
         <Tree
             contract="course-detail-page"
             render={defineContractComponent("course-detail-page", {
-                breadcrumb: defineContractComponent("course-breadcrumb-row", {
-                    crumb: [
-                        defineLeafComponent("text", {}, () => (
-                            <Text props={{ content: input.props.labels.navHome, size: "xs" }} />
-                        )),
-                        defineLeafComponent("icon", {}, () => (
-                            <Icon props={{ name: "next", role: "chip" }} />
-                        )),
-                        defineLeafComponent("text", {}, () => (
-                            <Text props={{ content: input.props.labels.navCourses, size: "xs" }} />
-                        )),
-                    ],
+                navigation: defineContractComponent("course-section-navigation", {
+                    tabs: defineLeafComponent("choice-tabs", {}, () => (
+                        <ChoiceTabs
+                            props={{
+                                label: input.props.labels.sectionTabsLabel,
+                                selectedKey: input.props.selectedSection ?? "overview",
+                                tabs: [
+                                    { id: "overview", label: input.props.labels.overviewTab },
+                                    { id: "curriculum", label: input.props.labels.curriculumTab },
+                                    { id: "reviews", label: input.props.labels.reviewsTab },
+                                ],
+                            }}
+                            on={{ select: (key) => input.on?.selectSection?.(key as CourseDetailSection) }}
+                        />
+                    )),
                 }),
                 body: defineContractComponent("main-then-rail", {
                     main: hero,

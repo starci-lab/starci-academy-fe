@@ -1,3 +1,12 @@
+import { Tree } from "@/components/branches/Tree"
+import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { Article } from "@/components/leaves/Article"
+import { Button } from "@/components/leaves/Button"
+import { CodeBlock } from "@/components/leaves/CodeBlock"
+import { Heading } from "@/components/leaves/Heading"
+import { NavLink } from "@/components/leaves/NavLink"
+import { Text } from "@/components/leaves/Text"
+import { defineCompositeComponent, defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 import type { PlaygroundStep } from "@/modules/api/graphql/queries/query-playground"
 
 /** Live relay states exposed by the pure playground workspace. */
@@ -19,6 +28,7 @@ export type CoursePlaygroundSessionPageProps = {
         readonly completedText: string
         readonly failedText: string
         readonly stepLabel: string
+        readonly passedLabel: string
     }
     readonly on: {
         readonly step: (index: number) => void
@@ -29,71 +39,72 @@ export type CoursePlaygroundSessionPageProps = {
 }
 
 /** Draw a live playground whose progress advances only from server `step:verified` events. */
-export const _CoursePlaygroundSessionPage = ({ state, props, on }: CoursePlaygroundSessionPageProps) => {
-    const current = props.steps[props.selectedStepIndex]
+export const _CoursePlaygroundSessionPage = (input: CoursePlaygroundSessionPageProps) => {
+    const current = input.props.steps[input.props.selectedStepIndex]
+    const commandHint = current?.commandHint ?? undefined
+    const actionHint = current?.actionHint ?? undefined
+    const settled = input.state === "failed" || input.state === "completed"
+    const notice = settled
+        ? defineCompositeComponent("empty-notice", {}, () => (
+            <EmptyNotice
+                props={{
+                    message: input.state === "completed" ? input.props.completedTitle : input.props.failedText,
+                    description: input.state === "completed" ? input.props.completedText : undefined,
+                    actionLabel: input.state === "failed" ? input.props.retryLabel : undefined,
+                }}
+                on={{ act: input.on.retry }}
+            />
+        ))
+        : undefined
+
     return (
-        <section data-tier="page" data-component="CoursePlaygroundSessionPage" data-state={state} className="grid min-h-[calc(100dvh-4rem)] w-full @app-lg:grid-cols-[17rem_1fr]">
-            <aside className="border-b border-default bg-surface p-4 @app-lg:border-b-0 @app-lg:border-r">
-                <button type="button" className="text-sm text-accent" onClick={on.leave}>{props.leaveLabel}</button>
-                <h1 className="mt-5 font-semibold">{props.title}</h1>
-                <ol className="mt-4 flex gap-2 overflow-x-auto @app-lg:flex-col @app-lg:overflow-visible">
-                    {props.steps.map((step, index) => {
-                        const passed = props.passedStepIndexes.includes(index)
-                        const available = passed || index <= Math.max(0, props.passedStepIndexes.length)
-                        return (
-                            <li key={step.id}>
-                                <button
-                                    type="button"
-                                    disabled={!available}
-                                    aria-current={index === props.selectedStepIndex ? "step" : undefined}
-                                    className="w-full min-w-40 rounded-lg px-3 py-2 text-left text-sm disabled:opacity-40 aria-[current=step]:bg-default-200"
-                                    onClick={() => on.step(index)}
-                                >
-                                    <span className="font-medium">{props.stepLabel} {index + 1}</span>
-                                    <span className="mt-1 block truncate text-xs text-muted">{passed ? "Passed: " : ""}{step.title}</span>
-                                </button>
-                            </li>
-                        )
-                    })}
-                </ol>
-            </aside>
-            <div className="flex min-w-0 flex-col gap-6 p-4 @app-sm:p-6">
-                <header className="flex flex-wrap items-center justify-between gap-3 border-b border-default pb-4">
-                    <div>
-                        <p className="text-xs uppercase tracking-wide text-muted">{props.connectionText}</p>
-                        <h2 className="mt-1 text-xl font-semibold">{current?.title ?? props.title}</h2>
-                    </div>
-                    <button type="button" className="rounded-lg border border-default px-3 py-2 text-sm" onClick={on.leave}>{props.leaveLabel}</button>
-                </header>
-                {state === "failed" ? (
-                    <div className="rounded-xl border border-default bg-surface p-5">
-                        <p className="text-sm text-danger">{props.failedText}</p>
-                        <button type="button" className="mt-4 rounded-lg bg-accent px-3 py-2 text-sm font-medium text-accent-foreground" onClick={on.retry}>{props.retryLabel}</button>
-                    </div>
-                ) : state === "completed" ? (
-                    <div className="rounded-xl border border-success bg-success-soft p-6">
-                        <h2 className="text-lg font-semibold text-success-soft-foreground">{props.completedTitle}</h2>
-                        <p className="mt-2 text-sm text-success-soft-foreground">{props.completedText}</p>
-                    </div>
-                ) : (
-                    <>
-                        <article className="flex flex-col gap-4 rounded-xl border border-default bg-surface p-5">
-                            <p className="whitespace-pre-wrap text-sm leading-6">{current?.body ?? ""}</p>
-                            {current?.commandHint === null || current?.commandHint === undefined ? null : <pre className="overflow-x-auto rounded-lg bg-[#101318] p-4 text-sm text-green-300"><code>{current.commandHint}</code></pre>}
-                            {current?.actionHint === null || current?.actionHint === undefined ? null : <p className="rounded-lg bg-default-100 p-3 text-sm">{current.actionHint}</p>}
-                        </article>
-                        <button
-                            type="button"
-                            disabled={state !== "live" || current === undefined || props.passedStepIndexes.includes(props.selectedStepIndex)}
-                            className="self-start rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground disabled:opacity-50"
-                            onClick={on.submit}
-                        >
-                            {props.submitLabel}
-                        </button>
-                    </>
-                )}
-            </div>
-        </section>
+        <Tree contract="course-playground-session-page" render={defineContractComponent("course-playground-session-page", {
+            leave: defineLeafComponent("button", {}, () => (
+                <Button props={{ label: input.props.leaveLabel, variant: "ghost" }} on={{ press: input.on.leave }} />
+            )),
+            connection: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                <Text props={{ content: input.props.connectionText, size: "xs", tone: "muted", live: "polite" }} />
+            )),
+            title: defineLeafComponent("heading", {}, () => (
+                <Heading props={{ content: current?.title ?? input.props.title, level: 1 }} />
+            )),
+            step: input.props.steps.map((step, index) => {
+                const passed = input.props.passedStepIndexes.includes(index)
+                const available = passed || index <= Math.max(0, input.props.passedStepIndexes.length)
+                const status = passed ? `${input.props.passedLabel} · ` : ""
+                return defineLeafComponent("nav-link", { kind: "section" }, () => (
+                    <NavLink
+                        props={{
+                            label: `${input.props.stepLabel} ${index + 1} · ${status}${step.title}`,
+                            kind: "section",
+                            isCurrent: index === input.props.selectedStepIndex,
+                        }}
+                        on={{ press: available ? () => input.on.step(index) : undefined }}
+                    />
+                ))
+            }),
+            ...(!settled ? {
+                body: defineLeafComponent("article", {}, () => (
+                    <Article props={{ body: current?.body }} />
+                )),
+                ...(commandHint === undefined ? {} : {
+                    command: defineLeafComponent("code-block", {}, () => (
+                        <CodeBlock props={{ code: commandHint }} />
+                    )),
+                }),
+                ...(actionHint === undefined ? {} : {
+                    hint: defineLeafComponent("text", { size: "sm" }, () => (
+                        <Text props={{ content: actionHint, size: "sm" }} />
+                    )),
+                }),
+                ...(input.state !== "live" || current === undefined || input.props.passedStepIndexes.includes(input.props.selectedStepIndex) ? {} : {
+                    submit: defineLeafComponent("button", {}, () => (
+                        <Button props={{ label: input.props.submitLabel, variant: "primary" }} on={{ press: input.on.submit }} />
+                    )),
+                }),
+            } : {}),
+            notice,
+        })} />
     )
 }
 

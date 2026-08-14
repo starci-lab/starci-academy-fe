@@ -41,8 +41,10 @@ afterEach(cleanup)
 describe("_CourseFlashcardSessionPage", () => {
     it("sends the selected SM-2 grade in review mode", () => {
         const input = makeInput("review")
-        render(<_CourseFlashcardSessionPage {...input} />)
+        const { container } = render(<_CourseFlashcardSessionPage {...input} />)
 
+        expect(container.querySelector("[data-node=course-flashcard-session-page]")).toBeTruthy()
+        expect(container.querySelector("[data-node=flashcard-session-card]")).toBeTruthy()
         fireEvent.click(screen.getByRole("button", { name: "Good" }))
         expect(input.on.rate).toHaveBeenCalledWith(2)
     })

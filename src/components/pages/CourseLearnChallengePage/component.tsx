@@ -126,8 +126,8 @@ export const _CourseLearnChallengePage = (input: CourseLearnChallengePageProps) 
 
     return (
         <Tree
-            contract="centred-page-column"
-            render={defineContractComponent("centred-page-column", {
+            contract="course-learn-challenge-page"
+            render={defineContractComponent("course-learn-challenge-page", {
                 header: defineContractComponent("centred-title-pair", {
                     title: defineLeafComponent("heading", {}, () => (
                         <Heading props={{ content: input.props.title, level: 1 }} isLoading={loading} />
@@ -136,7 +136,7 @@ export const _CourseLearnChallengePage = (input: CourseLearnChallengePageProps) 
                         <Text props={{ content: input.props.description, size: "sm" }} isLoading={loading} />
                     )),
                 }),
-                body: [defineContractComponent("stacked-peer-controls", { control: controls })],
+                body: defineContractComponent("stacked-peer-controls", { control: controls }),
             })}
         />
     )

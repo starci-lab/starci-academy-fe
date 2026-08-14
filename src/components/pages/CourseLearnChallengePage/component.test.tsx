@@ -24,6 +24,7 @@ describe("_CourseLearnChallengePage", () => {
     it("rests the challenge facts and controls while pending", () => {
         const { container } = render(<_CourseLearnChallengePage state="pending" props={baseProps} />)
 
+        expect(container.querySelector("[data-node=course-learn-challenge-page]")).toBeTruthy()
         expect(container.querySelector("h1")).toHaveAttribute("data-loading", "true")
         expect(screen.getByRole("button", { name: "Submit" })).toBeDisabled()
     })

@@ -6,6 +6,8 @@ import { SearchBox } from "@/components/leaves/SearchBox"
 import { defineCompositeComponent, defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 import type { Foundation } from "@/modules/api/graphql/queries/query-foundations"
 
+type FoundationRow = Pick<Foundation, "id" | "displayId" | "title" | "description">
+
 /** Resolved states, resources and actions for one foundation category. */
 export type CourseFoundationCategoryPageProps = {
     readonly state: "pending" | "ready" | "empty" | "failed"
@@ -24,8 +26,8 @@ export type CourseFoundationCategoryPageProps = {
 /** Draw one searchable foundation category and all query result states. */
 export const _CourseFoundationCategoryPage = (input: CourseFoundationCategoryPageProps) => {
     const loading = input.state === "pending"
-    const rows: ReadonlyArray<Foundation> = loading && input.props.foundations.length === 0
-        ? Array.from({ length: 6 }, (_, index) => ({ id: `pending-${index}`, displayId: `pending-${index}`, title: "", description: null, value: "" }))
+    const rows: ReadonlyArray<FoundationRow> = loading && input.props.foundations.length === 0
+        ? Array.from({ length: 6 }, (_, index) => ({ id: `pending-${index}`, displayId: `pending-${index}`, title: "", description: null }))
         : input.props.foundations
     const notice = input.state === "empty" || input.state === "failed"
         ? defineCompositeComponent("empty-notice", {}, () => (

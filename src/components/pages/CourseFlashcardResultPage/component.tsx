@@ -1,4 +1,13 @@
+import { Tree } from "@/components/branches/Tree"
+import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { Button } from "@/components/leaves/Button"
 import { Heading } from "@/components/leaves/Heading"
+import { Text } from "@/components/leaves/Text"
+import {
+    defineCompositeComponent,
+    defineContractComponent,
+    defineLeafComponent,
+} from "@/components/contracts/props"
 import type { FlashcardSessionMode } from "@/modules/api/graphql/queries/query-my-in-progress-flashcard-session"
 
 /** One resolved weak-topic row from a persisted result projection. */
@@ -43,66 +52,103 @@ export type CourseFlashcardResultPageProps = {
 /** Renders the stable review/quiz result URL with score, history, and onward actions. */
 export const _CourseFlashcardResultPage = (input: CourseFlashcardResultPageProps) => {
     const { state, data, on } = input
+    const isLoading = state === "pending"
+    const statValues = [
+        [data.scoreLabel, data.scoreText],
+        [data.reviewedLabel, data.reviewedText],
+        [data.xpLabel, data.xpText],
+        [data.durationLabel, data.durationText],
+    ] as const
+    const header = defineContractComponent("centred-title-pair", {
+        title: defineLeafComponent("heading", {}, () => (
+            <Heading props={{ content: data.title, level: 1 }} isLoading={isLoading} />
+        )),
+        description: defineLeafComponent("text", { size: "sm" }, () => (
+            <Text props={{ content: data.subtitle, size: "sm", tone: "muted" }} isLoading={isLoading} />
+        )),
+    })
+    const stats = state === "failed"
+        ? undefined
+        : statValues.map(([label, value]) => defineContractComponent("flashcard-result-stat", {
+            label: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                <Text props={{ content: label, size: "xs" }} isLoading={isLoading} />
+            )),
+            value: defineLeafComponent("heading", {}, () => (
+                <Heading props={{ content: value, level: 2 }} isLoading={isLoading} />
+            )),
+        }))
+    const nextDue = state === "ready" && data.nextDueText !== undefined
+        ? defineContractComponent("centred-title-pair", {
+            title: defineLeafComponent("heading", {}, () => (
+                <Heading props={{ content: data.nextDueLabel, level: 3 }} />
+            )),
+            description: defineLeafComponent("text", { size: "sm" }, () => (
+                <Text props={{ content: data.nextDueText, size: "sm", weight: "semibold" }} />
+            )),
+        })
+        : undefined
+    const grades = state === "ready"
+        ? data.gradeRows.map((row) => defineContractComponent("flashcard-result-fact-row", {
+            label: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
+                <Text props={{ content: row.label, size: "sm", weight: "medium" }} />
+            )),
+            value: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                <Text props={{ content: row.value.toString(), size: "sm", tone: "muted" }} />
+            )),
+        }))
+        : undefined
+    const weakTopics = state === "ready"
+        ? data.weakTopics.map((topic) => defineContractComponent("flashcard-result-fact-row", {
+            label: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
+                <Text props={{ content: topic.tag, size: "sm", weight: "medium" }} />
+            )),
+            value: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                <Text props={{ content: topic.value, size: "sm", tone: "muted" }} />
+            )),
+        }))
+        : undefined
+    const actions = state === "ready"
+        ? [
+            defineLeafComponent("button", {}, () => (
+                <Button props={{ label: data.backLabel, variant: "outline" }} on={{ press: on.back }} />
+            )),
+            defineLeafComponent("button", {}, () => (
+                <Button props={{ label: data.retrySessionLabel, variant: "primary" }} on={{ press: on.retrySession }} />
+            )),
+        ]
+        : undefined
+    const notice = state === "failed"
+        ? defineCompositeComponent("empty-notice", {}, () => (
+            <EmptyNotice
+                props={{ message: data.failedText, actionLabel: data.retryLabel }}
+                on={{ act: on.retryLoad }}
+            />
+        ))
+        : undefined
+
     return (
-        <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-6 @app-sm:px-6">
-            <header className="flex flex-col gap-2">
-                <p className="text-sm text-muted">{data.mode === "review" ? "Review" : "Quiz"}</p>
-                <Heading props={{ content: data.title, level: 1 }} />
-                <p className="text-sm text-muted">{data.subtitle}</p>
-            </header>
-            {state === "pending" ? (
-                <section aria-label={data.title} className="grid grid-cols-2 gap-4 @app-sm:grid-cols-4">
-                    {[0, 1, 2, 3].map((item) => <div key={item} className="h-28 animate-pulse rounded-xl bg-default-200" />)}
-                </section>
-            ) : state === "failed" ? (
-                <section className="rounded-xl border border-default bg-surface p-5">
-                    <p className="text-sm text-danger">{data.failedText}</p>
-                    <button type="button" className="mt-4 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground" onClick={on.retryLoad}>{data.retryLabel}</button>
-                </section>
-            ) : (
-                <>
-                    <section className="grid grid-cols-2 gap-4 @app-sm:grid-cols-4">
-                        {[
-                            [data.scoreLabel, data.scoreText],
-                            [data.reviewedLabel, data.reviewedText],
-                            [data.xpLabel, data.xpText],
-                            [data.durationLabel, data.durationText],
-                        ].map(([label, value]) => (
-                            <article key={label} className="rounded-xl border border-default bg-surface p-4">
-                                <p className="text-xs text-muted">{label}</p>
-                                <p className="mt-2 text-xl font-semibold">{value}</p>
-                            </article>
-                        ))}
-                    </section>
-                    {data.nextDueText === undefined ? null : (
-                        <section className="rounded-xl border border-default bg-surface p-5">
-                            <p className="text-sm text-muted">{data.nextDueLabel}</p>
-                            <p className="mt-2 font-semibold">{data.nextDueText}</p>
-                        </section>
-                    )}
-                    {data.gradeRows.length === 0 ? null : (
-                        <section className="rounded-xl border border-default bg-surface p-5">
-                            <Heading props={{ content: data.breakdownTitle, level: 2 }} />
-                            <ul className="mt-4 grid grid-cols-2 gap-3 @app-sm:grid-cols-4">
-                                {data.gradeRows.map((row) => <li key={row.label} className="rounded-lg bg-default-100 p-3 text-sm"><span>{row.label}</span><strong className="ml-2">{row.value}</strong></li>)}
-                            </ul>
-                        </section>
-                    )}
-                    {data.weakTopics.length === 0 ? null : (
-                        <section className="rounded-xl border border-default bg-surface p-5">
-                            <Heading props={{ content: data.weakTopicsTitle, level: 2 }} />
-                            <ul className="mt-4 flex flex-wrap gap-2">
-                                {data.weakTopics.map((topic) => <li key={topic.tag} className="rounded-full bg-default-100 px-3 py-2 text-sm">{topic.tag} · {topic.value}</li>)}
-                            </ul>
-                        </section>
-                    )}
-                    <div className="flex flex-wrap justify-center gap-3">
-                        <button type="button" className="rounded-lg border border-default px-4 py-2 text-sm font-medium" onClick={on.back}>{data.backLabel}</button>
-                        <button type="button" className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground" onClick={on.retrySession}>{data.retrySessionLabel}</button>
-                    </div>
-                </>
-            )}
-        </main>
+        <Tree contract="course-flashcard-result-page" render={defineContractComponent("course-flashcard-result-page", {
+            mode: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                <Text props={{ content: data.mode === "review" ? "Review" : "Quiz", size: "sm", tone: "muted" }} />
+            )),
+            header,
+            stat: stats,
+            nextDue,
+            breakdownTitle: state === "ready" && data.gradeRows.length > 0
+                ? defineLeafComponent("heading", {}, () => (
+                    <Heading props={{ content: data.breakdownTitle, level: 2 }} />
+                ))
+                : undefined,
+            grade: grades,
+            weakTopicsTitle: state === "ready" && data.weakTopics.length > 0
+                ? defineLeafComponent("heading", {}, () => (
+                    <Heading props={{ content: data.weakTopicsTitle, level: 2 }} />
+                ))
+                : undefined,
+            weakTopic: weakTopics,
+            action: actions,
+            notice,
+        })} />
     )
 }
 

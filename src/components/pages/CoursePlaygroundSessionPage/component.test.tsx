@@ -17,6 +17,7 @@ const props = (overrides: Partial<CoursePlaygroundSessionPageProps> = {}): Cours
         completedText: "Every step passed.",
         failedText: "Session unavailable.",
         stepLabel: "Step",
+        passedLabel: "Passed",
     },
     on: { step: vi.fn(), submit: vi.fn(), leave: vi.fn(), retry: vi.fn() },
     ...overrides,

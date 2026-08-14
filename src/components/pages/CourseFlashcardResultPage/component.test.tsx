@@ -36,10 +36,13 @@ afterEach(cleanup)
 describe("_CourseFlashcardResultPage", () => {
     it("renders the persisted score, breakdown, weak topics, and retry path", () => {
         const input = makeInput()
-        render(<_CourseFlashcardResultPage {...input} />)
+        const { container } = render(<_CourseFlashcardResultPage {...input} />)
 
+        expect(container.querySelector("[data-node=course-flashcard-result-page]")).toBeTruthy()
+        expect(container.querySelectorAll("[data-node=flashcard-result-stat]")).toHaveLength(4)
         expect(screen.getByText("75%")).toBeTruthy()
-        expect(screen.getByText("Redis · 1")).toBeTruthy()
+        expect(screen.getByText("Redis")).toBeTruthy()
+        expect(screen.getByText("1")).toBeTruthy()
         fireEvent.click(screen.getByRole("button", { name: "Practice again" }))
         expect(input.on.retrySession).toHaveBeenCalledOnce()
     })
