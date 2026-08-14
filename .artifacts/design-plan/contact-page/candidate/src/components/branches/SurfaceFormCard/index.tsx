@@ -1,7 +1,7 @@
 import { Card } from "@heroui/react"
-import { Tree } from "@/components/branches/Tree"
-import type { ContractKey } from "@/components/contracts"
-import type { ContractBranchProps } from "@/components/contracts/props"
+import { Tree } from "~candidate/components/branches/Tree"
+import type { ContractKey } from "~candidate/components/contracts"
+import type { ContractBranchProps } from "~candidate/components/contracts/props"
 
 /** Props for a card whose complete content is one typed form-oriented contract. */
 export type SurfaceFormCardProps<K extends ContractKey> = ContractBranchProps<K>

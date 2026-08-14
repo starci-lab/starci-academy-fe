@@ -1,0 +1,174 @@
+{
+    "labels": {
+        "navCourse": "System Design Mastery",
+        "navModule": "Mô hình dữ liệu",
+        "facesLabel": "Mặt của bài học",
+        "pageLabel": "Bài trong chương",
+        "previousLabel": "Bài trước",
+        "nextLabel": "Bài sau",
+        "reactionsLabel": "Cảm nhận về bài học",
+        "reactionPrompt": "Bài học này hữu ích chứ?",
+        "nextTitle": "Đi tiếp từ đây",
+        "searchPlaceholder": "Tìm nội dung...",
+        "searchLabel": "Tìm trong khoá học",
+        "searchClearLabel": "Xoá ô tìm kiếm",
+        "outlineTitle": "Trên trang này"
+    },
+    "title": "Mô hình tài liệu và ODM: nhúng hay tham chiếu",
+    "faces": [
+        {
+            "id": "content",
+            "label": "Bài đọc",
+            "icon": "course"
+        },
+        {
+            "id": "challenges",
+            "label": "Thử thách",
+            "icon": "complete"
+        },
+        {
+            "id": "sandbox",
+            "label": "Sân tập",
+            "icon": "code"
+        }
+    ],
+    "selectedFace": "content",
+    "sections": [
+        {
+            "id": "s1",
+            "title": "Nhúng và tham chiếu là hai câu trả lời cho một câu hỏi",
+            "paragraphs": [
+                "Một tài liệu chứa dữ liệu con của nó, hay chỉ giữ khoá của dữ liệu ấy — lựa chọn này quyết định số lần đọc đĩa cho một màn hình, chứ không phải quyết định cách vẽ sơ đồ.",
+                "Quy tắc đọc được: nếu dữ liệu con luôn được đọc cùng cha và không lớn vô hạn, nhúng. Nếu nó được đọc riêng, được chia sẻ, hoặc mọc mãi, tham chiếu."
+            ]
+        },
+        {
+            "id": "s2",
+            "title": "Cập nhật nguyên tử là hệ quả, không phải mục tiêu",
+            "paragraphs": [
+                "Nhúng cho bạn một lần ghi nguyên tử cho cả cụm. Tham chiếu buộc bạn tự lo tính nhất quán giữa hai lần ghi — và đó là chỗ mọi hệ thống nhỏ bắt đầu rò rỉ.",
+                "Khi phải tham chiếu, hãy đặt câu hỏi: nếu lần ghi thứ hai thất bại, người dùng nhìn thấy gì?"
+            ]
+        },
+        {
+            "id": "s3",
+            "title": "Chỉ mục theo hình dạng truy vấn",
+            "paragraphs": [
+                "Chỉ mục không phục vụ bảng, nó phục vụ câu truy vấn. Một chỉ mục ghép sai thứ tự cột đọc nhanh cho truy vấn này và vô dụng cho truy vấn kia."
+            ]
+        }
+    ],
+    "nextSteps": [
+        {
+            "id": "n1",
+            "label": "Thử thách: thiết kế lược đồ cho giỏ hàng",
+            "isComplete": false
+        },
+        {
+            "id": "n2",
+            "label": "Bài sau: Nhất quán cuối cùng",
+            "isComplete": false
+        }
+    ],
+    "page": 2,
+    "totalPages": 7,
+    "reactions": {
+        "count": 42,
+        "labels": {
+            "like": "Thích",
+            "love": "Yêu thích",
+            "haha": "Vui",
+            "wow": "Bất ngờ",
+            "sad": "Buồn",
+            "angry": "Bực"
+        }
+    },
+    "lockedMessage": "Bài học này thuộc gói trả phí của khóa.",
+    "lockedAction": "Xem giá khóa học",
+    "failedMessage": "Không tải được bài học.",
+    "failedAction": "Thử lại",
+    "languagesLabel": "Ngôn ngữ ví dụ",
+    "languages": [
+        {
+            "id": "ts",
+            "label": "TypeScript"
+        },
+        {
+            "id": "py",
+            "label": "Python"
+        }
+    ],
+    "selectedLanguage": "ts",
+    "selectionHint": "Bôi đen một đoạn bất kỳ để hỏi trợ lý về đúng đoạn đó.",
+    "courseProgress": {
+        "label": "Tiến độ",
+        "value": 1,
+        "total": 153
+    },
+    "modules": [
+        {
+            "id": "m1",
+            "title": "Nền tảng Linux cho DevOps",
+            "countLabel": "1/5 bài",
+            "isOpen": true,
+            "contents": [
+                {
+                    "id": "c1",
+                    "title": "Shell & Filesystem — điều hướng và vận hành",
+                    "meta": "22 phút",
+                    "isCurrent": true
+                },
+                {
+                    "id": "c2",
+                    "title": "Users, Permissions & Ownership — kiểm soát truy cập",
+                    "meta": "22 phút"
+                },
+                {
+                    "id": "c3",
+                    "title": "Processes & Services — quản lý tiến trình và dịch vụ",
+                    "meta": "20 phút"
+                },
+                {
+                    "id": "c4",
+                    "title": "Package Management & Text Processing",
+                    "meta": "22 phút"
+                },
+                {
+                    "id": "c5",
+                    "title": "Networking Basics & SSH — kết nối, port và tunnel",
+                    "meta": "22 phút"
+                }
+            ]
+        },
+        {
+            "id": "m2",
+            "title": "Terraform Fundamentals",
+            "countLabel": "1/6 bài"
+        },
+        {
+            "id": "m3",
+            "title": "AWS Foundations — IAM & Billing",
+            "countLabel": "0/4 bài"
+        },
+        {
+            "id": "m4",
+            "title": "AWS Compute — EC2 & Auto Scaling",
+            "countLabel": "0/5 bài"
+        }
+    ],
+    "outline": [
+        {
+            "id": "s1",
+            "label": "Nhúng và tham chiếu là hai câu trả lời cho một câu hỏi",
+            "isCurrent": true
+        },
+        {
+            "id": "s2",
+            "label": "Cập nhật nguyên tử là hệ quả, không phải mục tiêu"
+        },
+        {
+            "id": "s3",
+            "label": "Chỉ mục theo hình dạng truy vấn"
+        }
+    ]
+}

@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "task": "learn-system-map",
+  "phase": "plan",
+  "status": "locked",
+  "trustRoot": "D:/Repositories/starci-academy-backend/.claude",
+  "skill": {
+    "name": "starci-fe-design-plan",
+    "path": "D:/Repositories/starci-academy-backend/.claude/skills/starci-fe-design-plan/SKILL.md"
+  },
+  "targets": [
+    {
+      "role": "primary",
+      "repo": "starci-academy-fe",
+      "gitRoot": "D:/Repositories/starci-academy-fe",
+      "branch": "session/surface-branch-and-press-affordance",
+      "worktree": "D:/Repositories/starci-academy-fe",
+      "head": "a5d833a",
+      "remote": "https://github.com/starci-lab/starci-academy-fe.git"
+    }
+  ],
+  "references": [
+    {
+      "role": "legacy-parity-baseline",
+      "repo": "starci-academy",
+      "gitRoot": "D:/Repositories/starci-academy",
+      "branch": "mtp",
+      "head": "9a19342",
+      "purpose": "The named legacy render of the learn surfaces"
+    }
+  ],
+  "artifactRoot": "D:/Repositories/starci-academy-fe/.artifacts/design-plan/learn-system-map",
+  "writeBoundary": ["D:/Repositories/starci-academy-fe/.artifacts/design-plan/learn-system-map"],
+  "readOnlyBoundary": [
+    "D:/Repositories/starci-academy-fe/src",
+    "D:/Repositories/starci-academy",
+    "D:/Repositories/starci-academy-backend/.claude"
+  ],
+  "runtime": { "lab": "http://127.0.0.1:8080", "startPolicy": "first free port from 8080" },
+  "evidence": [
+    "learn/page.tsx redirects to learn/content",
+    "LearnShellLayout decides rails per segment and flags a live assessment",
+    "ENROLL_REQUIRED_SURFACES gates only personal-project",
+    "LearnMobileTabBar carries map/lesson/on-this-page",
+    "11 route segments, 29 pages, 123 learn blocks"
+  ],
+  "inheritedFrom": null,
+  "detectedAt": "2026-08-14T02:27:00+07:00"
+}

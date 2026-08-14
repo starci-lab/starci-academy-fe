@@ -79,8 +79,8 @@ import {
     XMarkIcon as XMarkSolidIcon,
 } from "@heroicons/react/16/solid"
 import type { ComponentType, SVGProps } from "react"
-import { GithubMark, GoogleMark } from "./brands"
-import type { LeafProps } from "@/components/contracts/props"
+import { FacebookMark, GithubMark, GoogleMark, LinkedinMark } from "./brands"
+import type { LeafProps } from "~candidate/components/contracts/props"
 
 /**
  * LEAF - `Icon`: the picture a word needs when the word alone is slower to find.
@@ -105,7 +105,7 @@ export type IconName =
     | "email" | "password" | "revealPassword" | "hidePassword" | "code"
     | "complete" | "pending" | "signIn" | "signUp" | "close" | "next" | "disclosure" | "retry" | "send"
     | "home" | "explore" | "community" | "league" | "review" | "livestream"
-    | "light" | "dark" | "locale" | "google" | "github"
+    | "light" | "dark" | "locale" | "google" | "github" | "facebook" | "linkedin"
     | "search" | "cart" | "notification" | "account" | "saved" | "blog" | "talents" | "jobs" | "practice"
     | "viewGrid" | "viewList"
 
@@ -206,6 +206,8 @@ const GLYPHS: Record<IconName, GlyphCuts> = {
     viewList: cuts(ListBulletIcon, ListBulletSolidIcon),
     google: cuts(GoogleMark, GoogleMark),
     github: cuts(GithubMark, GithubMark),
+    facebook: cuts(FacebookMark, FacebookMark),
+    linkedin: cuts(LinkedinMark, LinkedinMark),
 }
 
 /** Each role keeps the diameter its Heroicon drawing was authored for. */

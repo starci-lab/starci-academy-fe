@@ -1,0 +1,68 @@
+{
+    "version": 1,
+    "task": "course-detail-page-v3",
+    "phase": "plan",
+    "status": "locked",
+    "trustRoot": "D:\\Repositories\\starci-academy-backend\\.claude",
+    "skill": "starci-fe-design-plan",
+    "caseId": "case-course-detail-v3",
+    "targets": [
+        {
+            "role": "primary-target",
+            "repo": "starci-academy-fe",
+            "gitRoot": "D:\\Repositories\\starci-academy-fe",
+            "branch": "session/surface-branch-and-press-affordance",
+            "worktree": "D:\\Repositories\\starci-academy-fe",
+            "head": "a5d833a",
+            "remote": "https://github.com/starci-lab/starci-academy-fe.git"
+        }
+    ],
+    "references": [
+        {
+            "role": "legacy-parity",
+            "repo": "starci-academy",
+            "branch": "mtp",
+            "head": "9a1934231"
+        },
+        {
+            "role": "prior-case-applied",
+            "path": ".artifacts/design-plan/course-detail-page-v2"
+        },
+        {
+            "role": "prior-case-plan-only",
+            "path": ".artifacts/design-plan/cart"
+        },
+        {
+            "role": "backend-enabler",
+            "repo": "starci-academy-backend",
+            "branch": "mtp",
+            "head": "b75ba232",
+            "note": "course review feature built this session; 48 unit specs and a 5-step broker e2e pass"
+        }
+    ],
+    "artifactRoot": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page-v3",
+    "writeBoundary": [
+        "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page-v3"
+    ],
+    "readOnlyBoundary": [
+        "D:\\Repositories\\starci-academy-fe\\src",
+        "D:\\Repositories\\starci-academy",
+        "D:\\Repositories\\starci-academy-backend\\.claude"
+    ],
+    "runtime": {
+        "labPortFrom": 8080,
+        "devServer": "not started by this phase"
+    },
+    "evidence": [
+        "git rev-parse per repo",
+        "full mutation and query enumeration of the core app, read rather than grepped",
+        "locked contract table read at a5d833a"
+    ],
+    "hazards": [
+        "target carries 30 uncommitted files from another session",
+        "target HEAD moved twice during this session",
+        "trust root carries 17 uncommitted files from another session; gates green at 245"
+    ],
+    "inheritedFrom": null,
+    "detectedAt": "session-local"
+}

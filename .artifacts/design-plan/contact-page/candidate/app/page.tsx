@@ -61,7 +61,6 @@ const guest = (
     session: "guest",
     props: {
         labels,
-        channelsLabel: fixture.channelsLabel,
         channels,
         form: {
             state,
@@ -83,7 +82,6 @@ const signedIn = (
     session: "signed-in",
     props: {
         labels,
-        channelsLabel: fixture.channelsLabel,
         channels,
         conversation: {
             state,

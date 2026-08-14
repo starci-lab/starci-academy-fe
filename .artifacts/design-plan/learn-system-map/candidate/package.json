@@ -1,0 +1,11 @@
+{
+  "name": "starci-learn-content-candidate",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Preview candidate for case-learn-system / direction-b-one-spine, scope learn-content-page. Artifact-only: never shipped, never imported by production.",
+  "scripts": {
+    "build": "next build --webpack",
+    "dev": "next dev",
+    "typecheck": "tsc --noEmit"
+  }
+}

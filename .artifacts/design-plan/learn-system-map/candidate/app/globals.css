@@ -1,0 +1,18 @@
+/*
+ * The candidate's stylesheet is the TARGET's stylesheet.
+ *
+ * It is imported, not copied: every token the candidate renders resolves from
+ * `src/app/globals.css` in the locked target, so a colour that changes there changes here and a
+ * drift between the two is impossible by construction. Copying the palette would have produced a
+ * candidate that looks approved while resolving its own private values.
+ *
+ * The two `@source` lines exist because Tailwind v4 discovers utilities by scanning source files
+ * relative to this stylesheet and skips paths git ignores. `.artifacts/` is ignored by the target
+ * repository, so without these the candidate's own class names would be discovered as nothing and
+ * the page would render unstyled while still building cleanly — the worst kind of green.
+ */
+@import "../../../../../src/app/globals.css";
+
+@source "../../../../../src/components";
+@source "../src";
+@source "../app";

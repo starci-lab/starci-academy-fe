@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "task": "coding-practice",
+  "phase": "plan",
+  "status": "locked",
+  "trustRoot": "D:\\Repositories\\starci-academy-backend\\.claude",
+  "skill": {
+    "name": "starci-fe-design-plan",
+    "path": "D:\\Repositories\\starci-academy-backend\\.claude\\skills\\starci-fe-design-plan\\SKILL.md"
+  },
+  "targets": [
+    {
+      "role": "design-target",
+      "repo": "starci-academy-fe",
+      "gitRoot": "D:\\Repositories\\starci-academy-fe",
+      "branch": "session/surface-branch-and-press-affordance",
+      "worktree": "D:\\Repositories\\starci-academy-fe",
+      "head": "a5d833a",
+      "remote": "https://github.com/starci-lab/starci-academy-fe.git",
+      "note": "NOT `main`. Another session owns this branch and was editing branches/ and contracts/ during detection. Plan writes no source, so this is recorded rather than blocking - but Preview and Apply inherit it, and the owner should confirm the branch before either runs."
+    }
+  ],
+  "references": [
+    {
+      "role": "parity-baseline",
+      "repo": "starci-academy",
+      "gitRoot": "D:\\Repositories\\starci-academy",
+      "head": "9a1934231",
+      "purpose": "src/components/pages/PracticeHubPage (PracticeRail, ProgressCockpit, PracticeFilters, ProblemCatalog, CodingLeaderboard) and src/components/pages/PracticeProblemPage; route /[locale]/practice"
+    },
+    {
+      "role": "business-truth",
+      "repo": "starci-academy-backend",
+      "gitRoot": "D:\\Repositories\\starci-academy-backend",
+      "purpose": "graphql domain `coding`: 8 queries and 2 mutations, CodingProblemEntity, CodingSubmissionEntity, CodingDifficulty, CodingDomain, CodingLanguage, CodingVerdict"
+    }
+  ],
+  "artifactRoot": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\coding-practice",
+  "writeBoundary": ["D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\coding-practice"],
+  "readOnlyBoundary": ["starci-academy-fe/src", "starci-academy", "starci-academy-backend", "the trust tree"],
+  "runtime": { "kind": "direction-lab", "startPort": 8080 },
+  "scopeDecision": "One case, two work items and one direction system: the practice hub and the problem-solving page. Chosen by the owner over a single-page scope.",
+  "editorDecision": "CodeMirror 6, chosen by the owner over Monaco. The new frontend carries NO editor and NO socket client today; the legacy app carries both.",
+  "inheritedFrom": null,
+  "detectedAt": "2026-08-14"
+}

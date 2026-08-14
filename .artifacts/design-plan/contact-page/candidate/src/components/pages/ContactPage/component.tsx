@@ -10,9 +10,9 @@ import {
     defineLeafComponent,
 } from "~candidate/components/contracts/props"
 import {
-    _ContactChannelList,
-    type ContactChannel,
-} from "~candidate/components/blocks/contact/ContactChannelList/component"
+    _ContactChannelTile,
+    type ContactChannelTileData,
+} from "~candidate/components/blocks/contact/ContactChannelTile/component"
 import {
     _ContactMessageForm,
     type ContactMessageFormData,
@@ -68,10 +68,8 @@ export type ContactPageLabels = {
 /** What the page draws. */
 export type ContactPageData = {
     readonly labels: ContactPageLabels
-    /** The already-resolved heading of the channel card. */
-    readonly channelsLabel: string
     /** The ways to reach the founder, in the order they should be tried. */
-    readonly channels: ReadonlyArray<ContactChannel>
+    readonly channels: ReadonlyArray<ContactChannelTileData & { readonly id: string }>
     /** The guest form's own situation and content. Present only for a guest. */
     readonly form?: {
         readonly state: ContactMessageFormState
@@ -156,13 +154,15 @@ export const _ContactPage = (input: ContactPageProps) => {
         }),
     })
 
-    const channels = defineContractProjection("contact-channel-list", () => (
-        <_ContactChannelList
-            state="ready"
-            props={{ label: input.props.channelsLabel, channels: input.props.channels }}
-            on={{ open: input.on?.openChannel }}
-        />
-    ))
+    const channels = defineContractComponent("contact-channel-strip", {
+        channel: input.props.channels.map((channel) => defineContractProjection("contact-channel-tile", () => (
+            <_ContactChannelTile
+                state="ready"
+                props={channel}
+                onOpen={() => input.on?.openChannel?.(channel.id)}
+            />
+        ))),
+    })
 
     const conversation = input.props.conversation
     const form = input.props.form

@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "task": "learn-system-map",
+  "phase": "preview",
+  "status": "locked",
+  "caseId": "case-learn-system",
+  "selectedDirectionId": "direction-b-one-spine",
+  "scope": "learn-content-page",
+  "trustRoot": "D:/Repositories/starci-academy-backend/.claude",
+  "skill": {
+    "name": "starci-fe-design-preview",
+    "path": "D:/Repositories/starci-academy-backend/.claude/skills/starci-fe-design-preview/SKILL.md"
+  },
+  "targets": [
+    {
+      "role": "primary",
+      "repo": "starci-academy-fe",
+      "gitRoot": "D:/Repositories/starci-academy-fe",
+      "branch": "session/surface-branch-and-press-affordance",
+      "worktree": "D:/Repositories/starci-academy-fe",
+      "head": "a5d833a",
+      "remote": "https://github.com/starci-lab/starci-academy-fe.git"
+    }
+  ],
+  "references": [
+    {
+      "role": "legacy-parity-baseline",
+      "repo": "starci-academy",
+      "gitRoot": "D:/Repositories/starci-academy",
+      "branch": "mtp",
+      "head": "9a19342",
+      "purpose": "pages/ContentPage and the learn shell, read as source for concept parity"
+    }
+  ],
+  "artifactRoot": "D:/Repositories/starci-academy-fe/.artifacts/design-plan/learn-system-map",
+  "writeBoundary": ["D:/Repositories/starci-academy-fe/.artifacts/design-plan/learn-system-map"],
+  "readOnlyBoundary": [
+    "D:/Repositories/starci-academy-fe/src",
+    "D:/Repositories/starci-academy",
+    "D:/Repositories/starci-academy-backend/.claude"
+  ],
+  "runtime": { "candidate": "first free port from 8080", "labStillServing": "http://127.0.0.1:8080/" },
+  "drift": [],
+  "inheritedFrom": "D:/Repositories/starci-academy-fe/.artifacts/design-plan/learn-system-map/context-lock.plan.json",
+  "detectedAt": "2026-08-14T10:35:00+07:00"
+}

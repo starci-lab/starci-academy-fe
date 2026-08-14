@@ -27,12 +27,12 @@
 export type LayoutClassName =
     | "flex" | "grid" | "flex-col" | "flex-row" | "flex-wrap" | "overflow-hidden"
     | "items-center" | "items-baseline" | "items-start" | "items-end"
-    | "justify-between" | "justify-center" | "justify-start" | "justify-end" | "[&>*]:w-full"
-    | "gap-0" | "gap-1" | "gap-2" | "gap-3" | "gap-4" | "gap-5" | "gap-6" | "gap-8"
-    | "grid-cols-1" | "grid-cols-2" | "sm:grid-cols-2" | "sm:grid-cols-4" | "lg:grid-cols-3" | "lg:grid-cols-4"
-    | "md:flex" | "md:flex-row" | "md:items-start"
+    | "justify-between" | "justify-center" | "[&>*]:w-full"
+    | "gap-1" | "gap-2" | "gap-3" | "gap-4" | "gap-6" | "gap-8"
+    | "grid-cols-1" | "grid-cols-2" | "sm:grid-cols-2" | "sm:grid-cols-4" | "lg:grid-cols-3"
+    | "md:flex" | "md:flex-row" | "md:items-start" | "md:gap-8"
     | "@app-md:flex-row" | "@app-md:items-start" | "@app-md:gap-8" | "@app-md:w-72"
-    | "mx-auto" | "min-h-screen" | "w-full" | "min-w-0" | "grow" | "flex-1" | "shrink-0" | "hidden" | "max-w-app-lg" | "max-w-app-xl" | "max-w-6xl" | "max-w-sm" | "@container"
+    | "mx-auto" | "min-h-screen" | "w-full" | "min-w-0" | "grow" | "flex-1" | "shrink-0" | "hidden" | "max-w-app-sm" | "max-w-app-md" | "max-w-app-lg" | "max-w-app-xl" | "max-w-6xl" | "max-w-sm" | "max-w-md" | "@container"
     | "h-16" | "min-h-16" | "sticky" | "top-0" | "top-16" | "z-40" | "z-50"
     | "border" | "border-b" | "border-separator" | "divide-y" | "divide-separator" | "bg-background"
     | "px-3" | "px-4" | "px-6" | "py-2" | "py-3" | "py-6" | "p-0" | "p-2" | "p-4" | "p-6"
@@ -48,12 +48,19 @@ export type LayoutClassName =
     | "md:[&>*:last-child]:w-72" | "md:[&>*:last-child]:shrink-0"
     | "md:[&>*:first-child]:w-72" | "md:[&>*:first-child]:shrink-0"
     | "md:[&>*:last-child]:min-w-0" | "md:[&>*:last-child]:grow"
-    | "md:[&>*:first-child]:sticky" | "md:[&>*:first-child]:top-6"
+    | "md:[&>*:first-child]:overflow-y-auto"
+    | "md:[&>*:nth-child(2)]:min-w-0" | "md:[&>*:nth-child(2)]:grow"
+    | "md:[&>*:first-child]:sticky" | "md:[&>*:first-child]:top-rail"
     | "md:[&>*:first-child]:self-start" | "md:[&>*:first-child]:max-h-rail"
     | "md:[&>*:first-child]:overflow-y-auto"
     | "[&>*]:px-4" | "[&>*]:py-3" | "[&>*]:p-2" | "[&>*]:p-3" | "[&>*]:border-separator"
     | "[&>*:nth-child(odd)]:border-r" | "[&>*:nth-child(-n+4)]:border-b"
     | "[&>*:first-child]:w-5" | "[&>*:first-child]:shrink-0"
+    // A catalog row reads left to right: what it looks like, what it is, what to do. The artwork
+    // is FIXED rather than proportional, because a thumbnail that grew with the viewport would
+    // make the title column narrower on a wider screen, and the trailing controls hold their own
+    // measure so the row does not end in a ragged edge down the list.
+    | "[&>*:first-child]:w-36" | "[&>*:last-child]:shrink-0"
     | "[&>*:first-child]:text-center" | "[&>*:first-child]:tabular-nums"
     | "[&>*:first-child]:pt-4" | "[&>*:last-child]:pb-4"
     // The end rows carry the surface's own radius. A verdict band is an inset shadow, so it
@@ -79,7 +86,7 @@ export type LayoutClassName =
     // repository, which is why these read as gaps rather than omissions: every one is the mirror of a
     // member already present for the opposite child or the opposite edge.
     | "[&>*:last-child]:min-w-0" | "[&>*:last-child]:grow" | "[&>*:last-child]:shrink-0"
-    | "md:[&>*:last-child]:sticky" | "md:[&>*:last-child]:top-6"
+    | "md:[&>*:last-child]:sticky" | "md:[&>*:last-child]:top-rail"
     | "md:[&>*:last-child]:self-start" | "md:[&>*:last-child]:max-h-rail"
     | "md:[&>*:last-child]:overflow-y-auto"
     | "bottom-0" | "border-t" | "md:hidden"
@@ -254,7 +261,7 @@ export const CONTRACTS = buildContracts({
         why: "Authentication is the route's only task, so its one bounded form sits at the visual centre instead of inheriting the dashboard's rail-and-main reading order.",
     },
     "authentication-panel-card": {
-        classes: ["w-full", "max-w-sm", "p-4"],
+        classes: ["w-full", "max-w-md", "p-4"],
         children: {
             panel: { contract: "centred-page-column" },
         },
@@ -334,7 +341,7 @@ export const CONTRACTS = buildContracts({
         why: "Four proof metrics scan as equal peers, using two readable columns when narrow and one complete ribbon once all four retain useful width.",
     },
     "profile-breakdown-stack": {
-        classes: ["flex", "flex-col", "gap-6", "p-4"],
+        classes: ["flex", "flex-col", "gap-4", "p-4"],
         children: { breakdown: { contract: "profile-breakdown", repeats: true, restingCount: 3 } },
         why: "Difficulty, topic and language are independent evidence breakdowns whose shared vertical rhythm preserves their distinct labels and visuals.",
     },
@@ -425,7 +432,7 @@ export const CONTRACTS = buildContracts({
         why: "A proof figure and its short qualifier are one metric sentence and must not drift into separate rows.",
     },
     "profile-project-card-grid": {
-        classes: ["grid", "grid-cols-1", "gap-3", "sm:grid-cols-2"],
+        classes: ["grid", "grid-cols-1", "gap-4", "sm:grid-cols-2"],
         children: { card: { contract: "profile-project-card", repeats: true, restingCount: 2 } },
         why: "Pinned project proofs stack when narrow and become equal peer cards only when each retains readable title and description width.",
     },
@@ -544,7 +551,7 @@ export const CONTRACTS = buildContracts({
         why: "The smaller line qualifies one proof title and therefore stays attached beneath it instead of becoming a peer fact elsewhere in the row.",
     },
     "dashboard-rail-then-main": {
-        classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "flex-col", "gap-6", "px-6", "py-6", "md:flex-row", "md:items-start", "md:[&>*:first-child]:w-72", "md:[&>*:first-child]:shrink-0", "md:[&>*:last-child]:min-w-0", "md:[&>*:last-child]:grow"],
+        classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "flex-col", "gap-6", "md:gap-8", "px-6", "py-6", "md:flex-row", "md:items-start", "md:[&>*:first-child]:w-72", "md:[&>*:first-child]:shrink-0", "md:[&>*:last-child]:min-w-0", "md:[&>*:last-child]:grow"],
         children: {
             rail: { contract: "dashboard-rail" },
             main: { contract: ["dashboard-main", "dashboard-tab-main", "centred-empty-notice"] },
@@ -607,7 +614,7 @@ export const CONTRACTS = buildContracts({
         why: "The kind, title and way back into one content item share a bounded ground because none identifies the resumable item without the other two.",
     },
     "weekly-challenge-card": {
-        classes: ["flex", "flex-col", "gap-3", "p-4"],
+        classes: ["flex", "flex-col", "gap-4", "p-4"],
         children: {
             title: { composite: "weekly-challenge-title" },
             status: { composite: "weekly-challenge-status" },
@@ -690,14 +697,9 @@ export const CONTRACTS = buildContracts({
         why: "A suggested identity is recognised first, qualified only when needed, and acted on last; the name stack therefore owns the flexible middle between avatar and follow action.",
     },
     "name-over-handle": {
-        classes: ["flex", "flex-col", "gap-0"],
+        classes: ["flex", "flex-col", "gap-1"],
         children: {
-            // The name is a LINK where the person can be opened and plain text where they cannot.
-            // The founder in a conversation header is the second case: there is no profile route to
-            // send the reader to, and a link that navigates nowhere is a promise the page cannot
-            // keep. The relationship above and below is unchanged, which is why this is a widened
-            // slot rather than a second entry saying the same thing.
-            name: { leaf: ["text-link", "text"], props: { size: "sm" } },
+            name: { leaf: "text-link", props: { size: "sm" } },
             handle: { leaf: "text", props: { size: "xs", tone: "muted" } },
         },
         why: "The handle identifies the name without competing with it, so the two stay in one tight vertical identity stack.",
@@ -956,7 +958,7 @@ export const CONTRACTS = buildContracts({
         why: "The live mark identifies the event, title owns the flexible middle and concrete timing stays visible at the trailing edge of the same destination row.",
     },
     "leaderboard-card": {
-        classes: ["flex", "flex-col", "gap-3", "p-4"],
+        classes: ["flex", "flex-col", "gap-4", "p-4"],
         children: { standing: { composite: "leaderboard-standing-row", optional: true }, list: { contract: "ranked-user-list" } },
         why: "Viewer standing explains the ranked identities beneath it, so both share one competition surface while the joined list keeps its own separators.",
     },
@@ -966,7 +968,7 @@ export const CONTRACTS = buildContracts({
         why: "The rank artwork fixes the viewer's current place and the standing sentence sits directly against it, because the two are one statement; the body owns the spare width so an optional tier fact still settles at the far edge without the sentence drifting there when no fact exists.",
     },
     "standing-hero-card": {
-        classes: ["flex", "flex-col", "gap-5", "p-4"],
+        classes: ["flex", "flex-col", "gap-4", "p-4"],
         children: { standing: { composite: "leaderboard-standing-row" }, goal: { contract: "standing-goal-meter", optional: true }, action: { leaf: "button" } },
         why: "A standing that comes with a way to change it is one story: where the learner is, how far the next place is, and the single action that closes the gap.",
     },
@@ -1065,7 +1067,7 @@ export const CONTRACTS = buildContracts({
         why: "The same comparable row keeps a two-pixel danger band inset on its left edge because negative movement belongs to this learner's data — and the band stays square, because the one border in this picture is the list's.",
     },
     "ranked-user-name-over-subtitle": {
-        classes: ["flex", "min-w-0", "flex-col", "gap-0"],
+        classes: ["flex", "min-w-0", "flex-col", "gap-1"],
         children: { name: { leaf: ["text", "text-link"] }, subtitle: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true } },
         why: "The optional movement or viewer qualifier stays directly beneath the learner name so both read as one identity while the row keeps its trailing comparison column.",
     },
@@ -1151,7 +1153,7 @@ export const CONTRACTS = buildContracts({
         why: "A joined list may qualify its own rows with a semibold label and a smaller muted fact on one baseline; without peer identities outside the list there is no reason to add a leading glyph.",
     },
     "resume-card-grid": {
-        classes: ["grid", "grid-cols-1", "gap-3", "sm:grid-cols-2", "lg:grid-cols-3"],
+        classes: ["grid", "grid-cols-1", "gap-4", "sm:grid-cols-2", "lg:grid-cols-3"],
         children: {
             card: { contract: "resume-item-card", repeats: true, restingCount: 3 },
         },
@@ -1161,12 +1163,7 @@ export const CONTRACTS = buildContracts({
         classes: ["flex", "flex-col", "gap-3"],
         children: {
             label: { leaf: "label" },
-            // THE CONTROL IS NOT ALWAYS ONE LINE. This entry already owned the label-control-hint
-            // relationship; what it did not admit was a control that is not a single-line box, and
-            // that gap was invisible until a form needed a message field and a reason-for-contact
-            // choice. Widening the union is the whole change: the label still names the control and
-            // the hint still sits under it, whichever of the four the control turns out to be.
-            field: { leaf: ["input", "field", "textarea", "select"] },
+            field: { leaf: ["input", "field"] },
             hint: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
         },
         why: "The hint belongs under the control it explains rather than beside the label, because a reader reaches the hint after failing at the control and not before trying it.",
@@ -1227,7 +1224,7 @@ export const CONTRACTS = buildContracts({
         why: "The original ExtendedTabs primitive owns the inset, compound tab anatomy and selected indicator as one typed run, so no caller can redraw one dashboard tab differently from its peers.",
     },
     "centred-page-column": {
-        classes: ["mx-auto", "flex", "w-full", "max-w-sm", "flex-col", "gap-6"],
+        classes: ["mx-auto", "flex", "w-full", "max-w-md", "flex-col", "gap-6"],
         children: {
             header: { contract: "centred-title-pair" },
             body: {
@@ -1246,7 +1243,7 @@ export const CONTRACTS = buildContracts({
             shortcuts: { contract: "auth-shortcuts-over-divider" },
             credentials: { leaf: "form" },
         },
-        why: "Authentication has exactly two entry blocks: OAuth closed by the OR divider above, and the credential form below. This node alone owns their gap-3 seam so the outer page rhythm cannot add a second gap.",
+        why: "Authentication has exactly two entry blocks: OAuth closed by the OR divider above, and the credential form below. This node alone owns the seam between them, and it stays at gap-3 because the divider has already closed the shortcut choice: a boundary that is drawn does not also need to be spaced. The controls INSIDE the form take the wider seam, because those are small blocks of one function and nothing else marks where each of them ends.",
     },
     "centred-title-pair": {
         classes: ["flex", "flex-col", "gap-3", "items-center", "text-center"],
@@ -1265,7 +1262,7 @@ export const CONTRACTS = buildContracts({
         why: "OAuth shortcuts and the OR divider are one alternative-entry cluster: the divider closes the shortcut choice before the credential form begins, so it keeps the cluster's gap rather than the larger seam between form groups.",
     },
     "stacked-peer-controls": {
-        classes: ["flex", "flex-col", "gap-3", "[&>*]:w-full"],
+        classes: ["flex", "flex-col", "gap-4", "[&>*]:w-full"],
         children: {
             control: {
                 contract: "spread-choice-row",
@@ -1278,7 +1275,7 @@ export const CONTRACTS = buildContracts({
         why: "Controls repeat down one column as independently readable field or action units, so the ordinary gap-3 keeps each decision legible while their shared width still makes the run read as one form.",
     },
     "stacked-stat-rows": {
-        classes: ["flex", "flex-col", "gap-0", "p-0", "[&>*]:w-full", "[&>*]:p-2"],
+        classes: ["flex", "flex-col", "p-0", "[&>*]:w-full", "[&>*]:p-2"],
         children: {
             stat: { composite: "stat-row", repeats: true, restingCount: 3 },
         },
@@ -1302,7 +1299,7 @@ export const CONTRACTS = buildContracts({
         why: "The avatar identifies the profile, the name stack owns the available width, and the trailing disclosure makes the whole row's destination explicit.",
     },
     "profile-name-over-handle": {
-        classes: ["flex", "min-w-0", "flex-col", "gap-0"],
+        classes: ["flex", "min-w-0", "flex-col", "gap-1"],
         children: {
             name: { leaf: "text", props: { size: "sm", weight: "semibold" } },
             handle: { leaf: "text", props: { size: "xs", tone: "muted" } },
@@ -1332,6 +1329,168 @@ export const CONTRACTS = buildContracts({
         },
         why: "An empty region still has to offer a way out, so the recovery action is part of this node rather than something a caller remembers to add beside it.",
     },
+    /*
+     * PROPOSED - learn-content-page. Target path on materialization: the locked table.
+     *
+     * The reader read top to bottom: where this content sits and what it is called, which of the
+     * content's own faces is open, the face itself, then what the reader does next. Everything below
+     * the body is evidence about the content rather than the content, which is why they are peers of
+     * the body rather than parts of it.
+     */
+    /*
+     * PROPOSED - the reader, rebuilt from `pages/ContentPage` at 9a19342 rather than from a
+     * reading of it. The legacy page is three blocks at one seam - header, tab bar, and a
+     * ZERO-gap column holding the reading region above its footer - and that last seam is the
+     * detail a redrawing loses: reading region, footer and advertisement sit flush there, each
+     * owning its own trailing space, because a gap between them would separate a content from the
+     * chrome that belongs to it.
+     */
+    "content-reading-column": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col"],
+        children: {
+            reading: { contract: ["content-reading-paper", "content-article-body"] },
+            footer: { contract: "content-reader-footer", optional: true },
+        },
+        why: "The content and the chrome under it are one continuous reading, so nothing separates them: each block already closes with its own trailing space, and a seam here would read as the page changing subject between the article and the reactions to it.",
+    },
+    "content-reading-paper": {
+        classes: ["mx-auto", "flex", "w-full", "min-w-0", "max-w-app-md", "flex-col", "gap-4", "p-4"],
+        children: {
+            hint: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+            article: { contract: "content-article-body" },
+            paywall: { composite: "empty-notice", optional: true },
+        },
+        why: "The article is read on a raised page of its own - the paper - which is what separates a content from the chrome around it at a glance. A locked content keeps that paper and its faded article, and the paywall joins it INSIDE rather than replacing it: the reader is shown what they would be reading, which is the whole argument for paying.",
+    },
+    "content-reader-footer": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6"],
+        children: {
+            reactions: { contract: "content-reaction-card", optional: true },
+            next: { contract: "content-next-list", optional: true },
+            pager: { leaf: "pagination", optional: true },
+        },
+        why: "What follows a content is a run of major blocks rather than parts of one: a reaction, where to go next, and the content's place in its module each stand alone, so they take the block seam rather than the group seam. The whole footer is absent on a locked content, because there is nothing to react to, discuss or page past yet.",
+    },
+    "content-reaction-card": {
+        classes: ["mx-auto", "flex", "w-full", "max-w-app-md", "flex-row", "items-center", "gap-3", "p-4", "[&>*:first-child]:grow"],
+        children: {
+            prompt: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            reactions: { leaf: "reaction-picker" },
+        },
+        why: "The reaction stands on its own ground rather than loose under the article, which is what stops it reading as the last line of the content - and it keeps the reading measure so the control sits under the words it belongs to.",
+    },
+
+    /*
+     * PROPOSED - the reader's frame, and the two rails the plan record puts INSIDE this work item
+     * rather than in the shell: `learn-content-page` settles the content body, the contents panel,
+     * the on-this-page outline, the pager and the paywall boundary.
+     *
+     * Revision 1.2 shipped the middle column alone and called the rails somebody else's job. They
+     * are not: a reading measure is only a decision once you can see what stands beside it, and a
+     * content read without the map it sits in is a different product - the reader loses both where
+     * they are in the course and where they are in the page.
+     *
+     * The spine - the eleven learn modes - stays out, because that one IS the shell layout's item
+     * and hangs every other mode off it.
+     */
+    "content-reader-frame": {
+        classes: [
+            "mx-auto", "flex", "w-full", "min-w-0", "max-w-app-xl", "flex-col", "items-start", "gap-6", "px-6", "py-6",
+            "md:flex-row", "md:items-start", "md:gap-8",
+            "md:[&>*:first-child]:w-72", "md:[&>*:first-child]:shrink-0",
+            "md:[&>*:first-child]:sticky", "md:[&>*:first-child]:top-rail",
+            "md:[&>*:first-child]:self-start", "md:[&>*:first-child]:max-h-rail",
+            "md:[&>*:first-child]:overflow-y-auto",
+            "md:[&>*:nth-child(2)]:min-w-0", "md:[&>*:nth-child(2)]:grow",
+            "md:[&>*:last-child]:w-72", "md:[&>*:last-child]:shrink-0",
+            "md:[&>*:last-child]:sticky", "md:[&>*:last-child]:top-rail",
+            "md:[&>*:last-child]:self-start", "md:[&>*:last-child]:max-h-rail",
+            "md:[&>*:last-child]:overflow-y-auto",
+        ],
+        children: {
+            contents: { contract: "content-map-panel" },
+            main: { contract: "learn-content-page" },
+            outline: { contract: "content-outline-rail", optional: true },
+        },
+        why: "Where the reader is in the COURSE stands on one side and where they are in the PAGE on the other, so the content keeps the flexible middle and neither answer costs it a scroll. Both rails follow the reader down a long content and scroll on their own, because a map that leaves the screen is a map consulted by scrolling back. The outline is absent rather than empty when a body carries no headings - a tab of cards has nothing to outline, and an empty rail would take width from the reading for nothing.",
+    },
+    "content-map-panel": {
+        host: "nav",
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4"],
+        children: {
+            progress: { composite: "labelled-progress-row" },
+            search: { leaf: "search-box" },
+            module: { leaf: "curriculum-module-row", repeats: true, restingCount: 4 },
+        },
+        why: "The map answers three questions in the order they are asked: how far in am I, where is the thing I remember, and what else is in this course. Search sits above the tree rather than inside it because it filters the whole tree, and the modules are the same disclosing row the curriculum already uses - one content list, not a second one that drifts.",
+    },
+    "content-outline-rail": {
+        host: "nav",
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3"],
+        children: {
+            label: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            heading: { leaf: "text-link", props: { size: "sm" }, repeats: true, restingCount: 5 },
+        },
+        why: "The outline is a named list of places in the current content, so it takes the owner-to-owned seam under its label and the tighter seam between the destinations themselves. They are links rather than lines of text because each one moves the reader.",
+    },
+
+    "learn-content-page": {
+        // The reader IS this screen, so it opens the document's one main landmark itself rather
+        // than being posted inside somebody else's - which is what let a review harness draw a
+        // second one, and what a rule caught before any of it was seen.
+        host: "main",
+        classes: ["mx-auto", "flex", "w-full", "max-w-app-md", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            header: { contract: "page-header-stack" },
+            faces: { contract: "dual-tabs-toolbar", optional: true },
+            body: { contract: ["content-reading-column", "centred-empty-notice"] },
+        },
+        why: "A content is read straight down one measure, so the page holds one column: the trail and the title, the faces this content actually has, the face that is open, and the ways on. The body slot admits the empty-notice surface as well as the article because a locked content replaces the reading rather than decorating it - the reader is told the same thing in the same place either way.",
+    },
+    /*
+     * PROPOSED - content-article-body. Target path on materialization: the locked table.
+     */
+    /*
+     * PROPOSED - content-next-list and content-next-row. Target path on materialization: the locked table.
+     *
+     * Legacy draws an up-next card and a related-content list beneath the content. Both answer one
+     * question - where does the reader go from here - so they are one joined list of destinations
+     * rather than two surfaces. The row carries no completion mark: a tick would promise something
+     * to finish, and these are places to open.
+     */
+    "content-next-list": {
+        classes: ["overflow-hidden", "divide-y", "divide-separator", "p-0", "[&>*]:px-4", "[&>*]:py-3", "[&>*:first-child]:pt-4", "[&>*:last-child]:pb-4"],
+        children: {
+            step: { contract: "content-next-row", repeats: true, restingCount: 2 },
+        },
+        why: "Where a content leads is a short run of peers read in order, so they share one surface and a full-width rule separates each from the next - the same joined list the dashboard reads, and the reason a reader can tell two destinations apart without two cards.",
+    },
+    "content-next-row": {
+        classes: ["flex", "w-full", "flex-row", "items-center", "gap-3", "[&>*:first-child]:min-w-0", "[&>*:first-child]:grow"],
+        children: {
+            label: { leaf: "text", props: { size: "md" } },
+            disclosure: { leaf: "icon", optional: true },
+        },
+        why: "The destination owns the width and the glyph at the end says the row opens something; the pair reads as one line rather than as a label with an ornament, which is what a tick would have made it.",
+    },
+    "content-article-body": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4"],
+        children: {
+            block: { contract: ["heading-over-paragraph"], repeats: true, restingCount: 3 },
+        },
+        why: "Long-form teaching is a run of sections rather than one block of prose, and the seam between two sections is the one thing a reader uses to find their place again after looking away. The measure is not owned here: the page holds it, so the same body can stand in a rail-less reader and inside the shell without two answers about how wide a line may be.",
+    },
+    /*
+     * PROPOSED - heading-over-paragraph. Target path on materialization: the locked table.
+     */
+    "heading-over-paragraph": {
+        classes: ["flex", "flex-col", "gap-2"],
+        children: {
+            title: { leaf: "heading" },
+            body: { leaf: "text", props: { size: "md" }, repeats: true, restingCount: 2 },
+        },
+        why: "A section title and the paragraphs under it are one unit: the title is read as the name of what follows rather than as a peer of it, so they sit a step closer to each other than two sections do.",
+    },
     "courses-catalog-page": {
         // The same measure and inset the dashboard and the leaderboard use. A catalog reached from
         // the navbar and returned to must not appear to shift the chrome, so the page width belongs
@@ -1350,7 +1509,7 @@ export const CONTRACTS = buildContracts({
         why: "One toolbar narrows both groups at once, so it is a peer of them rather than something either group owns, and every region on the route keeps the same seam instead of choosing its own spacing.",
     },
     "catalog-search-count-view-row": {
-        classes: ["flex", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-3"],
+        classes: ["flex", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-4"],
         children: {
             search: { contract: "catalog-query-with-count" },
             view: { leaf: "choice-tabs" },
@@ -1369,7 +1528,10 @@ export const CONTRACTS = buildContracts({
         classes: ["flex", "flex-col", "gap-3"],
         children: {
             title: { leaf: "heading" },
-            grid: { contract: "catalog-card-grid" },
+            // The slot admits EITHER arrangement because the group's own statement does not
+            // change with it: this is still a titled set of purchasable courses whether the
+            // reader is comparing them side by side or scanning them down a column.
+            grid: { contract: ["catalog-card-grid", "catalog-card-list"] },
         },
         why: "Owned and purchasable courses answer different questions, so each keeps its own titled group and one action meaning instead of forcing the reader to tell them apart card by card.",
     },
@@ -1380,8 +1542,37 @@ export const CONTRACTS = buildContracts({
         },
         why: "Catalog courses are interchangeable peers compared side by side, so they share one responsive measure rather than a single reading column. The slot names the one card kind it accepts rather than opening to any content: a course the learner already owns is not a card here at all, it is a row of the same joined list the dashboard already draws.",
     },
+    "catalog-card-list": {
+        classes: ["overflow-hidden", "divide-y", "divide-separator", "p-0", "[&>*]:px-4", "[&>*]:py-3", "[&>*:first-child]:pt-4", "[&>*:last-child]:pb-4"],
+        children: {
+            course: { contract: "catalog-card-line", repeats: true, restingCount: 3 },
+        },
+        why: "Scanning is the other question a catalog is asked: not which of these three, but which of these twenty. Twenty separate cards answer it badly - each edge is a stop, and the eye pays for twenty of them - so the rows share ONE surface and a full-width rule separates each from the next, which is the same joined list the dashboard reads. The inset is owned here, row by row, so every divider reaches both edges of the card.",
+    },
+    "catalog-card-line": {
+        classes: [
+            "flex", "flex-row", "items-center", "gap-4",
+            "[&>*:first-child]:w-36", "[&>*:first-child]:shrink-0",
+            "[&>*:nth-child(2)]:min-w-0", "[&>*:nth-child(2)]:grow",
+            "[&>*:last-child]:shrink-0",
+        ],
+        children: {
+            cover: { leaf: "cover-image" },
+            body: { contract: "catalog-card-line-body" },
+            action: { contract: "catalog-card-action-row" },
+        },
+        why: "The same offer read across instead of down. It is a separate entry rather than the grid card under different classes because it does not hold the same things: at one course per row the promises list would set the row height by the longest course in the catalog, so the row states what it is and what it costs and leaves the claims to the card that has the depth for them.",
+    },
+    "catalog-card-line-body": {
+        classes: ["flex", "min-w-0", "grow", "flex-col", "gap-1"],
+        children: {
+            heading: { contract: "title-with-baseline-fact" },
+            price: { contract: "catalog-price-group" },
+        },
+        why: "In a row the name and the price are the whole statement, and they sit at the tightest seam because there is nothing between them to separate - the card's own rhythm is a rhythm between three parts, and holding it here would leave a gap the row has no third thing to fill.",
+    },
     "catalog-card": {
-        classes: ["flex", "grow", "flex-col", "gap-3", "p-4"],
+        classes: ["flex", "grow", "flex-col", "gap-4", "p-4"],
         children: {
             cover: { leaf: "cover-image" },
             body: { contract: "catalog-card-body" },
@@ -1417,7 +1608,7 @@ export const CONTRACTS = buildContracts({
         why: "Taking the course now and reading about it first are peers at the foot of one offer, so they share a line and an equal measure - stacked, the second reads as a lesser afterthought of the first, and sized to their own words they draw a ragged edge across a row of cards.",
     },
     "catalog-card-body": {
-        classes: ["flex", "min-w-0", "grow", "flex-col", "gap-3"],
+        classes: ["flex", "min-w-0", "grow", "flex-col", "gap-4"],
         children: {
             heading: { contract: "catalog-card-heading-row" },
             price: { contract: "catalog-price-group" },
@@ -1426,7 +1617,7 @@ export const CONTRACTS = buildContracts({
         why: "A purchasable course reads top to bottom as one decision - what it is, what it costs, what it promises, what to do - so its parts stack in that order at the card's own rhythm. What it costs is ONE part rather than two, which is why the price group below holds the tighter seam and this level does not.",
     },
     "catalog-price-group": {
-        classes: ["flex", "flex-col", "gap-2"],
+        classes: ["flex", "flex-col", "gap-1"],
         children: {
             price: { contract: "price-discount-line" },
             note: { contract: "price-note-row", optional: true },
@@ -1460,9 +1651,9 @@ export const CONTRACTS = buildContracts({
         why: "The trail back is a set of destinations rather than prose, so it is a nav a reader can jump to, and its crumbs and separators share one baseline instead of stacking.",
     },
     "main-then-rail": {
-        classes: ["mx-auto", "w-full", "max-w-6xl", "px-6", "pb-6", "flex", "flex-col", "gap-6", "md:flex-row", "md:items-start", "md:[&>*:first-child]:min-w-0", "md:[&>*:first-child]:grow",
+        classes: ["mx-auto", "w-full", "max-w-6xl", "px-6", "pb-6", "flex", "flex-col", "gap-6", "md:gap-8", "md:flex-row", "md:items-start", "md:[&>*:first-child]:min-w-0", "md:[&>*:first-child]:grow",
             "md:[&>*:last-child]:w-72", "md:[&>*:last-child]:shrink-0",
-            "md:[&>*:last-child]:sticky", "md:[&>*:last-child]:top-6",
+            "md:[&>*:last-child]:sticky", "md:[&>*:last-child]:top-rail",
             "md:[&>*:last-child]:self-start", "md:[&>*:last-child]:max-h-rail",
             "md:[&>*:last-child]:overflow-y-auto",
         ],
@@ -1594,114 +1785,6 @@ export const CONTRACTS = buildContracts({
             action: { leaf: "button" },
         },
         why: "Below the rail's breakpoint the purchase decision would scroll away entirely, so the price and its one action pin to the bottom edge and step aside as soon as the rail can hold them again.",
-    },
-    "contact-page": {
-        classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "flex-col", "gap-6", "px-6", "py-6"],
-        children: {
-            intro: { contract: "contact-intro-stack" },
-            channels: { contract: "contact-channel-strip" },
-            conversation: { contract: "founder-conversation-panel", optional: true },
-            form: { contract: "contact-message-form", optional: true },
-        },
-        why: "The channels sit ABOVE the writing surface because they depend on no request at all: with every query failed the reader can still reach the founder, and a page that puts its only guaranteed path last has ordered itself by implementation rather than by what survives. Exactly one writing surface exists at a time - the session decides which - so both are optional slots rather than one slot holding whichever is null.",
-    },
-    "contact-intro-stack": {
-        classes: ["flex", "flex-col", "gap-3"],
-        children: {
-            header: { contract: "page-header-stack" },
-            promise: { contract: "contact-promise-stack" },
-        },
-        why: "The promise qualifies the title rather than opening a second region, so it stays inside the header's own seam instead of taking the page's wider one.",
-    },
-    "contact-promise-stack": {
-        classes: ["flex", "flex-col", "gap-1"],
-        children: {
-            intro: { leaf: "text" },
-            responseTime: { leaf: "text", props: { size: "sm", tone: "muted" } },
-        },
-        why: "The response time is a condition on the invitation above it, not a separate announcement, so the two are read as one sentence and the smaller line carries the qualification.",
-    },
-    "contact-channel-strip": {
-        classes: ["grid", "grid-cols-1", "sm:grid-cols-2", "lg:grid-cols-4", "gap-4"],
-        children: {
-            channel: { contract: "contact-channel-tile", repeats: true, restingCount: 4 },
-        },
-        why: "Four ways to reach one person are peers, and a row of them says so; the same four stacked would read as a ranking nobody decided.",
-    },
-    "contact-channel-tile": {
-        // THE GROUND BELONGS TO THE BRANCH, and an earlier revision of this entry learned that from
-        // the gate rather than from reading first. It carried `bg-surface`, `shadow-surface` and
-        // `rounded-3xl` directly, and `no-interaction-class-in-entry` refused all three: a ground
-        // and an elevation make the node a raised OBJECT, and a raised object already has an owner.
-        // `PressableSurface` with `isRaised` draws the card and puts this node inside it, which is
-        // the arrangement `catalog-card` reaches for too. `grow` fills that card so four tiles in
-        // one row end on the same line when one handle wraps.
-        classes: ["flex", "grow", "flex-col", "items-start", "gap-2", "p-4"],
-        children: {
-            mark: { leaf: "icon" },
-            identity: { contract: "name-over-handle" },
-        },
-        why: "The handle is shown rather than hidden behind the channel's name, because the reader decides whether to press by recognising the destination - an unlabelled mark asks them to trust it instead.",
-    },
-    "founder-conversation-panel": {
-        classes: ["flex", "flex-col", "gap-4", "w-full"],
-        children: {
-            identity: { contract: "founder-identity-row" },
-            thread: { contract: "conversation-thread", optional: true },
-            notice: { composite: "empty-notice", optional: true },
-            composer: { contract: "message-composer-row" },
-        },
-        why: "The composer stays put while the thread above it changes, because a reader who has already started typing must not have the box move under them when a message arrives. The thread and the notice are alternatives - a conversation that failed to load has no messages to draw - so each is optional rather than one slot rendering an empty list.",
-    },
-    "founder-identity-row": {
-        classes: ["flex", "flex-row", "items-center", "gap-3", "w-full", "[&>*:nth-child(2)]:min-w-0", "[&>*:nth-child(2)]:grow"],
-        children: {
-            avatar: { leaf: "avatar" },
-            identity: { contract: "name-over-handle" },
-            status: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
-        },
-        why: "A private conversation has to say who is on the other end before its first message, so the person is named at the top of the panel rather than inferred from the messages inside it.",
-    },
-    "conversation-thread": {
-        classes: ["flex", "flex-col", "gap-3", "w-full"],
-        children: {
-            message: {
-                contract: ["conversation-message-row-viewer", "conversation-message-row-other"],
-                repeats: true,
-                restingCount: 3,
-            },
-        },
-        why: "A thread is read oldest-first so the newest message is nearest the box that answers it; its order IS the content, and nothing above it may re-sort it.",
-    },
-    "conversation-message-row-viewer": {
-        classes: ["flex", "flex-row", "justify-end", "w-full"],
-        children: { message: { leaf: "message-bubble" } },
-        why: "Whose message it is picks the row rather than a class the bubble writes about itself: a leaf that sided itself would be deciding its position inside a parent it cannot see.",
-    },
-    "conversation-message-row-other": {
-        classes: ["flex", "flex-row", "justify-start", "w-full"],
-        children: { message: { leaf: "message-bubble" } },
-        why: "The twin of the viewer's row, and separate from it for the same reason two states are two trees: the difference is which side the reader's eye returns to, not a value inside the message.",
-    },
-    "message-composer-row": {
-        classes: ["flex", "flex-row", "items-end", "gap-3", "w-full", "[&>*:first-child]:min-w-0", "[&>*:first-child]:grow"],
-        children: {
-            input: { leaf: "textarea" },
-            send: { leaf: "button" },
-        },
-        why: "Writing and sending are one act, so they share a baseline at the bottom edge - the box grows upward as the message gets longer and the button stays where the hand left it.",
-    },
-    "contact-message-form": {
-        classes: ["flex", "w-full", "flex-col", "gap-4"],
-        children: {
-            // A SETTLED OUTCOME REPLACES THE CONTROLS RATHER THAN CROWNING THEM. When the message
-            // has been sent there is nothing left to fill in, and a form still standing under a
-            // thank-you invites a second identical send while the first is being read.
-            notice: { composite: "empty-notice", optional: true },
-            field: { contract: "label-field-hint", repeats: true, restingCount: 4 },
-            submit: { leaf: "button" },
-        },
-        why: "The same one-control-at-a-time reading as `form-column`, at the measure of the surface that holds it rather than at a narrow column's: this form is the page's main region and not a panel beside one, so a capped measure would leave the message box narrower than the sentence a reader is trying to write in it.",
     },
 })
 

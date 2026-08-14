@@ -1,0 +1,362 @@
+{
+    "version": 2,
+    "task": "course-detail-page-v3",
+    "contextLock": "context-lock.plan.json",
+    "caseId": "case-course-detail-v3",
+    "deliveryMode": "single",
+    "mode": "mixed",
+    "renderStatus": "directional-not-apply-baseline",
+    "status": "direction-selected",
+    "parityBaseline": "starci-academy @ 9a1934231 - the named legacy course detail render, plus the applied v2 page at .artifacts/design-plan/course-detail-page-v2",
+    "workItems": [
+        {
+            "id": "page-course-detail",
+            "scope": "page",
+            "owns": "the /courses/[displayId] route: its narrative column, its buy rail and the mobile action bar",
+            "target": "D:\\Repositories\\starci-academy-fe"
+        }
+    ],
+    "evidence": [
+        {
+            "source": "src/components/contracts/index.ts @ a5d833a",
+            "claim": "course-promise-list and course-module-list are ALREADY joined SurfaceListCard lists with divide-y, and the module list is an ol because modules are ordered. Two of the seven requested items are therefore already satisfied and are excluded from this case."
+        },
+        {
+            "source": "course-promise-list .why @ a5d833a",
+            "claim": "Reusing profile-evidence-list was considered and refused because the mechanics are identical but the domain noun differs. The same reasoning governs the new prerequisite list here."
+        },
+        {
+            "source": "starci-academy-backend core app, full operation enumeration",
+            "claim": "startTrial, addToCart, removeFromCart, clearCart, courseEnroll, coursesCheckout and refundCoursePurchase all exist. Neither the trial button nor the cart button needs a backend enabler."
+        },
+        {
+            "source": "starci-academy-backend PrerequisiteEntity on CourseEntity",
+            "claim": "Ordered prerequisites already hang off a course, so the prerequisite block reads real data."
+        },
+        {
+            "source": "starci-academy-backend course-review feature, built this session",
+            "claim": "submitCourseReview / updateCourseReview / deleteCourseReview / courseReviews, plus a CDC-fed aggregate serving reviewCount, averageScore and scoreHistogram. 48 unit specs and a 5-step broker e2e pass. This is what unblocked the review block, which the v2 plan recorded as impossible."
+        },
+        {
+            "source": "starci-academy-fe useMutateAddToCartSwr + mutation-add-to-cart",
+            "claim": "The cart mutation is already wired and used by CourseCatalogCard, so the detail page reuses a hook rather than adding plumbing."
+        },
+        {
+            "source": ".artifacts/design-plan/cart/plan-record.json",
+            "claim": "direction-legacy-full-default was selected for the cart case and never went through Preview. Its posture is folded into direction A rather than left as a second case competing for the same rail."
+        },
+        {
+            "source": "contracts main-then-rail @ a5d833a",
+            "claim": "The rail already declares md:sticky, md:self-start, md:max-h-rail and md:overflow-y-auto. Its pin was repaired earlier this session from top-6 to a named --top-rail, because the navbar is itself sticky and 4rem tall."
+        }
+    ],
+    "unknowns": [
+        "Whether an empty review block at the foot of the page reads as 'no reviews yet' or as a broken region. Direction A places it there and cannot answer this from the registry.",
+        "Whether the trial button should disappear or disable once a trial has been used. The backend has startTrial but the page has no state evidence for a spent trial.",
+        "Whether the rail's discount ladder and the new review summary ever compete for the same fold on a short laptop. Only a rendered state can say."
+    ],
+    "businessCapabilities": [
+        {
+            "capability": "read a course's reviews and its rating",
+            "status": "exists",
+            "evidence": "courseReviews query + course_review_stats_projections, this session"
+        },
+        {
+            "capability": "write, edit and delete one's own review",
+            "status": "exists",
+            "evidence": "three mutations, gated on a PAID enrollment (isEnrolled true), 37 unit cases"
+        },
+        {
+            "capability": "start a trial",
+            "status": "exists",
+            "evidence": "courses/start-trial"
+        },
+        {
+            "capability": "add the course to a cart",
+            "status": "exists",
+            "evidence": "courses/add-to-cart + FE hook already in use"
+        },
+        {
+            "capability": "read ordered prerequisites",
+            "status": "exists",
+            "evidence": "PrerequisiteEntity"
+        },
+        {
+            "capability": "read the pricing phase ladder",
+            "status": "exists",
+            "evidence": "coursePricePreview + course-voucher + the locked pricing-phase-ladder contract"
+        }
+    ],
+    "stateManifest": [
+        {
+            "owner": "course-pricing-rail",
+            "states": [
+                "price loaded",
+                "price loading",
+                "no discount phase",
+                "already enrolled",
+                "trial available",
+                "trial spent",
+                "in cart",
+                "not in cart"
+            ]
+        },
+        {
+            "owner": "course-review-block",
+            "states": [
+                "empty",
+                "one page",
+                "more than one page",
+                "viewer may write",
+                "viewer may not write (no paid enrollment)",
+                "viewer has already written"
+            ]
+        },
+        {
+            "owner": "course-prerequisite-list",
+            "states": [
+                "has prerequisites",
+                "course has none"
+            ]
+        },
+        {
+            "owner": "page-course-detail",
+            "states": [
+                "desktop",
+                "below md with the mobile action bar",
+                "loading",
+                "course not found"
+            ]
+        }
+    ],
+    "blockTrees": [
+        {
+            "directionId": "direction-parity-rail",
+            "tree": "course-detail-page > [course-breadcrumb-row, main-then-rail > [course-hero > (course-hero-heading, course-stat-chip-run, course-section/promises, course-section/PREREQUISITES, course-section/curriculum, COURSE-REVIEW-BLOCK), course-pricing-rail > (cover-image, course-price-block, pricing-phase-ladder, enrol button, TRIAL button, CART button, proof text)], course-mobile-action-bar]"
+        },
+        {
+            "directionId": "direction-proof-first",
+            "tree": "course-detail-page > [course-breadcrumb-row, main-then-rail > [course-hero > (course-hero-heading, course-stat-chip-run + RATING CHIP, promises, COURSE-REVIEW-BLOCK, curriculum > COURSE-PREREQUISITE-DISCLOSURE), course-pricing-rail collapsing to a price+CTA strip], course-mobile-action-bar]"
+        },
+        {
+            "directionId": "direction-decision-desk",
+            "tree": "course-detail-page > [course-breadcrumb-row, main-then-rail > [course-hero > (heading, chips, promises, curriculum, COURSE-REVIEW-BLOCK), course-pricing-rail > (cover, price, ladder, RATING LINE, COURSE-RAIL-PREREQUISITE-LIST, enrol, TRIAL, CART, proof)], course-mobile-action-bar]"
+        }
+    ],
+    "contracts": [
+        {
+            "key": "course-promise-list",
+            "verdict": "REUSE",
+            "why": "already the joined checklist the request asked for"
+        },
+        {
+            "key": "course-module-list",
+            "verdict": "REUSE",
+            "why": "already a joined ol inside a SurfaceListCard"
+        },
+        {
+            "key": "pricing-phase-ladder",
+            "verdict": "REUSE",
+            "why": "the discount ladder already exists and already sits in the rail"
+        },
+        {
+            "key": "course-section",
+            "verdict": "REUSE",
+            "why": "title-over-body is the shape every new narrative region needs"
+        },
+        {
+            "key": "course-pricing-rail",
+            "verdict": "EXTEND",
+            "why": "two new slots, trial and cart, on the owner that already holds the primary action"
+        },
+        {
+            "key": "course-prerequisite-list",
+            "verdict": "NEW because a prerequisite is not a promise and naming one list for the other is the mistake course-promise-list already refused once"
+        },
+        {
+            "key": "course-review-block",
+            "verdict": "NEW because no existing key holds a summary, a distribution and a paginated list as one region"
+        },
+        {
+            "key": "course-review-summary",
+            "verdict": "NEW because a mean, a count and a histogram read as one compact statement and nothing existing expresses it"
+        },
+        {
+            "key": "course-review-row",
+            "verdict": "NEW because an author, a score and a body is a different row from evidence-row or activity rows"
+        }
+    ],
+    "vocabularyProposals": [
+        {
+            "name": "course-prerequisite-list",
+            "kind": "contract",
+            "shape": "joined ul of course-prerequisite-row, same mechanics as course-promise-list"
+        },
+        {
+            "name": "course-review-block",
+            "kind": "contract",
+            "shape": "section holding summary + list + optional write action"
+        },
+        {
+            "name": "course-review-summary",
+            "kind": "contract",
+            "shape": "mean, star run, count and histogram"
+        },
+        {
+            "name": "course-review-row",
+            "kind": "contract",
+            "shape": "author identity, star run, body"
+        }
+    ],
+    "backendEnablerProposals": [],
+    "directions": [
+        {
+            "directionId": "direction-parity-rail",
+            "posture": "parity-first",
+            "thesis": "Everything new lands where the named legacy render already put it. Prerequisites become a gate under the promises, the discount ladder stays in the rail beneath the price, trial and cart join the rail under the primary enrol button, and the review block sits at the foot after the curriculum. The rail is a form, so it holds still: a buy box that animates while a reader compares a price is a buy box they stop trusting.",
+            "primaryCta": "Dang ky hoc, in the rail, unmoved from where the applied page puts it",
+            "representativeSceneId": "direction-parity-rail",
+            "readingOrder": [
+                "breadcrumb",
+                "title and stat chips",
+                "promises",
+                "prerequisites",
+                "curriculum",
+                "reviews",
+                "rail: price, ladder, enrol, trial, cart"
+            ],
+            "tradeoffs": [
+                "Strongest: nothing that works today moves, so review compares additions rather than a rearrangement.",
+                "Weakest: the reviews sit furthest from the moment of decision, which is the one thing the new backend was built to serve.",
+                "Rejection risk: a reader who never scrolls past the curriculum never sees the rating at all."
+            ],
+            "legacyDivergence": [],
+            "implementationFeasibility": {
+                "status": "mapped",
+                "existingOwners": [
+                    "course-detail-page",
+                    "main-then-rail",
+                    "course-hero",
+                    "course-section",
+                    "course-pricing-rail",
+                    "course-mobile-action-bar"
+                ],
+                "existingContracts": [
+                    "course-promise-list",
+                    "course-module-list",
+                    "pricing-phase-ladder",
+                    "course-price-block"
+                ],
+                "exactProposals": [
+                    "NEW contract course-prerequisite-list + course-prerequisite-row, mirroring course-promise-list mechanics under a domain-correct name",
+                    "NEW contract course-review-block, course-review-summary, course-review-row",
+                    "EXTEND course-pricing-rail children with trial and cart slots, both optional"
+                ],
+                "unmappedAnatomy": []
+            }
+        },
+        {
+            "directionId": "direction-proof-first",
+            "posture": "bold",
+            "thesis": "A buyer who is not convinced does not read a curriculum, so the rating rises into the hero chip run and the review block moves above the curriculum. Prerequisites become a disclosure at the head of the curriculum, where they answer the question the curriculum raises. The rail collapses to a price-and-CTA strip once the hero scrolls past.",
+            "primaryCta": "Dang ky hoc, surviving into the collapsed rail strip",
+            "representativeSceneId": "direction-proof-first",
+            "readingOrder": [
+                "breadcrumb",
+                "title, stat chips including rating",
+                "promises",
+                "reviews",
+                "curriculum with prerequisite disclosure",
+                "rail: collapses on scroll"
+            ],
+            "tradeoffs": [
+                "Strongest: proof arrives before the price is compared, which is what the new review capability exists for.",
+                "Weakest: the hero rating must be ABSENT rather than zero when a course has no reviews, because zero stars reads as a bad course rather than a new one.",
+                "Rejection risk: the collapse behaviour is client behaviour no existing owner declares, and the collapsed rail must decide whether to keep or drop the discount ladder - keeping it defeats the collapse, dropping it hides the reason for the price."
+            ],
+            "legacyDivergence": [
+                "The named legacy render puts reviews last; this direction puts them before the curriculum.",
+                "Legacy has no rating in the hero."
+            ],
+            "implementationFeasibility": {
+                "status": "partial",
+                "existingOwners": [
+                    "course-detail-page",
+                    "main-then-rail",
+                    "course-hero",
+                    "course-stat-chip-run",
+                    "course-pricing-rail"
+                ],
+                "existingContracts": [
+                    "course-promise-list",
+                    "course-module-list",
+                    "pricing-phase-ladder"
+                ],
+                "exactProposals": [
+                    "EXTEND course-stat-chip-run with an optional rating chip",
+                    "NEW contract course-review-block, course-review-summary, course-review-row, course-prerequisite-disclosure"
+                ],
+                "unmappedAnatomy": [
+                    "the rail's collapse-on-scroll behaviour: no locked owner declares a scroll observer, and the tier that would hold it today declares only static classes"
+                ]
+            }
+        },
+        {
+            "directionId": "direction-decision-desk",
+            "posture": "balanced",
+            "thesis": "Split the page by job rather than by topic. The main column becomes pure narrative and the rail becomes the whole decision surface: price, ladder, rating line, prerequisites as a checklist, and all three ways in. A reader deciding never leaves the rail; a reader learning never steps over a CTA.",
+            "primaryCta": "Dang ky hoc, inside a rail that also carries the conditions of buying",
+            "representativeSceneId": "direction-decision-desk",
+            "readingOrder": [
+                "breadcrumb",
+                "title and chips",
+                "promises",
+                "curriculum",
+                "reviews",
+                "rail: price, ladder, rating, prerequisites, enrol, trial, cart"
+            ],
+            "tradeoffs": [
+                "Strongest: everything a purchase decision needs is in one place, and the narrative is never interrupted by a CTA.",
+                "Weakest: it claims a prerequisite is a condition of buying rather than a piece of the syllabus. If that claim is wrong, this direction puts course content inside a buy box.",
+                "Rejection risk: the rail already declares max-h-rail and overflow-y-auto, so a long desk can push the enrol button below the rail's OWN fold on a short laptop - a failure the other two directions cannot produce."
+            ],
+            "legacyDivergence": [
+                "Legacy keeps prerequisites in the narrative column."
+            ],
+            "implementationFeasibility": {
+                "status": "mapped",
+                "existingOwners": [
+                    "course-detail-page",
+                    "main-then-rail",
+                    "course-hero",
+                    "course-pricing-rail",
+                    "course-mobile-action-bar"
+                ],
+                "existingContracts": [
+                    "course-promise-list",
+                    "course-module-list",
+                    "pricing-phase-ladder"
+                ],
+                "exactProposals": [
+                    "NEW contract course-review-block, course-review-summary, course-review-row, course-rail-prerequisite-list",
+                    "EXTEND course-pricing-rail children with four optional slots"
+                ],
+                "unmappedAnatomy": []
+            }
+        }
+    ],
+    "directionLab": {
+        "path": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page-v3",
+        "url": "http://127.0.0.1:8084",
+        "caseId": "case-course-detail-v3",
+        "directionIds": [
+            "direction-parity-rail",
+            "direction-proof-first",
+            "direction-decision-desk"
+        ],
+        "note": "Ports 8080 to 8083 were already held by direction labs from other sessions, so the serve script advanced to 8084."
+    },
+    "selectedDirectionId": "direction-parity-rail",
+    "selectionKind": "explicit",
+    "selectionEvidence": "Asked to choose between A, B and C after the lab was hosted; answered \"A - Rail quyet, dung yen\". An earlier bare \"ok\" was NOT treated as a selection, and the choice was put once more as a named question before this was recorded."
+}
