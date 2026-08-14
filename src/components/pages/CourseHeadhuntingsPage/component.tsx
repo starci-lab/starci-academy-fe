@@ -110,11 +110,11 @@ export const _CourseHeadhuntingsPage = (input: CourseHeadhuntingsPageProps) => {
         : undefined
 
     return (
-        <Tree contract="courses-catalog-page" render={defineContractComponent("courses-catalog-page", {
+        <Tree contract="course-headhuntings-page" render={defineContractComponent("course-headhuntings-page", {
             header,
-            toolbar,
+            search: toolbar,
             ...(notice === undefined ? {
-                discover: defineContractProjection("catalog-section-group", () => (
+                directories: defineContractProjection("catalog-section-group", () => (
                     <>
                         <SurfaceListCard
                             contract="content-next-list"

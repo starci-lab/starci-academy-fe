@@ -2,21 +2,19 @@ import { Badge } from "@/components/leaves/Badge"
 import { Button } from "@/components/leaves/Button"
 import { Heading } from "@/components/leaves/Heading"
 import { Text } from "@/components/leaves/Text"
-import { TaskProgressRow } from "@/components/composites/TaskProgressRow"
 import { TextLink } from "@/components/leaves/TextLink"
 // Contract machinery through the candidate mirror, and only because `ContractKey` is closed over
 // the table on disk. The mirror is the locked `contracts/*` and `branches/Tree` copied verbatim
 // with their imports repointed. On materialization these specifiers become `@/`.
 import { Tree } from "@/components/branches/Tree"
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { SurfaceListCard, type SurfaceListCardData } from "@/components/branches/SurfaceListCard"
+import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
+import { CourseValuePropositionList } from "@/components/blocks/courses/CourseValuePropositionList/component"
 import {
-    defineCompositeComponent,
     defineContractComponent,
     defineContractProjection,
     defineLeafComponent,
     type BlockProps,
-    type LeafProps,
 } from "@/components/contracts/props"
 import { CoverImage } from "@/components/leaves/CoverImage"
 
@@ -101,34 +99,6 @@ export type CourseCatalogCardProps = BlockProps<CourseCatalogCardState, CourseCa
  *
  * @param input - {@link CourseCatalogCardProps}
  */
-/** What the promise list draws: the already-resolved claims, in the server's own order. */
-type ValuePropositionsData = SurfaceListCardData & {
-    readonly promises: ReadonlyArray<string>
-}
-
-/**
- * Turn a course's promises into the repeated row the list contract admits.
- *
- * ONE TICK, ONE OWNER. The row is `TaskProgressRow` - the same composite the day's tasks use - so
- * a promise and a task cannot end up wearing two different marks for the same "done" idea.
- */
-const ValuePropositionsView = ({ props, isLoading = false }: LeafProps<ValuePropositionsData>) => (
-    <Tree
-        contract="marked-row-list"
-        render={defineContractComponent("marked-row-list", {
-            row: props.promises.map((promise, index) => defineCompositeComponent("task-progress-row", {}, () => (
-                <TaskProgressRow
-                    props={{ id: `promise-${index}`, title: promise, isComplete: true }}
-                    isLoading={isLoading}
-                />
-            ))),
-        })}
-    />
-)
-
-/** Stable component type branded for the exact list contract it implements. */
-const ValuePropositions = defineContractComponent("marked-row-list", ValuePropositionsView)
-
 /**
  * Draw one purchasable course.
  *
@@ -221,7 +191,7 @@ export const _CourseCatalogCard = (input: CourseCatalogCardProps) => {
                     isNested: true,
                 }}
                 contract="marked-row-list"
-                render={ValuePropositions}
+                render={CourseValuePropositionList}
                 isLoading={isLoading}
             />
         )),

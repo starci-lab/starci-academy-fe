@@ -23,6 +23,9 @@ export type ChoiceTabsData = {
     readonly label: string
     readonly selectedKey: string
     readonly tabs: ReadonlyArray<ChoiceTabData>
+    /** Product hierarchy; independent from HeroUI's paint-token names. */
+    readonly hierarchy?: "primary" | "secondary"
+    /** Local control paint. A primary hierarchy always resolves to the full-width underline. */
     readonly variant?: "primary" | "secondary"
 }
 /** Selection reported by the peer-choice control. */
@@ -52,13 +55,23 @@ const PRIMARY_TAB_CLASSES = "whitespace-nowrap rounded-full aria-selected:bg-sur
 /** The underline variant keeps the vendor's mechanics, so its tab only refuses to wrap. */
 const SECONDARY_TAB_CLASSES = "whitespace-nowrap"
 
+/** A primary navigation run owns the complete line, like the ShellNav tab layer. */
+const PRIMARY_LINE_CLASSES = "w-full"
+
 /** Text-only peer choices, except where a glyph names the SHAPE being chosen. Business categories do not gain decorative glyphs. */
 export const ChoiceTabs = ({ props, on }: ChoiceTabsProps) => {
-    const variant = props.variant ?? "secondary"
+    const isPrimaryLine = props.hierarchy === "primary"
+    const variant = isPrimaryLine ? "secondary" : props.variant ?? "secondary"
     return (
-        <Tabs variant={variant} selectedKey={props.selectedKey} onSelectionChange={(key) => on?.select?.(String(key))}>
+        <Tabs
+            variant={variant}
+            selectedKey={props.selectedKey}
+            onSelectionChange={(key) => on?.select?.(String(key))}
+            className={isPrimaryLine ? PRIMARY_LINE_CLASSES : undefined}
+            data-hierarchy={isPrimaryLine ? "primary" : "secondary"}
+        >
             <Tabs.ListContainer>
-                <Tabs.List aria-label={props.label}>
+                <Tabs.List aria-label={props.label} className={isPrimaryLine ? PRIMARY_LINE_CLASSES : undefined}>
                     {props.tabs.map((tab) => (
                     // `whitespace-nowrap` because the vendor gives every segment an equal, fixed
                     // width and leaves wrapping on: a two-word label breaks onto a second line

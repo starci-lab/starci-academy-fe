@@ -187,14 +187,20 @@
             "inCart": "Đã trong giỏ hàng"
         },
         "detail": {
+            "breadcrumbLabel": "Đường dẫn khóa học",
+            "breadcrumbHome": "Trang chủ",
+            "breadcrumbCourses": "Khóa học",
             "sectionTabsLabel": "Các phần của khóa học",
             "overviewTab": "Khám phá khóa học",
             "curriculumTab": "Nội dung",
             "reviewsTab": "Kết quả học viên",
+            "faqTab": "FAQ",
             "valuePropsTitle": "Bạn sẽ học được gì",
             "prerequisitesTitle": "Cần có trước khi bắt đầu",
             "reviewsTitle": "Đánh giá từ học viên",
             "reviewsEmpty": "Chưa có đánh giá nào cho khóa học này.",
+            "faqTitle": "Câu hỏi thường gặp",
+            "faqEmpty": "Khóa học này chưa đăng câu hỏi thường gặp nào.",
             "reviewCount": "{count} đánh giá",
             "curriculumTitle": "Nội dung khóa học",
             "statLearners": "{count} Học viên",
@@ -607,6 +613,12 @@
                 "flashcards": "Th\u1ebb ghi nh\u1edb",
                 "project": "D\u1ef1 \u00e1n c\u00e1 nh\u00e2n"
             }
+        },
+        "contentHome": {
+            "title": "C\u00e1c m\u00f4-\u0111un c\u1ee7a kh\u00f3a h\u1ecdc",
+            "description": "Ch\u1ecdn m\u1ed9t m\u00f4-\u0111un \u0111\u1ec3 ti\u1ebfp t\u1ee5c h\u1ecdc.",
+            "modules": "M\u00f4-\u0111un",
+            "moduleCount": "{count} m\u00f4-\u0111un"
         },
         "content": {
             "navCourse": "Khoá học",

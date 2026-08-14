@@ -4,8 +4,10 @@ import { Tree } from "@/components/branches/Tree"
 import { SurfaceListCard, type SurfaceListCardData } from "@/components/branches/SurfaceListCard"
 import { _CoursePrerequisiteList, type CoursePrerequisite } from "@/components/blocks/courses/CoursePrerequisiteList/component"
 import { _CourseReviewBlock, type CourseReview } from "@/components/blocks/courses/CourseReviewBlock/component"
+import { CourseValuePropositionList } from "@/components/blocks/courses/CourseValuePropositionList/component"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { ChoiceTabs } from "@/components/leaves/ChoiceTabs"
+import { Breadcrumbs } from "@/components/leaves/Breadcrumbs"
 import { Heading } from "@/components/leaves/Heading"
 import { Text } from "@/components/leaves/Text"
 import { CurriculumModuleRow, type CurriculumLesson } from "@/components/leaves/CurriculumModuleRow"
@@ -64,7 +66,17 @@ export type CourseStat = {
 }
 
 /** The real sections the course-page tabs can reach. */
-export type CourseDetailSection = "overview" | "curriculum" | "reviews"
+export type CourseDetailSection = "overview" | "curriculum" | "reviews" | "faq"
+
+/** One authored question and answer on the course landing page. */
+export type CourseFaq = {
+    /** Stable backend identity. */
+    readonly id: string
+    /** The learner-facing question. */
+    readonly question: string
+    /** The course owner's answer. */
+    readonly answer: string
+}
 
 /** One curriculum module. */
 export type CourseModule = {
@@ -82,6 +94,12 @@ export type CourseModule = {
 
 /** Every already-resolved string the page renders. */
 export type CourseDetailLabels = {
+    /** Accessible name for the route trail. */
+    readonly breadcrumbLabel: string
+    /** Root breadcrumb. */
+    readonly breadcrumbHome: string
+    /** Course catalogue breadcrumb. */
+    readonly breadcrumbCourses: string
     /** Accessible name for the section tabs. */
     readonly sectionTabsLabel: string
     /** Overview tab. */
@@ -90,6 +108,8 @@ export type CourseDetailLabels = {
     readonly curriculumTab: string
     /** Reviews tab. */
     readonly reviewsTab: string
+    /** FAQ tab. */
+    readonly faqTab: string
     /** Promises section title. */
     readonly valuePropsTitle: string
     /** Curriculum section title. */
@@ -100,6 +120,10 @@ export type CourseDetailLabels = {
     readonly reviewsTitle: string
     /** What the reviews region says when nobody has reviewed yet. */
     readonly reviewsEmpty: string
+    /** FAQ section title. */
+    readonly faqTitle: string
+    /** What the FAQ region says when no rows are authored. */
+    readonly faqEmpty: string
     /** Already-formatted "N reviews" copy. */
     readonly reviewCount: string
 }
@@ -122,6 +146,8 @@ export type CourseDetailPageData = {
     readonly prerequisites?: ReadonlyArray<CoursePrerequisite>
     /** The reviews on the first page, newest first. */
     readonly reviews?: ReadonlyArray<CourseReview>
+    /** Authored course FAQs in declaration order. */
+    readonly faqs?: ReadonlyArray<CourseFaq>
     /** Mean across every review, from the projection rather than from the rows above. */
     readonly averageScore?: number
     /** How many reviews the course carries in total. */
@@ -140,8 +166,16 @@ export type CourseDetailPageData = {
 
 /** What the page reports. */
 export type CourseDetailPageActions = {
+    /** Return through the breadcrumb to the product home. */
+    readonly navigateHome?: () => void
+    /** Return through the breadcrumb to the course catalogue. */
+    readonly navigateCourses?: () => void
     /** The single buy action, shared by the rail and the pinned bar. */
     readonly act?: () => void
+    /** Open the previewable learning path without buying the course. */
+    readonly trial?: () => void
+    /** Put the course in the viewer's cart without leaving this page. */
+    readonly addToCart?: () => void
     /** Move the reader to one real section on this page. */
     readonly selectSection?: (section: CourseDetailSection) => void
     /** Recovery from the failed situation. */
@@ -170,12 +204,13 @@ export type CourseDetailPageProps = {
  */
 const RESTING = {
     stats: CONTRACTS["course-signal-board"].children.signal.restingCount,
-    promises: CONTRACTS["course-promise-list"].children.promise.restingCount,
+    promises: CONTRACTS["marked-row-list"].children.row.restingCount,
     modules: CONTRACTS["course-module-list"].children.module.restingCount,
     prerequisites: CONTRACTS["course-prerequisite-list"].children.prerequisite.restingCount,
+    faqs: CONTRACTS["course-faq-list"].children.faq.restingCount,
 }
 
-/** Draw one signal through the surface contract matching its approved emphasis. */
+/** Draw one cell inside the shared signal surface. */
 const courseSignalCard = (stat: CourseStat, isLoading: boolean) => {
     const slots = {
         label: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
@@ -187,23 +222,15 @@ const courseSignalCard = (stat: CourseStat, isLoading: boolean) => {
     }
 
     if (stat.emphasis === "accent") {
-        return defineContractProjection("course-signal-card-accent", () => (
-            <SurfaceCard contract="course-signal-card-accent" render={defineContractComponent("course-signal-card-accent", slots)} />
-        ))
+        return defineContractComponent("course-signal-card-accent", slots)
     }
     if (stat.emphasis === "success") {
-        return defineContractProjection("course-signal-card-success", () => (
-            <SurfaceCard contract="course-signal-card-success" render={defineContractComponent("course-signal-card-success", slots)} />
-        ))
+        return defineContractComponent("course-signal-card-success", slots)
     }
     if (stat.emphasis === "warning") {
-        return defineContractProjection("course-signal-card-warning", () => (
-            <SurfaceCard contract="course-signal-card-warning" render={defineContractComponent("course-signal-card-warning", slots)} />
-        ))
+        return defineContractComponent("course-signal-card-warning", slots)
     }
-    return defineContractProjection("course-signal-card-neutral", () => (
-        <SurfaceCard contract="course-signal-card-neutral" render={defineContractComponent("course-signal-card-neutral", slots)} />
-    ))
+    return defineContractComponent("course-signal-card-neutral", slots)
 }
 
 /**
@@ -216,35 +243,16 @@ const courseSignalCard = (stat: CourseStat, isLoading: boolean) => {
  * is not drawn twice.
  */
 
-/** What the promise run draws: the already-resolved claims, in the course's own order. */
-type CoursePromiseListData = SurfaceListCardData & {
-    readonly promises: ReadonlyArray<string>
-}
-
 /** What the curriculum run draws: the modules, in teaching order. */
 type CourseModuleListData = SurfaceListCardData & {
     readonly modules: ReadonlyArray<CourseModule>
 }
 
-/** The unordered run of promises, drawn inside the surface branch's body. */
-const CoursePromiseListView = ({ props, isLoading = false }: LeafProps<CoursePromiseListData>) => (
-    <Tree
-        contract="course-promise-list"
-        render={defineContractComponent("course-promise-list", {
-            promise: props.promises.map((line) => defineContractComponent("course-promise-row", {
-                mark: defineLeafComponent("text", { size: "sm" }, () => (
-                    <Text props={{ icon: "complete", content: "", size: "sm", tone: "accent" }} />
-                )),
-                promise: defineLeafComponent("text", { size: "sm" }, () => (
-                    <Text props={{ content: line, size: "sm" }} isLoading={isLoading} />
-                )),
-            })),
-        })}
-    />
-)
-
-/** Stable component type branded for the exact promise contract it implements. */
-const CoursePromiseList = defineContractComponent("course-promise-list", CoursePromiseListView)
+/** What the FAQ run draws: authored question/answer pairs or one honest empty row. */
+type CourseFaqListData = SurfaceListCardData & {
+    readonly faqs: ReadonlyArray<CourseFaq>
+    readonly emptyLabel: string
+}
 
 /** What the prerequisite list draws inside the surface branch body. */
 type CoursePrerequisiteListData = SurfaceListCardData & {
@@ -284,6 +292,31 @@ const CourseModuleListView = ({ props, isLoading = false }: LeafProps<CourseModu
 
 /** Stable component type branded for the exact curriculum contract it implements. */
 const CourseModuleList = defineContractComponent("course-module-list", CourseModuleListView)
+
+/** The unordered FAQ run, drawn inside the existing joined-list surface. */
+const CourseFaqListView = ({ props, isLoading = false }: LeafProps<CourseFaqListData>) => {
+    const rows = props.faqs.length === 0 && !isLoading
+        ? [{ id: "empty", question: props.emptyLabel, answer: "" }]
+        : props.faqs
+    return (
+        <Tree
+            contract="course-faq-list"
+            render={defineContractComponent("course-faq-list", {
+                faq: rows.map((faq) => defineContractComponent("course-faq-row", {
+                    question: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
+                        <Text props={{ content: faq.question, size: "sm", weight: "semibold" }} isLoading={isLoading} />
+                    )),
+                    answer: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                        <Text props={{ content: faq.answer, size: "sm", tone: "muted" }} isLoading={isLoading} />
+                    )),
+                })),
+            })}
+        />
+    )
+}
+
+/** Stable component type branded for the exact FAQ contract it implements. */
+const CourseFaqList = defineContractComponent("course-faq-list", CourseFaqListView)
 
 /**
  * Draw the course landing.
@@ -332,8 +365,25 @@ export const _CourseDetailPage = (input: CourseDetailPageProps) => {
         ? Array.from({ length: RESTING.prerequisites }, (_unused, index) => ({ id: `resting-${index + 1}`, requirement: "" }))
         : input.props.prerequisites ?? []
     const reviews: ReadonlyArray<CourseReview> = isLoading ? [] : input.props.reviews ?? []
+    const faqs: ReadonlyArray<CourseFaq> = isLoading
+        ? Array.from({ length: RESTING.faqs }, (_unused, index) => ({ id: `resting-${index + 1}`, question: "", answer: "" }))
+        : input.props.faqs ?? []
 
     const hero = defineContractComponent("course-hero", {
+        trail: defineLeafComponent("breadcrumbs", {}, () => (
+            <Breadcrumbs
+                props={{
+                    label: input.props.labels.breadcrumbLabel,
+                    steps: [
+                        { id: "home", label: input.props.labels.breadcrumbHome },
+                        { id: "courses", label: input.props.labels.breadcrumbCourses },
+                        { id: "course", label: input.props.title ?? "" },
+                    ],
+                }}
+                on={{ home: input.on?.navigateHome, courses: input.on?.navigateCourses }}
+                isLoading={isLoading}
+            />
+        )),
         heading: defineContractComponent("course-hero-heading", {
             identity: defineContractComponent("course-hero-title-stack", {
                 title: defineLeafComponent("heading", {}, () => (
@@ -343,72 +393,40 @@ export const _CourseDetailPage = (input: CourseDetailPageProps) => {
                     <Text props={{ content: input.props.tagline, size: "sm" }} isLoading={isLoading} />
                 )),
             }),
-            rating: isLoading || (input.props.reviewTotal ?? 0) === 0 || input.props.averageScore === undefined
-                ? undefined
-                : defineContractComponent("course-hero-rating", {
-                    score: defineLeafComponent("heading", {}, () => (
-                        <Heading props={{ content: input.props.averageScore?.toFixed(1), level: 2 }} />
-                    )),
-                    count: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                        <Text props={{ content: input.props.labels.reviewCount, icon: "star", size: "xs", tone: "muted" }} />
-                    )),
-                }),
         }),
-        evidence: defineContractComponent("course-signal-board", {
-            signal: stats.map((stat) => courseSignalCard(stat, isLoading)),
-        }),
+        evidence: defineContractProjection("course-signal-board", () => (
+            <SurfaceCard
+                contract="course-signal-board"
+                render={defineContractComponent("course-signal-board", {
+                    signal: stats.map((stat) => courseSignalCard(stat, isLoading)),
+                })}
+            />
+        )),
         section: [
-            defineContractComponent("course-section", {
-                title: defineLeafComponent("heading", {}, () => (
-                    <Heading props={{ content: input.props.labels.valuePropsTitle, level: 2 }} />
-                )),
-                body: defineContractProjection("course-promise-list", () => (
-                    <SurfaceListCard
-                        contract="course-promise-list"
-                        render={CoursePromiseList}
-                        props={{
-                            label: input.props.labels.valuePropsTitle,
-                            isLabelHidden: true,
-                            promises: valueProps,
-                        }}
-                        isLoading={isLoading}
-                    />
-                )),
-            }),
-            defineContractComponent("course-section", {
-                title: defineLeafComponent("heading", {}, () => (
-                    <Heading props={{ content: input.props.labels.prerequisitesTitle, level: 2 }} />
-                )),
-                body: defineContractProjection("course-prerequisite-list", () => (
-                    <SurfaceListCard
-                        contract="course-prerequisite-list"
-                        render={CoursePrerequisiteList}
-                        props={{
-                            label: input.props.labels.prerequisitesTitle,
-                            isLabelHidden: true,
-                            prerequisites,
-                        }}
-                        isLoading={isLoading}
-                    />
-                )),
-            }),
-            defineContractComponent("course-section", {
-                title: defineLeafComponent("heading", {}, () => (
-                    <Heading props={{ content: input.props.labels.curriculumTitle, level: 2 }} />
-                )),
-                body: defineContractProjection("course-module-list", () => (
-                    <SurfaceListCard
-                        contract="course-module-list"
-                        render={CourseModuleList}
-                        props={{
-                            label: input.props.labels.curriculumTitle,
-                            isLabelHidden: true,
-                            modules,
-                        }}
-                        isLoading={isLoading}
-                    />
-                )),
-            }),
+            defineContractProjection("marked-row-list", () => (
+                <SurfaceListCard
+                    contract="marked-row-list"
+                    render={CourseValuePropositionList}
+                    props={{ label: input.props.labels.valuePropsTitle, promises: valueProps }}
+                    isLoading={isLoading}
+                />
+            )),
+            defineContractProjection("course-prerequisite-list", () => (
+                <SurfaceListCard
+                    contract="course-prerequisite-list"
+                    render={CoursePrerequisiteList}
+                    props={{ label: input.props.labels.prerequisitesTitle, prerequisites }}
+                    isLoading={isLoading}
+                />
+            )),
+            defineContractProjection("course-module-list", () => (
+                <SurfaceListCard
+                    contract="course-module-list"
+                    render={CourseModuleList}
+                    props={{ label: input.props.labels.curriculumTitle, modules }}
+                    isLoading={isLoading}
+                />
+            )),
             defineContractComponent("course-section", {
                 title: defineLeafComponent("heading", {}, () => (
                     <Heading props={{ content: input.props.labels.reviewsTitle, level: 2 }} />
@@ -426,6 +444,14 @@ export const _CourseDetailPage = (input: CourseDetailPageProps) => {
                     />
                 )),
             }),
+            defineContractProjection("course-faq-list", () => (
+                <SurfaceListCard
+                    contract="course-faq-list"
+                    render={CourseFaqList}
+                    props={{ label: input.props.labels.faqTitle, faqs, emptyLabel: input.props.labels.faqEmpty }}
+                    isLoading={isLoading}
+                />
+            )),
         ],
     })
 
@@ -440,9 +466,10 @@ export const _CourseDetailPage = (input: CourseDetailPageProps) => {
                                 label: input.props.labels.sectionTabsLabel,
                                 selectedKey: input.props.selectedSection ?? "overview",
                                 tabs: [
-                                    { id: "overview", label: input.props.labels.overviewTab },
-                                    { id: "curriculum", label: input.props.labels.curriculumTab },
-                                    { id: "reviews", label: input.props.labels.reviewsTab },
+                                    { id: "overview", label: input.props.labels.overviewTab, icon: "explore" },
+                                    { id: "curriculum", label: input.props.labels.curriculumTab, icon: "course" },
+                                    { id: "reviews", label: input.props.labels.reviewsTab, icon: "review" },
+                                    { id: "faq", label: input.props.labels.faqTab, icon: "disclosure" },
                                 ],
                             }}
                             on={{ select: (key) => input.on?.selectSection?.(key as CourseDetailSection) }}
@@ -454,7 +481,11 @@ export const _CourseDetailPage = (input: CourseDetailPageProps) => {
                     rail: CoursePricingRail({
                         state: input.props.railState ?? "ready",
                         props: input.props.rail ?? { title: input.props.title ?? "", ctaLabel: "" },
-                        on: { act: input.on?.act },
+                        on: {
+                            act: input.on?.act,
+                            trial: input.on?.trial,
+                            addToCart: input.on?.addToCart,
+                        },
                     }),
                 }),
                 action: input.props.rail === undefined ? undefined : CourseMobileEnrollBar({

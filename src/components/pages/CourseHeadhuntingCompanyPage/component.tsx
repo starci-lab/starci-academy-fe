@@ -103,11 +103,11 @@ export const _CourseHeadhuntingCompanyPage = (input: CourseHeadhuntingCompanyPag
         : undefined
 
     return (
-        <Tree contract="courses-catalog-page" render={defineContractComponent("courses-catalog-page", {
+        <Tree contract="course-headhunting-company-page" render={defineContractComponent("course-headhunting-company-page", {
             header,
-            toolbar,
+            actions: toolbar,
             ...(notice === undefined ? {
-                discover: defineContractProjection("catalog-section-group", () => (
+                profile: defineContractProjection("catalog-section-group", () => (
                     <>
                         {input.props.description === undefined ? null : <Text props={{ content: input.props.description, size: "md" }} isLoading={isLoading} />}
                         {input.props.address === undefined ? null : <Text props={{ content: input.props.address, size: "sm", tone: "muted" }} isLoading={isLoading} />}

@@ -46,6 +46,12 @@ const query1 = gql`
                     text
                     orderIndex
                 }
+                qnas {
+                    id
+                    question
+                    answer
+                    orderIndex
+                }
                 pricingPhases {
                     id
                     phase

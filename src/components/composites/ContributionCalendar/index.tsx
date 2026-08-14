@@ -48,6 +48,7 @@ export const ContributionCalendar = ({ props, on, isLoading = false }: Contribut
                 props={{
                     label: props.totalLabel ?? "",
                     selectedKey: String(props.year),
+                    hierarchy: "primary",
                     tabs: props.years.map((year) => ({ id: String(year), label: String(year) })),
                 }}
                 on={{ select: (key) => on?.selectYear?.(Number(key)) }}

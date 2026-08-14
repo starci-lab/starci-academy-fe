@@ -2,7 +2,7 @@
 import { useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
-import { useQueryCourseReviewsSwr, useQueryCourseSwr } from "@/hooks"
+import { useMutateAddToCartSwr, useQueryCourseReviewsSwr, useQueryCourseSwr } from "@/hooks"
 import { _CourseDetailPage, type CourseDetailSection } from "./component"
 import type { CourseDetail, CourseModule } from "@/modules/api/graphql/queries/types/course"
 
@@ -45,10 +45,14 @@ const byOrder = <T extends { orderIndex: number }>(rows: ReadonlyArray<T>) =>
  */
 export const CourseDetailPage = (input: CourseDetailPageProps) => {
     const t = useTranslations("courses.detail")
+    const tCourses = useTranslations("courses")
+    const tCatalog = useTranslations("courses.catalog")
     const locale = useLocale()
     const router = useRouter()
     const [selectedSection, setSelectedSection] = useState<CourseDetailSection>("overview")
+    const [isInCart, setIsInCart] = useState(false)
     const query = useQueryCourseSwr({ displayId: input.displayId })
+    const cart = useMutateAddToCartSwr(query.data?.id)
     // The rating is a second request on purpose: it is public, shared by every reader and
     // invalidated by a different event than the course itself, so folding it into the course
     // query would make one cache entry answer two questions that change at different times.
@@ -56,15 +60,21 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
     const money = new Intl.NumberFormat(locale, { style: "currency", currency: "VND", maximumFractionDigits: 0 })
 
     const labels = {
+        breadcrumbLabel: t("breadcrumbLabel"),
+        breadcrumbHome: t("breadcrumbHome"),
+        breadcrumbCourses: t("breadcrumbCourses"),
         sectionTabsLabel: t("sectionTabsLabel"),
         overviewTab: t("overviewTab"),
         curriculumTab: t("curriculumTab"),
         reviewsTab: t("reviewsTab"),
+        faqTab: t("faqTab"),
         valuePropsTitle: t("valuePropsTitle"),
         curriculumTitle: t("curriculumTitle"),
         prerequisitesTitle: t("prerequisitesTitle"),
         reviewsTitle: t("reviewsTitle"),
         reviewsEmpty: t("reviewsEmpty"),
+        faqTitle: t("faqTitle"),
+        faqEmpty: t("faqEmpty"),
         reviewCount: t("reviewCount", { count: reviewQuery.data?.total ?? 0 }),
     }
 
@@ -97,7 +107,8 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
         const sections = document.querySelectorAll<HTMLElement>("[data-node=\"course-section\"]")
         const target = section === "overview"
             ? document.querySelector<HTMLElement>("[data-node=\"course-hero-heading\"]")
-            : section === "curriculum" ? sections.item(2) : sections.item(3)
+            : section === "curriculum" ? sections.item(2)
+                : section === "reviews" ? sections.item(3) : sections.item(4)
         target?.scrollIntoView({ behavior: "smooth", block: "start" })
     }
 
@@ -145,8 +156,19 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
                         value: t("statChallenges", { count: sumContents(modules, (content) => content.numChallenges) }),
                         emphasis: "neutral",
                     },
+                    {
+                        id: "rating",
+                        label: t("reviewCount", { count: reviewQuery.data?.total ?? 0 }),
+                        value: reviewQuery.data?.averageScore?.toFixed(1) ?? "—",
+                        emphasis: "neutral",
+                    },
                 ],
                 valueProps: byOrder(course.valuePropositions ?? []).map((proposition) => proposition.text),
+                faqs: byOrder(course.qnas ?? []).map((faq) => ({
+                    id: faq.id,
+                    question: faq.question,
+                    answer: faq.answer,
+                })),
                 // Ordered by the backend and read that way here: a learner who lacks the first
                 // requirement cannot judge the second, so arrival order is not good enough.
                 // The mean and the total describe the WHOLE population and come from the
@@ -199,11 +221,40 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
                     // guest, which is neither - and a guest is asked to enrol, because that is the
                     // action the page can actually offer them.
                     ctaLabel: course.isEnrolled === true ? t("continue") : t("enroll"),
+                    trialLabel: course.isEnrolled === true ? undefined : tCourses("trial"),
+                    cartLabel: course.isEnrolled === true
+                        ? undefined
+                        : isInCart ? tCatalog("inCart") : tCatalog("addToCart"),
+                    isInCart,
                     enrolmentLabel: t("enrolled", { count: course.enrollmentCount }),
                 },
+                railState: cart.isMutating ? "adding" : "ready",
             }}
             on={{
-                act: () => { router.push(`/courses/${course.displayId}/learn`) },
+                act: () => {
+                    if (course.isEnrolled === true) {
+                        router.push(`/courses/${course.displayId}/learn`)
+                        return
+                    }
+                    if (isInCart) {
+                        router.push("/cart")
+                        return
+                    }
+                    void cart.trigger({ courseId: course.id }).then((result) => {
+                        if (result?.data?.addToCart?.success !== true) return
+                        setIsInCart(true)
+                        router.push("/cart")
+                    })
+                },
+                trial: () => { router.push(`/courses/${course.displayId}/learn`) },
+                addToCart: () => {
+                    if (isInCart) return
+                    void cart.trigger({ courseId: course.id }).then((result) => {
+                        if (result?.data?.addToCart?.success === true) setIsInCart(true)
+                    })
+                },
+                navigateHome: () => { router.push("/") },
+                navigateCourses: () => { router.push("/courses") },
                 selectSection,
             }}
         />

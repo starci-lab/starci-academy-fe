@@ -25,7 +25,7 @@
  * when the bad value cannot be typed.
  */
 export type LayoutClassName =
-    | "flex" | "grid" | "flex-col" | "flex-row" | "flex-wrap" | "overflow-hidden"
+    | "flex" | "grid" | "flex-col" | "flex-row" | "flex-wrap" | "overflow-hidden" | "relative"
     | "items-center" | "items-baseline" | "items-start" | "items-end"
     | "justify-between" | "justify-center" | "[&>*]:w-full"
     | "gap-1" | "gap-2" | "gap-3" | "gap-4" | "gap-6" | "gap-8"
@@ -43,7 +43,7 @@ export type LayoutClassName =
     | "mx-auto" | "min-h-screen" | "w-full" | "min-w-0" | "grow" | "flex-1" | "shrink-0" | "hidden" | "max-w-app-sm" | "max-w-app-md" | "max-w-app-lg" | "max-w-app-xl" | "max-w-6xl" | "max-w-sm" | "max-w-md" | "@container"
     | "h-16" | "min-h-16" | "sticky" | "top-0" | "top-16" | "z-40" | "z-50"
     | "border" | "border-b" | "border-separator" | "divide-y" | "divide-separator" | "bg-background"
-    | "px-3" | "px-4" | "px-6" | "py-2" | "py-3" | "py-6" | "p-0" | "p-2" | "p-4" | "p-6"
+    | "px-3" | "px-4" | "px-6" | "py-2" | "py-3" | "py-6" | "p-0" | "p-2" | "p-4" | "p-6" | "-mt-px"
     | "px-2" | "pl-4" | "cursor-pointer" | "text-left" | "text-foreground" | "hover:opacity-80"
     | "group" | "active:opacity-70"
     | "rounded-xl" | "rounded-2xl" | "rounded-3xl"
@@ -276,6 +276,26 @@ export const CONTRACTS = buildContracts({
             notice: { composite: "empty-notice", optional: true },
         },
         why: "Today gives the learner one deterministic next move before any alternatives. Course and progress are alternate mobile compositions of the same route, so each owns a named optional slot instead of mutating the URL or drawing a second page.",
+    },
+    "course-learn-content-home-page": {
+        host: "main",
+        classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "flex-col", "gap-4", "px-6", "py-6"],
+        children: {
+            title: { leaf: "heading" },
+            description: { leaf: "text", props: { size: "sm" } },
+            modulesTitle: { leaf: "heading", optional: true },
+            module: { leaf: "curriculum-module-row", repeats: true, restingCount: 3, optional: true },
+        },
+        why: "The Modules landing page names the enrolled course, explains the collection, then keeps every authored module in one scannable run; loading and failure retain that same route landmark instead of replacing the page identity.",
+    },
+    "course-learn-module-page": {
+        host: "main",
+        classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "flex-col", "gap-4", "px-6", "py-6"],
+        children: {
+            title: { leaf: "heading" },
+            module: { leaf: "curriculum-module-row" },
+        },
+        why: "A selected module keeps its title and authored contents together under one main landmark, so opening a module narrows the curriculum without inventing a second navigation shell.",
     },
     "learn-mobile-tab-bar": {
         host: "nav",
@@ -1200,12 +1220,12 @@ export const CONTRACTS = buildContracts({
         why: "The year summary, one intrinsic contribution plot and its reading key form a single fixed visualization, so the composite closes those three regions without owning their DOM mechanics.",
     },
     "contribution-calendar-heading-row": {
-        classes: ["flex", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-3"],
+        classes: ["flex", "w-full", "flex-col", "gap-3"],
         children: {
             total: { leaf: "text", props: { size: "xs", tone: "muted" } },
             years: { leaf: "choice-tabs" },
         },
-        why: "The activity total identifies the plot while the peer year choices change its time window, so they share one header row without either becoming part of the grid mechanics.",
+        why: "The activity total identifies the plot, then the primary year navigation owns one complete underline run before the grid begins. Like ShellNav, the run spans its available line because it changes the whole panel rather than acting as a compact secondary filter at one edge.",
     },
     "contribution-calendar-footer-row": {
         classes: ["flex", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-3"],
@@ -1996,6 +2016,39 @@ export const CONTRACTS = buildContracts({
         },
         why: "One toolbar narrows both groups at once, so it is a peer of them rather than something either group owns, and every region on the route keeps the same seam instead of choosing its own spacing.",
     },
+    "course-qa-page": {
+        host: "main",
+        classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            header: { contract: "page-header-stack" },
+            composer: { contract: "catalog-search-count-view-row" },
+            thread: { contract: "catalog-section-group", optional: true },
+            notice: { composite: "empty-notice", optional: true },
+        },
+        why: "Course Q&A keeps search and the inline question composer together before the selected question-or-reply thread; settled empty and failed states replace that thread without turning the route into a course catalog.",
+    },
+    "course-headhuntings-page": {
+        host: "main",
+        classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            header: { contract: "page-header-stack" },
+            search: { contract: "catalog-search-count-view-row" },
+            directories: { contract: "catalog-section-group", optional: true },
+            notice: { composite: "empty-notice", optional: true },
+        },
+        why: "The headhunting directory reads from course identity through one company query into the company and consultant runs it narrows; empty and failed outcomes replace those directories in place.",
+    },
+    "course-headhunting-company-page": {
+        host: "main",
+        classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            header: { contract: "page-header-stack" },
+            actions: { contract: "catalog-search-count-view-row" },
+            profile: { contract: "catalog-section-group", optional: true },
+            notice: { composite: "empty-notice", optional: true },
+        },
+        why: "One company profile keeps back and contact actions ahead of its description and consultant contacts; not-found and failed outcomes replace the profile while preserving the company route identity.",
+    },
     "catalog-search-count-view-row": {
         classes: ["flex", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-4"],
         children: {
@@ -2024,11 +2077,11 @@ export const CONTRACTS = buildContracts({
         why: "Owned and purchasable courses answer different questions, so each keeps its own titled group and one action meaning instead of forcing the reader to tell them apart card by card.",
     },
     "catalog-card-grid": {
-        classes: ["grid", "grid-cols-1", "sm:grid-cols-2", "lg:grid-cols-3", "gap-4"],
+        classes: ["grid", "grid-cols-1", "sm:grid-cols-2", "lg:grid-cols-3", "gap-2"],
         children: {
             course: { contract: "catalog-card", repeats: true, restingCount: 3 },
         },
-        why: "Catalog courses are interchangeable peers compared side by side, so they share one responsive measure rather than a single reading column. The slot names the one card kind it accepts rather than opening to any content: a course the learner already owns is not a card here at all, it is a row of the same joined list the dashboard already draws.",
+        why: "Catalog courses are compact comparison peers in one responsive decision cluster, so the 8px grouped-card seam keeps columns associated without merging their individual surfaces. The slot names the one card kind it accepts rather than opening to any content: a course the learner already owns is not a card here at all, it is a row of the same joined list the dashboard already draws.",
     },
     "catalog-card-list": {
         classes: ["overflow-hidden", "divide-y", "divide-separator", "p-0", "[&>*]:px-4", "[&>*]:py-3", "[&>*:first-child]:pt-4", "[&>*:last-child]:pb-4"],
@@ -2122,19 +2175,19 @@ export const CONTRACTS = buildContracts({
         why: "The course name leads while its enrolment count qualifies it from the end of the same line, because the count is evidence about the name rather than a fact of its own. The name owns the spare width and yields it back as the card narrows, so the count stays whole instead of being clipped by the card's own rounded overflow.",
     },
     "course-detail-page": {
-        classes: ["flex", "min-w-0", "flex-col", "gap-4", "pt-6"],
+        classes: ["flex", "min-w-0", "flex-col", "gap-4"],
         children: {
             navigation: { contract: "course-section-navigation" },
             body: { contract: "main-then-rail" },
             action: { contract: "course-mobile-action-bar", optional: true },
         },
-        why: "The page begins with peer section navigation and carries no horizontal inset or bottom padding: the navigation and body own their readable measure while the pinned phone action still reaches both viewport edges and rests flush on the bottom edge.",
+        why: "The page begins at the navbar seam with peer section navigation and carries no horizontal inset or bottom padding: the navigation reads as the primary navbar's second layer while the body owns its readable measure and the pinned phone action still reaches both viewport edges.",
     },
     "course-section-navigation": {
         host: "nav",
-        classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "border-b", "border-separator", "px-6"],
+        classes: ["sticky", "top-16", "z-50", "-mt-px", "flex", "w-full", "border-b", "border-separator", "bg-background", "px-6"],
         children: { tabs: { leaf: "choice-tabs" } },
-        why: "The three controls move within one course document, so they share one navigation landmark and one full-width baseline above the narrative instead of masquerading as breadcrumb destinations.",
+        why: "The four controls move within one course document, so they share one navigation landmark and one full-width baseline above the narrative. Their sticky layer stays directly under the primary navbar while scrolling, and its opaque surface overlaps the primary navbar's bottom stroke by exactly one pixel, leaving the same single divider below the complete two-row navbar as Dashboard; the breadcrumb inside the narrative separately preserves route ancestry.",
     },
     "main-then-rail": {
         classes: ["mx-auto", "w-full", "max-w-6xl", "px-6", "pb-6", "flex", "flex-col", "gap-6", "md:gap-8", "md:flex-row", "md:items-start", "md:[&>*:first-child]:min-w-0", "md:[&>*:first-child]:grow",
@@ -2153,19 +2206,19 @@ export const CONTRACTS = buildContracts({
         host: "section",
         classes: ["flex", "min-w-0", "flex-col", "gap-6"],
         children: {
+            trail: { leaf: "breadcrumbs" },
             heading: { contract: "course-hero-heading" },
             evidence: { contract: "course-signal-board" },
-            section: { contract: "course-section", repeats: true, restingCount: 2 },
+            section: { contract: ["marked-row-list", "course-prerequisite-list", "course-module-list", "course-section", "course-faq-list"], repeats: true, restingCount: 2 },
         },
-        why: "What the course is, the evidence behind it and what follows are one conversion narrative: identity leads, a bounded signal board makes the proof scannable, and the detailed sections answer the proof in reading order.",
+        why: "The route trail first restores where the reader came from, then course identity leads the conversion narrative: a bounded signal board makes the proof scannable and each page-level joined list arrives as its own labelled SurfaceListCard projection. The review block keeps a named section because it is not a list-surface branch. Section tabs do not replace this ancestry.",
     },
     "course-hero-heading": {
-        classes: ["flex", "flex-col", "gap-4", "sm:flex-row", "sm:items-start", "sm:justify-between"],
+        classes: ["flex", "min-w-0", "flex-col"],
         children: {
             identity: { contract: "course-hero-title-stack" },
-            rating: { contract: "course-hero-rating", optional: true },
         },
-        why: "Course identity owns the flexible reading measure while the compact population rating sits at its end only when learners have actually reviewed the course; neither introduces a second commerce action.",
+        why: "Course identity owns the full readable measure; population rating now belongs to the six-cell evidence ribbon with the other comparable course facts.",
     },
     "course-hero-title-stack": {
         classes: ["flex", "min-w-0", "grow", "flex-col", "gap-2"],
@@ -2175,38 +2228,36 @@ export const CONTRACTS = buildContracts({
         },
         why: "The course name and its qualifying sentence are one identity statement and keep the flexible measure so a long technical description wraps before it squeezes the rating.",
     },
-    "course-hero-rating": {
-        classes: ["flex", "shrink-0", "flex-col", "items-center", "gap-1", "rounded-2xl", "bg-accent-soft", "p-4", "text-center"],
-        children: {
-            score: { leaf: "heading" },
-            count: { leaf: "text", props: { size: "xs", tone: "muted" } },
-        },
-        why: "The mean and the population behind it are one compact proof object; it appears only for a rated course so zero is never mistaken for a verdict.",
-    },
     "course-signal-board": {
-        classes: ["grid", "grid-cols-1", "gap-4", "sm:grid-cols-2", "lg:grid-cols-3"],
+        classes: [
+            "grid", "grid-cols-2", "overflow-hidden", "sm:grid-cols-3",
+            "[&>*]:p-4", "[&>*]:border-separator",
+            "[&>*:nth-child(even)]:border-l", "[&>*:nth-child(n+3)]:border-t",
+            "sm:[&>*:nth-child(even)]:border-l-0", "sm:[&>*:not(:nth-child(3n+1))]:border-l",
+            "sm:[&>*:nth-child(3)]:border-t-0",
+        ],
         children: {
-            signal: { contract: ["course-signal-card-accent", "course-signal-card-success", "course-signal-card-warning", "course-signal-card-neutral"], repeats: true, restingCount: 5 },
+            signal: { contract: ["course-signal-card-accent", "course-signal-card-success", "course-signal-card-warning", "course-signal-card-neutral"], repeats: true, restingCount: 6 },
         },
-        why: "Five course facts form one responsive board: primary conversion signals gain status-tinted surfaces while supporting inventory facts keep the neutral ground, so the eye finds the decision evidence before counting every unit.",
+        why: "Six comparable course facts share one card and read across its ruled cells, matching the weekly-goal ribbon instead of becoming six smaller cards with six competing radii.",
     },
     "course-signal-card-accent": {
-        classes: ["flex", "min-w-0", "flex-col", "gap-2", "rounded-2xl", "bg-accent-soft", "p-4"],
+        classes: ["flex", "min-w-0", "flex-col", "gap-2", "bg-accent-soft"],
         children: { label: { leaf: "text", props: { size: "xs", tone: "muted" } }, value: { leaf: "text", props: { size: "md", weight: "semibold" } } },
         why: "The lead adoption signal receives the brand-soft ground without changing the semantic rank of its label and value.",
     },
     "course-signal-card-success": {
-        classes: ["flex", "min-w-0", "flex-col", "gap-2", "rounded-2xl", "bg-success-soft", "p-4"],
+        classes: ["flex", "min-w-0", "flex-col", "gap-2", "bg-success-soft"],
         children: { label: { leaf: "text", props: { size: "xs", tone: "muted" } }, value: { leaf: "text", props: { size: "md", weight: "semibold" } } },
         why: "Curriculum depth is affirmative evidence, so it takes the success-soft ground while remaining the same label-over-value sentence as its peers.",
     },
     "course-signal-card-warning": {
-        classes: ["flex", "min-w-0", "flex-col", "gap-2", "rounded-2xl", "bg-warning-soft", "p-4"],
+        classes: ["flex", "min-w-0", "flex-col", "gap-2", "bg-warning-soft"],
         children: { label: { leaf: "text", props: { size: "xs", tone: "muted" } }, value: { leaf: "text", props: { size: "md", weight: "semibold" } } },
         why: "Time commitment needs attention before purchase, so it takes the warning-soft ground without being styled as an error.",
     },
     "course-signal-card-neutral": {
-        classes: ["flex", "min-w-0", "flex-col", "gap-2", "rounded-2xl", "p-4"],
+        classes: ["flex", "min-w-0", "flex-col", "gap-2"],
         children: { label: { leaf: "text", props: { size: "xs", tone: "muted" } }, value: { leaf: "text", props: { size: "md", weight: "semibold" } } },
         why: "Supporting inventory evidence remains a real bounded card but yields chromatic priority to adoption, depth and time.",
     },
@@ -2215,26 +2266,26 @@ export const CONTRACTS = buildContracts({
         classes: ["flex", "flex-col", "gap-3"],
         children: {
             title: { leaf: "heading" },
-            body: { contract: ["course-promise-list", "course-module-list", "course-prerequisite-list", "course-review-block"] },
+            body: { contract: "course-review-block" },
         },
-        why: "A named region of the page is its heading and the body that heading introduces, which is what a section is for: the name travels with the content to anything navigating by region.",
+        why: "The learner-review block is not a SurfaceListCard and therefore needs one section owner to keep its heading attached to the rating summary and review rows. Page-level joined lists bypass this wrapper because their SurfaceListCard already owns the exact label.",
     },
-    "course-promise-list": {
+    "course-faq-list": {
         host: "ul",
         classes: ["flex", "flex-col", "divide-y", "divide-separator", "overflow-hidden", "p-0", "[&>*]:px-4", "[&>*]:py-3"],
         children: {
-            promise: { contract: "course-promise-row", repeats: true, restingCount: 4 },
+            faq: { contract: "course-faq-row", repeats: true, restingCount: 3 },
         },
-        why: "A course's promises are unordered peers of one joined list, so full-width separators keep the scan continuous and no promise acquires a card of its own. Deliberately not profile-evidence-list, whose identical mechanics are named for a different domain.",
+        why: "Questions are peer entry points rather than steps, so an unordered joined list keeps each authored answer bounded while full-width dividers preserve one continuous scan.",
     },
-    "course-promise-row": {
+    "course-faq-row": {
         host: "li",
-        classes: ["flex", "flex-row", "items-start", "gap-3", "[&>*:last-child]:min-w-0", "[&>*:last-child]:grow"],
+        classes: ["flex", "min-w-0", "flex-col", "gap-1"],
         children: {
-            mark: { leaf: "text", props: { size: "sm" } },
-            promise: { leaf: "text", props: { size: "sm" } },
+            question: { leaf: "text", props: { size: "sm", weight: "semibold" } },
+            answer: { leaf: "text", props: { size: "sm", tone: "muted" } },
         },
-        why: "The affirmative mark leads the sentence it affirms, and the sentence owns the remaining width so a long promise wraps under itself rather than under the mark.",
+        why: "The answer only makes sense under its question, so the pair stays in one row and long copy wraps within the same readable measure.",
     },
     "course-prerequisite-list": {
         host: "ol",
@@ -2242,7 +2293,7 @@ export const CONTRACTS = buildContracts({
         children: {
             prerequisite: { contract: "course-prerequisite-row", repeats: true, restingCount: 3 },
         },
-        why: "Prerequisites are ORDERED - the backend stores them in sequence and a learner who lacks the first cannot judge the second - so an ol says that sequence to a reader who cannot see numbering. Deliberately not course-promise-list: identical mechanics under a ul would be that entry under a second name, and it would drop the ordering the data carries.",
+        why: "Prerequisites are ORDERED - the backend stores them in sequence and a learner who lacks the first cannot judge the second - so an ol says that sequence to a reader who cannot see numbering. Deliberately not marked-row-list: those rows are peer completion statements, while these are sequential conditions the platform has not verified.",
     },
     "course-prerequisite-row": {
         host: "li",
@@ -2321,16 +2372,32 @@ export const CONTRACTS = buildContracts({
     },
     "course-pricing-rail": {
         host: "aside",
-        classes: ["flex", "flex-col", "gap-4"],
+        classes: ["flex", "flex-col", "gap-4", "p-4"],
         children: {
             phase: { leaf: "badge", optional: true },
             cover: { leaf: "cover-image" },
             price: { contract: "course-price-block" },
             ladder: { contract: "course-pricing-phase-grid", optional: true },
-            action: { leaf: "button" },
+            action: { contract: "course-pricing-action-stack" },
             proof: { leaf: "text", props: { size: "xs" }, optional: true },
         },
         why: "The buy box is complementary to the narrative: active phase, artwork, price, compact phase comparison, action and enrolment proof are one sticky decision read top to bottom.",
+    },
+    "course-pricing-action-stack": {
+        classes: ["flex", "flex-col", "gap-2", "[&>*:first-child]:w-full"],
+        children: {
+            primary: { leaf: "button" },
+            secondary: { contract: "course-pricing-secondary-action-row", optional: true },
+        },
+        why: "The purchase action owns the full primary line while trial and cart remain two quieter peer ways into the same course decision below it.",
+    },
+    "course-pricing-secondary-action-row": {
+        classes: ["flex", "flex-row", "items-center", "gap-2", "[&>*]:w-full"],
+        children: {
+            trial: { leaf: "button", optional: true },
+            cart: { leaf: "button", optional: true },
+        },
+        why: "Trial and cart are independent secondary actions of equal rank, so they share one line and equal measure without competing with enrolment above.",
     },
     "course-price-block": {
         classes: ["flex", "flex-col", "gap-1"],

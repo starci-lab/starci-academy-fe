@@ -48,6 +48,7 @@ export interface SubmitCodingSolutionOptions {
     debug?: boolean
 }
 
+/** Submit source and telemetry, returning the asynchronous judge identities. */
 export const mutationSubmitCodingSolution = async (
     request: MutationSubmitCodingSolutionRequest,
     options: SubmitCodingSolutionOptions = {},

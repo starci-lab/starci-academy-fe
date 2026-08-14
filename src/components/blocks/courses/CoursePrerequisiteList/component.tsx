@@ -36,9 +36,9 @@ export type CoursePrerequisiteListData = {
  * prerequisites required before joining the course", so the sequence carries meaning: somebody who
  * lacks the first cannot judge the second. An `ol` says that to a reader who cannot see numbering.
  *
- * It is also why this is not `course-promise-list` with different copy. Identical mechanics under a
- * `ul` would be that entry under a second name - which `no-duplicate-entry-shape` refuses - and it
- * would throw away the ordering at the same time.
+ * It is also why this is not `marked-row-list` with different copy. That contract describes peer
+ * completion statements under a `ul`; prerequisites are ordered conditions and would lose both
+ * their sequence and their unverified state if rendered as completed promise rows.
  *
  * THE ORDINAL IS TEXT, not the browser's own marker. The list carries `p-0` and its rows own the
  * inset, so a native marker hangs outside that inset and sits against the card's edge.

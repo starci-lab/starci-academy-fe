@@ -152,7 +152,11 @@ export const ShellNav = () => {
                     guestMessage: t("guestMessage"),
                     signInLabel: t("signIn"),
                     signUpLabel: t("signUp"),
-                    isSignedIn: sessionToken !== undefined,
+                    // The server cannot see the browser session store. Keep the first client tree
+                    // identical to the server, then reveal signed-in tools after mount; otherwise
+                    // AccountMenu is replaced by notification/account controls during hydration
+                    // and every React-Aria id below this row shifts.
+                    isSignedIn: isMounted && sessionToken !== undefined,
                 }}
                 on={{ openSignIn, openSignUp, navigate, selectTab, toggleTheme: () => setTheme(isDark ? "light" : "dark"), toggleLocale, openCart: () => setIsCartOpen(true) }}
             />

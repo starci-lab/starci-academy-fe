@@ -175,11 +175,11 @@ export const _CourseQaPage = (input: CourseQaPageProps) => {
         : undefined
 
     return (
-        <Tree contract="courses-catalog-page" render={defineContractComponent("courses-catalog-page", {
+        <Tree contract="course-qa-page" render={defineContractComponent("course-qa-page", {
             header,
-            toolbar,
+            composer: toolbar,
             ...(notice === undefined ? {
-                discover: defineContractProjection("catalog-section-group", () => (
+                thread: defineContractProjection("catalog-section-group", () => (
                     <>
                         {input.props.selectedQuestion === undefined ? null : (
                             <Button props={{ label: input.props.backLabel, variant: "ghost", size: "sm" }} on={{ press: input.on?.closeThread }} />

@@ -187,14 +187,20 @@
             "inCart": "In cart"
         },
         "detail": {
+            "breadcrumbLabel": "Course path",
+            "breadcrumbHome": "Home",
+            "breadcrumbCourses": "Courses",
             "sectionTabsLabel": "Course sections",
             "overviewTab": "Explore the course",
             "curriculumTab": "Content",
             "reviewsTab": "Learner outcomes",
+            "faqTab": "FAQ",
             "valuePropsTitle": "What you will learn",
             "prerequisitesTitle": "What you need first",
             "reviewsTitle": "Learner reviews",
             "reviewsEmpty": "No reviews yet for this course.",
+            "faqTitle": "Frequently asked questions",
+            "faqEmpty": "No frequently asked questions have been published for this course yet.",
             "reviewCount": "{count} reviews",
             "curriculumTitle": "Course content",
             "statLearners": "{count} Learners",
@@ -607,6 +613,12 @@
                 "flashcards": "Flashcards",
                 "project": "Personal project"
             }
+        },
+        "contentHome": {
+            "title": "Course modules",
+            "description": "Choose a module to continue learning.",
+            "modules": "Modules",
+            "moduleCount": "{count} modules"
         },
         "content": {
             "navCourse": "Course",

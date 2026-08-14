@@ -56,6 +56,18 @@ export interface CourseValueProposition {
     orderIndex: number
 }
 
+/** One authored FAQ row on the public course landing page. */
+export interface CourseFaqRow {
+    /** Stable key from the backend FAQ entity. */
+    id: string
+    /** The learner's question. */
+    question: string
+    /** The course owner's answer. */
+    answer: string
+    /** Declaration order from the authored course source. */
+    orderIndex: number
+}
+
 /** One content inside a module. Selected for its COUNTS, not to be listed. */
 export interface CourseModuleContent {
     /** Stable key. */
@@ -129,6 +141,8 @@ export interface CourseDetail {
     pricingPhases?: ReadonlyArray<CoursePricingPhaseRow>
     /** What a learner should already meet, in the order the course stores them. */
     prerequisites?: ReadonlyArray<CoursePrerequisiteRow>
+    /** Authored FAQs, in declaration order. */
+    qnas?: ReadonlyArray<CourseFaqRow>
     /** The curriculum, in declaration order. */
     modules?: ReadonlyArray<CourseModule>
 }
