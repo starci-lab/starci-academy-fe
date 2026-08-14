@@ -1,5 +1,6 @@
 import type { CourseLearnContentPageProps } from "~candidate/components/pages/CourseLearnContentPage/component"
 import type { ContentFaceTab } from "~candidate/components/blocks/learn/ContentTabRow/component"
+import type { ContentOutlineEntry } from "~candidate/components/pages/CourseLearnContentPage/component"
 import fixture from "~candidate/fixtures/content.json"
 
 /**
@@ -20,6 +21,8 @@ import fixture from "~candidate/fixtures/content.json"
 /** The content as the reader receives it once the request has settled. */
 /** The faces, narrowed once so every state below reads the same list. */
 const faces = fixture.faces as ReadonlyArray<ContentFaceTab>
+// JSON widens a literal depth to `number`; the outline admits only the three levels it draws.
+const outline = fixture.outline as ReadonlyArray<ContentOutlineEntry>
 
 const settled = {
     labels: fixture.labels,
@@ -35,7 +38,7 @@ const settled = {
     sections: fixture.sections,
     courseProgress: fixture.courseProgress,
     modules: fixture.modules,
-    outline: fixture.outline,
+    outline,
     selectionHint: fixture.selectionHint,
     nextSteps: fixture.nextSteps,
     page: fixture.page,

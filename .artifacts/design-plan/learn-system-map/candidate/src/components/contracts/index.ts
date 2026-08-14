@@ -1420,16 +1420,24 @@ export const CONTRACTS = buildContracts({
         children: {
             progress: { composite: "labelled-progress-row" },
             search: { leaf: "search-box" },
-            module: { leaf: "curriculum-module-row", repeats: true, restingCount: 4 },
+            module: { contract: "content-map-module", repeats: true, restingCount: 4 },
         },
         why: "The map answers three questions in the order they are asked: how far in am I, where is the thing I remember, and what else is in this course. Search sits above the tree rather than inside it because it filters the whole tree, and the modules are the same disclosing row the curriculum already uses - one content list, not a second one that drifts.",
     },
+    "content-map-module": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-1"],
+        children: {
+            title: { contract: "title-with-baseline-fact" },
+            row: { leaf: "content-map-row", repeats: true, restingCount: 0 },
+        },
+        why: "A module is its name and the contents under it, so the name and its count share one line and the contents sit at the tightest seam beneath - one identity, not a heading over an unrelated list. A module the reader has not opened carries no rows at all rather than an empty run, because the map is scanned by module first.",
+    },
     "content-outline-rail": {
         host: "nav",
-        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3"],
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-2"],
         children: {
             label: { leaf: "text", props: { size: "sm", tone: "muted" } },
-            heading: { leaf: "text-link", props: { size: "sm" }, repeats: true, restingCount: 5 },
+            heading: { leaf: "nav-link", props: { kind: "section" }, repeats: true, restingCount: 5 },
         },
         why: "The outline is a named list of places in the current content, so it takes the owner-to-owned seam under its label and the tighter seam between the destinations themselves. They are links rather than lines of text because each one moves the reader.",
     },

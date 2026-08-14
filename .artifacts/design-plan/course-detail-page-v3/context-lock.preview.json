@@ -1,0 +1,87 @@
+{
+    "version": 1,
+    "task": "course-detail-page-v3",
+    "phase": "preview",
+    "status": "locked",
+    "trustRoot": "D:\\Repositories\\starci-academy-backend\\.claude",
+    "trustHead": "3bcbe95",
+    "skill": "starci-fe-design-preview",
+    "caseId": "case-course-detail-v3",
+    "inheritedFrom": "context-lock.plan.json",
+    "selectedDirectionId": "direction-parity-rail",
+    "targets": [
+        {
+            "role": "primary-target",
+            "repo": "starci-academy-fe",
+            "gitRoot": "D:\\Repositories\\starci-academy-fe",
+            "branch": "session/surface-branch-and-press-affordance",
+            "worktree": "D:\\Repositories\\starci-academy-fe",
+            "head": "2a82e7b",
+            "remote": "https://github.com/starci-lab/starci-academy-fe.git"
+        }
+    ],
+    "references": [
+        {
+            "role": "legacy-parity",
+            "repo": "starci-academy",
+            "branch": "mtp",
+            "head": "9a1934231",
+            "note": "unchanged since the plan lock"
+        },
+        {
+            "role": "prior-case-applied",
+            "path": ".artifacts/design-plan/course-detail-page-v2"
+        },
+        {
+            "role": "backend-enabler",
+            "repo": "starci-academy-backend",
+            "note": "course review feature, this session"
+        }
+    ],
+    "drift": {
+        "detected": true,
+        "resolution": "relocked on both, with the user's explicit answer",
+        "rows": [
+            {
+                "field": "target HEAD",
+                "inherited": "a5d833a",
+                "detected": "2a82e7b",
+                "material": false,
+                "why": "one commit, a fidelity fix on the CATALOG page. It touched CourseCatalogCard and CoursesCatalogPage and did NOT touch contracts/index.ts, CourseDetailPage, CoursePricingRail or main-then-rail - the four things this case's evidence rests on."
+            },
+            {
+                "field": "trust HEAD",
+                "inherited": "3e75901",
+                "detected": "3bcbe95",
+                "material": true,
+                "why": "TOKEN-9 landed: a class naming a theme token resolves only when the theme defines it, with a rule in sources/fe/tokens.mjs. Preview requires the candidate to pass the target's canon lint, so building against the older law would have been rework by construction."
+            }
+        ],
+        "token9Check": "max-w-md was added to the union earlier this session for the auth card. The rule checks max-w-app-* against --container-app-* only, and deliberately exempts names Tailwind resolves itself; @theme here extends rather than resets, so --container-md survives from Tailwind's defaults. Verified by reading the rule, not by trusting a green run."
+    },
+    "artifactRoot": "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page-v3",
+    "writeBoundary": [
+        "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page-v3\\candidate",
+        "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page-v3\\screens",
+        "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page-v3\\logs",
+        "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page-v3\\cases.js",
+        "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page-v3\\design-record.md",
+        "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page-v3\\design-record.json",
+        "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page-v3\\context-lock.preview.md",
+        "D:\\Repositories\\starci-academy-fe\\.artifacts\\design-plan\\course-detail-page-v3\\context-lock.preview.json"
+    ],
+    "readOnlyBoundary": [
+        "D:\\Repositories\\starci-academy-fe\\src",
+        "D:\\Repositories\\starci-academy",
+        "D:\\Repositories\\starci-academy-backend\\.claude"
+    ],
+    "runtime": {
+        "candidatePortFrom": 8080,
+        "note": "8080-8083 held by direction labs from other sessions; the plan lab is on 8084"
+    },
+    "hazards": [
+        "the target carries 27 uncommitted files from another session and its HEAD has moved three times during this session",
+        "no dev server slot is available in this folder: five are held by other chats, so no rendered production comparison has been possible all session"
+    ],
+    "detectedAt": "session-local"
+}

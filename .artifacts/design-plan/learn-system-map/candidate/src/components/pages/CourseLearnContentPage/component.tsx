@@ -3,8 +3,8 @@ import { SurfaceCard } from "~candidate/components/branches/SurfaceCard"
 import { SurfaceListCard, type SurfaceListCardData } from "~candidate/components/branches/SurfaceListCard"
 import { LabelledProgressRow } from "@/components/composites/LabelledProgressRow"
 import { Breadcrumbs } from "@/components/leaves/Breadcrumbs"
-import { CurriculumModuleRow } from "@/components/leaves/CurriculumModuleRow"
-import { TextLink } from "@/components/leaves/TextLink"
+import { NavLink } from "~candidate/components/leaves/NavLink"
+import { ContentMapRow } from "~candidate/components/leaves/ContentMapRow"
 import { SearchBox } from "@/components/leaves/SearchBox"
 import { Icon } from "@/components/leaves/Icon"
 import { Heading } from "@/components/leaves/Heading"
@@ -155,6 +155,8 @@ export type ContentOutlineEntry = {
     readonly id: string
     readonly label: string
     readonly isCurrent?: boolean
+    /** How deep inside the article this place sits - the outline is a tree, not a list. */
+    readonly depth?: 1 | 2 | 3
 }
 
 /** What the reader reports. */
@@ -369,6 +371,8 @@ export const _CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
      * the plan record puts the contents panel and the outline in this work item, and a reading
      * measure cannot be judged without the columns standing either side of it.
      */
+    const progress = input.props.courseProgress
+    const progressPercent = progress === undefined ? undefined : Math.round((progress.value / progress.total) * 100)
     const contents = defineContractComponent("content-map-panel", {
         progress: defineCompositeComponent("labelled-progress-row", {}, () => (
             <LabelledProgressRow
@@ -390,23 +394,30 @@ export const _CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                 }}
             />
         )),
-        module: (input.props.modules ?? []).map((module) => defineLeafComponent("curriculum-module-row", {}, () => (
-            <CurriculumModuleRow
-                props={{
-                    title: module.title,
-                    previewLabel: module.countLabel,
-                    isOpen: module.isOpen,
-                    lessons: (module.contents ?? []).map((content) => ({
+        module: (input.props.modules ?? []).map((module) => defineContractComponent("content-map-module", {
+            title: defineContractComponent("title-with-baseline-fact", {
+                title: defineLeafComponent("heading", {}, () => (
+                    <Heading props={{ content: module.title, level: 3 }} isLoading={isLoading} />
+                )),
+                fact: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                    <Text props={{ content: module.countLabel, size: "sm", tone: "muted" }} isLoading={isLoading} />
+                )),
+            }),
+            // A module the reader has not opened carries no rows at all: the map is scanned by
+            // module first, and four closed modules each showing five contents is not a map.
+            row: (module.isOpen === true ? module.contents ?? [] : []).map((content) => defineLeafComponent("content-map-row", {}, () => (
+                <ContentMapRow
+                    props={{
                         id: content.id,
                         title: content.title,
                         meta: content.meta,
                         isComplete: content.isComplete,
                         isCurrent: content.isCurrent,
-                    })),
-                }}
-                isLoading={isLoading}
-            />
-        ))),
+                    }}
+                    isLoading={isLoading}
+                />
+            ))),
+        })),
     })
 
     /*
@@ -414,15 +425,13 @@ export const _CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
      * outline. A tab of cards carries no headings, and a rail standing empty would take width from
      * the reading in exchange for nothing.
      */
-    const progress = input.props.courseProgress
-    const progressPercent = progress === undefined ? undefined : Math.round((progress.value / progress.total) * 100)
     const outlineEntries = hasFailed || isLoading ? [] : input.props.outline ?? []
     const outline = defineContractComponent("content-outline-rail", {
         label: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
             <Text props={{ content: labels.outlineTitle, size: "sm", tone: "muted" }} />
         )),
-        heading: outlineEntries.map((entry) => defineLeafComponent("text-link", { size: "sm" }, () => (
-            <TextLink props={{ label: entry.label, size: "sm", isSelected: entry.isCurrent }} />
+        heading: outlineEntries.map((entry) => defineLeafComponent("nav-link", { kind: "section" }, () => (
+            <NavLink props={{ label: entry.label, kind: "section", depth: entry.depth, isCurrent: entry.isCurrent }} />
         ))),
     })
 

@@ -160,15 +160,28 @@
         {
             "id": "s1",
             "label": "Nhúng và tham chiếu là hai câu trả lời cho một câu hỏi",
+            "depth": 1,
             "isCurrent": true
         },
         {
+            "id": "s1a",
+            "label": "Khi nào nhúng",
+            "depth": 2
+        },
+        {
+            "id": "s1b",
+            "label": "Khi nào tham chiếu",
+            "depth": 2
+        },
+        {
             "id": "s2",
-            "label": "Cập nhật nguyên tử là hệ quả, không phải mục tiêu"
+            "label": "Cập nhật nguyên tử là hệ quả, không phải mục tiêu",
+            "depth": 1
         },
         {
             "id": "s3",
-            "label": "Chỉ mục theo hình dạng truy vấn"
+            "label": "Chỉ mục theo hình dạng truy vấn",
+            "depth": 1
         }
     ]
 }
