@@ -78,6 +78,14 @@ export interface ContentDetail {
     body: string
     /** Whether reading this requires enrolment. */
     isPremium: boolean
+    /** Whether this lesson owns a synchronized browser sandbox snapshot. */
+    isSandbox: boolean
+    /** GitHub repository identity used by the backend synchronizer; never fetched directly here. */
+    githubBaseUrl: string | null
+    /** Repository-relative directory synchronized into the lesson snapshot. */
+    githubDir: string | null
+    /** Optional mock-service path injected into sandbox source at runtime. */
+    backendUrl: string | null
     /** How long it takes to read, in minutes. */
     minutesRead: number
     /** Declaration order inside the module - the reader's place in it. */

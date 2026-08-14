@@ -31,6 +31,10 @@ const query1 = gql`
                 description
                 body
                 isPremium
+                isSandbox
+                githubBaseUrl
+                githubDir
+                backendUrl
                 minutesRead
                 orderIndex
                 module {
