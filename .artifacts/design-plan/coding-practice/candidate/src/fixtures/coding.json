@@ -1,0 +1,130 @@
+{
+  "note": "Every figure here is shaped by the live API this case's backend enablers were built against. The domain totals and the solved count are the real ones returned by codingDomainSummary and myCodingProgress on the local stack; the problem titles are the real seeded ones.",
+  "hub": {
+    "labels": {
+      "navHome": "Trang chủ",
+      "navPractice": "Luyện thuật toán",
+      "title": "Luyện thuật toán",
+      "standingLabel": "Bảng xếp hạng",
+      "standingMore": "Xem tất cả"
+    },
+    "resume": {
+      "title": "Longest Substring Without Repeating",
+      "kind": "Cửa sổ trượt · bài 5 / 9 · đã nộp 3 lần",
+      "actionLabel": "Tiếp tục"
+    },
+    "domains": [
+      { "id": "arrays", "name": "Mảng", "total": 2, "solved": 1, "countLabel": "1 / 2 bài", "label": "Mở chủ đề Mảng, đã giải 1 trên 2 bài", "meterLabel": "Tiến độ chủ đề Mảng" },
+      { "id": "graph", "name": "Đồ thị", "total": 2, "solved": 0, "countLabel": "0 / 2 bài", "label": "Mở chủ đề Đồ thị, chưa giải bài nào", "meterLabel": "Tiến độ chủ đề Đồ thị" },
+      { "id": "linkedList", "name": "Danh sách liên kết", "total": 2, "solved": 0, "countLabel": "0 / 2 bài", "label": "Mở chủ đề Danh sách liên kết, chưa giải bài nào", "meterLabel": "Tiến độ chủ đề Danh sách liên kết" },
+      { "id": "slidingWindow", "name": "Cửa sổ trượt", "total": 1, "solved": 0, "countLabel": "0 / 1 bài", "label": "Mở chủ đề Cửa sổ trượt, chưa giải bài nào", "meterLabel": "Tiến độ chủ đề Cửa sổ trượt" },
+      { "id": "hashing", "name": "Hash", "total": 1, "solved": 1, "countLabel": "1 / 1 bài", "label": "Mở chủ đề Hash, đã giải hết", "meterLabel": "Tiến độ chủ đề Hash" },
+      { "id": "dynamicProgramming", "name": "Quy hoạch động", "total": 1, "solved": 0, "countLabel": "0 / 1 bài", "label": "Mở chủ đề Quy hoạch động, chưa giải bài nào", "meterLabel": "Tiến độ chủ đề Quy hoạch động" },
+      { "id": "binarySearch", "name": "Tìm nhị phân", "total": 1, "solved": 0, "countLabel": "0 / 1 bài", "label": "Mở chủ đề Tìm nhị phân, chưa giải bài nào", "meterLabel": "Tiến độ chủ đề Tìm nhị phân" },
+      { "id": "stack", "name": "Ngăn xếp", "total": 1, "solved": 0, "countLabel": "0 / 1 bài", "label": "Mở chủ đề Ngăn xếp, chưa giải bài nào", "meterLabel": "Tiến độ chủ đề Ngăn xếp" },
+      { "id": "twoPointers", "name": "Hai con trỏ", "total": 1, "solved": 0, "countLabel": "0 / 1 bài", "label": "Mở chủ đề Hai con trỏ, chưa giải bài nào", "meterLabel": "Tiến độ chủ đề Hai con trỏ" },
+      { "id": "trees", "name": "Cây", "total": 0, "solved": 0, "countLabel": "Chưa có bài", "label": "Chủ đề Cây, chưa có bài nào", "meterLabel": "Tiến độ chủ đề Cây" },
+      { "id": "recursion", "name": "Đệ quy", "total": 0, "solved": 0, "countLabel": "Chưa có bài", "label": "Chủ đề Đệ quy, chưa có bài nào", "meterLabel": "Tiến độ chủ đề Đệ quy" },
+      { "id": "greedy", "name": "Tham lam", "total": 0, "solved": 0, "countLabel": "Chưa có bài", "label": "Chủ đề Tham lam, chưa có bài nào", "meterLabel": "Tiến độ chủ đề Tham lam" }
+    ],
+    "standing": [
+      { "id": "u1", "rank": 1, "username": "nguyenvana", "fact": "98 bài", "isViewer": false },
+      { "id": "u2", "rank": 2, "username": "tranthib", "fact": "91 bài", "isViewer": false },
+      { "id": "u3", "rank": 24, "username": "bạn", "fact": "37 bài", "isViewer": true }
+    ]
+  },
+  "domain": {
+    "labels": {
+      "navHome": "Trang chủ",
+      "navPractice": "Luyện thuật toán",
+      "title": "Mảng",
+      "standingLabel": "Tiến độ chủ đề",
+      "standingFact": "1 / 2 bài",
+      "meterLabel": "Tiến độ chủ đề Mảng"
+    },
+    "percent": 50,
+    "problems": [
+      { "slug": "two-sum", "title": "Two Sum", "fact": "Dễ · 10đ", "isSolved": true, "label": "Mở bài Two Sum, đã giải" },
+      { "slug": "merge-intervals", "title": "Merge Intervals", "fact": "Vừa · 15đ · đã nộp 3 lần", "isSolved": false, "label": "Mở bài Merge Intervals, chưa giải" }
+    ],
+    "empty": {
+      "noticeMessage": "Chủ đề này chưa có bài nào.",
+      "noticeDescription": "Bài đang được soạn. Chọn chủ đề khác trong lúc chờ.",
+      "noticeActionLabel": "Về danh sách chủ đề"
+    },
+    "allSolved": {
+      "noticeMessage": "Xong cả chủ đề này rồi.",
+      "noticeDescription": "Hai trên hai bài đã giải. Chọn chủ đề tiếp theo.",
+      "noticeActionLabel": "Về danh sách chủ đề"
+    }
+  },
+  "problem": {
+    "reading": {
+      "tab": "statement",
+      "tabLabels": {
+        "statement": "Đề bài",
+        "hint": "Gợi ý",
+        "solution": "Lời giải",
+        "submissions": "Bài nộp",
+        "group": "Phần đang đọc"
+      },
+      "title": "Two Sum",
+      "difficulty": "Dễ · 10đ · 2000ms · 256MB",
+      "body": "Cho mảng số nguyên `nums` và số nguyên `target`, trả về **chỉ số** của hai phần tử có tổng bằng `target`.\n\nGiả thiết mỗi đầu vào có đúng một đáp án, và không dùng cùng một phần tử hai lần.\n\n```\nInput:  nums = [2,7,11,15], target = 9\nOutput: [0,1]\n```\n\n- `2 <= nums.length <= 10^4`\n- `-10^9 <= nums[i] <= 10^9`\n",
+      "hintBody": "Nghĩ về việc **đổi thời gian lấy bộ nhớ**.\n\nVới mỗi phần tử, thứ bạn cần là `target - n`. Nếu đã từng thấy nó thì đáp án nằm ngay đó.\n",
+      "tags": ["mảng", "hash"]
+    },
+    "languages": [
+      { "id": "python", "label": "Python" },
+      { "id": "javascript", "label": "JavaScript" },
+      { "id": "typescript", "label": "TypeScript" },
+      { "id": "java", "label": "Java" },
+      { "id": "cpp", "label": "C++" }
+    ],
+    "editorLabels": {
+      "editor": "Vùng soạn lời giải",
+      "languageField": "Ngôn ngữ",
+      "run": "Chạy thử",
+      "submit": "Nộp bài",
+      "submitting": "Đang nộp…"
+    },
+    "source": "def two_sum(nums, target):\n    seen = {}\n    for i, n in enumerate(nums):\n        if target - n in seen:\n            return [seen[target - n], i]\n        seen[n] = i\n    return []\n",
+    "verdicts": {
+      "idle": { "verdictLabel": "Chưa nộp lần nào", "detailLabel": "Nộp bài để chấm" },
+      "pending": { "verdictLabel": "Đang xếp hàng", "detailLabel": "Bài nộp #4 đang chờ máy chấm" },
+      "judging": { "verdictLabel": "Đang chấm", "detailLabel": "6 / 18 testcase" },
+      "accepted": { "verdictLabel": "Accepted", "detailLabel": "18 / 18 · 42ms · 16.4MB · +10đ", "actionLabel": "Bài kế trong chủ đề" },
+      "wrongAnswer": { "verdictLabel": "Sai kết quả", "detailLabel": "14 / 18 testcase · dừng ở testcase 15", "actionLabel": "Xem bài nộp" },
+      "timeLimitExceeded": { "verdictLabel": "Quá thời gian", "detailLabel": "Vượt 2000ms ở testcase 12", "actionLabel": "Xem bài nộp" },
+      "memoryLimitExceeded": { "verdictLabel": "Quá bộ nhớ", "detailLabel": "Vượt 256MB ở testcase 9", "actionLabel": "Xem bài nộp" },
+      "runtimeError": { "verdictLabel": "Lỗi khi chạy", "detailLabel": "IndexError ở testcase 7", "actionLabel": "Xem bài nộp" },
+      "compileError": { "verdictLabel": "Không biên dịch được", "detailLabel": "Chưa chạy testcase nào" },
+      "internalError": { "verdictLabel": "Máy chấm gặp sự cố", "detailLabel": "Không phải lỗi bài của bạn. Thử nộp lại.", "actionLabel": "Nộp lại" },
+      "socket-lost": { "verdictLabel": "Mất kết nối", "detailLabel": "Bài vẫn đang được chấm trên máy chủ", "actionLabel": "Đọc lại kết quả" }
+    },
+    "testcases": {
+      "judging": [
+        { "id": "t1", "label": "#1", "passed": true },
+        { "id": "t2", "label": "#2", "passed": true },
+        { "id": "t3", "label": "#3", "passed": true },
+        { "id": "t4", "label": "#4" },
+        { "id": "t5", "label": "#5" }
+      ],
+      "accepted": [
+        { "id": "t1", "label": "#1", "passed": true },
+        { "id": "t2", "label": "#2", "passed": true },
+        { "id": "t3", "label": "#3", "passed": true },
+        { "id": "t4", "label": "#4 ẩn", "passed": true },
+        { "id": "t5", "label": "18 / 18 đạt", "passed": true }
+      ],
+      "wrongAnswer": [
+        { "id": "t1", "label": "#1", "passed": true },
+        { "id": "t2", "label": "#2", "passed": true },
+        { "id": "t3", "label": "#3", "passed": false },
+        { "id": "t4", "label": "#4 ẩn", "passed": true },
+        { "id": "t5", "label": "14 / 18 đạt" }
+      ]
+    },
+    "compilerMessage": "solution.py:4:9: SyntaxError: invalid syntax\n    if target - n in seen\n                        ^\n"
+  }
+}

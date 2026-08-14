@@ -33,31 +33,6 @@
         }
     ],
     "selectedFace": "content",
-    "sections": [
-        {
-            "id": "s1",
-            "title": "Nhúng và tham chiếu là hai câu trả lời cho một câu hỏi",
-            "paragraphs": [
-                "Một tài liệu chứa dữ liệu con của nó, hay chỉ giữ khoá của dữ liệu ấy — lựa chọn này quyết định số lần đọc đĩa cho một màn hình, chứ không phải quyết định cách vẽ sơ đồ.",
-                "Quy tắc đọc được: nếu dữ liệu con luôn được đọc cùng cha và không lớn vô hạn, nhúng. Nếu nó được đọc riêng, được chia sẻ, hoặc mọc mãi, tham chiếu."
-            ]
-        },
-        {
-            "id": "s2",
-            "title": "Cập nhật nguyên tử là hệ quả, không phải mục tiêu",
-            "paragraphs": [
-                "Nhúng cho bạn một lần ghi nguyên tử cho cả cụm. Tham chiếu buộc bạn tự lo tính nhất quán giữa hai lần ghi — và đó là chỗ mọi hệ thống nhỏ bắt đầu rò rỉ.",
-                "Khi phải tham chiếu, hãy đặt câu hỏi: nếu lần ghi thứ hai thất bại, người dùng nhìn thấy gì?"
-            ]
-        },
-        {
-            "id": "s3",
-            "title": "Chỉ mục theo hình dạng truy vấn",
-            "paragraphs": [
-                "Chỉ mục không phục vụ bảng, nó phục vụ câu truy vấn. Một chỉ mục ghép sai thứ tự cột đọc nhanh cho truy vấn này và vô dụng cho truy vấn kia."
-            ]
-        }
-    ],
     "nextSteps": [
         {
             "id": "n1",
@@ -158,30 +133,26 @@
     ],
     "outline": [
         {
-            "id": "s1",
-            "label": "Nhúng và tham chiếu là hai câu trả lời cho một câu hỏi",
+            "id": "h1",
+            "label": "1. Lời mở đầu",
             "depth": 1,
             "isCurrent": true
         },
         {
-            "id": "s1a",
-            "label": "Khi nào nhúng",
+            "id": "h11",
+            "label": "1.1. Kiểm tra bằng lệnh",
             "depth": 2
         },
         {
-            "id": "s1b",
-            "label": "Khi nào tham chiếu",
-            "depth": 2
-        },
-        {
-            "id": "s2",
-            "label": "Cập nhật nguyên tử là hệ quả, không phải mục tiêu",
+            "id": "h2",
+            "label": "2. Cập nhật nguyên tử là hệ quả, không phải mục tiêu",
             "depth": 1
         },
         {
-            "id": "s3",
-            "label": "Chỉ mục theo hình dạng truy vấn",
+            "id": "h3",
+            "label": "3. Chỉ mục theo hình dạng truy vấn",
             "depth": 1
         }
-    ]
+    ],
+    "body": "## 1. Lời mở đầu\n\nMột tài liệu chứa dữ liệu con của nó, hay chỉ giữ khoá của dữ liệu ấy — lựa chọn này quyết định **số lần đọc đĩa** cho một màn hình, chứ không phải quyết định cách vẽ sơ đồ.\n\nQuy tắc đọc được:\n\n- Nếu dữ liệu con luôn được đọc cùng cha và không lớn vô hạn, **nhúng**.\n- Nếu nó được đọc riêng, được chia sẻ, hoặc mọc mãi, **tham chiếu**.\n\n### 1.1. Kiểm tra bằng lệnh\n\nChạy `mongosh` rồi xem một tài liệu thật trước khi quyết định — đừng tin sơ đồ:\n\n```bash\nmongosh \"mongodb://localhost:27017/academy\"   --eval 'db.orders.findOne({ _id: ObjectId(\"6650a1\") })'\n```\n\n## 2. Cập nhật nguyên tử là hệ quả, không phải mục tiêu\n\nNhúng cho bạn một lần ghi nguyên tử cho cả cụm. Tham chiếu buộc bạn tự lo tính nhất quán giữa hai lần ghi — và đó là chỗ mọi hệ thống nhỏ bắt đầu rò rỉ.\n\n> Khi phải tham chiếu, hãy đặt câu hỏi: nếu lần ghi thứ hai thất bại, người dùng nhìn thấy gì?\n\n## 3. Chỉ mục theo hình dạng truy vấn\n\nChỉ mục không phục vụ bảng, nó phục vụ câu truy vấn. Một chỉ mục ghép sai thứ tự cột đọc nhanh cho truy vấn này và vô dụng cho truy vấn kia."
 }

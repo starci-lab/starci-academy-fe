@@ -15,7 +15,7 @@ import type { LeafProps } from "@/components/contracts/props"
  */
 
 /** Whether this names a page or a section of one. */
-export type NavLinkKind = "route" | "tab"
+export type NavLinkKind = "route" | "tab" | "section"
 
 /** What this leaf draws. A `type`, not an `interface` - only an alias satisfies the data fence. */
 export type NavLinkData = {
@@ -27,6 +27,14 @@ export type NavLinkData = {
     readonly isCurrent?: boolean
     /** A page destination, or a section of the page. */
     readonly kind?: NavLinkKind
+    /**
+     * How deep inside the page this section sits. Only a `section` reads it.
+     *
+     * The outline of a document is a TREE, and a flat list of its headings is a list of places
+     * with the one fact that orders them thrown away - which of them is inside which. Legacy
+     * indents from the third level down for exactly that reason.
+     */
+    readonly depth?: 1 | 2 | 3
 }
 
 /** Internal route choice reported to the connected navigation owner. */
@@ -47,7 +55,20 @@ const KIND_CLASSES = {
         base: "inline-flex items-center gap-2 border-b-2 border-transparent py-3 text-sm text-muted",
         current: "inline-flex items-center gap-2 border-b-2 border-accent py-3 text-sm font-semibold text-accent",
     },
+    /*
+     * A SECTION WEARS NO CHROME. A route is a pill and a tab is an underline, because each stands
+     * in a bar of peers and needs an edge; an outline entry stands in a column of prose-length
+     * lines, and a plate around one of them reads as a control rather than as where you are. The
+     * words themselves carry the state - the same answer the reference render gives.
+     */
+    section: {
+        base: "flex text-start text-sm text-muted",
+        current: "flex text-start text-sm font-medium text-accent-soft-foreground",
+    },
 } as const
+
+/** How far an outline entry is indented for the level it sits at. */
+const DEPTH_CLASSES = { 1: "", 2: " pl-3", 3: " pl-6" } as const
 
 /**
  * Draw one destination.
@@ -65,7 +86,7 @@ export const NavLink = ({ props, on }: NavLinkProps) => {
             data-current={isCurrent ? "true" : "false"}
             onPress={on?.press}
             aria-current={isCurrent ? "page" : undefined}
-            className={isCurrent ? kind.current : kind.base}
+            className={`${isCurrent ? kind.current : kind.base}${DEPTH_CLASSES[props.depth ?? 1]}`}
         >
             {props.icon === undefined ? null : <Icon props={{ name: props.icon, role: "leading" }} />}
             {props.label}

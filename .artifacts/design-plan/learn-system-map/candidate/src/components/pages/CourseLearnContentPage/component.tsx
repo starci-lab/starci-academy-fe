@@ -6,6 +6,7 @@ import { Breadcrumbs } from "@/components/leaves/Breadcrumbs"
 import { NavLink } from "~candidate/components/leaves/NavLink"
 import { ContentMapRow } from "~candidate/components/leaves/ContentMapRow"
 import { SearchBox } from "@/components/leaves/SearchBox"
+import { Article } from "~candidate/components/leaves/Article"
 import { Icon } from "@/components/leaves/Icon"
 import { Heading } from "@/components/leaves/Heading"
 import { Pagination } from "@/components/leaves/Pagination"
@@ -63,12 +64,6 @@ export type CourseLearnContentPageState = "pending" | "ready" | "locked" | "fail
 /** One face of a content - a tab the content actually carries. Owned by the row that draws it. */
 export type ContentFace = ContentFaceTab
 
-/** One section of the article: a title and the paragraphs under it. */
-export type ContentSection = {
-    readonly id: string
-    readonly title: string
-    readonly paragraphs: ReadonlyArray<string>
-}
 
 /** One way on from this content. */
 export type ContentNextStep = {
@@ -109,7 +104,14 @@ export type CourseLearnContentPageData = {
     readonly languagesLabel?: string
     readonly languages?: ReadonlyArray<ContentLanguageTab>
     readonly selectedLanguage?: string
-    readonly sections?: ReadonlyArray<ContentSection>
+    /**
+     * The markdown body exactly as the server returned it.
+     *
+     * A LOCKED CONTENT IS TRUNCATED BY THE SERVER, not here: the entity arrives already cut for a
+     * viewer who is not entitled, with the premium flag beside it. The page draws what it was
+     * given and adds the paywall, rather than deciding for itself how much of a paid lesson to show.
+     */
+    readonly body?: string
     /** The one line above an unlocked content telling the reader what selecting text will do. */
     readonly selectionHint?: string
     /** What the reader is told instead of - or under - the article, when locked or failed. */
@@ -176,11 +178,7 @@ export type CourseLearnContentPageProps = {
     readonly on?: CourseLearnContentPageActions
 }
 
-/** How many sections rest while the content is in flight. */
-const RESTING_SECTIONS = 3
 
-/** How much of a locked content is shown before the paywall: enough to judge, not enough to read. */
-const PREVIEW_SECTIONS = 1
 
 /** What the joined list of destinations draws - the steps, in the order the module gives them. */
 type ContentNextStepsData = SurfaceListCardData & {
@@ -225,15 +223,10 @@ export const _CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
     const isLocked = input.state === "locked"
     const hasFailed = input.state === "failed"
     const faces = input.props.faces ?? []
-    const resting = Array.from({ length: RESTING_SECTIONS }, (_unused, index) => ({
-        id: `resting-${index + 1}`,
-        title: "",
-        paragraphs: ["", ""],
-    }))
-    const written = input.props.sections ?? []
-    const sections = isLoading
-        ? resting
-        : isLocked ? written.slice(0, PREVIEW_SECTIONS) : written
+
+    const article = defineLeafComponent("article", {}, () => (
+        <Article props={{ body: input.props.body }} isLoading={isLoading} />
+    ))
 
     const header = defineContractComponent("page-header-stack", {
         trail: defineLeafComponent("breadcrumbs", {}, () => (
@@ -251,17 +244,6 @@ export const _CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
         title: defineLeafComponent("heading", {}, () => (
             <Heading props={{ content: input.props.title, level: 1 }} isLoading={isLoading} />
         )),
-    })
-
-    const article = defineContractComponent("content-article-body", {
-        block: sections.map((section) => defineContractComponent("heading-over-paragraph", {
-            title: defineLeafComponent("heading", {}, () => (
-                <Heading props={{ content: section.title, level: 2 }} isLoading={isLoading} />
-            )),
-            body: section.paragraphs.map((paragraph) => defineLeafComponent("text", { size: "md" }, () => (
-                <Text props={{ content: paragraph, size: "md" }} isLoading={isLoading} />
-            ))),
-        })),
     })
 
     /*
@@ -395,12 +377,15 @@ export const _CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
             />
         )),
         module: (input.props.modules ?? []).map((module) => defineContractComponent("content-map-module", {
-            title: defineContractComponent("title-with-baseline-fact", {
-                title: defineLeafComponent("heading", {}, () => (
-                    <Heading props={{ content: module.title, level: 3 }} isLoading={isLoading} />
+            title: defineContractComponent("content-map-module-summary", {
+                title: defineLeafComponent("text", { size: "sm" }, () => (
+                    <Text props={{ content: module.title, size: "sm" }} isLoading={isLoading} />
                 )),
-                fact: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                    <Text props={{ content: module.countLabel, size: "sm", tone: "muted" }} isLoading={isLoading} />
+                fact: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                    <Text props={{ content: module.countLabel, size: "xs", tone: "muted" }} isLoading={isLoading} />
+                )),
+                caret: defineLeafComponent("icon", { role: "chip" }, () => (
+                    <Icon props={{ name: module.isOpen === true ? "disclosure" : "next", role: "chip" }} />
                 )),
             }),
             // A module the reader has not opened carries no rows at all: the map is scanned by

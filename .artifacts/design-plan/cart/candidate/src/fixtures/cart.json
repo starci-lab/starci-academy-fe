@@ -1,0 +1,86 @@
+{
+  "_why": "Every VND figure here is the backend's, not this file's arithmetic. coursesCheckoutPreview returns per-line listVnd/chargedVnd and the order's totalListVnd/totalChargedVnd/savingsVnd; the installment cycles come from the enabler installment-preview-schedule at 5% markup with the share vector 50 / 27.5 / 27.5 of base. Nothing in the candidate recomputes a discount or a cycle - the failure the plan record names in the legacy drawer is a client that re-declared the tiers.",
+  "locale": "vi",
+  "lines": [
+    {
+      "courseId": "c-system-design",
+      "title": "System Design Mastery",
+      "tier": "Cốt lõi",
+      "listVnd": 2000000,
+      "chargedVnd": 1800000,
+      "discountPercent": 10
+    },
+    {
+      "courseId": "c-fullstack",
+      "title": "Fullstack Mastery",
+      "tier": "Nền tảng",
+      "listVnd": 1500000,
+      "chargedVnd": 1350000,
+      "discountPercent": 10
+    },
+    {
+      "courseId": "c-devops",
+      "title": "DevOps Mastery",
+      "tier": "Nâng cao",
+      "listVnd": 2000000,
+      "chargedVnd": 1800000,
+      "discountPercent": 10
+    }
+  ],
+  "totalListVnd": 5500000,
+  "totalChargedVnd": 4950000,
+  "savingsVnd": 550000,
+  "bundleBonusPercent": 10,
+  "itemCount": 3,
+  "installmentOption": {
+    "months": 3,
+    "markupPercent": 5,
+    "totalAmountVnd": 5197500,
+    "cycles": [
+      {
+        "ordinal": 1,
+        "percent": 50,
+        "amountVnd": 2475000,
+        "dueOffsetMonths": 0
+      },
+      {
+        "ordinal": 2,
+        "percent": 27.5,
+        "amountVnd": 1361250,
+        "dueOffsetMonths": 1
+      },
+      {
+        "ordinal": 3,
+        "percent": 27.5,
+        "amountVnd": 1361250,
+        "dueOffsetMonths": 2
+      }
+    ]
+  },
+  "labels": {
+    "navHome": "Trang chủ",
+    "navCart": "Giỏ hàng",
+    "title": "Giỏ hàng",
+    "subtotal": "Tạm tính",
+    "savings": "Tiết kiệm",
+    "total": "Tổng",
+    "checkout": "Thanh toán",
+    "clearAll": "Xoá hết",
+    "remove": "Bỏ khỏi giỏ",
+    "viewFullCart": "Xem giỏ đầy đủ",
+    "drawerTitle": "Giỏ hàng",
+    "emptyMessage": "Giỏ hàng đang trống.",
+    "emptyAction": "Xem khoá học",
+    "installmentHint": "Có thể trả góp 3 kỳ — trả trước 2.475.000₫. Chi tiết ở bước thanh toán.",
+    "payFull": "Trả một lần",
+    "payInstalments": "Trả góp 3 kỳ",
+    "installmentTotal": "Tổng trả góp",
+    "installmentFee": "Phí trả góp 3 kỳ (5%)",
+    "cycleOrdinal": "Kỳ {ordinal}",
+    "cycleToday": "hôm nay",
+    "cycleAfterMonths": "sau {months} tháng",
+    "manualWarning": "Mỗi kỳ bạn tự vào đóng, hệ thống không tự trừ tiền. Trễ quá 14 ngày sẽ tạm khoá cả 3 khoá trong đơn này cho tới khi đóng tiếp.",
+    "gateways": "PayOS · Sepay · Stripe · PayPal · Crypto",
+    "confirmClearAll": "Bấm lần nữa để xoá hết"
+  }
+}

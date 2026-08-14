@@ -35,7 +35,7 @@ const settled = {
     languagesLabel: fixture.languagesLabel,
     languages: fixture.languages,
     selectedLanguage: fixture.selectedLanguage,
-    sections: fixture.sections,
+    body: fixture.body,
     courseProgress: fixture.courseProgress,
     modules: fixture.modules,
     outline,

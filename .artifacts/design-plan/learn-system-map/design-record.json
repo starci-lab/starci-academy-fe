@@ -1,0 +1,1331 @@
+{
+  "version": 3,
+  "caseId": "case-learn-system",
+  "scope": "learn-content-page",
+  "approvedRevision": "1.6",
+  "approval": {
+    "kind": "confirmed-restated",
+    "source": "ok lam di",
+    "restatement": "Revision 1.6 as shown: the body is markdown drawn by the Article leaf, and the connected half - two reads, the route and the copy - is built to the same seal.",
+    "at": "2026-08-14"
+  },
+  "preview": {
+    "revision": "1.6",
+    "phase": "preview",
+    "directionId": "direction-b-one-spine"
+  },
+  "revisionHistory": [
+    {
+      "revision": "1.0",
+      "change": "The reader rebuilt as an executable candidate from the selected direction."
+    },
+    {
+      "revision": "1.1",
+      "change": "The double tab row extracted to its own block, as the dashboard does it."
+    },
+    {
+      "revision": "1.2",
+      "change": "Rebuilt from `pages/ContentPage` read line by line: paper card, paywall inside it, footer suppressed when locked, reaction on its own ground, destinations under one name, tab bar never rested, reading column at no seam."
+    },
+    {
+      "revision": "1.3",
+      "change": "The two rails the plan record puts in this work item: the content map and the on-this-page outline. The entity renamed from `lesson` to `content` across every key, type and fixture field."
+    },
+    {
+      "revision": "1.4",
+      "change": "The outline entry tinted rather than plated and indented by depth; the map row given its mark, its reading time and its current plate; the module given a summary line that opens and closes."
+    },
+    {
+      "revision": "1.5",
+      "change": "No pixel changes. The record declares the one environment edit materialization requires: the candidate mirror specifier  becomes . Revision 1.4 was sealed without it, which would have made Apply either write an undeclared difference or stop - and an undeclared edit is exactly what the seal exists to refuse."
+    },
+    {
+      "revision": "1.6",
+      "change": "The body is markdown, because the data is: `ContentEntity.body` is a markdown column, so `sections` was retired along with `content-article-body` and `heading-over-paragraph`, and two leaves took their place - `Article`, which walks an mdast tree, and `CodeBlock`, whose target folder existed and was empty. The connected half arrived with it: two reads, the route, and the reader's copy in both locales."
+    }
+  ],
+  "candidate": {
+    "root": "D:/Repositories/starci-academy-fe/.artifacts/design-plan/learn-system-map/candidate",
+    "framework": "next@16 / react@19 / tailwind@4 / heroui@3, the target's own",
+    "buildCommand": "npm run build",
+    "build": {
+      "command": "npm run build (next build --webpack)",
+      "exitCode": 0,
+      "log": {
+        "path": "logs/candidate.build.log",
+        "sha256": "8bba0cf360371781b1de3531787d1f799653ec50078350e514bf7587b54e8fd4"
+      }
+    },
+    "lint": {
+      "command": "npx eslint \".artifacts/design-plan/learn-system-map/candidate/src/**/*.{ts,tsx}\"",
+      "exitCode": 0,
+      "log": {
+        "path": "logs/candidate.lint.log",
+        "sha256": "1f5245f49d3a8b9bde512c83088db71c4a2367b438544d7a7c9caa3017c217da"
+      }
+    },
+    "files": [
+      {
+        "path": "candidate/src/components/pages/CourseLearnContentPage/component.tsx",
+        "targetPath": "src/components/pages/CourseLearnContentPage/component.tsx",
+        "sha256": "592ccda18ac5bc45f161c688650c52c06a3f8c8866d164f9bc966bd70a865c0c"
+      },
+      {
+        "path": "candidate/src/components/pages/CourseLearnContentPage/index.tsx",
+        "targetPath": "src/components/pages/CourseLearnContentPage/index.tsx",
+        "sha256": "5e0757654ed0c78136343f5f5851cd9437ba5479ef94c9ba83fac26df4e47fd0"
+      },
+      {
+        "path": "candidate/src/components/blocks/learn/ContentTabRow/component.tsx",
+        "targetPath": "src/components/blocks/learn/ContentTabRow/component.tsx",
+        "sha256": "71418d90d7eaf0b9994e6cc869c79f2a430ada2bfec15aaa2d48cb67deeaa492"
+      },
+      {
+        "path": "candidate/src/components/leaves/ContentMapRow/index.tsx",
+        "targetPath": "src/components/leaves/ContentMapRow/index.tsx",
+        "sha256": "8c143ca38a7db9c726ce1ba38f66ab02ec74b1c302d88f4e9db84c5a770d51f7"
+      },
+      {
+        "path": "candidate/src/components/leaves/Article/index.tsx",
+        "targetPath": "src/components/leaves/Article/index.tsx",
+        "sha256": "9ed6cef80fc53ce0d86f31962f34ab189b3b3f8d9812e6bf1fbe9d596fbf9cb1"
+      },
+      {
+        "path": "candidate/src/components/leaves/CodeBlock/index.tsx",
+        "targetPath": "src/components/leaves/CodeBlock/index.tsx",
+        "sha256": "30be89dfb381d2c0f2c8d775c1f4b2d7f564634bc07ecf32ce3a71a9b614de3c"
+      },
+      {
+        "path": "candidate/src/components/leaves/NavLink/index.tsx",
+        "targetPath": "src/components/leaves/NavLink/index.tsx",
+        "sha256": "9f39d411f1c7e70f63a44d752957711b36fc1ed0b0fad0193df8079d38f2621f"
+      },
+      {
+        "path": "candidate/src/components/contracts/index.ts",
+        "targetPath": "src/components/contracts/index.ts",
+        "sha256": "ef86b54fc750a5aaceb4b13f1459974bfdac8ff11ee7e07cbc552a14b71e6f94"
+      },
+      {
+        "path": "candidate/src/modules/api/graphql/queries/query-content.ts",
+        "targetPath": "src/modules/api/graphql/queries/query-content.ts",
+        "sha256": "ab6930bc39961a86c525079fe9a089bdd9b94304b4389eaa586566af22b57a61"
+      },
+      {
+        "path": "candidate/src/modules/api/graphql/queries/query-module.ts",
+        "targetPath": "src/modules/api/graphql/queries/query-module.ts",
+        "sha256": "4e8f301a25e8ab0d85e87548d568e273bd85c33c6994f5c455fc080011e1c5c8"
+      },
+      {
+        "path": "candidate/src/modules/api/graphql/queries/types/content.ts",
+        "targetPath": "src/modules/api/graphql/queries/types/content.ts",
+        "sha256": "540cb6f0566461894bf42a24b2b02112cf597a4cb6d14e5cd73bf38c4333f0d7"
+      },
+      {
+        "path": "candidate/src/hooks/swr/useQueryContentSwr.ts",
+        "targetPath": "src/hooks/swr/useQueryContentSwr.ts",
+        "sha256": "e8023c5adcc0ddcfe554e70f995635e38a8b31984cbf3823791d27d6eb3b7578"
+      },
+      {
+        "path": "candidate/src/hooks/swr/useQueryModuleSwr.ts",
+        "targetPath": "src/hooks/swr/useQueryModuleSwr.ts",
+        "sha256": "2b598739b4cf656ab06a1de0a8fc42d866d6289c182b2eb0cd210ea10fa73339"
+      },
+      {
+        "path": "candidate/src/routes/course-learn-content-page.tsx",
+        "targetPath": "src/app/[lang]/courses/[displayId]/learn/content/modules/[moduleId]/contents/[contentId]/page.tsx",
+        "sha256": "3fa86a7e33fdfaa70666de29fb5104125be276349cc58b92922132a3d86c845b"
+      },
+      {
+        "path": "candidate/src/messages/vi.json",
+        "targetPath": "src/messages/vi.json",
+        "sha256": "d50387028c2fc9c6e9272948cf85c8e039bbcdaad865006467927f4fee5b0f80"
+      },
+      {
+        "path": "candidate/src/messages/en.json",
+        "targetPath": "src/messages/en.json",
+        "sha256": "25cee07e44318d6f919517ba0d15fa3025e492031445573ef78168d126119d62"
+      }
+    ],
+    "mirror": {
+      "note": "contracts/index.ts, contracts/props.ts, branches/Tree, branches/SurfaceCard, branches/SurfaceListCard are the locked target files copied verbatim with their specifiers repointed. Only the contract TABLE is a target write; the rest exist so `ContractKey` closes over the proposed entries."
+    }
+  },
+  "states": [
+    {
+      "stateId": "reader-ready",
+      "ownerId": "CourseLearnContentPage",
+      "note": "The ordinary case: three faces, an article on its paper, the reaction, where to go next, and the pager.",
+      "route": "/state/reader-ready",
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "enrolled-learner",
+      "coverage": "rendered",
+      "viewport": {
+        "width": 1440,
+        "height": 1400,
+        "dpr": 1
+      },
+      "fixture": {
+        "path": "candidate/src/fixtures/content.json",
+        "sha256": "42ddcca1c5034d6a7d4311429e2e54308116b90e6ad5a0e92a7a8954264e23f1"
+      },
+      "screenshot": {
+        "path": "screens/revision-1-6/reader-ready.png",
+        "sha256": "42a2e69ad90432dc0b78c8a58b97b21b2576d3d6a025172150330b6dc8349a65"
+      },
+      "componentTree": [
+        "CourseLearnContentPage",
+        "Tree",
+        "SurfaceCard",
+        "SurfaceListCard",
+        "ContentTabRow",
+        "ContentMapRow",
+        "NavLink",
+        "LabelledProgressRow",
+        "SearchBox",
+        "Text",
+        "Icon",
+        "Breadcrumbs",
+        "ReactionPicker",
+        "Pagination",
+        "EmptyNotice",
+        "Article",
+        "CodeBlock",
+        "Heading"
+      ],
+      "contracts": [
+        "content-reader-frame",
+        "content-map-panel",
+        "content-map-module",
+        "content-map-module-summary",
+        "learn-content-page",
+        "page-header-stack",
+        "dual-tabs-toolbar",
+        "content-reading-column",
+        "content-reading-paper",
+        "content-reader-footer",
+        "content-reaction-card",
+        "content-next-list",
+        "content-next-row",
+        "content-outline-rail"
+      ],
+      "props": [
+        "state",
+        "props.labels",
+        "props.title",
+        "props.faces",
+        "props.body",
+        "props.modules",
+        "props.outline",
+        "props.courseProgress",
+        "props.nextSteps",
+        "props.reactions",
+        "props.page",
+        "props.totalPages"
+      ],
+      "tokens": [
+        "gap-1",
+        "gap-2",
+        "gap-3",
+        "gap-4",
+        "gap-6",
+        "md:gap-8",
+        "p-4",
+        "px-3",
+        "py-2",
+        "px-6",
+        "py-6",
+        "max-w-app-md",
+        "max-w-app-xl",
+        "top-rail",
+        "max-h-rail"
+      ]
+    },
+    {
+      "stateId": "reader-pending",
+      "ownerId": "CourseLearnContentPage",
+      "note": "In flight. Title, faces and the whole map are already true; only the article rests.",
+      "route": "/state/reader-pending",
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "enrolled-learner",
+      "coverage": "rendered",
+      "viewport": {
+        "width": 1440,
+        "height": 1400,
+        "dpr": 1
+      },
+      "fixture": {
+        "path": "candidate/src/fixtures/content.json",
+        "sha256": "42ddcca1c5034d6a7d4311429e2e54308116b90e6ad5a0e92a7a8954264e23f1"
+      },
+      "screenshot": {
+        "path": "screens/revision-1-6/reader-pending.png",
+        "sha256": "95f7225a929fc16ca7f166a994ab80debb8cfe121e701f30682fe454ec2551b3"
+      },
+      "componentTree": [
+        "CourseLearnContentPage",
+        "Tree",
+        "SurfaceCard",
+        "SurfaceListCard",
+        "ContentTabRow",
+        "ContentMapRow",
+        "NavLink",
+        "LabelledProgressRow",
+        "SearchBox",
+        "Text",
+        "Icon",
+        "Breadcrumbs",
+        "ReactionPicker",
+        "Pagination",
+        "EmptyNotice",
+        "Article",
+        "CodeBlock",
+        "Heading"
+      ],
+      "contracts": [
+        "content-reader-frame",
+        "content-map-panel",
+        "content-map-module",
+        "content-map-module-summary",
+        "learn-content-page",
+        "page-header-stack",
+        "dual-tabs-toolbar",
+        "content-reading-column",
+        "content-reading-paper"
+      ],
+      "props": [
+        "state",
+        "props.labels",
+        "props.title",
+        "props.faces",
+        "props.body",
+        "props.modules",
+        "props.outline",
+        "props.courseProgress",
+        "props.nextSteps",
+        "props.reactions",
+        "props.page",
+        "props.totalPages"
+      ],
+      "tokens": [
+        "gap-1",
+        "gap-2",
+        "gap-3",
+        "gap-4",
+        "gap-6",
+        "md:gap-8",
+        "p-4",
+        "px-3",
+        "py-2",
+        "px-6",
+        "py-6",
+        "max-w-app-md",
+        "max-w-app-xl",
+        "top-rail",
+        "max-h-rail"
+      ]
+    },
+    {
+      "stateId": "reader-single-face",
+      "ownerId": "CourseLearnContentPage",
+      "note": "A content carrying only prose. The face bar is absent rather than drawn with one tab.",
+      "route": "/state/reader-single-face",
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "enrolled-learner",
+      "coverage": "rendered",
+      "viewport": {
+        "width": 1440,
+        "height": 1400,
+        "dpr": 1
+      },
+      "fixture": {
+        "path": "candidate/src/fixtures/content.json",
+        "sha256": "42ddcca1c5034d6a7d4311429e2e54308116b90e6ad5a0e92a7a8954264e23f1"
+      },
+      "screenshot": {
+        "path": "screens/revision-1-6/reader-single-face.png",
+        "sha256": "4aa74c9d80f3cc6944c13588fee6ca9581e79b85862ba8ba460405c1556b265f"
+      },
+      "componentTree": [
+        "CourseLearnContentPage",
+        "Tree",
+        "SurfaceCard",
+        "SurfaceListCard",
+        "ContentTabRow",
+        "ContentMapRow",
+        "NavLink",
+        "LabelledProgressRow",
+        "SearchBox",
+        "Text",
+        "Icon",
+        "Breadcrumbs",
+        "ReactionPicker",
+        "Pagination",
+        "EmptyNotice",
+        "Article",
+        "CodeBlock",
+        "Heading"
+      ],
+      "contracts": [
+        "content-reader-frame",
+        "content-map-panel",
+        "content-map-module",
+        "content-map-module-summary",
+        "learn-content-page",
+        "page-header-stack",
+        "content-reading-column",
+        "content-reading-paper",
+        "content-reader-footer",
+        "content-reaction-card",
+        "content-next-list",
+        "content-next-row",
+        "content-outline-rail"
+      ],
+      "props": [
+        "state",
+        "props.labels",
+        "props.title",
+        "props.faces",
+        "props.body",
+        "props.modules",
+        "props.outline",
+        "props.courseProgress",
+        "props.nextSteps",
+        "props.reactions",
+        "props.page",
+        "props.totalPages"
+      ],
+      "tokens": [
+        "gap-1",
+        "gap-2",
+        "gap-3",
+        "gap-4",
+        "gap-6",
+        "md:gap-8",
+        "p-4",
+        "px-3",
+        "py-2",
+        "px-6",
+        "py-6",
+        "max-w-app-md",
+        "max-w-app-xl",
+        "top-rail",
+        "max-h-rail"
+      ]
+    },
+    {
+      "stateId": "reader-locked",
+      "ownerId": "CourseLearnContentPage",
+      "note": "Premium. One preview section keeps the paper, the paywall joins it inside, the footer is gone.",
+      "route": "/state/reader-locked",
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "enrolled-learner",
+      "coverage": "rendered",
+      "viewport": {
+        "width": 1440,
+        "height": 1400,
+        "dpr": 1
+      },
+      "fixture": {
+        "path": "candidate/src/fixtures/content.json",
+        "sha256": "42ddcca1c5034d6a7d4311429e2e54308116b90e6ad5a0e92a7a8954264e23f1"
+      },
+      "screenshot": {
+        "path": "screens/revision-1-6/reader-locked.png",
+        "sha256": "f1a8e66a3c3e947d67aaf85269a1d49fa2653a6db4dbbf0066b52cb1449dcddb"
+      },
+      "componentTree": [
+        "CourseLearnContentPage",
+        "Tree",
+        "SurfaceCard",
+        "SurfaceListCard",
+        "ContentTabRow",
+        "ContentMapRow",
+        "NavLink",
+        "LabelledProgressRow",
+        "SearchBox",
+        "Text",
+        "Icon",
+        "Breadcrumbs",
+        "ReactionPicker",
+        "Pagination",
+        "EmptyNotice",
+        "Article",
+        "CodeBlock",
+        "Heading"
+      ],
+      "contracts": [
+        "content-reader-frame",
+        "content-map-panel",
+        "content-map-module",
+        "content-map-module-summary",
+        "learn-content-page",
+        "page-header-stack",
+        "dual-tabs-toolbar",
+        "content-reading-column",
+        "content-reading-paper"
+      ],
+      "props": [
+        "state",
+        "props.labels",
+        "props.title",
+        "props.faces",
+        "props.body",
+        "props.modules",
+        "props.outline",
+        "props.courseProgress",
+        "props.nextSteps",
+        "props.reactions",
+        "props.page",
+        "props.totalPages"
+      ],
+      "tokens": [
+        "gap-1",
+        "gap-2",
+        "gap-3",
+        "gap-4",
+        "gap-6",
+        "md:gap-8",
+        "p-4",
+        "px-3",
+        "py-2",
+        "px-6",
+        "py-6",
+        "max-w-app-md",
+        "max-w-app-xl",
+        "top-rail",
+        "max-h-rail"
+      ]
+    },
+    {
+      "stateId": "reader-failed",
+      "ownerId": "CourseLearnContentPage",
+      "note": "The request failed - one notice at the reading measure, no footer, no outline.",
+      "route": "/state/reader-failed",
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "enrolled-learner",
+      "coverage": "rendered",
+      "viewport": {
+        "width": 1440,
+        "height": 1400,
+        "dpr": 1
+      },
+      "fixture": {
+        "path": "candidate/src/fixtures/content.json",
+        "sha256": "42ddcca1c5034d6a7d4311429e2e54308116b90e6ad5a0e92a7a8954264e23f1"
+      },
+      "screenshot": {
+        "path": "screens/revision-1-6/reader-failed.png",
+        "sha256": "581cfa86435680061e0bf345c67eab719cd12357834f470a6876264e39bfff37"
+      },
+      "componentTree": [
+        "CourseLearnContentPage",
+        "Tree",
+        "SurfaceCard",
+        "SurfaceListCard",
+        "ContentTabRow",
+        "ContentMapRow",
+        "NavLink",
+        "LabelledProgressRow",
+        "SearchBox",
+        "Text",
+        "Icon",
+        "Breadcrumbs",
+        "ReactionPicker",
+        "Pagination",
+        "EmptyNotice",
+        "Article",
+        "CodeBlock",
+        "Heading"
+      ],
+      "contracts": [
+        "content-reader-frame",
+        "content-map-panel",
+        "content-map-module",
+        "content-map-module-summary",
+        "learn-content-page",
+        "page-header-stack",
+        "centred-empty-notice"
+      ],
+      "props": [
+        "state",
+        "props.labels",
+        "props.title",
+        "props.faces",
+        "props.body",
+        "props.modules",
+        "props.outline",
+        "props.courseProgress",
+        "props.nextSteps",
+        "props.reactions",
+        "props.page",
+        "props.totalPages"
+      ],
+      "tokens": [
+        "gap-1",
+        "gap-2",
+        "gap-3",
+        "gap-4",
+        "gap-6",
+        "md:gap-8",
+        "p-4",
+        "px-3",
+        "py-2",
+        "px-6",
+        "py-6",
+        "max-w-app-md",
+        "max-w-app-xl",
+        "top-rail",
+        "max-h-rail"
+      ]
+    },
+    {
+      "stateId": "reader-first-content",
+      "ownerId": "CourseLearnContentPage",
+      "note": "First content of a module: the pager stands with no previous.",
+      "route": "/state/reader-first-content",
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "enrolled-learner",
+      "coverage": "rendered",
+      "viewport": {
+        "width": 1440,
+        "height": 1400,
+        "dpr": 1
+      },
+      "fixture": {
+        "path": "candidate/src/fixtures/content.json",
+        "sha256": "42ddcca1c5034d6a7d4311429e2e54308116b90e6ad5a0e92a7a8954264e23f1"
+      },
+      "screenshot": {
+        "path": "screens/revision-1-6/reader-first-content.png",
+        "sha256": "7afaacd81fcc1b1dcb27c845a9d427cf8627f5fbb34fce9f1450e9d5393a4701"
+      },
+      "componentTree": [
+        "CourseLearnContentPage",
+        "Tree",
+        "SurfaceCard",
+        "SurfaceListCard",
+        "ContentTabRow",
+        "ContentMapRow",
+        "NavLink",
+        "LabelledProgressRow",
+        "SearchBox",
+        "Text",
+        "Icon",
+        "Breadcrumbs",
+        "ReactionPicker",
+        "Pagination",
+        "EmptyNotice",
+        "Article",
+        "CodeBlock",
+        "Heading"
+      ],
+      "contracts": [
+        "content-reader-frame",
+        "content-map-panel",
+        "content-map-module",
+        "content-map-module-summary",
+        "learn-content-page",
+        "page-header-stack",
+        "dual-tabs-toolbar",
+        "content-reading-column",
+        "content-reading-paper",
+        "content-reader-footer",
+        "content-reaction-card",
+        "content-next-list",
+        "content-next-row",
+        "content-outline-rail"
+      ],
+      "props": [
+        "state",
+        "props.labels",
+        "props.title",
+        "props.faces",
+        "props.body",
+        "props.modules",
+        "props.outline",
+        "props.courseProgress",
+        "props.nextSteps",
+        "props.reactions",
+        "props.page",
+        "props.totalPages"
+      ],
+      "tokens": [
+        "gap-1",
+        "gap-2",
+        "gap-3",
+        "gap-4",
+        "gap-6",
+        "md:gap-8",
+        "p-4",
+        "px-3",
+        "py-2",
+        "px-6",
+        "py-6",
+        "max-w-app-md",
+        "max-w-app-xl",
+        "top-rail",
+        "max-h-rail"
+      ]
+    },
+    {
+      "stateId": "reader-last-content",
+      "ownerId": "CourseLearnContentPage",
+      "note": "Last content: the pager stands with no next.",
+      "route": "/state/reader-last-content",
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "enrolled-learner",
+      "coverage": "rendered",
+      "viewport": {
+        "width": 1440,
+        "height": 1400,
+        "dpr": 1
+      },
+      "fixture": {
+        "path": "candidate/src/fixtures/content.json",
+        "sha256": "42ddcca1c5034d6a7d4311429e2e54308116b90e6ad5a0e92a7a8954264e23f1"
+      },
+      "screenshot": {
+        "path": "screens/revision-1-6/reader-last-content.png",
+        "sha256": "77f15e284a3a5b9c8730565090fac0509f238d85e0df81d20aedd60f0be38963"
+      },
+      "componentTree": [
+        "CourseLearnContentPage",
+        "Tree",
+        "SurfaceCard",
+        "SurfaceListCard",
+        "ContentTabRow",
+        "ContentMapRow",
+        "NavLink",
+        "LabelledProgressRow",
+        "SearchBox",
+        "Text",
+        "Icon",
+        "Breadcrumbs",
+        "ReactionPicker",
+        "Pagination",
+        "EmptyNotice",
+        "Article",
+        "CodeBlock",
+        "Heading"
+      ],
+      "contracts": [
+        "content-reader-frame",
+        "content-map-panel",
+        "content-map-module",
+        "content-map-module-summary",
+        "learn-content-page",
+        "page-header-stack",
+        "dual-tabs-toolbar",
+        "content-reading-column",
+        "content-reading-paper",
+        "content-reader-footer",
+        "content-reaction-card",
+        "content-next-list",
+        "content-next-row",
+        "content-outline-rail"
+      ],
+      "props": [
+        "state",
+        "props.labels",
+        "props.title",
+        "props.faces",
+        "props.body",
+        "props.modules",
+        "props.outline",
+        "props.courseProgress",
+        "props.nextSteps",
+        "props.reactions",
+        "props.page",
+        "props.totalPages"
+      ],
+      "tokens": [
+        "gap-1",
+        "gap-2",
+        "gap-3",
+        "gap-4",
+        "gap-6",
+        "md:gap-8",
+        "p-4",
+        "px-3",
+        "py-2",
+        "px-6",
+        "py-6",
+        "max-w-app-md",
+        "max-w-app-xl",
+        "top-rail",
+        "max-h-rail"
+      ]
+    },
+    {
+      "stateId": "reader-no-next-steps",
+      "ownerId": "CourseLearnContentPage",
+      "note": "A content that leads nowhere in particular: the joined list is absent rather than titled and empty.",
+      "route": "/state/reader-no-next-steps",
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "enrolled-learner",
+      "coverage": "rendered",
+      "viewport": {
+        "width": 1440,
+        "height": 1400,
+        "dpr": 1
+      },
+      "fixture": {
+        "path": "candidate/src/fixtures/content.json",
+        "sha256": "42ddcca1c5034d6a7d4311429e2e54308116b90e6ad5a0e92a7a8954264e23f1"
+      },
+      "screenshot": {
+        "path": "screens/revision-1-6/reader-no-next-steps.png",
+        "sha256": "3da8b593b1415fd3421ea3fb36f2a476e8f235c76d7d635f1cf0ef74128b842c"
+      },
+      "componentTree": [
+        "CourseLearnContentPage",
+        "Tree",
+        "SurfaceCard",
+        "SurfaceListCard",
+        "ContentTabRow",
+        "ContentMapRow",
+        "NavLink",
+        "LabelledProgressRow",
+        "SearchBox",
+        "Text",
+        "Icon",
+        "Breadcrumbs",
+        "ReactionPicker",
+        "Pagination",
+        "EmptyNotice",
+        "Article",
+        "CodeBlock",
+        "Heading"
+      ],
+      "contracts": [
+        "content-reader-frame",
+        "content-map-panel",
+        "content-map-module",
+        "content-map-module-summary",
+        "learn-content-page",
+        "page-header-stack",
+        "dual-tabs-toolbar",
+        "content-reading-column",
+        "content-reading-paper",
+        "content-reader-footer",
+        "content-reaction-card",
+        "content-outline-rail"
+      ],
+      "props": [
+        "state",
+        "props.labels",
+        "props.title",
+        "props.faces",
+        "props.body",
+        "props.modules",
+        "props.outline",
+        "props.courseProgress",
+        "props.nextSteps",
+        "props.reactions",
+        "props.page",
+        "props.totalPages"
+      ],
+      "tokens": [
+        "gap-1",
+        "gap-2",
+        "gap-3",
+        "gap-4",
+        "gap-6",
+        "md:gap-8",
+        "p-4",
+        "px-3",
+        "py-2",
+        "px-6",
+        "py-6",
+        "max-w-app-md",
+        "max-w-app-xl",
+        "top-rail",
+        "max-h-rail"
+      ]
+    }
+  ],
+  "stateCoverage": [
+    {
+      "ownerId": "CourseLearnContentPage",
+      "state": "loading",
+      "coverage": "rendered",
+      "scenarioId": "reader-pending"
+    },
+    {
+      "ownerId": "CourseLearnContentPage",
+      "state": "content body, unlocked",
+      "coverage": "rendered",
+      "scenarioId": "reader-ready"
+    },
+    {
+      "ownerId": "CourseLearnContentPage",
+      "state": "content body, no headings",
+      "coverage": "rendered",
+      "scenarioId": "reader-single-face",
+      "evidence": "The outline rail is absent rather than empty; the same branch runs when a body carries no headings."
+    },
+    {
+      "ownerId": "CourseLearnContentPage",
+      "state": "locked premium content",
+      "coverage": "rendered",
+      "scenarioId": "reader-locked"
+    },
+    {
+      "ownerId": "CourseLearnContentPage",
+      "state": "first content",
+      "coverage": "rendered",
+      "scenarioId": "reader-first-content"
+    },
+    {
+      "ownerId": "CourseLearnContentPage",
+      "state": "last content",
+      "coverage": "rendered",
+      "scenarioId": "reader-last-content"
+    },
+    {
+      "ownerId": "CourseLearnContentPage",
+      "state": "failed",
+      "coverage": "rendered",
+      "scenarioId": "reader-failed"
+    },
+    {
+      "ownerId": "CourseLearnContentPage",
+      "state": "face absent (no sandbox, no lab)",
+      "coverage": "rendered",
+      "scenarioId": "reader-single-face"
+    },
+    {
+      "ownerId": "CourseLearnContentPage",
+      "state": "no destinations after the content",
+      "coverage": "rendered",
+      "scenarioId": "reader-no-next-steps"
+    },
+    {
+      "ownerId": "CourseLearnContentPage",
+      "state": "discussion, selection-to-AI, advertisement",
+      "coverage": "not-applicable",
+      "evidence": "Each is its own case with its own states; drawing them from evidence gathered for the reader would settle three surfaces nobody surveyed. Recorded in preview-inventory.md under revision 1.2."
+    },
+    {
+      "ownerId": "CourseLearnContentPage",
+      "state": "the fade over a locked preview",
+      "coverage": "not-applicable",
+      "evidence": "Legacy's `LockedContentMask` is a new owner nobody has approved. The preview is short instead of faded - stated in the page's own header comment and in the revision 1.2 record."
+    },
+    {
+      "ownerId": "CourseLearnContentPage",
+      "state": "mobile: both rails folded into a bottom bar",
+      "coverage": "not-applicable",
+      "evidence": "`LearnMobileTabBar` belongs to `learn-shell-layout`, the case's own work item, and folds rails the shell owns."
+    },
+    {
+      "ownerId": "CourseLearnContentPage (connected)",
+      "state": "every situation the reader can be in",
+      "coverage": "covered-by",
+      "scenarioId": "reader-ready",
+      "evidence": "The connected half resolves data and renders the pure half; it draws nothing of its own. Its four situations ARE the four states rendered above, reached with fixtures instead of a live server."
+    },
+    {
+      "ownerId": "CourseLearnContentPage (connected)",
+      "state": "which outline entry the reader is level with",
+      "coverage": "not-applicable",
+      "evidence": "Scroll-spy needs a live document and an intersection observer. Until it exists no entry claims to be current, because a wrong current entry is worse than none. Recorded as owed rather than done."
+    }
+  ],
+  "relationships": [
+    {
+      "kind": "seam",
+      "subject": "content-reading-column",
+      "decision": "no gap class at all",
+      "reason": "The article and the chrome under it are one continuous reading; each block closes with its own trailing space, and legacy's `StackV gap={1}` is a ZERO seam this scale does not name. A rung here would read as the page changing subject."
+    },
+    {
+      "kind": "seam",
+      "subject": "content-reading-paper interior",
+      "decision": "gap-4",
+      "reason": "Legacy's `gap={5}` is 20px and off this ladder. Hint, article and paywall are each already a cluster, which is exactly what the 16px rung names."
+    },
+    {
+      "kind": "seam",
+      "subject": "content-reader-footer",
+      "decision": "gap-6",
+      "reason": "A reaction, where to go next and the content's place in its module each stand alone - block boundaries, not parts of one group."
+    },
+    {
+      "kind": "seam",
+      "subject": "content-map-module",
+      "decision": "gap-1",
+      "reason": "A module's name and the contents under it are one identity, not two facts."
+    },
+    {
+      "kind": "seam",
+      "subject": "content-reader-frame",
+      "decision": "md:gap-8",
+      "reason": "The layout seam: a rail against the column beside it."
+    },
+    {
+      "kind": "rank",
+      "subject": "the content title",
+      "decision": "level 1",
+      "reason": "The page is one content; its name is the document's heading and the outline a screen reader builds starts there."
+    },
+    {
+      "kind": "rank",
+      "subject": "a module name in the map",
+      "decision": "text at sm, not a heading",
+      "reason": "The map is a nav, and every module name as a heading would put the whole course tree into the document outline beside the article's own headings."
+    },
+    {
+      "kind": "variant",
+      "subject": "the outline entry",
+      "decision": "nav-link kind section",
+      "reason": "A route is a pill and a tab is an underline because each stands in a bar of peers; an outline entry stands in a column of prose-length lines, where a plate reads as a control rather than as where you are."
+    },
+    {
+      "kind": "variant",
+      "subject": "the paywall action",
+      "decision": "the notice composite's own action",
+      "reason": "The paywall is a notice with one way out, which the composite already owns; a second button beside it would offer two."
+    }
+  ],
+  "openQuestions": [
+    {
+      "question": "Does the reading column keep its breadcrumb, title and tab bar? The running product shows none of the three.",
+      "default": "Kept, following `ContentPage` at the reference HEAD.",
+      "cost": "If production has genuinely moved past the baseline, the candidate carries three pieces of chrome the product dropped.",
+      "resolution": "answered",
+      "answeredBy": "The reader confirmed after the divergence was stated in conversation (revision 1.4 hand-over)."
+    },
+    {
+      "question": "Is the reaction a bare count or a question with a count?",
+      "default": "A question - `Bài học này hữu ích chứ?` - with the count at the far end.",
+      "cost": "One more string to translate, and a card that is taller than the legacy bar.",
+      "resolution": "answered",
+      "answeredBy": "Accepted at revision 1.2 hand-over without objection after being stated."
+    },
+    {
+      "question": "Are up-next and related content one list or two surfaces?",
+      "default": "One named joined list - both answer where the reader goes from here.",
+      "cost": "Loses legacy's distinction between the next content and merely related ones.",
+      "resolution": "answered",
+      "answeredBy": "Stated as a deliberate merge in preview-inventory.md at revision 1.2; accepted at hand-over."
+    },
+    {
+      "question": "How much of a locked content is shown before the paywall?",
+      "default": "One section.",
+      "cost": "A long first section shows more than a short one; the amount is not proportional to the content.",
+      "resolution": "waived",
+      "answeredBy": "Not raised at hand-over; recorded here so Apply does not treat it as settled by the picture."
+    },
+    {
+      "question": "Syntax highlighting in code blocks",
+      "default": "None. Mono type on the raised ground, with the fence's language named above it.",
+      "cost": "A bash block and a TypeScript block look alike; the reference colours both with shiki.",
+      "resolution": "waived",
+      "answeredBy": "Stated at the 1.6 hand-over as one of three deliberate omissions; not contested."
+    },
+    {
+      "question": "Remark directives (`:::accordion` and friends)",
+      "default": "Parsed so their markers do not spill into the prose, drawn as ordinary blocks.",
+      "cost": "Content authored as an accordion reads as a run of paragraphs.",
+      "resolution": "waived",
+      "answeredBy": "Stated at the 1.6 hand-over; giving directives their own vocabulary is a case of its own."
+    },
+    {
+      "question": "A long command line: wrap or scroll?",
+      "default": "Wrap.",
+      "cost": "Differs from the reference, which scrolls horizontally.",
+      "resolution": "answered",
+      "answeredBy": "Taken after the first render cut `mongosh \"mongodb://...` at the card edge with no closing quote visible."
+    }
+  ],
+  "newOwners": [
+    "ContentMapRow",
+    "NavLink.kind=section",
+    "ContentTabRow",
+    "content-reader-frame",
+    "content-map-panel",
+    "content-map-module",
+    "content-map-module-summary",
+    "content-outline-rail",
+    "content-reading-column",
+    "content-reading-paper",
+    "content-reader-footer",
+    "content-reaction-card",
+    "content-next-list",
+    "content-next-row",
+    "content-article-body",
+    "Article",
+    "CodeBlock",
+    "useQueryContentSwr",
+    "useQueryModuleSwr",
+    "queryContent",
+    "queryModule"
+  ],
+  "consolidation": [
+    {
+      "ownerId": "ContentMapRow",
+      "kin": [
+        "TaskProgressRow",
+        "NavLink",
+        "CurriculumModuleRow's lesson line"
+      ],
+      "verdict": "keep-apart",
+      "distinguishingFact": "Navigation state. A task list has no cursor, so `isCurrent` on `TaskProgressRow` would be a fact that component does not own; a nav link is one line of words rather than a mark, a wrapping title and a trailing reading time; the curriculum line sells a course and carries no progress."
+    },
+    {
+      "ownerId": "NavLink.kind=section",
+      "kin": [
+        "NavLink kind route",
+        "NavLink kind tab",
+        "TextLink"
+      ],
+      "verdict": "prop-variant",
+      "reason": "NavLink already owns `a destination, marked when it is where you are`, and a place inside the page is a destination. `TextLink.isSelected` draws a choice chip, which is a different statement."
+    },
+    {
+      "ownerId": "ContentTabRow",
+      "kin": [
+        "DualTabsToolbar",
+        "StackedChoiceTabs"
+      ],
+      "verdict": "extract-composite",
+      "reason": "The same double row the dashboard draws; extracted so the reader and the dashboard cannot drift apart."
+    },
+    {
+      "ownerId": "content-reader-frame",
+      "kin": [
+        "main-then-rail",
+        "rail-then-main"
+      ],
+      "verdict": "keep-apart",
+      "distinguishingFact": "Two rails, not one: the flexible column is neither the first nor the last child, which is the whole of what those two entries express."
+    },
+    {
+      "ownerId": "content-map-panel",
+      "kin": [
+        "course-module-list",
+        "search-over-list"
+      ],
+      "verdict": "keep-apart",
+      "distinguishingFact": "It opens with the reader's own progress and a filter over the whole tree; the module list is a list of modules and knows nothing about the reader."
+    },
+    {
+      "ownerId": "content-map-module",
+      "kin": [
+        "marked-row-list",
+        "course-module-list"
+      ],
+      "verdict": "keep-apart",
+      "distinguishingFact": "Its rows disappear entirely when the module is closed - a disclosure, not a list."
+    },
+    {
+      "ownerId": "content-map-module-summary",
+      "kin": [
+        "title-with-baseline-fact",
+        "title-with-end-action"
+      ],
+      "verdict": "keep-apart",
+      "distinguishingFact": "Three children, not two: a name, a count and the control that opens it, and the control must be last so nobody presses the count."
+    },
+    {
+      "ownerId": "content-outline-rail",
+      "kin": [
+        "marked-row-list",
+        "quick-actions-list"
+      ],
+      "verdict": "keep-apart",
+      "distinguishingFact": "Its entries are depth-bearing places in one document rather than peers; the indent is the content of the relationship."
+    },
+    {
+      "ownerId": "content-reading-column",
+      "kin": [
+        "centred-page-column"
+      ],
+      "verdict": "keep-apart",
+      "distinguishingFact": "It declares no seam at all, which is the one thing the page column cannot express."
+    },
+    {
+      "ownerId": "content-reading-paper",
+      "kin": [
+        "surface-card-body",
+        "authentication-panel-card"
+      ],
+      "verdict": "keep-apart",
+      "distinguishingFact": "It caps the READING measure rather than a panel width, and admits a paywall as a sibling of the body it is hiding."
+    },
+    {
+      "ownerId": "content-reader-footer",
+      "kin": [
+        "centred-page-column"
+      ],
+      "verdict": "keep-apart",
+      "distinguishingFact": "Every child is independently capped to the reading measure; the page column caps once, at the top."
+    },
+    {
+      "ownerId": "content-reaction-card",
+      "kin": [
+        "activity-sentence-over-reaction"
+      ],
+      "verdict": "keep-apart",
+      "distinguishingFact": "The reaction answers the whole content rather than a sentence above it, so the prompt sits BESIDE it on one row rather than over it."
+    },
+    {
+      "ownerId": "content-next-list",
+      "kin": [
+        "marked-row-list",
+        "course-module-list"
+      ],
+      "verdict": "keep-apart",
+      "distinguishingFact": "Its rows carry no completion mark: a tick would promise something to finish, and these are places to open."
+    },
+    {
+      "ownerId": "content-next-row",
+      "kin": [
+        "task-mark-title-fact-row"
+      ],
+      "verdict": "keep-apart",
+      "distinguishingFact": "It ends in a disclosure glyph rather than a fact - the row leads somewhere."
+    },
+    {
+      "ownerId": "content-article-body",
+      "kin": [
+        "centred-page-column"
+      ],
+      "verdict": "keep-apart",
+      "distinguishingFact": "It is prose sections inside a surface that already owns the measure, so it caps nothing itself."
+    },
+    {
+      "ownerId": "Article",
+      "kin": [
+        "Text",
+        "Heading",
+        "content-article-body (retired)"
+      ],
+      "verdict": "keep-apart",
+      "distinguishingFact": "It draws INLINE structure - a bold phrase, a piece of code inside a sentence, a link mid-clause. Every text leaf in this house takes `content: string`, which holds a sentence but not a sentence with a link inside it."
+    },
+    {
+      "ownerId": "CodeBlock",
+      "kin": [
+        "Text",
+        "Article"
+      ],
+      "verdict": "keep-apart",
+      "distinguishingFact": "A passage the reader will run rather than read: it keeps its own whitespace, names its language, and never re-flows into prose measure."
+    },
+    {
+      "ownerId": "useQueryContentSwr",
+      "kin": [
+        "useQueryCourseSwr",
+        "useQueryMyLearnedLessonsSwr"
+      ],
+      "verdict": "keep-apart",
+      "distinguishingFact": "Its answer is PERSONAL to the viewer for the same id - the server truncates a premium body per entitlement - so the viewer is in the key for correctness rather than for hygiene."
+    },
+    {
+      "ownerId": "useQueryModuleSwr",
+      "kin": [
+        "useQueryContentSwr",
+        "useQueryCourseSwr"
+      ],
+      "verdict": "keep-apart",
+      "distinguishingFact": "It outlives a page turn: the content it maps is replaced while the map stays true, which is the whole reason it is a second read."
+    },
+    {
+      "ownerId": "queryContent",
+      "kin": [
+        "queryCourse"
+      ],
+      "verdict": "keep-apart",
+      "distinguishingFact": "Authenticated rather than optional-auth: the server refuses an anonymous read of a content."
+    },
+    {
+      "ownerId": "queryModule",
+      "kin": [
+        "queryContent",
+        "queryCourse"
+      ],
+      "verdict": "keep-apart",
+      "distinguishingFact": "Login-only rather than enrolment-gated - a trial reader may see a module's shape without opening its premium contents."
+    }
+  ],
+  "seal": {
+    "algorithm": "sha256",
+    "manifestSha256": "2ddee2666fd8e085c802fa6fb927c8155e3ed0a98be6fe9456f8cbd198300e99"
+  },
+  "integrationEdits": [
+    {
+      "targetPath": "src/components/pages/CourseLearnContentPage/component.tsx",
+      "reason": "Mirror specifier repoint only. During Preview the candidate imports its contract machinery and its own not-yet-landed files through `~candidate/*`, because `ContractKey` closes over the table ON DISK and these files do not exist in the target yet. Once they land the mirror has no reason to exist, so every `~candidate/` specifier becomes `@/` and nothing else changes. The edit is mechanical, total and checkable: no `~candidate` may remain in a materialized file."
+    },
+    {
+      "targetPath": "src/components/pages/CourseLearnContentPage/index.tsx",
+      "reason": "Mirror specifier repoint only. During Preview the candidate imports its contract machinery and its own not-yet-landed files through `~candidate/*`, because `ContractKey` closes over the table ON DISK and these files do not exist in the target yet. Once they land the mirror has no reason to exist, so every `~candidate/` specifier becomes `@/` and nothing else changes. The edit is mechanical, total and checkable: no `~candidate` may remain in a materialized file."
+    },
+    {
+      "targetPath": "src/components/blocks/learn/ContentTabRow/component.tsx",
+      "reason": "Mirror specifier repoint only. During Preview the candidate imports its contract machinery and its own not-yet-landed files through `~candidate/*`, because `ContractKey` closes over the table ON DISK and these files do not exist in the target yet. Once they land the mirror has no reason to exist, so every `~candidate/` specifier becomes `@/` and nothing else changes. The edit is mechanical, total and checkable: no `~candidate` may remain in a materialized file."
+    },
+    {
+      "targetPath": "src/components/leaves/ContentMapRow/index.tsx",
+      "reason": "Mirror specifier repoint only. During Preview the candidate imports its contract machinery and its own not-yet-landed files through `~candidate/*`, because `ContractKey` closes over the table ON DISK and these files do not exist in the target yet. Once they land the mirror has no reason to exist, so every `~candidate/` specifier becomes `@/` and nothing else changes. The edit is mechanical, total and checkable: no `~candidate` may remain in a materialized file."
+    },
+    {
+      "targetPath": "src/components/leaves/Article/index.tsx",
+      "reason": "Mirror specifier repoint only. During Preview the candidate imports its contract machinery and its own not-yet-landed files through `~candidate/*`, because `ContractKey` closes over the table ON DISK and these files do not exist in the target yet. Once they land the mirror has no reason to exist, so every `~candidate/` specifier becomes `@/` and nothing else changes. The edit is mechanical, total and checkable: no `~candidate` may remain in a materialized file."
+    },
+    {
+      "targetPath": "src/components/leaves/CodeBlock/index.tsx",
+      "reason": "Mirror specifier repoint only. During Preview the candidate imports its contract machinery and its own not-yet-landed files through `~candidate/*`, because `ContractKey` closes over the table ON DISK and these files do not exist in the target yet. Once they land the mirror has no reason to exist, so every `~candidate/` specifier becomes `@/` and nothing else changes. The edit is mechanical, total and checkable: no `~candidate` may remain in a materialized file."
+    },
+    {
+      "targetPath": "src/components/leaves/NavLink/index.tsx",
+      "reason": "Mirror specifier repoint only. During Preview the candidate imports its contract machinery and its own not-yet-landed files through `~candidate/*`, because `ContractKey` closes over the table ON DISK and these files do not exist in the target yet. Once they land the mirror has no reason to exist, so every `~candidate/` specifier becomes `@/` and nothing else changes. The edit is mechanical, total and checkable: no `~candidate` may remain in a materialized file."
+    },
+    {
+      "targetPath": "src/components/contracts/index.ts",
+      "reason": "Mirror specifier repoint only. During Preview the candidate imports its contract machinery and its own not-yet-landed files through `~candidate/*`, because `ContractKey` closes over the table ON DISK and these files do not exist in the target yet. Once they land the mirror has no reason to exist, so every `~candidate/` specifier becomes `@/` and nothing else changes. The edit is mechanical, total and checkable: no `~candidate` may remain in a materialized file."
+    },
+    {
+      "targetPath": "src/modules/api/graphql/queries/query-content.ts",
+      "reason": "Mirror specifier repoint only. During Preview the candidate imports its contract machinery and its own not-yet-landed files through `~candidate/*`, because `ContractKey` closes over the table ON DISK and these files do not exist in the target yet. Once they land the mirror has no reason to exist, so every `~candidate/` specifier becomes `@/` and nothing else changes. The edit is mechanical, total and checkable: no `~candidate` may remain in a materialized file."
+    },
+    {
+      "targetPath": "src/modules/api/graphql/queries/query-module.ts",
+      "reason": "Mirror specifier repoint only. During Preview the candidate imports its contract machinery and its own not-yet-landed files through `~candidate/*`, because `ContractKey` closes over the table ON DISK and these files do not exist in the target yet. Once they land the mirror has no reason to exist, so every `~candidate/` specifier becomes `@/` and nothing else changes. The edit is mechanical, total and checkable: no `~candidate` may remain in a materialized file."
+    },
+    {
+      "targetPath": "src/modules/api/graphql/queries/types/content.ts",
+      "reason": "Mirror specifier repoint only. During Preview the candidate imports its contract machinery and its own not-yet-landed files through `~candidate/*`, because `ContractKey` closes over the table ON DISK and these files do not exist in the target yet. Once they land the mirror has no reason to exist, so every `~candidate/` specifier becomes `@/` and nothing else changes. The edit is mechanical, total and checkable: no `~candidate` may remain in a materialized file."
+    },
+    {
+      "targetPath": "src/hooks/swr/useQueryContentSwr.ts",
+      "reason": "Mirror specifier repoint only. During Preview the candidate imports its contract machinery and its own not-yet-landed files through `~candidate/*`, because `ContractKey` closes over the table ON DISK and these files do not exist in the target yet. Once they land the mirror has no reason to exist, so every `~candidate/` specifier becomes `@/` and nothing else changes. The edit is mechanical, total and checkable: no `~candidate` may remain in a materialized file."
+    },
+    {
+      "targetPath": "src/hooks/swr/useQueryModuleSwr.ts",
+      "reason": "Mirror specifier repoint only. During Preview the candidate imports its contract machinery and its own not-yet-landed files through `~candidate/*`, because `ContractKey` closes over the table ON DISK and these files do not exist in the target yet. Once they land the mirror has no reason to exist, so every `~candidate/` specifier becomes `@/` and nothing else changes. The edit is mechanical, total and checkable: no `~candidate` may remain in a materialized file."
+    },
+    {
+      "targetPath": "src/app/[lang]/courses/[displayId]/learn/content/modules/[moduleId]/contents/[contentId]/page.tsx",
+      "reason": "Mirror specifier repoint only. During Preview the candidate imports its contract machinery and its own not-yet-landed files through `~candidate/*`, because `ContractKey` closes over the table ON DISK and these files do not exist in the target yet. Once they land the mirror has no reason to exist, so every `~candidate/` specifier becomes `@/` and nothing else changes. The edit is mechanical, total and checkable: no `~candidate` may remain in a materialized file."
+    },
+    {
+      "targetPath": "src/messages/vi.json",
+      "reason": "Merged rather than copied. `src/messages/<locale>.json` already carries every other surface's copy, so materialization adds the `learn` key to the existing object instead of replacing the file. The candidate file IS that merge computed against the target at seal time, which is why it is byte-for-byte what should land - but a target that gained other strings meanwhile must be re-merged rather than overwritten."
+    },
+    {
+      "targetPath": "src/messages/en.json",
+      "reason": "Merged rather than copied. `src/messages/<locale>.json` already carries every other surface's copy, so materialization adds the `learn` key to the existing object instead of replacing the file. The candidate file IS that merge computed against the target at seal time, which is why it is byte-for-byte what should land - but a target that gained other strings meanwhile must be re-merged rather than overwritten."
+    }
+  ]
+}

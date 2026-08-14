@@ -107,3 +107,67 @@ to rename.
 | The outline title names a nav, not a control | `text` at `sm`/`muted`, not `Label` | A `Label` requires `htmlFor`; the rail names a region. Neither is in the heading outline. |
 | An in-page destination is not a route or a tab | `text-link` | `NavLink`'s `kind` admits `route` and `tab` only. A third kind is a real gap - recorded, not invented. |
 | The current outline entry | `isSelected` | Draws as a filled pill, where the reference tints the words. Wrong affordance, and the next revision's first fix. |
+
+## Revision 1.4 — the three fixes, and the one question left
+
+| Fixed | Was | Now |
+|---|---|---|
+| The outline entry the reader is level with | a filled pill (`TextLink.isSelected` draws a choice chip) | tinted words, no plate - `NavLink` gains a third kind, `section` |
+| The outline was a flat list | every entry at one indent | `depth` 1-3, indented from the second level down, the way the reference indents from the third |
+| A content in the map | title only, no state, no length | mark, title, reading time, and a plate on the one being read |
+| A module in the map | no way to open or close it | name, count and caret on one line; a closed module carries no rows at all |
+
+**New owners, with their verdicts.** `NavLink` + `kind: "section"` is `prop-variant`: it already owns "a
+destination, marked when it is where you are", and a place inside the page is a destination - the
+route pill and the tab underline are chrome for a bar of peers, which an outline is not.
+`ContentMapRow` is `keep-apart` from `TaskProgressRow` and from `NavLink`, and the distinguishing
+fact is navigation state: a task list has no cursor, so `isCurrent` there would be a fact that
+component does not own, and a nav link is one line of words rather than a mark, a wrapping title and
+a trailing time.
+
+**The open question this revision did NOT settle.** In the running product the reading column starts
+straight at the article - no breadcrumb, no title, no tab bar - while `ContentPage` at the reference
+HEAD renders all three. Either the screen was captured scrolled, or production has moved past the
+reference. The candidate follows the SOURCE and keeps them, because the plan record names
+`starci-academy@9a19342` as the parity baseline; changing it on the strength of one screenshot would
+settle a product question from a picture.
+
+## Revision 1.6 — the body is markdown, because the data is
+
+Preparing Apply for the connected half found something bigger than a missing route.
+`ContentEntity.body` is a `text` column whose own description reads "Markdown body content", and the
+reference reader draws it with `react-markdown` + `remark-gfm` + `remark-directive` + shiki. Every
+revision up to `1.5` modelled the body as `sections: { title, paragraphs[] }` — a shape nothing the
+server returns can produce without dropping code blocks, lists, tables and images. In a coding
+academy that is lost content, not lost decoration.
+
+| Retired | Added |
+|---|---|
+| `content-article-body` | leaf `Article` — owns the whole body |
+| `heading-over-paragraph` | leaf `CodeBlock` — the target folder existed and was EMPTY |
+| page prop `sections` | page prop `body`, the markdown as the server returned it |
+
+**The locked state changed with it.** `1.5` cut the preview to one section by itself. The server
+already truncates a premium body and flags it, so the page now draws what it was given and adds the
+paywall — the decision about how much of a paid lesson to show belongs to the server that enforces
+the entitlement.
+
+**Canon refused the first shape of `Article`, twice, and both refusals were right.** It handed
+`react-markdown` a table of component replacements: every replacement takes `children` — markup
+already built, whose shape nothing can check — and each heading replacement wrote a raw `<h2>`,
+splitting the outline tag from the visible size. The leaf now parses to `mdast` and decides each
+node itself: headings go through the heading component, and the parser's output crosses ONE checked
+boundary — narrowed with `typeof` checks the compiler follows, renamed from `children` to `parts`,
+because what comes out of a parser is data rather than markup.
+
+### Still open on this revision
+
+| Question | Default taken | Cost |
+|---|---|---|
+| Syntax highlighting | None. Mono type on the raised ground. | A `bash` block and a `ts` block look alike; the reference colours both. |
+| Remark directives (`:::accordion`) | Parsed so their markers do not spill into the prose, drawn as plain blocks. | A directive authored as an accordion reads as a run of paragraphs. |
+| Long command lines | Wrap, rather than scroll. | Differs from the reference, which scrolls; a wrapped line keeps its closing quote on screen. |
+
+Dependencies: `unified`, `remark-parse`, `remark-gfm`, `remark-directive`, installed with
+`--no-save` so `package.json` — which is outside the confirmed write boundary — is untouched. They
+are declared at the next Apply, which will need that boundary widened by one file.

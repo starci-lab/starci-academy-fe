@@ -85,6 +85,7 @@ export type LayoutClassName =
     // The course detail page is the first right-hand rail and the first bottom-pinned bar in this
     // repository, which is why these read as gaps rather than omissions: every one is the mirror of a
     // member already present for the opposite child or the opposite edge.
+    | "[&>*:nth-child(2)]:shrink-0"
     | "[&>*:last-child]:min-w-0" | "[&>*:last-child]:grow" | "[&>*:last-child]:shrink-0"
     | "md:[&>*:last-child]:sticky" | "md:[&>*:last-child]:top-rail"
     | "md:[&>*:last-child]:self-start" | "md:[&>*:last-child]:max-h-rail"
@@ -1348,7 +1349,7 @@ export const CONTRACTS = buildContracts({
     "content-reading-column": {
         classes: ["flex", "w-full", "min-w-0", "flex-col"],
         children: {
-            reading: { contract: ["content-reading-paper", "content-article-body"] },
+            reading: { contract: "content-reading-paper" },
             footer: { contract: "content-reader-footer", optional: true },
         },
         why: "The content and the chrome under it are one continuous reading, so nothing separates them: each block already closes with its own trailing space, and a seam here would read as the page changing subject between the article and the reactions to it.",
@@ -1357,7 +1358,7 @@ export const CONTRACTS = buildContracts({
         classes: ["mx-auto", "flex", "w-full", "min-w-0", "max-w-app-md", "flex-col", "gap-4", "p-4"],
         children: {
             hint: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
-            article: { contract: "content-article-body" },
+            article: { leaf: "article" },
             paywall: { composite: "empty-notice", optional: true },
         },
         why: "The article is read on a raised page of its own - the paper - which is what separates a content from the chrome around it at a glance. A locked content keeps that paper and its faded article, and the paywall joins it INSIDE rather than replacing it: the reader is shown what they would be reading, which is the whole argument for paying.",
@@ -1424,10 +1425,19 @@ export const CONTRACTS = buildContracts({
         },
         why: "The map answers three questions in the order they are asked: how far in am I, where is the thing I remember, and what else is in this course. Search sits above the tree rather than inside it because it filters the whole tree, and the modules are the same disclosing row the curriculum already uses - one content list, not a second one that drifts.",
     },
+    "content-map-module-summary": {
+        classes: ["flex", "w-full", "min-w-0", "flex-row", "items-center", "gap-3", "px-3", "py-2", "[&>*:first-child]:min-w-0", "[&>*:first-child]:grow", "[&>*:nth-child(2)]:shrink-0", "[&>*:last-child]:shrink-0"],
+        children: {
+            title: { leaf: "text", props: { size: "sm" } },
+            fact: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            caret: { leaf: "icon", props: { role: "chip" } },
+        },
+        why: "A module names itself, says how much of it is done, and says whether it is open - three facts on one line, in the order a reader scanning a map needs them. The caret sits at the far end because it is the control, and a control between the name and its count would be pressed by somebody reaching for the count.",
+    },
     "content-map-module": {
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-1"],
         children: {
-            title: { contract: "title-with-baseline-fact" },
+            title: { contract: "content-map-module-summary" },
             row: { leaf: "content-map-row", repeats: true, restingCount: 0 },
         },
         why: "A module is its name and the contents under it, so the name and its count share one line and the contents sit at the tightest seam beneath - one identity, not a heading over an unrelated list. A module the reader has not opened carries no rows at all rather than an empty run, because the map is scanned by module first.",
@@ -1456,8 +1466,6 @@ export const CONTRACTS = buildContracts({
         why: "A content is read straight down one measure, so the page holds one column: the trail and the title, the faces this content actually has, the face that is open, and the ways on. The body slot admits the empty-notice surface as well as the article because a locked content replaces the reading rather than decorating it - the reader is told the same thing in the same place either way.",
     },
     /*
-     * PROPOSED - content-article-body. Target path on materialization: the locked table.
-     */
     /*
      * PROPOSED - content-next-list and content-next-row. Target path on materialization: the locked table.
      *
@@ -1480,24 +1488,6 @@ export const CONTRACTS = buildContracts({
             disclosure: { leaf: "icon", optional: true },
         },
         why: "The destination owns the width and the glyph at the end says the row opens something; the pair reads as one line rather than as a label with an ornament, which is what a tick would have made it.",
-    },
-    "content-article-body": {
-        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4"],
-        children: {
-            block: { contract: ["heading-over-paragraph"], repeats: true, restingCount: 3 },
-        },
-        why: "Long-form teaching is a run of sections rather than one block of prose, and the seam between two sections is the one thing a reader uses to find their place again after looking away. The measure is not owned here: the page holds it, so the same body can stand in a rail-less reader and inside the shell without two answers about how wide a line may be.",
-    },
-    /*
-     * PROPOSED - heading-over-paragraph. Target path on materialization: the locked table.
-     */
-    "heading-over-paragraph": {
-        classes: ["flex", "flex-col", "gap-2"],
-        children: {
-            title: { leaf: "heading" },
-            body: { leaf: "text", props: { size: "md" }, repeats: true, restingCount: 2 },
-        },
-        why: "A section title and the paragraphs under it are one unit: the title is read as the name of what follows rather than as a peer of it, so they sit a step closer to each other than two sections do.",
     },
     "courses-catalog-page": {
         // The same measure and inset the dashboard and the leaderboard use. A catalog reached from

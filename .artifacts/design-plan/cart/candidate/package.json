@@ -1,0 +1,11 @@
+{
+  "name": "starci-cart-candidate",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Preview candidate for case-cart-system / direction-legacy-full-default, scope /cart page, cart drawer and the payment step's installment schedule. Artifact-only: never shipped, never imported by production.",
+  "scripts": {
+    "build": "next build --webpack",
+    "dev": "next dev",
+    "typecheck": "tsc --noEmit"
+  }
+}
