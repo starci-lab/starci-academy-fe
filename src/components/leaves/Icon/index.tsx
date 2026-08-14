@@ -103,7 +103,7 @@ import type { LeafProps } from "@/components/contracts/props"
 
 /** What an icon MEANS on these screens. The glyph that draws it is this file's business. */
 export type IconName =
-    | "brand" | "streak" | "credit" | "reward" | "course"
+    | "brand" | "aiChatbot" | "streak" | "credit" | "reward" | "course"
     | "email" | "password" | "revealPassword" | "hidePassword" | "code"
     | "complete" | "pending" | "signIn" | "signUp" | "close" | "next" | "disclosure" | "retry" | "send"
     | "home" | "explore" | "community" | "league" | "review" | "livestream"
@@ -157,6 +157,34 @@ const CircleIcon = (props: SVGProps<SVGSVGElement>) => (
     </svg>
 )
 
+/**
+ * StarCi AI's own mark: one chat silhouette around code chevrons and a small assistant spark.
+ *
+ * It is intentionally not a Heroicon. `talents` already owns the generic sparkle, while this
+ * product identity must read as conversation plus code even when the floating button shows no
+ * nearby text.
+ */
+const StarCiChatbotMark = (props: SVGProps<SVGSVGElement>) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth={1.8}
+        stroke="currentColor"
+        aria-hidden="true"
+        data-slot="icon"
+        {...props}
+    >
+        <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M5.25 4.75h13.5A2.25 2.25 0 0 1 21 7v8.5a2.25 2.25 0 0 1-2.25 2.25H11l-4.75 2.5v-2.5h-1A2.25 2.25 0 0 1 3 15.5V7a2.25 2.25 0 0 1 2.25-2.25Z"
+        />
+        <path strokeLinecap="round" strokeLinejoin="round" d="m9 9-2 2 2 2m6-4 2 2-2 2m-3.25-5-1.5 6" />
+        <path strokeLinecap="round" d="M18.25 3v2.5M17 4.25h2.5" />
+    </svg>
+)
+
 /** Native Heroicon drawings for the two product roles. */
 type GlyphCuts = { readonly heading: GlyphComponent, readonly leading: GlyphComponent, readonly chip: GlyphComponent }
 
@@ -169,6 +197,7 @@ const cuts = (outline: GlyphComponent, chip: GlyphComponent): GlyphCuts => ({
 
 const GLYPHS: Record<IconName, GlyphCuts> = {
     brand: cuts(AcademicCapIcon, AcademicCapSolidIcon),
+    aiChatbot: cuts(StarCiChatbotMark, StarCiChatbotMark),
     streak: cuts(FireIcon, FireSolidIcon),
     credit: cuts(BoltIcon, BoltSolidIcon),
     reward: cuts(GiftIcon, GiftSolidIcon),

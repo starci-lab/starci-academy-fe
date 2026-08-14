@@ -3,6 +3,8 @@ import { notFound } from "next/navigation"
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server"
 import { hasLocale } from "next-intl"
 import { routing } from "@/i18n/routing"
+import { GlobalAiChatLayout } from "@/components/layouts/GlobalAiChatLayout"
+import { RouteShell } from "@/components/shells/RouteShell"
 import { AppProviders } from "../providers"
 import "../globals.css"
 
@@ -70,7 +72,9 @@ const LocaleLayout = async ({ children, params }: LayoutProps<"/[lang]">) => {
         <html lang={lang} suppressHydrationWarning>
             <body>
                 <AppProviders locale={lang} messages={messages}>
-                    {children}
+                    <RouteShell frame={GlobalAiChatLayout} props={{}}>
+                        {children}
+                    </RouteShell>
                 </AppProviders>
             </body>
         </html>

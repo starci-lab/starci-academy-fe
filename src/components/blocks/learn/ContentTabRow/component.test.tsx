@@ -19,44 +19,44 @@ describe("ContentTabRow", () => {
     it("dispatches each available finite face to its named action", () => {
         const selectReading = vi.fn()
         const selectChallenge = vi.fn()
-        const selectAi = vi.fn()
+        const selectSource = vi.fn()
         renderRow({
             facesLabel: "Lesson faces",
             selectedFace: "reading",
             faces: [
                 { id: "reading", label: "Reading" },
                 { id: "challenge", label: "Challenge" },
-                { id: "ai", label: "AI" },
+                { id: "source", label: "Source" },
             ],
-        }, { selectReading, selectChallenge, selectAi })
+        }, { selectReading, selectChallenge, selectSource })
 
         fireEvent.click(screen.getByText("Challenge"))
-        fireEvent.click(screen.getByText("AI"))
+        fireEvent.click(screen.getByText("Source"))
         fireEvent.click(screen.getByText("Reading"))
 
         expect(selectChallenge).toHaveBeenCalledTimes(1)
-        expect(selectAi).toHaveBeenCalledTimes(1)
+        expect(selectSource).toHaveBeenCalledTimes(1)
         expect(selectReading).toHaveBeenCalledTimes(1)
     })
 
     it("does not dispatch disabled or locked faces", () => {
         const selectChallenge = vi.fn()
-        const selectAi = vi.fn()
+        const selectSource = vi.fn()
         renderRow({
             facesLabel: "Lesson faces",
             selectedFace: "reading",
             faces: [
                 { id: "reading", label: "Reading" },
                 { id: "challenge", label: "Challenge", disabled: true },
-                { id: "ai", label: "AI", locked: true },
+                { id: "source", label: "Source", locked: true },
             ],
-        }, { selectChallenge, selectAi })
+        }, { selectChallenge, selectSource })
 
         fireEvent.click(screen.getByText("Challenge"))
-        fireEvent.click(screen.getByText("AI"))
+        fireEvent.click(screen.getByText("Source"))
 
         expect(selectChallenge).not.toHaveBeenCalled()
-        expect(selectAi).not.toHaveBeenCalled()
+        expect(selectSource).not.toHaveBeenCalled()
     })
 
     it("keeps the selected face inside the finite reader union", () => {

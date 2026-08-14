@@ -30,14 +30,14 @@ import { Drawer } from "@heroui/react"
  */
 
 /** Which edge the panel is anchored to. */
-export type DrawerShellSide = "left" | "right"
+export type DrawerShellPlacement = "left" | "right" | "bottom"
 
 /** Props for {@link DrawerShell}. */
 export type DrawerShellProps = {
     /** Whether the drawer is showing. Owned by whoever mounts it, never by the shell. */
     readonly isOpen: boolean
     /** The edge it opens from. Absent is `right`, which is where this product's basket lives. */
-    readonly side?: DrawerShellSide
+    readonly placement?: DrawerShellPlacement
     /** The already-resolved title. A drawer names itself; the interior does not repeat it. */
     readonly title: string
     /** Content passed straight to the vendor body without inspection or arrangement. */
@@ -59,7 +59,7 @@ export const DrawerShell = (input: DrawerShellProps) => (
         }}
     >
         <Drawer.Backdrop>
-            <Drawer.Content placement={input.side ?? "right"}>
+            <Drawer.Content placement={input.placement ?? "right"}>
                 <Drawer.Dialog data-tier="shell" data-component="DrawerShell">
                     <Drawer.Header>
                         <Drawer.Heading>{input.title}</Drawer.Heading>

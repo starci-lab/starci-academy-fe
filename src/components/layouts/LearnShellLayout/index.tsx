@@ -12,6 +12,7 @@ import type { LearnSpineGroup } from "@/components/blocks/learn/LearnSpine/compo
 import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
 import { useQueryGlobalLeaderboardSwr } from "@/hooks/swr/useQueryGlobalLeaderboardSwr"
 import { useQueryMyCoursesSwr } from "@/hooks/swr/useQueryMyCoursesSwr"
+import { isLiveAssessmentRoute } from "@/modules/learn/is-live-assessment-route"
 import type { ComponentType } from "react"
 
 type LearnMobileViewContextValue = {
@@ -137,10 +138,7 @@ export const LearnShellLayout = (input: LearnShellLayoutProps) => {
     useEffect(() => {
         if (!validViews.includes(mobileView)) setMobileView(routeDefault)
     }, [mobileView, routeDefault, validViews])
-    const isFullBleed = pathname.includes("/learn/mind-map")
-        || /\/learn\/mock-interview\/interview\/[^/]+$/.test(pathname)
-        || /\/learn\/playground\/[^/]+\/session$/.test(pathname)
-        || /\/learn\/flashcards\/(?:review|quiz)\/sessions\/[^/]+$/.test(pathname)
+    const isFullBleed = isLiveAssessmentRoute(pathname)
 
     const groups = useMemo(() => GROUPS.map((group) => ({
         id: group.id,

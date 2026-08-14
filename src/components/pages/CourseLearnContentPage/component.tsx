@@ -23,6 +23,12 @@ import {
     type ContentDiscussionPanelData,
     type ContentDiscussionPanelState,
 } from "@/components/blocks/learn/ContentDiscussionPanel/component"
+import {
+    ContentSourceWorkspace,
+    type ContentSourceWorkspaceActions,
+    type ContentSourceWorkspaceData,
+    type ContentSourceWorkspaceState,
+} from "@/components/blocks/learn/ContentSourceWorkspace/component"
 import type { LearnMobileView } from "@/components/layouts/LearnShellLayout/component"
 import type { ReactionType } from "@/modules/api/graphql/queries/types/reactions"
 // Contract machinery through the candidate mirror, and only because `ContractKey` is closed over the
@@ -114,6 +120,9 @@ export type CourseLearnContentPageData = {
     /** The faces this content carries. One face means the bar states the obvious, so it is absent. */
     readonly faces?: ReadonlyArray<ContentFace>
     readonly selectedFace?: ContentFaceId
+    /** Source is omitted for prose-only and unauthorized lessons, so no dead face can leak. */
+    readonly sourceState?: ContentSourceWorkspaceState
+    readonly source?: ContentSourceWorkspaceData
     /** The languages the examples can be read in, and which is open. */
     readonly languagesLabel?: string
     readonly languages?: ReadonlyArray<ContentLanguageTab>
@@ -185,8 +194,9 @@ export type ContentOutlineEntry = {
 /** What the reader reports. */
 export type CourseLearnContentPageActions = {
     readonly selectReading?: () => void
+    readonly selectSource?: () => void
     readonly selectChallenge?: () => void
-    readonly selectAi?: () => void
+    readonly source?: ContentSourceWorkspaceActions
     readonly selectLanguage?: (language: string) => void
     readonly changePage?: (page: number) => void
     readonly selectReaction?: (reaction: ReactionType | null) => void
@@ -254,7 +264,7 @@ export const _CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
     const discussion = input.props.discussion
 
     const article = defineLeafComponent("article", {}, () => (
-        <Article props={{ body: input.props.body }} isLoading={isLoading} />
+        <Article props={{ body: input.props.body, aiSelectable: true }} isLoading={isLoading} />
     ))
 
     const header = defineContractComponent("page-header-stack", {
@@ -376,7 +386,7 @@ export const _CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
         )),
     })
 
-    const body = hasFailed
+    const readingBody = hasFailed
         ? defineContractComponent("centred-empty-notice", {
             notice: defineCompositeComponent("empty-notice", {}, () => (
                 <EmptyNotice
@@ -467,6 +477,19 @@ export const _CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
         ))),
     })
 
+    const sourceBody = input.props.sourceState === undefined || input.props.source === undefined
+        ? undefined
+        : defineContractProjection("source-workspace-grid", () => (
+            <ContentSourceWorkspace
+                state={input.props.sourceState}
+                props={input.props.source}
+                on={input.on?.source}
+            />
+        ))
+    const visibleBody = input.props.selectedFace === "source" && sourceBody !== undefined
+        ? sourceBody
+        : readingBody
+
     const reader = defineContractComponent("learn-content-page", {
         header,
         /*
@@ -487,13 +510,13 @@ export const _CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                 },
                 {
                     selectReading: input.on?.selectReading,
+                    selectSource: input.on?.selectSource,
                     selectChallenge: input.on?.selectChallenge,
-                    selectAi: input.on?.selectAi,
                     selectLanguage: input.on?.selectLanguage,
                 },
             ),
         } : {}),
-        body,
+        body: visibleBody,
     })
 
     if (input.props.mobileView === "contents") {

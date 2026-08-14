@@ -28,6 +28,7 @@ icon leaf selects the outline or micro drawing from the role.
 | Meaning (`IconName`) | Product feature | Heroicon | Why this glyph owns the feature |
 |---|---|---|---|
 | `brand` | Academy/learning identity | `AcademicCapIcon` | A graduation cap names education without borrowing the course-reading mark |
+| `aiChatbot` | Global StarCi AI assistant and Code coach | Purpose-drawn `StarCiChatbotMark` | A speech silhouette containing code chevrons makes the assistant distinct from the generic talent sparkle and readable without a text label |
 | `streak` | Learning streak | `FireIcon` | Fire is the established continuous-streak metaphor |
 | `credit` | AI credit/quota | `BoltIcon` | A bolt reads as consumable AI power, distinct from rewards |
 | `reward` | Rewards and gift points | `GiftIcon` | A gift names the thing received rather than its numeric balance |

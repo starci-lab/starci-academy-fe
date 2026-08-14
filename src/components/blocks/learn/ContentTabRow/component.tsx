@@ -23,7 +23,7 @@ import { defineContractComponent, defineLeafComponent } from "@/components/contr
  */
 
 /** One face of the content - a tab the content actually carries. */
-export type ContentFaceId = "reading" | "challenge" | "ai"
+export type ContentFaceId = "reading" | "source" | "challenge"
 
 /** One finite reader face and whether its producer can currently open it. */
 export type ContentFaceTab = {
@@ -54,8 +54,8 @@ export type ContentTabRowData = {
 /** What the row reports. */
 export type ContentTabRowActions = {
     readonly selectReading?: () => void
+    readonly selectSource?: () => void
     readonly selectChallenge?: () => void
-    readonly selectAi?: () => void
     readonly selectLanguage?: (language: string) => void
 }
 
@@ -68,8 +68,8 @@ const selectFace = (
     const face = faces.find((candidate) => candidate.id === faceId)
     if (face === undefined || face.disabled === true || face.locked === true) return
     if (face.id === "reading") on?.selectReading?.()
+    if (face.id === "source") on?.selectSource?.()
     if (face.id === "challenge") on?.selectChallenge?.()
-    if (face.id === "ai") on?.selectAi?.()
 }
 
 /**

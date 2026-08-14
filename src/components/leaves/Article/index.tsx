@@ -44,6 +44,8 @@ import type { LeafProps } from "@/components/contracts/props"
 export type ArticleData = {
     /** The markdown body exactly as the server returned it - already truncated when premium. */
     readonly body?: string
+    /** Whether this exact article is an allowed prose-grounding root for StarCi AI selection. */
+    readonly aiSelectable?: boolean
 }
 
 /** Props for {@link Article}. */
@@ -201,9 +203,10 @@ const block = (node: MarkdownNode, key: string): ReactNode => {
  * @param input - {@link ArticleProps}
  */
 export const Article = ({ props, isLoading = false }: ArticleProps) => {
+    const selectable = props.aiSelectable === true ? { "data-ai-selectable": "true" } : {}
     if (isLoading || props.body === undefined) {
         return (
-            <div data-tier="leaf" data-component="Article" data-resting="true" className={NODE_CLASSES.root}>
+            <div {...selectable} data-tier="leaf" data-component="Article" data-resting="true" className={NODE_CLASSES.root}>
                 {RESTING_WIDTHS.map((width, index) => (
                     <span key={`resting-${index + 1}`} className={`${RESTING_LINE} ${width}`} />
                 ))}
@@ -212,7 +215,7 @@ export const Article = ({ props, isLoading = false }: ArticleProps) => {
     }
     const root = toNode(parser.parse(props.body))
     return (
-        <div data-tier="leaf" data-component="Article" className={NODE_CLASSES.root}>
+        <div {...selectable} data-tier="leaf" data-component="Article" className={NODE_CLASSES.root}>
             {(root?.parts ?? []).map((node, index) => block(node, `${node.type}-${index}`))}
         </div>
     )

@@ -2,6 +2,14 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { _CourseLearnContentPage, type CourseLearnContentPageData } from "./component"
 
+class TestResizeObserver implements ResizeObserver {
+    observe = () => undefined
+    unobserve = () => undefined
+    disconnect = () => undefined
+}
+
+globalThis.ResizeObserver = TestResizeObserver
+
 const labels: CourseLearnContentPageData["labels"] = {
     navCourse: "Course",
     navModule: "Module",
@@ -147,5 +155,48 @@ describe("_CourseLearnContentPage", () => {
         expect(screen.getByText("Helpful context")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Post comment" }))
         expect(submitDiscussion).toHaveBeenCalledTimes(1)
+    })
+
+    it("switches the lesson body to the approved Source face", () => {
+        const selectSource = vi.fn()
+        const { container } = render(
+            <_CourseLearnContentPage
+                state="ready"
+                props={{
+                    labels,
+                    title: "Current lesson",
+                    body: "Lesson body",
+                    selectedFace: "source",
+                    faces: [
+                        { id: "reading", label: "Reading" },
+                        { id: "source", label: "Source" },
+                        { id: "challenge", label: "Challenge" },
+                    ],
+                    sourceState: "pending",
+                    source: {
+                        files: {},
+                        dependencies: {},
+                        activePath: "",
+                        editedPaths: [],
+                        filesLabel: "Files",
+                        editorLabel: "Source",
+                        identity: "Lesson snapshot",
+                        loadingLabel: "Loading source",
+                        failedLabel: "Source failed",
+                        retryLabel: "Try again",
+                        resetLabel: "Reset",
+                        localChangesLabel: "Local changes",
+                        runtimeErrorLabel: "Preview failed",
+                        askErrorLabel: "Debug preview",
+                    },
+                }}
+                on={{ selectSource }}
+            />,
+        )
+
+        expect(container.querySelector("[data-component=Article]")).toBeNull()
+        expect(container.querySelector("[data-component=ContentSourceWorkspace]")).not.toBeNull()
+        fireEvent.click(screen.getByText("Source"))
+        expect(selectSource).toHaveBeenCalledTimes(1)
     })
 })

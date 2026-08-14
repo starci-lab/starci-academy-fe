@@ -9,8 +9,17 @@ import { useQueryContentReactionsSwr } from "@/hooks/swr/useQueryContentReaction
 import { useMutateReactContentSwr } from "@/hooks/swr/useMutateReactContentSwr"
 import { useQueryContentCommentsSwr } from "@/hooks/swr/useQueryContentCommentsSwr"
 import { useMutateSubmitContentCommentSwr } from "@/hooks/swr/useMutateSubmitContentCommentSwr"
+import { useRepoSandpackFiles } from "@/hooks/swr/useRepoSandpackFiles"
 import { ReactionType } from "@/modules/api/graphql/queries/types/reactions"
 import { useLearnMobileView } from "@/components/layouts/LearnShellLayout"
+import { useGlobalAiChat } from "@/components/layouts/GlobalAiChatLayout"
+import type { ContentFaceId } from "@/components/blocks/learn/ContentTabRow/component"
+import {
+    CONTENT_AI_SELECTION_MAX,
+    CONTENT_AI_SELECTION_MIN,
+} from "@/modules/ai/content-ai-selection-context"
+import { sandboxFileCode, type SandboxCodeSelection } from "@/modules/code/sandbox-repo"
+import type { SandpackFiles } from "@codesandbox/sandpack-react"
 import {
     _CourseLearnContentPage,
     type ContentOutlineEntry,
@@ -83,11 +92,17 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
     const react = useMutateReactContentSwr()
     const comments = useQueryContentCommentsSwr({ contentId: input.contentId })
     const submitComment = useMutateSubmitContentCommentSwr()
+    const ai = useGlobalAiChat()
     const { view } = useLearnMobileView()
     const [isMobile, setIsMobile] = useState(false)
     const [discussionDraft, setDiscussionDraft] = useState("")
     const [discussionDraftKey, setDiscussionDraftKey] = useState(0)
     const [discussionError, setDiscussionError] = useState(false)
+    const [selectedFace, setSelectedFace] = useState<ContentFaceId>("reading")
+    const [sourceFiles, setSourceFiles] = useState<SandpackFiles>({})
+    const [activeSourcePath, setActiveSourcePath] = useState("")
+    const [editedSourcePaths, setEditedSourcePaths] = useState<ReadonlyArray<string>>([])
+    const [sourceRuntimeError, setSourceRuntimeError] = useState<string>()
 
     useEffect(() => {
         const query = window.matchMedia("(max-width: 767px)")
@@ -103,6 +118,39 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
     const state: CourseLearnContentPageState = isPending
         ? "pending"
         : hasFailed ? "failed" : isLocked ? "locked" : "ready"
+
+    const hasSource = content.data?.isSandbox === true
+        && content.data.githubBaseUrl !== null
+        && content.data.githubDir !== null
+        && !isLocked
+    const source = useRepoSandpackFiles({
+        contentId: content.data?.id,
+        githubBaseUrl: content.data?.githubBaseUrl,
+        githubDir: content.data?.githubDir,
+        isPremium: content.data?.isPremium,
+        enabled: selectedFace === "source" && hasSource,
+    })
+
+    useEffect(() => {
+        setSelectedFace("reading")
+        setSourceFiles({})
+        setActiveSourcePath("")
+        setEditedSourcePaths([])
+        setSourceRuntimeError(undefined)
+    }, [input.contentId])
+
+    useEffect(() => {
+        if (selectedFace !== "source") ai.clearCodeContext()
+    }, [ai, selectedFace])
+
+    useEffect(() => {
+        if (source.data === undefined) return
+        const paths = Object.keys(source.data.files)
+        setSourceFiles(source.data.files)
+        setActiveSourcePath((current) => current !== "" && paths.includes(current) ? current : paths[0] ?? "")
+        setEditedSourcePaths([])
+        setSourceRuntimeError(undefined)
+    }, [source.data])
 
     const body = content.data?.body
     const outline = useMemo(() => body === undefined ? [] : outlineOf(body), [body])
@@ -167,17 +215,40 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                     : undefined,
                 title: content.data?.title,
                 faces: [
-                    { id: "reading", label: t("pageLabel"), icon: "course" },
+                    { id: "reading", label: t("readingFace"), icon: "course" },
+                    ...(hasSource ? [{ id: "source" as const, label: t("sourceFace"), icon: "practice" as const }] : []),
                     {
                         id: "challenge",
-                        label: challenges[0]?.title ?? t("nextTitle"),
+                        label: t("challengeFace"),
                         icon: "practice",
                         disabled: challenges.length === 0,
                         locked: isLocked,
                     },
-                    { id: "ai", label: "AI", icon: "code", disabled: true, locked: isLocked },
                 ],
-                selectedFace: "reading",
+                selectedFace,
+                ...(selectedFace !== "source" || !hasSource ? {} : {
+                    sourceState: source.error !== undefined
+                        ? "failed" as const
+                        : source.data === undefined ? "pending" as const : "ready" as const,
+                    source: {
+                        files: sourceFiles,
+                        dependencies: source.dependencies,
+                        activePath: activeSourcePath,
+                        editedPaths: editedSourcePaths,
+                        ...(sourceRuntimeError === undefined ? {} : { runtimeError: sourceRuntimeError }),
+                        filesLabel: t("sourceFiles"),
+                        editorLabel: t("sourceEditor"),
+                        editedLabel: t("sourceEdited"),
+                        identity: t("sourceIdentity", { path: activeSourcePath }),
+                        loadingLabel: t("sourceLoading"),
+                        failedLabel: t("sourceFailed"),
+                        retryLabel: t("sourceRetry"),
+                        resetLabel: t("sourceReset"),
+                        localChangesLabel: t("sourceEdited"),
+                        runtimeErrorLabel: t("sourceRuntimeError"),
+                        askErrorLabel: t("sourceDebugError"),
+                    },
+                }),
                 body,
                 selectionHint: t("selectionHint"),
                 // A premium content and a failed request are told apart by which sentence they get,
@@ -257,13 +328,65 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                             ])
                         }
                         : undefined,
-                selectReading: () => undefined,
+                selectReading: () => setSelectedFace("reading"),
+                selectSource: hasSource ? () => setSelectedFace("source") : undefined,
                 selectChallenge: () => {
                     const challenge = challenges[0]
                     if (challenge === undefined) return
                     router.push(`/courses/${input.displayId}/learn/content/modules/${input.moduleId}/contents/${input.contentId}/challenges/${challenge.id}`)
                 },
-                selectAi: () => undefined,
+                source: selectedFace !== "source" || !hasSource ? undefined : {
+                    activateFile: setActiveSourcePath,
+                    updateFile: (path: string, code: string) => {
+                        setSourceFiles((current) => {
+                            const previous = current[path]
+                            return {
+                                ...current,
+                                [path]: typeof previous === "string"
+                                    ? code
+                                    : { ...previous, code },
+                            }
+                        })
+                        setEditedSourcePaths((current) => current.includes(path) ? current : [...current, path])
+                    },
+                    reset: () => {
+                        setSourceFiles(source.files)
+                        setEditedSourcePaths([])
+                        setSourceRuntimeError(undefined)
+                        ai.clearCodeContext()
+                    },
+                    selectCode: (selection?: SandboxCodeSelection) => {
+                        if (selection === undefined) {
+                            ai.clearCodeContext()
+                            return
+                        }
+                        if (selection.text.length < CONTENT_AI_SELECTION_MIN
+                            || selection.text.length > CONTENT_AI_SELECTION_MAX) return
+                        ai.setCodeContext({
+                            kind: "code",
+                            quote: selection.text,
+                            path: selection.path,
+                            startLine: selection.startLine,
+                            endLine: selection.endLine,
+                            hasLocalEdit: editedSourcePaths.includes(selection.path),
+                        })
+                        ai.open()
+                    },
+                    askError: () => {
+                        if (sourceRuntimeError === undefined) return
+                        const currentCode = sandboxFileCode(sourceFiles, activeSourcePath)
+                        ai.setCodeContext({
+                            kind: "code",
+                            quote: (currentCode || sourceRuntimeError).slice(0, CONTENT_AI_SELECTION_MAX),
+                            path: activeSourcePath || undefined,
+                            runtimeError: sourceRuntimeError,
+                            hasLocalEdit: editedSourcePaths.includes(activeSourcePath),
+                        })
+                        ai.open()
+                    },
+                    runtimeError: setSourceRuntimeError,
+                    retry: () => { void source.mutate() },
+                },
                 selectReaction: (type) => {
                     void react.trigger({ contentId: input.contentId, type }).then((result) => {
                         const next = result.data?.reactToContent?.data
