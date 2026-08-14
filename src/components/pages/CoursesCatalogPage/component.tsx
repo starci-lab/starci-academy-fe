@@ -4,12 +4,14 @@ import { Breadcrumbs } from "@/components/leaves/Breadcrumbs"
 import { Heading } from "@/components/leaves/Heading"
 import { SearchBox } from "@/components/leaves/SearchBox"
 import { Text } from "@/components/leaves/Text"
+import { SurfaceListCard, type SurfaceListCardData } from "@/components/branches/SurfaceListCard"
 import { Tree } from "@/components/branches/Tree"
 import {
     defineCompositeComponent,
     defineContractComponent,
     defineContractProjection,
     defineLeafComponent,
+    type LeafProps,
 } from "@/components/contracts/props"
 import { Pagination } from "@/components/leaves/Pagination"
 import { CourseCatalogCard } from "@/components/blocks/courses/CourseCatalogCard"
@@ -120,6 +122,37 @@ export type CoursesCatalogPageProps = {
 /** How many resting cards the discover group shows while the first page is in flight. */
 const RESTING_COUNT = 3
 
+/** What the joined list draws: the rows, plus the frame words `SurfaceListCard` owns. */
+type CatalogLineListData = SurfaceListCardData & {
+    readonly courses: ReadonlyArray<CourseCatalogCardData>
+}
+
+/**
+ * The rows of the list view, as the component lane `SurfaceListCard` takes.
+ *
+ * The branch hands data and actions back rather than accepting a closed descriptor, so the rows are
+ * built here from `props` and reach their journeys through `on` - the same shape the dashboard's
+ * own joined lists use, which is why this is a component rather than a record of slots.
+ */
+const CatalogLineListView = ({ props, on, isLoading = false }: LeafProps<CatalogLineListData, CoursesCatalogPageActions>) => (
+    <Tree
+        contract="catalog-card-list"
+        render={defineContractComponent("catalog-card-list", {
+            course: props.courses.map((course) => defineContractProjection("catalog-card-line", () => (
+                <CourseCatalogCard
+                    state={isLoading ? "pending" : "ready"}
+                    course={{ ...course, layout: "line" }}
+                    onView={on?.[`view:${course.id}`]}
+                    onOpenPriceDetail={on?.[`priceDetail:${course.id}`]}
+                />
+            ))),
+        })}
+    />
+)
+
+/** Stable component type branded for the exact list contract it implements. */
+const CatalogLineList = defineContractComponent("catalog-card-list", CatalogLineListView)
+
 /**
  * Draw the catalog.
  *
@@ -216,20 +249,54 @@ export const _CoursesCatalogPage = (input: CoursesCatalogPageProps) => {
      */
     const ownedGroup = defineContractProjection("course-progress-list", () => <MyCoursesProgress />)
 
+    /*
+     * THE TOGGLE CHOOSES THE CONTAINER AND THE CARD TOGETHER, because it is one decision.
+     *
+     * It used to choose neither. The selected key travelled from the page down to the tabs and
+     * back into the pill that produced it, and nothing else read it - so pressing the list option
+     * moved the pill and re-rendered the identical three-column grid. A control that reports a
+     * choice nobody acts on is worse than an absent one: the reader concludes the layout is broken
+     * rather than that it is missing.
+     */
+    const isLine = input.props.view === "line"
+    const courses = isLoading ? restingCards : discover
+
+    const card = (course: CourseCatalogCardData) => () => (
+        <CourseCatalogCard
+            state={isLoading ? "pending" : "ready"}
+            course={{ ...course, layout: isLine ? "line" : "grid" }}
+            onView={input.on?.[`view:${course.id}`]}
+            onOpenPriceDetail={input.on?.[`priceDetail:${course.id}`]}
+        />
+    )
+
     const discoverGroup = defineContractComponent("catalog-section-group", {
         title: defineLeafComponent("heading", {}, () => (
             <Heading props={{ content: labels.discoverTitle, level: 2 }} />
         )),
-        grid: defineContractComponent("catalog-card-grid", {
-            course: (isLoading ? restingCards : discover).map((course) => defineContractProjection("catalog-card", () => (
-                <CourseCatalogCard
-                    state={isLoading ? "pending" : "ready"}
-                    course={course}
-                    onView={input.on?.[`view:${course.id}`]}
-                    onOpenPriceDetail={input.on?.[`priceDetail:${course.id}`]}
+        /*
+         * THE LIST IS ONE SURFACE, THE GRID IS MANY. Scanning twenty courses down a column is not
+         * reading twenty cards: every card edge is a stop, and the reader pays for all of them. So
+         * the rows share the joined surface `SurfaceListCard` draws - one ground, one rule between
+         * rows, the inset owned row by row so every divider reaches both edges - and each row draws
+         * no card of its own. Side by side, three cards are three objects and each keeps its edge.
+         *
+         * The label is hidden rather than absent: the section above already says "explore", and the
+         * surface would otherwise say it a second time directly beneath it.
+         */
+        grid: isLine
+            ? defineContractProjection("catalog-card-list", () => (
+                <SurfaceListCard
+                    contract="catalog-card-list"
+                    render={CatalogLineList}
+                    props={{ label: labels.discoverTitle, isLabelHidden: true, courses: [...courses] }}
+                    on={input.on}
+                    isLoading={isLoading}
                 />
-            ))),
-        }),
+            ))
+            : defineContractComponent("catalog-card-grid", {
+                course: courses.map((course) => defineContractProjection("catalog-card", card(course))),
+            }),
     })
 
     /*

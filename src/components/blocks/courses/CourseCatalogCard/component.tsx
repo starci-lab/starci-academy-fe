@@ -276,12 +276,30 @@ export const _CourseCatalogCard = (input: CourseCatalogCardProps) => {
      * when they are comparing twenty rather than three.
      */
     if (input.props.layout === "line") {
+        /*
+         * NO SURFACE OF ITS OWN. A row in the list view stands on the joined surface its list
+         * draws, so a card here would be a card inside a card and twenty edges where the reader
+         * was promised one column. The list owns the ground, the rule between rows and the inset;
+         * this owns what the row says.
+         */
         return (
-            <SurfaceCard
+            <Tree
                 contract="catalog-card-line"
                 render={defineContractComponent("catalog-card-line", {
                     cover,
-                    body: defineContractComponent("catalog-card-line-body", { heading, price: priceGroup }),
+                    body: defineContractComponent("catalog-card-line-body", {
+                        heading: defineContractComponent("title-with-baseline-fact", {
+                            title: defineLeafComponent("heading", {}, () => (
+                                <Heading props={{ content: input.props.title, level: 2 }} isLoading={isLoading} />
+                            )),
+                            // The entry fixes this step: a fact read as part of the heading sentence
+                            // sits at the body step beside it, not at the caption step below it.
+                            fact: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                                <Text props={{ content: input.props.enrolmentLabel, size: "sm", tone: "muted" }} isLoading={isLoading} />
+                            )),
+                        }),
+                        price: priceGroup,
+                    }),
                     action,
                 })}
             />
@@ -302,33 +320,7 @@ export const _CourseCatalogCard = (input: CourseCatalogCardProps) => {
                 // IT SAYS WHAT IT DOES, IN WORDS. A lone trolley glyph is a guess the reader has
                 // to make about whether it buys, saves or opens something, and it made the two
                 // controls read as one button and one mystery.
-                action: defineContractComponent("catalog-card-action-row", {
-                    cart: defineLeafComponent("button", {}, () => (
-                        <Button
-                            props={{
-                                label: input.props.cartLabel ?? "",
-                                variant: "secondary",
-                                size: "sm",
-                                disabled: isLoading || input.props.isInCart === true,
-                                isPending: input.state === "adding",
-                            }}
-                            on={{ press: input.on?.addToCart }}
-                        />
-                    )),
-                    open: defineLeafComponent("button", {}, () => (
-                        <Button
-                            props={{
-                                label: input.props.viewLabel ?? "",
-                                variant: "primary",
-                                size: "sm",
-                                icon: "next",
-                                iconPlacement: "trailing",
-                                disabled: isLoading,
-                            }}
-                            on={{ press: input.on?.view }}
-                        />
-                    )),
-                }),
+                action,
             })}
         />
     )

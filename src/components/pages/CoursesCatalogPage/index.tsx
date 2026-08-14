@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
 import { CoursePriceOverlay } from "@/components/overlays/courses/CoursePriceOverlay"
 import { useRouter } from "@/i18n/navigation"
@@ -9,6 +9,9 @@ import { _CoursesCatalogPage, type CoursesCatalogPageState } from "./component"
 
 /** Courses per page. Three columns times three rows on a desktop grid. */
 const PAGE_SIZE = 9
+
+/** Where the reader's layout choice is remembered between visits. */
+const VIEW_STORAGE_KEY = "starci.courses.view"
 
 /** One phase row: what that phase charges, when it overrides the list price. */
 type CoursePhaseRow = {
@@ -55,7 +58,21 @@ export const CoursesCatalogPage = () => {
     const router = useRouter()
     const [query, setQuery] = useState("")
     const [page, setPage] = useState(1)
+    /*
+     * THE LAYOUT CHOICE OUTLIVES THE VISIT, because it is a statement about how this reader reads
+     * rather than about this page load. Somebody who scans a list does not want to press the same
+     * control every time they come back to the catalog.
+     *
+     * IT HYDRATES AFTER MOUNT rather than initialising from storage: the server has no
+     * `localStorage`, so reading it during the first render is a different tree on the server than
+     * on the client, which React resolves by discarding the markup it just streamed.
+     */
     const [view, setView] = useState<"grid" | "line">("grid")
+
+    useEffect(() => {
+        const saved = window.localStorage.getItem(VIEW_STORAGE_KEY)
+        if (saved === "grid" || saved === "line") setView(saved)
+    }, [])
     /*
      * WHICH COURSE IS EXPLAINING ITS PRICE IS THE PAGE'S STATE, not each card's.
      *
@@ -220,7 +237,17 @@ export const CoursesCatalogPage = () => {
                         setPage(1)
                     },
                     goHome: () => router.push("/dashboard"),
-                    changeView: (next: string) => setView(next === "line" ? "line" : "grid"),
+                    changeView: (next: string) => {
+                        const chosen = next === "line" ? "line" : "grid"
+                        setView(chosen)
+                        try {
+                            window.localStorage.setItem(VIEW_STORAGE_KEY, chosen)
+                        } catch {
+                            // Storage refused (private mode, or a quota). The layout still changes
+                            // for this visit; only the memory of it is lost, which is not worth
+                            // failing a press over.
+                        }
+                    },
                     changePage: setPage,
                     recover: () => {
                         if (state === "failed") void catalog.mutate()
