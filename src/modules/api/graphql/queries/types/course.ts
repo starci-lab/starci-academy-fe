@@ -35,6 +35,19 @@ export interface CoursePricingPhaseRow {
     orderIndex: number
 }
 
+/**
+ * One condition a learner should already meet.
+ *
+ * Separate from a promise on purpose: a promise is what the course gives and a prerequisite is
+ * what it asks for, and a reader scanning for one must not find the other.
+ */
+export interface CoursePrerequisiteRow {
+    /** The requirement as the course wrote it. */
+    text: string
+    /** Declaration order - the backend stores these ordered, and the order carries meaning. */
+    orderIndex: number
+}
+
 /** One promise the course makes. */
 export interface CourseValueProposition {
     /** The already-authored claim. */
@@ -114,6 +127,8 @@ export interface CourseDetail {
     valuePropositions?: ReadonlyArray<CourseValueProposition>
     /** The price ladder, in declaration order. */
     pricingPhases?: ReadonlyArray<CoursePricingPhaseRow>
+    /** What a learner should already meet, in the order the course stores them. */
+    prerequisites?: ReadonlyArray<CoursePrerequisiteRow>
     /** The curriculum, in declaration order. */
     modules?: ReadonlyArray<CourseModule>
 }

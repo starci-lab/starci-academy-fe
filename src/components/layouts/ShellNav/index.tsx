@@ -6,6 +6,7 @@ import { useTheme } from "next-themes"
 import { useSearchParams } from "next/navigation"
 import { usePathname, useRouter } from "@/i18n/navigation"
 import { SignInOverlay } from "@/components/overlays/auth/SignInOverlay"
+import { CartDrawer } from "@/components/overlays/commerce/CartDrawer"
 import { LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE } from "@/i18n/config"
 import { useSessionToken } from "@/hooks/auth/useSessionToken"
 import { useSessionRefresh } from "@/hooks/auth/useSessionRefresh"
@@ -51,6 +52,7 @@ export const ShellNav = () => {
     const searchParams = useSearchParams()
     const { resolvedTheme, setTheme } = useTheme()
     const [isOpen, setIsOpen] = useState(false)
+    const [isCartOpen, setIsCartOpen] = useState(false)
     const [authMode, setAuthMode] = useState<AuthMode>("signIn")
     const sessionToken = useSessionToken()
 
@@ -152,9 +154,16 @@ export const ShellNav = () => {
                     signUpLabel: t("signUp"),
                     isSignedIn: sessionToken !== undefined,
                 }}
-                on={{ openSignIn, openSignUp, navigate, selectTab, toggleTheme: () => setTheme(isDark ? "light" : "dark"), toggleLocale }}
+                on={{ openSignIn, openSignUp, navigate, selectTab, toggleTheme: () => setTheme(isDark ? "light" : "dark"), toggleLocale, openCart: () => setIsCartOpen(true) }}
             />
             <SignInOverlay isOpen={isOpen} initialMode={authMode} onDismiss={dismiss} />
+            {/*
+              * THE DRAWER IS MOUNTED HERE, once, beside the navbar that opens it - not on each
+              * page. The control lives in the chrome, so the panel has to outlive the route under
+              * it; and a drawer per page would be a focus trap per page for a panel only one of
+              * which can ever be on screen.
+              */}
+            <CartDrawer isOpen={isCartOpen} onDismiss={() => setIsCartOpen(false)} />
         </>
     )
 }

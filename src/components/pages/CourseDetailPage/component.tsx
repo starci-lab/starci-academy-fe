@@ -1,6 +1,8 @@
 import { CONTRACTS } from "@/components/contracts"
 import { Tree } from "@/components/branches/Tree"
 import { SurfaceListCard, type SurfaceListCardData } from "@/components/branches/SurfaceListCard"
+import { _CoursePrerequisiteList, type CoursePrerequisite } from "@/components/blocks/courses/CoursePrerequisiteList/component"
+import { _CourseReviewBlock, type CourseReview } from "@/components/blocks/courses/CourseReviewBlock/component"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { Badge } from "@/components/leaves/Badge"
 import { Heading } from "@/components/leaves/Heading"
@@ -81,6 +83,14 @@ export type CourseDetailLabels = {
     readonly valuePropsTitle: string
     /** Curriculum section title. */
     readonly curriculumTitle: string
+    /** Prerequisites section title. */
+    readonly prerequisitesTitle: string
+    /** Reviews section title. */
+    readonly reviewsTitle: string
+    /** What the reviews region says when nobody has reviewed yet. */
+    readonly reviewsEmpty: string
+    /** Already-formatted "N reviews" copy. */
+    readonly reviewCount: string
 }
 
 /** What the page draws. */
@@ -95,6 +105,14 @@ export type CourseDetailPageData = {
     readonly stats?: ReadonlyArray<CourseStat>
     /** The promises. */
     readonly valueProps?: ReadonlyArray<string>
+    /** What a learner should already meet, in the order the course stores them. */
+    readonly prerequisites?: ReadonlyArray<CoursePrerequisite>
+    /** The reviews on the first page, newest first. */
+    readonly reviews?: ReadonlyArray<CourseReview>
+    /** Mean across every review, from the projection rather than from the rows above. */
+    readonly averageScore?: number
+    /** How many reviews the course carries in total. */
+    readonly reviewTotal?: number
     /** The curriculum. */
     readonly modules?: ReadonlyArray<CourseModule>
     /** Everything the rail needs. */
@@ -139,6 +157,7 @@ const RESTING = {
     stats: CONTRACTS["course-stat-chip-run"].children.stat.restingCount,
     promises: CONTRACTS["course-promise-list"].children.promise.restingCount,
     modules: CONTRACTS["course-module-list"].children.module.restingCount,
+    prerequisites: CONTRACTS["course-prerequisite-list"].children.prerequisite.restingCount,
 }
 
 /**
@@ -180,6 +199,20 @@ const CoursePromiseListView = ({ props, isLoading = false }: LeafProps<CoursePro
 
 /** Stable component type branded for the exact promise contract it implements. */
 const CoursePromiseList = defineContractComponent("course-promise-list", CoursePromiseListView)
+
+/** What the prerequisite list draws inside the surface branch body. */
+type CoursePrerequisiteListData = SurfaceListCardData & {
+    /** The requirements, in the order the course stores them. */
+    readonly prerequisites: ReadonlyArray<CoursePrerequisite>
+}
+
+/** The ordered run of requirements, drawn inside the surface branch body. */
+const CoursePrerequisiteListView = ({ props }: LeafProps<CoursePrerequisiteListData>) => (
+    <_CoursePrerequisiteList state="required" props={{ prerequisites: props.prerequisites }} />
+)
+
+/** Stable component type branded for the exact prerequisite contract it implements. */
+const CoursePrerequisiteList = defineContractComponent("course-prerequisite-list", CoursePrerequisiteListView)
 
 /** The ordered run of modules, drawn inside the surface branch's body. */
 const CourseModuleListView = ({ props, isLoading = false }: LeafProps<CourseModuleListData>) => (
@@ -242,6 +275,12 @@ export const _CourseDetailPage = (input: CourseDetailPageProps) => {
     const modules: ReadonlyArray<CourseModule> = isLoading
         ? Array.from({ length: RESTING.modules }, (_unused, index) => ({ id: `resting-${index + 1}`, title: "" }))
         : input.props.modules ?? []
+    // A resting prerequisite list rests at the same count the entry declares, so nothing moves
+    // when the real requirements land.
+    const prerequisites: ReadonlyArray<CoursePrerequisite> = isLoading
+        ? Array.from({ length: RESTING.prerequisites }, (_unused, index) => ({ id: `resting-${index + 1}`, requirement: "" }))
+        : input.props.prerequisites ?? []
+    const reviews: ReadonlyArray<CourseReview> = isLoading ? [] : input.props.reviews ?? []
 
     const hero = defineContractComponent("course-hero", {
         heading: defineContractComponent("course-hero-heading", {
@@ -279,6 +318,23 @@ export const _CourseDetailPage = (input: CourseDetailPageProps) => {
             }),
             defineContractComponent("course-section", {
                 title: defineLeafComponent("heading", {}, () => (
+                    <Heading props={{ content: input.props.labels.prerequisitesTitle, level: 2 }} />
+                )),
+                body: defineContractProjection("course-prerequisite-list", () => (
+                    <SurfaceListCard
+                        contract="course-prerequisite-list"
+                        render={CoursePrerequisiteList}
+                        props={{
+                            label: input.props.labels.prerequisitesTitle,
+                            isLabelHidden: true,
+                            prerequisites,
+                        }}
+                        isLoading={isLoading}
+                    />
+                )),
+            }),
+            defineContractComponent("course-section", {
+                title: defineLeafComponent("heading", {}, () => (
                     <Heading props={{ content: input.props.labels.curriculumTitle, level: 2 }} />
                 )),
                 body: defineContractProjection("course-module-list", () => (
@@ -291,6 +347,23 @@ export const _CourseDetailPage = (input: CourseDetailPageProps) => {
                             modules,
                         }}
                         isLoading={isLoading}
+                    />
+                )),
+            }),
+            defineContractComponent("course-section", {
+                title: defineLeafComponent("heading", {}, () => (
+                    <Heading props={{ content: input.props.labels.reviewsTitle, level: 2 }} />
+                )),
+                body: defineContractProjection("course-review-block", () => (
+                    <_CourseReviewBlock
+                        state={(input.props.reviewTotal ?? 0) === 0 ? "unrated" : "rated"}
+                        props={{
+                            averageScore: input.props.averageScore ?? 0,
+                            total: input.props.reviewTotal ?? 0,
+                            reviews,
+                            countLabel: input.props.labels.reviewCount,
+                            emptyLabel: input.props.labels.reviewsEmpty,
+                        }}
                     />
                 )),
             }),

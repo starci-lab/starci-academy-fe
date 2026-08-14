@@ -50,6 +50,8 @@ export type ShellNavActions = {
     readonly openSearch?: () => void
     readonly toggleTheme?: () => void
     readonly toggleLocale?: () => void
+    /** Opens the basket panel. The navbar owns the control; the shell owns the panel. */
+    readonly openCart?: () => void
 }
 
 /** Props for the presentational double navbar. */
@@ -100,7 +102,7 @@ export const _ShellNav = (input: ShellNavProps) => (
                     }),
                     tool: [
                         defineLeafComponent("icon-button", {}, () => (
-                            <IconButton props={{ icon: "cart", label: input.props.cartLabel }} />
+                            <IconButton props={{ icon: "cart", label: input.props.cartLabel }} on={{ press: input.on?.openCart }} />
                         )),
                         ...(input.props.isSignedIn ? [defineLeafComponent("icon-button", {}, () => (
                             <IconButton props={{ icon: "notification", label: input.props.notificationLabel }} />

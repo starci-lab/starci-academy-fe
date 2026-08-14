@@ -31,6 +31,13 @@ export type LayoutClassName =
     | "gap-1" | "gap-2" | "gap-3" | "gap-4" | "gap-6" | "gap-8"
     | "grid-cols-1" | "grid-cols-2" | "sm:grid-cols-2" | "sm:grid-cols-4" | "lg:grid-cols-3"
     | "md:flex" | "md:flex-row" | "md:items-start" | "md:gap-8"
+    // A PROPORTIONAL split, which the union could not previously express. Every existing two-column
+    // token is a FIXED rail (`md:[&>*:first-child]:w-72`), and 288px is a sidebar measure: a problem
+    // statement read at that width wraps every second word. `md:shrink-0` comes with it because a
+    // proportional width is only a REQUEST until shrinking is refused - measured at 273px inside a
+    // 934px viewport before it was added. The seam flips with the axis: a rule UNDER the reading
+    // column while the two are stacked, and BESIDE it once they are side by side.
+    | "md:w-2/5" | "md:shrink-0" | "md:border-b-0" | "md:border-r"
     | "@app-md:flex-row" | "@app-md:items-start" | "@app-md:gap-8" | "@app-md:w-72"
     | "mx-auto" | "min-h-screen" | "w-full" | "min-w-0" | "grow" | "flex-1" | "shrink-0" | "hidden" | "max-w-app-sm" | "max-w-app-md" | "max-w-app-lg" | "max-w-app-xl" | "max-w-6xl" | "max-w-sm" | "max-w-md" | "@container"
     | "h-16" | "min-h-16" | "sticky" | "top-0" | "top-16" | "z-40" | "z-50"
@@ -246,6 +253,65 @@ const buildContracts = <const T extends { readonly [K in keyof T]: ContractSpec 
  * constraining anything, and its `why` decays into a label the moment a second screen uses it.
  */
 export const CONTRACTS = buildContracts({
+    "learn-mobile-tab-bar": {
+        host: "nav",
+        classes: ["sticky", "bottom-0", "z-40", "flex", "w-full", "min-w-0", "flex-row", "items-center", "justify-between", "gap-2", "border-t", "border-separator", "bg-background", "px-4", "py-3", "md:hidden"],
+        children: {
+            tab: { leaf: "nav-link", props: { kind: "tab" }, repeats: true, restingCount: 3 },
+        },
+        why: "Below the rail's breakpoint the course is not reachable at all, so its ways in pin to the bottom edge where a thumb already is. It is a NAV of peers rather than the action bar it shares a shape with: those two differ in what sits inside them, which is exactly what a key is for - one holds a price and the thing that buys it, this holds destinations, and no reader should have to tell them apart by guessing.",
+    },
+    "learn-shell-frame": {
+        classes: [
+            "flex", "min-h-screen", "w-full", "min-w-0", "flex-col", "items-start",
+            "[&>*:nth-child(2)]:min-w-0", "[&>*:nth-child(2)]:grow",
+            "md:flex-row", "md:items-start",
+            "md:[&>*:first-child]:w-72", "md:[&>*:first-child]:shrink-0",
+            "md:[&>*:first-child]:sticky", "md:[&>*:first-child]:top-rail",
+            "md:[&>*:first-child]:self-start", "md:[&>*:first-child]:max-h-rail",
+            "md:[&>*:first-child]:overflow-y-auto",
+            "md:[&>*:nth-child(2)]:min-w-0", "md:[&>*:nth-child(2)]:grow",
+        ],
+        children: {
+            spine: { contract: "learn-spine-column" },
+            body: { leaf: "page" },
+            bar: { contract: "learn-mobile-tab-bar", optional: true },
+        },
+        why: "The spine is furniture rather than content: it stays under the navbar, takes the height the navbar leaves, and scrolls on its own so a reader deep in a long lesson still sees where they are in the course. It sits BESIDE the routed main rather than around it, so changing surface repaints the body and leaves the spine standing - which is the whole reason a learner can move between eleven modes without the frame flickering.",
+    },
+    "learn-spine-column": {
+        host: "nav",
+        classes: ["hidden", "w-full", "min-w-0", "flex-col", "gap-4", "p-4", "md:flex"],
+        children: {
+            resume: { contract: "learn-resume-card", optional: true },
+            group: { contract: "learn-nav-group", repeats: true, restingCount: 3 },
+        },
+        why: "Where the learner left off answers a different question from where they can go, so it stands above the groups rather than inside one - and the groups take the seam between two composed clusters, because each is already a label with a run of destinations under it.",
+    },
+    "learn-nav-group": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-1"],
+        children: {
+            label: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            row: { contract: "learn-nav-row", repeats: true, restingCount: 3 },
+        },
+        why: "A group name and the destinations under it are one identity, so they sit at the tightest seam: the name is read as what the run IS rather than as a peer of its first row. The group draws no surface, because a nav that boxes its own sections turns navigation into a page of cards.",
+    },
+    "learn-nav-row": {
+        classes: ["flex", "w-full", "min-w-0", "flex-row", "items-center", "gap-2", "[&>*:first-child]:min-w-0", "[&>*:first-child]:grow", "[&>*:last-child]:shrink-0"],
+        children: {
+            link: { leaf: "nav-link", props: { kind: "route" } },
+            fact: { leaf: ["text", "icon"], optional: true },
+        },
+        why: "The destination owns the width and one fact sits at the far end - a due count, a rank, or the lock that says this mode is not open yet. It is never an action: it reads as part of the row sentence, and a control there gets pressed by somebody who meant to read it.",
+    },
+    "learn-resume-card": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-1", "p-4"],
+        children: {
+            label: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            progress: { composite: "labelled-progress-row" },
+        },
+        why: "Continuing is one press, so the whole card is the target and its two lines are one identity: what this is, then how far in. It keeps a surface where the groups below have none, because it is the only thing in the rail that acts rather than navigates.",
+    },
     "nav-over-body-page": {
         classes: ["flex", "min-h-screen", "w-full", "flex-col"],
         children: {
@@ -685,7 +751,14 @@ export const CONTRACTS = buildContracts({
     "marked-row-list": {
         classes: ["overflow-hidden", "divide-y", "divide-separator", "p-0", "[&>*]:px-4", "[&>*]:py-3", "[&>*:first-child]:pt-4", "[&>*:last-child]:pb-4"],
         children: {
-            row: { composite: "task-progress-row", repeats: true, restingCount: 5 },
+            // EXTENDED. The slot admitted only the composite, and the composite renders its own
+            // `Tree` - so a row that must be PRESSED could not use this list at all. Admitting the
+            // row contract lets a caller wrap the same anatomy in `PressableSurface` instead. The
+            // `why` below is unchanged and still true of both: what makes them peers is the mark.
+            //
+            // A second list entry was the alternative and was refused: its class list would have
+            // been identical to this one, which is what `no-duplicate-entry-shape` exists to catch.
+            row: { composite: "task-progress-row", contract: "task-mark-title-fact-row", repeats: true, restingCount: 5 },
         },
         why: "Rows that each carry a completion mark are peers of one joined list, so a shared surface and a full-width rule - rather than card spacing - separate one row from the next, and the eye lands on the third row of two lists standing side by side at the same height. The mark is what makes them peers: something still to finish and something already true are one statement in two states, so the tick belongs to the row and is never re-drawn per list.",
     },
@@ -1710,7 +1783,7 @@ export const CONTRACTS = buildContracts({
         classes: ["flex", "flex-col", "gap-3"],
         children: {
             title: { leaf: "heading" },
-            body: { contract: ["course-promise-list", "course-module-list"] },
+            body: { contract: ["course-promise-list", "course-module-list", "course-prerequisite-list", "course-review-block"] },
         },
         why: "A named region of the page is its heading and the body that heading introduces, which is what a section is for: the name travels with the content to anything navigating by region.",
     },
@@ -1730,6 +1803,73 @@ export const CONTRACTS = buildContracts({
             promise: { leaf: "text", props: { size: "sm" } },
         },
         why: "The affirmative mark leads the sentence it affirms, and the sentence owns the remaining width so a long promise wraps under itself rather than under the mark.",
+    },
+    "course-prerequisite-list": {
+        host: "ol",
+        classes: ["flex", "flex-col", "divide-y", "divide-separator", "overflow-hidden", "p-0", "[&>*]:px-4", "[&>*]:py-3"],
+        children: {
+            prerequisite: { contract: "course-prerequisite-row", repeats: true, restingCount: 3 },
+        },
+        why: "Prerequisites are ORDERED - the backend stores them in sequence and a learner who lacks the first cannot judge the second - so an ol says that sequence to a reader who cannot see numbering. Deliberately not course-promise-list: identical mechanics under a ul would be that entry under a second name, and it would drop the ordering the data carries.",
+    },
+    "course-prerequisite-row": {
+        host: "li",
+        classes: ["flex", "flex-row", "items-start", "gap-3", "[&>*:last-child]:min-w-0", "[&>*:last-child]:grow"],
+        children: {
+            mark: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            requirement: { leaf: "text", props: { size: "sm" } },
+        },
+        why: "One requirement is one item of the ordered list. Its mark is muted rather than a tick, because a prerequisite is a condition the reader must satisfy themselves and a green check would claim the platform had verified it.",
+    },
+    "course-review-block": {
+        host: "section",
+        classes: ["flex", "flex-col", "gap-4"],
+        children: {
+            summary: { contract: "course-review-summary" },
+            list: { contract: "course-review-list" },
+        },
+        why: "A rating and the reviews behind it are two composed groups of one region, so the seam between them out-ranks the seams inside each. The summary answers whether the course is any good and the list answers why, and a reader who only wants the first must not have to read the second.",
+    },
+    "course-review-summary": {
+        classes: ["flex", "flex-row", "flex-wrap", "items-baseline", "gap-3"],
+        children: {
+            score: { leaf: "heading" },
+            scale: { contract: "rating-star-run" },
+            count: { leaf: "text", props: { size: "sm", tone: "muted" } },
+        },
+        why: "The mean, the scale it is measured against and the count are one statement about the whole population, sharing a baseline so the figure does not float against its own qualifier. They are separate semantic groups on one row rather than one compact control.",
+    },
+    "rating-star-run": {
+        classes: ["flex", "flex-row", "items-center", "gap-1"],
+        children: {
+            star: { leaf: "icon", repeats: true, restingCount: 5 },
+        },
+        why: "Five marks stand for the scale a score is read against, so they are one compact functional cluster rather than five facts. The run says how far the scale goes and the number beside it says where this course sits; a filled mark would need a glyph family this product does not carry.",
+    },
+    "course-review-list": {
+        host: "ul",
+        classes: ["flex", "flex-col", "divide-y", "divide-separator", "overflow-hidden", "p-0", "[&>*]:px-4", "[&>*]:py-3"],
+        children: {
+            review: { contract: "course-review-row", repeats: true, restingCount: 3 },
+        },
+        why: "Reviews are unordered peers of one joined list - review three is not a consequence of review two - so a ul, and full-width separators keep the scan continuous without giving any single opinion a card of its own.",
+    },
+    "course-review-row": {
+        host: "li",
+        classes: ["flex", "min-w-0", "flex-col", "gap-1"],
+        children: {
+            author: { contract: "course-review-author-line" },
+            body: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+        },
+        why: "Who said it and what they said are two lines of ONE opinion, so they sit at the identity rung rather than at the unit rung. The body is optional because a score alone is a complete review, and requiring prose is how a list fills with one-word bodies.",
+    },
+    "course-review-author-line": {
+        classes: ["flex", "flex-row", "flex-wrap", "items-baseline", "gap-2"],
+        children: {
+            name: { leaf: "text", props: { size: "sm", weight: "medium" } },
+            score: { leaf: "text", props: { size: "xs" } },
+        },
+        why: "A name and the score that person gave are one compact reading on one row - the score here is a fact about what THIS person thought rather than about the course - so they form one functional cluster.",
     },
     "course-module-list": {
         host: "ol",
@@ -1893,7 +2033,138 @@ export const CONTRACTS = buildContracts({
         },
         why: "Below the rail's breakpoint the purchase decision would scroll away entirely, so the price and its one action pin to the bottom edge and step aside as soon as the rail can hold them again.",
     },
-})
+    "coding-practice-page": {
+        classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            header: { contract: "page-header-stack" },
+            resume: { contract: "resume-item-card", optional: true },
+            domains: { contract: "domain-mastery-grid" },
+            standing: { contract: "leaderboard-card", optional: true },
+        },
+        why: "The learner is asked to continue before being asked to choose: the thing already half-done is the cheapest next move and it is the only region that can be absent. The domain field follows because it answers where to go NEXT, and the ranking comes last because it is the only region that says nothing about what to do.",
+    },
+    "domain-mastery-grid": {
+        classes: ["grid", "grid-cols-1", "sm:grid-cols-2", "lg:grid-cols-3", "gap-4"],
+        children: {
+            domain: { contract: "domain-mastery-card", repeats: true, restingCount: 6 },
+        },
+        why: "Twenty topics are scanned for the weakest one rather than read in order, so they are a field the eye crosses in two directions instead of a column it walks down.",
+    },
+    "domain-mastery-card": {
+        classes: ["flex", "grow", "flex-col", "items-start", "gap-2", "p-4"],
+        children: {
+            name: { leaf: "text", props: { size: "sm", weight: "semibold" } },
+            count: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            meter: { leaf: "progress" },
+        },
+        why: "The count and the bar are the same fact told twice on purpose - one to read and one to scan - because a learner comparing twenty topics needs the shape before the number, and the number once they have stopped on one.",
+    },
+    "coding-domain-page": {
+        classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            header: { contract: "page-header-stack" },
+            standing: { contract: "label-fact-over-progress", optional: true },
+            problems: { contract: "marked-row-list", optional: true },
+            notice: { composite: "empty-notice", optional: true },
+        },
+        why: "One topic's page opens on how far through it the reader is, because that is the question the hub sent them here holding; the problems follow as the answer to it.",
+    },
+    "coding-problem-page": {
+        classes: ["flex", "w-full", "min-h-screen", "flex-col", "md:flex-row"],
+        children: {
+            reading: { contract: "problem-reading-column" },
+            work: { contract: "problem-work-column" },
+        },
+        why: "Reading and writing are side by side on a desktop because the statement is consulted WHILE the solution is written, and stacked below the breakpoint because two columns of forty characters are worse than one of eighty.",
+    },
+    "problem-reading-column": {
+        // `md:shrink-0` is not decoration. Without it the work column's `grow` squeezes this one
+        // well past the measure `md:w-2/5` asked for - measured at 273px inside a 934px viewport
+        // where two fifths is 373 - and a problem statement at that width wraps every few words.
+        // A proportional width is a REQUEST until shrinking is refused.
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4", "border-b", "border-separator", "p-6", "md:w-2/5", "md:shrink-0", "md:border-b-0", "md:border-r"],
+        children: {
+            tabs: { leaf: "extended-tabs" },
+            body: { contract: "problem-statement-stack" },
+        },
+        why: "The tabs stay put while what is under them changes, so a reader who moved to the hint and back does not lose the place they were reading from.",
+    },
+    "problem-statement-stack": {
+        classes: ["flex", "min-w-0", "flex-col", "gap-3"],
+        children: {
+            heading: { contract: "title-with-baseline-fact" },
+            // `article` REUSED, and a proposed `markdown-prose` leaf withdrawn. The repository
+            // already renders authored Markdown - `leaves/Article` parses to mdast and decides what
+            // each node becomes - and its own comment records that canon refused `react-markdown`
+            // here twice: every replacement takes `children`, and heading replacements wrote raw
+            // tags that split the outline from the visible size. A second markdown owner would have
+            // walked into both refusals again, and pulled in a dependency to do it.
+            prose: { leaf: "article" },
+            tags: { contract: "profile-topic-chip-run", optional: true },
+        },
+        why: "The difficulty sits on the title's own baseline because it qualifies the title rather than the problem body, and the tags close the statement because they are what the reader scans when deciding to skip it.",
+    },
+    "problem-work-column": {
+        classes: ["flex", "w-full", "min-w-0", "grow", "flex-col"],
+        children: {
+            // TWO BLOCKS, NOT ONE. The verdict strip and the editor are separate owners with
+            // separate situations - one is driven by a socket, the other by a keyboard - so the
+            // PAGE composes them here rather than the editor drawing a strip it cannot fill.
+            verdict: { contract: "judge-status-strip" },
+            work: { contract: "editor-over-console" },
+        },
+        why: "The verdict is pinned above the editor rather than inside the tray below it, because it is the thing a reader watches while waiting and the tray is the thing they open once the waiting is over. The editor takes whatever height the other three leave, which is what makes it the region that grows on a taller screen.",
+    },
+    "judge-status-strip": {
+        classes: ["flex", "flex-row", "items-center", "gap-3", "w-full", "border-b", "border-separator", "px-4", "py-3", "[&>*:nth-child(3)]:min-w-0", "[&>*:nth-child(3)]:grow"],
+        children: {
+            mark: { leaf: "status-dot" },
+            verdict: { leaf: "text", props: { size: "sm", weight: "semibold" } },
+            detail: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            action: { leaf: "button", optional: true },
+        },
+        why: "Nine judging outcomes and a lost connection need ONE place that exists before the first submission and never moves, because a reader waiting on a verdict watches one spot and a strip that appears only on failure teaches them to watch nothing.",
+    },
+    "editor-over-console": {
+        classes: ["flex", "min-w-0", "grow", "flex-col"],
+        children: {
+            toolbar: { contract: "editor-toolbar-row" },
+            editor: { leaf: "code-editor" },
+            console: { contract: "judge-console", optional: true },
+        },
+        why: "The writing surface takes whatever height the bar above and the tray below leave it, which is what makes the editor the region that grows on a taller screen. The tray is absent until a run has produced something to put in it - parked open before the first submission it would take height to show nothing.",
+    },
+    "editor-toolbar-row": {
+        classes: ["flex", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-3", "w-full", "border-b", "border-separator", "px-4", "py-3"],
+        children: {
+            language: { leaf: "select" },
+            // REUSED, not invented. `catalog-card-action-row` already owns "two peer actions share
+            // one line and an equal measure", which is exactly running and submitting an attempt.
+            // `stacked-peer-controls` was the first reach and was wrong: it is `flex-col`, so it
+            // would have stacked Run above Submit at full width inside a toolbar.
+            //
+            // Its NAME still says `catalog`, which is now false for one of its two callers. That is
+            // recorded as an open question rather than fixed here: renaming a shipped entry touches
+            // every call site and belongs to a consolidation run, not to this candidate.
+            actions: { contract: "catalog-card-action-row" },
+        },
+        why: "The language belongs to the code and the actions belong to the attempt, so they take opposite ends of one bar rather than queueing on the same side.",
+    },
+    "judge-console": {
+        classes: ["flex", "flex-col", "gap-2", "w-full", "border-t", "border-separator", "px-4", "py-3"],
+        children: {
+            cases: { contract: "testcase-chip-run" },
+            message: { leaf: "code-block", optional: true },
+        },
+        why: "The per-case marks are the summary and the compiler's own words are the detail, so the detail appears only for the one verdict that carries any.",
+    },
+    "testcase-chip-run": {
+        classes: ["flex", "flex-row", "flex-wrap", "items-center", "gap-2"],
+        children: {
+            testcase: { leaf: "badge", repeats: true, restingCount: 5 },
+        },
+        why: "Testcases are equal peers read as a run rather than a ranking, and they wrap because their number is a property of the problem rather than of the layout.",
+    },})
 
 /** Every key in the registry. A key not in this union is a compile error at the call site. */
 export type ContractKey = keyof typeof CONTRACTS

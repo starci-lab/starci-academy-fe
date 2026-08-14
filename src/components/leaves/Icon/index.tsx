@@ -37,6 +37,7 @@ import {
     UserGroupIcon,
     UserPlusIcon,
     XMarkIcon,
+    StarIcon,
 } from "@heroicons/react/24/outline"
 import {
     AcademicCapIcon as AcademicCapSolidIcon,
@@ -77,6 +78,7 @@ import {
     UserGroupIcon as UserGroupSolidIcon,
     UserPlusIcon as UserPlusSolidIcon,
     XMarkIcon as XMarkSolidIcon,
+    StarIcon as StarSolidIcon,
 } from "@heroicons/react/16/solid"
 import type { ComponentType, SVGProps } from "react"
 import { GithubMark, GoogleMark } from "./brands"
@@ -108,6 +110,7 @@ export type IconName =
     | "light" | "dark" | "locale" | "google" | "github"
     | "search" | "cart" | "notification" | "account" | "saved" | "blog" | "talents" | "jobs" | "practice"
     | "viewGrid" | "viewList"
+    | "star"
 
 /** The two native Heroicon roles used by the product. */
 export type IconRole = "heading" | "leading" | "chip"
@@ -190,6 +193,7 @@ const GLYPHS: Record<IconName, GlyphCuts> = {
     league: cuts(TrophyIcon, TrophySolidIcon),
     livestream: cuts(VideoCameraIcon, VideoCameraSolidIcon),
     review: cuts(ClipboardDocumentCheckIcon, ClipboardDocumentCheckSolidIcon),
+    star: cuts(StarIcon, StarSolidIcon),
     light: cuts(SunIcon, SunSolidIcon),
     dark: cuts(MoonIcon, MoonSolidIcon),
     locale: cuts(LanguageIcon, LanguageSolidIcon),

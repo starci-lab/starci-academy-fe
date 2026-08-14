@@ -42,6 +42,10 @@ const query1 = gql`
                     text
                     orderIndex
                 }
+                prerequisites {
+                    text
+                    orderIndex
+                }
                 pricingPhases {
                     id
                     phase

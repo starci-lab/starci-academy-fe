@@ -8,7 +8,8 @@ import {
     defineLeafComponent,
 } from "@/components/contracts/props"
 import { DrawerShell } from "@/components/shells/DrawerShell"
-import { _CartLine, type CartLineData } from "@/components/blocks/commerce/CartLine/component"
+import { CartLine } from "@/components/blocks/commerce/CartLine"
+import { type CartLineData } from "@/components/blocks/commerce/CartLine/component"
 import { _OrderSummary, type OrderSummaryLabels } from "@/components/blocks/commerce/OrderSummary/component"
 
 /**
@@ -48,6 +49,10 @@ export type CartDrawerLabels = {
     readonly viewFullCart: string
     /** Shown when the basket holds nothing. */
     readonly emptyMessage: string
+    /** Shown when the basket could not be READ at all - refused, or the request failed. */
+    readonly failedMessage: string
+    /** The way out of a failed read: ask again. */
+    readonly failedAction: string
     /** The way out of an empty basket. */
     readonly emptyAction: string
 }
@@ -67,8 +72,6 @@ export type CartDrawerData = {
     readonly total?: string
     /** Whether the pricing request failed while the lines stand. */
     readonly hasPricingFailed?: boolean
-    /** The course whose removal is in flight, if any. */
-    readonly removingCourseId?: string
 }
 
 /** What the drawer reports. */
@@ -81,8 +84,6 @@ export type CartDrawerActions = {
     readonly viewFullCart?: () => void
     /** Called when an empty basket sends the reader to the catalogue. */
     readonly browse?: () => void
-    /** Per-line removal, keyed `remove:{courseId}`. */
-    readonly [key: string]: ((...args: Array<never>) => void) | undefined
 }
 
 /** Props for {@link _CartDrawer}. */
@@ -123,17 +124,7 @@ export const _CartDrawer = (input: CartDrawerProps) => {
                     ...(showsNotice ? {} : {
                         lines: defineContractComponent("cart-line-list", {
                             line: lines.map((line) => defineContractProjection("cart-line-row", () => (
-                                <_CartLine
-                                    state={
-                                        isLoading
-                                            ? "pending"
-                                            : input.props.removingCourseId === line.courseId
-                                                ? "removing"
-                                                : "ready"
-                                    }
-                                    props={line}
-                                    on={{ remove: input.on?.[`remove:${line.courseId}`] }}
-                                />
+                                <CartLine state={isLoading ? "pending" : "ready"} line={line} />
                             ))),
                         }),
                     }),
@@ -177,8 +168,14 @@ export const _CartDrawer = (input: CartDrawerProps) => {
                             <EmptyNotice
                                 props={{
                                     icon: "cart",
-                                    message: labels.emptyMessage,
-                                    actionLabel: labels.emptyAction,
+                                    // EMPTY AND REFUSED ARE NOT THE SAME SENTENCE, and the real page is what proved it: a
+
+                                    // signed-out reader was told their basket was empty when nobody had asked them to sign
+
+                                    // in. Both states hide the same regions, so only the copy can tell them apart.
+
+                                    message: input.state === "failed" ? labels.failedMessage : labels.emptyMessage,
+                                    actionLabel: input.state === "failed" ? labels.failedAction : labels.emptyAction,
                                 }}
                                 on={{ act: input.on?.browse }}
                             />

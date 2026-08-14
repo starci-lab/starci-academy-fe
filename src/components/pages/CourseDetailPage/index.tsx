@@ -1,7 +1,7 @@
 "use client"
 import { useLocale, useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
-import { useQueryCourseSwr } from "@/hooks"
+import { useQueryCourseReviewsSwr, useQueryCourseSwr } from "@/hooks"
 import { _CourseDetailPage } from "./component"
 import type { CourseDetail, CourseModule } from "@/modules/api/graphql/queries/types/course"
 
@@ -47,6 +47,10 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
     const locale = useLocale()
     const router = useRouter()
     const query = useQueryCourseSwr({ displayId: input.displayId })
+    // The rating is a second request on purpose: it is public, shared by every reader and
+    // invalidated by a different event than the course itself, so folding it into the course
+    // query would make one cache entry answer two questions that change at different times.
+    const reviewQuery = useQueryCourseReviewsSwr(query.data?.id)
     const money = new Intl.NumberFormat(locale, { style: "currency", currency: "VND", maximumFractionDigits: 0 })
 
     const labels = {
@@ -54,6 +58,10 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
         navCourses: t("navCourses"),
         valuePropsTitle: t("valuePropsTitle"),
         curriculumTitle: t("curriculumTitle"),
+        prerequisitesTitle: t("prerequisitesTitle"),
+        reviewsTitle: t("reviewsTitle"),
+        reviewsEmpty: t("reviewsEmpty"),
+        reviewCount: t("reviewCount", { count: reviewQuery.data?.total ?? 0 }),
     }
 
     if (query.error !== undefined && query.data === undefined) {
@@ -100,6 +108,23 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
                     { id: "challenges", label: t("statChallenges", { count: sumContents(modules, (content) => content.numChallenges) }) },
                 ],
                 valueProps: byOrder(course.valuePropositions ?? []).map((proposition) => proposition.text),
+                // Ordered by the backend and read that way here: a learner who lacks the first
+                // requirement cannot judge the second, so arrival order is not good enough.
+                // The mean and the total describe the WHOLE population and come from the
+                // projection; the nodes are one page. Deriving the mean from the nodes would
+                // answer a different question and change on every page turn.
+                averageScore: reviewQuery.data?.averageScore,
+                reviewTotal: reviewQuery.data?.total,
+                reviews: (reviewQuery.data?.nodes ?? []).map((row) => ({
+                    id: row.id,
+                    author: row.userId,
+                    score: row.score,
+                    body: row.body ?? undefined,
+                })),
+                prerequisites: byOrder(course.prerequisites ?? []).map((row, index) => ({
+                    id: `prerequisite-${index + 1}`,
+                    requirement: row.text,
+                })),
                 modules: modules.map((module) => {
                     const previews = byOrder(module.previewContents ?? [])
                     return {

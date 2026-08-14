@@ -1,0 +1,72 @@
+import { Tree } from "@/components/branches/Tree"
+import { Text } from "@/components/leaves/Text"
+import {
+    defineContractComponent,
+    defineLeafComponent,
+    type BlockProps,
+} from "@/components/contracts/props"
+
+/** One requirement a learner should already satisfy. */
+export type CoursePrerequisite = {
+    /** Stable id for the list key. */
+    readonly id: string
+    /** What the learner must already have or know. */
+    readonly requirement: string
+}
+
+/**
+ * The two situations this block can be in.
+ *
+ * A course with no prerequisites is not an empty list - it is a course that asks for nothing,
+ * and drawing a bordered card around nothing says the opposite. The state is what makes that
+ * unsayable rather than merely discouraged.
+ */
+export type CoursePrerequisiteListState = "required" | "none"
+
+/** What the prerequisite list draws. */
+export type CoursePrerequisiteListData = {
+    /** The requirements, in the order the backend stores them. */
+    readonly prerequisites: ReadonlyArray<CoursePrerequisite>
+}
+
+/**
+ * BLOCK - `CoursePrerequisiteList`: what a learner should already have before starting.
+ *
+ * IT IS AN `ol`, AND THAT IS DATA RATHER THAN STYLE. The backend documents the relation as "Ordered
+ * prerequisites required before joining the course", so the sequence carries meaning: somebody who
+ * lacks the first cannot judge the second. An `ol` says that to a reader who cannot see numbering.
+ *
+ * It is also why this is not `course-promise-list` with different copy. Identical mechanics under a
+ * `ul` would be that entry under a second name - which `no-duplicate-entry-shape` refuses - and it
+ * would throw away the ordering at the same time.
+ *
+ * THE ORDINAL IS TEXT, not the browser's own marker. The list carries `p-0` and its rows own the
+ * inset, so a native marker hangs outside that inset and sits against the card's edge.
+ *
+ * @param input - The requirements to draw.
+ * @returns The ordered prerequisite list.
+ */
+export const _CoursePrerequisiteList = ({
+    props,
+    state,
+}: BlockProps<CoursePrerequisiteListState, CoursePrerequisiteListData>) => (
+    state === "none"
+        ? null
+        :
+        <Tree
+            contract="course-prerequisite-list"
+            render={defineContractComponent("course-prerequisite-list", {
+                prerequisite: props.prerequisites.map((prerequisite, index) => defineContractComponent("course-prerequisite-row", {
+                    mark: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                        <Text props={{ content: `${index + 1}.`, size: "sm", tone: "muted" }} />
+                    )),
+                    requirement: defineLeafComponent("text", { size: "sm" }, () => (
+                        <Text props={{ content: prerequisite.requirement, size: "sm" }} />
+                    )),
+                })),
+            })}
+        />
+)
+
+/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
+export const meta = { shape: "block", world: "pure" } as const
