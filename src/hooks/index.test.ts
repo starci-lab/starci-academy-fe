@@ -47,6 +47,14 @@ const EXPECTED = [
     "useQueryMyUpcomingLivestreamsSwr",
     "useQueryMyLeagueSwr",
     "useQueryGlobalLeaderboardSwr",
+    "useQueryContentAiSessionsSwr",
+    "useQueryContentAiHistorySwr",
+    "useMutateCreateContentAiSessionSwr",
+    "useMutateRenameContentAiSessionSwr",
+    "useMutateSetContentAiSessionArchivedSwr",
+    "useMutateDeleteContentAiSessionSwr",
+    "useMutateTouchContentAiSessionSwr",
+    "useContentAiStream",
 ]
 
 describe("hooks barrel", () => {
@@ -67,7 +75,7 @@ describe("hooks barrel", () => {
     })
 
     it("leaks no cache key, type or query module through the barrel", () => {
-        const leaked = Object.keys(hooks).filter((name) => !/^use(Query|Mutate)/.test(name))
+        const leaked = Object.keys(hooks).filter((name) => !/^use(Query|Mutate)|^useContentAiStream$/.test(name))
         expect(leaked).toEqual([])
     })
 })
