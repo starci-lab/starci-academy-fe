@@ -1,7 +1,10 @@
-import { PersonalProjectPage } from "./component"
+import { CoursePersonalProjectPage } from "@/components/pages/CoursePersonalProjectPage"
 
-interface PersonalProjectRouteProps { params: Promise<{ lang: string; displayId: string }> }
+interface PersonalProjectRouteProps { params: Promise<{ displayId: string }> }
 
-const PersonalProjectRoute = async ({ params }: PersonalProjectRouteProps) => { const resolved = await params; return <PersonalProjectPage lang={resolved.lang} displayId={resolved.displayId} /> }
+const PersonalProjectRoute = async ({ params }: PersonalProjectRouteProps) => {
+    const { displayId } = await params
+    return <CoursePersonalProjectPage displayId={displayId} />
+}
 
 export default PersonalProjectRoute

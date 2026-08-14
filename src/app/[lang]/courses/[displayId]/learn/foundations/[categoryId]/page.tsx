@@ -1,4 +1,11 @@
-import { getLocale } from "next-intl/server"
-import { FoundationsCategory } from "../_components"
+import { CourseFoundationCategoryPage } from "@/components/pages/CourseFoundationCategoryPage"
 
-export default async function FoundationsCategoryPage({ params }: { params: Promise<{ displayId: string, categoryId: string }> }) { const [{ displayId, categoryId }, locale] = await Promise.all([params, getLocale()]); return <FoundationsCategory displayId={displayId} categoryId={categoryId} isVi={locale === "vi"} /> }
+type FoundationsCategoryRouteProps = { readonly params: Promise<{ displayId: string; categoryId: string }> }
+
+/** Mount the canonical searchable foundation-category page. */
+const FoundationsCategoryPage = async (input: FoundationsCategoryRouteProps) => {
+    const { displayId, categoryId } = await input.params
+    return <CourseFoundationCategoryPage displayId={displayId} categoryId={categoryId} />
+}
+
+export default FoundationsCategoryPage

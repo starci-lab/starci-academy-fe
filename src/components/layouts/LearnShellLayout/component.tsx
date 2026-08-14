@@ -33,6 +33,15 @@ export interface LearnMobileTab {
     readonly isCurrent?: boolean
 }
 
+/** The finite mobile panels owned by the learn segment. */
+export type LearnMobileView =
+    | "today"
+    | "course"
+    | "progress"
+    | "contents"
+    | "lesson"
+    | "outline"
+
 /** What the frame draws. */
 export type LearnShellLayoutData = {
     /** Everything the learner can do in this course. */
@@ -45,11 +54,15 @@ export type LearnShellLayoutData = {
      * into the same bar the course does. One bar, not a bar plus a drawer plus a second bar -
      * which is what the reference product settled on and why its reader has a tab bar of its own.
      */
-    readonly tabs?: ReadonlyArray<LearnMobileTab>
+    readonly mobileTabs?: ReadonlyArray<LearnMobileTab>
+    /** Focused work sessions remove course furniture and give the routed surface the full frame. */
+    readonly isFullBleed: boolean
 }
 
 /** What the frame reports. */
-export type LearnShellLayoutActions = LearnSpineActions
+export type LearnShellLayoutActions = LearnSpineActions & {
+    readonly openMobileTab?: (id: string) => void
+}
 
 /** Props for {@link _LearnShellLayout}. */
 export type LearnShellLayoutProps = {
@@ -71,14 +84,16 @@ export const _LearnShellLayout = (input: LearnShellLayoutProps) => {
         <Tree
             contract="learn-shell-frame"
             render={defineContractComponent("learn-shell-frame", {
-                spine: learnSpine({ props: input.props.spine, on: input.on, isLoading: input.isLoading ?? false }),
+                ...(input.props.isFullBleed ? {} : {
+                    spine: learnSpine({ props: input.props.spine, on: input.on, isLoading: input.isLoading ?? false }),
+                }),
                 body: defineLeafComponent("page", {}, () => <Surface />),
-                ...((input.props.tabs ?? []).length === 0 ? {} : {
+                ...((input.props.mobileTabs ?? []).length === 0 ? {} : {
                     bar: defineContractComponent("learn-mobile-tab-bar", {
-                        tab: (input.props.tabs ?? []).map((tab) => defineLeafComponent("nav-link", { kind: "tab" }, () => (
+                        tab: (input.props.mobileTabs ?? []).map((tab) => defineLeafComponent("nav-link", { kind: "tab" }, () => (
                             <NavLink
                                 props={{ label: tab.label, icon: tab.icon, kind: "tab", isCurrent: tab.isCurrent }}
-                                on={{ press: () => input.on?.openRow?.(tab.id) }}
+                                on={{ press: () => input.on?.openMobileTab?.(tab.id) }}
                             />
                         ))),
                     }),

@@ -38,6 +38,23 @@ const query1 = gql`
                     title
                     numContents
                 }
+                challenges {
+                    id
+                    displayId
+                    title
+                    description
+                    score
+                    difficulty
+                    orderIndex
+                    hint
+                    submissions {
+                        id
+                        title
+                        description
+                        score
+                        sortIndex
+                    }
+                }
             }
         }
     }

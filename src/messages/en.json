@@ -572,6 +572,35 @@
         }
     },
     "learn": {
+        "today": {
+            "title": "Today",
+            "subtitle": "Your next steps in {course}",
+            "primaryLabel": "Continue where you left off",
+            "secondaryLabel": "Also worth doing today",
+            "courseLabel": "Course",
+            "progressLabel": "Course progress",
+            "progressFact": "{percent}% complete",
+            "modules": "Course modules",
+            "resume": "Continue",
+            "open": "Open modules",
+            "review": "Review now",
+            "continue": "Continue task",
+            "prepare": "Set up interview",
+            "dueTitle": "{count, plural, one {# card is due} other {# cards are due}}",
+            "projectTitle": "Continue your current project task",
+            "interviewTitle": "Prepare a mock interview",
+            "empty": "This course is not available.",
+            "failed": "Today could not be loaded.",
+            "retry": "Try again",
+            "kinds": {
+                "interview": "Mock interview",
+                "challenge": "Challenge",
+                "lesson": "Lesson",
+                "course": "Course",
+                "flashcards": "Flashcards",
+                "project": "Personal project"
+            }
+        },
         "content": {
             "navCourse": "Course",
             "navModule": "Module",
@@ -612,11 +641,16 @@
                 "qa": "Q&A"
             },
             "tabs": {
+                "today": "Today",
                 "course": "Course",
+                "progress": "Progress",
                 "contents": "Contents",
-                "page": "This page"
+                "lesson": "Lesson",
+                "outline": "This page"
             },
-            "locked": "Locked"
+            "locked": "Locked",
+            "resume": "Continue learning",
+            "progress": "{percent}% complete"
         }
     },
     "practice": {

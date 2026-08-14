@@ -1,3 +1,11 @@
-import { getLocale } from "next-intl/server"
-import { PlaygroundSession } from "../../_components"
-export default async function PlaygroundSessionPage({ params }: { params: Promise<{ displayId: string, slug: string }> }) { const [{ displayId, slug }, locale] = await Promise.all([params, getLocale()]); return <PlaygroundSession displayId={displayId} slug={slug} isVi={locale === "vi"} /> }
+import { CoursePlaygroundSessionPage } from "@/components/pages/CoursePlaygroundSessionPage"
+
+type PlaygroundSessionRouteProps = { readonly params: Promise<{ displayId: string; slug: string }> }
+
+/** Mount the live session page inside the persistent slug layout. */
+const PlaygroundSessionPage = async (input: PlaygroundSessionRouteProps) => {
+    const { displayId, slug } = await input.params
+    return <CoursePlaygroundSessionPage displayId={displayId} slug={slug} />
+}
+
+export default PlaygroundSessionPage

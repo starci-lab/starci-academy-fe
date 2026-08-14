@@ -1,11 +1,34 @@
 "use client"
 
-import { useMemo } from "react"
+import { createContext, useContext, useEffect, useMemo, useState } from "react"
 import { useTranslations } from "next-intl"
 import { usePathname, useRouter } from "@/i18n/navigation"
-import { _LearnShellLayout, type LearnMobileTab } from "./component"
+import {
+    _LearnShellLayout,
+    type LearnMobileTab,
+    type LearnMobileView,
+} from "./component"
 import type { LearnSpineGroup } from "@/components/blocks/learn/LearnSpine/component"
+import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
+import { useQueryGlobalLeaderboardSwr } from "@/hooks/swr/useQueryGlobalLeaderboardSwr"
+import { useQueryMyCoursesSwr } from "@/hooks/swr/useQueryMyCoursesSwr"
 import type { ComponentType } from "react"
+
+type LearnMobileViewContextValue = {
+    readonly view: LearnMobileView
+    readonly openView: (view: LearnMobileView) => void
+}
+
+const LearnMobileViewContext = createContext<LearnMobileViewContextValue | undefined>(undefined)
+
+/** Read the learn layout's current mobile panel from a routed page. */
+export const useLearnMobileView = (): LearnMobileViewContextValue => {
+    const value = useContext(LearnMobileViewContext)
+    if (value === undefined) {
+        throw new Error("useLearnMobileView must be used inside LearnShellLayout")
+    }
+    return value
+}
 
 /**
  * The learn frame, connected.
@@ -35,6 +58,8 @@ interface SpineRoute {
     readonly icon: LearnSpineGroup["rows"][number]["icon"]
     /** The path under the course this row opens. */
     readonly at: string
+    /** This surface stays visible but reports the course enrolment gate. */
+    readonly requiresEnrollment?: boolean
 }
 
 /** The three groups, and the routes inside each. */
@@ -43,14 +68,14 @@ const GROUPS: ReadonlyArray<{ id: string, rows: ReadonlyArray<SpineRoute> }> = [
         id: "path",
         rows: [
             { id: "content", icon: "course", at: "/learn/content" },
-            { id: "personalProject", icon: "practice", at: "/learn/personal-project" },
+            { id: "personalProject", icon: "practice", at: "/learn/personal-project", requiresEnrollment: true },
         ],
     },
     {
         id: "practice",
         rows: [
             { id: "flashcards", icon: "review", at: "/learn/flashcards" },
-            { id: "mockInterview", icon: "talents", at: "/learn/mock-interview" },
+            { id: "mockInterview", icon: "talents", at: "/learn/mock-interview", requiresEnrollment: true },
             { id: "foundations", icon: "explore", at: "/learn/foundations" },
             { id: "playground", icon: "code", at: "/learn/playground" },
         ],
@@ -66,10 +91,16 @@ const GROUPS: ReadonlyArray<{ id: string, rows: ReadonlyArray<SpineRoute> }> = [
 ]
 
 /** What the bottom bar offers below the rail's breakpoint. */
-const TABS: ReadonlyArray<{ id: string, icon: LearnMobileTab["icon"] }> = [
-    { id: "course", icon: "course" },
+const TODAY_TABS: ReadonlyArray<{ id: LearnMobileView, icon: LearnMobileTab["icon"] }> = [
+    { id: "today", icon: "course" },
+    { id: "course", icon: "explore" },
+    { id: "progress", icon: "league" },
+]
+
+const READER_TABS: ReadonlyArray<{ id: LearnMobileView, icon: LearnMobileTab["icon"] }> = [
     { id: "contents", icon: "explore" },
-    { id: "page", icon: "blog" },
+    { id: "lesson", icon: "course" },
+    { id: "outline", icon: "blog" },
 ]
 
 /**
@@ -82,6 +113,34 @@ export const LearnShellLayout = (input: LearnShellLayoutProps) => {
     const router = useRouter()
     const pathname = usePathname()
     const base = `/courses/${input.displayId}`
+    const course = useQueryCourseSwr({ displayId: input.displayId })
+    const enrolledCourses = useQueryMyCoursesSwr()
+    const leaderboard = useQueryGlobalLeaderboardSwr()
+
+    const enrolledCourse = enrolledCourses.data?.find((candidate) => candidate.globalId === course.data?.id)
+    const enrollmentKnown = course.data !== undefined
+    const viewerRank = leaderboard.data?.myRank
+
+    const isReader = pathname.includes("/learn/content/modules/")
+        && pathname.includes("/contents/")
+        && !pathname.includes("/challenges/")
+    const isToday = pathname === `${base}/learn`
+    const routeDefault: LearnMobileView = isToday ? "today" : isReader ? "lesson" : "course"
+    const validViews = useMemo<ReadonlyArray<LearnMobileView>>(() => (
+        isToday
+            ? TODAY_TABS.map((tab) => tab.id)
+            : isReader
+                ? READER_TABS.map((tab) => tab.id)
+                : [routeDefault]
+    ), [isReader, isToday, routeDefault])
+    const [mobileView, setMobileView] = useState<LearnMobileView>(routeDefault)
+    useEffect(() => {
+        if (!validViews.includes(mobileView)) setMobileView(routeDefault)
+    }, [mobileView, routeDefault, validViews])
+    const isFullBleed = pathname.includes("/learn/mind-map")
+        || /\/learn\/mock-interview\/interview\/[^/]+$/.test(pathname)
+        || /\/learn\/playground\/[^/]+\/session$/.test(pathname)
+        || /\/learn\/flashcards\/(?:review|quiz)\/sessions\/[^/]+$/.test(pathname)
 
     const groups = useMemo(() => GROUPS.map((group) => ({
         id: group.id,
@@ -91,24 +150,56 @@ export const LearnShellLayout = (input: LearnShellLayoutProps) => {
             label: t(`rows.${row.id}`),
             icon: row.icon,
             isCurrent: pathname.startsWith(`${base}${row.at}`),
+            isLocked: row.requiresEnrollment === true && enrollmentKnown && course.data?.isEnrolled !== true,
+            fact: row.id === "leaderboard" && viewerRank !== null && viewerRank !== undefined
+                ? `#${viewerRank}`
+                : undefined,
         })),
-    })), [t, pathname, base])
+    })), [t, pathname, base, enrollmentKnown, course.data?.isEnrolled, viewerRank])
+
+    const tabs = isToday ? TODAY_TABS : isReader ? READER_TABS : undefined
 
     return (
-        <_LearnShellLayout
-            props={{
-                spine: { lockedLabel: t("locked"), groups },
-                tabs: TABS.map((tab) => ({ id: tab.id, label: t(`tabs.${tab.id}`), icon: tab.icon })),
-            }}
-            on={{
-                openRow: (id: string) => {
-                    const row = GROUPS.flatMap((group) => group.rows).find((candidate) => candidate.id === id)
-                    if (row === undefined) return
-                    router.push(`${base}${row.at}`)
-                },
-            }}
-            surface={input.surface}
-        />
+        <LearnMobileViewContext.Provider value={{ view: mobileView, openView: setMobileView }}>
+            <_LearnShellLayout
+                props={{
+                    spine: {
+                        lockedLabel: t("locked"),
+                        groups,
+                        ...(enrolledCourse === undefined ? {} : {
+                            resume: {
+                                label: t("resume"),
+                                title: enrolledCourse.label,
+                                percent: enrolledCourse.completionPercent,
+                                percentText: t("progress", { percent: enrolledCourse.completionPercent }),
+                            },
+                        }),
+                    },
+                    mobileTabs: tabs
+                        ? tabs.map((tab) => ({
+                            id: tab.id,
+                            label: t(`tabs.${tab.id}`),
+                            icon: tab.icon,
+                            isCurrent: tab.id === mobileView,
+                        }))
+                        : undefined,
+                    isFullBleed,
+                }}
+                on={{
+                    openRow: (id: string) => {
+                        const row = GROUPS.flatMap((group) => group.rows).find((candidate) => candidate.id === id)
+                        if (row === undefined) return
+                        router.push(`${base}${row.at}`)
+                    },
+                    openMobileTab: (id: string) => {
+                        const next = validViews.find((view) => view === id)
+                        if (next !== undefined) setMobileView(next)
+                    },
+                    resume: () => router.push(`${base}/learn/content`),
+                }}
+                surface={input.surface}
+            />
+        </LearnMobileViewContext.Provider>
     )
 }
 

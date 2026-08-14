@@ -1,4 +1,4 @@
-import { Tree } from "@/components/branches/Tree"
+import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { Badge } from "@/components/leaves/Badge"
 import { Button } from "@/components/leaves/Button"
 import { CoverImage } from "@/components/leaves/CoverImage"
@@ -121,7 +121,7 @@ export const _CoursePricingRail = (input: CoursePricingRailProps) => {
     })
 
     return (
-        <Tree
+        <SurfaceCard
             contract="course-pricing-rail"
             render={defineContractComponent("course-pricing-rail", {
                 cover: defineLeafComponent("cover-image", {}, () => (
@@ -182,9 +182,9 @@ export const _CoursePricingRail = (input: CoursePricingRailProps) => {
 /**
  * The rail, branded for the slot that holds it.
  *
- * A projection rather than bound slots: the block has already drawn its own `Tree`, and
- * `ContractContent` renders a projection without opening a second node around it. Binding slots here
- * instead would inset the rail twice.
+ * A projection rather than bound slots: `SurfaceCard` has already drawn the contract's `Tree`, and
+ * `ContractContent` renders a projection without opening a second node around it. Binding slots
+ * here instead would inset the rail twice.
  */
 export const CoursePricingRail = (input: CoursePricingRailProps) =>
     defineContractProjection("course-pricing-rail", () => <_CoursePricingRail {...input} />)

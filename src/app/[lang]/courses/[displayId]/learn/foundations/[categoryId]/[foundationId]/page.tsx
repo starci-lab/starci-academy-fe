@@ -1,4 +1,11 @@
-import { getLocale } from "next-intl/server"
-import { FoundationResource } from "../../_components"
+import { CourseFoundationResourcePage } from "@/components/pages/CourseFoundationResourcePage"
 
-export default async function FoundationResourcePage({ params }: { params: Promise<{ displayId: string, categoryId: string, foundationId: string }> }) { const [{ displayId, categoryId, foundationId }, locale] = await Promise.all([params, getLocale()]); return <FoundationResource displayId={displayId} categoryId={categoryId} foundationId={foundationId} isVi={locale === "vi"} /> }
+type FoundationResourceRouteProps = { readonly params: Promise<{ displayId: string; categoryId: string; foundationId: string }> }
+
+/** Mount the canonical foundation-resource reader page. */
+const FoundationResourcePage = async (input: FoundationResourceRouteProps) => {
+    const { displayId, categoryId, foundationId } = await input.params
+    return <CourseFoundationResourcePage displayId={displayId} categoryId={categoryId} foundationId={foundationId} />
+}
+
+export default FoundationResourcePage

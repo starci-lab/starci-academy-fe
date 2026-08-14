@@ -1,3 +1,11 @@
-import { getLocale } from "next-intl/server"
-import { MindMapWorkspace } from "./_components"
-export default async function MindMapPage({ params }: { params: Promise<{ displayId: string }> }) { const [{ displayId }, locale] = await Promise.all([params, getLocale()]); return <MindMapWorkspace displayId={displayId} isVi={locale === "vi"} /> }
+import { CourseMindMapPage } from "@/components/pages/CourseMindMapPage"
+
+type MindMapRouteProps = { readonly params: Promise<{ displayId: string }> }
+
+/** Mount the canonical backend-computed course mind map. */
+const MindMapPage = async (input: MindMapRouteProps) => {
+    const { displayId } = await input.params
+    return <CourseMindMapPage displayId={displayId} />
+}
+
+export default MindMapPage

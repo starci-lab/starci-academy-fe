@@ -1,10 +1,10 @@
-import { PersonalProjectTaskResultPage } from "./component"
+import { CoursePersonalProjectResultPage } from "@/components/pages/CoursePersonalProjectResultPage"
 
-interface ResultRouteProps { params: Promise<{ lang: string; displayId: string; taskId: string }> }
+interface ResultRouteProps { params: Promise<{ displayId: string; taskId: string }> }
 
 const ResultRoute = async ({ params }: ResultRouteProps) => {
-    const { lang, displayId, taskId } = await params
-    return <PersonalProjectTaskResultPage lang={lang} displayId={displayId} taskId={taskId} />
+    const { displayId, taskId } = await params
+    return <CoursePersonalProjectResultPage displayId={displayId} taskId={taskId} />
 }
 
 export default ResultRoute

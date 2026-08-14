@@ -1,10 +1,13 @@
-import { FlashcardsSurface } from "../_components"
+import { CourseFlashcardsReviewPage } from "@/components/pages/CourseFlashcardsReviewPage"
 
-type PageProps = { params: Promise<{ lang: string, displayId: string }> }
-
-const Page = async ({ params }: PageProps) => {
-    const { lang, displayId } = await params
-    return <FlashcardsSurface lang={lang} displayId={displayId} />
+interface FlashcardsReviewRouteProps {
+    readonly params: Promise<{ readonly displayId: string }>
 }
 
-export default Page
+/** Mounts the connected review overview without route-local product drawing. */
+const FlashcardsReviewRoute = async ({ params }: FlashcardsReviewRouteProps) => {
+    const { displayId } = await params
+    return <CourseFlashcardsReviewPage displayId={displayId} />
+}
+
+export default FlashcardsReviewRoute

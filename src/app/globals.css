@@ -52,7 +52,7 @@
      * unreachable while the rail is stuck. The two values move together - changing the pin without
      * the height is what leaves a rail either clipped at the top or unreachable at the bottom.
      */
-    --top-rail: 5.5rem;
+    --spacing-rail: 5.5rem;
     --max-height-rail: calc(100dvh - 7rem);
 
     /*

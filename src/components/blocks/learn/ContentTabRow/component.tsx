@@ -23,11 +23,16 @@ import { defineContractComponent, defineLeafComponent } from "@/components/contr
  */
 
 /** One face of the content - a tab the content actually carries. */
+export type ContentFaceId = "reading" | "challenge" | "ai"
+
+/** One finite reader face and whether its producer can currently open it. */
 export type ContentFaceTab = {
-    readonly id: string
+    readonly id: ContentFaceId
     readonly label: string
     /** The glyph legacy draws beside the name; the shape is the more direct label. */
     readonly icon?: IconName
+    readonly disabled?: boolean
+    readonly locked?: boolean
 }
 
 /** One language the examples can be read in. */
@@ -40,7 +45,7 @@ export type ContentLanguageTab = {
 export type ContentTabRowData = {
     readonly facesLabel: string
     readonly faces: ReadonlyArray<ContentFaceTab>
-    readonly selectedFace?: string
+    readonly selectedFace?: ContentFaceId
     readonly languagesLabel?: string
     readonly languages?: ReadonlyArray<ContentLanguageTab>
     readonly selectedLanguage?: string
@@ -48,8 +53,23 @@ export type ContentTabRowData = {
 
 /** What the row reports. */
 export type ContentTabRowActions = {
-    readonly selectFace?: (face: string) => void
+    readonly selectReading?: () => void
+    readonly selectChallenge?: () => void
+    readonly selectAi?: () => void
     readonly selectLanguage?: (language: string) => void
+}
+
+/** Dispatch one finite face without allowing disabled or locked producers to run. */
+const selectFace = (
+    faces: ReadonlyArray<ContentFaceTab>,
+    on: ContentTabRowActions | undefined,
+    faceId: string,
+) => {
+    const face = faces.find((candidate) => candidate.id === faceId)
+    if (face === undefined || face.disabled === true || face.locked === true) return
+    if (face.id === "reading") on?.selectReading?.()
+    if (face.id === "challenge") on?.selectChallenge?.()
+    if (face.id === "ai") on?.selectAi?.()
 }
 
 /**
@@ -77,7 +97,7 @@ export const contentTabRow = (props: ContentTabRowData, on?: ContentTabRowAction
                         ...(face.icon === undefined ? {} : { icon: face.icon }),
                     })),
                 }}
-                on={{ select: on?.selectFace }}
+                on={{ select: (faceId) => selectFace(props.faces, on, faceId) }}
             />
         )),
         trailing: defineLeafComponent("choice-tabs", {}, () => (

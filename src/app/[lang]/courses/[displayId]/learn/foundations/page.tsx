@@ -1,4 +1,11 @@
-import { getLocale } from "next-intl/server"
-import { FoundationsHub } from "./_components"
+import { CourseFoundationsPage } from "@/components/pages/CourseFoundationsPage"
 
-export default async function FoundationsPage({ params }: { params: Promise<{ displayId: string }> }) { const [{ displayId }, locale] = await Promise.all([params, getLocale()]); return <FoundationsHub displayId={displayId} isVi={locale === "vi"} /> }
+type FoundationsRouteProps = { readonly params: Promise<{ displayId: string }> }
+
+/** Mount the canonical foundations hub page for one course. */
+const FoundationsPage = async (input: FoundationsRouteProps) => {
+    const { displayId } = await input.params
+    return <CourseFoundationsPage displayId={displayId} />
+}
+
+export default FoundationsPage

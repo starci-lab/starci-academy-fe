@@ -1,10 +1,14 @@
 "use client"
 
-import { useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryContentSwr } from "@/hooks/swr/useQueryContentSwr"
 import { useQueryModuleSwr } from "@/hooks/swr/useQueryModuleSwr"
+import { useQueryContentReactionsSwr } from "@/hooks/swr/useQueryContentReactionsSwr"
+import { useMutateReactContentSwr } from "@/hooks/swr/useMutateReactContentSwr"
+import { ReactionType } from "@/modules/api/graphql/queries/types/reactions"
+import { useLearnMobileView } from "@/components/layouts/LearnShellLayout"
 import {
     _CourseLearnContentPage,
     type ContentOutlineEntry,
@@ -68,9 +72,22 @@ const outlineOf = (body: string): Array<ContentOutlineEntry> => {
  */
 export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
     const t = useTranslations("learn.content")
+    const reactionText = useTranslations("dashboard.explore.reactions")
     const router = useRouter()
     const content = useQueryContentSwr({ id: input.contentId })
     const module = useQueryModuleSwr({ id: input.moduleId })
+    const reactions = useQueryContentReactionsSwr(input.contentId)
+    const react = useMutateReactContentSwr()
+    const { view } = useLearnMobileView()
+    const [isMobile, setIsMobile] = useState(false)
+
+    useEffect(() => {
+        const query = window.matchMedia("(max-width: 767px)")
+        const sync = () => setIsMobile(query.matches)
+        sync()
+        query.addEventListener("change", sync)
+        return () => query.removeEventListener("change", sync)
+    }, [])
 
     const isPending = content.data === undefined && content.error === undefined
     const hasFailed = content.error !== undefined || (content.data === null && !isPending)
@@ -89,6 +106,10 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
         [contents],
     )
     const position = ordered.findIndex((sibling) => sibling.id === input.contentId)
+    const challenges = useMemo(
+        () => [...(content.data?.challenges ?? [])].sort((first, second) => first.orderIndex - second.orderIndex),
+        [content.data?.challenges],
+    )
 
     const openContent = (id: string) => {
         router.push(`/courses/${input.displayId}/learn/content/modules/${input.moduleId}/contents/${id}`)
@@ -113,7 +134,22 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                     reactionPrompt: t("reactionPrompt"),
                     nextTitle: t("nextTitle"),
                 },
+                mobileView: isMobile
+                    ? view === "contents" || view === "outline" ? view : "lesson"
+                    : undefined,
                 title: content.data?.title,
+                faces: [
+                    { id: "reading", label: t("pageLabel"), icon: "course" },
+                    {
+                        id: "challenge",
+                        label: challenges[0]?.title ?? t("nextTitle"),
+                        icon: "practice",
+                        disabled: challenges.length === 0,
+                        locked: isLocked,
+                    },
+                    { id: "ai", label: "AI", icon: "code", disabled: true, locked: isLocked },
+                ],
+                selectedFace: "reading",
                 body,
                 selectionHint: t("selectionHint"),
                 // A premium content and a failed request are told apart by which sentence they get,
@@ -121,6 +157,25 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                 noticeMessage: isLocked ? t("lockedMessage") : hasFailed ? t("failedMessage") : undefined,
                 noticeActionLabel: isLocked ? t("lockedAction") : hasFailed ? t("failedAction") : undefined,
                 outline,
+                nextSteps: [
+                    ...challenges.map((challenge) => ({ id: challenge.id, label: challenge.title })),
+                    ...(ordered[position + 1] === undefined
+                        ? []
+                        : [{ id: ordered[position + 1].id, label: ordered[position + 1].title }]),
+                ],
+                reactions: reactions.data === null || reactions.data === undefined ? undefined : {
+                    count: reactions.data.total,
+                    selected: reactions.data.myReaction,
+                    isPending: react.isMutating,
+                    labels: {
+                        [ReactionType.Like]: reactionText("like"),
+                        [ReactionType.Love]: reactionText("love"),
+                        [ReactionType.Haha]: reactionText("haha"),
+                        [ReactionType.Wow]: reactionText("wow"),
+                        [ReactionType.Sad]: reactionText("sad"),
+                        [ReactionType.Angry]: reactionText("angry"),
+                    },
+                },
                 modules: module.data === null || module.data === undefined ? [] : [{
                     id: module.data.id,
                     title: module.data.title,
@@ -142,7 +197,33 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                     if (target === undefined) return
                     openContent(target.id)
                 },
+                openContent,
                 goCourse: () => router.push(`/courses/${input.displayId}`),
+                goModule: () => router.push(`/courses/${input.displayId}/learn/content/modules/${input.moduleId}`),
+                act: isLocked
+                    ? () => router.push(`/courses/${input.displayId}`)
+                    : hasFailed
+                        ? () => {
+                            void Promise.all([
+                                content.mutate(),
+                                module.mutate(),
+                                reactions.mutate(),
+                            ])
+                        }
+                        : undefined,
+                selectReading: () => undefined,
+                selectChallenge: () => {
+                    const challenge = challenges[0]
+                    if (challenge === undefined) return
+                    router.push(`/courses/${input.displayId}/learn/content/modules/${input.moduleId}/contents/${input.contentId}/challenges/${challenge.id}`)
+                },
+                selectAi: () => undefined,
+                selectReaction: (type) => {
+                    void react.trigger({ contentId: input.contentId, type }).then((result) => {
+                        const next = result.data?.reactToContent?.data
+                        if (next !== null && next !== undefined) void reactions.mutate(next, { revalidate: false })
+                    })
+                },
             }}
         />
     )

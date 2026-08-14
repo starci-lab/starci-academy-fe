@@ -12,7 +12,14 @@ import { Heading } from "@/components/leaves/Heading"
 import { Pagination } from "@/components/leaves/Pagination"
 import { ReactionPicker, type ReactionLabels } from "@/components/leaves/ReactionPicker"
 import { Text } from "@/components/leaves/Text"
-import { contentTabRow, type ContentFaceTab, type ContentLanguageTab } from "@/components/blocks/learn/ContentTabRow/component"
+import {
+    contentTabRow,
+    type ContentFaceId,
+    type ContentFaceTab,
+    type ContentLanguageTab,
+} from "@/components/blocks/learn/ContentTabRow/component"
+import type { LearnMobileView } from "@/components/layouts/LearnShellLayout/component"
+import type { ReactionType } from "@/modules/api/graphql/queries/types/reactions"
 // Contract machinery through the candidate mirror, and only because `ContractKey` is closed over the
 // table on disk: the entries this page needs are proposals, not yet law. The mirror is the locked
 // `contracts/*` and `branches/Tree` copied verbatim with their imports repointed; on materialization
@@ -96,10 +103,12 @@ export type CourseLearnContentPageLabels = {
 /** What the reader draws. */
 export type CourseLearnContentPageData = {
     readonly labels: CourseLearnContentPageLabels
+    /** Undefined keeps the desktop three-column frame; a value selects exactly one mobile panel. */
+    readonly mobileView?: Extract<LearnMobileView, "contents" | "lesson" | "outline">
     readonly title?: string
     /** The faces this content carries. One face means the bar states the obvious, so it is absent. */
     readonly faces?: ReadonlyArray<ContentFace>
-    readonly selectedFace?: string
+    readonly selectedFace?: ContentFaceId
     /** The languages the examples can be read in, and which is open. */
     readonly languagesLabel?: string
     readonly languages?: ReadonlyArray<ContentLanguageTab>
@@ -123,6 +132,8 @@ export type CourseLearnContentPageData = {
     /** How many readers have reacted, and the six names the control announces. */
     readonly reactions?: {
         readonly count: number
+        readonly selected?: ReactionType | null
+        readonly isPending?: boolean
         readonly labels: ReactionLabels
     }
     /** How far into the course the reader is, drawn at the top of the contents panel. */
@@ -163,12 +174,16 @@ export type ContentOutlineEntry = {
 
 /** What the reader reports. */
 export type CourseLearnContentPageActions = {
-    readonly selectFace?: (face: string) => void
+    readonly selectReading?: () => void
+    readonly selectChallenge?: () => void
+    readonly selectAi?: () => void
     readonly selectLanguage?: (language: string) => void
     readonly changePage?: (page: number) => void
+    readonly selectReaction?: (reaction: ReactionType | null) => void
+    readonly openContent?: (contentId: string) => void
     readonly act?: () => void
     readonly goCourse?: () => void
-    readonly [key: string]: ((...args: Array<never>) => void) | undefined
+    readonly goModule?: () => void
 }
 
 /** Props for {@link _CourseLearnContentPage}. */
@@ -236,9 +251,10 @@ export const _CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                     steps: [
                         { id: "course", label: labels.navCourse },
                         { id: "module", label: labels.navModule },
+                        { id: "content", label: input.props.title ?? "" },
                     ],
                 }}
-                on={{ course: input.on?.goCourse }}
+                on={{ course: input.on?.goCourse, module: input.on?.goModule }}
             />
         )),
         title: defineLeafComponent("heading", {}, () => (
@@ -297,8 +313,11 @@ export const _CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                                 props={{
                                     label: labels.reactionsLabel,
                                     count: input.props.reactions?.count ?? 0,
+                                    selected: input.props.reactions?.selected,
+                                    isPending: input.props.reactions?.isPending,
                                     labels: input.props.reactions?.labels ?? ({} as ReactionLabels),
                                 }}
+                                on={{ select: input.on?.selectReaction }}
                             />
                         )),
                     })}
@@ -399,6 +418,7 @@ export const _CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                         isComplete: content.isComplete,
                         isCurrent: content.isCurrent,
                     }}
+                    on={{ press: () => input.on?.openContent?.(content.id) }}
                     isLoading={isLoading}
                 />
             ))),
@@ -438,11 +458,26 @@ export const _CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                     languages: input.props.languages,
                     selectedLanguage: input.props.selectedLanguage,
                 },
-                { selectFace: input.on?.selectFace, selectLanguage: input.on?.selectLanguage },
+                {
+                    selectReading: input.on?.selectReading,
+                    selectChallenge: input.on?.selectChallenge,
+                    selectAi: input.on?.selectAi,
+                    selectLanguage: input.on?.selectLanguage,
+                },
             ),
         } : {}),
         body,
     })
+
+    if (input.props.mobileView === "contents") {
+        return <Tree contract="content-map-panel" render={contents} />
+    }
+    if (input.props.mobileView === "lesson") {
+        return <Tree contract="learn-content-page" render={reader} />
+    }
+    if (input.props.mobileView === "outline") {
+        return <Tree contract="content-outline-rail" render={outline} />
+    }
 
     return (
         <Tree

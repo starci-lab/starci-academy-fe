@@ -57,6 +57,15 @@ export type LayoutClassName =
     | "md:[&>*:last-child]:min-w-0" | "md:[&>*:last-child]:grow"
     | "md:[&>*:first-child]:overflow-y-auto"
     | "md:[&>*:nth-child(2)]:min-w-0" | "md:[&>*:nth-child(2)]:grow"
+    | "[&>*]:min-w-0" | "[&>*]:grow"
+    | "md:[&>[data-node=learn-spine-column]]:w-72"
+    | "md:[&>[data-node=learn-spine-column]]:grow-0"
+    | "md:[&>[data-node=learn-spine-column]]:shrink-0"
+    | "md:[&>[data-node=learn-spine-column]]:sticky"
+    | "md:[&>[data-node=learn-spine-column]]:top-rail"
+    | "md:[&>[data-node=learn-spine-column]]:self-start"
+    | "md:[&>[data-node=learn-spine-column]]:max-h-rail"
+    | "md:[&>[data-node=learn-spine-column]]:overflow-y-auto"
     | "md:[&>*:first-child]:sticky" | "md:[&>*:first-child]:top-rail"
     | "md:[&>*:first-child]:self-start" | "md:[&>*:first-child]:max-h-rail"
     | "md:[&>*:first-child]:overflow-y-auto"
@@ -253,6 +262,19 @@ const buildContracts = <const T extends { readonly [K in keyof T]: ContractSpec 
  * constraining anything, and its `why` decays into a label the moment a second screen uses it.
  */
 export const CONTRACTS = buildContracts({
+    "course-learn-today-page": {
+        classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            header: { contract: "page-header-stack" },
+            subtitle: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            primary: { contract: "resume-item-card", optional: true },
+            secondary: { contract: "resume-card-grid", optional: true },
+            course: { contract: "resume-item-card", optional: true },
+            progress: { contract: "label-fact-over-progress", optional: true },
+            notice: { composite: "empty-notice", optional: true },
+        },
+        why: "Today gives the learner one deterministic next move before any alternatives. Course and progress are alternate mobile compositions of the same route, so each owns a named optional slot instead of mutating the URL or drawing a second page.",
+    },
     "learn-mobile-tab-bar": {
         host: "nav",
         classes: ["sticky", "bottom-0", "z-40", "flex", "w-full", "min-w-0", "flex-row", "items-center", "justify-between", "gap-2", "border-t", "border-separator", "bg-background", "px-4", "py-3", "md:hidden"],
@@ -264,16 +286,19 @@ export const CONTRACTS = buildContracts({
     "learn-shell-frame": {
         classes: [
             "flex", "min-h-screen", "w-full", "min-w-0", "flex-col", "items-start",
-            "[&>*:nth-child(2)]:min-w-0", "[&>*:nth-child(2)]:grow",
+            "[&>*]:min-w-0", "[&>*]:grow",
             "md:flex-row", "md:items-start",
-            "md:[&>*:first-child]:w-72", "md:[&>*:first-child]:shrink-0",
-            "md:[&>*:first-child]:sticky", "md:[&>*:first-child]:top-rail",
-            "md:[&>*:first-child]:self-start", "md:[&>*:first-child]:max-h-rail",
-            "md:[&>*:first-child]:overflow-y-auto",
-            "md:[&>*:nth-child(2)]:min-w-0", "md:[&>*:nth-child(2)]:grow",
+            "md:[&>[data-node=learn-spine-column]]:w-72",
+            "md:[&>[data-node=learn-spine-column]]:grow-0",
+            "md:[&>[data-node=learn-spine-column]]:shrink-0",
+            "md:[&>[data-node=learn-spine-column]]:sticky",
+            "md:[&>[data-node=learn-spine-column]]:top-rail",
+            "md:[&>[data-node=learn-spine-column]]:self-start",
+            "md:[&>[data-node=learn-spine-column]]:max-h-rail",
+            "md:[&>[data-node=learn-spine-column]]:overflow-y-auto",
         ],
         children: {
-            spine: { contract: "learn-spine-column" },
+            spine: { contract: "learn-spine-column", optional: true },
             body: { leaf: "page" },
             bar: { contract: "learn-mobile-tab-bar", optional: true },
         },
@@ -311,6 +336,206 @@ export const CONTRACTS = buildContracts({
             progress: { composite: "labelled-progress-row" },
         },
         why: "Continuing is one press, so the whole card is the target and its two lines are one identity: what this is, then how far in. It keeps a surface where the groups below have none, because it is the only thing in the rail that acts rather than navigates.",
+    },
+    "personal-project-workspace-frame": {
+        classes: [
+            "flex", "min-h-screen", "w-full", "min-w-0", "flex-col", "items-start",
+            "md:flex-row", "md:items-start", "md:gap-8",
+            "md:[&>*:first-child]:w-72", "md:[&>*:first-child]:shrink-0",
+            "[&>*:last-child]:min-w-0", "[&>*:last-child]:grow",
+        ],
+        children: {
+            milestone: { leaf: "nav-link", props: { kind: "section" }, repeats: true, restingCount: 4 },
+            body: { leaf: "page" },
+        },
+        why: "The milestone run persists beside dashboard, task and result routes so progress and the next available task remain legible while only the routed workspace body changes.",
+    },
+    "course-personal-project-task-page": {
+        classes: ["mx-auto", "flex", "w-full", "max-w-app-lg", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            header: { contract: "centred-title-pair" },
+            controls: { contract: "stacked-peer-controls" },
+        },
+        why: "A task brief is read before its score constraint and one submission action, so the controls remain one bounded vertical decision directly below the title rather than entering a generic page body run.",
+    },
+    "course-personal-project-result-page": {
+        classes: ["mx-auto", "flex", "w-full", "max-w-app-lg", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            header: { contract: "centred-title-pair" },
+            attempts: { contract: "stacked-peer-controls" },
+            feedback: { contract: "stacked-peer-controls", optional: true },
+            action: { leaf: "button", optional: true },
+        },
+        why: "Attempt history is the result's primary evidence, feedback is its optional explanation, and retry closes the reading order as a page action instead of being repeated inside either evidence group.",
+    },
+    "course-personal-project-page": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4", "px-6", "py-6"],
+        children: {
+            title: { leaf: "heading" },
+            description: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            progress: { leaf: "progress" },
+            fact: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            task: { leaf: "nav-link", props: { kind: "section" }, repeats: true, restingCount: 4 },
+            notice: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+            retry: { leaf: "button", optional: true },
+        },
+        why: "The capstone overview reads from identity through completion into its ordered tasks, with empty and failed notices occupying the same sentence rather than opening a second page shape.",
+    },
+    "course-foundations-page": {
+        host: "main",
+        classes: ["mx-auto", "flex", "w-full", "max-w-app-lg", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            header: { contract: "page-header-stack" },
+            description: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            search: { leaf: "search-box" },
+            category: { leaf: "nav-link", props: { kind: "section" }, repeats: true, restingCount: 4, optional: true },
+            notice: { composite: "empty-notice", optional: true },
+        },
+        why: "The foundation catalog introduces why the prerequisite library exists before the query and its live category results, while empty and failed outcomes replace only the result run.",
+    },
+    "course-foundation-category-page": {
+        host: "main",
+        classes: ["mx-auto", "flex", "w-full", "max-w-app-lg", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            header: { contract: "page-header-stack" },
+            search: { leaf: "search-box" },
+            resource: { leaf: "nav-link", props: { kind: "section" }, repeats: true, restingCount: 6, optional: true },
+            notice: { composite: "empty-notice", optional: true },
+        },
+        why: "One category is a searchable reading list, so its title and query precede one ordered run of backend resources and the settled notice occupies that run when no resource can be shown.",
+    },
+    "course-foundation-resource-page": {
+        host: "main",
+        classes: ["mx-auto", "flex", "w-full", "max-w-app-md", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            back: { leaf: "button" },
+            header: { contract: "page-header-stack", optional: true },
+            description: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+            body: { leaf: "article", optional: true },
+            practice: { leaf: "button", optional: true },
+            notice: { composite: "empty-notice", optional: true },
+        },
+        why: "A prerequisite resource is read from its server title through its authored body before the related practice action, while back navigation remains available across ready and recovery states.",
+    },
+    "playground-session-frame": {
+        classes: ["flex", "min-h-screen", "w-full", "min-w-0", "flex-col"],
+        children: {
+            surface: { leaf: "page", optional: true },
+            notice: { composite: "empty-notice", optional: true },
+        },
+        why: "The slug layout keeps one full-width frame mounted while setup and session surfaces change beneath the same pairing and socket owner, and only a load failure replaces that routed surface.",
+    },
+    "course-playground-page": {
+        host: "main",
+        classes: ["mx-auto", "flex", "w-full", "max-w-app-lg", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            header: { contract: "page-header-stack" },
+            description: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            playground: { leaf: "nav-link", props: { kind: "section" }, repeats: true, restingCount: 4, optional: true },
+            notice: { composite: "empty-notice", optional: true },
+        },
+        why: "The live lab catalog explains server verification once, then presents each backend playground as a peer destination; pending, empty and failed states keep the same page identity.",
+    },
+    "course-playground-setup-page": {
+        host: "main",
+        classes: ["mx-auto", "flex", "w-full", "max-w-app-md", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            header: { contract: "page-header-stack" },
+            description: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            preparationTitle: { leaf: "heading" },
+            preparationStep: { leaf: "text", props: { size: "sm" }, repeats: true, restingCount: 3 },
+            pairingLabel: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
+            pairingCode: { leaf: "text", props: { size: "sm", weight: "semibold" }, optional: true },
+            status: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+            action: { leaf: "button", repeats: true, restingCount: 1, optional: true },
+            notice: { composite: "empty-notice", optional: true },
+        },
+        why: "Preparation is read before a session is created; once the server returns a pairing code, that identity and agent readiness replace the create action before entry becomes available.",
+    },
+    "course-playground-session-page": {
+        host: "main",
+        classes: ["flex", "min-h-screen", "w-full", "min-w-0", "flex-col", "gap-6", "bg-background", "px-6", "py-6"],
+        children: {
+            leave: { leaf: "button" },
+            connection: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            title: { leaf: "heading" },
+            step: { leaf: "nav-link", props: { kind: "section" }, repeats: true, restingCount: 4 },
+            body: { leaf: "article", optional: true },
+            command: { leaf: "code-block", optional: true },
+            hint: { leaf: "text", props: { size: "sm" }, optional: true },
+            submit: { leaf: "button", optional: true },
+            notice: { composite: "empty-notice", optional: true },
+        },
+        why: "The persistent live workspace keeps connection state and server-owned steps ahead of the selected instruction; verification is one action and completion or failure replaces the instruction without inventing client progress.",
+    },
+    "course-mind-map-page": {
+        host: "main",
+        classes: ["mx-auto", "flex", "w-full", "max-w-app-lg", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            header: { contract: "page-header-stack" },
+            description: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            search: { leaf: "search-box" },
+            graphFact: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            node: { leaf: "nav-link", props: { kind: "section" }, repeats: true, restingCount: 6, optional: true },
+            selection: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+            open: { leaf: "button", optional: true },
+            notice: { composite: "empty-notice", optional: true },
+        },
+        why: "The concept map keeps search and graph scale ahead of one selectable backend node field, then exposes an open action only for the selected node whose linked entity resolves to a real course route.",
+    },
+    "course-mock-interview-setup-page": {
+        host: "main",
+        classes: ["mx-auto", "flex", "w-full", "max-w-md", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            header: { contract: "centred-title-pair" },
+            levelLabel: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            level: { leaf: "button", repeats: true, restingCount: 3 },
+            modeLabel: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            mode: { leaf: "button", repeats: true, restingCount: 2 },
+            status: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+            action: { leaf: "button", repeats: true, restingCount: 2 },
+        },
+        why: "The green room asks for seniority before format, then reports the persisted session state before either starting or resuming, so each decision keeps a named place in one narrow reading column.",
+    },
+    "course-mock-interview-session-page": {
+        host: "main",
+        classes: ["flex", "min-h-screen", "w-full", "min-w-0", "flex-col", "gap-6", "bg-background", "px-6", "py-6"],
+        children: {
+            header: { contract: "centred-title-pair" },
+            progress: { composite: "labelled-progress-row" },
+            remaining: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
+            notice: { leaf: "text", props: { size: "sm" } },
+            turn: { contract: "centred-title-pair", repeats: true, restingCount: 3 },
+            streaming: { contract: "centred-title-pair", optional: true },
+            answerLabel: { leaf: "text", props: { size: "sm", weight: "medium" } },
+            answer: { leaf: "textarea" },
+            action: { leaf: "button", repeats: true, restingCount: 3 },
+            workspaceTitle: { leaf: "heading" },
+            workspace: { leaf: ["code-block", "text"] },
+        },
+        why: "The live room reads from the current prompt and server clock through the persisted conversation into one answer decision, with the question workspace following as supporting evidence rather than becoming a second untyped page frame.",
+    },
+    "course-mock-interview-result-page": {
+        host: "main",
+        classes: ["mx-auto", "flex", "w-full", "max-w-app-lg", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            header: { contract: "centred-title-pair" },
+            notice: { composite: "empty-notice", optional: true },
+            grading: { leaf: "progress", optional: true },
+            scoreLabel: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
+            score: { leaf: "heading", optional: true },
+            verdict: { contract: "centred-title-pair", optional: true },
+            phaseTitle: { leaf: "heading", optional: true },
+            phase: { composite: "labelled-progress-row", repeats: true, restingCount: 3, optional: true },
+            strengthsTitle: { leaf: "heading", optional: true },
+            strength: { leaf: "text", props: { size: "sm" }, repeats: true, restingCount: 3, optional: true },
+            gapsTitle: { leaf: "heading", optional: true },
+            gap: { leaf: "text", props: { size: "sm" }, repeats: true, restingCount: 3, optional: true },
+            reviewsTitle: { leaf: "heading", optional: true },
+            review: { composite: "evidence-row", repeats: true, restingCount: 3, optional: true },
+            action: { leaf: "button", repeats: true, restingCount: 2 },
+        },
+        why: "A persisted debrief moves from outcome to rubric, then from general strengths and gaps to question evidence, and closes with the next interview action so grading and recovery replace the evidence without changing the page owner.",
     },
     "nav-over-body-page": {
         classes: ["flex", "min-h-screen", "w-full", "flex-col"],

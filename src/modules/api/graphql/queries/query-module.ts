@@ -35,6 +35,23 @@ const query1 = gql`
                     minutesRead
                     isPremium
                     orderIndex
+                    challenges {
+                        id
+                        displayId
+                        title
+                        description
+                        score
+                        difficulty
+                        orderIndex
+                        hint
+                        submissions {
+                            id
+                            title
+                            description
+                            score
+                            sortIndex
+                        }
+                    }
                 }
             }
         }

@@ -17,8 +17,10 @@ optional reading, it is where the last session lost the most time.
 Restore points, newest last: `7aa4ba0` → `270fad8` → `bc5a239`.
 
 **Local stack.** Backend: `npm run sync` → `npm run compose` → `npm run start:dev`. Postgres 5432,
-Keycloak 8089, API 3001. Frontend: `npm run dev` on **port 3000** — Keycloak's `academy-web` client
-whitelists `http://localhost:3000/authentication` and nothing else, so a different port produces
+Keycloak 8089, API 3001. Frontend: `npm run dev` on **`http://localhost:3000`**; the repository
+scripts explicitly lock both hostname and port. Do not open the live app through `127.0.0.1`:
+Keycloak's `academy-web` client whitelists `http://localhost:3000/authentication` and nothing else,
+so a different hostname or port can produce CORS, cookie/storage or
 `Invalid parameter: redirect_uri`. That whitelist lives only in the running Keycloak; it is not
 seeded from the repo and is lost on reprovision.
 

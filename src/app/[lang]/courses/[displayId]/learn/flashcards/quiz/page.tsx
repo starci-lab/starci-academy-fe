@@ -1,10 +1,13 @@
-import { FlashcardsSurface } from "../_components"
+import { CourseFlashcardsQuizPage } from "@/components/pages/CourseFlashcardsQuizPage"
 
-type PageProps = { params: Promise<{ lang: string, displayId: string }> }
-
-const Page = async ({ params }: PageProps) => {
-    const { lang, displayId } = await params
-    return <FlashcardsSurface lang={lang} displayId={displayId} mode="quiz" />
+interface FlashcardsQuizRouteProps {
+    readonly params: Promise<{ readonly displayId: string }>
 }
 
-export default Page
+/** Mounts the connected quiz setup without route-local product drawing. */
+const FlashcardsQuizRoute = async ({ params }: FlashcardsQuizRouteProps) => {
+    const { displayId } = await params
+    return <CourseFlashcardsQuizPage displayId={displayId} />
+}
+
+export default FlashcardsQuizRoute

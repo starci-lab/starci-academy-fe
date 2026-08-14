@@ -21,6 +21,8 @@ export interface ContentSibling {
     isPremium: boolean
     /** Declaration order, so the module reads in the sequence its author set. */
     orderIndex: number
+    /** Challenges attached to this lesson, in authored order. */
+    challenges?: ReadonlyArray<ContentChallenge>
 }
 
 /** The module a content belongs to, selected only as far as the map needs it. */
@@ -31,6 +33,28 @@ export interface ContentModule {
     title: string
     /** How many contents the module holds, for the count on its summary line. */
     numContents: number
+}
+
+/** One deliverable accepted by a content challenge. */
+export interface ContentChallengeSubmission {
+    readonly id: string
+    readonly title: string
+    readonly description: string | null
+    readonly score: number
+    readonly sortIndex: number
+}
+
+/** One challenge face attached to the content returned by the reader query. */
+export interface ContentChallenge {
+    readonly id: string
+    readonly displayId: string
+    readonly title: string
+    readonly description: string
+    readonly score: number
+    readonly difficulty: "easy" | "medium" | "hard" | "insane" | "expert"
+    readonly orderIndex: number
+    readonly hint: string | null
+    readonly submissions: ReadonlyArray<ContentChallengeSubmission>
 }
 
 /** One content, read. */
@@ -60,6 +84,8 @@ export interface ContentDetail {
     orderIndex: number
     /** The module this content belongs to. */
     module: ContentModule
+    /** The finite challenge faces the reader may open from this lesson. */
+    challenges?: ReadonlyArray<ContentChallenge>
 }
 
 /** What the reader must say about the content it wants. Exactly one of the two. */
