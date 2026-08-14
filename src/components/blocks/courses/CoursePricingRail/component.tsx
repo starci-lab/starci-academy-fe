@@ -140,8 +140,8 @@ export const _CoursePricingRail = (input: CoursePricingRailProps) => {
                             <Text props={{ content: input.props.scarcityLabel, size: "xs" }} />
                         )),
                 }),
-                ladder: phases.length === 0 ? undefined : defineContractComponent("pricing-phase-ladder", {
-                    phase: phases.map((phase) => defineContractComponent("pricing-phase-row", {
+                ladder: phases.length === 0 ? undefined : defineContractComponent("ordered-step-ladder", {
+                    step: phases.map((phase) => defineContractComponent("ordered-step-row", {
                         // The mark means "this is the open phase", so only the open phase carries
                         // one. StatusDot's tones are all affirmative and it requires an accessible
                         // name, so there is no honest way to draw a dot for a phase that is not
