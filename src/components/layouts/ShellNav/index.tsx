@@ -107,7 +107,11 @@ export const ShellNav = () => {
     const routes: ReadonlyArray<ShellNavRoute> = ROUTES.map((route) => ({
         id: route.id,
         label: t(`routes.${route.id}`),
-        isCurrent: route.id === "dashboard" ? pathname.startsWith("/dashboard") : pathname === route.path,
+        // A route is current on its own path AND anywhere beneath it: a course detail page is
+        // still somewhere inside Courses, and a navbar that forgets that leaves the reader with
+        // no lit destination at all. The trailing slash is what keeps `/contact` from lighting up
+        // for a hypothetical `/contacts`.
+        isCurrent: pathname === route.path || pathname.startsWith(`${route.path}/`),
     }))
     const dashboardTabs: ReadonlyArray<ShellNavTab> | undefined = pathname.startsWith("/dashboard")
         ? DASHBOARD_TABS.map((tab) => ({

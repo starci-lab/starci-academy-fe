@@ -90,7 +90,9 @@ describe("_AuthenticationPanel", () => {
         const { container } = render(<_AuthenticationPanel {...signUpProps} />)
         const credentials = container.querySelector("[data-node='stacked-peer-controls']")
 
-        expect(credentials?.className).toContain("gap-3")
+        // The controls are small blocks of one function inside one block, so their seam
+        // out-ranks the gap-3 each of them uses between its own label and control.
+        expect(credentials?.className).toContain("gap-4")
         expect(credentials?.className).not.toContain("gap-2")
         expect(container.querySelector("[data-node='label-field-hint']")?.className).toContain("gap-3")
     })

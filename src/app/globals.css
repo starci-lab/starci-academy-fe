@@ -38,12 +38,22 @@
     --container-app-xl: 80rem;
 
     /*
-     * How tall a pinned rail may grow before it scrolls on its own. The viewport minus the space
-     * it is pinned below and the same space again beneath it, so a rail longer than the screen
-     * scrolls INSIDE itself and its last shortcut stays reachable - without this it grows past
-     * the bottom edge and the end of it becomes unreachable while the rail is stuck.
+     * Where a pinned rail comes to rest, and how tall it may grow before it scrolls on its own.
+     *
+     * The rest position is NOT the top of the viewport. The navbar is itself sticky at `top-0` and
+     * stands 4rem tall, so a rail pinned any higher than that slides UNDER it and loses its own
+     * head - the reader scrolls down and the price the rail exists to state is the first thing to
+     * go. So the pin is the navbar's height plus the same 1.5rem breathing the page uses
+     * elsewhere.
+     *
+     * The height follows from the pin: the viewport minus the space above it and the same space
+     * again beneath, so a rail longer than the screen scrolls INSIDE itself and its last action
+     * stays reachable. Without this it grows past the bottom edge and the end of it becomes
+     * unreachable while the rail is stuck. The two values move together - changing the pin without
+     * the height is what leaves a rail either clipped at the top or unreachable at the bottom.
      */
-    --max-height-rail: calc(100dvh - 3rem);
+    --top-rail: 5.5rem;
+    --max-height-rail: calc(100dvh - 7rem);
 
     /*
      * How tall an embedded document stands. A CV is read as a PAGE, not as a panel: it wants most
