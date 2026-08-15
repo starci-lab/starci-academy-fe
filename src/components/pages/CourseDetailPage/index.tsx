@@ -142,192 +142,192 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
 
     return (
         <>
-        <_CourseDetailPage
-            state="ready"
-            props={{
-                labels,
-                selectedSection,
-                title: course.title,
-                tagline: course.description,
-                stats: [
-                    {
-                        id: "learners",
-                        label: t("learnerSignalLabel"),
-                        value: t("statLearners", { count: course.enrollmentCount }),
-                    },
-                    {
-                        id: "modules",
-                        label: t("moduleSignalLabel"),
-                        value: t("statModules", { count: modules.length }),
-                    },
-                    // Counted from the contents themselves, NOT from `numContents`. The served
-                    // schema exposes that field and returns zero for it on this query path, so the
-                    // chip claimed no lessons beside a curriculum listing twenty-three modules.
-                    // The rows are already selected for the hours chip; counting them is the same
-                    // source answering the same question.
-                    {
-                        id: "hours",
-                        label: t("hourSignalLabel"),
-                        value: t("statHours", { count: Math.round(sumContents(modules, (content) => content.minutesRead) / 60) }),
-                    },
-                    {
-                        id: "contents",
-                        label: t("contentSignalLabel"),
-                        value: t("statContents", { count: sumContents(modules, () => 1) }),
-                    },
-                    {
-                        id: "challenges",
-                        label: t("challengeSignalLabel"),
-                        value: t("statChallenges", { count: sumContents(modules, (content) => content.numChallenges) }),
-                    },
-                    {
-                        id: "rating",
-                        label: t("reviewCount", { count: reviewQuery.data?.total ?? 0 }),
-                        value: reviewQuery.data?.averageScore?.toFixed(1) ?? "—",
-                    },
-                ],
-                valueProps: byOrder(course.valuePropositions ?? []).map((proposition) => proposition.text),
-                faqs: byOrder(course.qnas ?? []).map((faq) => ({
-                    id: faq.id,
-                    question: faq.question,
-                    answer: faq.answer,
-                })),
-                // Ordered by the backend and read that way here: a learner who lacks the first
-                // requirement cannot judge the second, so arrival order is not good enough.
-                // The mean and the total describe the WHOLE population and come from the
-                // projection; the nodes are one page. Deriving the mean from the nodes would
-                // answer a different question and change on every page turn.
-                averageScore: reviewQuery.data?.averageScore,
-                reviewTotal: reviewQuery.data?.total,
-                reviews: (reviewQuery.data?.nodes ?? []).map((row) => ({
-                    id: row.id,
-                    // A UUID is storage identity, not a public learner name. Until the public
-                    // author projection is available, use a localized neutral label.
-                    author: t("reviewsAnonymous"),
-                    score: row.score,
-                    body: row.body ?? undefined,
-                })),
-                prerequisites: byOrder(course.prerequisites ?? []).map((row, index) => ({
-                    id: `prerequisite-${index + 1}`,
-                    requirement: row.text,
-                })),
-                modules: modules.map((module) => {
-                    const previews = byOrder(module.previewContents ?? [])
-                    return {
-                        id: module.id,
-                        title: module.title,
-                        level: module.contentTier,
-                        levelLabel: t(`tier.${module.contentTier}`),
-                        previewLabel: previews.length === 0 ? undefined : t("previewCount", { count: previews.length }),
-                        // A preview bullet IS the thing the disclosure reveals, and every one of
-                        // them is previewable by definition - that is what makes it a preview.
-                        lessons: previews.map((preview) => ({ id: preview.id, title: preview.text, isPreview: true })),
-                    }
-                }),
-                rail: {
-                    intent: {
-                        purchaseTitle: t("purchaseTitle"),
-                        purchaseDescription: t("purchaseDescription"),
-                        trialTitle: t("trialTitle"),
-                        trialDescription: t("trialDescription"),
-                        phaseDisclosureLabel: t("phaseDisclosureLabel"),
-                    },
-                    coverUrl: course.coverImageUrl ?? null,
+            <_CourseDetailPage
+                state="ready"
+                props={{
+                    labels,
+                    selectedSection,
                     title: course.title,
-                    price: money.format(payable),
-                    originalPrice: hasDiscount ? money.format(listPrice) : undefined,
-                    discountLabel: hasDiscount ? `−${discountPercent}%` : undefined,
-                    savingsLabel: hasDiscount ? t("savings", { amount: money.format(listPrice - payable) }) : undefined,
-                    priceDetailLabel: tCatalog("priceDetail"),
-                    scarcityLabel: openPhase === undefined || openPhase.slotAvailable <= 0
-                        ? undefined
-                        : t("scarcity", { count: openPhase.slotAvailable, phase: t(`phase.${openPhase.phase}`) }),
-                    phases: phases.map((phase) => ({
-                        id: phase.id,
-                        name: t(`phase.${phase.phase}`),
-                        // The OPEN phase shows that it is open rather than repeating its price -
-                        // the price is already the headline above, and a ladder that restates it
-                        // reads as two prices.
-                        value: phase.phase === course.currentPhase ? t("phaseOpen") : money.format(phase.price),
-                        isActive: phase.phase === course.currentPhase,
+                    tagline: course.description,
+                    stats: [
+                        {
+                            id: "learners",
+                            label: t("learnerSignalLabel"),
+                            value: t("statLearners", { count: course.enrollmentCount }),
+                        },
+                        {
+                            id: "modules",
+                            label: t("moduleSignalLabel"),
+                            value: t("statModules", { count: modules.length }),
+                        },
+                        // Counted from the contents themselves, NOT from `numContents`. The served
+                        // schema exposes that field and returns zero for it on this query path, so the
+                        // chip claimed no lessons beside a curriculum listing twenty-three modules.
+                        // The rows are already selected for the hours chip; counting them is the same
+                        // source answering the same question.
+                        {
+                            id: "hours",
+                            label: t("hourSignalLabel"),
+                            value: t("statHours", { count: Math.round(sumContents(modules, (content) => content.minutesRead) / 60) }),
+                        },
+                        {
+                            id: "contents",
+                            label: t("contentSignalLabel"),
+                            value: t("statContents", { count: sumContents(modules, () => 1) }),
+                        },
+                        {
+                            id: "challenges",
+                            label: t("challengeSignalLabel"),
+                            value: t("statChallenges", { count: sumContents(modules, (content) => content.numChallenges) }),
+                        },
+                        {
+                            id: "rating",
+                            label: t("reviewCount", { count: reviewQuery.data?.total ?? 0 }),
+                            value: reviewQuery.data?.averageScore?.toFixed(1) ?? "—",
+                        },
+                    ],
+                    valueProps: byOrder(course.valuePropositions ?? []).map((proposition) => proposition.text),
+                    faqs: byOrder(course.qnas ?? []).map((faq) => ({
+                        id: faq.id,
+                        question: faq.question,
+                        answer: faq.answer,
                     })),
-                    // An enrolled viewer continues; everyone else enrols. `isEnrolled` is null for a
-                    // guest, which is neither - and a guest is asked to enrol, because that is the
-                    // action the page can actually offer them.
-                    ctaLabel: course.isEnrolled === true ? t("continue") : t("enroll"),
-                    trialLabel: course.isEnrolled === true ? undefined : tCourses("trial"),
-                    cartLabel: course.isEnrolled === true || !isPaid
-                        ? undefined
-                        : isInCart ? tCart("remove") : tCatalog("addToCart"),
-                    isInCart,
-                    enrolmentLabel: t("enrolled", { count: course.enrollmentCount }),
-                },
-                railState: pricePreview.isLoading
-                    ? "price-pending"
-                    : checkout.isMutating
-                    ? "checking-out"
-                    : trial.isMutating
-                        ? "trialing"
-                        : adding.isMutating || removing.isMutating
-                            ? "adding"
-                            : "ready",
-            }}
-            on={{
-                act: () => {
-                    if (course.isEnrolled === true) {
-                        router.push(`/courses/${course.displayId}/learn/content`)
-                        return
-                    }
-                    if (sessionToken === undefined) {
-                        router.push("/authentication")
-                        return
-                    }
-                    const here = window.location.href
-                    void checkout.trigger({
-                        courseIds: [course.id],
-                        paymentType: "payos",
-                        returnUrl: here,
-                        cancelUrl: here,
-                    }).then((result) => {
-                        const url = result?.data?.coursesCheckout?.data?.checkoutUrl
-                        if (typeof url === "string" && url !== "") window.location.assign(url)
-                    })
-                },
-                trial: () => {
-                    if (sessionToken === undefined) {
-                        router.push("/authentication")
-                        return
-                    }
-                    void trial.trigger({ courseId: course.id }).then((result) => {
-                        if (result?.data?.startTrial?.success !== true) return
-                        router.push(`/courses/${course.displayId}/learn/content`)
-                    }).catch(() => undefined)
-                },
-                addToCart: () => {
-                    if (sessionToken === undefined) {
-                        router.push("/authentication")
-                        return
-                    }
-                    const operation = isInCart
-                        ? removing.trigger({ courseId: course.id }).then((result) => result?.data?.removeFromCart?.success)
-                        : adding.trigger({ courseId: course.id }).then((result) => result?.data?.addToCart?.success)
-                    void operation.then((success) => {
-                        if (success !== true) return
-                        void mutate((key) => Array.isArray(key) && key[0] === QUERY_MY_CART_SWR_KEY[0])
-                    })
-                },
-                openPriceDetail: () => { setIsPriceDetailOpen(true) },
-                navigateHome: () => { router.push("/") },
-                navigateCourses: () => { router.push("/courses") },
-                selectSection,
-            }}
-        />
-        <CoursePriceOverlay
-            courseId={course.id}
-            title={course.title}
-            isOpen={isPriceDetailOpen}
-            onDismiss={() => { setIsPriceDetailOpen(false) }}
-        />
+                    // Ordered by the backend and read that way here: a learner who lacks the first
+                    // requirement cannot judge the second, so arrival order is not good enough.
+                    // The mean and the total describe the WHOLE population and come from the
+                    // projection; the nodes are one page. Deriving the mean from the nodes would
+                    // answer a different question and change on every page turn.
+                    averageScore: reviewQuery.data?.averageScore,
+                    reviewTotal: reviewQuery.data?.total,
+                    reviews: (reviewQuery.data?.nodes ?? []).map((row) => ({
+                        id: row.id,
+                        // A UUID is storage identity, not a public learner name. Until the public
+                        // author projection is available, use a localized neutral label.
+                        author: t("reviewsAnonymous"),
+                        score: row.score,
+                        body: row.body ?? undefined,
+                    })),
+                    prerequisites: byOrder(course.prerequisites ?? []).map((row, index) => ({
+                        id: `prerequisite-${index + 1}`,
+                        requirement: row.text,
+                    })),
+                    modules: modules.map((module) => {
+                        const previews = byOrder(module.previewContents ?? [])
+                        return {
+                            id: module.id,
+                            title: module.title,
+                            level: module.contentTier,
+                            levelLabel: t(`tier.${module.contentTier}`),
+                            previewLabel: previews.length === 0 ? undefined : t("previewCount", { count: previews.length }),
+                            // A preview bullet IS the thing the disclosure reveals, and every one of
+                            // them is previewable by definition - that is what makes it a preview.
+                            lessons: previews.map((preview) => ({ id: preview.id, title: preview.text, isPreview: true })),
+                        }
+                    }),
+                    rail: {
+                        intent: {
+                            purchaseTitle: t("purchaseTitle"),
+                            purchaseDescription: t("purchaseDescription"),
+                            trialTitle: t("trialTitle"),
+                            trialDescription: t("trialDescription"),
+                            phaseDisclosureLabel: t("phaseDisclosureLabel"),
+                        },
+                        coverUrl: course.coverImageUrl ?? null,
+                        title: course.title,
+                        price: money.format(payable),
+                        originalPrice: hasDiscount ? money.format(listPrice) : undefined,
+                        discountLabel: hasDiscount ? `−${discountPercent}%` : undefined,
+                        savingsLabel: hasDiscount ? t("savings", { amount: money.format(listPrice - payable) }) : undefined,
+                        priceDetailLabel: tCatalog("priceDetail"),
+                        scarcityLabel: openPhase === undefined || openPhase.slotAvailable <= 0
+                            ? undefined
+                            : t("scarcity", { count: openPhase.slotAvailable, phase: t(`phase.${openPhase.phase}`) }),
+                        phases: phases.map((phase) => ({
+                            id: phase.id,
+                            name: t(`phase.${phase.phase}`),
+                            // The OPEN phase shows that it is open rather than repeating its price -
+                            // the price is already the headline above, and a ladder that restates it
+                            // reads as two prices.
+                            value: phase.phase === course.currentPhase ? t("phaseOpen") : money.format(phase.price),
+                            isActive: phase.phase === course.currentPhase,
+                        })),
+                        // An enrolled viewer continues; everyone else enrols. `isEnrolled` is null for a
+                        // guest, which is neither - and a guest is asked to enrol, because that is the
+                        // action the page can actually offer them.
+                        ctaLabel: course.isEnrolled === true ? t("continue") : t("enroll"),
+                        trialLabel: course.isEnrolled === true ? undefined : tCourses("trial"),
+                        cartLabel: course.isEnrolled === true || !isPaid
+                            ? undefined
+                            : isInCart ? tCart("remove") : tCatalog("addToCart"),
+                        isInCart,
+                        enrolmentLabel: t("enrolled", { count: course.enrollmentCount }),
+                    },
+                    railState: pricePreview.isLoading
+                        ? "price-pending"
+                        : checkout.isMutating
+                            ? "checking-out"
+                            : trial.isMutating
+                                ? "trialing"
+                                : adding.isMutating || removing.isMutating
+                                    ? "adding"
+                                    : "ready",
+                }}
+                on={{
+                    act: () => {
+                        if (course.isEnrolled === true) {
+                            router.push(`/courses/${course.displayId}/learn/content`)
+                            return
+                        }
+                        if (sessionToken === undefined) {
+                            router.push("/authentication")
+                            return
+                        }
+                        const here = window.location.href
+                        void checkout.trigger({
+                            courseIds: [course.id],
+                            paymentType: "payos",
+                            returnUrl: here,
+                            cancelUrl: here,
+                        }).then((result) => {
+                            const url = result?.data?.coursesCheckout?.data?.checkoutUrl
+                            if (typeof url === "string" && url !== "") window.location.assign(url)
+                        })
+                    },
+                    trial: () => {
+                        if (sessionToken === undefined) {
+                            router.push("/authentication")
+                            return
+                        }
+                        void trial.trigger({ courseId: course.id }).then((result) => {
+                            if (result?.data?.startTrial?.success !== true) return
+                            router.push(`/courses/${course.displayId}/learn/content`)
+                        }).catch(() => undefined)
+                    },
+                    addToCart: () => {
+                        if (sessionToken === undefined) {
+                            router.push("/authentication")
+                            return
+                        }
+                        const operation = isInCart
+                            ? removing.trigger({ courseId: course.id }).then((result) => result?.data?.removeFromCart?.success)
+                            : adding.trigger({ courseId: course.id }).then((result) => result?.data?.addToCart?.success)
+                        void operation.then((success) => {
+                            if (success !== true) return
+                            void mutate((key) => Array.isArray(key) && key[0] === QUERY_MY_CART_SWR_KEY[0])
+                        })
+                    },
+                    openPriceDetail: () => { setIsPriceDetailOpen(true) },
+                    navigateHome: () => { router.push("/") },
+                    navigateCourses: () => { router.push("/courses") },
+                    selectSection,
+                }}
+            />
+            <CoursePriceOverlay
+                courseId={course.id}
+                title={course.title}
+                isOpen={isPriceDetailOpen}
+                onDismiss={() => { setIsPriceDetailOpen(false) }}
+            />
         </>
     )
 }

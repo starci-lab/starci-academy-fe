@@ -34,30 +34,10 @@ export default defineConfig([
             // file and reports thousands of problems that no longer exist in source -
             // noise that buries the real ones and makes a green gate impossible.
             "**/.claude/**",
-            /*
-             * Design artifacts are scratch - the scenario harness around a candidate, its
-             * directional HTML, its server logs - and a gate nobody can get green is a gate nobody
-             * reads. `cases.js` and `review.js` are comparison instruments written to be read once,
-             * not product source, and holding them to the app's house style produced two thousand
-             * findings that hid the one that mattered.
-             *
-             * THE PATTERNS ARE NARROW ON PURPOSE. Ignoring `**\/.artifacts/**` and re-including the
-             * candidate underneath it reports zero problems and lints NOTHING: a global ignore stops
-             * eslint descending into the directory at all, so the negation never gets a chance and
-             * even an explicit path answers "file ignored". Candidate SOURCE stays governed, because
-             * a candidate is the executable specification Apply ports.
-             */
-            "**/.artifacts/**/*.log",
-            "**/.artifacts/**/*.html",
-            "**/.artifacts/**/*.css",
-            "**/.artifacts/**/cases*.js",
-            "**/.artifacts/**/review*.js",
-            "**/.artifacts/**/design-record.js",
-            // The review chrome around a candidate: a scenario switcher and a theme toggle. It
-            // declares no target path and is never ported, so holding it to production rules would
-            // only teach the next author to move real work into the harness to escape them.
-            "**/.artifacts/**/candidate/app/**",
-            "**/.artifacts/**/candidate/*.{ts,mjs,js}",
+            // Disposable design evidence is reviewed by its owning workflow and never ships.
+            "**/.artifacts/**",
+            // This generated mirror is tested at the Trust owner and verified byte-for-byte by sync.
+            "plugins/eslint-canon/**",
         ],
     },
     {
