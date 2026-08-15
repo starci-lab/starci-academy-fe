@@ -1,6 +1,6 @@
 "use client"
 
-import { useId, useState } from "react"
+import { useState } from "react"
 import { Icon } from "@/components/leaves/Icon"
 import type { LeafProps } from "@/components/contracts/props"
 
@@ -31,41 +31,33 @@ export type PricingPhaseDisclosureProps = LeafProps<PricingPhaseDisclosureData>
  */
 export const PricingPhaseDisclosure = (input: PricingPhaseDisclosureProps) => {
     const [isOpen, setIsOpen] = useState(input.props.isOpen === true)
-    const disclosureId = useId()
-    const triggerId = `${disclosureId}-trigger`
-    const panelId = `${disclosureId}-panel`
     return (
-        <div className="flex w-full flex-col gap-3">
-            <button
-                id={triggerId}
-                type="button"
-                aria-expanded={isOpen}
-                aria-controls={panelId}
-                className="flex w-full items-center justify-between gap-2 p-0 text-sm font-medium"
-                onClick={() => setIsOpen((current) => !current)}
-            >
+        <details
+            className="flex w-full flex-col gap-3"
+            open={isOpen}
+            onToggle={(event) => setIsOpen(event.currentTarget.open)}
+        >
+            <summary className="flex w-full cursor-pointer list-none items-center justify-between gap-2 p-0 text-sm font-medium marker:content-none">
                 <span>{input.props.label}</span>
                 <span className={isOpen ? "rotate-90 text-foreground transition-transform" : "text-foreground transition-transform"}>
                     <Icon props={{ name: "disclosure", role: "chip" }} />
                 </span>
-            </button>
-            <div id={panelId} role="region" aria-labelledby={triggerId} hidden={!isOpen}>
-                <ul className="flex flex-col gap-3 px-4">
-                    {input.props.phases.map((phase) => (
-                        <li key={phase.id} className="flex items-center justify-between gap-2">
-                            <span
-                                className={phase.isActive === true
-                                    ? "text-sm font-normal text-accent-soft-foreground"
-                                    : "text-sm font-normal text-foreground"}
-                            >
-                                {phase.name}
-                            </span>
-                            <span className="text-sm text-muted">{phase.value}</span>
-                        </li>
-                    ))}
-                </ul>
+            </summary>
+            <div className="flex flex-col gap-2 px-4">
+                {input.props.phases.map((phase) => (
+                    <div key={phase.id} className="flex items-center justify-between gap-2">
+                        <span
+                            className={phase.isActive === true
+                                ? "text-sm font-normal text-accent-soft-foreground"
+                                : "text-sm font-normal text-foreground"}
+                        >
+                            {phase.name}
+                        </span>
+                        <span className="text-sm text-muted">{phase.value}</span>
+                    </div>
+                ))}
             </div>
-        </div>
+        </details>
     )
 }
 

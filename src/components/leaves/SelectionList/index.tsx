@@ -67,7 +67,7 @@ export const SelectionList = ({ props, on, isLoading = false }: SelectionListPro
                     if (props.variant === "scopes" && event.key === "Enter") on?.activate?.(item.id)
                 }}
                 className={props.variant === "scopes"
-                    ? "group min-h-11 cursor-pointer rounded-large px-2 py-2 text-foreground outline-none data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-accent data-[hovered=true]:bg-default data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent-soft-foreground"
+                    ? "group min-h-11 cursor-pointer rounded-large px-2 py-2 text-foreground outline-none data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-accent data-[hovered=true]:bg-default data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent-soft-foreground data-[selected=true]:data-[hovered=true]:bg-accent-soft"
                     : "items-start py-3"}
             >
                 {props.variant === "scopes" && item.icon !== undefined ? (

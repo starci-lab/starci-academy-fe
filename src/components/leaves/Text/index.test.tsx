@@ -35,5 +35,7 @@ describe("Text", () => {
         const line = container.querySelector("[data-component=Text]")
         expect(line).toHaveAttribute("data-parent-emphasis", "accent-soft")
         expect(line).toHaveClass("data-[parent-emphasis=accent-soft]:group-hover:text-accent-soft")
+        expect(line).toHaveClass("data-[parent-emphasis=accent-soft]:group-data-[selected=true]:text-accent-soft-foreground")
+        expect(line).toHaveClass("data-[parent-emphasis=accent-soft]:group-data-[selected=true]:group-hover:text-accent-soft-foreground")
     })
 })

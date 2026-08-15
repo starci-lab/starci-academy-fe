@@ -26,6 +26,7 @@
  */
 export type LayoutClassName =
     | "flex" | "grid" | "flex-col" | "flex-row" | "flex-wrap" | "flex-nowrap" | "overflow-hidden" | "relative"
+    | "min-h-0" | "overflow-y-auto" | "overscroll-contain" | "scrollbar"
     | "items-center" | "items-baseline" | "items-start" | "items-end"
     | "justify-between" | "justify-center" | "[&>*]:w-full"
     | "gap-1" | "gap-2" | "gap-3" | "gap-4" | "gap-6" | "gap-8"
@@ -2404,15 +2405,36 @@ export const CONTRACTS = buildContracts({
         },
         why: "The rail is one complementary decision surface: artwork and price evidence remain visible while a bounded primary choice selects exactly one purchase or exploration intent, and phase comparison is disclosed only when requested.",
     },
+    "pricing-rail-scroll-viewport": {
+        classes: ["min-h-0", "overflow-y-auto", "overscroll-contain", "scrollbar"],
+        children: {
+            body: { contract: "course-pricing-rail" },
+        },
+        why: "The pricing card remains one surface while its decision content exceeds the available viewport. HeroUI's themed scrollbar marks that the content, rather than the page or the card boundary, owns the bounded vertical movement.",
+    },
     "course-pricing-purchase-intent": {
+        classes: ["flex", "flex-col", "gap-3", "[&>*]:w-full"],
+        children: {
+            copy: { contract: "course-pricing-purchase-copy", optional: true },
+            actions: { contract: "course-pricing-purchase-actions" },
+        },
+        why: "Purchase copy and ownership actions are two sibling semantic blocks, so the rail separates them by gap-3 while each block keeps its own related members at gap-2.",
+    },
+    "course-pricing-purchase-copy": {
         classes: ["flex", "flex-col", "gap-2", "[&>*]:w-full"],
         children: {
             heading: { leaf: "text", props: { size: "sm", weight: "medium" }, optional: true },
             description: { leaf: "text", props: { size: "sm" }, optional: true },
+        },
+        why: "The purchase title and its description form one explanatory thought, so they remain a compact gap-2 copy block.",
+    },
+    "course-pricing-purchase-actions": {
+        classes: ["flex", "flex-col", "gap-2", "[&>*]:w-full"],
+        children: {
             primary: { leaf: "button" },
             cart: { leaf: "button", optional: true },
         },
-        why: "Purchase framing and the two ownership actions answer the selected buy intent. The persistent price stays above the selector; the primary enrol action leads and cart remains subordinate without becoming a separate card.",
+        why: "Enrol and cart answer the same ownership decision, so they remain one gap-2 action block with the primary action leading.",
     },
     "course-pricing-exploration-intent": {
         classes: ["flex", "flex-col", "gap-2", "[&>*]:w-full"],

@@ -176,9 +176,9 @@ export const CurriculumModuleRow = (input: CurriculumModuleRowProps) => {
             className="group"
         >
             <summary className={SUMMARY_CLASSES}>{head}</summary>
-            <ol className="mt-3 list-decimal divide-y divide-separator pl-12">
+            <div className="mt-3 divide-y divide-separator pl-12">
                 {lessons.map((lesson) => (
-                    <li key={lesson.id} className="py-2 pl-1 text-sm leading-5 text-foreground marker:text-muted">
+                    <div key={lesson.id} className="py-2 pl-1 text-sm leading-5 text-foreground marker:text-muted">
                         {input.on?.pressLesson === undefined ? (
                             <span>{lesson.title}</span>
                         ) : (
@@ -190,9 +190,9 @@ export const CurriculumModuleRow = (input: CurriculumModuleRowProps) => {
                                 {lesson.title}
                             </button>
                         )}
-                    </li>
+                    </div>
                 ))}
-            </ol>
+            </div>
         </details>
     )
 }

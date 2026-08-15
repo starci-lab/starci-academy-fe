@@ -360,6 +360,22 @@ body {
     padding: 0 !important;
 }
 
+/* Pricing rail: the card owns the viewport and only its content scrolls. */
+.card[data-component="SurfaceCardSurface"][data-scroll-inside="pricing-rail"] {
+    max-height: var(--max-height-pricing-rail);
+    overflow: hidden;
+}
+
+.card[data-component="SurfaceCardSurface"][data-scroll-inside="pricing-rail"]
+    [data-component="SurfaceCardBody"] {
+    min-height: 0;
+}
+
+.card[data-component="SurfaceCardSurface"][data-scroll-inside="pricing-rail"]
+    [data-node="pricing-rail-scroll-viewport"] {
+    max-height: var(--max-height-pricing-rail);
+}
+
 /*
  * A press label is ruled with the SAME mark the vendor link uses, because the two sit in one card
  * and stand for one promise. The vendor bakes `--separator-tertiary` at 1.5px into `.link`; naming
