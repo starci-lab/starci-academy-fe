@@ -3,7 +3,8 @@
 import { ListBox } from "@heroui/react"
 import type { Key } from "react"
 import type { LeafProps } from "@/components/contracts/props"
-import { Icon, type IconName } from "@/components/leaves/Icon"
+import type { IconName } from "@/components/leaves/Icon"
+import { IconLabelFactRow } from "@/components/composites/IconLabelFactRow"
 
 /** One closed row accepted by the reusable search selection list. */
 export type SelectionListItem = {
@@ -69,34 +70,35 @@ export const SelectionList = ({ props, on, isLoading = false }: SelectionListPro
                     ? "group min-h-11 cursor-pointer rounded-large px-2 py-2 text-foreground outline-none data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-accent data-[hovered=true]:bg-default data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent-soft-foreground"
                     : "items-start py-3"}
             >
-                <span className="flex min-w-0 flex-1 items-center gap-2">
-                    {props.variant === "scopes" && item.icon !== undefined
-                        ? <Icon props={{ name: item.icon, role: "leading" }} />
-                        : null}
-                    <span className="flex min-w-0 flex-1 flex-col gap-1">
-                        <span
-                            data-slot="label"
-                            className={props.variant === "scopes"
-                                ? "truncate text-sm font-medium text-current"
-                                : "truncate text-sm font-medium text-foreground"}
-                        >
-                            {item.title}
+                {props.variant === "scopes" && item.icon !== undefined ? (
+                    <IconLabelFactRow props={{
+                        icon: item.icon,
+                        label: item.title,
+                        endText: item.badge,
+                        recipe: "compact-action",
+                    }} />
+                ) : (
+                    <span className="flex min-w-0 flex-1 items-center gap-2">
+                        <span className="flex min-w-0 flex-1 flex-col gap-1">
+                            <span
+                                data-slot="label"
+                                className="truncate text-sm font-medium text-foreground"
+                            >
+                                {item.title}
+                            </span>
+                            {item.description === undefined ? null : (
+                                <span data-slot="description" className="truncate text-xs text-muted">
+                                    {item.description}
+                                </span>
+                            )}
                         </span>
-                        {item.description === undefined ? null : (
-                            <span data-slot="description" className="truncate text-xs text-muted">
-                                {item.description}
+                        {item.badge === undefined ? null : (
+                            <span className="shrink-0 rounded-full bg-default px-2 py-1 text-xs text-muted">
+                                {item.badge}
                             </span>
                         )}
                     </span>
-                    {item.badge === undefined ? null : (
-                        <span className={props.variant === "scopes"
-                            ? "shrink-0 text-xs text-muted group-hover:text-accent-soft"
-                            : "shrink-0 rounded-full bg-default px-2 py-1 text-xs text-muted"}
-                        >
-                            {item.badge}
-                        </span>
-                    )}
-                </span>
+                )}
                 {props.variant === "results" ? <ListBox.ItemIndicator /> : null}
             </ListBox.Item>
         ))}

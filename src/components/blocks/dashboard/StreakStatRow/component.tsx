@@ -1,4 +1,4 @@
-import { StatRow } from "@/components/composites/StatRow"
+import { IconLabelFactRow } from "@/components/composites/IconLabelFactRow"
 
 /** Props for the pure streak row, discriminated at the connected boundary. */
 export type StreakStatRowProps =
@@ -11,12 +11,12 @@ export type StreakStatRowProps =
 
 /** Render the streak row without reading request or locale state. */
 export const _StreakStatRow = (input: StreakStatRowProps) => input.state === "empty" ? null : (
-    <StatRow
-        hierarchy="peer"
+    <IconLabelFactRow
         props={{
             icon: "streak",
             label: input.props.label,
-            value: input.state === "settled" ? input.props.value : undefined,
+            endText: input.state === "settled" ? input.props.value : undefined,
+            recipe: "peer",
         }}
         isLoading={input.state === "pending"}
     />

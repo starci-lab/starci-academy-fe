@@ -59,6 +59,8 @@ type TextCommonData = {
     readonly isPressLabel?: boolean
     /** Whether a change to this line is announced, and how urgently. */
     readonly live?: TextLive
+    /** Respond to the surrounding interaction host without exposing caller-owned classes. */
+    readonly parentEmphasis?: "accent-soft"
 }
 
 /**
@@ -92,6 +94,7 @@ const TEXT_CLASSES = [
     "data-[size=sm]:text-sm data-[size=sm]:leading-5",
     "data-[tone=muted]:text-muted",
     "data-[tone=accent]:text-accent-soft-foreground",
+    "data-[parent-emphasis=accent-soft]:group-hover:text-accent-soft data-[parent-emphasis=accent-soft]:group-data-[selected=true]:text-accent-soft",
     "data-[weight=medium]:font-medium data-[weight=semibold]:font-semibold",
     "data-[icon=true]:inline-flex data-[icon=true]:items-center data-[icon=true]:gap-2",
     "data-[superseded=true]:line-through",
@@ -147,6 +150,7 @@ export const Text = ({ props, isLoading = false }: TextProps) => {
             data-superseded={props.isSuperseded === true ? "true" : "false"}
             data-press-label={props.isPressLabel === true ? "true" : "false"}
             data-live={live}
+            data-parent-emphasis={props.parentEmphasis}
             data-loading={isLoading ? "true" : "false"}
             role={LIVE_ROLES[live]}
             aria-live={live === "off" ? undefined : live}

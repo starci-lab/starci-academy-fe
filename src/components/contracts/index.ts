@@ -1637,6 +1637,15 @@ export const CONTRACTS = buildContracts({
         },
         why: "A compact identity statistic names one standing fact and prints its current value at the same reading rank, while tone still distinguishes the trailing value.",
     },
+    "glyph-compact-action-fact-row": {
+        classes: ["flex", "w-full", "min-w-0", "flex-row", "items-center", "gap-2", "[&>*:nth-child(2)]:min-w-0", "[&>*:nth-child(2)]:grow"],
+        children: {
+            glyph: { leaf: "icon", props: { size: "sm" } },
+            title: { leaf: "text", props: { size: "sm", tone: "default" } },
+            fact: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
+        },
+        why: "A compact action or selection row shares one icon-label rhythm, while its optional trailing fact remains subordinate and both texts respond to the surrounding interaction host.",
+    },
     "task-mark-title-fact-row": {
         classes: ["flex", "w-full", "flex-row", "items-center", "gap-2", "[&>*:nth-child(2)]:min-w-0", "[&>*:nth-child(2)]:grow"],
         children: {
@@ -1776,8 +1785,8 @@ export const CONTRACTS = buildContracts({
         children: {
             control: {
                 contract: "spread-choice-row",
-                leaf: ["button", "confirm-button", "quick-action-row", "quick-actions-list", "text"],
-                composite: ["field", "labelled-progress-row", "stat-row"],
+                leaf: ["button", "confirm-button", "quick-actions-list", "text"],
+                composite: ["field", "labelled-progress-row", "icon-label-fact-row"],
                 repeats: true,
                 restingCount: 3,
             },
@@ -1787,7 +1796,7 @@ export const CONTRACTS = buildContracts({
     "stacked-stat-rows": {
         classes: ["flex", "flex-col", "p-0", "[&>*]:w-full", "[&>*]:p-2"],
         children: {
-            stat: { composite: "stat-row", repeats: true, restingCount: 3 },
+            stat: { composite: "icon-label-fact-row", repeats: true, restingCount: 3 },
         },
         why: "Standing figures read like peer select rows: no parent inset and no gap interrupt the scan, while every row owns p-2 so its icon, label and value share the same select-like element geometry as the list below.",
     },

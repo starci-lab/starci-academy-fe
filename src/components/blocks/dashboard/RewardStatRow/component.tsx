@@ -1,4 +1,4 @@
-import { StatRow } from "@/components/composites/StatRow"
+import { IconLabelFactRow } from "@/components/composites/IconLabelFactRow"
 
 /** Props for the pure reward row, discriminated at the connected boundary. */
 export type RewardStatRowProps =
@@ -11,12 +11,12 @@ export type RewardStatRowProps =
 
 /** Render the reward row without reading request or locale state. */
 export const _RewardStatRow = (input: RewardStatRowProps) => input.state === "empty" ? null : (
-    <StatRow
-        hierarchy="peer"
+    <IconLabelFactRow
         props={{
             icon: "reward",
             label: input.props.label,
-            value: input.state === "settled" ? input.props.value : undefined,
+            endText: input.state === "settled" ? input.props.value : undefined,
+            recipe: "peer",
         }}
         isLoading={input.state === "pending"}
     />

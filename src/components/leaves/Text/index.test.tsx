@@ -29,4 +29,11 @@ describe("Text", () => {
 
         expect(line).toHaveClass("w-10", "text-xs", "leading-4")
     })
+
+    it("offers one closed parent-emphasis response without a style escape hatch", () => {
+        const { container } = render(<Text props={{ content: "Count", size: "xs", parentEmphasis: "accent-soft" }} />)
+        const line = container.querySelector("[data-component=Text]")
+        expect(line).toHaveAttribute("data-parent-emphasis", "accent-soft")
+        expect(line).toHaveClass("data-[parent-emphasis=accent-soft]:group-hover:text-accent-soft")
+    })
 })

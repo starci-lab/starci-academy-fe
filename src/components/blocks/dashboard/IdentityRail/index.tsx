@@ -28,9 +28,9 @@ export const IdentityRail = () => {
                 profile: defineCompositeComponent("profile-row", {}, () => <ProfileIdentityRow />),
                 stats: defineContractComponent("stacked-stat-rows", {
                     stat: [
-                        defineCompositeComponent("stat-row", {}, () => <StreakStatRow />),
-                        defineCompositeComponent("stat-row", {}, () => <CreditStatRow />),
-                        defineCompositeComponent("stat-row", {}, () => <RewardStatRow />),
+                        defineCompositeComponent("icon-label-fact-row", {}, () => <StreakStatRow />),
+                        defineCompositeComponent("icon-label-fact-row", {}, () => <CreditStatRow />),
+                        defineCompositeComponent("icon-label-fact-row", {}, () => <RewardStatRow />),
                     ],
                 }),
             })}

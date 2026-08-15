@@ -1,6 +1,6 @@
 import { Tree } from "@/components/branches/Tree"
 import { Heading } from "@/components/leaves/Heading"
-import { StatRow } from "@/components/composites/StatRow"
+import { IconLabelFactRow } from "@/components/composites/IconLabelFactRow"
 import { Text } from "@/components/leaves/Text"
 import {
     defineCompositeComponent,
@@ -19,7 +19,7 @@ import {
  * exactly the reader who will want to.
  *
  * IT REUSES THE STANDING-FIGURE ROW. Each line is a labelled amount with a mark, which is what
- * `stat-row` already is and what `stacked-stat-rows` already stacks with no gap and no parent
+ * `icon-label-fact-row` already is and what `stacked-stat-rows` already stacks with no gap and no parent
  * inset. Writing a second price-row vocabulary would have made the same shape twice.
  *
  * THE FORWARD LOOK IS PROSE, NOT A ROW. Seats remaining and the next phase's price are not another
@@ -87,12 +87,13 @@ export const _CoursePriceDetail = (input: CoursePriceDetailProps) => {
                     )),
                 } : {
                     reckoning: defineContractComponent("stacked-stat-rows", {
-                        stat: lines.map((line) => defineCompositeComponent("stat-row", {}, () => (
-                            <StatRow
+                        stat: lines.map((line) => defineCompositeComponent("icon-label-fact-row", {}, () => (
+                            <IconLabelFactRow
                                 props={{
                                     icon: LINE_ICONS[line.id] ?? "cart",
                                     label: line.label,
-                                    value: line.value,
+                                    endText: line.value,
+                                    recipe: "label-led",
                                 }}
                                 isLoading={isLoading}
                             />

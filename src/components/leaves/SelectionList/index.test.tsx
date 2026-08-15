@@ -33,9 +33,13 @@ describe("SelectionList", () => {
         expect(all.className).toContain("data-[selected=true]:text-accent-soft-foreground")
         expect(all.querySelector("svg[data-slot=\"icon\"]")).toBeTruthy()
         const count = screen.getByText("8")
-        expect(count.className).toBe("shrink-0 text-xs text-muted group-hover:text-accent-soft")
+        expect(count).toHaveAttribute("data-size", "xs")
+        expect(count).toHaveAttribute("data-tone", "muted")
+        expect(count).toHaveAttribute("data-parent-emphasis", "accent-soft")
+        expect(count.className).toContain("group-hover:text-accent-soft")
         expect(count.className).not.toContain("rounded")
         expect(count.className).not.toContain("bg-")
+        expect(all.querySelector("[data-node=glyph-compact-action-fact-row]")).toBeTruthy()
     })
 
     it("renders result description without accepting arbitrary children", () => {

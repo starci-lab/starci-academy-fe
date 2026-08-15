@@ -1,7 +1,8 @@
 "use client"
 
 import { ListBox } from "@heroui/react"
-import { Icon, type IconName } from "@/components/leaves/Icon"
+import type { IconName } from "@/components/leaves/Icon"
+import { IconLabelFactRow } from "@/components/composites/IconLabelFactRow"
 import type { LeafProps } from "@/components/contracts/props"
 
 /** One destination in the legacy quick-access ListBox. */
@@ -40,10 +41,9 @@ export const QuickActionsList = ({ props, on }: QuickActionsListProps) => (
                 key={item.id}
                 id={item.id}
                 textValue={item.label}
-                className="flex cursor-pointer items-center gap-2 rounded-large px-2 py-2 text-foreground outline-none data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-accent data-[hovered=true]:bg-default"
+                className="group flex cursor-pointer items-center gap-2 rounded-large px-2 py-2 text-foreground outline-none data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-accent data-[hovered=true]:bg-default"
             >
-                <Icon props={{ name: item.icon, role: "leading" }} />
-                <span className="min-w-0 flex-1 truncate text-sm">{item.label}</span>
+                <IconLabelFactRow props={{ icon: item.icon, label: item.label, recipe: "compact-action" }} />
             </ListBox.Item>
         ))}
     </ListBox>

@@ -1,4 +1,4 @@
-import { StatRow } from "@/components/composites/StatRow"
+import { IconLabelFactRow } from "@/components/composites/IconLabelFactRow"
 
 /** Props for the pure credit row, discriminated at the connected boundary. */
 export type CreditStatRowProps =
@@ -11,12 +11,12 @@ export type CreditStatRowProps =
 
 /** Render the credit row without reading request or locale state. */
 export const _CreditStatRow = (input: CreditStatRowProps) => input.state === "empty" ? null : (
-    <StatRow
-        hierarchy="peer"
+    <IconLabelFactRow
         props={{
             icon: "credit",
             label: input.props.label,
-            value: input.state === "settled" ? input.props.value : undefined,
+            endText: input.state === "settled" ? input.props.value : undefined,
+            recipe: "peer",
         }}
         isLoading={input.state === "pending"}
     />

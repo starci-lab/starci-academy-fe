@@ -35,6 +35,7 @@ describe("_GlobalSearchOverlay", () => {
         expect(screen.getByText("Search all")).toBeTruthy()
         expect(document.querySelector("[data-node=\"global-search-result-region\"] [data-node=\"empty-notice-stack\"]")).toBeTruthy()
         expect(screen.queryByRole("heading")).toBeNull()
+        expect(document.querySelector("[data-component=SelectionList][data-variant=scopes] [data-node=glyph-compact-action-fact-row]")).toBeTruthy()
         const body = document.querySelector("[data-node=\"global-search-body\"]")
         expect(body?.className).toContain("[data-variant=scopes]")
         expect(body?.className).toContain("[data-node=global-search-result-region]")
