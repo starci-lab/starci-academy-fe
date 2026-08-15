@@ -197,7 +197,7 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
             props={{
                 labels: {
                     navCourse: t("navCourse"),
-                    navModule: content.data?.module.title ?? t("navModule"),
+                    navModule: module.data?.title ?? t("navModule"),
                     facesLabel: t("facesLabel"),
                     searchPlaceholder: t("searchPlaceholder"),
                     searchLabel: t("searchLabel"),
@@ -302,7 +302,6 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                     contents: ordered.map((sibling) => ({
                         id: sibling.id,
                         title: sibling.title,
-                        meta: t("minutes", { minutes: sibling.minutesRead }),
                         isCurrent: sibling.id === input.contentId,
                     })),
                 }],

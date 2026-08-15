@@ -22,7 +22,10 @@ vi.mock("@/components/overlays/ai/StarCiAiDrawer", () => ({
 }))
 vi.mock("@/components/blocks/ai/StarCiAiSelectionAsk", () => ({ StarCiAiSelectionAsk: () => null }))
 
-const Surface = () => <main>Surface</main>
+const Surface = () => {
+    const chat = useGlobalAiChat()
+    return <main>Surface: {chat.anchor.scope}</main>
+}
 
 describe("GlobalAiChatLayout", () => {
     beforeEach(() => {
@@ -32,16 +35,16 @@ describe("GlobalAiChatLayout", () => {
 
     it("keeps the global owner beside an authenticated product surface", () => {
         render(<GlobalAiChatLayout surface={Surface} />)
-        expect(screen.getByText("Surface")).toBeInTheDocument()
+        expect(screen.getByText("Surface: global")).toBeInTheDocument()
         expect(screen.getByText("AI closed")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Open AI" }))
         expect(screen.getByText("AI open")).toBeInTheDocument()
     })
 
-    it("does not mount AI for a signed-out viewer", () => {
+    it("keeps context available without mounting AI for a signed-out viewer", () => {
         setSessionToken(undefined)
         render(<GlobalAiChatLayout surface={Surface} />)
-        expect(screen.getByText("Surface")).toBeInTheDocument()
+        expect(screen.getByText("Surface: global")).toBeInTheDocument()
         expect(screen.queryByRole("button", { name: "Open AI" })).not.toBeInTheDocument()
     })
 })

@@ -34,7 +34,7 @@ export type StarCiAiChatState =
     | "contextCleared"
 
 /** The drawer body selected by its one finite disclosure row. */
-export type StarCiAiMode = "general" | "code" | "history"
+export type StarCiAiMode = "general" | "history"
 
 /** One render-ready learner or assistant entry in the ordered transcript. */
 export type StarCiAiTurn = {
@@ -57,7 +57,6 @@ export type StarCiAiSession = {
 /** Resolved locale copy consumed by the pure drawer body. */
 export type StarCiAiChatLabels = {
     readonly generalMode: string
-    readonly codeMode: string
     readonly historyMode: string
     readonly composer: string
     readonly placeholder: string
@@ -156,12 +155,6 @@ export const _StarCiAiChat = (input: StarCiAiChatProps) => {
                                 <Button
                                     props={{ label: labels.generalMode, variant: input.props.mode === "general" ? "primary" : "ghost", size: "sm" }}
                                     on={{ press: () => input.on?.selectMode?.("general") }}
-                                />
-                            )),
-                            defineLeafComponent("button", {}, () => (
-                                <Button
-                                    props={{ label: labels.codeMode, variant: input.props.mode === "code" ? "primary" : "ghost", size: "sm" }}
-                                    on={{ press: () => input.on?.selectMode?.("code") }}
                                 />
                             )),
                             defineLeafComponent("button", {}, () => (

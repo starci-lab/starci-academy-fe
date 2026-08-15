@@ -87,12 +87,12 @@ export type CoursePricingRailActions = {
     readonly act?: () => void
     /** Open the course's previewable learning path. */
     readonly trial?: () => void
-    /** Add this course to the cart. */
+    /** Add this course to, or remove it from, the cart. */
     readonly addToCart?: () => void
 }
 
 /** The situations the rail can be in. */
-export type CoursePricingRailState = "ready" | "price-pending" | "adding"
+export type CoursePricingRailState = "ready" | "price-pending" | "adding" | "trialing" | "checking-out"
 
 /** Props for {@link _CoursePricingRail}. */
 export type CoursePricingRailProps = {
@@ -110,8 +110,12 @@ export type CoursePricingRailProps = {
  * @param input - {@link CoursePricingRailProps}
  */
 export const _CoursePricingRail = (input: CoursePricingRailProps) => {
+    const cartLabel = input.props.cartLabel
+    const trialLabel = input.props.trialLabel
     const isPricePending = input.state === "price-pending"
     const isAdding = input.state === "adding"
+    const isTrialing = input.state === "trialing"
+    const isCheckingOut = input.state === "checking-out"
     const phases = input.props.phases ?? []
     const activePhase = phases.find((phase) => phase.isActive === true)
 
@@ -173,36 +177,37 @@ export const _CoursePricingRail = (input: CoursePricingRailProps) => {
                 action: defineContractComponent("course-pricing-action-stack", {
                     primary: defineLeafComponent("button", {}, () => (
                         <Button
-                            props={{ label: input.props.ctaLabel, variant: "primary", size: "md", icon: "next" }}
+                            props={{
+                                label: input.props.ctaLabel,
+                                variant: "primary",
+                                size: "md",
+                                icon: "next",
+                                isPending: isCheckingOut,
+                            }}
                             on={{ press: input.on?.act }}
                         />
                     )),
-                    secondary: input.props.trialLabel === undefined && input.props.cartLabel === undefined
+                    cart: cartLabel === undefined
                         ? undefined
-                        : defineContractComponent("course-pricing-secondary-action-row", {
-                            trial: input.props.trialLabel === undefined
-                                ? undefined
-                                : defineLeafComponent("button", {}, () => (
-                                    <Button
-                                        props={{ label: input.props.trialLabel ?? "", variant: "secondary", size: "sm" }}
-                                        on={{ press: input.on?.trial }}
-                                    />
-                                )),
-                            cart: input.props.cartLabel === undefined
-                                ? undefined
-                                : defineLeafComponent("button", {}, () => (
-                                    <Button
-                                        props={{
-                                            label: input.props.cartLabel ?? "",
-                                            variant: "secondary",
-                                            size: "sm",
-                                            disabled: input.props.isInCart === true,
-                                            isPending: isAdding,
-                                        }}
-                                        on={{ press: input.on?.addToCart }}
-                                    />
-                                )),
-                        }),
+                        : defineLeafComponent("button", {}, () => (
+                            <Button
+                                props={{
+                                    label: cartLabel,
+                                    variant: "secondary",
+                                    size: "md",
+                                    isPending: isAdding,
+                                }}
+                                on={{ press: input.on?.addToCart }}
+                            />
+                        )),
+                    trial: trialLabel === undefined
+                        ? undefined
+                        : defineLeafComponent("button", {}, () => (
+                            <Button
+                                props={{ label: trialLabel, variant: "secondary", size: "md", isPending: isTrialing }}
+                                on={{ press: input.on?.trial }}
+                            />
+                        )),
                 }),
                 proof: input.props.enrolmentLabel === undefined
                     ? undefined

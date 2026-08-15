@@ -1,8 +1,19 @@
 "use client"
 import { useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
-import { useRouter } from "next/navigation"
-import { useMutateAddToCartSwr, useQueryCourseReviewsSwr, useQueryCourseSwr } from "@/hooks"
+import { useSWRConfig } from "swr"
+import { useRouter } from "@/i18n/navigation"
+import {
+    useMutateAddToCartSwr,
+    useMutateCoursesCheckoutSwr,
+    useMutateRemoveFromCartSwr,
+    useMutateStartTrialSwr,
+    useQueryCourseReviewsSwr,
+    useQueryCourseSwr,
+    useQueryMyCartSwr,
+} from "@/hooks"
+import { useSessionToken } from "@/hooks/auth/useSessionToken"
+import { QUERY_MY_CART_SWR_KEY } from "@/hooks/swr/useQueryMyCartSwr"
 import { _CourseDetailPage, type CourseDetailSection } from "./component"
 import type { CourseDetail, CourseModule } from "@/modules/api/graphql/queries/types/course"
 
@@ -47,12 +58,18 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
     const t = useTranslations("courses.detail")
     const tCourses = useTranslations("courses")
     const tCatalog = useTranslations("courses.catalog")
+    const tCart = useTranslations("cart")
     const locale = useLocale()
     const router = useRouter()
     const [selectedSection, setSelectedSection] = useState<CourseDetailSection>("overview")
-    const [isInCart, setIsInCart] = useState(false)
+    const { mutate } = useSWRConfig()
+    const sessionToken = useSessionToken()
     const query = useQueryCourseSwr({ displayId: input.displayId })
-    const cart = useMutateAddToCartSwr(query.data?.id)
+    const cartQuery = useQueryMyCartSwr()
+    const adding = useMutateAddToCartSwr(query.data?.id)
+    const removing = useMutateRemoveFromCartSwr(query.data?.id)
+    const checkout = useMutateCoursesCheckoutSwr()
+    const trial = useMutateStartTrialSwr(query.data?.id)
     // The rating is a second request on purpose: it is public, shared by every reader and
     // invalidated by a different event than the course itself, so folding it into the course
     // query would make one cache entry answer two questions that change at different times.
@@ -99,6 +116,8 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
     // open is not a guess: a course with no phase ladder sells at its list price, which is the same
     // number the ladder would have shown.
     const payable = openPhase?.price ?? course.originalPrice
+    const isPaid = payable > 0
+    const isInCart = (cartQuery.data ?? []).some((row) => row.courseId === course.id)
     const hasDiscount = payable < course.originalPrice
     const discountPercent = hasDiscount ? Math.round((1 - payable / course.originalPrice) * 100) : 0
 
@@ -125,13 +144,11 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
                         id: "learners",
                         label: t("learnerSignalLabel"),
                         value: t("statLearners", { count: course.enrollmentCount }),
-                        emphasis: "accent",
                     },
                     {
                         id: "modules",
                         label: t("moduleSignalLabel"),
                         value: t("statModules", { count: modules.length }),
-                        emphasis: "success",
                     },
                     // Counted from the contents themselves, NOT from `numContents`. The served
                     // schema exposes that field and returns zero for it on this query path, so the
@@ -142,25 +159,21 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
                         id: "hours",
                         label: t("hourSignalLabel"),
                         value: t("statHours", { count: Math.round(sumContents(modules, (content) => content.minutesRead) / 60) }),
-                        emphasis: "warning",
                     },
                     {
                         id: "contents",
                         label: t("contentSignalLabel"),
                         value: t("statContents", { count: sumContents(modules, () => 1) }),
-                        emphasis: "neutral",
                     },
                     {
                         id: "challenges",
                         label: t("challengeSignalLabel"),
                         value: t("statChallenges", { count: sumContents(modules, (content) => content.numChallenges) }),
-                        emphasis: "neutral",
                     },
                     {
                         id: "rating",
                         label: t("reviewCount", { count: reviewQuery.data?.total ?? 0 }),
                         value: reviewQuery.data?.averageScore?.toFixed(1) ?? "—",
-                        emphasis: "neutral",
                     },
                 ],
                 valueProps: byOrder(course.valuePropositions ?? []).map((proposition) => proposition.text),
@@ -178,7 +191,9 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
                 reviewTotal: reviewQuery.data?.total,
                 reviews: (reviewQuery.data?.nodes ?? []).map((row) => ({
                     id: row.id,
-                    author: row.userId,
+                    // A UUID is storage identity, not a public learner name. Until the public
+                    // author projection is available, use a localized neutral label.
+                    author: t("reviewsAnonymous"),
                     score: row.score,
                     body: row.body ?? undefined,
                 })),
@@ -191,6 +206,7 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
                     return {
                         id: module.id,
                         title: module.title,
+                        level: module.contentTier,
                         levelLabel: t(`tier.${module.contentTier}`),
                         previewLabel: previews.length === 0 ? undefined : t("previewCount", { count: previews.length }),
                         // A preview bullet IS the thing the disclosure reveals, and every one of
@@ -222,35 +238,62 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
                     // action the page can actually offer them.
                     ctaLabel: course.isEnrolled === true ? t("continue") : t("enroll"),
                     trialLabel: course.isEnrolled === true ? undefined : tCourses("trial"),
-                    cartLabel: course.isEnrolled === true
+                    cartLabel: course.isEnrolled === true || !isPaid
                         ? undefined
-                        : isInCart ? tCatalog("inCart") : tCatalog("addToCart"),
+                        : isInCart ? tCart("remove") : tCatalog("addToCart"),
                     isInCart,
                     enrolmentLabel: t("enrolled", { count: course.enrollmentCount }),
                 },
-                railState: cart.isMutating ? "adding" : "ready",
+                railState: checkout.isMutating
+                    ? "checking-out"
+                    : trial.isMutating
+                        ? "trialing"
+                        : adding.isMutating || removing.isMutating
+                            ? "adding"
+                            : "ready",
             }}
             on={{
                 act: () => {
                     if (course.isEnrolled === true) {
-                        router.push(`/courses/${course.displayId}/learn`)
+                        router.push(`/courses/${course.displayId}/learn/content`)
                         return
                     }
-                    if (isInCart) {
-                        router.push("/cart")
+                    if (sessionToken === undefined) {
+                        router.push("/authentication")
                         return
                     }
-                    void cart.trigger({ courseId: course.id }).then((result) => {
-                        if (result?.data?.addToCart?.success !== true) return
-                        setIsInCart(true)
-                        router.push("/cart")
+                    const here = window.location.href
+                    void checkout.trigger({
+                        courseIds: [course.id],
+                        paymentType: "payos",
+                        returnUrl: here,
+                        cancelUrl: here,
+                    }).then((result) => {
+                        const url = result?.data?.coursesCheckout?.data?.checkoutUrl
+                        if (typeof url === "string" && url !== "") window.location.assign(url)
                     })
                 },
-                trial: () => { router.push(`/courses/${course.displayId}/learn`) },
+                trial: () => {
+                    if (sessionToken === undefined) {
+                        router.push("/authentication")
+                        return
+                    }
+                    void trial.trigger({ courseId: course.id }).then((result) => {
+                        if (result?.data?.startTrial?.success !== true) return
+                        router.push(`/courses/${course.displayId}/learn/content`)
+                    }).catch(() => undefined)
+                },
                 addToCart: () => {
-                    if (isInCart) return
-                    void cart.trigger({ courseId: course.id }).then((result) => {
-                        if (result?.data?.addToCart?.success === true) setIsInCart(true)
+                    if (sessionToken === undefined) {
+                        router.push("/authentication")
+                        return
+                    }
+                    const operation = isInCart
+                        ? removing.trigger({ courseId: course.id }).then((result) => result?.data?.removeFromCart?.success)
+                        : adding.trigger({ courseId: course.id }).then((result) => result?.data?.addToCart?.success)
+                    void operation.then((success) => {
+                        if (success !== true) return
+                        void mutate((key) => Array.isArray(key) && key[0] === QUERY_MY_CART_SWR_KEY[0])
                     })
                 },
                 navigateHome: () => { router.push("/") },

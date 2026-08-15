@@ -199,6 +199,7 @@
             "prerequisitesTitle": "What you need first",
             "reviewsTitle": "Learner reviews",
             "reviewsEmpty": "No reviews yet for this course.",
+            "reviewsAnonymous": "Learner",
             "faqTitle": "Frequently asked questions",
             "faqEmpty": "No frequently asked questions have been published for this course yet.",
             "reviewCount": "{count} reviews",
@@ -480,13 +481,12 @@
         "title": "StarCi AI",
         "description": "Your study assistant across StarCi Academy.",
         "modes": {
-            "general": "General chat",
-            "code": "Code coach",
+            "general": "Ask anything",
             "history": "History"
         },
         "composer": {
             "label": "Ask StarCi AI",
-            "placeholder": "Ask about this lesson or selected code..."
+            "placeholder": "Ask about the lesson, code, challenge, or learning path..."
         },
         "actions": {
             "send": "Send",
@@ -526,8 +526,8 @@
             "reconnecting": "Reconnecting to StarCi AI...",
             "streamFailed": "The answer stopped because the model failed.",
             "aborted": "Answer stopped. The received part is preserved.",
-            "tangentReady": "A separate code conversation is ready.",
-            "contextCleared": "Code context cleared; the next question uses the lesson context."
+            "tangentReady": "A separate conversation is ready.",
+            "contextCleared": "Selection cleared; the next question still uses the learning-screen context."
         }
     },
     "profile": {
@@ -673,6 +673,9 @@
             "description": "Choose a module to continue learning.",
             "modules": "Modules",
             "moduleCount": "{count} modules"
+        },
+        "module": {
+            "contents": "Lessons"
         },
         "content": {
             "navCourse": "Course",

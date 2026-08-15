@@ -12,11 +12,10 @@ import { type QueryContentRequest, type QueryContentResponse } from "@/modules/a
  * the viewer belongs in the cache key of the hook above this, and why the client is built with auth
  * rather than optionally attaching it.
  *
- * WHAT IT SELECTS AND WHY. The body, the title and the module are the reading. `isPremium` is what
+ * WHAT IT SELECTS AND WHY. The body and title are the reading. `isPremium` is what
  * turns a short body into a paywall rather than a short lesson - without it the page cannot tell a
- * truncated content from a brief one. `orderIndex` and the module's `numContents` are the reader's
- * place in the module, which is the pager. Nothing else is selected: challenges, flashcards and AI
- * sessions are other surfaces with other cases.
+ * truncated content from a brief one. `orderIndex` is the reader's place in the module. The module
+ * outline is fetched by its own query because the content handler does not load that relation.
  */
 const query1 = gql`
     query Content($request: ContentRequest!) {
@@ -37,11 +36,6 @@ const query1 = gql`
                 backendUrl
                 minutesRead
                 orderIndex
-                module {
-                    id
-                    title
-                    numContents
-                }
                 challenges {
                     id
                     displayId

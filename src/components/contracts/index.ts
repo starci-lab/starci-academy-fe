@@ -1080,7 +1080,7 @@ export const CONTRACTS = buildContracts({
     "resume-item-card": {
         classes: ["flex", "flex-col", "gap-3", "p-4"],
         children: {
-            title: { leaf: "text", props: { size: "md", weight: "medium" } },
+            title: { leaf: "text", props: { size: "sm", weight: "medium" } },
             kind: { leaf: "text", props: { size: "sm", tone: "muted" } },
             resume: { leaf: "see-more-link", optional: true },
         },
@@ -1220,12 +1220,12 @@ export const CONTRACTS = buildContracts({
         why: "The year summary, one intrinsic contribution plot and its reading key form a single fixed visualization, so the composite closes those three regions without owning their DOM mechanics.",
     },
     "contribution-calendar-heading-row": {
-        classes: ["flex", "w-full", "flex-col", "gap-3"],
+        classes: ["flex", "w-full", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-3"],
         children: {
             total: { leaf: "text", props: { size: "xs", tone: "muted" } },
             years: { leaf: "choice-tabs" },
         },
-        why: "The activity total identifies the plot, then the primary year navigation owns one complete underline run before the grid begins. Like ShellNav, the run spans its available line because it changes the whole panel rather than acting as a compact secondary filter at one edge.",
+        why: "The activity total identifies one contribution plot while the year is a compact parameter of that same plot, so its primary segmented choice sits at the trailing edge rather than becoming a ShellNav-style secondary navigation line.",
     },
     "contribution-calendar-footer-row": {
         classes: ["flex", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-3"],
@@ -1607,11 +1607,20 @@ export const CONTRACTS = buildContracts({
         },
         why: "The glyph identifies the row faster than its name does, so it leads the line and the fact trails it - and the name between them takes the slack, because a long one must clip rather than push the figure off the end of the row.",
     },
+    "glyph-peer-fact-row": {
+        classes: ["flex", "flex-row", "items-center", "justify-between", "gap-2", "[&>*:nth-child(2)]:min-w-0", "[&>*:nth-child(2)]:grow"],
+        children: {
+            glyph: { leaf: "icon", props: { size: "sm" } },
+            title: { leaf: "text", props: { size: "sm", tone: "default" } },
+            fact: { leaf: "text", props: { size: "sm", tone: "muted" } },
+        },
+        why: "A compact identity statistic names one standing fact and prints its current value at the same reading rank, while tone still distinguishes the trailing value.",
+    },
     "task-mark-title-fact-row": {
         classes: ["flex", "w-full", "flex-row", "items-center", "gap-2", "[&>*:nth-child(2)]:min-w-0", "[&>*:nth-child(2)]:grow"],
         children: {
             mark: { leaf: "icon" },
-            title: { leaf: "text" },
+            title: { leaf: "text", props: { size: "sm" } },
             fact: { leaf: "text", props: { size: "xs", tone: "muted" } },
         },
         why: "The completion mark identifies task state, the title owns the flexible middle, and the quiet target remains aligned at the far edge of every joined row.",
@@ -2230,36 +2239,19 @@ export const CONTRACTS = buildContracts({
     },
     "course-signal-board": {
         classes: [
-            "grid", "grid-cols-2", "overflow-hidden", "sm:grid-cols-3",
-            "[&>*]:p-4", "[&>*]:border-separator",
-            "[&>*:nth-child(even)]:border-l", "[&>*:nth-child(n+3)]:border-t",
-            "sm:[&>*:nth-child(even)]:border-l-0", "sm:[&>*:not(:nth-child(3n+1))]:border-l",
-            "sm:[&>*:nth-child(3)]:border-t-0",
+            "grid", "grid-cols-2", "overflow-hidden",
+            "[&>*]:p-3", "[&>*:nth-child(odd)]:border-r", "[&>*:nth-child(-n+4)]:border-b",
+            "[&>*]:border-separator",
         ],
         children: {
-            signal: { contract: ["course-signal-card-accent", "course-signal-card-success", "course-signal-card-warning", "course-signal-card-neutral"], repeats: true, restingCount: 6 },
+            signal: { contract: "course-signal-card-neutral", repeats: true, restingCount: 6 },
         },
-        why: "Six comparable course facts share one card and read across its ruled cells, matching the weekly-goal ribbon instead of becoming six smaller cards with six competing radii.",
-    },
-    "course-signal-card-accent": {
-        classes: ["flex", "min-w-0", "flex-col", "gap-2", "bg-accent-soft"],
-        children: { label: { leaf: "text", props: { size: "xs", tone: "muted" } }, value: { leaf: "text", props: { size: "md", weight: "semibold" } } },
-        why: "The lead adoption signal receives the brand-soft ground without changing the semantic rank of its label and value.",
-    },
-    "course-signal-card-success": {
-        classes: ["flex", "min-w-0", "flex-col", "gap-2", "bg-success-soft"],
-        children: { label: { leaf: "text", props: { size: "xs", tone: "muted" } }, value: { leaf: "text", props: { size: "md", weight: "semibold" } } },
-        why: "Curriculum depth is affirmative evidence, so it takes the success-soft ground while remaining the same label-over-value sentence as its peers.",
-    },
-    "course-signal-card-warning": {
-        classes: ["flex", "min-w-0", "flex-col", "gap-2", "bg-warning-soft"],
-        children: { label: { leaf: "text", props: { size: "xs", tone: "muted" } }, value: { leaf: "text", props: { size: "md", weight: "semibold" } } },
-        why: "Time commitment needs attention before purchase, so it takes the warning-soft ground without being styled as an error.",
+        why: "Six comparable course facts share the HeroUI Card owned by SurfaceCard and read across its ruled cells; this contract owns only the internal grid and separators, never a second border, radius or shadow.",
     },
     "course-signal-card-neutral": {
         classes: ["flex", "min-w-0", "flex-col", "gap-2"],
-        children: { label: { leaf: "text", props: { size: "xs", tone: "muted" } }, value: { leaf: "text", props: { size: "md", weight: "semibold" } } },
-        why: "Supporting inventory evidence remains a real bounded card but yields chromatic priority to adoption, depth and time.",
+        children: { label: { leaf: "text", props: { size: "xs", tone: "muted" } }, value: { leaf: "text", props: { size: "sm", weight: "medium" } } },
+        why: "All six comparable facts remain neutral peers inside one ruled card; no fact receives decorative color priority over another.",
     },
     "course-section": {
         host: "section",
@@ -2314,43 +2306,35 @@ export const CONTRACTS = buildContracts({
         why: "A rating and the reviews behind it are two composed groups of one region, so the seam between them out-ranks the seams inside each. The summary answers whether the course is any good and the list answers why, and a reader who only wants the first must not have to read the second.",
     },
     "course-review-summary": {
-        classes: ["flex", "flex-row", "flex-wrap", "items-baseline", "gap-3"],
+        classes: ["flex", "flex-row", "flex-wrap", "items-center", "gap-3"],
         children: {
             score: { leaf: "heading" },
-            scale: { contract: "rating-star-run" },
+            scale: { leaf: "rating-stars" },
             count: { leaf: "text", props: { size: "sm", tone: "muted" } },
         },
         why: "The mean, the scale it is measured against and the count are one statement about the whole population, sharing a baseline so the figure does not float against its own qualifier. They are separate semantic groups on one row rather than one compact control.",
     },
-    "rating-star-run": {
-        classes: ["flex", "flex-row", "items-center", "gap-1"],
-        children: {
-            star: { leaf: "icon", repeats: true, restingCount: 5 },
-        },
-        why: "Five marks stand for the scale a score is read against, so they are one compact functional cluster rather than five facts. The run says how far the scale goes and the number beside it says where this course sits; a filled mark would need a glyph family this product does not carry.",
-    },
     "course-review-list": {
-        host: "ul",
-        classes: ["flex", "flex-col", "divide-y", "divide-separator", "overflow-hidden", "p-0", "[&>*]:px-4", "[&>*]:py-3"],
+        classes: ["flex", "flex-col", "divide-y", "divide-separator", "overflow-hidden", "p-0"],
         children: {
             review: { contract: "course-review-row", repeats: true, restingCount: 3 },
         },
-        why: "Reviews are unordered peers of one joined list - review three is not a consequence of review two - so a ul, and full-width separators keep the scan continuous without giving any single opinion a card of its own.",
+        why: "Reviews are unordered peers inside one joined list surface. Dividers preserve each learner's authorship boundary without repeating card chrome or elevation for every opinion.",
     },
     "course-review-row": {
-        host: "li",
-        classes: ["flex", "min-w-0", "flex-col", "gap-1"],
+        host: "section",
+        classes: ["flex", "min-w-0", "flex-col", "gap-2", "p-4"],
         children: {
             author: { contract: "course-review-author-line" },
             body: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
         },
-        why: "Who said it and what they said are two lines of ONE opinion, so they sit at the identity rung rather than at the unit rung. The body is optional because a score alone is a complete review, and requiring prose is how a list fills with one-word bodies.",
+        why: "Who said it, the score they gave and what they wrote are one bounded row of the joined review list. The body remains optional because a score alone is a complete review.",
     },
     "course-review-author-line": {
-        classes: ["flex", "flex-row", "flex-wrap", "items-baseline", "gap-2"],
+        classes: ["flex", "flex-row", "flex-wrap", "items-center", "gap-2"],
         children: {
             name: { leaf: "text", props: { size: "sm", weight: "medium" } },
-            score: { leaf: "text", props: { size: "xs" } },
+            score: { leaf: "rating-stars" },
         },
         why: "A name and the score that person gave are one compact reading on one row - the score here is a fact about what THIS person thought rather than about the course - so they form one functional cluster.",
     },
@@ -2384,20 +2368,13 @@ export const CONTRACTS = buildContracts({
         why: "The buy box is complementary to the narrative: active phase, artwork, price, compact phase comparison, action and enrolment proof are one sticky decision read top to bottom.",
     },
     "course-pricing-action-stack": {
-        classes: ["flex", "flex-col", "gap-2", "[&>*:first-child]:w-full"],
+        classes: ["flex", "flex-col", "gap-2", "[&>*]:w-full"],
         children: {
             primary: { leaf: "button" },
-            secondary: { contract: "course-pricing-secondary-action-row", optional: true },
-        },
-        why: "The purchase action owns the full primary line while trial and cart remain two quieter peer ways into the same course decision below it.",
-    },
-    "course-pricing-secondary-action-row": {
-        classes: ["flex", "flex-row", "items-center", "gap-2", "[&>*]:w-full"],
-        children: {
-            trial: { leaf: "button", optional: true },
             cart: { leaf: "button", optional: true },
+            trial: { leaf: "button", optional: true },
         },
-        why: "Trial and cart are independent secondary actions of equal rank, so they share one line and equal measure without competing with enrolment above.",
+        why: "The legacy conversion cluster is one full-width sibling stack: enrol first, cart second when the course is paid, and trial last. Gap two preserves peer rhythm without inventing a nested secondary row.",
     },
     "course-price-block": {
         classes: ["flex", "flex-col", "gap-1"],

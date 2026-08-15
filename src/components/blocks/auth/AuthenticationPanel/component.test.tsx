@@ -96,4 +96,11 @@ describe("_AuthenticationPanel", () => {
         expect(credentials?.className).not.toContain("gap-2")
         expect(container.querySelector("[data-node='label-field-hint']")?.className).toContain("gap-3")
     })
+
+    it("keeps OAuth shortcuts outlined instead of styling them as secondary actions", () => {
+        render(<_AuthenticationPanel {...signUpProps} />)
+
+        expect(screen.getByRole("button", { name: "Sign In With Google" })).toHaveAttribute("data-variant", "outline")
+        expect(screen.getByRole("button", { name: "Sign In With GitHub" })).toHaveAttribute("data-variant", "outline")
+    })
 })

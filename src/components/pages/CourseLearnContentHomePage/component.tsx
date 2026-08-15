@@ -42,6 +42,7 @@ export const _CourseLearnContentHomePage = (input: CourseLearnContentHomeProps) 
                 defineLeafComponent("curriculum-module-row", {}, () => (
                     <CurriculumModuleRow
                         props={{ title: module.title, levelLabel: module.contentTier, previewLabel: `${module.numContents}` }}
+                        on={{ press: () => input.onModule?.(module.id) }}
                         isLoading={loading}
                     />
                 ))

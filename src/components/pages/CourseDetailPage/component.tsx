@@ -10,7 +10,11 @@ import { ChoiceTabs } from "@/components/leaves/ChoiceTabs"
 import { Breadcrumbs } from "@/components/leaves/Breadcrumbs"
 import { Heading } from "@/components/leaves/Heading"
 import { Text } from "@/components/leaves/Text"
-import { CurriculumModuleRow, type CurriculumLesson } from "@/components/leaves/CurriculumModuleRow"
+import {
+    CurriculumModuleRow,
+    type CurriculumLesson,
+    type CurriculumLevel,
+} from "@/components/leaves/CurriculumModuleRow"
 import {
     defineContractComponent,
     defineContractProjection,
@@ -61,8 +65,6 @@ export type CourseStat = {
     readonly label: string
     /** The already-formatted evidence figure. */
     readonly value: string
-    /** The visual rank this fact holds in the conversion board. */
-    readonly emphasis: "accent" | "success" | "warning" | "neutral"
 }
 
 /** The real sections the course-page tabs can reach. */
@@ -84,6 +86,8 @@ export type CourseModule = {
     readonly id: string
     /** The already-resolved module title. */
     readonly title: string
+    /** Stable difficulty identity used to select the level's semantic tone. */
+    readonly level?: CurriculumLevel
     /** The already-resolved level word. */
     readonly levelLabel?: string
     /** The already-resolved preview count sentence. */
@@ -216,20 +220,11 @@ const courseSignalCard = (stat: CourseStat, isLoading: boolean) => {
         label: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
             <Text props={{ content: stat.label, size: "xs", tone: "muted" }} isLoading={isLoading} />
         )),
-        value: defineLeafComponent("text", { size: "md", weight: "semibold" }, () => (
-            <Text props={{ content: stat.value, size: "md", weight: "semibold" }} isLoading={isLoading} />
+        value: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
+            <Text props={{ content: stat.value, size: "sm", weight: "medium" }} isLoading={isLoading} />
         )),
     }
 
-    if (stat.emphasis === "accent") {
-        return defineContractComponent("course-signal-card-accent", slots)
-    }
-    if (stat.emphasis === "success") {
-        return defineContractComponent("course-signal-card-success", slots)
-    }
-    if (stat.emphasis === "warning") {
-        return defineContractComponent("course-signal-card-warning", slots)
-    }
     return defineContractComponent("course-signal-card-neutral", slots)
 }
 
@@ -278,6 +273,7 @@ const CourseModuleListView = ({ props, isLoading = false }: LeafProps<CourseModu
                     <CurriculumModuleRow
                         props={{
                             title: module.title,
+                            level: module.level,
                             levelLabel: module.levelLabel,
                             previewLabel: module.previewLabel,
                             lessons: module.lessons,
@@ -350,7 +346,6 @@ export const _CourseDetailPage = (input: CourseDetailPageProps) => {
             id: `resting-${index + 1}`,
             label: "",
             value: "",
-            emphasis: (["accent", "success", "warning", "neutral", "neutral"] as const)[index] ?? "neutral",
         }))
         : input.props.stats ?? []
     const valueProps: ReadonlyArray<string> = isLoading
@@ -489,7 +484,7 @@ export const _CourseDetailPage = (input: CourseDetailPageProps) => {
                     }),
                 }),
                 action: input.props.rail === undefined ? undefined : CourseMobileEnrollBar({
-                    state: input.props.railState ?? "ready",
+                    state: input.props.railState === "price-pending" ? "price-pending" : "ready",
                     props: {
                         price: input.props.rail.price,
                         originalPrice: input.props.rail.originalPrice,

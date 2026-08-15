@@ -136,8 +136,8 @@ export const _CodingProblemList = (input: CodingProblemListProps) => {
                                     isLoading={isLoading}
                                 />
                             )),
-                            title: defineLeafComponent("text", {}, () => (
-                                <Text props={{ content: problem.title }} isLoading={isLoading} />
+                            title: defineLeafComponent("text", { size: "sm" }, () => (
+                                <Text props={{ content: problem.title, size: "sm" }} isLoading={isLoading} />
                             )),
                             fact: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
                                 <Text

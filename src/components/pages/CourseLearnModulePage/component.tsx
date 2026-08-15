@@ -10,6 +10,7 @@ export type CourseLearnModulePageProps = {
     readonly title?: string
     readonly module?: ModuleDetail
     readonly label: string
+    readonly onContent?: (contentId: string) => void
 }
 
 /** Draw one selected module and its authored content run. */
@@ -24,6 +25,7 @@ export const _CourseLearnModulePage = (input: CourseLearnModulePageProps) => (
                     title: input.module?.title ?? input.label,
                     lessons: (input.module?.contents ?? []).map((content) => ({ id: content.id, title: content.title })),
                 }}
+                on={{ pressLesson: input.onContent }}
                 isLoading={input.state === "pending"}
             />
         )),

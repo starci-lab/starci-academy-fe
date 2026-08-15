@@ -12,6 +12,7 @@ export type StreakStatRowProps =
 /** Render the streak row without reading request or locale state. */
 export const _StreakStatRow = (input: StreakStatRowProps) => input.state === "empty" ? null : (
     <StatRow
+        hierarchy="peer"
         props={{
             icon: "streak",
             label: input.props.label,

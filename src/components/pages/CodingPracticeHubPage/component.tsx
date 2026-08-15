@@ -132,8 +132,8 @@ export const _CodingPracticeHubPage = (input: CodingPracticeHubPageProps) => {
                 // not be shown an empty shelf where the way back would be.
                 ...(resume === undefined ? {} : {
                     resume: defineContractComponent("resume-item-card", {
-                        title: defineLeafComponent("text", { size: "md", weight: "medium" }, () => (
-                            <Text props={{ content: resume.title, size: "md", weight: "medium" }} />
+                        title: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
+                            <Text props={{ content: resume.title, size: "sm", weight: "medium" }} />
                         )),
                         kind: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
                             <Text props={{ content: resume.kind, size: "sm", tone: "muted" }} />

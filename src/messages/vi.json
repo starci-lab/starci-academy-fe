@@ -199,6 +199,7 @@
             "prerequisitesTitle": "Cần có trước khi bắt đầu",
             "reviewsTitle": "Đánh giá từ học viên",
             "reviewsEmpty": "Chưa có đánh giá nào cho khóa học này.",
+            "reviewsAnonymous": "Học viên",
             "faqTitle": "Câu hỏi thường gặp",
             "faqEmpty": "Khóa học này chưa đăng câu hỏi thường gặp nào.",
             "reviewCount": "{count} đánh giá",
@@ -480,13 +481,12 @@
         "title": "StarCi AI",
         "description": "Trợ giảng đồng hành trên toàn StarCi Academy.",
         "modes": {
-            "general": "Chat chung",
-            "code": "Code coach",
+            "general": "Hỏi mọi thứ",
             "history": "Lịch sử"
         },
         "composer": {
             "label": "Hỏi StarCi AI",
-            "placeholder": "Hỏi về bài học hoặc đoạn code đang chọn..."
+            "placeholder": "Hỏi về bài học, code, challenge hoặc lộ trình..."
         },
         "actions": {
             "send": "Gửi",
@@ -526,8 +526,8 @@
             "reconnecting": "Đang kết nối lại StarCi AI...",
             "streamFailed": "Answer dừng vì model gặp lỗi.",
             "aborted": "Đã dừng answer. Phần đã nhận vẫn được giữ.",
-            "tangentReady": "Conversation code riêng đã sẵn sàng.",
-            "contextCleared": "Đã bỏ ngữ cảnh code; câu kế tiếp dùng ngữ cảnh bài học."
+            "tangentReady": "Conversation riêng đã sẵn sàng.",
+            "contextCleared": "Đã bỏ phần đang chọn; câu kế tiếp vẫn dùng ngữ cảnh màn học."
         }
     },
     "profile": {
@@ -673,6 +673,9 @@
             "description": "Ch\u1ecdn m\u1ed9t m\u00f4-\u0111un \u0111\u1ec3 ti\u1ebfp t\u1ee5c h\u1ecdc.",
             "modules": "M\u00f4-\u0111un",
             "moduleCount": "{count} m\u00f4-\u0111un"
+        },
+        "module": {
+            "contents": "B\u00e0i h\u1ecdc"
         },
         "content": {
             "navCourse": "Khoá học",

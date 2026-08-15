@@ -61,8 +61,8 @@ const resumeCard = (
     open: CourseLearnTodayActions["open"],
     isLoading = false,
 ) => defineContractComponent("resume-item-card", {
-    title: defineLeafComponent("text", { size: "md", weight: "medium" }, () => (
-        <Text props={{ content: item.title, size: "md", weight: "medium" }} isLoading={isLoading} />
+    title: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
+        <Text props={{ content: item.title, size: "sm", weight: "medium" }} isLoading={isLoading} />
     )),
     kind: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
         <Text props={{ content: item.kind, size: "sm", tone: "muted" }} isLoading={isLoading} />

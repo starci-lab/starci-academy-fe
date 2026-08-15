@@ -14,7 +14,6 @@ const stateLabels = Object.fromEntries(
 const props: StarCiAiChatData = {
     labels: {
         generalMode: "General",
-        codeMode: "Code coach",
         historyMode: "History",
         composer: "Ask StarCi AI",
         placeholder: "Ask a follow-up",
@@ -30,7 +29,7 @@ const props: StarCiAiChatData = {
         partial: "Partial answer",
         states: stateLabels,
     },
-    mode: "code",
+    mode: "general",
     contextSummary: "content:lesson-1 · src/useTodos.ts · L14-21",
     turns: [{
         id: "turn-1",
@@ -59,6 +58,7 @@ describe("_StarCiAiChat", () => {
 
     it("quotes selected code inside the user turn and keeps context to one row", () => {
         const { container } = render(<_StarCiAiChat state="ready" props={props} />)
+        expect(screen.queryByRole("button", { name: "Code coach" })).not.toBeInTheDocument()
         expect(screen.getAllByText("const controller = new AbortController()").length).toBeGreaterThan(0)
         expect(container.querySelectorAll("[data-node=starci-ai-context-stack]")).toHaveLength(1)
         expect(screen.getByText("content:lesson-1 · src/useTodos.ts · L14-21")).toBeInTheDocument()

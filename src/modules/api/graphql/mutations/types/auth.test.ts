@@ -58,6 +58,16 @@ describe("MutationSignInInitResponse", () => {
             }
         })
 
+    it("does not mistake nullable GraphQL union fields for a completed session", () => {
+        const challengeWithSelectedNullableField = {
+            challengeId: "challenge-1",
+            expiresInSeconds: 300,
+            accessToken: null,
+        } as unknown as SignInChallengeData
+
+        expect(isSignInSessionData(challengeWithSelectedNullableField)).toBe(false)
+    })
+
     it("describes a refusal with no challenge at all", () => {
         const response: MutationSignInInitResponse = {
             signInInit: { success: false, message: "Wrong password", error: "INVALID_CREDENTIALS" },

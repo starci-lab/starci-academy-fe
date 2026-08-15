@@ -110,7 +110,7 @@ export type IconName =
     | "light" | "dark" | "locale" | "google" | "github"
     | "search" | "cart" | "notification" | "account" | "saved" | "blog" | "talents" | "jobs" | "practice"
     | "viewGrid" | "viewList"
-    | "star"
+    | "star" | "ratingStarEmpty" | "ratingStarFilled"
 
 /** The two native Heroicon roles used by the product. */
 export type IconRole = "heading" | "leading" | "chip"
@@ -223,6 +223,8 @@ const GLYPHS: Record<IconName, GlyphCuts> = {
     livestream: cuts(VideoCameraIcon, VideoCameraSolidIcon),
     review: cuts(ClipboardDocumentCheckIcon, ClipboardDocumentCheckSolidIcon),
     star: cuts(StarIcon, StarSolidIcon),
+    ratingStarEmpty: cuts(StarIcon, StarIcon),
+    ratingStarFilled: cuts(StarSolidIcon, StarSolidIcon),
     light: cuts(SunIcon, SunSolidIcon),
     dark: cuts(MoonIcon, MoonSolidIcon),
     locale: cuts(LanguageIcon, LanguageSolidIcon),

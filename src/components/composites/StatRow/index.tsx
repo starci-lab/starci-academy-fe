@@ -30,18 +30,38 @@ export type StatRowData = {
 }
 
 /** Props for {@link StatRow}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type StatRowProps = CompositeProps<StatRowData>
+export type StatRowProps = CompositeProps<StatRowData> & {
+    /** Whether the label leads a supporting fact or both facts share one reading rank. */
+    readonly hierarchy?: "label-led" | "peer"
+}
 
 /**
  * Draw one standing figure.
  *
  * @param input - {@link StatRowProps}
  */
-export const StatRow = ({ props, isLoading = false }: StatRowProps) => {
+export const StatRow = ({ props, hierarchy = "label-led", isLoading = false }: StatRowProps) => {
+    if (hierarchy === "peer") {
+        const content = defineContractComponent("glyph-peer-fact-row", {
+            glyph: defineLeafComponent("icon", { size: "sm" }, () => <Icon props={{ name: props.icon, role: "leading" }} />),
+            title: defineLeafComponent("text", { size: "sm", tone: "default" }, () => (
+                <Text props={{ content: props.label, size: "sm" }} />
+            )),
+            fact: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                <Text props={{ content: props.value, size: "sm", tone: "muted" }} isLoading={isLoading} />
+            )),
+        })
+        return <Tree contract="glyph-peer-fact-row" render={content} />
+    }
+
     const content = defineContractComponent("glyph-title-fact-row", {
         glyph: defineLeafComponent("icon", { size: "sm" }, () => <Icon props={{ name: props.icon, role: "leading" }} />),
-        title: defineLeafComponent("text", { size: "md", tone: "default" }, () => <Text props={{ content: props.label, size: "md" }} />),
-        fact: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: props.value, size: "xs" }} isLoading={isLoading} />),
+        title: defineLeafComponent("text", { size: "md", tone: "default" }, () => (
+            <Text props={{ content: props.label, size: "md" }} />
+        )),
+        fact: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+            <Text props={{ content: props.value, size: "xs" }} isLoading={isLoading} />
+        )),
     })
     return <Tree contract="glyph-title-fact-row" render={content} />
 }

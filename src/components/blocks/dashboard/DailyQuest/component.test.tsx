@@ -83,6 +83,12 @@ describe("_DailyQuest", () => {
         expect(container.querySelector("[data-node=\"task-mark-title-fact-row\"]")?.className).not.toMatch(/\bp-/)
         expect(container.querySelector("[data-component=\"SurfaceListCard\"]")?.className).toContain("gap-3")
         expect(container.querySelector("[data-node=\"title-with-end-action\"]")).toBeNull()
+
+        const titles = tasks.map((task) => screen.getByText(task.title))
+        for (const title of titles) {
+            expect(title).toHaveAttribute("data-size", "sm")
+            expect(title).toHaveAttribute("data-weight", "normal")
+        }
     })
 
     it("uses the semantic completion icon only for completed tasks", () => {
@@ -107,14 +113,14 @@ describe("_DailyQuest", () => {
         // Resting rows stand in for real ones so the card does not jump when they land.
         expect(container.querySelectorAll("[data-node=\"task-mark-title-fact-row\"]")).toHaveLength(5)
         const restingTitles = container.querySelectorAll(
-            "[data-node=\"task-mark-title-fact-row\"] [data-component=\"Text\"][data-size=\"md\"][data-loading=\"true\"]",
+            "[data-node=\"task-mark-title-fact-row\"] [data-component=\"Text\"][data-size=\"sm\"][data-loading=\"true\"]",
         )
         const restingFacts = container.querySelectorAll(
             "[data-node=\"task-mark-title-fact-row\"] [data-component=\"Text\"][data-size=\"xs\"][data-loading=\"true\"]",
         )
         expect(restingTitles).toHaveLength(5)
         expect(restingFacts).toHaveLength(5)
-        expect(restingTitles[0]?.className).toContain("w-40")
+        expect(restingTitles[0]?.className).toContain("w-12")
         expect(restingFacts[0]?.className).toContain("w-10")
     })
 

@@ -28,6 +28,10 @@ describe("queryContentMap", () => {
         expect(documentText).not.toContain("repoFiles")
         expect(documentText).not.toContain("githubToken")
     })
+
+    it("leaves the module relation to the dedicated outline query", () => {
+        expect(documentText).not.toMatch(/\bmodule\s*\{/)
+    })
 })
 
 describe("queryContent", () => {

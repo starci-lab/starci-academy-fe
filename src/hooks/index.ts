@@ -13,6 +13,7 @@
 
 export { useMutateAddToCartSwr } from "./swr/useMutateAddToCartSwr"
 export { useMutateRemoveFromCartSwr } from "./swr/useMutateRemoveFromCartSwr"
+export { useMutateStartTrialSwr } from "./swr/useMutateStartTrialSwr"
 export { useMutateClearCartSwr } from "./swr/useMutateClearCartSwr"
 export { useQueryMyCartSwr, QUERY_MY_CART_SWR_KEY } from "./swr/useQueryMyCartSwr"
 export { useQueryCoursesCheckoutPreviewSwr } from "./swr/useQueryCoursesCheckoutPreviewSwr"

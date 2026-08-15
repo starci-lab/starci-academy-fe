@@ -53,7 +53,13 @@ export const GlobalAiChatLayout = ({ surface: Surface }: GlobalAiChatLayoutProps
         },
     }), [anchor, codeContext, isOpen, tangentVersion])
 
-    if (token === undefined || isContentAiRouteHidden(pathname)) return <Surface />
+    if (token === undefined || isContentAiRouteHidden(pathname)) {
+        return (
+            <GlobalAiChatContext.Provider value={value}>
+                <Surface />
+            </GlobalAiChatContext.Provider>
+        )
+    }
 
     return (
         <GlobalAiChatContext.Provider value={value}>

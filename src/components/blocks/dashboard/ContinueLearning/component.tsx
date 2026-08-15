@@ -136,9 +136,9 @@ export const _ContinueLearning = (input: ContinueLearningInput) => {
                         isLoading={isLoading}
                     />
                 )),
-                title: defineLeafComponent("text", { size: "md", weight: "medium" }, () => (
+                title: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
                     <Text
-                        props={{ content: item?.title, size: "md", weight: "medium" }}
+                        props={{ content: item?.title, size: "sm", weight: "medium" }}
                         isLoading={isLoading}
                     />
                 )),

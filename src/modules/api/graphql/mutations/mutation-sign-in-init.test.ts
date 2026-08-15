@@ -73,6 +73,11 @@ describe("mutationSignInInit", () => {
         expect(mocks.createApolloClient.mock.calls[0][0]).not.toHaveProperty("withAuth", true)
     })
 
+    it("accepts the HttpOnly session cookie returned by the direct local-test branch", async () => {
+        await mutationSignInInit({ request: { email: "learner@example.com", password: "secret" } })
+        expect(mocks.createApolloClient.mock.calls[0][0]).toHaveProperty("withCredentials", true)
+    })
+
     it("passes the abort signal and extra headers through to the client", async () => {
         const controller = new AbortController()
         await mutationSignInInit({

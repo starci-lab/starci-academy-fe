@@ -43,7 +43,7 @@ export type SignInInitData = SignInChallengeData | SignInSessionData
 
 /** Narrow a sign-in init result to the direct local test session branch. */
 export const isSignInSessionData = (data: SignInInitData): data is SignInSessionData => {
-    return "accessToken" in data
+    return "accessToken" in data && typeof data.accessToken === "string" && data.accessToken !== ""
 }
 
 /** The response of `signInInit`, envelope included. */

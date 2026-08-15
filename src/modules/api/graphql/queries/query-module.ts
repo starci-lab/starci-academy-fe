@@ -1,7 +1,6 @@
 import { gql, type DocumentNode } from "@apollo/client"
 import { createApolloClient } from "@/modules/api/graphql/clients/create-apollo-client"
 import { type QueryParams } from "@/modules/api/graphql/types"
-import { type ContentSibling } from "@/modules/api/graphql/queries/types/content"
 import { type GraphQLResponse } from "@/modules/api/graphql/types"
 
 /**
@@ -32,26 +31,7 @@ const query1 = gql`
                 contents {
                     id
                     title
-                    minutesRead
-                    isPremium
                     orderIndex
-                    challenges {
-                        id
-                        displayId
-                        title
-                        description
-                        score
-                        difficulty
-                        orderIndex
-                        hint
-                        submissions {
-                            id
-                            title
-                            description
-                            score
-                            sortIndex
-                        }
-                    }
                 }
             }
         }
@@ -69,7 +49,11 @@ export interface ModuleDetail {
     /** How many contents it holds. */
     numContents: number
     /** Its contents, in the order the module sets. */
-    contents: Array<ContentSibling>
+    contents: Array<{
+        id: string
+        title: string
+        orderIndex: number
+    }>
 }
 
 /** What the caller must say about the module it wants. Exactly one of the two. */

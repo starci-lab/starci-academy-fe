@@ -25,16 +25,6 @@ export interface ContentSibling {
     challenges?: ReadonlyArray<ContentChallenge>
 }
 
-/** The module a content belongs to, selected only as far as the map needs it. */
-export interface ContentModule {
-    /** Stable identity. */
-    id: string
-    /** The already-resolved module title. */
-    title: string
-    /** How many contents the module holds, for the count on its summary line. */
-    numContents: number
-}
-
 /** One deliverable accepted by a content challenge. */
 export interface ContentChallengeSubmission {
     readonly id: string
@@ -90,8 +80,6 @@ export interface ContentDetail {
     minutesRead: number
     /** Declaration order inside the module - the reader's place in it. */
     orderIndex: number
-    /** The module this content belongs to. */
-    module: ContentModule
     /** The finite challenge faces the reader may open from this lesson. */
     challenges?: ReadonlyArray<ContentChallenge>
 }

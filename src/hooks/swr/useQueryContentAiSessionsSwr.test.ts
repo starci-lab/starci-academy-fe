@@ -62,6 +62,13 @@ describe("useQueryContentAiSessionsSwr", () => {
         expect(mocks.queryContentAiSessions).not.toHaveBeenCalled()
     })
 
+    it("pauses while a route slug is still resolving to a course id", async () => {
+        const { result } = renderHook(() => useQueryContentAiSessionsSwr(null), { wrapper })
+        expect(result.current.data).toBeUndefined()
+        await new Promise((resolve) => setTimeout(resolve, 0))
+        expect(mocks.queryContentAiSessions).not.toHaveBeenCalled()
+    })
+
     it("keeps transport failures as errors instead of empty history", async () => {
         mocks.queryContentAiSessions.mockRejectedValue(new Error("offline"))
         const { result } = renderHook(() => useQueryContentAiSessionsSwr(), { wrapper })

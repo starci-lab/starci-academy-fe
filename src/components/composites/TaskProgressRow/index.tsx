@@ -19,7 +19,7 @@ export type TaskProgressRowProps = CompositeProps<TaskProgressRowData>
 export const TaskProgressRow = ({ props, isLoading = false }: TaskProgressRowProps) => {
     const content = defineContractComponent("task-mark-title-fact-row", {
         mark: defineLeafComponent("icon", {}, () => <Icon props={{ name: props.isComplete === true ? "complete" : "pending", role: "leading" }} isLoading={isLoading} />),
-        title: defineLeafComponent("text", {}, () => <Text props={{ content: props.title }} isLoading={isLoading} />),
+        title: defineLeafComponent("text", { size: "sm" }, () => <Text props={{ content: props.title, size: "sm" }} isLoading={isLoading} />),
         fact: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: props.fact, size: "xs" }} isLoading={isLoading} />),
     })
     return <Tree contract="task-mark-title-fact-row" render={content} />

@@ -34,10 +34,15 @@ export type CurriculumLesson = {
     readonly isPreview?: boolean
 }
 
+/** Stable module difficulty identity; labels stay localized at the connected owner. */
+export type CurriculumLevel = "foundation" | "intermediate" | "advanced"
+
 /** What this leaf draws. A `type`, not an `interface` - only an alias satisfies the data fence. */
 export type CurriculumModuleRowData = {
     /** The already-resolved module title. */
     readonly title: string
+    /** Stable difficulty identity used to select a semantic badge tone. */
+    readonly level?: CurriculumLevel
     /** The already-resolved level word the production render shows beside the title. */
     readonly levelLabel?: string
     /** The already-resolved preview count sentence. */
@@ -48,8 +53,14 @@ export type CurriculumModuleRowData = {
     readonly isOpen?: boolean
 }
 
+/** Navigation emitted by a flat module row or one lesson inside its disclosure. */
+export type CurriculumModuleRowActions = {
+    readonly press?: () => void
+    readonly pressLesson?: (id: string) => void
+}
+
 /** Props for {@link CurriculumModuleRow}. Three fixed slots, no fourth. */
-export type CurriculumModuleRowProps = LeafProps<CurriculumModuleRowData>
+export type CurriculumModuleRowProps = LeafProps<CurriculumModuleRowData, CurriculumModuleRowActions>
 
 const SUMMARY_CLASSES = "flex cursor-pointer list-none flex-row items-center gap-3 marker:content-none"
 const ROW_CLASSES = "flex flex-row items-center gap-3"
@@ -72,7 +83,14 @@ const META_CLASSES = "flex shrink-0 flex-row flex-wrap items-center justify-star
  * height far more than it needs the tail of a long name - which the disclosure reveals in full the
  * moment it is opened.
  */
-const TITLE_CLASSES = "block min-w-0 grow truncate text-sm leading-5 text-foreground"
+const TITLE_CLASSES = "block min-w-0 grow truncate text-sm font-medium leading-5 text-foreground"
+
+/** Difficulty is the meaning; the Badge leaf remains the sole owner of actual palette tokens. */
+const LEVEL_TONES = {
+    foundation: "success",
+    intermediate: "warning",
+    advanced: "danger",
+} as const
 
 /**
  * Draw one curriculum module, disclosing its lessons when it has any.
@@ -94,9 +112,13 @@ export const CurriculumModuleRow = (input: CurriculumModuleRowProps) => {
             {input.props.levelLabel === undefined && input.props.previewLabel === undefined ? null : (
                 <span className={META_CLASSES}>
                     {input.props.levelLabel === undefined ? null : (
-                        // The locked Badge owns this shape and its success tone. Hand-writing a pill
-                        // here would make this file a second owner of the product's chip.
-                        <Badge props={{ content: input.props.levelLabel, tone: "success" }} isLoading={isLoading} />
+                        <Badge
+                            props={{
+                                content: input.props.levelLabel,
+                                tone: input.props.level === undefined ? "neutral" : LEVEL_TONES[input.props.level],
+                            }}
+                            isLoading={isLoading}
+                        />
                     )}
                     {input.props.previewLabel === undefined ? null : (
                         <span className="text-xs leading-4 text-muted">{input.props.previewLabel}</span>
@@ -107,6 +129,22 @@ export const CurriculumModuleRow = (input: CurriculumModuleRowProps) => {
     )
 
     if (!canDisclose) {
+        if (input.on?.press !== undefined) {
+            return (
+                <button
+                    type="button"
+                    data-tier="leaf"
+                    data-component="CurriculumModuleRow"
+                    data-disclosing="false"
+                    data-loading={isLoading ? "true" : "false"}
+                    className={`${ROW_CLASSES} w-full text-left`}
+                    disabled={isLoading}
+                    onClick={input.on.press}
+                >
+                    {head}
+                </button>
+            )
+        }
         return (
             <div
                 data-tier="leaf"
@@ -130,18 +168,23 @@ export const CurriculumModuleRow = (input: CurriculumModuleRowProps) => {
             className="group"
         >
             <summary className={SUMMARY_CLASSES}>{head}</summary>
-            <ul className="mt-3 flex flex-col gap-2 pl-7">
+            <ol className="mt-3 list-decimal divide-y divide-separator pl-12">
                 {lessons.map((lesson) => (
-                    <li key={lesson.id} className="flex flex-row items-center gap-2">
-                        <span className="min-w-0 grow text-xs leading-4 text-muted">{lesson.title}</span>
-                        {lesson.isPreview === true ? (
-                            <span className="shrink-0 text-accent-soft-foreground">
-                                <Icon props={{ name: "review", role: "chip" }} />
-                            </span>
-                        ) : null}
+                    <li key={lesson.id} className="py-2 pl-1 text-sm leading-5 text-foreground marker:text-muted">
+                        {input.on?.pressLesson === undefined ? (
+                            <span>{lesson.title}</span>
+                        ) : (
+                            <button
+                                type="button"
+                                className="text-left hover:text-accent-soft-foreground"
+                                onClick={() => input.on?.pressLesson?.(lesson.id)}
+                            >
+                                {lesson.title}
+                            </button>
+                        )}
                     </li>
                 ))}
-            </ul>
+            </ol>
         </details>
     )
 }

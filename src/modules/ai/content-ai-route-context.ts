@@ -1,3 +1,6 @@
+import type { QueryContentAiSessionsRequest } from "@/modules/api/graphql/queries/types/content-ai-sessions"
+import { isLiveAssessmentRoute } from "@/modules/learn/is-live-assessment-route"
+
 /** The product scope grounding one Content AI conversation. */
 export type ContentAiScope = "content" | "task" | "challenge" | "foundation" | "course" | "global"
 
@@ -7,14 +10,6 @@ export type ContentAiRouteAnchor = {
     readonly id?: string
     readonly path: string
 }
-
-const ROUTE_SCOPE_SEGMENTS: ReadonlyArray<readonly [ContentAiScope, string]> = [
-    ["content", "contents"],
-    ["task", "tasks"],
-    ["challenge", "challenges"],
-    ["foundation", "foundations"],
-    ["course", "courses"],
-]
 
 /** Drop query/hash/locale so every caller compares the same path identity. */
 export const normalizeContentAiPath = (pathname: string): string => {
@@ -28,24 +23,48 @@ export const normalizeContentAiPath = (pathname: string): string => {
 export const resolveContentAiRouteAnchor = (pathname: string): ContentAiRouteAnchor => {
     const path = normalizeContentAiPath(pathname)
     const segments = path.split("/").filter(Boolean)
-    for (const [scope, segment] of ROUTE_SCOPE_SEGMENTS) {
-        const index = segments.lastIndexOf(segment)
-        const id = index < 0 ? undefined : segments[index + 1]
-        if (id !== undefined && id !== "") return { scope, id, path }
-    }
+
+    const challengeIndex = segments.lastIndexOf("challenges")
+    const challengeId = challengeIndex < 0 ? undefined : segments[challengeIndex + 1]
+    if (challengeId !== undefined) return { scope: "challenge", id: challengeId, path }
+
+    const taskIndex = segments.lastIndexOf("tasks")
+    const taskId = taskIndex < 0 ? undefined : segments[taskIndex + 1]
+    if (taskId !== undefined) return { scope: "task", id: taskId, path }
+
+    const contentIndex = segments.lastIndexOf("contents")
+    const contentId = contentIndex < 0 ? undefined : segments[contentIndex + 1]
+    if (contentId !== undefined) return { scope: "content", id: contentId, path }
+
+    const foundationIndex = segments.lastIndexOf("foundations")
+    const foundationId = foundationIndex < 0 ? undefined : segments[foundationIndex + 2]
+    if (foundationId !== undefined) return { scope: "foundation", id: foundationId, path }
+
+    const courseIndex = segments.lastIndexOf("courses")
+    const courseDisplayId = courseIndex < 0 ? undefined : segments[courseIndex + 1]
+    if (courseDisplayId !== undefined) return { scope: "course", id: courseDisplayId, path }
+
     return { scope: "global", path }
+}
+
+/** Convert route evidence to the backend request, resolving the course slug to its UUID first. */
+export const resolveContentAiAnchorRequest = (
+    anchor: ContentAiRouteAnchor,
+    courseId?: string,
+): QueryContentAiSessionsRequest | null => {
+    if (anchor.scope === "global" || anchor.id === undefined) return { scope: "global" }
+    if (anchor.scope === "course") return courseId === undefined ? null : { scope: "course", courseId }
+    if (anchor.scope === "content") return { scope: "content", contentId: anchor.id }
+    if (anchor.scope === "task") return { scope: "task", taskId: anchor.id }
+    if (anchor.scope === "challenge") return { scope: "challenge", challengeId: anchor.id }
+    return { scope: "foundation", foundationId: anchor.id }
 }
 
 /** Auth and focused live-evaluation routes do not mount the global assistant. */
 export const isContentAiRouteHidden = (pathname: string): boolean => {
     const path = normalizeContentAiPath(pathname)
     if (path === "/authentication" || path.startsWith("/authentication/")) return true
-    return [
-        /\/learn\/challenge(?:\/|$)/u,
-        /\/learn\/flashcards\/(?:quiz|session)(?:\/|$)/u,
-        /\/learn\/mock-interview\/session(?:\/|$)/u,
-        /\/learn\/playgrounds\/[^/]+\/session(?:\/|$)/u,
-    ].some((pattern) => pattern.test(path))
+    return isLiveAssessmentRoute(path)
 }
 
 /** Route navigation changes grounding when either its scope, id or normalized path changes. */

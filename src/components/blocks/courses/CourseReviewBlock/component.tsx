@@ -1,11 +1,14 @@
+import { SurfaceListCard, type SurfaceListCardData } from "@/components/branches/SurfaceListCard"
 import { Tree } from "@/components/branches/Tree"
 import { Heading } from "@/components/leaves/Heading"
-import { Icon } from "@/components/leaves/Icon"
+import { RatingStars } from "@/components/leaves/RatingStars"
 import { Text } from "@/components/leaves/Text"
 import {
     defineContractComponent,
+    defineContractProjection,
     defineLeafComponent,
     type BlockProps,
+    type LeafProps,
 } from "@/components/contracts/props"
 
 /** How many marks the scale carries. */
@@ -46,6 +49,43 @@ export type CourseReviewBlockData = {
     readonly emptyLabel: string
 }
 
+/** Data passed through the joined-list surface to the review rows. */
+type CourseReviewListData = SurfaceListCardData & {
+    readonly reviews: ReadonlyArray<CourseReview>
+}
+
+/** Draw every learner opinion as one row of the shared review surface. */
+const CourseReviewListView = ({ props }: LeafProps<CourseReviewListData>) => (
+    <Tree
+        contract="course-review-list"
+        render={defineContractComponent("course-review-list", {
+            review: props.reviews.map((review) => defineContractComponent("course-review-row", {
+                author: defineContractComponent("course-review-author-line", {
+                    name: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
+                        <Text props={{ content: review.author, size: "sm", weight: "medium" }} />
+                    )),
+                    score: defineLeafComponent("rating-stars", {}, () => (
+                        <RatingStars
+                            props={{
+                                label: `${review.author}: ${review.score}/${SCORE_SCALE}`,
+                                value: review.score,
+                            }}
+                        />
+                    )),
+                }),
+                body: review.body === undefined
+                    ? undefined
+                    : defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                        <Text props={{ content: review.body, size: "sm", tone: "muted" }} />
+                    )),
+            })),
+        })}
+    />
+)
+
+/** Stable component type branded for the joined review-list contract. */
+const CourseReviewList = defineContractComponent("course-review-list", CourseReviewListView)
+
 /**
  * BLOCK - `CourseReviewBlock`: what other learners thought, and how the course scores overall.
  *
@@ -59,11 +99,9 @@ export type CourseReviewBlockData = {
  * number, so the region says what is true instead. This was found by looking at it, not by reading
  * the code.
  *
- * THE SCALE IS FIVE OUTLINE MARKS, ALL ALIKE. A filled mark would need the `24/solid` family, which
- * is not one of this product's two, and ICON-5 refuses telling filled from empty by colour. So the
- * run says how far the scale goes and the number beside it says where this course sits. Each row
- * states its own score in words rather than drawing a second run - repeating the scale on every
- * line is what makes the scale stop meaning anything.
+ * THE SCALE IS READ-ONLY AND YELLOW. The aggregate and each learner card use the same five-star
+ * vocabulary; half values stay visible rather than being rounded away, while the numeric aggregate
+ * remains beside the first run for an exact scan.
  *
  * @param input - The rating and the page of reviews.
  * @returns The review region.
@@ -83,32 +121,25 @@ export const _CourseReviewBlock = ({
                     score: defineLeafComponent("heading", {}, () => (
                         <Heading props={{ content: props.averageScore.toFixed(1), level: 3 }} />
                     )),
-                    scale: defineContractComponent("rating-star-run", {
-                        star: Array.from({ length: SCORE_SCALE }, () => defineLeafComponent("icon", {}, () => (
-                            <Icon props={{ name: "star", role: "chip" }} />
-                        ))),
-                    }),
+                    scale: defineLeafComponent("rating-stars", {}, () => (
+                        <RatingStars
+                            props={{
+                                label: `${props.averageScore.toFixed(1)}/${SCORE_SCALE}`,
+                                value: props.averageScore,
+                            }}
+                        />
+                    )),
                     count: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
                         <Text props={{ content: props.countLabel, size: "sm", tone: "muted" }} />
                     )),
                 }),
-                list: defineContractComponent("course-review-list", {
-                    review: props.reviews.map((review) => defineContractComponent("course-review-row", {
-                        author: defineContractComponent("course-review-author-line", {
-                            name: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
-                                <Text props={{ content: review.author, size: "sm", weight: "medium" }} />
-                            )),
-                            score: defineLeafComponent("text", { size: "xs" }, () => (
-                                <Text props={{ content: `${review.score}/${SCORE_SCALE}`, size: "xs" }} />
-                            )),
-                        }),
-                        body: review.body === undefined
-                            ? undefined
-                            : defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                                <Text props={{ content: review.body, size: "sm", tone: "muted" }} />
-                            )),
-                    })),
-                }),
+                list: defineContractProjection("course-review-list", () => (
+                    <SurfaceListCard
+                        contract="course-review-list"
+                        render={CourseReviewList}
+                        props={{ label: "", isLabelHidden: true, reviews: props.reviews }}
+                    />
+                )),
             })}
         />
     )

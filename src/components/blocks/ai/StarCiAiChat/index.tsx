@@ -10,9 +10,13 @@ import {
     useMutateSetContentAiSessionArchivedSwr,
     useQueryContentAiHistorySwr,
     useQueryContentAiSessionsSwr,
+    useQueryCourseSwr,
     useQueryMyAiQuotaSwr,
 } from "@/hooks"
 import { useGlobalAiChat } from "@/modules/ai/global-ai-chat-context"
+import {
+    resolveContentAiAnchorRequest,
+} from "@/modules/ai/content-ai-route-context"
 import {
     buildContentAiQuestion,
     formatContentAiContextSummary,
@@ -36,7 +40,7 @@ export const StarCiAiChat = () => {
     const t = useTranslations("globalAi")
     const locale = useLocale()
     const owner = useGlobalAiChat()
-    const [mode, setMode] = useState<StarCiAiMode>(owner.codeContext === undefined ? "general" : "code")
+    const [mode, setMode] = useState<StarCiAiMode>("general")
     const [activeSessionId, setActiveSessionId] = useState<string>()
     const [draft, setDraft] = useState("")
     const [draftKey, setDraftKey] = useState(0)
@@ -44,7 +48,12 @@ export const StarCiAiChat = () => {
     const [terminalState, setTerminalState] = useState<StarCiAiChatState>()
     const handledTangentVersion = useRef(owner.tangentVersion)
     const failedAttempt = useRef<StarCiAiAttempt | undefined>(undefined)
-    const sessions = useQueryContentAiSessionsSwr()
+    const course = useQueryCourseSwr({ displayId: owner.anchor.scope === "course" ? owner.anchor.id : undefined })
+    const anchorRequest = useMemo(
+        () => resolveContentAiAnchorRequest(owner.anchor, course.data?.id),
+        [course.data?.id, owner.anchor],
+    )
+    const sessions = useQueryContentAiSessionsSwr(anchorRequest)
     const history = useQueryContentAiHistorySwr(activeSessionId)
     const quota = useQueryMyAiQuotaSwr()
     const createSession = useMutateCreateContentAiSessionSwr()
@@ -52,10 +61,6 @@ export const StarCiAiChat = () => {
     const archiveSession = useMutateSetContentAiSessionArchivedSwr()
     const deleteSession = useMutateDeleteContentAiSessionSwr()
     const stream = useContentAiStream()
-    const anchorRequest = useMemo(() => owner.anchor.scope === "global" || owner.anchor.id === undefined
-        ? { scope: "global" as const }
-        : { scope: owner.anchor.scope, [`${owner.anchor.scope}Id`]: owner.anchor.id }, [owner.anchor.id, owner.anchor.scope])
-
     useEffect(() => {
         if (activeSessionId === undefined && sessions.data?.sessions[0] !== undefined) {
             setActiveSessionId(sessions.data.sessions[0].id)
@@ -63,18 +68,15 @@ export const StarCiAiChat = () => {
     }, [activeSessionId, sessions.data?.sessions])
 
     useEffect(() => {
-        if (owner.codeContext !== undefined) setMode("code")
-    }, [owner.codeContext])
-
-    useEffect(() => {
         if (owner.tangentVersion === handledTangentVersion.current) return
         handledTangentVersion.current = owner.tangentVersion
+        if (anchorRequest === null) return
         let isCurrent = true
         void createSession.trigger({ ...anchorRequest, archived: true }).then((created) => {
             if (!isCurrent || created.id === null || created.id === undefined) return
             setActiveSessionId(created.id)
             setLocalTurns([])
-            setMode("code")
+            setMode("general")
             setTerminalState("tangentReady")
             void sessions.mutate()
         }).catch(() => {
@@ -100,23 +102,25 @@ export const StarCiAiChat = () => {
     const historyMode = mode === "history"
     const state: StarCiAiChatState = historyMode
         ? sessions.isLoading ? "historyPending" : sessions.error !== undefined ? "historyFailed" : (sessions.data?.sessions.length ?? 0) === 0 ? "searchEmpty" : "historyReady"
-        : terminalState ?? (stream.isStreaming
-            ? "streaming"
-            : sessions.isLoading
-                ? "sessionsPending"
-                : sessions.error !== undefined
-                    ? "sessionsFailed"
-                    : activeSessionId === undefined
-                        ? "noSession"
-                        : stream.state === "reconnecting" || stream.state === "connecting"
-                            ? "reconnecting"
-                            : stream.state === "failed"
-                                ? "offline"
-                                : stream.state === "idle"
-                                    ? "reconnecting"
-                                    : quota.isLoading
-                                        ? "quotaPending"
-                                        : quota.data?.credit.remainingWeek === 0 ? "zeroPaidCredits" : "ready")
+        : terminalState ?? (anchorRequest === null
+            ? "sessionsPending"
+            : stream.isStreaming
+                ? "streaming"
+                : sessions.isLoading
+                    ? "sessionsPending"
+                    : sessions.error !== undefined
+                        ? "sessionsFailed"
+                        : activeSessionId === undefined
+                            ? "noSession"
+                            : stream.state === "reconnecting" || stream.state === "connecting"
+                                ? "reconnecting"
+                                : stream.state === "failed"
+                                    ? "offline"
+                                    : stream.state === "idle"
+                                        ? "reconnecting"
+                                        : quota.isLoading
+                                            ? "quotaPending"
+                                            : quota.data?.credit.remainingWeek === 0 ? "zeroPaidCredits" : "ready")
 
     const refreshSessions = async () => {
         await sessions.mutate()
@@ -161,7 +165,7 @@ export const StarCiAiChat = () => {
     }
 
     const send = async (discardedAttempt?: StarCiAiAttempt) => {
-        if (draft.trim() === "") return
+        if (draft.trim() === "" || anchorRequest === null) return
         setTerminalState(undefined)
         let sessionId = activeSessionId
         if (sessionId === undefined) {
@@ -236,7 +240,7 @@ export const StarCiAiChat = () => {
     }
 
     const labels = {
-        generalMode: t("modes.general"), codeMode: t("modes.code"), historyMode: t("modes.history"),
+        generalMode: t("modes.general"), historyMode: t("modes.history"),
         composer: t("composer.label"), placeholder: t("composer.placeholder"), send: t("actions.send"),
         stop: t("actions.stop"), retry: t("actions.retry"), clearContext: t("actions.clearContext"),
         rename: t("actions.rename"), archive: t("actions.archive"), delete: t("actions.delete"),

@@ -53,7 +53,9 @@ export const mutationSignInInit = async ({
     signal,
     debug,
 }: MutationParams<MutationSignInInit, SignInInitRequest>) => {
-    const apollo = createApolloClient({ headers, signal, debug })
+    // The ordinary branch only opens an OTP challenge, but the approved local-test branch
+    // completes sign-in here and sets the same HttpOnly session cookie as OTP verification.
+    const apollo = createApolloClient({ headers, signal, debug, withCredentials: true })
     return apollo.mutate<MutationSignInInitResponse>({
         mutation: mutationSignInInitMap[mutation],
         variables: { request },
