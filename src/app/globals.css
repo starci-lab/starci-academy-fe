@@ -56,6 +56,14 @@
     --max-height-rail: calc(100dvh - 7rem);
 
     /*
+     * Course detail has TWO sticky navbar rows. Measured on the live route, the primary row occupies
+     * 4rem and the course section row adds 2.1rem after its one-pixel overlap: 6.1rem in total.
+     * The pricing rail starts below that complete stack and may use only 80% of the space left by it.
+     */
+    --spacing-course-rail: 6.1rem;
+    --max-height-pricing-rail: calc((100dvh - var(--spacing-course-rail)) * 0.8);
+
+    /*
      * How tall an embedded document stands. A CV is read as a PAGE, not as a panel: it wants most
      * of the viewport so a reader can take in a whole section without scrolling the frame and the
      * page at once, and it wants a floor so a short laptop window does not squeeze it into a strip

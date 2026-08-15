@@ -20,8 +20,20 @@ vi.mock("../modules/api/graphql/clients/create-apollo-client", () => ({
 
 /** Every hook the app's blocks are entitled to import from `@/hooks`. */
 const EXPECTED = [
+    "useQueryAutocompleteGlobalSearchSwr",
+    "useMutateAddToCartSwr",
+    "useMutateRemoveFromCartSwr",
+    "useMutateStartTrialSwr",
+    "useMutateClearCartSwr",
+    "useQueryMyCartSwr",
+    "useQueryCoursesCheckoutPreviewSwr",
+    "useMutateCoursesCheckoutSwr",
+    "useQueryCoursePricePreviewSwr",
+    "useQueryCourseReviewsSwr",
     "useQueryCoursesSwr",
+    "useQueryCourseSwr",
     "useQueryMeSwr",
+    "useMutateSignOutSwr",
     "useQueryPlatformStatsSwr",
     "useQueryMyCoursesSwr",
     "useQueryMyWeeklyStatsSwr",

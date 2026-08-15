@@ -57,6 +57,13 @@ describe("_ShellNav", () => {
         expect(screen.queryByRole("textbox")).toBeNull()
     })
 
+    it("forwards one search press to the connected shell owner", () => {
+        const openSearch = vi.fn()
+        render(<_ShellNav props={props} on={{ openSearch }} />)
+        fireEvent.click(screen.getByRole("button", { name: "Open search" }))
+        expect(openSearch).toHaveBeenCalledOnce()
+    })
+
     it("composes the language and account blocks with the original switch and tabs", () => {
         const { container } = render(<_ShellNav props={props} />)
         expect(screen.getByRole("switch", { name: "Switch theme" })).toBeTruthy()

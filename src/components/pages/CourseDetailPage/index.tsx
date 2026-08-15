@@ -226,6 +226,9 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
                     }),
                     rail: {
                         intent: {
+                            intentTabsLabel: t("intentTabsLabel"),
+                            purchaseModeLabel: t("purchaseModeLabel"),
+                            trialModeLabel: t("trialModeLabel"),
                             purchaseTitle: t("purchaseTitle"),
                             purchaseDescription: t("purchaseDescription"),
                             trialTitle: t("trialTitle"),

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react"
+import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 import { CurriculumModuleRow } from "."
 
@@ -31,6 +31,25 @@ describe("CurriculumModuleRow", () => {
         expect(list.tagName).toBe("OL")
         expect(screen.getAllByRole("listitem")).toHaveLength(2)
         expect(list).toHaveTextContent("BoundariesFailure modes")
+    })
+
+    it("keeps the Heroicons disclosure chevron foreground and rotates it down on open", async () => {
+        render(
+            <CurriculumModuleRow
+                props={{
+                    title: "Architecture foundations",
+                    lessons: [{ id: "content-1", title: "Boundaries" }],
+                }}
+            />,
+        )
+
+        const title = screen.getByText("Architecture foundations")
+        const chevron = title.previousElementSibling
+        expect(chevron).toHaveClass("text-foreground", "rotate-0")
+        fireEvent.click(title)
+        await waitFor(() => expect(chevron).toHaveClass("rotate-90"))
+        expect(chevron).not.toHaveClass("text-muted", "rotate-0")
+        expect(chevron?.querySelector("svg")).toBeInTheDocument()
     })
 
     it("does not decorate preview lessons with a repeated status glyph", () => {

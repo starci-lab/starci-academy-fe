@@ -3,6 +3,10 @@ import { notFound } from "next/navigation"
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server"
 import { hasLocale } from "next-intl"
 import { routing } from "@/i18n/routing"
+import {
+    openGraphLocale,
+    readSeoConfig,
+} from "@/config/seo"
 import { GlobalAiChatLayout } from "@/components/layouts/GlobalAiChatLayout"
 import { RouteShell } from "@/components/shells/RouteShell"
 import { AppProviders } from "../providers"
@@ -44,7 +48,29 @@ export const generateMetadata = async ({ params }: LayoutProps<"/[lang]">): Prom
     if (!hasLocale(routing.locales, lang)) notFound()
     setRequestLocale(lang)
     const t = await getTranslations("app")
-    return { title: t("title"), description: t("description") }
+    const config = readSeoConfig()
+    const title = t("title")
+    const description = t("description")
+    return {
+        metadataBase: new URL(config.siteUrl),
+        applicationName: config.siteName,
+        title: {
+            default: title,
+            template: `%s | ${config.siteName}`,
+        },
+        description,
+        verification: config.googleSiteVerification
+            ? { google: config.googleSiteVerification }
+            : undefined,
+        openGraph: {
+            type: "website",
+            siteName: config.siteName,
+            title,
+            description,
+            locale: openGraphLocale(lang),
+            images: [config.imagePath],
+        },
+    }
 }
 
 /**

@@ -9,23 +9,29 @@ const phases = [
 ]
 
 describe("PricingPhaseDisclosure", () => {
-    it("uses one native disclosure and reveals every resolved phase", () => {
+    it("uses one native disclosure trigger and reveals every resolved phase", () => {
         render(<PricingPhaseDisclosure props={{ label: "Compare phases", phases }} />)
 
-        const disclosure = screen.getByText("Compare phases").closest("details")
-        expect(disclosure).not.toHaveAttribute("open")
-        expect(disclosure?.querySelectorAll("li")).toHaveLength(3)
+        const trigger = screen.getByRole("button", { name: "Compare phases" })
+        expect(trigger).toHaveAttribute("aria-expanded", "false")
+        expect(screen.getAllByRole("listitem", { hidden: true })).toHaveLength(3)
 
-        fireEvent.click(screen.getByText("Compare phases"))
-        expect(disclosure).toHaveAttribute("open")
+        fireEvent.click(trigger)
+        expect(trigger).toHaveAttribute("aria-expanded", "true")
         expect(screen.getByText("Pioneer")).toBeInTheDocument()
         expect(screen.getByText("Early")).toBeInTheDocument()
         expect(screen.getByText("Standard")).toBeInTheDocument()
+        expect(screen.getByText("Pioneer")).toHaveClass("text-sm", "font-normal", "text-foreground")
+        expect(screen.getByText("Standard")).toHaveClass("text-sm", "font-normal", "text-foreground")
+        expect(screen.getByText("Early")).toHaveClass("text-sm", "font-normal", "text-accent-soft-foreground")
+        expect(screen.getByText("Pioneer").closest("ul")).toHaveClass("flex", "flex-col", "gap-3", "px-4")
+        expect(trigger).toHaveClass("p-0")
+        expect(trigger.lastElementChild).toHaveClass("rotate-90", "text-foreground")
     })
 
     it("can start open without changing phase cardinality", () => {
         render(<PricingPhaseDisclosure props={{ label: "Compare phases", phases, isOpen: true }} />)
-        expect(screen.getByText("Compare phases").closest("details")).toHaveAttribute("open")
+        expect(screen.getByRole("button", { name: "Compare phases" })).toHaveAttribute("aria-expanded", "true")
         expect(screen.getAllByRole("listitem")).toHaveLength(3)
     })
 })

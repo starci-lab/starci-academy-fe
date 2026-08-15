@@ -54,7 +54,17 @@ export type LayoutClassName =
     | "[&>*:nth-child(3)]:min-w-0" | "[&>*:nth-child(3)]:grow"
     | "md:[&>*:first-child]:min-w-0" | "md:[&>*:first-child]:grow"
     | "[&>*:first-child]:min-w-0" | "[&>*:first-child]:grow"
-    | "md:[&>*:last-child]:w-72" | "md:[&>*:last-child]:shrink-0"
+    | "md:[&>*:last-child]:w-72" | "md:[&>*:last-child]:w-80" | "md:[&>*:last-child]:shrink-0"
+    | "md:[&>[data-component=SelectionList][data-variant=scopes]]:w-72"
+    | "md:[&>[data-component=SelectionList][data-variant=scopes]]:shrink-0"
+    | "md:[&>[data-component=SelectionList][data-variant=results]]:min-w-0"
+    | "md:[&>[data-component=SelectionList][data-variant=results]]:grow"
+    | "md:[&>[data-node=empty-notice-stack]]:min-w-0"
+    | "md:[&>[data-node=empty-notice-stack]]:grow"
+    | "md:[&>[data-node=global-search-result-region]]:min-w-0"
+    | "md:[&>[data-node=global-search-result-region]]:grow"
+    | "md:[&>[data-node=global-search-context-card]]:w-72"
+    | "md:[&>[data-node=global-search-context-card]]:shrink-0"
     | "md:[&>*:first-child]:w-72" | "md:[&>*:first-child]:shrink-0"
     | "md:[&>*:last-child]:min-w-0" | "md:[&>*:last-child]:grow"
     | "md:[&>*:first-child]:overflow-y-auto"
@@ -119,7 +129,7 @@ export type LayoutClassName =
     // member already present for the opposite child or the opposite edge.
     | "[&>*:nth-child(2)]:shrink-0"
     | "[&>*:last-child]:min-w-0" | "[&>*:last-child]:grow" | "[&>*:last-child]:shrink-0"
-    | "md:[&>*:last-child]:sticky" | "md:[&>*:last-child]:top-rail"
+    | "md:[&>*:last-child]:sticky" | "md:[&>*:last-child]:top-rail" | "md:[&>*:last-child]:top-course-rail"
     | "md:[&>*:last-child]:self-start" | "md:[&>*:last-child]:max-h-rail"
     | "md:[&>*:last-child]:overflow-y-auto"
     | "bottom-0" | "border-t" | "md:hidden"
@@ -2153,7 +2163,7 @@ export const CONTRACTS = buildContracts({
         why: "A price the reader is asked to check reads downward as one argument - what it is, what it is made of, why it is lower, and what changes if they wait - and it carries its own inset because the shell it sits in passes the interior through without arranging or padding it.",
     },
     "price-note-row": {
-        classes: ["flex", "flex-row", "flex-wrap", "items-center", "gap-2"],
+        classes: ["flex", "flex-row", "flex-nowrap", "items-center", "gap-2", "[&>*]:whitespace-nowrap"],
         children: {
             fact: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
             action: { leaf: "text-link", props: { size: "xs" } },
@@ -2211,10 +2221,9 @@ export const CONTRACTS = buildContracts({
     },
     "main-then-rail": {
         classes: ["mx-auto", "w-full", "max-w-6xl", "px-6", "pb-6", "flex", "flex-col", "gap-6", "md:gap-8", "md:flex-row", "md:items-start", "md:[&>*:first-child]:min-w-0", "md:[&>*:first-child]:grow",
-            "md:[&>*:last-child]:w-72", "md:[&>*:last-child]:shrink-0",
-            "md:[&>*:last-child]:sticky", "md:[&>*:last-child]:top-rail",
-            "md:[&>*:last-child]:self-start", "md:[&>*:last-child]:max-h-rail",
-            "md:[&>*:last-child]:overflow-y-auto",
+            "md:[&>*:last-child]:w-80", "md:[&>*:last-child]:shrink-0",
+            "md:[&>*:last-child]:sticky", "md:[&>*:last-child]:top-course-rail",
+            "md:[&>*:last-child]:self-start",
         ],
         children: {
             main: { contract: "course-hero" },
@@ -2377,23 +2386,24 @@ export const CONTRACTS = buildContracts({
         children: {
             phase: { leaf: "badge", optional: true },
             cover: { leaf: "cover-image" },
-            purchase: { contract: "course-pricing-purchase-intent" },
+            price: { contract: "course-price-block" },
+            selector: { leaf: "choice-tabs", optional: true },
+            purchase: { contract: "course-pricing-purchase-intent", optional: true },
             exploration: { contract: "course-pricing-exploration-intent", optional: true },
             ladder: { leaf: "pricing-phase-disclosure", optional: true },
             proof: { leaf: "text", props: { size: "xs" }, optional: true },
         },
-        why: "The rail is one complementary decision surface: artwork and active phase lead into a purchase intent, exploration remains visibly separate, and phase comparison is disclosed only when requested.",
+        why: "The rail is one complementary decision surface: artwork and price evidence remain visible while a bounded primary choice selects exactly one purchase or exploration intent, and phase comparison is disclosed only when requested.",
     },
     "course-pricing-purchase-intent": {
         classes: ["flex", "flex-col", "gap-2", "[&>*]:w-full"],
         children: {
-            price: { contract: "course-price-block" },
             heading: { leaf: "text", props: { size: "sm", weight: "medium" }, optional: true },
             description: { leaf: "text", props: { size: "sm" }, optional: true },
             primary: { leaf: "button" },
             cart: { leaf: "button", optional: true },
         },
-        why: "Price, purchase framing and the two ownership actions answer one intent. The primary enrol action leads; the text-only cart action remains subordinate without becoming a separate card.",
+        why: "Purchase framing and the two ownership actions answer the selected buy intent. The persistent price stays above the selector; the primary enrol action leads and cart remains subordinate without becoming a separate card.",
     },
     "course-pricing-exploration-intent": {
         classes: ["flex", "flex-col", "gap-2", "[&>*]:w-full"],
@@ -2402,17 +2412,23 @@ export const CONTRACTS = buildContracts({
             description: { leaf: "text", props: { size: "sm" }, optional: true },
             action: { leaf: "button" },
         },
-        why: "Trial answers exploration rather than payment, so its heading, explanation and ghost action form a separate semantic group inside the same outer surface.",
+        why: "Trial answers exploration rather than payment, so its heading, explanation and tertiary action form a separate semantic group inside the same outer surface.",
     },
-    "course-price-block": {
+    "course-price-primary-group": {
         classes: ["flex", "flex-col", "gap-1"],
         children: {
             line: { contract: "price-discount-line" },
-            savings: { leaf: "text", props: { size: "xs" }, optional: true },
-            detail: { leaf: "text-link", props: { size: "xs" }, optional: true },
+            note: { contract: "price-note-row", optional: true },
+        },
+        why: "The payable price and the line that explains its saving are one compact thought, so they stay at gap-1 before any separate availability signal.",
+    },
+    "course-price-block": {
+        classes: ["flex", "flex-col", "gap-2"],
+        children: {
+            primary: { contract: "course-price-primary-group" },
             scarcity: { leaf: "badge", optional: true },
         },
-        why: "The payable price, what it saves and what is running out are one claim about cost, so they sit tighter to each other than to the ladder below them.",
+        why: "Scarcity affects timing rather than the price calculation itself, so it sits one spacing step away from the compact price-and-saving group.",
     },
     "cart-line-list": {
         classes: [
@@ -2798,6 +2814,49 @@ export const CONTRACTS = buildContracts({
             testcase: { leaf: "badge", repeats: true, restingCount: 5 },
         },
         why: "Testcases are equal peers read as a run rather than a ranking, and they wrap because their number is a property of the problem rather than of the layout.",
+    },
+    "global-search-workspace": {
+        classes: ["flex", "min-w-0", "flex-col", "gap-4"],
+        children: {
+            query: { leaf: "search-command-field" },
+            body: { contract: "global-search-body" },
+        },
+        why: "The command field governs one search workspace, so it stays above the scope, result and context regions that answer the same query.",
+    },
+    "global-search-body": {
+        classes: ["flex", "min-w-0", "flex-col", "gap-4", "md:flex", "md:flex-row", "md:items-start", "md:gap-8", "md:[&>[data-component=SelectionList][data-variant=scopes]]:w-72", "md:[&>[data-component=SelectionList][data-variant=scopes]]:shrink-0", "md:[&>[data-node=global-search-result-region]]:min-w-0", "md:[&>[data-node=global-search-result-region]]:grow", "md:[&>[data-node=global-search-context-card]]:w-72", "md:[&>[data-node=global-search-context-card]]:shrink-0"],
+        children: {
+            scopes: { leaf: "selection-list" },
+            results: { contract: "global-search-result-region" },
+            context: { contract: "global-search-context-card", optional: true },
+        },
+        why: "The scope ListBox, result region and selected render stay visible together on desktop. The middle region renders the existing ListBox when populated and the existing EmptyNotice when settled empty, with no invented label or nested surface. Width follows stable region identity because React Aria inserts FocusScope siblings around ListBox.",
+    },
+    "global-search-result-region": {
+        classes: ["min-w-0"],
+        children: {
+            list: { contract: "global-search-surface-list", optional: true },
+            notice: { composite: "empty-notice", optional: true },
+        },
+        why: "The middle region has no label: populated results use the existing nested SurfaceListCard projection, while settled absence replaces the whole list surface with the shared EmptyNotice.",
+    },
+    "global-search-surface-list": {
+        classes: ["min-w-0", "overflow-hidden", "divide-y", "divide-separator", "p-0"],
+        children: {
+            list: { leaf: "selection-list", repeats: true, restingCount: 1 },
+        },
+        why: "Global Search results share one label-less nested SurfaceListCard; the existing SelectionList keeps keyboard selection and row anatomy while this joined contract owns the bounded list surface.",
+    },
+    "global-search-context-card": {
+        classes: ["hidden", "min-w-0", "flex-col", "gap-3", "p-4", "md:flex"],
+        children: {
+            title: { leaf: "text", props: { size: "sm", weight: "medium" } },
+            kind: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            snippet: { leaf: "text", props: { size: "sm" }, optional: true },
+            status: { leaf: "badge", optional: true },
+            action: { leaf: "button", optional: true },
+        },
+        why: "The selected hit's identity, evidence and one canonical way out share a bounded desktop context surface; mobile omits this redundant pane.",
     },
 })
 

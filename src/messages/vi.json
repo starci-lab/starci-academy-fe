@@ -3,6 +3,22 @@
         "title": "StarCi Academy",
         "description": "Bảng điều khiển của người học."
     },
+    "globalSearch": {
+        "label": "Tìm kiếm toàn StarCi Academy",
+        "placeholder": "Tìm khóa học, bài học, luyện tập và dự án...",
+        "clear": "Xóa tìm kiếm",
+        "shortcut": "Ctrl K",
+        "scopesLabel": "Phạm vi tìm kiếm",
+        "resultsLabel": "Kết quả tìm kiếm",
+        "scopes": { "all": "Tất cả", "courses": "Khóa học", "learning": "Học tập", "practice": "Luyện tập", "projects": "Dự án", "foundations": "Nền tảng" },
+        "kinds": { "courses": "Khóa học", "modules": "Mô-đun", "contents": "Bài học", "challenges": "Thử thách", "flashcardDecks": "Flashcard", "milestones": "Dự án", "milestoneTasks": "Nhiệm vụ dự án", "foundations": "Nền tảng" },
+        "status": { "enrolled": "Đã tham gia", "free": "Miễn phí", "premium": "Trả phí" },
+        "idle": { "message": "Tìm trong toàn bộ học viện", "description": "Tìm khóa học, quay lại một bài học hoặc mở phần luyện tập mà không rời trang hiện tại." },
+        "empty": { "message": "Không có kết quả phù hợp", "description": "Thử cụm từ ngắn hơn, đổi phạm vi hoặc xem danh mục khóa học." },
+        "error": { "message": "Tìm kiếm tạm thời không khả dụng", "description": "Từ khóa và phạm vi vẫn được giữ. Hãy thử lại cùng tìm kiếm này." },
+        "detail": { "loading": "Đang tải chi tiết...", "error": "Không thể tải chi tiết" },
+        "actions": { "browseCourses": "Xem khóa học", "retry": "Thử lại", "openResult": "Mở kết quả" }
+    },
     "shell": {
         "brand": "StarCi Academy",
         "signIn": "Đăng nhập",
@@ -231,6 +247,9 @@
             "enrolled": "{count} người đã đăng ký",
             "enroll": "Đăng ký học",
             "continue": "Tiếp tục học",
+            "intentTabsLabel": "Chọn cách bắt đầu",
+            "purchaseModeLabel": "Mua khóa học",
+            "trialModeLabel": "Học thử",
             "purchaseTitle": "Sở hữu trọn khóa học",
             "purchaseDescription": "Chọn phương án phù hợp để bắt đầu toàn bộ lộ trình.",
             "trialTitle": "Khám phá trước khi đăng ký",
@@ -471,6 +490,7 @@
         "endsIn": "Còn {days} ngày {hours} giờ",
         "passedCount": "{count} người đã vượt qua",
         "claim": "Nhận +{count} coin",
+        "claimed": "Đã nhận thưởng",
         "tryNow": "Thử ngay"
     },
     "contributions": {

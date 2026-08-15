@@ -3,6 +3,22 @@
         "title": "StarCi Academy",
         "description": "Learner dashboard."
     },
+    "globalSearch": {
+        "label": "Search StarCi Academy",
+        "placeholder": "Search courses, lessons, practice and projects...",
+        "clear": "Clear search",
+        "shortcut": "Ctrl K",
+        "scopesLabel": "Search scopes",
+        "resultsLabel": "Search results",
+        "scopes": { "all": "All", "courses": "Courses", "learning": "Learning", "practice": "Practice", "projects": "Projects", "foundations": "Foundations" },
+        "kinds": { "courses": "Course", "modules": "Module", "contents": "Lesson", "challenges": "Challenge", "flashcardDecks": "Flashcards", "milestones": "Project", "milestoneTasks": "Project task", "foundations": "Foundation" },
+        "status": { "enrolled": "Enrolled", "free": "Free", "premium": "Premium" },
+        "idle": { "message": "Search across the whole academy", "description": "Find a course, jump back into a lesson, or open practice without leaving your current page." },
+        "empty": { "message": "No matching results", "description": "Try a shorter phrase, switch scope, or browse the course catalog." },
+        "error": { "message": "Search is temporarily unavailable", "description": "Your query and selected scope are still here. Try the same search again." },
+        "detail": { "loading": "Loading details...", "error": "Unable to load details" },
+        "actions": { "browseCourses": "Browse courses", "retry": "Try again", "openResult": "Open result" }
+    },
     "shell": {
         "brand": "StarCi Academy",
         "signIn": "Sign in",
@@ -231,6 +247,9 @@
             "enrolled": "{count} learners enrolled",
             "enroll": "Enrol now",
             "continue": "Continue learning",
+            "intentTabsLabel": "Choose how to start",
+            "purchaseModeLabel": "Buy course",
+            "trialModeLabel": "Trial",
             "purchaseTitle": "Own the complete course",
             "purchaseDescription": "Choose the right option to start the complete learning path.",
             "trialTitle": "Explore before enrolling",
@@ -471,6 +490,7 @@
         "endsIn": "Ends in {days}d {hours}h",
         "passedCount": "{count, plural, one {# learner passed} other {# learners passed}}",
         "claim": "Claim +{count} coins",
+        "claimed": "Reward claimed",
         "tryNow": "Try it now"
     },
     "contributions": {

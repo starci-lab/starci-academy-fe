@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation"
 import { usePathname, useRouter } from "@/i18n/navigation"
 import { SignInOverlay } from "@/components/overlays/auth/SignInOverlay"
 import { CartDrawer } from "@/components/overlays/commerce/CartDrawer"
+import { GlobalSearchOverlay, type GlobalSearchOpenIntent } from "@/components/overlays/search/GlobalSearchOverlay"
 import { useSessionToken } from "@/hooks/auth/useSessionToken"
 import { useSessionRefresh } from "@/hooks/auth/useSessionRefresh"
 import { _ShellNav, type ShellNavRoute, type ShellNavTab } from "./component"
@@ -51,8 +52,24 @@ export const ShellNav = () => {
     const { resolvedTheme, setTheme } = useTheme()
     const [isOpen, setIsOpen] = useState(false)
     const [isCartOpen, setIsCartOpen] = useState(false)
+    const [searchIntent, setSearchIntent] = useState<GlobalSearchOpenIntent>()
     const [authMode, setAuthMode] = useState<AuthMode>("signIn")
     const sessionToken = useSessionToken()
+
+    const openSearch = useCallback((source: GlobalSearchOpenIntent["source"]) => {
+        setSearchIntent({ requestId: Date.now(), source })
+    }, [])
+
+    useEffect(() => {
+        const onShortcut = (event: KeyboardEvent) => {
+            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+                event.preventDefault()
+                openSearch("shortcut")
+            }
+        }
+        window.addEventListener("keydown", onShortcut)
+        return () => window.removeEventListener("keydown", onShortcut)
+    }, [openSearch])
 
     /**
      * WHY THE THEME IS NOT READ UNTIL AFTER MOUNT, and why this is not ceremony.
@@ -140,7 +157,7 @@ export const ShellNav = () => {
                     // and every React-Aria id below this row shifts.
                     isSignedIn: isMounted && sessionToken !== undefined,
                 }}
-                on={{ openSignIn, openSignUp, navigate, selectTab, toggleTheme: () => setTheme(isDark ? "light" : "dark"), openCart: () => setIsCartOpen(true) }}
+                on={{ openSignIn, openSignUp, navigate, selectTab, openSearch: () => openSearch("navbar"), toggleTheme: () => setTheme(isDark ? "light" : "dark"), openCart: () => setIsCartOpen(true) }}
             />
             <SignInOverlay isOpen={isOpen} initialMode={authMode} onDismiss={dismiss} />
             {/*
@@ -150,6 +167,7 @@ export const ShellNav = () => {
               * which can ever be on screen.
               */}
             <CartDrawer isOpen={isCartOpen} onDismiss={() => setIsCartOpen(false)} />
+            <GlobalSearchOverlay intent={searchIntent} on={{ dismissed: () => setSearchIntent(undefined) }} />
         </>
     )
 }

@@ -21,7 +21,7 @@ import type { LeafProps } from "@/components/contracts/props"
  * take INSTEAD of the main action - a sign-in shortcut beside a form - and it reads as an equal
  * offer rather than a lesser one, which a filled `secondary` does not.
  */
-export type ButtonVariant = "primary" | "secondary" | "outline" | "ghost"
+export type ButtonVariant = "primary" | "secondary" | "tertiary" | "outline" | "ghost"
 
 /**
  * Control heights. `sm` belongs inside a row or compact cluster; `md` anchors a standalone action.
@@ -71,7 +71,13 @@ export type ButtonActions = {
 export type ButtonProps = LeafProps<ButtonData, ButtonActions>
 
 /** The four appearances, as the vendor names them, so fill and foreground travel together. */
-const VARIANTS = { primary: "primary", secondary: "secondary", outline: "outline", ghost: "ghost" } as const
+const VARIANTS = {
+    primary: "primary",
+    secondary: "secondary",
+    tertiary: "tertiary",
+    outline: "outline",
+    ghost: "ghost",
+} as const
 
 /** The size step, as the vendor names it. */
 const SIZES = { sm: "sm", md: "md" } as const

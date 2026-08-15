@@ -1,4 +1,4 @@
-import { Card } from "@heroui/react"
+import { Card, ScrollShadow } from "@heroui/react"
 import { Tree } from "@/components/branches/Tree"
 import { Heading } from "@/components/leaves/Heading"
 import { Text } from "@/components/leaves/Text"
@@ -72,6 +72,8 @@ export type SurfaceCardData = {
      * content is ALREADY a set of surfaces. The label stays either way.
      */
     readonly isFrameless?: boolean
+    /** Let a tall pricing rail scroll inside an 80%-viewport shadow without a native scrollbar. */
+    readonly scrollShadow?: "pricing-rail"
 }
 
 /** What the section reports. */
@@ -124,7 +126,7 @@ export const SurfaceCard = <const K extends ContractKey>({
                 end: defineLeafComponent("see-more-link", {}, () => end),
             } : {}),
         })
-    const surface = props.isFrameless === true ? (
+    const plainSurface = props.isFrameless === true ? (
         <Tree contract={contract} render={render} />
     ) : (
         /*
@@ -142,6 +144,16 @@ export const SurfaceCard = <const K extends ContractKey>({
             </Card.Content>
         </Card>
     )
+    const surface = props.scrollShadow === "pricing-rail" ? (
+        <ScrollShadow
+            data-component="CoursePricingRailScroll"
+            hideScrollBar
+            orientation="vertical"
+            className="max-h-pricing-rail"
+        >
+            {plainSurface}
+        </ScrollShadow>
+    ) : plainSurface
 
     // No name, no section: the column and the label line exist to hold a label, so an object that
     // names itself gets the ground alone rather than an empty row above it.

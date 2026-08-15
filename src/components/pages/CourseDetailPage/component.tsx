@@ -463,10 +463,10 @@ export const _CourseDetailPage = (input: CourseDetailPageProps) => {
                                 label: input.props.labels.sectionTabsLabel,
                                 selectedKey: input.props.selectedSection ?? "overview",
                                 tabs: [
-                                    { id: "overview", label: input.props.labels.overviewTab, icon: "explore" },
-                                    { id: "curriculum", label: input.props.labels.curriculumTab, icon: "course" },
-                                    { id: "reviews", label: input.props.labels.reviewsTab, icon: "review" },
-                                    { id: "faq", label: input.props.labels.faqTab, icon: "disclosure" },
+                                    { id: "overview", label: input.props.labels.overviewTab },
+                                    { id: "curriculum", label: input.props.labels.curriculumTab },
+                                    { id: "reviews", label: input.props.labels.reviewsTab },
+                                    { id: "faq", label: input.props.labels.faqTab },
                                 ],
                             }}
                             on={{ select: (key) => input.on?.selectSection?.(key as CourseDetailSection) }}

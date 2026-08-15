@@ -1,4 +1,7 @@
 import createNextIntlPlugin from "next-intl/plugin"
+import {
+    withSentryConfig,
+} from "@sentry/nextjs"
 import type {
     NextConfig,
 } from "next"
@@ -20,4 +23,17 @@ import type {
 const nextConfig: NextConfig = {
 }
 
-export default createNextIntlPlugin()(nextConfig)
+const configuredNext = createNextIntlPlugin()(nextConfig)
+const canUploadSentrySourceMaps = Boolean(
+    process.env.SENTRY_AUTH_TOKEN && process.env.SENTRY_PROJECT,
+)
+
+export default withSentryConfig(configuredNext, {
+    authToken: process.env.SENTRY_AUTH_TOKEN,
+    org: process.env.SENTRY_ORG,
+    project: process.env.SENTRY_PROJECT,
+    silent: !process.env.CI,
+    sourcemaps: {
+        disable: !canUploadSentrySourceMaps,
+    },
+})

@@ -6,6 +6,12 @@ import { Button } from "./index"
 afterEach(cleanup)
 
 describe("Button", () => {
+    it("exposes the vendor tertiary appearance without custom paint", () => {
+        render(<Button props={{ label: "Trial", variant: "tertiary" }} />)
+
+        expect(screen.getByRole("button", { name: "Trial" })).toHaveAttribute("data-variant", "tertiary")
+    })
+
     it("draws action progress without replacing the resting label width", () => {
         const { container } = render(
             <Button props={{ label: "Sign In", variant: "primary", isPending: true }} />,

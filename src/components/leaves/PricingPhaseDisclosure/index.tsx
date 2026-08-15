@@ -1,4 +1,7 @@
-import { Badge } from "@/components/leaves/Badge"
+"use client"
+
+import { useId, useState } from "react"
+import { Icon } from "@/components/leaves/Icon"
 import type { LeafProps } from "@/components/contracts/props"
 
 /** One already-resolved phase shown by the disclosure. */
@@ -22,27 +25,49 @@ export type PricingPhaseDisclosureProps = LeafProps<PricingPhaseDisclosureData>
 /**
  * Reveal phase comparison only when requested.
  *
- * Native details/summary owns keyboard and expanded-state semantics. The rows intentionally have
- * no nested card, border or radius: they are supporting facts inside the rail's sole SurfaceCard.
+ * A native button owns keyboard and focus semantics while this leaf owns the bounded expanded
+ * state. The rows intentionally have no nested card, border or radius: they are supporting facts
+ * inside the rail's sole SurfaceCard.
  */
-export const PricingPhaseDisclosure = (input: PricingPhaseDisclosureProps) => (
-    <details className="group" open={input.props.isOpen}>
-        <summary className="flex cursor-pointer list-none items-center justify-between gap-2 py-2 text-sm font-medium marker:content-none">
-            <span>{input.props.label}</span>
-            <span aria-hidden="true" className="text-muted transition-transform group-open:rotate-180">⌄</span>
-        </summary>
-        <ul className="divide-y divide-separator">
-            {input.props.phases.map((phase) => (
-                <li key={phase.id} className="flex items-center justify-between gap-2 py-2 text-sm">
-                    {phase.isActive === true
-                        ? <Badge props={{ content: phase.name, tone: "accent" }} />
-                        : <span className="font-medium">{phase.name}</span>}
-                    <span className="text-muted">{phase.value}</span>
-                </li>
-            ))}
-        </ul>
-    </details>
-)
+export const PricingPhaseDisclosure = (input: PricingPhaseDisclosureProps) => {
+    const [isOpen, setIsOpen] = useState(input.props.isOpen === true)
+    const disclosureId = useId()
+    const triggerId = `${disclosureId}-trigger`
+    const panelId = `${disclosureId}-panel`
+    return (
+        <div className="flex w-full flex-col gap-3">
+            <button
+                id={triggerId}
+                type="button"
+                aria-expanded={isOpen}
+                aria-controls={panelId}
+                className="flex w-full items-center justify-between gap-2 p-0 text-sm font-medium"
+                onClick={() => setIsOpen((current) => !current)}
+            >
+                <span>{input.props.label}</span>
+                <span className={isOpen ? "rotate-90 text-foreground transition-transform" : "text-foreground transition-transform"}>
+                    <Icon props={{ name: "disclosure", role: "chip" }} />
+                </span>
+            </button>
+            <div id={panelId} role="region" aria-labelledby={triggerId} hidden={!isOpen}>
+                <ul className="flex flex-col gap-3 px-4">
+                    {input.props.phases.map((phase) => (
+                        <li key={phase.id} className="flex items-center justify-between gap-2">
+                            <span
+                                className={phase.isActive === true
+                                    ? "text-sm font-normal text-accent-soft-foreground"
+                                    : "text-sm font-normal text-foreground"}
+                            >
+                                {phase.name}
+                            </span>
+                            <span className="text-sm text-muted">{phase.value}</span>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        </div>
+    )
+}
 
 /** Source-level tier marker. */
 export const meta = { shape: "leaf", world: "pure" } as const

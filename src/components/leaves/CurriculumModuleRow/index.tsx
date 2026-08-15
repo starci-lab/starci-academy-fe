@@ -1,3 +1,6 @@
+"use client"
+
+import { useState } from "react"
 import { Badge } from "@/components/leaves/Badge"
 import { Icon } from "@/components/leaves/Icon"
 import type { LeafProps } from "@/components/contracts/props"
@@ -98,13 +101,17 @@ const LEVEL_TONES = {
  * @param input - {@link CurriculumModuleRowProps}
  */
 export const CurriculumModuleRow = (input: CurriculumModuleRowProps) => {
+    const [isOpen, setIsOpen] = useState(input.props.isOpen ?? false)
     const lessons = input.props.lessons ?? []
     const isLoading = input.isLoading ?? false
     const canDisclose = lessons.length > 0 && !isLoading
     const head = (
         <>
             {canDisclose ? (
-                <span className="shrink-0 text-muted transition-transform group-open:rotate-180">
+                <span
+                    data-curriculum-chevron
+                    className={`shrink-0 text-foreground transition-transform ${isOpen ? "rotate-90" : "rotate-0"}`}
+                >
                     <Icon props={{ name: "disclosure", role: "chip" }} />
                 </span>
             ) : null}
@@ -164,7 +171,8 @@ export const CurriculumModuleRow = (input: CurriculumModuleRowProps) => {
             data-component="CurriculumModuleRow"
             data-disclosing="true"
             data-lessons={lessons.length}
-            open={input.props.isOpen ?? false}
+            open={isOpen}
+            onToggle={(event) => setIsOpen(event.currentTarget.open)}
             className="group"
         >
             <summary className={SUMMARY_CLASSES}>{head}</summary>
