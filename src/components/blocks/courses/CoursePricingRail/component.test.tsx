@@ -60,6 +60,7 @@ describe("_CoursePricingRail", () => {
         const pricePrimary = document.querySelector("[data-node=\"course-price-primary-group\"]")
         const priceBlock = document.querySelector("[data-node=\"course-price-block\"]")
         expect(priceNote).toHaveClass("flex-nowrap")
+        expect(priceNote).toHaveClass("[&>*]:whitespace-nowrap")
         expect(pricePrimary).toHaveClass("gap-1")
         expect(priceBlock).toHaveClass("gap-2")
         expect(priceBlock?.firstElementChild).toBe(pricePrimary)

@@ -25,7 +25,7 @@
  * when the bad value cannot be typed.
  */
 export type LayoutClassName =
-    | "flex" | "grid" | "flex-col" | "flex-row" | "flex-wrap" | "overflow-hidden" | "relative"
+    | "flex" | "grid" | "flex-col" | "flex-row" | "flex-wrap" | "flex-nowrap" | "overflow-hidden" | "relative"
     | "items-center" | "items-baseline" | "items-start" | "items-end"
     | "justify-between" | "justify-center" | "[&>*]:w-full"
     | "gap-1" | "gap-2" | "gap-3" | "gap-4" | "gap-6" | "gap-8"
@@ -69,7 +69,7 @@ export type LayoutClassName =
     | "md:[&>*:last-child]:min-w-0" | "md:[&>*:last-child]:grow"
     | "md:[&>*:first-child]:overflow-y-auto"
     | "md:[&>*:nth-child(2)]:min-w-0" | "md:[&>*:nth-child(2)]:grow"
-    | "[&>*]:min-w-0" | "[&>*]:grow"
+    | "[&>*]:min-w-0" | "[&>*]:grow" | "[&>*]:whitespace-nowrap"
     | "md:[&>[data-node=learn-spine-column]]:w-72"
     | "md:[&>[data-node=learn-spine-column]]:grow-0"
     | "md:[&>[data-node=learn-spine-column]]:shrink-0"
