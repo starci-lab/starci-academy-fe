@@ -16,6 +16,16 @@
         "themeLight": "Switch to light",
         "themeDark": "Switch to dark",
         "locale": "Change language",
+        "localeOptions": {
+            "en": "English",
+            "vi": "Tiếng Việt"
+        },
+        "accountMenu": {
+            "dashboard": "Dashboard",
+            "profile": "Profile",
+            "cv": "CV",
+            "signOut": "Sign out"
+        },
         "tabs": {
             "overview": "Overview",
             "explore": "Explore",

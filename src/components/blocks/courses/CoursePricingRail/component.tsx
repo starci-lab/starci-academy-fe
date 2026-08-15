@@ -4,6 +4,7 @@ import { Button } from "@/components/leaves/Button"
 import { CoverImage } from "@/components/leaves/CoverImage"
 import { PricingPhaseDisclosure } from "@/components/leaves/PricingPhaseDisclosure"
 import { Text } from "@/components/leaves/Text"
+import { TextLink } from "@/components/leaves/TextLink"
 import {
     defineContractComponent,
     defineContractProjection,
@@ -77,6 +78,8 @@ export type CoursePricingRailData = {
     readonly discountLabel?: string
     /** The already-formatted savings sentence. */
     readonly savingsLabel?: string
+    /** Opens the server-owned price breakdown. */
+    readonly priceDetailLabel?: string
     /** One scarcity line, e.g. remaining slots in the open phase. */
     readonly scarcityLabel?: string
     /** The ladder. An empty run renders no ladder at all. */
@@ -101,6 +104,8 @@ export type CoursePricingRailActions = {
     readonly trial?: () => void
     /** Add this course to, or remove it from, the cart. */
     readonly addToCart?: () => void
+    /** Explain list, phase, loyalty and payable price in a modal. */
+    readonly openPriceDetail?: () => void
 }
 
 /** The situations the rail can be in. */
@@ -166,6 +171,14 @@ export const _CoursePricingRail = (input: CoursePricingRailProps) => {
                             ? undefined
                             : defineLeafComponent("text", { size: "xs" }, () => (
                                 <Text props={{ content: input.props.savingsLabel, size: "xs" }} />
+                            )),
+                        detail: input.props.priceDetailLabel === undefined
+                            ? undefined
+                            : defineLeafComponent("text-link", { size: "xs" }, () => (
+                                <TextLink
+                                    props={{ label: input.props.priceDetailLabel ?? "", size: "xs" }}
+                                    on={{ press: input.on?.openPriceDetail }}
+                                />
                             )),
                         scarcity: input.props.scarcityLabel === undefined
                             ? undefined

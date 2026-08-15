@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import { Dropdown } from "@heroui/react"
+import { Dropdown, Header } from "@heroui/react"
 import { Icon, type IconName } from "@/components/leaves/Icon"
 
 /** Placement choices exposed without leaking the vendor vocabulary beyond the shell. */
@@ -11,6 +11,8 @@ export type DropdownShellItemData<I extends string> = {
     readonly label: string
     readonly icon?: IconName
     readonly isDisabled?: boolean
+    readonly tone?: "default" | "danger"
+    readonly showsIndicator?: boolean
 }
 
 /** One semantic section in a menu. */
@@ -23,6 +25,8 @@ export type DropdownShellData<I extends string> = {
     readonly label: string
     readonly placement?: DropdownShellPlacement
     readonly sections: ReadonlyArray<DropdownShellSectionData<I>>
+    readonly selectionMode?: "single"
+    readonly selectedId?: I
 }
 
 /** Menu selection reported without putting functions in item data. */
@@ -35,6 +39,7 @@ export type DropdownShellProps<I extends string> = {
     readonly props: DropdownShellData<I>
     readonly on?: DropdownShellActions<I>
     readonly trigger: ReactNode
+    readonly header?: ReactNode
 }
 
 /**
@@ -52,7 +57,16 @@ export const DropdownShell = <const I extends string>(input: DropdownShellProps<
             {input.trigger}
         </Dropdown.Trigger>
         <Dropdown.Popover placement={input.props.placement ?? "bottom right"}>
-            <Dropdown.Menu aria-label={input.props.label}>
+            {input.header === undefined ? null : (
+                <Header className="border-b border-separator">
+                    {input.header}
+                </Header>
+            )}
+            <Dropdown.Menu
+                aria-label={input.props.label}
+                selectionMode={input.props.selectionMode}
+                selectedKeys={input.props.selectedId === undefined ? undefined : new Set([input.props.selectedId])}
+            >
                 {input.props.sections.map((section, sectionIndex) => (
                     <Dropdown.Section key={"section-" + sectionIndex}>
                         {section.items.map((item) => (
@@ -61,8 +75,10 @@ export const DropdownShell = <const I extends string>(input: DropdownShellProps<
                                 id={item.id}
                                 textValue={item.label}
                                 isDisabled={item.isDisabled}
+                                className={item.tone === "danger" ? "text-danger-soft-foreground" : undefined}
                                 onAction={() => input.on?.action?.(item.id)}
                             >
+                                {item.showsIndicator === true ? <Dropdown.ItemIndicator /> : null}
                                 {item.icon === undefined ? null : <Icon props={{ name: item.icon, role: "leading" }} />}
                                 {item.label}
                             </Dropdown.Item>

@@ -40,6 +40,7 @@ vi.mock("@/hooks", () => ({
         mutate: vi.fn(),
     }),
     useQueryCourseReviewsSwr: () => ({ data: { total: 0, nodes: [] } }),
+    useQueryCoursePricePreviewSwr: () => ({ data: undefined, isLoading: false }),
     useQueryMyCartSwr: () => ({ data: mocks.cartRows }),
     useMutateAddToCartSwr: () => ({ trigger: mocks.add, isMutating: false }),
     useMutateRemoveFromCartSwr: () => ({ trigger: mocks.remove, isMutating: false }),

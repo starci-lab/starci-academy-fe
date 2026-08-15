@@ -62,6 +62,10 @@ icon leaf selects the outline or micro drawing from the role.
 | `cart` | Shopping cart | `ShoppingCartIcon` | The cart names purchasing and basket state |
 | `notification` | Notifications | `BellIcon` | The bell names incoming alerts |
 | `account` | Current user account | `UserCircleIcon` | A person in a circle names the signed-in account surface |
+| `profile` | Current learner profile | `UserIcon` | A single person names the learner's profile destination without reusing the enclosing account surface |
+| `cv` | Learner CV | `DocumentTextIcon` | A text document names the compiled CV destination |
+| `settings` | Account/profile settings | `Cog6ToothIcon` | A cog names configuration; the meaning remains available when the settings route is implemented |
+| `signOut` | End the current session | `ArrowLeftStartOnRectangleIcon` | An arrow leaving a boundary is the directional counterpart to session entry |
 | `saved` | Saved/bookmarked content | `BookmarkIcon` | The bookmark names content retained for later |
 | `blog` | Blog/editorial content | `NewspaperIcon` | A newspaper names published articles without reusing Explore |
 | `talents` | Talent discovery | `SparklesIcon` | Sparkles name exceptional ability without reusing account creation |

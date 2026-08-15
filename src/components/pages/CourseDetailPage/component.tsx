@@ -180,6 +180,8 @@ export type CourseDetailPageActions = {
     readonly trial?: () => void
     /** Put the course in the viewer's cart without leaving this page. */
     readonly addToCart?: () => void
+    /** Open the canonical backend price breakdown. */
+    readonly openPriceDetail?: () => void
     /** Move the reader to one real section on this page. */
     readonly selectSection?: (section: CourseDetailSection) => void
     /** Recovery from the failed situation. */
@@ -480,6 +482,7 @@ export const _CourseDetailPage = (input: CourseDetailPageProps) => {
                             act: input.on?.act,
                             trial: input.on?.trial,
                             addToCart: input.on?.addToCart,
+                            openPriceDetail: input.on?.openPriceDetail,
                         },
                     }),
                 }),

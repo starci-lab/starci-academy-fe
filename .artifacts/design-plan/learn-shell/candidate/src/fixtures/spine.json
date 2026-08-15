@@ -1,0 +1,97 @@
+{
+    "resume": {
+        "label": "Tiếp tục",
+        "title": "Shell & Filesystem — điều hướng và vận hành",
+        "percent": 1,
+        "percentText": "1/153"
+    },
+    "groups": [
+        {
+            "id": "path",
+            "label": "Lộ trình",
+            "rows": [
+                {
+                    "id": "content",
+                    "label": "Học phần",
+                    "icon": "course",
+                    "isCurrent": true
+                },
+                {
+                    "id": "personal-project",
+                    "label": "Dự án cá nhân",
+                    "icon": "practice",
+                    "gated": true
+                }
+            ]
+        },
+        {
+            "id": "practice",
+            "label": "Ôn & luyện",
+            "rows": [
+                {
+                    "id": "flashcards",
+                    "label": "Ôn tập",
+                    "icon": "review",
+                    "fact": "20"
+                },
+                {
+                    "id": "mock-interview",
+                    "label": "Phỏng vấn thử",
+                    "icon": "talents",
+                    "gated": true
+                },
+                {
+                    "id": "foundations",
+                    "label": "Nền tảng",
+                    "icon": "explore"
+                },
+                {
+                    "id": "playground",
+                    "label": "Playground",
+                    "icon": "code"
+                }
+            ]
+        },
+        {
+            "id": "track",
+            "label": "Theo dõi",
+            "rows": [
+                {
+                    "id": "mind-map",
+                    "label": "Sơ đồ tư duy",
+                    "icon": "blog"
+                },
+                {
+                    "id": "leaderboard",
+                    "label": "Bảng xếp hạng",
+                    "icon": "league",
+                    "fact": "#12"
+                },
+                {
+                    "id": "qa",
+                    "label": "Hỏi đáp",
+                    "icon": "community"
+                }
+            ]
+        }
+    ],
+    "lockedLabel": "Khoá",
+    "tabs": [
+        {
+            "id": "course",
+            "label": "Khoá học",
+            "icon": "course",
+            "isCurrent": true
+        },
+        {
+            "id": "contents",
+            "label": "Mục lục",
+            "icon": "explore"
+        },
+        {
+            "id": "outline",
+            "label": "Trang này",
+            "icon": "blog"
+        }
+    ]
+}

@@ -3,6 +3,7 @@ import { Link } from "@/components/leaves/Link"
 import { NavLink } from "@/components/leaves/NavLink"
 import { IconButton } from "@/components/leaves/IconButton"
 import { AccountMenu } from "@/components/blocks/auth/AccountMenu"
+import { LanguageMenu } from "@/components/blocks/locale/LanguageMenu"
 import { PressableInputLike } from "@/components/leaves/PressableInputLike"
 import { ThemeSwitch } from "@/components/leaves/ThemeSwitch"
 import { ExtendedTabs } from "@/components/leaves/ExtendedTabs"
@@ -28,16 +29,11 @@ export type ShellNavData = {
     readonly tabs?: ReadonlyArray<ShellNavTab>
     readonly themeLabel: string
     readonly isDark: boolean
-    readonly localeLabel: string
     readonly searchPlaceholder: string
     readonly searchLabel: string
     readonly searchShortcut: string
     readonly cartLabel: string
     readonly notificationLabel: string
-    readonly accountLabel: string
-    readonly guestMessage: string
-    readonly signInLabel: string
-    readonly signUpLabel: string
     readonly isSignedIn: boolean
 }
 
@@ -49,7 +45,6 @@ export type ShellNavActions = {
     readonly selectTab?: (key: string) => void
     readonly openSearch?: () => void
     readonly toggleTheme?: () => void
-    readonly toggleLocale?: () => void
     /** Opens the basket panel. The navbar owns the control; the shell owns the panel. */
     readonly openCart?: () => void
 }
@@ -90,8 +85,8 @@ export const _ShellNav = (input: ShellNavProps) => (
                                 on={{ press: input.on?.openSearch }}
                             />
                         )),
-                        locale: defineLeafComponent("icon-button", {}, () => (
-                            <IconButton props={{ icon: "locale", label: input.props.localeLabel }} on={{ press: input.on?.toggleLocale }} />
+                        locale: defineLeafComponent("language-menu", {}, () => (
+                            <LanguageMenu />
                         )),
                         theme: defineLeafComponent("theme-switch", {}, () => (
                             <ThemeSwitch
@@ -107,19 +102,11 @@ export const _ShellNav = (input: ShellNavProps) => (
                         ...(input.props.isSignedIn ? [defineLeafComponent("icon-button", {}, () => (
                             <IconButton props={{ icon: "notification", label: input.props.notificationLabel }} />
                         ))] : []),
-                        ...(input.props.isSignedIn ? [defineLeafComponent("icon-button", {}, () => (
-                            <IconButton props={{ icon: "account", label: input.props.accountLabel }} />
-                        ))] : [defineLeafComponent("account-menu", {}, () => (
+                        defineLeafComponent("account-menu", {}, () => (
                             <AccountMenu
-                                props={{
-                                    label: input.props.accountLabel,
-                                    guestMessage: input.props.guestMessage,
-                                    signInLabel: input.props.signInLabel,
-                                    signUpLabel: input.props.signUpLabel,
-                                }}
                                 on={{ signIn: input.on?.openSignIn, signUp: input.on?.openSignUp }}
                             />
-                        ))]),
+                        )),
                     ],
                 }),
             }),

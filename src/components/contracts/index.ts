@@ -79,6 +79,10 @@ export type LayoutClassName =
     // make the title column narrower on a wider screen, and the trailing controls hold their own
     // measure so the row does not end in a ragged edge down the list.
     | "[&>*:first-child]:w-36" | "[&>*:last-child]:shrink-0"
+    | "[&>[data-component=Badge]:first-child]:absolute"
+    | "[&>[data-component=Badge]:first-child]:right-4"
+    | "[&>[data-component=Badge]:first-child]:top-4"
+    | "[&>[data-component=Badge]:first-child]:z-10"
     | "[&>*:first-child]:text-center" | "[&>*:first-child]:tabular-nums"
     | "[&>*:first-child]:pt-4" | "[&>*:last-child]:pb-4"
     // A total is not the last of the figures above it, it is what they resolve to. Every other
@@ -160,6 +164,13 @@ type ChildProps<S> = S extends { readonly props?: infer P }
  */
 type CallerContent = "$content"
 
+/**
+ * The identity a parent contract needs from one already-validated child contract.
+ *
+ * The child builder has already checked its own slots. Re-expanding those slots while validating
+ * the parent recursively opens the complete registry at every edge and eventually collapses the
+ * vocabulary to `never`; the parent only consumes the closed identity at runtime.
+ */
 type ContractChild<S> = S extends { readonly contract: infer K }
     ? [K extends ReadonlyArray<infer A> ? A : K] extends [CallerContent]
         ? import("@/components/contracts/props").ContractComponent<ContractKey>
@@ -814,7 +825,7 @@ export const CONTRACTS = buildContracts({
         why: "Four proof metrics scan as equal peers, using two readable columns when narrow and one complete ribbon once all four retain useful width.",
     },
     "profile-breakdown-stack": {
-        classes: ["flex", "flex-col", "gap-4", "p-4"],
+        classes: ["flex", "flex-col", "gap-4"],
         children: { breakdown: { contract: "profile-breakdown", repeats: true, restingCount: 3 } },
         why: "Difficulty, topic and language are independent evidence breakdowns whose shared vertical rhythm preserves their distinct labels and visuals.",
     },
@@ -1700,7 +1711,7 @@ export const CONTRACTS = buildContracts({
         classes: ["hidden", "items-center", "gap-2", "md:flex"],
         children: {
             search: { leaf: "pressable-input-like" },
-            locale: { leaf: "icon-button" },
+            locale: { leaf: "language-menu" },
             theme: { leaf: "theme-switch" },
         },
         why: "Search, language and appearance are the legacy desktop subgroup, whose own centred flex axis prevents the shorter native switch track from dropping against neighbouring buttons.",
@@ -1783,7 +1794,7 @@ export const CONTRACTS = buildContracts({
         children: {
             avatar: { leaf: "avatar" },
             identity: { contract: "profile-name-over-handle" },
-            disclosure: { leaf: "icon" },
+            disclosure: { leaf: "icon", optional: true },
         },
         why: "The avatar identifies the profile, the name stack owns the available width, and the trailing disclosure makes the whole row's destination explicit.",
     },
@@ -2356,7 +2367,13 @@ export const CONTRACTS = buildContracts({
     },
     "course-pricing-rail": {
         host: "aside",
-        classes: ["flex", "flex-col", "gap-4", "p-4"],
+        classes: [
+            "relative", "flex", "flex-col", "gap-4", "p-4",
+            "[&>[data-component=Badge]:first-child]:absolute",
+            "[&>[data-component=Badge]:first-child]:right-4",
+            "[&>[data-component=Badge]:first-child]:top-4",
+            "[&>[data-component=Badge]:first-child]:z-10",
+        ],
         children: {
             phase: { leaf: "badge", optional: true },
             cover: { leaf: "cover-image" },
@@ -2392,6 +2409,7 @@ export const CONTRACTS = buildContracts({
         children: {
             line: { contract: "price-discount-line" },
             savings: { leaf: "text", props: { size: "xs" }, optional: true },
+            detail: { leaf: "text-link", props: { size: "xs" }, optional: true },
             scarcity: { leaf: "badge", optional: true },
         },
         why: "The payable price, what it saves and what is running out are one claim about cost, so they sit tighter to each other than to the ladder below them.",
@@ -2780,7 +2798,8 @@ export const CONTRACTS = buildContracts({
             testcase: { leaf: "badge", repeats: true, restingCount: 5 },
         },
         why: "Testcases are equal peers read as a run rather than a ranking, and they wrap because their number is a property of the problem rather than of the layout.",
-    },})
+    },
+})
 
 /** Every key in the registry. A key not in this union is a compile error at the call site. */
 export type ContractKey = keyof typeof CONTRACTS

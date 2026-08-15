@@ -9,9 +9,12 @@ import {
     useMutateRemoveFromCartSwr,
     useMutateStartTrialSwr,
     useQueryCourseReviewsSwr,
+    useQueryCoursePricePreviewSwr,
     useQueryCourseSwr,
     useQueryMyCartSwr,
 } from "@/hooks"
+import { CoursePriceOverlay } from "@/components/overlays/courses/CoursePriceOverlay"
+import { isPersonalPrice } from "@/modules/utils/course-price"
 import { useSessionToken } from "@/hooks/auth/useSessionToken"
 import { QUERY_MY_CART_SWR_KEY } from "@/hooks/swr/useQueryMyCartSwr"
 import { _CourseDetailPage, type CourseDetailSection } from "./component"
@@ -62,6 +65,7 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
     const locale = useLocale()
     const router = useRouter()
     const [selectedSection, setSelectedSection] = useState<CourseDetailSection>("overview")
+    const [isPriceDetailOpen, setIsPriceDetailOpen] = useState(false)
     const { mutate } = useSWRConfig()
     const sessionToken = useSessionToken()
     const query = useQueryCourseSwr({ displayId: input.displayId })
@@ -74,6 +78,7 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
     // invalidated by a different event than the course itself, so folding it into the course
     // query would make one cache entry answer two questions that change at different times.
     const reviewQuery = useQueryCourseReviewsSwr(query.data?.id)
+    const pricePreview = useQueryCoursePricePreviewSwr(query.data?.id)
     const money = new Intl.NumberFormat(locale, { style: "currency", currency: "VND", maximumFractionDigits: 0 })
 
     const labels = {
@@ -115,11 +120,15 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
     // The payable price IS the open phase's price. Falling back to the list price when no phase is
     // open is not a guess: a course with no phase ladder sells at its list price, which is the same
     // number the ladder would have shown.
-    const payable = openPhase?.price ?? course.originalPrice
+    const personalPrice = isPersonalPrice(pricePreview.data ?? undefined)
+    const payable = personalPrice ? pricePreview.data?.discountedPriceVnd ?? 0 : openPhase?.price ?? course.originalPrice
+    const listPrice = personalPrice ? pricePreview.data?.originalPriceVnd ?? course.originalPrice : course.originalPrice
     const isPaid = payable > 0
     const isInCart = (cartQuery.data ?? []).some((row) => row.courseId === course.id)
-    const hasDiscount = payable < course.originalPrice
-    const discountPercent = hasDiscount ? Math.round((1 - payable / course.originalPrice) * 100) : 0
+    const hasDiscount = payable < listPrice
+    const discountPercent = personalPrice
+        ? pricePreview.data?.discountPercent ?? 0
+        : hasDiscount ? Math.round((1 - payable / listPrice) * 100) : 0
 
     const selectSection = (section: CourseDetailSection) => {
         setSelectedSection(section)
@@ -132,6 +141,7 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
     }
 
     return (
+        <>
         <_CourseDetailPage
             state="ready"
             props={{
@@ -225,9 +235,10 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
                     coverUrl: course.coverImageUrl ?? null,
                     title: course.title,
                     price: money.format(payable),
-                    originalPrice: hasDiscount ? money.format(course.originalPrice) : undefined,
+                    originalPrice: hasDiscount ? money.format(listPrice) : undefined,
                     discountLabel: hasDiscount ? `−${discountPercent}%` : undefined,
-                    savingsLabel: hasDiscount ? t("savings", { amount: money.format(course.originalPrice - payable) }) : undefined,
+                    savingsLabel: hasDiscount ? t("savings", { amount: money.format(listPrice - payable) }) : undefined,
+                    priceDetailLabel: tCatalog("priceDetail"),
                     scarcityLabel: openPhase === undefined || openPhase.slotAvailable <= 0
                         ? undefined
                         : t("scarcity", { count: openPhase.slotAvailable, phase: t(`phase.${openPhase.phase}`) }),
@@ -251,7 +262,9 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
                     isInCart,
                     enrolmentLabel: t("enrolled", { count: course.enrollmentCount }),
                 },
-                railState: checkout.isMutating
+                railState: pricePreview.isLoading
+                    ? "price-pending"
+                    : checkout.isMutating
                     ? "checking-out"
                     : trial.isMutating
                         ? "trialing"
@@ -303,11 +316,19 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
                         void mutate((key) => Array.isArray(key) && key[0] === QUERY_MY_CART_SWR_KEY[0])
                     })
                 },
+                openPriceDetail: () => { setIsPriceDetailOpen(true) },
                 navigateHome: () => { router.push("/") },
                 navigateCourses: () => { router.push("/courses") },
                 selectSection,
             }}
         />
+        <CoursePriceOverlay
+            courseId={course.id}
+            title={course.title}
+            isOpen={isPriceDetailOpen}
+            onDismiss={() => { setIsPriceDetailOpen(false) }}
+        />
+        </>
     )
 }
 

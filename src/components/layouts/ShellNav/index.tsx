@@ -1,13 +1,12 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import { useLocale, useTranslations } from "next-intl"
+import { useTranslations } from "next-intl"
 import { useTheme } from "next-themes"
 import { useSearchParams } from "next/navigation"
 import { usePathname, useRouter } from "@/i18n/navigation"
 import { SignInOverlay } from "@/components/overlays/auth/SignInOverlay"
 import { CartDrawer } from "@/components/overlays/commerce/CartDrawer"
-import { LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE } from "@/i18n/config"
 import { useSessionToken } from "@/hooks/auth/useSessionToken"
 import { useSessionRefresh } from "@/hooks/auth/useSessionRefresh"
 import { _ShellNav, type ShellNavRoute, type ShellNavTab } from "./component"
@@ -46,7 +45,6 @@ const DASHBOARD_TABS: ReadonlyArray<{ id: string, icon: IconName }> = [
 export const ShellNav = () => {
     useSessionRefresh()
     const t = useTranslations("shell")
-    const locale = useLocale()
     const pathname = usePathname()
     const router = useRouter()
     const searchParams = useSearchParams()
@@ -95,17 +93,6 @@ export const ShellNav = () => {
     // Before mount the answer is the same on both sides; after it, the real one.
     const isDark = isMounted && resolvedTheme === "dark"
 
-    /**
-     * The language is written to the cookie the server reads, then the page is reloaded rather
-     * than re-rendered: the catalogue is resolved on the server, so a client-side swap would leave
-     * every server-rendered string in the old language until the next navigation.
-     */
-    const toggleLocale = useCallback(() => {
-        const next = locale === "vi" ? "en" : "vi"
-        document.cookie = `${LOCALE_COOKIE}=${next}; path=/; max-age=${LOCALE_COOKIE_MAX_AGE}`
-        window.location.reload()
-    }, [locale])
-
     const routes: ReadonlyArray<ShellNavRoute> = ROUTES.map((route) => ({
         id: route.id,
         label: t(`routes.${route.id}`),
@@ -142,23 +129,18 @@ export const ShellNav = () => {
                     tabs,
                     themeLabel: isDark ? t("themeLight") : t("themeDark"),
                     isDark,
-                    localeLabel: t("locale"),
                     searchPlaceholder: t("searchPlaceholder"),
                     searchLabel: t("search"),
                     searchShortcut: t("searchShortcut"),
                     cartLabel: t("cart"),
                     notificationLabel: t("notifications"),
-                    accountLabel: t("account"),
-                    guestMessage: t("guestMessage"),
-                    signInLabel: t("signIn"),
-                    signUpLabel: t("signUp"),
                     // The server cannot see the browser session store. Keep the first client tree
                     // identical to the server, then reveal signed-in tools after mount; otherwise
                     // AccountMenu is replaced by notification/account controls during hydration
                     // and every React-Aria id below this row shifts.
                     isSignedIn: isMounted && sessionToken !== undefined,
                 }}
-                on={{ openSignIn, openSignUp, navigate, selectTab, toggleTheme: () => setTheme(isDark ? "light" : "dark"), toggleLocale, openCart: () => setIsCartOpen(true) }}
+                on={{ openSignIn, openSignUp, navigate, selectTab, toggleTheme: () => setTheme(isDark ? "light" : "dark"), openCart: () => setIsCartOpen(true) }}
             />
             <SignInOverlay isOpen={isOpen} initialMode={authMode} onDismiss={dismiss} />
             {/*

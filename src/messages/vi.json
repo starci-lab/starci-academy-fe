@@ -16,6 +16,16 @@
         "themeLight": "Chuyển sang sáng",
         "themeDark": "Chuyển sang tối",
         "locale": "Đổi ngôn ngữ",
+        "localeOptions": {
+            "en": "English",
+            "vi": "Tiếng Việt"
+        },
+        "accountMenu": {
+            "dashboard": "Trang chủ",
+            "profile": "Hồ sơ",
+            "cv": "CV",
+            "signOut": "Đăng xuất"
+        },
         "tabs": {
             "overview": "Tổng quan",
             "explore": "Khám phá",

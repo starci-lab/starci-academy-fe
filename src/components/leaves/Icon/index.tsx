@@ -3,6 +3,7 @@ import {
     ArrowPathIcon,
     ArrowRightIcon,
     ArrowRightOnRectangleIcon,
+    ArrowLeftStartOnRectangleIcon,
     BellIcon,
     BoltIcon,
     BookmarkIcon,
@@ -12,6 +13,8 @@ import {
     ChevronRightIcon,
     ClipboardDocumentCheckIcon,
     CodeBracketIcon,
+    Cog6ToothIcon,
+    DocumentTextIcon,
     EnvelopeIcon,
     EyeIcon,
     EyeSlashIcon,
@@ -34,6 +37,7 @@ import {
     ListBulletIcon,
     Squares2X2Icon,
     UserCircleIcon,
+    UserIcon,
     UserGroupIcon,
     UserPlusIcon,
     XMarkIcon,
@@ -44,6 +48,7 @@ import {
     ArrowPathIcon as ArrowPathSolidIcon,
     ArrowRightIcon as ArrowRightSolidIcon,
     ArrowRightEndOnRectangleIcon as ArrowRightOnRectangleSolidIcon,
+    ArrowLeftStartOnRectangleIcon as ArrowLeftStartOnRectangleSolidIcon,
     BellIcon as BellSolidIcon,
     BoltIcon as BoltSolidIcon,
     BookmarkIcon as BookmarkSolidIcon,
@@ -53,6 +58,8 @@ import {
     ChevronRightIcon as ChevronRightSolidIcon,
     ClipboardDocumentCheckIcon as ClipboardDocumentCheckSolidIcon,
     CodeBracketIcon as CodeBracketSolidIcon,
+    Cog6ToothIcon as Cog6ToothSolidIcon,
+    DocumentTextIcon as DocumentTextSolidIcon,
     EnvelopeIcon as EnvelopeSolidIcon,
     EyeIcon as EyeSolidIcon,
     EyeSlashIcon as EyeSlashSolidIcon,
@@ -75,6 +82,7 @@ import {
     ListBulletIcon as ListBulletSolidIcon,
     Squares2X2Icon as Squares2X2SolidIcon,
     UserCircleIcon as UserCircleSolidIcon,
+    UserIcon as UserSolidIcon,
     UserGroupIcon as UserGroupSolidIcon,
     UserPlusIcon as UserPlusSolidIcon,
     XMarkIcon as XMarkSolidIcon,
@@ -108,7 +116,8 @@ export type IconName =
     | "complete" | "pending" | "signIn" | "signUp" | "close" | "next" | "disclosure" | "retry" | "send"
     | "home" | "explore" | "community" | "league" | "review" | "livestream"
     | "light" | "dark" | "locale" | "google" | "github"
-    | "search" | "cart" | "notification" | "account" | "saved" | "blog" | "talents" | "jobs" | "practice"
+    | "search" | "cart" | "notification" | "account" | "profile" | "cv" | "settings" | "signOut"
+    | "saved" | "blog" | "talents" | "jobs" | "practice"
     | "viewGrid" | "viewList"
     | "star" | "ratingStarEmpty" | "ratingStarFilled"
 
@@ -232,6 +241,10 @@ const GLYPHS: Record<IconName, GlyphCuts> = {
     cart: cuts(ShoppingCartIcon, ShoppingCartSolidIcon),
     notification: cuts(BellIcon, BellSolidIcon),
     account: cuts(UserCircleIcon, UserCircleSolidIcon),
+    profile: cuts(UserIcon, UserSolidIcon),
+    cv: cuts(DocumentTextIcon, DocumentTextSolidIcon),
+    settings: cuts(Cog6ToothIcon, Cog6ToothSolidIcon),
+    signOut: cuts(ArrowLeftStartOnRectangleIcon, ArrowLeftStartOnRectangleSolidIcon),
     saved: cuts(BookmarkIcon, BookmarkSolidIcon),
     blog: cuts(NewspaperIcon, NewspaperSolidIcon),
     talents: cuts(SparklesIcon, SparklesSolidIcon),

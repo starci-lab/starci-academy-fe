@@ -3,6 +3,20 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { _ShellNav } from "./component"
 
+vi.mock("@/components/blocks/locale/LanguageMenu", () => ({
+    LanguageMenu: () => <button type="button" aria-label="Language menu" />,
+}))
+
+type MockAccountMenuProps = {
+    readonly on?: { readonly signIn?: () => void }
+}
+
+vi.mock("@/components/blocks/auth/AccountMenu", () => ({
+    AccountMenu: (input: MockAccountMenuProps) => (
+        <button type="button" aria-label="Account menu" onClick={input.on?.signIn} />
+    ),
+}))
+
 class TestResizeObserver implements ResizeObserver {
     observe = () => undefined
     unobserve = () => undefined
@@ -19,16 +33,11 @@ const props = {
     tabs: [{ id: "overview", label: "Overview", icon: "home" as const, isCurrent: true }],
     themeLabel: "Switch theme",
     isDark: false,
-    localeLabel: "Change language",
     searchPlaceholder: "Search",
     searchLabel: "Open search",
     searchShortcut: "Ctrl K",
     cartLabel: "Basket",
     notificationLabel: "Notifications",
-    accountLabel: "Account",
-    guestMessage: "Sign in to follow your progress",
-    signInLabel: "Sign in",
-    signUpLabel: "Sign up",
     isSignedIn: false,
 } as const
 
@@ -48,21 +57,20 @@ describe("_ShellNav", () => {
         expect(screen.queryByRole("textbox")).toBeNull()
     })
 
-    it("draws the original switch, account dropdown trigger and ExtendedTabs bottom layer", () => {
+    it("composes the language and account blocks with the original switch and tabs", () => {
         const { container } = render(<_ShellNav props={props} />)
         expect(screen.getByRole("switch", { name: "Switch theme" })).toBeTruthy()
-        expect(screen.getByRole("button", { name: "Account" })).toBeTruthy()
-        expect(screen.queryByText("Sign in")).toBeNull()
+        expect(screen.getByRole("button", { name: "Language menu" })).toBeTruthy()
+        expect(screen.getByRole("button", { name: "Account menu" })).toBeTruthy()
         const navbar = container.querySelector("[data-node=\"double-navbar\"]")
         expect(navbar?.querySelector("[data-node=\"underlined-tab-strip\"]")).toBeTruthy()
         expect(navbar?.querySelector("[data-component=\"ExtendedTabs\"]")).toBeTruthy()
     })
 
-    it("opens guest authentication choices from the account trigger", async () => {
-        render(<_ShellNav props={props} />)
-        fireEvent.click(screen.getByRole("button", { name: "Account" }))
-        expect(await screen.findByText("Sign in to follow your progress")).toBeTruthy()
-        expect(screen.getByRole("menuitem", { name: "Sign in" })).toBeTruthy()
-        expect(screen.getByRole("menuitem", { name: "Sign up" })).toBeTruthy()
+    it("forwards the guest authentication journey to the account block", () => {
+        const openSignIn = vi.fn()
+        render(<_ShellNav props={props} on={{ openSignIn }} />)
+        fireEvent.click(screen.getByRole("button", { name: "Account menu" }))
+        expect(openSignIn).toHaveBeenCalledOnce()
     })
 })
