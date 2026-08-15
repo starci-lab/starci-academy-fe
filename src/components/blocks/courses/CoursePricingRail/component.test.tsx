@@ -18,10 +18,17 @@ const props = {
     trialLabel: "Trial",
     cartLabel: "Add to cart",
     enrolmentLabel: "13 learners enrolled",
+    intent: {
+        purchaseTitle: "Own the complete course",
+        purchaseDescription: "Choose a purchase option to start the complete path.",
+        trialTitle: "Explore before enrolling",
+        trialDescription: "Try open content before deciding.",
+        phaseDisclosureLabel: "Compare phases",
+    },
 }
 
 describe("_CoursePricingRail", () => {
-    it("keeps one sticky-card decision with compact phase comparison", () => {
+    it("keeps one surface while separating purchase and exploration intent", () => {
         const act = vi.fn()
         const trial = vi.fn()
         const addToCart = vi.fn()
@@ -30,13 +37,19 @@ describe("_CoursePricingRail", () => {
         expect(document.querySelector("[data-component=\"SurfaceCardSurface\"]")).toBeTruthy()
         expect(screen.getAllByText("Early")).toHaveLength(2)
         expect(screen.getByText("100 seats left in Early")).toBeInTheDocument()
-        expect(document.querySelectorAll("[data-node=\"course-pricing-phase-card\"]")).toHaveLength(3)
+        expect(document.querySelectorAll("[data-component=\"SurfaceCardSurface\"]")).toHaveLength(1)
+        expect(document.querySelector("[data-node=\"course-pricing-purchase-intent\"]")).toBeTruthy()
+        expect(document.querySelector("[data-node=\"course-pricing-exploration-intent\"]")).toBeTruthy()
         expect(screen.getAllByRole("button").map((button) => button.textContent)).toEqual([
             "Enrol now",
             "Add to cart",
             "Trial",
         ])
+        expect(screen.getByRole("button", { name: "Trial" })).toHaveAttribute("data-variant", "ghost")
         expect(screen.getByRole("button", { name: "Add to cart" }).querySelector("svg")).toBeNull()
+        fireEvent.click(screen.getByText("Compare phases"))
+        expect(screen.getByText("Pioneer")).toBeInTheDocument()
+        expect(screen.getByText("Standard")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Enrol now" }))
         fireEvent.click(screen.getByRole("button", { name: "Trial" }))
         fireEvent.click(screen.getByRole("button", { name: "Add to cart" }))
@@ -44,6 +57,17 @@ describe("_CoursePricingRail", () => {
         expect(trial).toHaveBeenCalledOnce()
         expect(addToCart).toHaveBeenCalledOnce()
         expect(document.querySelector("[data-node=\"course-pricing-rail\"]")?.className).toContain("p-4")
+    })
+
+    it("omits optional exploration and disclosure when their data is absent", () => {
+        render(
+            <_CoursePricingRail
+                state="ready"
+                props={{ ...props, trialLabel: undefined, phases: [], intent: undefined }}
+            />,
+        )
+        expect(document.querySelector("[data-node=\"course-pricing-exploration-intent\"]")).toBeNull()
+        expect(screen.queryByText("Compare phases")).toBeNull()
     })
 
     it("keeps the cart action available as the legacy add/remove toggle", () => {

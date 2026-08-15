@@ -51,10 +51,18 @@ vi.mock("./component", () => {
         readonly trial?: () => void
         readonly addToCart?: () => void
     }
-    type ConnectedProps = { readonly on?: ConnectedActions }
+    type ConnectedProps = {
+        readonly props?: {
+            readonly rail?: {
+                readonly intent?: Readonly<Record<string, string>>
+            }
+        }
+        readonly on?: ConnectedActions
+    }
     return {
         _CourseDetailPage: (input: ConnectedProps) => (
             <>
+                <output data-testid="rail-intent">{JSON.stringify(input.props?.rail?.intent)}</output>
                 <button type="button" onClick={input.on?.trial}>Trial intent</button>
                 <button type="button" onClick={input.on?.addToCart}>Cart intent</button>
             </>
@@ -67,6 +75,17 @@ describe("CourseDetailPage commerce actions", () => {
         mocks.sessionToken = "session-token"
         mocks.cartRows = []
         vi.clearAllMocks()
+    })
+
+    it("resolves all five intent labels at the connected boundary", () => {
+        render(<CourseDetailPage displayId="system-design-mastery" />)
+        expect(screen.getByTestId("rail-intent")).toHaveTextContent(JSON.stringify({
+            purchaseTitle: "purchaseTitle",
+            purchaseDescription: "purchaseDescription",
+            trialTitle: "trialTitle",
+            trialDescription: "trialDescription",
+            phaseDisclosureLabel: "phaseDisclosureLabel",
+        }))
     })
 
     it.each(["Trial intent", "Cart intent"])("sends a guest to authentication before %s", (intent) => {

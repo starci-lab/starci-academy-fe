@@ -215,6 +215,13 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
                     }
                 }),
                 rail: {
+                    intent: {
+                        purchaseTitle: t("purchaseTitle"),
+                        purchaseDescription: t("purchaseDescription"),
+                        trialTitle: t("trialTitle"),
+                        trialDescription: t("trialDescription"),
+                        phaseDisclosureLabel: t("phaseDisclosureLabel"),
+                    },
                     coverUrl: course.coverImageUrl ?? null,
                     title: course.title,
                     price: money.format(payable),

@@ -2360,21 +2360,32 @@ export const CONTRACTS = buildContracts({
         children: {
             phase: { leaf: "badge", optional: true },
             cover: { leaf: "cover-image" },
-            price: { contract: "course-price-block" },
-            ladder: { contract: "course-pricing-phase-grid", optional: true },
-            action: { contract: "course-pricing-action-stack" },
+            purchase: { contract: "course-pricing-purchase-intent" },
+            exploration: { contract: "course-pricing-exploration-intent", optional: true },
+            ladder: { leaf: "pricing-phase-disclosure", optional: true },
             proof: { leaf: "text", props: { size: "xs" }, optional: true },
         },
-        why: "The buy box is complementary to the narrative: active phase, artwork, price, compact phase comparison, action and enrolment proof are one sticky decision read top to bottom.",
+        why: "The rail is one complementary decision surface: artwork and active phase lead into a purchase intent, exploration remains visibly separate, and phase comparison is disclosed only when requested.",
     },
-    "course-pricing-action-stack": {
+    "course-pricing-purchase-intent": {
         classes: ["flex", "flex-col", "gap-2", "[&>*]:w-full"],
         children: {
+            price: { contract: "course-price-block" },
+            heading: { leaf: "text", props: { size: "sm", weight: "medium" }, optional: true },
+            description: { leaf: "text", props: { size: "sm" }, optional: true },
             primary: { leaf: "button" },
             cart: { leaf: "button", optional: true },
-            trial: { leaf: "button", optional: true },
         },
-        why: "The legacy conversion cluster is one full-width sibling stack: enrol first, cart second when the course is paid, and trial last. Gap two preserves peer rhythm without inventing a nested secondary row.",
+        why: "Price, purchase framing and the two ownership actions answer one intent. The primary enrol action leads; the text-only cart action remains subordinate without becoming a separate card.",
+    },
+    "course-pricing-exploration-intent": {
+        classes: ["flex", "flex-col", "gap-2", "[&>*]:w-full"],
+        children: {
+            heading: { leaf: "text", props: { size: "sm", weight: "medium" } },
+            description: { leaf: "text", props: { size: "sm" }, optional: true },
+            action: { leaf: "button" },
+        },
+        why: "Trial answers exploration rather than payment, so its heading, explanation and ghost action form a separate semantic group inside the same outer surface.",
     },
     "course-price-block": {
         classes: ["flex", "flex-col", "gap-1"],
@@ -2384,19 +2395,6 @@ export const CONTRACTS = buildContracts({
             scarcity: { leaf: "badge", optional: true },
         },
         why: "The payable price, what it saves and what is running out are one claim about cost, so they sit tighter to each other than to the ladder below them.",
-    },
-    "course-pricing-phase-grid": {
-        classes: ["grid", "grid-cols-1", "gap-2", "sm:grid-cols-2"],
-        children: { phase: { contract: "course-pricing-phase-card", repeats: true, restingCount: 3 } },
-        why: "The phase offers are peer comparisons rather than sequential instructions, so compact cards let a reader compare names and values without reading a false process ladder.",
-    },
-    "course-pricing-phase-card": {
-        classes: ["flex", "min-w-0", "flex-col", "gap-1", "rounded-xl", "border", "border-separator", "p-2"],
-        children: {
-            name: { leaf: ["text", "badge"] },
-            value: { leaf: "text", props: { size: "xs", tone: "muted" } },
-        },
-        why: "One phase is one compact offer: its name leads and the resolved price or open status qualifies it below, with the active phase using a badge rather than a second layout.",
     },
     "cart-line-list": {
         classes: [

@@ -2,6 +2,7 @@ import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { Badge } from "@/components/leaves/Badge"
 import { Button } from "@/components/leaves/Button"
 import { CoverImage } from "@/components/leaves/CoverImage"
+import { PricingPhaseDisclosure } from "@/components/leaves/PricingPhaseDisclosure"
 import { Text } from "@/components/leaves/Text"
 import {
     defineContractComponent,
@@ -51,8 +52,19 @@ export type PricingPhase = {
     readonly isActive?: boolean
 }
 
+/** Localized framing that separates buying from exploring. */
+export type CoursePricingRailIntentCopy = {
+    readonly purchaseTitle: string
+    readonly purchaseDescription: string
+    readonly trialTitle: string
+    readonly trialDescription: string
+    readonly phaseDisclosureLabel: string
+}
+
 /** What the rail draws. */
 export type CoursePricingRailData = {
+    /** Resolved copy for the two decision intents and phase disclosure. */
+    readonly intent?: CoursePricingRailIntentCopy
     /** Artwork source; `null` draws the leaf's token fallback. */
     readonly coverUrl?: string | null
     /** The course title, used as the artwork's alternative text. */
@@ -142,39 +154,35 @@ export const _CoursePricingRail = (input: CoursePricingRailProps) => {
                 cover: defineLeafComponent("cover-image", {}, () => (
                     <CoverImage props={{ src: input.props.coverUrl ?? null, alt: input.props.title, ratio: "wide" }} />
                 )),
-                price: defineContractComponent("course-price-block", {
-                    line: priceLine,
-                    savings: input.props.savingsLabel === undefined || isPricePending
-                        ? undefined
-                        : defineLeafComponent("text", { size: "xs" }, () => (
-                            <Text props={{ content: input.props.savingsLabel, size: "xs" }} />
-                        )),
-                    scarcity: input.props.scarcityLabel === undefined
-                        ? undefined
-                        : defineLeafComponent("badge", {}, () => (
-                            <Badge props={{ content: input.props.scarcityLabel, tone: "warning" }} />
-                        )),
-                }),
                 phase: activePhase === undefined
                     ? undefined
                     : defineLeafComponent("badge", {}, () => (
                         <Badge props={{ content: activePhase.name, tone: "accent" }} />
                     )),
-                ladder: phases.length === 0 ? undefined : defineContractComponent("course-pricing-phase-grid", {
-                    phase: phases.map((phase) => defineContractComponent("course-pricing-phase-card", {
-                        name: phase.isActive === true
-                            ? defineLeafComponent("badge", {}, () => (
-                                <Badge props={{ content: phase.name, tone: "accent" }} />
-                            ))
-                            : defineLeafComponent("text", {}, () => (
-                                <Text props={{ content: phase.name, size: "sm", weight: "semibold" }} />
+                purchase: defineContractComponent("course-pricing-purchase-intent", {
+                    price: defineContractComponent("course-price-block", {
+                        line: priceLine,
+                        savings: input.props.savingsLabel === undefined || isPricePending
+                            ? undefined
+                            : defineLeafComponent("text", { size: "xs" }, () => (
+                                <Text props={{ content: input.props.savingsLabel, size: "xs" }} />
                             )),
-                        value: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                            <Text props={{ content: phase.value, size: "xs", tone: "muted" }} />
+                        scarcity: input.props.scarcityLabel === undefined
+                            ? undefined
+                            : defineLeafComponent("badge", {}, () => (
+                                <Badge props={{ content: input.props.scarcityLabel, tone: "warning" }} />
+                            )),
+                    }),
+                    heading: input.props.intent === undefined
+                        ? undefined
+                        : defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
+                            <Text props={{ content: input.props.intent?.purchaseTitle, size: "sm", weight: "medium" }} />
                         )),
-                    })),
-                }),
-                action: defineContractComponent("course-pricing-action-stack", {
+                    description: input.props.intent === undefined
+                        ? undefined
+                        : defineLeafComponent("text", { size: "sm" }, () => (
+                            <Text props={{ content: input.props.intent?.purchaseDescription, size: "sm" }} />
+                        )),
                     primary: defineLeafComponent("button", {}, () => (
                         <Button
                             props={{
@@ -200,15 +208,41 @@ export const _CoursePricingRail = (input: CoursePricingRailProps) => {
                                 on={{ press: input.on?.addToCart }}
                             />
                         )),
-                    trial: trialLabel === undefined
-                        ? undefined
-                        : defineLeafComponent("button", {}, () => (
+                }),
+                exploration: trialLabel === undefined
+                    ? undefined
+                    : defineContractComponent("course-pricing-exploration-intent", {
+                        heading: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
+                            <Text
+                                props={{
+                                    content: input.props.intent?.trialTitle ?? trialLabel,
+                                    size: "sm",
+                                    weight: "medium",
+                                }}
+                            />
+                        )),
+                        description: input.props.intent === undefined
+                            ? undefined
+                            : defineLeafComponent("text", { size: "sm" }, () => (
+                                <Text props={{ content: input.props.intent?.trialDescription, size: "sm" }} />
+                            )),
+                        action: defineLeafComponent("button", {}, () => (
                             <Button
-                                props={{ label: trialLabel, variant: "secondary", size: "md", isPending: isTrialing }}
+                                props={{ label: trialLabel, variant: "ghost", size: "md", isPending: isTrialing }}
                                 on={{ press: input.on?.trial }}
                             />
                         )),
-                }),
+                    }),
+                ladder: phases.length === 0
+                    ? undefined
+                    : defineLeafComponent("pricing-phase-disclosure", {}, () => (
+                        <PricingPhaseDisclosure
+                            props={{
+                                label: input.props.intent?.phaseDisclosureLabel ?? input.props.title,
+                                phases,
+                            }}
+                        />
+                    )),
                 proof: input.props.enrolmentLabel === undefined
                     ? undefined
                     : defineLeafComponent("text", { size: "xs" }, () => (
