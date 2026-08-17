@@ -17,6 +17,7 @@ const mutation1 = gql`
     }
 `
 
+/** Selects content-AI session renaming in the shared GraphQL executor. */
 export enum MutationRenameContentAiSession { Mutation1 = "mutation1" }
 
 /** Every supported conversation-rename document keyed by variant. */

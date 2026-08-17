@@ -21,6 +21,7 @@ const query1 = gql`
     }
 `
 
+/** Selects the current learner identity in the shared GraphQL executor. */
 export enum QueryMe {
     Query1 = "query1",
 }

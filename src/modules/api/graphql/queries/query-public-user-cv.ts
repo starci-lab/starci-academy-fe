@@ -17,6 +17,7 @@ const query1 = gql`
     }
 `
 
+/** Selects a public learner CV in the shared GraphQL executor. */
 export enum QueryPublicUserCv { Query1 = "query1" }
 
 /** Supported public-CV documents. */

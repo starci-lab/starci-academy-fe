@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState, type ComponentType } from "react"
+import { useEffect, useMemo, useState, type ReactNode } from "react"
 import { usePathname } from "@/i18n/navigation"
 import { useSessionToken } from "@/hooks/auth/useSessionToken"
 import { Tree } from "@/components/branches/Tree"
@@ -21,11 +21,11 @@ import { GlobalAiChatContext, type GlobalAiChatContextValue } from "@/modules/ai
 
 /** One routed surface mounted below the persistent locale-root AI owner. */
 export type GlobalAiChatLayoutProps = {
-    readonly surface: ComponentType
+    readonly surface: ReactNode
 }
 
 /** Keep one AI conversation owner alive while routed product surfaces change beneath it. */
-export const GlobalAiChatLayout = ({ surface: Surface }: GlobalAiChatLayoutProps) => {
+export const GlobalAiChatLayout = ({ surface }: GlobalAiChatLayoutProps) => {
     const pathname = usePathname()
     const token = useSessionToken()
     const anchor = useMemo(() => resolveContentAiRouteAnchor(pathname), [pathname])
@@ -56,7 +56,7 @@ export const GlobalAiChatLayout = ({ surface: Surface }: GlobalAiChatLayoutProps
     if (token === undefined || isContentAiRouteHidden(pathname)) {
         return (
             <GlobalAiChatContext.Provider value={value}>
-                <Surface />
+                {surface}
             </GlobalAiChatContext.Provider>
         )
     }
@@ -66,7 +66,7 @@ export const GlobalAiChatLayout = ({ surface: Surface }: GlobalAiChatLayoutProps
             <Tree
                 contract="global-ai-layout"
                 render={defineContractComponent("global-ai-layout", {
-                    surface: defineLeafComponent("page", {}, () => <Surface />),
+                    surface: defineLeafComponent("page", {}, () => <>{surface}</>),
                     selection: defineContractProjection("selection-ai-actions", () => <StarCiAiSelectionAsk />),
                     trigger: defineContractProjection("floating-ai-trigger", () => (
                         <StarCiAiFab

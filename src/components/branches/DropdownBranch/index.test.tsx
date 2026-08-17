@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { DropdownShell } from "./index"
+import { DropdownBranch } from "./index"
+import { defineLeafComponent } from "@/components/contracts/props"
 
 class TestResizeObserver implements ResizeObserver {
     observe = () => undefined
@@ -12,13 +13,13 @@ globalThis.ResizeObserver = TestResizeObserver
 
 afterEach(cleanup)
 
-describe("DropdownShell", () => {
+describe("DropdownBranch", () => {
     it("keeps a static header outside menu options", async () => {
         render(
-            <DropdownShell
+            <DropdownBranch
                 props={{ label: "Account", sections: [{ items: [{ id: "profile", label: "Profile" }] }] }}
-                trigger={<span>Avatar</span>}
-                header={<span data-testid="static-header" />}
+                trigger={defineLeafComponent("text", {}, () => <span>Avatar</span>)}
+                header={defineLeafComponent("text", {}, () => <span data-testid="static-header" />)}
             />,
         )
 
@@ -31,7 +32,7 @@ describe("DropdownShell", () => {
     it("owns controlled selection, indicators and danger item treatment", async () => {
         const action = vi.fn()
         render(
-            <DropdownShell
+            <DropdownBranch
                 props={{
                     label: "Choices",
                     selectionMode: "single",
@@ -42,7 +43,7 @@ describe("DropdownShell", () => {
                     ] }],
                 }}
                 on={{ action }}
-                trigger={<span>Open</span>}
+                trigger={defineLeafComponent("text", {}, () => <span>Open</span>)}
             />,
         )
 

@@ -12,7 +12,7 @@
  * a shape is findable.
  */
 
-import { COMPONENT_ROOTS, isContractTableFile, isInComponentTier } from "./contract.mjs"
+import { COMPONENT_ROOTS, isContractTableFile, isInComponentTier, isTestFile } from "./contract.mjs"
 
 /** True when a parameter type contains an anonymous object shape, including inside intersections. */
 const isInlineObjectType = (node) => {
@@ -58,9 +58,6 @@ export const noInlineParameterType = {
 
 // -- SLOTS-4 ---------------------------------------------------------------------------------------
 
-/** The only three components where a React `children` hole is lawful. */
-const CHILDREN_SHELLS = ["ModalShell", "DrawerShell", "DropdownShell", "RouteShell"]
-
 /**
  * True for a component file the slot fence governs.
  *
@@ -74,15 +71,11 @@ const CHILDREN_SHELLS = ["ModalShell", "DrawerShell", "DropdownShell", "RouteShe
  * NAMED CHILD GRAMMAR that replaces one. Reporting it asks the file that abolished the anonymous
  * slot to stop describing what it admits instead.
  *
- * The three shells stay exempt for the reason canon already gives them: they pass real children
- * through and arrange nothing.
- *
  * @param filename - the file being linted.
  */
 const isGoverned = (filename) => {
   const path = String(filename || "").replace(/\\/g, "/")
   if (isContractTableFile(path)) return false
-  if (CHILDREN_SHELLS.some((shell) => isInComponentTier(path, `shells/${shell}`))) return false
   /*
    * The bare `src` root is dropped here, and only here. `COMPONENT_ROOTS` carries it as a
    * catch-all so a reader that walks up from any file still finds the table; used as a FENCE it
@@ -99,21 +92,22 @@ const isGoverned = (filename) => {
  * aliases it defines, but nothing stops a file declaring its own props shape by hand and putting
  * `children` in it. What the alias makes unrepresentable, a hand-written interface makes ordinary.
  *
- * ModalShell, DrawerShell and DropdownShell are exempt because they ignore the interior shape and
- * pass it directly to the vendor body. No folder-wide exemption exists.
+ * There is no tier exemption. Vendor mechanics are named branches too, and receive typed contract
+ * content rather than an already-built markup hole.
  */
 export const noChildrenSlot = {
   meta: {
     type: "problem",
-    docs: { description: "A container takes contract and render; only the three closed shells may take children." },
+    docs: { description: "A component container takes contract and render; no component tier takes children." },
     schema: [],
     messages: {
       slot:
-        "`children` accepts markup that has already been built, so its shape cannot be checked. Take contract + render instead. Only ModalShell, DrawerShell, DropdownShell and RouteShell may take one - the first three pass an interior straight to vendor mechanics, and RouteShell converts the children a framework layout is handed.",
+        "`children` accepts markup that has already been built, so its shape cannot be checked. Take a named contract + typed render instead. Framework route files may receive children, but no component tier may carry that anonymous hole across its boundary.",
     },
   },
   create(context) {
-    if (!isGoverned(context.filename || context.getFilename())) return {}
+    const filename = context.filename || context.getFilename()
+    if (isTestFile(filename) || !isGoverned(filename)) return {}
     return {
       TSPropertySignature(node) {
         if (node.key && node.key.type === "Identifier" && node.key.name === "children") {
@@ -127,6 +121,159 @@ export const noChildrenSlot = {
         if (node.key && node.key.type === "Identifier" && node.key.name === "children") {
           context.report({ node: node.key, messageId: "slot" })
         }
+      },
+    }
+  },
+}
+
+/** Name of a plain TypeScript property key. */
+const propertyName = (node) => {
+  const key = node?.key ?? node?.property
+  if (!key) return null
+  if (key.type === "Identifier") return key.name
+  if (key.type === "Literal" && typeof key.value === "string") return key.value
+  return null
+}
+
+/** Product source inside a supported component root. */
+const isComponentSource = (filename) => {
+  const path = String(filename || "").replace(/\\/g, "/")
+  return COMPONENT_ROOTS.filter((root) => root !== "src").some((root) => path.includes(`/${root}/`))
+}
+
+// -- SLOTS-5 · SLOTS-6 ---------------------------------------------------------------------------
+
+/** A caller cannot reach into one named internal part and style it. */
+export const noPerPartClassNameProp = {
+  meta: {
+    type: "problem",
+    docs: { description: "No <part>ClassName prop exposes a component's internal nodes." },
+    schema: [],
+    messages: {
+      perPart:
+        "`{{prop}}` lets a caller restyle a node it does not own. Replace the CSS door with a named semantic prop, and keep the appearance decision inside the component or its contract.",
+    },
+  },
+  create(context) {
+    const filename = context.filename || context.getFilename()
+    if (isTestFile(filename) || !isComponentSource(filename)) return {}
+    return {
+      TSPropertySignature(node) {
+        const name = propertyName(node)
+        if (!name || name === "className" || !/^[a-z][A-Za-z0-9]*ClassName$/.test(name)) return
+        context.report({ node, messageId: "perPart", data: { prop: name } })
+      },
+    }
+  },
+}
+
+/** Public house components never expose className/classNames placement doors. */
+export const noPublicClassNameProp = {
+  meta: {
+    type: "problem",
+    docs: { description: "House components own appearance and expose no public className/classNames prop." },
+    schema: [],
+    messages: {
+      declaration:
+        "Public component prop `{{prop}}` is a CSS placement door. Expose a semantic variant or a named contract instead.",
+      usage:
+        "Do not pass `{{prop}}` to house component `{{component}}`; its owner or parent contract decides appearance.",
+    },
+  },
+  create(context) {
+    const filename = context.filename || context.getFilename()
+    if (isTestFile(filename)) return {}
+    const inComponent = isComponentSource(filename)
+    const bindings = new Set()
+    return {
+      ImportDeclaration(node) {
+        const source = String(node.source?.value || "").replace(/\\/g, "/")
+        if (!/(?:^|\/)components\//.test(source)) return
+        for (const specifier of node.specifiers || []) {
+          if (specifier.local?.name) bindings.add(specifier.local.name)
+        }
+      },
+      TSPropertySignature(node) {
+        if (!inComponent) return
+        const name = propertyName(node)
+        if (name === "className" || name === "classNames") {
+          context.report({ node, messageId: "declaration", data: { prop: name } })
+        }
+      },
+      JSXOpeningElement(node) {
+        const component = node.name?.type === "JSXIdentifier" ? node.name.name : null
+        if (!component || !bindings.has(component)) return
+        for (const attribute of node.attributes || []) {
+          if (attribute.type !== "JSXAttribute") continue
+          const prop = attribute.name?.type === "JSXIdentifier" ? attribute.name.name : null
+          if (prop === "className" || prop === "classNames") {
+            context.report({ node: attribute, messageId: "usage", data: { prop, component } })
+          }
+        }
+      },
+    }
+  },
+}
+
+/** CSS-shaped layout props are not public API above the atomic leaf tier. */
+const FRAME_CSS_PROPS = new Set(["gap", "padding", "align", "justify", "className", "classNames", "style", "inline", "nested"])
+
+export const noPublicFrameCssProps = {
+  meta: {
+    type: "problem",
+    docs: { description: "Non-leaf component contracts expose semantic decisions, not CSS-shaped frame props." },
+    schema: [],
+    messages: {
+      css:
+        "`{{prop}}` is a public CSS/frame decision above the leaf tier. Move the arrangement into a named contract or expose the semantic state that selects one.",
+    },
+  },
+  create(context) {
+    const filename = context.filename || context.getFilename()
+    if (isTestFile(filename) || !isComponentSource(filename) || isInComponentTier(filename, "leaves")) return {}
+    return {
+      TSPropertySignature(node) {
+        const name = propertyName(node)
+        if (name && FRAME_CSS_PROPS.has(name)) context.report({ node, messageId: "css", data: { prop: name } })
+      },
+    }
+  },
+}
+
+/** String literal keys named by Omit/Pick/Exclude. */
+const typeKeys = (node, out = []) => {
+  if (!node) return out
+  if (node.type === "TSUnionType") {
+    for (const member of node.types || []) typeKeys(member, out)
+    return out
+  }
+  if (node.type === "TSLiteralType" && node.literal?.type === "Literal" && typeof node.literal.value === "string") {
+    out.push(node.literal.value)
+  }
+  return out
+}
+
+/** Hiding a CSS door with a utility type is not closing the owner that exposed it. */
+export const noCssDoorTypeLaundering = {
+  meta: {
+    type: "problem",
+    docs: { description: "Omit/Pick/Exclude cannot hide className/classNames/style doors." },
+    schema: [],
+    messages: {
+      utility:
+        "`{{utility}}` of `{{prop}}` launders a CSS door instead of closing it. Remove the prop from the owning public contract and every consumer.",
+    },
+  },
+  create(context) {
+    const file = String(context.filename || context.getFilename()).replace(/\\/g, "/")
+    if (isTestFile(file) || !file.includes("/src/")) return {}
+    return {
+      TSTypeReference(node) {
+        const utility = node.typeName?.type === "Identifier" ? node.typeName.name : null
+        if (!utility || !["Omit", "Pick", "Exclude"].includes(utility)) return
+        const params = node.typeArguments?.params || node.typeParameters?.params || []
+        const prop = typeKeys(params[1]).find((key) => key === "className" || key === "classNames" || key === "style")
+        if (prop) context.report({ node, messageId: "utility", data: { utility, prop } })
       },
     }
   },
@@ -176,6 +323,10 @@ export const noSurfaceListItemsSlot = {
 export const rules = {
   "no-inline-parameter-type": noInlineParameterType,
   "no-children-slot": noChildrenSlot,
+  "no-per-part-classname-prop": noPerPartClassNameProp,
+  "no-public-classname-prop": noPublicClassNameProp,
+  "no-public-frame-css-props": noPublicFrameCssProps,
+  "no-css-door-type-laundering": noCssDoorTypeLaundering,
   "no-surface-list-items-slot": noSurfaceListItemsSlot,
 }
 

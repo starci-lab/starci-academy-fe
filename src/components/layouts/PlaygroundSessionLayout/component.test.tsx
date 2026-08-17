@@ -7,7 +7,7 @@ const Surface = () => <p>Routed playground surface</p>
 describe("_PlaygroundSessionLayout", () => {
     it("keeps the routed surface inside the persistent canonical frame", () => {
         const { container } = render(
-            <_PlaygroundSessionLayout state="ready" surface={Surface} failedLabel="Failed" retryLabel="Try again" />,
+            <_PlaygroundSessionLayout state="ready" surface={<Surface />} failedLabel="Failed" retryLabel="Try again" />,
         )
 
         expect(container.querySelector("[data-node=\"playground-session-frame\"]")).not.toBeNull()
@@ -19,7 +19,7 @@ describe("_PlaygroundSessionLayout", () => {
         render(
             <_PlaygroundSessionLayout
                 state="failed"
-                surface={Surface}
+                surface={<Surface />}
                 failedLabel="Playground failed"
                 retryLabel="Try again"
                 onRetry={onRetry}

@@ -74,6 +74,7 @@ const query1 = gql`
     }
 `
 
+/** Selects content comments in the shared GraphQL executor. */
 export enum QueryContentComments { Query1 = "query1" }
 
 /** Every supported content-comments document keyed by its finite variant. */

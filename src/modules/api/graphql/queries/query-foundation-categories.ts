@@ -54,6 +54,7 @@ const document = gql`
     }
 `
 
+/** Selects foundation categories in the shared GraphQL executor. */
 export enum QueryFoundationCategories { Query1 = "query1" }
 
 /** Read the localized, server-filtered foundation category page. */

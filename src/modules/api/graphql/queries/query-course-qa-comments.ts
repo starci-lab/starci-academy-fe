@@ -62,6 +62,7 @@ const query1 = gql`
     }
 `
 
+/** Selects course Q&A comments in the shared GraphQL executor. */
 export enum QueryCourseQaComments { Query1 = "query1" }
 
 const queryCourseQaCommentsMap: Record<QueryCourseQaComments, DocumentNode> = {

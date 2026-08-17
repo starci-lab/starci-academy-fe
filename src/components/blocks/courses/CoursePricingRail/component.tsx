@@ -6,10 +6,11 @@ import { Badge } from "@/components/leaves/Badge"
 import { Button } from "@/components/leaves/Button"
 import { ChoiceTabs } from "@/components/leaves/ChoiceTabs"
 import { CoverImage } from "@/components/leaves/CoverImage"
-import { PricingPhaseDisclosure } from "@/components/leaves/PricingPhaseDisclosure"
+import { PricingPhaseDisclosure } from "@/components/composites/PricingPhaseDisclosure"
 import { Text } from "@/components/leaves/Text"
 import { TextLink } from "@/components/leaves/TextLink"
 import {
+    defineCompositeComponent,
     defineContractComponent,
     defineContractProjection,
     defineLeafComponent,
@@ -291,7 +292,7 @@ export const _CoursePricingRail = (input: CoursePricingRailProps) => {
                     }),
                 ladder: phases.length === 0
                     ? undefined
-                    : defineLeafComponent("pricing-phase-disclosure", {}, () => (
+                    : defineCompositeComponent("pricing-phase-disclosure", {}, () => (
                         <PricingPhaseDisclosure
                             props={{
                                 label: input.props.intent?.phaseDisclosureLabel ?? input.props.title,

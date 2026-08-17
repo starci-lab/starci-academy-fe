@@ -21,7 +21,7 @@
 const normalizePath = (filename) => String(filename || "").replace(/\\/g, "/")
 
 /** Tiers that receive every word they render: they know no domain, so they can know no sentence. */
-const VOCABULARY_DIRS = ["leaves", "shells", "composites", "branches"]
+const VOCABULARY_DIRS = ["leaves", "composites", "branches"]
 
 /** True when a file sits in a tier that must not hold copy. */
 const isVocabularyFile = (filename) => {

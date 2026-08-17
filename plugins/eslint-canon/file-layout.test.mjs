@@ -15,9 +15,11 @@ import {
   monorepoTierBelongsToItsSide,
   noHelperFolderInComponents,
   noRuntimeNamespace,
+  noShellTier,
   routeTreeHoldsRoutesOnly,
   rules,
   surfaceFolderTwoFilesOnly,
+  sourceTierMarkerMatchesFolder,
 } from "./file-layout.mjs"
 
 const tester = new RuleTester({
@@ -37,7 +39,7 @@ test("every rule this law declares is exported under its published name", () => 
   }
 })
 
-test("LAYOUT-2: a surface folder holds its two halves and their twins", () => {
+test("FILE-2: a surface folder holds its two halves and their twins", () => {
   tester.run("surface-folder-two-files-only", surfaceFolderTwoFilesOnly, {
     valid: [
       { filename: `${R}/pages/DashboardPage/index.tsx`, code: "export const P = () => null" },
@@ -62,7 +64,7 @@ test("LAYOUT-2: a surface folder holds its two halves and their twins", () => {
   })
 })
 
-test("LAYOUT-6: the routing tree holds route files and nothing else", () => {
+test("FILE-6: the routing tree holds route files and nothing else", () => {
   const A = "D:/repo/apps/app/src/app"
   tester.run("route-tree-holds-routes-only", routeTreeHoldsRoutesOnly, {
     valid: [
@@ -118,7 +120,7 @@ test("LAYOUT-6: the routing tree holds route files and nothing else", () => {
   })
 })
 
-test("LAYOUT-3: a helper folder under components has a real home elsewhere", () => {
+test("FILE-3: a helper folder under components has a real home elsewhere", () => {
   tester.run("no-helper-folder-in-components", noHelperFolderInComponents, {
     valid: [
       { filename: `${R}/leaves/Text/index.tsx`, code: "export const T = () => null" },
@@ -140,7 +142,7 @@ test("LAYOUT-3: a helper folder under components has a real home elsewhere", () 
   })
 })
 
-test("LAYOUT-1: the path predicts the name", () => {
+test("FILE-1: the path predicts the name", () => {
   tester.run("export-matches-folder", exportMatchesFolder, {
     valid: [
       { filename: `${R}/leaves/Text/index.tsx`, code: "export const Text = () => null" },
@@ -160,7 +162,7 @@ test("LAYOUT-1: the path predicts the name", () => {
   })
 })
 
-test("LAYOUT-4: a family is exported as members, not as one object", () => {
+test("FILE-4: a family is exported as members, not as one object", () => {
   tester.run("no-runtime-namespace", noRuntimeNamespace, {
     valid: [
       "export const CardRoot = () => null",
@@ -183,13 +185,13 @@ test("LAYOUT-4: a family is exported as members, not as one object", () => {
 })
 
 /**
- * LAYOUT-5, and the cases that decide it are the SINGLE-APP ones.
+ * FILE-5, and the cases that decide it are the SINGLE-APP ones.
  *
  * This rule keys on `packages/<name>/src/` and `apps/<name>/src/`, so a repository that has neither
  * must match nothing at all. A path rule that widens by one segment starts firing on a whole tier
  * at once, and the tier it would fire on here is every block in every single-app repository.
  */
-test("LAYOUT-5: each tier sits on its own side of the feature line", () => {
+test("FILE-5: each tier sits on its own side of the feature line", () => {
   tester.run("monorepo-tier-belongs-to-its-side", monorepoTierBelongsToItsSide, {
     valid: [
       // The shared package holds the tiers that know no feature.
@@ -227,6 +229,23 @@ test("LAYOUT-5: each tier sits on its own side of the feature line", () => {
         errors: [{ messageId: "vocabularyInApp" }],
       },
     ],
+  })
+})
+
+test("FILE-7: shells are branches with typed contracts, not a tier", () => {
+  tester.run("no-shell-tier", noShellTier, {
+    valid: [{ filename: `${R}/branches/ModalBranch/index.tsx`, code: "export const ModalBranch = () => null" }],
+    invalid: [{ filename: `${R}/shells/ModalShell/index.tsx`, code: "export const ModalShell = () => null", errors: [{ messageId: "shell" }] }],
+  })
+})
+
+test("FILE-8: the source marker and owning tier agree", () => {
+  tester.run("source-tier-marker-matches-folder", sourceTierMarkerMatchesFolder, {
+    valid: [
+      { filename: `${R}/branches/ModalBranch/index.tsx`, code: "export const meta = { shape: 'branch' } as const" },
+      { filename: `${R}/overlays/auth/SignInOverlay/component.tsx`, code: "export const meta = { shape: 'overlay' } as const" },
+    ],
+    invalid: [{ filename: `${R}/branches/ModalBranch/index.tsx`, code: "export const meta = { shape: 'shell' } as const", errors: [{ messageId: "mismatch" }] }],
   })
 })
 

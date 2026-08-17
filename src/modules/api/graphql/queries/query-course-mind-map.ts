@@ -14,6 +14,7 @@ export type CourseMindMap = { readonly nodes: ReadonlyArray<MindMapNode>; readon
 export type CourseMindMapRequest = { readonly courseId: string }
 type QueryCourseMindMapResponse = { readonly courseMindMap: GraphQLResponse<CourseMindMap> }
 const document = gql`query CourseMindMap($request: CourseMindMapRequest!) { courseMindMap(request: $request) { success message error data { nodes { id type position { x y } data { label kind entityId moduleId displayId desc popularity links { kind entityId moduleId displayId } } } edges { id source target type animated } } } }`
+/** Selects one course mind map in the shared GraphQL executor. */
 export enum QueryCourseMindMap { Query1 = "query1" }
 
 /** Read the server-positioned concept graph for a course id or display slug. */

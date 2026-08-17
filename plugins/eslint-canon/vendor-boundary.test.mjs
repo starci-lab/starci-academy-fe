@@ -4,8 +4,8 @@
  *   node --test vendor-boundary.test.mjs
  *
  * Two cases carry this suite. The provider outside the component tree must stay valid, or the rule
- * forbids the one file that has to stand the library up. And the empty shell must fail, or the
- * folder is an exemption anybody can opt into - which is the same hole with a nicer name.
+ * forbids the one file that has to stand the library up. And an empty named mechanics branch must
+ * fail, or its whitelist becomes an exemption anybody can opt into.
  */
 import assert from "node:assert/strict"
 import test from "node:test"
@@ -18,7 +18,7 @@ import {
   authOverlayOwnsSingleContentHost,
   fieldInputUsesSecondaryVariant,
   fieldLabelIsTextOnly,
-  modalShellOwnsScrollBody,
+  modalBranchOwnsScrollBody,
   noSurfaceBranchInOverlay,
   rules,
   textLinkUsesHeroLink,
@@ -35,7 +35,7 @@ const tester = new RuleTester({
 })
 
 const LEAF = "D:/repo/src/components/leaves/Button/index.tsx"
-const SHELL = "D:/repo/src/components/shells/ModalShell/index.tsx"
+const MECHANICS = "D:/repo/src/components/branches/ModalBranch/index.tsx"
 const BRANCH = "D:/repo/src/components/branches/SurfaceCard/index.tsx"
 const BLOCK = "D:/repo/src/components/blocks/dashboard/DailyQuest/component.tsx"
 const PROVIDER = "D:/repo/src/app/providers.tsx"
@@ -46,11 +46,11 @@ test("every rule this law declares is exported under its published name", () => 
   }
 })
 
-test("VENDOR-1: the library belongs to closed primitives, covering shells and named surface branches", () => {
+test("VENDOR-1: the library belongs to leaves and closed named branches", () => {
   tester.run("vendor-boundary", vendorBoundary, {
     valid: [
       { filename: LEAF, code: "import { Button } from \"@heroui/react\"" },
-      { filename: SHELL, code: "import { Modal } from \"@heroui/react\"" },
+      { filename: MECHANICS, code: "import { Modal } from \"@heroui/react\"" },
       // outside the component tree: standing the library up is not reaching past a tier
       { filename: PROVIDER, code: "import { HeroUIProvider } from \"@heroui/react\"" },
       { filename: BRANCH, code: "import { Card } from \"@heroui/react\"" },
@@ -65,45 +65,40 @@ test("VENDOR-1: the library belongs to closed primitives, covering shells and na
   })
 })
 
-test("VENDOR-2: a shell that wraps nothing is an ordinary component in the wrong folder", () => {
+test("VENDOR-2: a mechanics branch that wraps nothing owns no exception", () => {
   tester.run("vendor-boundary", vendorBoundary, {
     valid: [
-      { filename: SHELL, code: "import { Modal } from \"@heroui/react\"" },
+      { filename: MECHANICS, code: "import { Modal } from \"@heroui/react\"" },
       {
-        filename: "D:/repo/src/components/shells/DropdownShell/index.test.tsx",
+        filename: "D:/repo/src/components/branches/DropdownBranch/index.test.tsx",
         code: "export const Fixture = () => <span>Static identity</span>",
       },
     ],
     invalid: [
       {
-        filename: SHELL,
+        filename: MECHANICS,
         code: "import { Tree } from \"@/components/branches/Tree\"",
-        errors: [{ messageId: "emptyShell" }],
-      },
-      {
-        filename: "D:/repo/src/components/shells/SurfaceCard/index.tsx",
-        code: "import { Tree } from \"@/components/branches/Tree\"",
-        errors: [{ messageId: "unknownShell" }],
+        errors: [{ messageId: "emptyMechanics" }],
       },
     ],
   })
 })
 
-test("VENDOR-6: ModalShell owns one zero-inset scroll body", () => {
-  tester.run("modal-shell-owns-scroll-body", modalShellOwnsScrollBody, {
+test("VENDOR-6: ModalBranch owns one zero-inset scroll body", () => {
+  tester.run("modal-branch-owns-scroll-body", modalBranchOwnsScrollBody, {
     valid: [{
-      filename: SHELL,
-      code: "export const S = ({ children }) => <Modal.Dialog><Modal.Body className='p-0'>{children}</Modal.Body></Modal.Dialog>",
+      filename: MECHANICS,
+      code: "export const S = ({ contract, render }) => <Modal.Dialog><Modal.Body className='p-0'><Tree contract={contract} render={render} /></Modal.Body></Modal.Dialog>",
     }],
     invalid: [
       {
-        filename: SHELL,
-        code: "export const S = ({ children }) => <Modal.Dialog>{children}</Modal.Dialog>",
+        filename: MECHANICS,
+        code: "export const S = ({ contract, render }) => <Modal.Dialog><Tree contract={contract} render={render} /></Modal.Dialog>",
         errors: [{ messageId: "missing" }],
       },
       {
-        filename: SHELL,
-        code: "export const S = ({ children }) => <Modal.Dialog><Modal.Body>{children}</Modal.Body></Modal.Dialog>",
+        filename: MECHANICS,
+        code: "export const S = ({ contract, render }) => <Modal.Dialog><Modal.Body><Tree contract={contract} render={render} /></Modal.Body></Modal.Dialog>",
         errors: [{ messageId: "inset" }],
       },
     ],
@@ -146,7 +141,7 @@ test("VENDOR-9: Field labels do not infer decorative kind icons", () => {
 test("VENDOR-8: an overlay does not draw a surface inside itself", () => {
   const overlay = "D:/repo/src/components/overlays/auth/SignInOverlay/component.tsx"
   tester.run("no-surface-branch-in-overlay", noSurfaceBranchInOverlay, {
-    valid: [{ filename: overlay, code: "import { ModalShell } from '@/components/shells/ModalShell'" }],
+    valid: [{ filename: overlay, code: "import { ModalBranch } from '@/components/branches/ModalBranch'" }],
     invalid: [
       {
         filename: overlay,
@@ -176,16 +171,16 @@ test("VENDOR-10: TextLink delegates hover and press behavior to HeroUI Link", ()
   })
 })
 
-test("VENDOR-11: the account block owns product choices while DropdownShell owns HeroUI", () => {
+test("VENDOR-11: the account block owns product choices while DropdownBranch owns HeroUI", () => {
   tester.run("account-control-owns-dropdown", accountControlOwnsDropdown, {
     valid: [
       {
-        filename: "D:/repo/src/components/shells/DropdownShell/index.tsx",
-        code: "import { Dropdown } from '@heroui/react'; export const DropdownShell = () => <Dropdown />",
+        filename: "D:/repo/src/components/branches/DropdownBranch/index.tsx",
+        code: "import { Dropdown } from '@heroui/react'; export const DropdownBranch = () => <Dropdown />",
       },
       {
         filename: "D:/repo/src/components/blocks/auth/AccountMenu/component.tsx",
-        code: "import { DropdownShell } from '@/components/shells/DropdownShell'; export const _AccountMenu = () => <DropdownShell />",
+        code: "import { DropdownBranch } from '@/components/branches/DropdownBranch'; export const _AccountMenu = () => <DropdownBranch />",
       },
       {
         filename: "D:/repo/src/components/layouts/ShellNav/component.tsx",
@@ -194,23 +189,23 @@ test("VENDOR-11: the account block owns product choices while DropdownShell owns
     ],
     invalid: [
       {
-        filename: "D:/repo/src/components/shells/DropdownShell/index.tsx",
-        code: "export const DropdownShell = () => <div />",
+        filename: "D:/repo/src/components/branches/DropdownBranch/index.tsx",
+        code: "export const DropdownBranch = () => <div />",
         errors: [{ messageId: "dropdown" }],
       },
       {
-        filename: "D:/repo/src/components/shells/DropdownShell/index.tsx",
-        code: "import { Dropdown } from '@heroui/react'; export const DropdownShell = () => <Dropdown />; export const DropdownShellItem = Dropdown.Item",
+        filename: "D:/repo/src/components/branches/DropdownBranch/index.tsx",
+        code: "import { Dropdown } from '@heroui/react'; export const DropdownBranch = () => <Dropdown />; export const DropdownBranchItem = Dropdown.Item",
         errors: [{ messageId: "pieces" }],
       },
       {
         filename: "D:/repo/src/components/blocks/auth/AccountMenu/component.tsx",
         code: "import { Dropdown } from '@heroui/react'; export const _AccountMenu = () => <Dropdown />",
-        errors: [{ messageId: "vendor" }, { messageId: "shell" }],
+        errors: [{ messageId: "vendor" }, { messageId: "branch" }],
       },
       {
         filename: "D:/repo/src/components/blocks/auth/AccountMenu/component.tsx",
-        code: "import { DropdownShell, DropdownShellItem } from '@/components/shells/DropdownShell'; export const _AccountMenu = () => <DropdownShell><DropdownShellItem /></DropdownShell>",
+        code: "import { DropdownBranch, DropdownBranchItem } from '@/components/branches/DropdownBranch'; export const _AccountMenu = () => <DropdownBranch><DropdownBranchItem /></DropdownBranch>",
         errors: [{ messageId: "pieces" }],
       },
       {
@@ -278,13 +273,13 @@ test("VENDOR-12: the auth overlay has one zero-inset content host", () => {
     valid: [
       {
         filename: "D:/repo/src/components/overlays/auth/SignInOverlay/component.tsx",
-        code: "import { ContractContent } from '@/components/branches/Tree'; export const Overlay = ({ render }) => <ContractContent contract={render.meta.contract} render={render} />",
+        code: "import { ModalBranch } from '@/components/branches/ModalBranch'; export const Overlay = ({ render }) => <ModalBranch contract={render.meta.contract} render={render} />",
       },
       {
-        // the same projection in a workspace that publishes its branches from a
+        // the same branch in a workspace that publishes its branches from a
         // package: the law is satisfied, so the rule must be too
         filename: "D:/repo/src/components/overlays/auth/SignInOverlay/component.tsx",
-        code: "import { ContractContent } from '@acme/ui'; export const Overlay = ({ render }) => <ContractContent contract={render.meta.contract} render={render} />",
+        code: "import { ModalBranch } from '@acme/ui'; export const Overlay = ({ render }) => <ModalBranch contract={render.meta.contract} render={render} />",
       },
       {
         filename: "D:/repo/src/components/contracts/index.ts",

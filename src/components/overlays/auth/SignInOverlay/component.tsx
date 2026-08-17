@@ -1,5 +1,4 @@
-import { ModalShell } from "@/components/shells/ModalShell"
-import { ContractContent } from "@/components/branches/Tree"
+import { ModalBranch } from "@/components/branches/ModalBranch"
 import type { ContractKey } from "@/components/contracts"
 import type { ContractComponent } from "@/components/contracts/props"
 
@@ -16,7 +15,7 @@ import type { ContractComponent } from "@/components/contracts/props"
  * thing only a covering surface can: the way out.
  *
  * IT DOES NOT TOUCH THE VENDOR. The focus trap, the backdrop, the placement and the scroll lock
- * are `ModalShell`'s, wrapped once at the shell tier - which is what stops two surfaces disagreeing
+ * are `ModalBranch`'s, wrapped once - which is what stops two surfaces disagreeing
  * about how a modal behaves.
  */
 
@@ -24,7 +23,7 @@ import type { ContractComponent } from "@/components/contracts/props"
 export type SignInOverlayProps<K extends ContractKey> = {
     /** Whether the surface is on screen. Owned by whoever mounts it, never by the surface. */
     readonly isOpen: boolean
-    /** Typed branch mounted inside the otherwise content-agnostic modal shell. */
+    /** Typed contract mounted inside the modal mechanics branch. */
     readonly render: ContractComponent<K>
     /** Every way out: the close control, Escape, the backdrop, and a successful sign-in. */
     readonly onDismiss: () => void
@@ -36,10 +35,14 @@ export type SignInOverlayProps<K extends ContractKey> = {
  * @param input - {@link SignInOverlayProps}
  */
 export const _SignInOverlay = <const K extends ContractKey>(input: SignInOverlayProps<K>) => (
-    <ModalShell isOpen={input.isOpen} size="xs" onDismiss={input.onDismiss}>
-        <ContractContent contract={input.render.meta.contract} render={input.render} />
-    </ModalShell>
+    <ModalBranch
+        isOpen={input.isOpen}
+        size="xs"
+        contract={input.render.meta.contract}
+        render={input.render}
+        onDismiss={input.onDismiss}
+    />
 )
 
 /** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "branch", world: "pure", domain: "auth" } as const
+export const meta = { shape: "overlay", world: "pure", domain: "auth" } as const

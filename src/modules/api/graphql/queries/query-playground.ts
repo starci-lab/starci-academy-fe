@@ -8,6 +8,7 @@ export type PlaygroundStep = { readonly id: string; readonly sortIndex: number; 
 export type Playground = { readonly id: string; readonly slug: string; readonly title: string; readonly description: string | null; readonly icon: string | null; readonly kind: string; readonly steps: ReadonlyArray<PlaygroundStep> }
 type QueryPlaygroundResponse = { readonly playground: GraphQLResponse<Playground> }
 const document = gql`query Playground($slug: String!) { playground(slug: $slug) { success message error data { id slug title description icon kind steps { id sortIndex title body commandHint actionHint } } } }`
+/** Selects one playground definition in the shared GraphQL executor. */
 export enum QueryPlayground { Query1 = "query1" }
 /** Transport inputs for resolving one playground by slug. */
 export type QueryPlaygroundParams = { readonly slug: string; readonly headers?: GraphQLHeaders; readonly signal?: AbortSignal; readonly debug?: boolean }

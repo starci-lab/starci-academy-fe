@@ -17,6 +17,7 @@ const mutation1 = gql`
     }
 `
 
+/** Selects content-AI session creation in the shared GraphQL executor. */
 export enum MutationCreateContentAiSession { Mutation1 = "mutation1" }
 
 /** Every supported conversation-creation document keyed by variant. */

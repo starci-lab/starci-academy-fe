@@ -33,6 +33,7 @@ const mutation1 = gql`
     }
 `
 
+/** Selects content-challenge submission in the shared GraphQL executor. */
 export enum MutationSubmitContentChallenge { Mutation1 = "mutation1" }
 
 /** Every supported challenge-submission document keyed by its finite variant. */

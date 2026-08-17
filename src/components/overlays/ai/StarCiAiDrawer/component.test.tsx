@@ -2,14 +2,15 @@ import { render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { _StarCiAiDrawer } from "./component"
 
-type DrawerShellMockProps = React.PropsWithChildren<{
+type DrawerBranchMockProps = {
     readonly isOpen: boolean
     readonly placement: string
-}>
+    readonly render: { readonly kind: string; readonly project?: () => React.ReactNode }
+}
 
-vi.mock("@/components/shells/DrawerShell", () => ({
-    DrawerShell: (input: DrawerShellMockProps) => (
-        <section data-open={input.isOpen} data-placement={input.placement}>{input.children}</section>
+vi.mock("@/components/branches/DrawerBranch", () => ({
+    DrawerBranch: (input: DrawerBranchMockProps) => (
+        <section data-open={input.isOpen} data-placement={input.placement}>{input.render.project?.()}</section>
     ),
 }))
 

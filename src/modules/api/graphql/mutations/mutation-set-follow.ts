@@ -9,6 +9,7 @@ const mutation1 = gql`
     }
 `
 
+/** Selects learner follow-state changes in the shared GraphQL executor. */
 export enum MutationSetFollow { Mutation1 = "mutation1" }
 
 /** Every supported follow document keyed by its public variant. */

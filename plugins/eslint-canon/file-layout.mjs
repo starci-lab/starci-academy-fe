@@ -34,7 +34,7 @@ const surfaceFolder = (filename) => {
   return hit ? { tier: hit[1], name: hit[2], rest: hit[3] } : null
 }
 
-// -- LAYOUT-2 --------------------------------------------------------------------------------------
+// -- FILE-2 --------------------------------------------------------------------------------------
 
 /** A page, layout or overlay folder holds its two halves and nothing else. */
 export const surfaceFolderTwoFilesOnly = {
@@ -58,7 +58,7 @@ export const surfaceFolderTwoFilesOnly = {
   },
 }
 
-// -- LAYOUT-3 --------------------------------------------------------------------------------------
+// -- FILE-3 --------------------------------------------------------------------------------------
 
 /** What is not component code does not live in the component tree. */
 export const noHelperFolderInComponents = {
@@ -82,7 +82,7 @@ export const noHelperFolderInComponents = {
   },
 }
 
-// -- LAYOUT-1 --------------------------------------------------------------------------------------
+// -- FILE-1 --------------------------------------------------------------------------------------
 
 /** A PascalCase folder exports a family whose name belongs to the folder. */
 export const exportMatchesFolder = {
@@ -121,7 +121,7 @@ export const exportMatchesFolder = {
   },
 }
 
-// -- LAYOUT-4 --------------------------------------------------------------------------------------
+// -- FILE-4 --------------------------------------------------------------------------------------
 
 /** Members that make an object literal look like a component family rather than data. */
 const looksLikeComponentMember = (name) => /^[A-Z]/.test(String(name))
@@ -158,13 +158,13 @@ export const noRuntimeNamespace = {
   },
 }
 
-// -- LAYOUT-5 --------------------------------------------------------------------------------------
+// -- FILE-5 --------------------------------------------------------------------------------------
 
 /** Tiers that know a feature, and therefore belong to the app that owns it. */
 const FEATURE_TIERS = /\/packages\/[^/]+\/src\/(blocks|overlays|pages|layouts)\//
 
 /** Tiers that know no feature, and therefore belong to the shared package. */
-const VOCABULARY_TIERS = /\/apps\/[^/]+\/src\/(?:components\/)?(contracts|leaves|composites|branches|shells)\//
+const VOCABULARY_TIERS = /\/apps\/[^/]+\/src\/(?:components\/)?(contracts|leaves|composites|branches)\//
 
 /**
  * In a monorepo, the shared package stops below the block.
@@ -183,7 +183,7 @@ export const monorepoTierBelongsToItsSide = {
     type: "problem",
     docs: {
       description:
-        "In a monorepo the shared package holds contracts, leaves, composites, branches and shells; blocks, overlays, layouts and pages belong to the app that owns the feature.",
+        "In a monorepo the shared package holds contracts, leaves, composites and branches; blocks, overlays, layouts and pages belong to the app that owns the feature.",
     },
     schema: [],
     messages: {
@@ -209,7 +209,84 @@ export const monorepoTierBelongsToItsSide = {
   },
 }
 
-// -- LAYOUT-6 --------------------------------------------------------------------------------------
+// -- FILE-7 · FILE-8 -----------------------------------------------------------------------------
+
+/** A shell path is an untyped branch exemption under another name. */
+const SHELL_TIER = /\/(?:src\/components|packages\/[^/]+\/src|apps\/[^/]+\/src\/(?:components\/)?)\/shells\//
+
+/** Component tiers whose source marker can be checked against their folder. */
+const TIER_PATH = /\/(?:src\/components|packages\/[^/]+\/src|apps\/[^/]+\/src\/(?:components\/)?)\/(leaves|composites|branches|blocks|layouts|overlays|pages)\//
+
+/** `shells/` no longer exists; vendor mechanics are closed named branches. */
+export const noShellTier = {
+  meta: {
+    type: "problem",
+    docs: { description: "The component vocabulary has no shell tier." },
+    schema: [],
+    messages: {
+      shell:
+        "`shells/` is an untyped branch exemption. Move the owner to a named branch, replace children with typed contract content, and keep vendor mechanics closed there.",
+    },
+  },
+  create(context) {
+    if (!SHELL_TIER.test(normalizePath(context.filename || context.getFilename()))) return {}
+    return { Program(node) { context.report({ node, messageId: "shell" }) } }
+  },
+}
+
+/** `meta.shape` must tell the same truth as the source path. */
+export const sourceTierMarkerMatchesFolder = {
+  meta: {
+    type: "problem",
+    docs: { description: "A source tier marker matches the component folder that owns it." },
+    schema: [],
+    messages: {
+      mismatch:
+        "This file sits in `{{tier}}/` but declares `meta.shape = {{shape}}`. A source marker is evidence, not a second classification; change the owner or the marker so the path and source agree.",
+    },
+  },
+  create(context) {
+    const hit = normalizePath(context.filename || context.getFilename()).match(TIER_PATH)
+    if (!hit) return {}
+    const expected = {
+      blocks: "block",
+      branches: "branch",
+      composites: "composite",
+      contracts: "contract",
+      layouts: "layout",
+      leaves: "leaf",
+      overlays: "overlay",
+      pages: "page",
+    }[hit[1]]
+    return {
+      ExportNamedDeclaration(node) {
+        const declaration = node.declaration
+        if (!declaration || declaration.type !== "VariableDeclaration") return
+        for (const item of declaration.declarations || []) {
+          if (item.id?.type !== "Identifier" || item.id.name !== "meta") continue
+          let init = item.init
+          while (init && (init.type === "TSAsExpression" || init.type === "TSSatisfiesExpression")) init = init.expression
+          if (!init || init.type !== "ObjectExpression") continue
+          const shapeProperty = init.properties.find((property) =>
+            property.type === "Property" && !property.computed && propertyName(property) === "shape")
+          const shape = shapeProperty?.value?.type === "Literal" ? shapeProperty.value.value : null
+          if (typeof shape === "string" && shape !== expected) {
+            context.report({ node: shapeProperty.value, messageId: "mismatch", data: { tier: hit[1], shape } })
+          }
+        }
+      },
+    }
+  },
+}
+
+/** Static property name helper. */
+function propertyName(node) {
+  if (node.key?.type === "Identifier") return node.key.name
+  if (node.key?.type === "Literal") return node.key.value
+  return null
+}
+
+// -- FILE-6 --------------------------------------------------------------------------------------
 
 /** Anything under a routing tree, in either workspace shape. */
 const ROUTE_TREE = /\/src\/app\/(.+)$/
@@ -260,7 +337,7 @@ const ROUTE_TREE_TEST = /\.test\.(?:tsx?|jsx?)$/
  * groups it with its siblings - `components/pages/<Name>/`, where the next author looks for it.
  *
  * The cost is stated where it bites: a route file that draws inside `page.tsx` still passes. That is
- * LAYOUT-2's `component.tsx` split to catch, and no path rule can see it.
+ * FILE-2's `component.tsx` split to catch, and no path rule can see it.
  */
 export const routeTreeHoldsRoutesOnly = {
   meta: {
@@ -297,6 +374,8 @@ export const rules = {
   "export-matches-folder": exportMatchesFolder,
   "no-runtime-namespace": noRuntimeNamespace,
   "monorepo-tier-belongs-to-its-side": monorepoTierBelongsToItsSide,
+  "no-shell-tier": noShellTier,
+  "source-tier-marker-matches-folder": sourceTierMarkerMatchesFolder,
 }
 
 /**

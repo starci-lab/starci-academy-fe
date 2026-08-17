@@ -23,6 +23,7 @@ const query1 = gql`
     }
 `
 
+/** Selects the current weekly challenge in the shared GraphQL executor. */
 export enum QueryWeeklyChallenge { Query1 = "query1" }
 /** Every supported weekly-challenge document keyed by its public variant. */
 export const queryWeeklyChallengeMap: Record<QueryWeeklyChallenge, DocumentNode> = {

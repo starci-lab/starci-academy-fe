@@ -44,6 +44,7 @@ const mutation1 = gql`
     }
 `
 
+/** Selects content-comment submission in the shared GraphQL executor. */
 export enum MutationSubmitContentComment { Mutation1 = "mutation1" }
 
 /** Every supported create-comment document keyed by its finite variant. */

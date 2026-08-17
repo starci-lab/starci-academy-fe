@@ -13,7 +13,11 @@ import { RuleTester } from "eslint"
 import tsParser from "@typescript-eslint/parser"
 import {
   noChildrenSlot,
+  noCssDoorTypeLaundering,
   noInlineParameterType,
+  noPerPartClassNameProp,
+  noPublicClassNameProp,
+  noPublicFrameCssProps,
   noSurfaceListItemsSlot,
   rules,
 } from "./props-and-slots.mjs"
@@ -75,19 +79,13 @@ test("SLOTS-3: a parameter's complete shape is named in the module", () => {
 })
 
 const BRANCH = "/repo/src/components/branches/SurfaceCard/index.tsx"
-const SHELL = "/repo/src/components/shells/ModalShell/index.tsx"
-const FAKE_SHELL = "/repo/src/components/shells/PopoverShell/index.tsx"
 
-test("SLOTS-4: containers take contract and render; only the three closed shells take children", () => {
+test("SLOTS-4: every component container takes contract and render instead of children", () => {
   tester.run("no-children-slot", noChildrenSlot, {
     valid: [
       // the shape this rule exists to push people towards
       { filename: BRANCH, code: "export interface P { contract: ContractKey; render: ChildrenOf<K> }" },
       { filename: BRANCH, code: "export const S = ({ props, render }: SProps) => null" },
-      // the one lawful home for the slot: the vendor declares it, the wrapper cannot refuse it
-      { filename: SHELL, code: "export interface P { children?: ReactNode }" },
-      { filename: SHELL, code: "export const M = ({ children }: MProps) => null" },
-      { filename: "/repo/src/components/shells/DropdownShell/index.tsx", code: "type DropdownShellProps = { children?: ReactNode }" },
       // outside the component tree entirely - a page or a test may say what it likes
       { filename: "/repo/src/app/page.tsx", code: "export const P = ({ children }: PProps) => null" },
       // an ordinary object property that happens to be called children is not a slot
@@ -95,7 +93,7 @@ test("SLOTS-4: containers take contract and render; only the three closed shells
     ],
     invalid: [
       {
-        filename: FAKE_SHELL,
+        filename: "/repo/src/components/shells/ModalShell/index.tsx",
         code: "type PopoverShellProps = { readonly children?: ReactNode }",
         errors: [{ messageId: "slot" }],
       },
@@ -137,22 +135,28 @@ test("SLOTS-7: list collections travel through named props, never an items lane"
   })
 })
 
-test("SLOTS-4: RouteShell may take the children the framework hands a layout", () => {
-  tester.run("no-children-slot", rules["no-children-slot"], {
-    valid: [
-      {
-        // The one seam between Next's contract and this house's: it converts and arranges nothing.
-        filename: "/repo/src/components/shells/RouteShell/index.tsx",
-        code: "export const RouteShell = ({ children, frame: Frame }) => <Frame surface={() => children} />",
-      },
-    ],
+test("SLOTS-5/6: public CSS doors stay closed at declarations, call sites and utility types", () => {
+  tester.run("no-per-part-classname-prop", noPerPartClassNameProp, {
+    valid: [{ filename: BRANCH, code: "type P = { tone: 'quiet' | 'loud' }" }],
+    invalid: [{ filename: BRANCH, code: "type P = { titleClassName?: string }", errors: [{ messageId: "perPart" }] }],
+  })
+  tester.run("no-public-classname-prop", noPublicClassNameProp, {
+    valid: [{ filename: BRANCH, code: "type P = { tone: 'quiet' | 'loud' }" }],
     invalid: [
+      { filename: BRANCH, code: "type P = { className?: string }", errors: [{ messageId: "declaration" }] },
       {
-        // A connected layout is NOT the seam, however close it sits to one.
-        filename: "/repo/src/components/layouts/LearnShellLayout/index.tsx",
-        code: "export const L = ({ children }) => <div>{children}</div>",
-        errors: 1,
+        filename: "/repo/src/components/blocks/X/component.tsx",
+        code: "import { SurfaceCard } from '@/components/branches/SurfaceCard'; const X = () => <SurfaceCard className='p-2' />",
+        errors: [{ messageId: "usage" }],
       },
     ],
+  })
+  tester.run("no-public-frame-css-props", noPublicFrameCssProps, {
+    valid: [{ filename: "/repo/src/components/leaves/Stack/index.tsx", code: "type P = { gap?: string }" }],
+    invalid: [{ filename: BRANCH, code: "type P = { gap?: string }", errors: [{ messageId: "css" }] }],
+  })
+  tester.run("no-css-door-type-laundering", noCssDoorTypeLaundering, {
+    valid: [{ filename: BRANCH, code: "type P = Pick<Base, 'tone'>" }],
+    invalid: [{ filename: BRANCH, code: "type P = Omit<Base, 'className'>", errors: [{ messageId: "utility" }] }],
   })
 })

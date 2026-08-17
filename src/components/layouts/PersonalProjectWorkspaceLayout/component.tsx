@@ -1,4 +1,4 @@
-import type { ComponentType } from "react"
+import type { ReactNode } from "react"
 import { Tree } from "@/components/branches/Tree"
 import { NavLink } from "@/components/leaves/NavLink"
 import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
@@ -13,14 +13,13 @@ export type PersonalProjectWorkspaceMilestone = {
 /** Pure workspace frame data and routed surface contract. */
 export type PersonalProjectWorkspaceLayoutProps = {
     readonly milestones: ReadonlyArray<PersonalProjectWorkspaceMilestone>
-    readonly surface: ComponentType
+    readonly surface: ReactNode
     readonly onTask?: (id: string) => void
     readonly isLoading?: boolean
 }
 
 /** Keeps milestone navigation mounted around dashboard, task and result surfaces. */
 export const _PersonalProjectWorkspaceLayout = (input: PersonalProjectWorkspaceLayoutProps) => {
-    const Surface = input.surface
     const milestones: ReadonlyArray<PersonalProjectWorkspaceMilestone> = input.isLoading === true && input.milestones.length === 0
         ? Array.from({ length: 4 }, (_, index) => ({ id: `pending-${index}`, label: "", isCurrent: false }))
         : input.milestones
@@ -35,7 +34,7 @@ export const _PersonalProjectWorkspaceLayout = (input: PersonalProjectWorkspaceL
                         isLoading={input.isLoading}
                     />
                 ))),
-                body: defineLeafComponent("page", {}, () => <Surface />),
+                body: defineLeafComponent("page", {}, () => <>{input.surface}</>),
             })}
         />
     )

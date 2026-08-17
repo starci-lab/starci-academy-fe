@@ -17,6 +17,7 @@ const mutation1 = gql`
     }
 `
 
+/** Selects content-AI session deletion in the shared GraphQL executor. */
 export enum MutationDeleteContentAiSession { Mutation1 = "mutation1" }
 
 /** Every supported conversation-deletion document keyed by variant. */

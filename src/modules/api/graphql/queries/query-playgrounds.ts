@@ -13,6 +13,7 @@ export type PlaygroundSummary = {
 
 type QueryPlaygroundsResponse = { readonly playgrounds: GraphQLResponse<ReadonlyArray<PlaygroundSummary>> }
 const document = gql`query Playgrounds($courseId: ID!) { playgrounds(courseId: $courseId) { success message error data { id slug title icon stepCount } } }`
+/** Selects course playground definitions in the shared GraphQL executor. */
 export enum QueryPlaygrounds { Query1 = "query1" }
 /** Transport inputs for listing a course's playgrounds. */
 export type QueryPlaygroundsParams = { readonly courseId: string; readonly headers?: GraphQLHeaders; readonly signal?: AbortSignal; readonly debug?: boolean }

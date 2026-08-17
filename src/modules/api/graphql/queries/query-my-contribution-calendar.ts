@@ -17,6 +17,7 @@ const query1 = gql`
     }
 `
 
+/** Selects the current learner contribution calendar in the shared GraphQL executor. */
 export enum QueryMyContributionCalendar { Query1 = "query1" }
 /** Every supported contribution-calendar document keyed by its public variant. */
 export const queryMyContributionCalendarMap: Record<QueryMyContributionCalendar, DocumentNode> = {

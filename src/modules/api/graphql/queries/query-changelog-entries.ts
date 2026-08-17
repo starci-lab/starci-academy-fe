@@ -14,6 +14,7 @@ const query1 = gql`
     }
 `
 
+/** Selects changelog entries in the shared GraphQL executor. */
 export enum QueryChangelogEntries { Query1 = "query1" }
 /** Every supported changelog document keyed by its public variant. */
 export const queryChangelogEntriesMap: Record<QueryChangelogEntries, DocumentNode> = {

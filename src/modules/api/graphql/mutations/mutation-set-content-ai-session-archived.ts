@@ -17,6 +17,7 @@ const mutation1 = gql`
     }
 `
 
+/** Selects content-AI archival changes in the shared GraphQL executor. */
 export enum MutationSetContentAiSessionArchived { Mutation1 = "mutation1" }
 
 /** Every supported archive-state document keyed by variant. */

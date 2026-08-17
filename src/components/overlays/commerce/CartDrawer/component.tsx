@@ -1,13 +1,12 @@
 import { Button } from "@/components/leaves/Button"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
-import { Tree } from "@/components/branches/Tree"
+import { DrawerBranch } from "@/components/branches/DrawerBranch"
 import {
     defineCompositeComponent,
     defineContractComponent,
     defineContractProjection,
     defineLeafComponent,
 } from "@/components/contracts/props"
-import { DrawerShell } from "@/components/shells/DrawerShell"
 import { CartLine } from "@/components/blocks/commerce/CartLine"
 import { type CartLineData } from "@/components/blocks/commerce/CartLine/component"
 import { _OrderSummary, type OrderSummaryLabels } from "@/components/blocks/commerce/OrderSummary/component"
@@ -21,7 +20,7 @@ import { _OrderSummary, type OrderSummaryLabels } from "@/components/blocks/comm
  * beside the same decision. The covering panel is already the bounded object; a `SurfaceCard`
  * inside it would draw a second border and a second inset around a body that is already framed.
  *
- * IT HOLDS NO HEADING. `DrawerShell` names the panel in the vendor's own header, and a second
+ * IT HOLDS NO HEADING. `DrawerBranch` names the panel in the vendor's own header, and a second
  * title inside would name the thing the reader has just opened, by name, twice.
  *
  * IT DRAWS THE SAME TWO BLOCKS THE PAGE DRAWS, not narrower copies of them. `CartLine` and
@@ -113,79 +112,76 @@ export const _CartDrawer = (input: CartDrawerProps) => {
     const lines = isLoading ? restingLines : input.props.lines ?? []
 
     return (
-        <DrawerShell
+        <DrawerBranch
             isOpen={input.props.isOpen}
             title={labels.title}
+            contract="cart-drawer-column"
+            render={defineContractComponent("cart-drawer-column", {
+                ...(showsNotice ? {} : {
+                    lines: defineContractComponent("cart-line-list", {
+                        line: lines.map((line) => defineContractProjection("cart-line-row", () => (
+                            <CartLine state={isLoading ? "pending" : "ready"} line={line} />
+                        ))),
+                    }),
+                }),
+                ...(showsNotice ? {} : {
+                    summary: defineContractProjection("order-summary-stack", () => (
+                        <_OrderSummary
+                            state={
+                                isLoading
+                                    ? "pending"
+                                    : input.props.hasPricingFailed === true ? "failed" : "ready"
+                            }
+                            props={{
+                                labels: labels.summary,
+                                subtotal: input.props.subtotal,
+                                savings: input.props.savings,
+                                total: input.props.total,
+                            }}
+                        />
+                    )),
+                }),
+                ...(showsNotice ? {} : {
+                    actions: defineContractComponent("stacked-peer-controls", {
+                        control: [
+                            defineLeafComponent("button", {}, () => (
+                                <Button
+                                    props={{ label: labels.checkout, variant: "primary", disabled: isLoading }}
+                                    on={{ press: input.on?.checkout }}
+                                />
+                            )),
+                            defineLeafComponent("button", {}, () => (
+                                <Button
+                                    props={{ label: labels.viewFullCart, variant: "secondary" }}
+                                    on={{ press: input.on?.viewFullCart }}
+                                />
+                            )),
+                        ],
+                    }),
+                }),
+                ...(showsNotice ? {
+                    notice: defineCompositeComponent("empty-notice", {}, () => (
+                        <EmptyNotice
+                            props={{
+                                icon: "cart",
+                                // EMPTY AND REFUSED ARE NOT THE SAME SENTENCE, and the real page is what proved it: a
+
+                                // signed-out reader was told their basket was empty when nobody had asked them to sign
+
+                                // in. Both states hide the same regions, so only the copy can tell them apart.
+
+                                message: input.state === "failed" ? labels.failedMessage : labels.emptyMessage,
+                                actionLabel: input.state === "failed" ? labels.failedAction : labels.emptyAction,
+                            }}
+                            on={{ act: input.on?.browse }}
+                        />
+                    )),
+                } : {}),
+            })}
             onDismiss={input.on?.dismiss ?? (() => undefined)}
-        >
-            <Tree
-                contract="cart-drawer-column"
-                render={defineContractComponent("cart-drawer-column", {
-                    ...(showsNotice ? {} : {
-                        lines: defineContractComponent("cart-line-list", {
-                            line: lines.map((line) => defineContractProjection("cart-line-row", () => (
-                                <CartLine state={isLoading ? "pending" : "ready"} line={line} />
-                            ))),
-                        }),
-                    }),
-                    ...(showsNotice ? {} : {
-                        summary: defineContractProjection("order-summary-stack", () => (
-                            <_OrderSummary
-                                state={
-                                    isLoading
-                                        ? "pending"
-                                        : input.props.hasPricingFailed === true ? "failed" : "ready"
-                                }
-                                props={{
-                                    labels: labels.summary,
-                                    subtotal: input.props.subtotal,
-                                    savings: input.props.savings,
-                                    total: input.props.total,
-                                }}
-                            />
-                        )),
-                    }),
-                    ...(showsNotice ? {} : {
-                        actions: defineContractComponent("stacked-peer-controls", {
-                            control: [
-                                defineLeafComponent("button", {}, () => (
-                                    <Button
-                                        props={{ label: labels.checkout, variant: "primary", disabled: isLoading }}
-                                        on={{ press: input.on?.checkout }}
-                                    />
-                                )),
-                                defineLeafComponent("button", {}, () => (
-                                    <Button
-                                        props={{ label: labels.viewFullCart, variant: "secondary" }}
-                                        on={{ press: input.on?.viewFullCart }}
-                                    />
-                                )),
-                            ],
-                        }),
-                    }),
-                    ...(showsNotice ? {
-                        notice: defineCompositeComponent("empty-notice", {}, () => (
-                            <EmptyNotice
-                                props={{
-                                    icon: "cart",
-                                    // EMPTY AND REFUSED ARE NOT THE SAME SENTENCE, and the real page is what proved it: a
-
-                                    // signed-out reader was told their basket was empty when nobody had asked them to sign
-
-                                    // in. Both states hide the same regions, so only the copy can tell them apart.
-
-                                    message: input.state === "failed" ? labels.failedMessage : labels.emptyMessage,
-                                    actionLabel: input.state === "failed" ? labels.failedAction : labels.emptyAction,
-                                }}
-                                on={{ act: input.on?.browse }}
-                            />
-                        )),
-                    } : {}),
-                })}
-            />
-        </DrawerShell>
+        />
     )
 }
 
 /** Source-level ownership marker. */
-export const meta = { shape: "branch", world: "pure", domain: "commerce" } as const
+export const meta = { shape: "overlay", world: "pure", domain: "commerce" } as const

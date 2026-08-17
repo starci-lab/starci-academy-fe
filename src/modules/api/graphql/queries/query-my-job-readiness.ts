@@ -27,6 +27,7 @@ const query1 = gql`
     }
 `
 
+/** Selects the current learner job-readiness evidence in the shared GraphQL executor. */
 export enum QueryMyJobReadiness { Query1 = "query1" }
 /** Every supported job-readiness document keyed by its public variant. */
 export const queryMyJobReadinessMap: Record<QueryMyJobReadiness, DocumentNode> = {

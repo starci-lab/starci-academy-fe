@@ -306,7 +306,7 @@ export const CONTRACTS = buildContracts({
             title: { leaf: "heading" },
             description: { leaf: "text", props: { size: "sm" } },
             modulesTitle: { leaf: "heading", optional: true },
-            module: { leaf: "curriculum-module-row", repeats: true, restingCount: 3, optional: true },
+            module: { composite: "curriculum-module-row", repeats: true, restingCount: 3, optional: true },
         },
         why: "The Modules landing page names the enrolled course, explains the collection, then keeps every authored module in one scannable run; loading and failure retain that same route landmark instead of replacing the page identity.",
     },
@@ -315,7 +315,7 @@ export const CONTRACTS = buildContracts({
         classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "flex-col", "gap-4", "px-6", "py-6"],
         children: {
             title: { leaf: "heading" },
-            module: { leaf: "curriculum-module-row" },
+            module: { composite: "curriculum-module-row" },
         },
         why: "A selected module keeps its title and authored contents together under one main landmark, so opening a module narrows the curriculum without inventing a second navigation shell.",
     },
@@ -2380,7 +2380,7 @@ export const CONTRACTS = buildContracts({
         host: "li",
         classes: ["flex", "min-w-0", "flex-col"],
         children: {
-            module: { leaf: "curriculum-module-row" },
+            module: { composite: "curriculum-module-row" },
         },
         why: "One module is one item of the ordered list, and the leaf inside it is a disclosure rather than a list item - a details element cannot be an ol's child and stay valid, and the browser stops counting the sequence the moment it is. Separating them also puts the list's own padding on the item, so an open module's lessons sit inside the same inset as its title instead of escaping it.",
     },
@@ -2400,7 +2400,7 @@ export const CONTRACTS = buildContracts({
             selector: { leaf: "choice-tabs", optional: true },
             purchase: { contract: "course-pricing-purchase-intent", optional: true },
             exploration: { contract: "course-pricing-exploration-intent", optional: true },
-            ladder: { leaf: "pricing-phase-disclosure", optional: true },
+            ladder: { composite: "pricing-phase-disclosure", optional: true },
             proof: { leaf: "text", props: { size: "xs" }, optional: true },
         },
         why: "The rail is one complementary decision surface: artwork and price evidence remain visible while a bounded primary choice selects exactly one purchase or exploration intent, and phase comparison is disclosed only when requested.",
@@ -2730,6 +2730,64 @@ export const CONTRACTS = buildContracts({
         },
         why: "The global AI mark, its accessible name and optional unread fact form one press target.",
     },
+    "curriculum-module-summary-row": {
+        classes: ["flex", "w-full", "min-w-0", "items-center", "gap-3", "[&>*:first-child]:min-w-0", "[&>*:first-child]:grow", "[&>*:last-child]:shrink-0"],
+        children: {
+            title: { leaf: "text", props: { size: "sm", weight: "medium" } },
+            meta: { contract: "curriculum-module-meta-row", optional: true },
+            indicator: { leaf: "disclosure-indicator", optional: true },
+        },
+        why: "A module title owns the flexible reading width while its optional difficulty and preview facts remain one trailing cluster.",
+    },
+    "curriculum-module-meta-row": {
+        classes: ["flex", "shrink-0", "flex-row", "flex-wrap", "items-center", "gap-2"],
+        children: {
+            level: { leaf: "badge", optional: true },
+            preview: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
+        },
+        why: "Difficulty and preview availability qualify the same module and wrap together before taking width away from its title.",
+    },
+    "curriculum-lesson-list": {
+        host: "ol",
+        classes: ["flex", "flex-col", "divide-y", "divide-separator", "pl-4"],
+        children: {
+            lesson: { contract: "curriculum-lesson-row", repeats: true, restingCount: 3 },
+        },
+        why: "Revealed lessons keep authored order in one announced list and share a separator instead of becoming unrelated loose controls.",
+    },
+    "curriculum-lesson-row": {
+        host: "li",
+        classes: ["flex", "items-center", "py-2"],
+        children: {
+            title: { leaf: ["text", "button"] },
+        },
+        why: "Each lesson keeps one title in one list row whether it is informative or opens the selected lesson route.",
+    },
+    "pricing-phase-disclosure-summary": {
+        classes: ["flex", "w-full", "items-center", "justify-between", "gap-2", "p-0"],
+        children: {
+            label: { leaf: "text", props: { size: "sm", weight: "medium" } },
+            indicator: { leaf: "disclosure-indicator" },
+        },
+        why: "The disclosure label remains one compact full-width summary before the optional phase comparison is revealed below it.",
+    },
+    "pricing-phase-list": {
+        host: "ul",
+        classes: ["flex", "flex-col", "gap-2", "px-4"],
+        children: {
+            phase: { contract: "pricing-phase-row", repeats: true, restingCount: 3 },
+        },
+        why: "Pricing phases form one vertical comparison run whose shared inset distinguishes supporting detail from the selected offer above.",
+    },
+    "pricing-phase-row": {
+        host: "li",
+        classes: ["flex", "items-center", "justify-between", "gap-2"],
+        children: {
+            name: { leaf: "text", props: { size: "sm" } },
+            value: { leaf: "text", props: { size: "sm", tone: "muted" } },
+        },
+        why: "Each phase name stays paired with its value on one comparable baseline while the gap protects them when either label grows.",
+    },
     "selection-ai-actions": {
         classes: ["flex", "flex-col", "gap-2"],
         children: {
@@ -2746,6 +2804,15 @@ export const CONTRACTS = buildContracts({
             chat: { contract: "starci-ai-turn-list" },
         },
         why: "Without this column the mode and grounding can scroll away from the transcript they qualify and leave the composer without visible context.",
+    },
+    "starci-ai-chat-stack": {
+        classes: ["flex", "min-w-0", "grow", "flex-col", "gap-2"],
+        children: {
+            conversation: { contract: "starci-ai-drawer-column" },
+            actions: { contract: "stacked-peer-controls", optional: true },
+            composer: { contract: "starci-ai-composer", optional: true },
+        },
+        why: "Conversation, optional session actions and the active composer remain one ordered drawer body instead of three anonymous sibling regions.",
     },
     "starci-ai-mode-row": {
         classes: ["flex", "items-center", "gap-1"],

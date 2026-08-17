@@ -14,6 +14,7 @@ const query1 = gql`
     }
 `
 
+/** Selects trending learning content in the shared GraphQL executor. */
 export enum QueryTrendingContents { Query1 = "query1" }
 
 /** Every supported trending-content document keyed by its public variant. */

@@ -28,23 +28,16 @@ const memberName = (node) => {
 const VENDOR_PACKAGE_PREFIX = "@heroui/"
 
 /**
- * The shell folder is closed, and it is closed to FOUR now.
- *
- * Three own a vendor interaction machine and ignore their interior. `RouteShell` owns a framework
- * one: a Next segment layout is handed its page as `children`, no tier below a shell may take one,
- * and a server component cannot convert it because a function does not serialise across that
- * boundary. It imports no vendor at all, which is why this rule can admit it without widening what
- * a vendor import means.
+ * Three named mechanics branches own the vendor interaction machines. They remain branches: their
+ * interior is a typed contract/render pair, never an arbitrary children hole.
  */
-const SHELL_DIR = "/src/components/shells/"
-const FRAMEWORK_SHELL = /\/src\/components\/shells\/RouteShell\//
-const SHELL_FILE = /\/src\/components\/shells\/(?:ModalShell|DrawerShell|DropdownShell|RouteShell)\//
+const MECHANICS_BRANCH = /\/src\/components\/branches\/(?:ModalBranch|DrawerBranch|DropdownBranch)\//
 
 /** Named surface branches may own the vendor wrapper they project a content contract into. */
 const SURFACE_BRANCH = /\/src\/components\/branches\/(?:SurfaceCard|SurfaceAccordionCard|SurfaceListCard|SurfaceFormCard)\//
 
 const isAllowedVendorOwner = (file) =>
-  file.includes("/src/components/leaves/") || SHELL_FILE.test(file) || SURFACE_BRANCH.test(file)
+  file.includes("/src/components/leaves/") || MECHANICS_BRANCH.test(file) || SURFACE_BRANCH.test(file)
 
 /** True for a file inside the component tree, where the boundary applies. */
 const isComponentFile = (filename) => normalizePath(filename).includes("/src/components/")
@@ -61,19 +54,17 @@ const jsxMemberName = (node) => {
 
 // -- VENDOR-1 · VENDOR-2 ---------------------------------------------------------------------------
 
-/** The library belongs to two folders, and a wrapper folder that wraps nothing is misfiled. */
+/** The library belongs to leaves and a closed set of named vendor-owning branches. */
 export const vendorBoundary = {
   meta: {
     type: "problem",
-    docs: { description: "Vendor imports belong to leaves, the two covering shells, and named surface branches." },
+    docs: { description: "Vendor imports belong to leaves and closed named mechanics/surface branches." },
     schema: [],
     messages: {
       outside:
-        "This component does not own a vendor primitive. Vendor imports belong to leaves, ModalShell/DrawerShell, and the named SurfaceCard family branches that project contracts into vendor bodies.",
-      emptyShell:
-        "ModalShell/DrawerShell must wrap their vendor covering primitive; otherwise this is an ordinary branch in the wrong tier.",
-      unknownShell:
-        "Only ModalShell, DrawerShell, DropdownShell and RouteShell are shells. This component must use contract + render as a branch; needing an arbitrary vendor children slot does not create another one - and the list disagreeing with canon is a gate bug, which is how this message came to name two when the tree said three.",
+        "This component does not own a vendor primitive. Vendor imports belong to leaves, ModalBranch/DrawerBranch/DropdownBranch, and the named SurfaceCard family branches that project contracts into vendor bodies.",
+      emptyMechanics:
+        "A named mechanics branch must wrap its vendor primitive; otherwise it is an ordinary branch holding an exemption it does not need.",
     },
   },
   create(context) {
@@ -81,8 +72,7 @@ export const vendorBoundary = {
     // Outside the component tree, a provider standing the library up for the whole application is a
     // different thing from a component pulling in a widget.
     if (!isComponentFile(file)) return {}
-    const isShellDirectory = file.includes(SHELL_DIR)
-    const isShell = SHELL_FILE.test(file)
+    const isMechanics = MECHANICS_BRANCH.test(file)
     const isTestFile = /\.(?:test|spec)\.[jt]sx?$/.test(file)
     const isAllowed = isAllowedVendorOwner(file)
     let importsVendor = false
@@ -95,14 +85,7 @@ export const vendorBoundary = {
       },
       "Program:exit"(node) {
         if (isTestFile) return
-        if (isShellDirectory && !isShell) context.report({ node, messageId: "unknownShell" })
-        /*
-         * A shell with no vendor import is empty - except the one whose mechanic is the FRAMEWORK's.
-         * `RouteShell` converts the children a Next layout is handed into the component every tier
-         * below expects, and it imports nothing to do it. Demanding a vendor primitive there would
-         * force an import that means nothing, which is how a rule teaches somebody to add noise.
-         */
-        else if (isShell && !importsVendor && !FRAMEWORK_SHELL.test(file)) context.report({ node, messageId: "emptyShell" })
+        if (isMechanics && !importsVendor) context.report({ node, messageId: "emptyMechanics" })
       },
     }
   },
@@ -110,22 +93,22 @@ export const vendorBoundary = {
 
 // -- VENDOR-6 --------------------------------------------------------------------------------------
 
-/** A content-agnostic modal shell owns one zero-inset vendor body as the scroll region. */
-export const modalShellOwnsScrollBody = {
+/** A modal mechanics branch owns one zero-inset vendor body as the scroll region. */
+export const modalBranchOwnsScrollBody = {
   meta: {
     type: "problem",
-    docs: { description: "ModalShell keeps one zero-inset Modal.Body as its scroll region." },
+    docs: { description: "ModalBranch keeps one zero-inset Modal.Body around typed contract content." },
     schema: [],
     messages: {
       missing:
-        "ModalShell must keep one `Modal.Body` around its uninterpreted children: that vendor body is the dialog's scroll region, not a second content surface.",
+        "ModalBranch must keep one `Modal.Body` around its typed contract content: that vendor body is the dialog's scroll region, not a second content surface.",
       inset:
-        "ModalShell's body must be `className=\"p-0\"`. The mounted contract owns layout; vendor body padding plus contract padding creates a doubled inset.",
+        "ModalBranch's body must be `className=\"p-0\"`. The mounted contract owns layout; vendor body padding plus contract padding creates a doubled inset.",
     },
   },
   create(context) {
     const file = normalizePath(context.filename || context.getFilename())
-    if (!/\/src\/components\/shells\/ModalShell\/index\.tsx$/.test(file)) return {}
+    if (!/\/src\/components\/branches\/ModalBranch\/index\.tsx$/.test(file)) return {}
     let hasBody = false
     return {
       JSXOpeningElement(node) {
@@ -295,24 +278,24 @@ export const textLinkUsesHeroLink = {
 
 // -- VENDOR-11 -------------------------------------------------------------------------------------
 
-/** The account block owns the product choices; DropdownShell alone owns HeroUI mechanics. */
+/** The account block owns the product choices; DropdownBranch alone owns HeroUI mechanics. */
 export const accountControlOwnsDropdown = {
   meta: {
     type: "problem",
-    docs: { description: "AccountMenu is a block over DropdownShell; only the shell imports HeroUI Dropdown." },
+    docs: { description: "AccountMenu is a block over DropdownBranch; only the mechanics branch imports HeroUI Dropdown." },
     schema: [],
     messages: {
-      dropdown: "DropdownShell must import HeroUI `Dropdown`; vendor mechanics belong to the shell.",
-      shell: "AccountMenu's pure block half must compose DropdownShell instead of importing HeroUI directly.",
-      vendor: "AccountMenu is a product block. Import DropdownShell; do not own HeroUI Dropdown here.",
+      dropdown: "DropdownBranch must import HeroUI `Dropdown`; vendor mechanics belong to the named branch.",
+      branch: "AccountMenu's pure block half must compose DropdownBranch instead of importing HeroUI directly.",
+      vendor: "AccountMenu is a product block. Import DropdownBranch; do not own HeroUI Dropdown here.",
       menu: "ShellNav must render the AccountMenu block from `components/blocks/auth/AccountMenu`.",
       direct: "The account IconButton may not carry an action in ShellNav. Guests open AccountMenu; its Sign in or Sign up choice opens the modal.",
-      pieces: "AccountMenu passes typed section data to DropdownShell; it must not import shell Section or Item pieces and rebuild vendor anatomy itself.",
+      pieces: "AccountMenu passes typed section data to DropdownBranch; it must not import vendor Section or Item pieces and rebuild vendor anatomy itself.",
     },
   },
   create(context) {
     const file = normalizePath(context.filename || context.getFilename())
-    const isDropdown = /\/src\/components\/shells\/DropdownShell\/index\.tsx$/.test(file)
+    const isDropdown = /\/src\/components\/branches\/DropdownBranch\/index\.tsx$/.test(file)
     const isMenu = /\/src\/components\/blocks\/auth\/AccountMenu\/component\.tsx$/.test(file)
     const isNav = /\/src\/components\/layouts\/ShellNav\/component\.tsx$/.test(file)
     if (!isDropdown && !isMenu && !isNav) return {}
@@ -321,7 +304,7 @@ export const accountControlOwnsDropdown = {
       ExportNamedDeclaration(node) {
         if (!isDropdown) return
         const source = context.sourceCode || context.getSourceCode()
-        if (/\bDropdownShell(?:Item|Section)\b/.test(source.getText(node))) {
+        if (/\bDropdownBranch(?:Item|Section)\b/.test(source.getText(node))) {
           context.report({ node, messageId: "pieces" })
         }
       },
@@ -330,10 +313,10 @@ export const accountControlOwnsDropdown = {
           hasOwner ||= (node.specifiers || []).some((specifier) => specifier.imported?.name === "Dropdown")
         }
         if (isMenu && node.source?.value === "@heroui/react") context.report({ node, messageId: "vendor" })
-        if (isMenu && /\/components\/shells\/DropdownShell$/.test(normalizePath(node.source?.value))) {
+        if (isMenu && /\/components\/branches\/DropdownBranch$/.test(normalizePath(node.source?.value))) {
           hasOwner = true
           if ((node.specifiers || []).some((specifier) =>
-            /^(?:DropdownShellSection|DropdownShellItem)/.test(specifier.imported?.name || ""))) {
+            /^(?:DropdownBranchSection|DropdownBranchItem)/.test(specifier.imported?.name || ""))) {
             context.report({ node, messageId: "pieces" })
           }
         }
@@ -350,7 +333,7 @@ export const accountControlOwnsDropdown = {
       },
       "Program:exit"(node) {
         if (hasOwner) return
-        context.report({ node, messageId: isDropdown ? "dropdown" : isMenu ? "shell" : "menu" })
+        context.report({ node, messageId: isDropdown ? "dropdown" : isMenu ? "branch" : "menu" })
       },
     }
   },
@@ -455,12 +438,12 @@ export const noInternalStarciHref = {
 export const authOverlayOwnsSingleContentHost = {
   meta: {
     type: "problem",
-    docs: { description: "Authentication has one zero-inset content host inside ModalShell." },
+    docs: { description: "Authentication passes one typed content contract to ModalBranch." },
     schema: [],
     messages: {
-      duplicate: "SignInOverlay must project with `ContractContent`, not open another `Tree` around a panel that already owns the same host.",
-      missing: "SignInOverlay must import `ContractContent` for its already-hosted projection.",
-      inset: "`centred-page-column` must not add py/pt/pb. ModalShell is zero-inset and the auth content touches that scroll region without a second vertical padding band.",
+      duplicate: "SignInOverlay passes its contract/render pair to ModalBranch; it must not open a second Tree or ContractContent host.",
+      missing: "SignInOverlay must import ModalBranch and pass its typed contract/render pair to that owner.",
+      inset: "`centred-page-column` must not add py/pt/pb. ModalBranch is zero-inset and the auth content touches that scroll region without a second vertical padding band.",
     },
   },
   create(context) {
@@ -483,8 +466,10 @@ export const authOverlayOwnsSingleContentHost = {
          * importing either means the same thing wherever it resolves from.
          */
         for (const specifier of node.specifiers || []) {
-          if (specifier.imported?.name === "ContractContent") hasContent = true
-          if (specifier.imported?.name === "Tree") context.report({ node: specifier, messageId: "duplicate" })
+          if (specifier.imported?.name === "ModalBranch") hasContent = true
+          if (specifier.imported?.name === "Tree" || specifier.imported?.name === "ContractContent") {
+            context.report({ node: specifier, messageId: "duplicate" })
+          }
         }
       },
       Property(node) {
@@ -504,7 +489,7 @@ export const authOverlayOwnsSingleContentHost = {
 /** The rules this law contributes to the plugin. */
 export const rules = {
   "vendor-boundary": vendorBoundary,
-  "modal-shell-owns-scroll-body": modalShellOwnsScrollBody,
+  "modal-branch-owns-scroll-body": modalBranchOwnsScrollBody,
   "field-input-uses-secondary-variant": fieldInputUsesSecondaryVariant,
   "field-label-is-text-only": fieldLabelIsTextOnly,
   "no-surface-branch-in-overlay": noSurfaceBranchInOverlay,
@@ -519,8 +504,7 @@ export const rules = {
  * The level this law asks for, as the plugin's own opinion.
  *
  * A repository adopting this with history should expect the outward half to report and the inward
- * half to be silent, because `shells/` will not exist yet. Creating it is the migration: every
- * vendor container currently wrapped as something else moves there, and each move is what makes the
- * inward check meaningful afterwards.
+ * half to be silent until the named mechanics branches exist. Creating those branches with typed
+ * contracts is the migration; no general-purpose wrapper folder is introduced.
  */
 export const recommended = Object.fromEntries(Object.keys(rules).map((name) => [`starci-fe/${name}`, "error"]))

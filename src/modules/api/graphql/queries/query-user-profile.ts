@@ -21,6 +21,7 @@ const query1 = gql`
     }
 `
 
+/** Selects one learner profile in the shared GraphQL executor. */
 export enum QueryUserProfile { Query1 = "query1" }
 
 /** Supported public-profile documents. */

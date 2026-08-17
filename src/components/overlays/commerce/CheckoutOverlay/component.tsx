@@ -2,8 +2,7 @@ import { Button } from "@/components/leaves/Button"
 import { ChoiceTabs } from "@/components/leaves/ChoiceTabs"
 import { StatusDot } from "@/components/leaves/StatusDot"
 import { Text } from "@/components/leaves/Text"
-import { ModalShell } from "@/components/shells/ModalShell"
-import { Tree } from "@/components/branches/Tree"
+import { ModalBranch } from "@/components/branches/ModalBranch"
 import {
     defineContractComponent,
     defineLeafComponent,
@@ -116,90 +115,87 @@ export const _CheckoutOverlay = (input: CheckoutOverlayProps) => {
     const cycles = input.props.cycles ?? []
 
     return (
-        <ModalShell
+        <ModalBranch
             isOpen={input.props.isOpen}
             size="sm"
+            contract="checkout-panel-column"
+            render={defineContractComponent("checkout-panel-column", {
+                choice: defineLeafComponent("choice-tabs", {}, () => (
+                    <ChoiceTabs
+                        props={{
+                            label: labels.planLabel,
+                            selectedKey: input.props.plan,
+                            variant: "primary",
+                            tabs: [
+                                { id: "full", label: labels.payFull },
+                                { id: "instalments", label: labels.payInstalments },
+                            ],
+                        }}
+                        on={{ select: input.on?.choosePlan }}
+                    />
+                )),
+                summary: defineContractProjection("order-summary-stack", () => (
+                    <_OrderSummary
+                        state="ready"
+                        props={{
+                            labels: labels.summary,
+                            subtotal: input.props.subtotal,
+                            savings: input.props.savings,
+                            surcharge: input.props.surcharge,
+                            total: input.props.total,
+                        }}
+                    />
+                )),
+                ...(isInstalments && cycles.length > 0 ? {
+                    schedule: defineContractComponent("ordered-step-ladder", {
+                        step: cycles.map((cycle) => defineContractComponent("ordered-step-row", {
+                            // THE MARK IS ONLY DRAWN WHERE IT IS TRUE. `StatusDot`'s tones are
+                            // all affirmative and it requires an accessible name, so there is
+                            // no honest dot for a cycle that is not the one due. The slot
+                            // stays occupied by a resting line, which is what keeps the names
+                            // aligned down the ladder.
+                            mark: cycle.isCurrent === true
+                                ? defineLeafComponent("status-dot", {}, () => (
+                                    <StatusDot props={{ tone: "accent", label: cycle.name }} />
+                                ))
+                                : defineLeafComponent("text", {}, () => (
+                                    <Text props={{ content: " " }} />
+                                )),
+                            name: defineLeafComponent("text", { size: "sm" }, () => (
+                                <Text props={{ content: cycle.name, size: "sm" }} />
+                            )),
+                            value: defineLeafComponent("text", { size: "xs" }, () => (
+                                <Text props={{ content: cycle.amount, size: "xs" }} />
+                            )),
+                        })),
+                    }),
+                } : {}),
+                // THE WARNING BELONGS TO THE CHOICE, not to the product. Nothing is charged
+                // automatically and one missed cycle locks every course in the order, so the
+                // reader is told both where the decision is made rather than after it.
+                ...(isInstalments ? {
+                    terms: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                        <Text props={{ content: labels.terms, size: "xs", tone: "muted" }} />
+                    )),
+                } : {}),
+                gateways: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                    <Text props={{ content: labels.gateways, size: "xs", tone: "muted" }} />
+                )),
+                action: defineLeafComponent("button", {}, () => (
+                    <Button
+                        props={{
+                            label: labels.action,
+                            variant: "primary",
+                            isPending: input.props.isPaying === true,
+                        }}
+                        on={{ press: input.on?.pay }}
+                    />
+                )),
+            })}
             onDismiss={input.on?.dismiss ?? (() => undefined)}
-        >
-            <Tree
-                contract="checkout-panel-column"
-                render={defineContractComponent("checkout-panel-column", {
-                    choice: defineLeafComponent("choice-tabs", {}, () => (
-                        <ChoiceTabs
-                            props={{
-                                label: labels.planLabel,
-                                selectedKey: input.props.plan,
-                                variant: "primary",
-                                tabs: [
-                                    { id: "full", label: labels.payFull },
-                                    { id: "instalments", label: labels.payInstalments },
-                                ],
-                            }}
-                            on={{ select: input.on?.choosePlan }}
-                        />
-                    )),
-                    summary: defineContractProjection("order-summary-stack", () => (
-                        <_OrderSummary
-                            state="ready"
-                            props={{
-                                labels: labels.summary,
-                                subtotal: input.props.subtotal,
-                                savings: input.props.savings,
-                                surcharge: input.props.surcharge,
-                                total: input.props.total,
-                            }}
-                        />
-                    )),
-                    ...(isInstalments && cycles.length > 0 ? {
-                        schedule: defineContractComponent("ordered-step-ladder", {
-                            step: cycles.map((cycle) => defineContractComponent("ordered-step-row", {
-                                // THE MARK IS ONLY DRAWN WHERE IT IS TRUE. `StatusDot`'s tones are
-                                // all affirmative and it requires an accessible name, so there is
-                                // no honest dot for a cycle that is not the one due. The slot
-                                // stays occupied by a resting line, which is what keeps the names
-                                // aligned down the ladder.
-                                mark: cycle.isCurrent === true
-                                    ? defineLeafComponent("status-dot", {}, () => (
-                                        <StatusDot props={{ tone: "accent", label: cycle.name }} />
-                                    ))
-                                    : defineLeafComponent("text", {}, () => (
-                                        <Text props={{ content: " " }} />
-                                    )),
-                                name: defineLeafComponent("text", { size: "sm" }, () => (
-                                    <Text props={{ content: cycle.name, size: "sm" }} />
-                                )),
-                                value: defineLeafComponent("text", { size: "xs" }, () => (
-                                    <Text props={{ content: cycle.amount, size: "xs" }} />
-                                )),
-                            })),
-                        }),
-                    } : {}),
-                    // THE WARNING BELONGS TO THE CHOICE, not to the product. Nothing is charged
-                    // automatically and one missed cycle locks every course in the order, so the
-                    // reader is told both where the decision is made rather than after it.
-                    ...(isInstalments ? {
-                        terms: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                            <Text props={{ content: labels.terms, size: "xs", tone: "muted" }} />
-                        )),
-                    } : {}),
-                    gateways: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                        <Text props={{ content: labels.gateways, size: "xs", tone: "muted" }} />
-                    )),
-                    action: defineLeafComponent("button", {}, () => (
-                        <Button
-                            props={{
-                                label: labels.action,
-                                variant: "primary",
-                                isPending: input.props.isPaying === true,
-                            }}
-                            on={{ press: input.on?.pay }}
-                        />
-                    )),
-                })}
-            />
-        </ModalShell>
+        />
     )
 }
 
 /** Source-level ownership marker. */
-export const meta = { shape: "branch", world: "pure", domain: "commerce" } as const
+export const meta = { shape: "overlay", world: "pure", domain: "commerce" } as const

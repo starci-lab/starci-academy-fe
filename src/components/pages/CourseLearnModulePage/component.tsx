@@ -1,7 +1,7 @@
 import { Tree } from "@/components/branches/Tree"
-import { CurriculumModuleRow } from "@/components/leaves/CurriculumModuleRow"
+import { CurriculumModuleRow } from "@/components/composites/CurriculumModuleRow"
 import { Heading } from "@/components/leaves/Heading"
-import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
+import { defineCompositeComponent, defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 import type { ModuleDetail } from "@/modules/api/graphql/queries/query-module"
 
 /** State and resolved module data drawn by the pure module route. */
@@ -19,7 +19,7 @@ export const _CourseLearnModulePage = (input: CourseLearnModulePageProps) => (
         title: defineLeafComponent("heading", {}, () => (
             <Heading props={{ content: input.title, level: 1 }} isLoading={input.state === "pending"} />
         )),
-        module: defineLeafComponent("curriculum-module-row", {}, () => (
+        module: defineCompositeComponent("curriculum-module-row", {}, () => (
             <CurriculumModuleRow
                 props={{
                     title: input.module?.title ?? input.label,

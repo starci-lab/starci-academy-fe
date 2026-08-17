@@ -17,6 +17,7 @@ import test from "node:test"
 import { RuleTester } from "eslint"
 import tsParser from "@typescript-eslint/parser"
 import {
+  contractChildrenAreTyped,
   noInteractionClassInEntry,
   contractWhyIsAReason,
   noClassCompositionOutsideContract,
@@ -81,6 +82,7 @@ const LEAF = `${ROOT}/src/components/leaves/Text/index.tsx`
 const FRAME = `${ROOT}/src/components/branches/Tree/index.tsx`
 const SURFACE = `${ROOT}/src/components/branches/SurfaceListCard/index.tsx`
 const FORM_SURFACE = `${ROOT}/src/components/branches/SurfaceFormCard/index.tsx`
+const DISCLOSURE = `${ROOT}/src/components/branches/DisclosureBranch/index.tsx`
 const TABLE = `${ROOT}/src/components/contracts/index.ts`
 
 test("the path constant still finds a real entry table", () => {
@@ -101,6 +103,7 @@ test("CONTRACT-1: a structural class written as a literal goes back to a key", (
       { filename: BLOCK, code: "export const E = () => <Tree contract=\"title-with-baseline-fact\" />" },
       { filename: BLOCK, code: "export const E = () => <Text className=\"text-sm\" />" },
       { filename: LEAF, code: "export const T = () => <p className=\"inline-flex items-center gap-2\" />" },
+      { filename: DISCLOSURE, code: "export const D = () => <details className=\"flex flex-col gap-3\" />" },
     ],
     invalid: [
       {
@@ -197,6 +200,7 @@ test("CONTRACT-7: a structural host outside the frame is a node with no key", ()
       { filename: FRAME, code: "export const Tree = () => <ul />" },
       { filename: SURFACE, code: "export const SurfaceListCard = () => <div className=\"flex flex-col gap-3\" />" },
       { filename: FORM_SURFACE, code: "export const SurfaceFormCard = () => <Card />" },
+      { filename: DISCLOSURE, code: "export const DisclosureBranch = () => <details><summary /></details>" },
       { filename: LEAF, code: "export const T = () => <div />" },
       { filename: BLOCK, code: "export const E = () => <span />" },
       // a semantic element carrying MEANING and no shape: it decides nothing, and swapping it for
@@ -293,6 +297,21 @@ test("CONTRACT-9: an unknown key describes nothing, and the message lists the re
       { filename: BLOCK, code: "export const E = () => <Tree contract=\"card\" />", errors: [{ messageId: "unknown" }] },
       { filename: BLOCK, code: "const spec = contractSpec(\"card\")", errors: [{ messageId: "unknown" }] },
       { filename: BLOCK, code: "export const E = () => <Tree contract=\"label-over-tile-grid\" />", errors: [{ messageId: "unknown" }] },
+    ],
+  })
+})
+
+test("CONTRACT-14: every entry declares a closed typed child grammar", () => {
+  tester.run("contract-children-are-typed", contractChildrenAreTyped, {
+    valid: [
+      { filename: TABLE, code: contractTable('    "empty-column": { classes: ["flex"], children: {}, why: "..." },') },
+      { filename: TABLE, code: contractTable('    "title-row": { classes: ["flex"], children: { title: { leaf: "text" }, fact: { contract: "fact" } }, why: "..." },') },
+      { filename: TABLE, code: contractTable('    "content-row": { classes: ["flex"], children: { body: { leaf: "text", contract: "detail-row" } }, why: "..." },') },
+    ],
+    invalid: [
+      { filename: TABLE, code: contractTable('    "empty-column": { classes: ["flex"], why: "..." },'), errors: [{ messageId: "missing" }] },
+      { filename: TABLE, code: contractTable('    "title-row": { classes: ["flex"], children: { title: ReactNode }, why: "..." },'), errors: [{ messageId: "untyped" }] },
+      { filename: TABLE, code: contractTable('    "title-row": { classes: ["flex"], children: { title: { optional: true } }, why: "..." },'), errors: [{ messageId: "untyped" }] },
     ],
   })
 })

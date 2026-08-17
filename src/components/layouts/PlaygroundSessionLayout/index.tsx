@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useCallback, useContext, useMemo, useState, type ComponentType } from "react"
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react"
 import { useTranslations } from "next-intl"
 import { useQueryPlaygroundSwr } from "@/hooks/swr/useQueryPlaygroundSwr"
 import { useMutateStartPlaygroundSessionSwr } from "@/hooks/swr/useMutateStartPlaygroundSessionSwr"
@@ -41,7 +41,7 @@ export const usePlaygroundSession = () => {
 export type PlaygroundSessionLayoutProps = {
     readonly displayId: string
     readonly slug: string
-    readonly surface: ComponentType
+    readonly surface: ReactNode
 }
 
 /** Resolve the playground once and preserve its server session and relay socket across navigation. */

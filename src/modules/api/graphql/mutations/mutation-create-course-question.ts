@@ -35,6 +35,7 @@ const mutation1 = gql`
     }
 `
 
+/** Selects course-question creation in the shared GraphQL executor. */
 export enum MutationCreateCourseQuestion { Mutation1 = "mutation1" }
 
 const mutationCreateCourseQuestionMap: Record<MutationCreateCourseQuestion, DocumentNode> = {

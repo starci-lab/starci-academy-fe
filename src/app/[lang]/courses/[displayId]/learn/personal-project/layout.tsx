@@ -1,6 +1,5 @@
 import type { ReactNode } from "react"
 import { PersonalProjectWorkspaceLayout } from "@/components/layouts/PersonalProjectWorkspaceLayout"
-import { RouteShell } from "@/components/shells/RouteShell"
 
 interface PersonalProjectLayoutRouteProps {
     readonly children: ReactNode
@@ -10,9 +9,7 @@ interface PersonalProjectLayoutRouteProps {
 const PersonalProjectLayoutRoute = async (input: PersonalProjectLayoutRouteProps) => {
     const { displayId } = await input.params
     return (
-        <RouteShell frame={PersonalProjectWorkspaceLayout} props={{ displayId }}>
-            {input.children}
-        </RouteShell>
+        <PersonalProjectWorkspaceLayout displayId={displayId} surface={input.children} />
     )
 }
 

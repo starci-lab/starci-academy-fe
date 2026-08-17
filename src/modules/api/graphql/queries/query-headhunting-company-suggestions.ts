@@ -30,6 +30,7 @@ const query1 = gql`
     }
 `
 
+/** Selects headhunting company suggestions in the shared GraphQL executor. */
 export enum QueryHeadhuntingCompanySuggestions { Query1 = "query1" }
 
 const queryHeadhuntingCompanySuggestionsMap: Record<QueryHeadhuntingCompanySuggestions, DocumentNode> = {

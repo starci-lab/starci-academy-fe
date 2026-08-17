@@ -58,6 +58,7 @@ const document = gql`
     }
 `
 
+/** Selects learning foundations in the shared GraphQL executor. */
 export enum QueryFoundations { Query1 = "query1" }
 
 /** Read the localized resources inside one foundation category. */

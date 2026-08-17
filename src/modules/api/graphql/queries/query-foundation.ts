@@ -31,6 +31,7 @@ const document = gql`
     }
 `
 
+/** Selects one learning foundation in the shared GraphQL executor. */
 export enum QueryFoundation { Query1 = "query1" }
 
 /** Resolve one foundation resource by its route identity. */

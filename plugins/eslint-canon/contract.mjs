@@ -105,9 +105,9 @@ export const isContractTableFile = (filename) =>
 /** True when this file is the frame that renders an entry, and therefore paints its markers. */
 export const isContractFrameFile = (filename) => isInComponentTier(filename, "branches/Tree")
 
-/** Named surface branches own fixed vendor-wrapper mechanics around one checked content node. */
+/** Named host branches own fixed vendor/native mechanics around checked contract content. */
 export const isSurfaceContractHostFile = (filename) =>
-  ["SurfaceCard", "SurfaceAccordionCard", "SurfaceListCard", "SurfaceFormCard"]
+  ["SurfaceCard", "SurfaceAccordionCard", "SurfaceListCard", "SurfaceFormCard", "DisclosureBranch"]
       .some((surface) => isInComponentTier(filename, `branches/${surface}`))
 
 /**
@@ -246,7 +246,7 @@ export const contractHostOf = (filename, key) => {
    * landmark. The rule was right about the law and wrong about where one entry stops.
    */
   const rest = source.slice(opening + 1)
-  const nextKey = rest.search(/\n    "[a-z0-9-]+": \{/)
+  const nextKey = rest.search(/\n[ ]{4}"[a-z0-9-]+": \{/)
   const window = nextKey === -1 ? source.slice(opening) : source.slice(opening, opening + 1 + nextKey)
   const host = window.match(/\bhost:\s*"([a-z]+)"/)
   return host ? host[1] : "div"
@@ -1269,6 +1269,53 @@ export const noDeadContractKey = {
   },
 }
 
+/** Every registry entry declares a closed, typed child grammar. */
+export const contractChildrenAreTyped = {
+  meta: {
+    type: "problem",
+    docs: { description: "Every contract entry declares children as closed leaf/composite/contract slot specs." },
+    schema: [],
+    messages: {
+      missing:
+        "Contract `{{key}}` has no `children` grammar. Even an empty node declares `children: {}` so the absence of content is typed rather than implied.",
+      untyped:
+        "Child `{{slot}}` on contract `{{key}}` is not a closed slot spec. Declare at least one typed owner identity: `leaf`, `composite`, or `contract`, plus its constraints.",
+    },
+  },
+  create(context) {
+    if (!isContractTableFile(context.filename || context.getFilename())) return {}
+    return {
+      CallExpression(node) {
+        if (node.callee?.type !== "Identifier" || node.callee.name !== "buildContracts") return
+        const table = node.arguments?.[0]
+        if (!table || table.type !== "ObjectExpression") return
+        for (const entry of table.properties || []) {
+          if (entry.type !== "Property" || entry.value?.type !== "ObjectExpression") continue
+          const key = propertyName(entry) ?? "<computed>"
+          const children = entry.value.properties.find((property) =>
+            property.type === "Property" && propertyName(property) === "children")
+          if (!children || children.value?.type !== "ObjectExpression") {
+            context.report({ node: children || entry, messageId: "missing", data: { key } })
+            continue
+          }
+          for (const slot of children.value.properties || []) {
+            const slotName = propertyName(slot) ?? "<computed>"
+            if (slot.type !== "Property" || slot.value?.type !== "ObjectExpression") {
+              context.report({ node: slot, messageId: "untyped", data: { key, slot: slotName } })
+              continue
+            }
+            const identities = slot.value.properties.filter((property) =>
+              property.type === "Property" && ["leaf", "composite", "contract"].includes(propertyName(property)))
+            if (identities.length === 0) {
+              context.report({ node: slot, messageId: "untyped", data: { key, slot: slotName } })
+            }
+          }
+        }
+      },
+    }
+  },
+}
+
 /** The rules this law contributes to the plugin. */
 export const rules = {
   "no-literal-structural-class": noLiteralStructuralClass,
@@ -1282,6 +1329,7 @@ export const rules = {
   "no-duplicate-entry-shape": noDuplicateEntryShape,
   "only-the-frame-wears-a-node": onlyTheFrameWearsANode,
   "no-dead-contract-key": noDeadContractKey,
+  "contract-children-are-typed": contractChildrenAreTyped,
 }
 
 /**

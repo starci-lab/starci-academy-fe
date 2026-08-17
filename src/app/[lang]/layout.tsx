@@ -8,7 +8,6 @@ import {
     readSeoConfig,
 } from "@/config/seo"
 import { GlobalAiChatLayout } from "@/components/layouts/GlobalAiChatLayout"
-import { RouteShell } from "@/components/shells/RouteShell"
 import { AppProviders } from "../providers"
 import "../globals.css"
 
@@ -98,9 +97,7 @@ const LocaleLayout = async ({ children, params }: LayoutProps<"/[lang]">) => {
         <html lang={lang} suppressHydrationWarning>
             <body>
                 <AppProviders locale={lang} messages={messages}>
-                    <RouteShell frame={GlobalAiChatLayout} props={{}}>
-                        {children}
-                    </RouteShell>
+                    <GlobalAiChatLayout surface={children} />
                 </AppProviders>
             </body>
         </html>

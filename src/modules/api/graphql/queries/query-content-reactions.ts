@@ -45,6 +45,7 @@ const query1 = gql`
     }
 `
 
+/** Selects content reactions in the shared GraphQL executor. */
 export enum QueryContentReactions { Query1 = "query1" }
 
 /** Every supported content-reactions document keyed by its finite variant. */

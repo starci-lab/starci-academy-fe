@@ -2,7 +2,8 @@
 import type { PropsWithChildren } from "react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
-import { ModalShell } from "."
+import { ModalBranch } from "."
+import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
 const mocks = vi.hoisted(() => ({
     size: vi.fn(),
@@ -36,9 +37,21 @@ vi.mock("@heroui/react", () => {
 
 afterEach(cleanup)
 
-describe("ModalShell", () => {
+const body = defineContractComponent("stacked-peer-controls", {
+    control: [defineLeafComponent("button", {}, () => <>Body</>)],
+})
+
+describe("ModalBranch", () => {
     it("forwards the approved cover size to vendor mechanics", () => {
-        render(<ModalShell isOpen size="cover" onDismiss={() => undefined}>Body</ModalShell>)
+        render(
+            <ModalBranch
+                isOpen
+                size="cover"
+                contract="stacked-peer-controls"
+                render={body}
+                onDismiss={() => undefined}
+            />,
+        )
         expect(mocks.size).toHaveBeenCalledWith("cover")
         expect(mocks.dialogClassName).toHaveBeenCalledWith("p-4")
         expect(mocks.bodyClassName).toHaveBeenCalledWith("p-0")
@@ -47,7 +60,14 @@ describe("ModalShell", () => {
 
     it("routes a vendor close outcome to one dismissal callback", () => {
         const dismiss = vi.fn()
-        render(<ModalShell isOpen onDismiss={dismiss}>Body</ModalShell>)
+        render(
+            <ModalBranch
+                isOpen
+                contract="stacked-peer-controls"
+                render={body}
+                onDismiss={dismiss}
+            />,
+        )
         fireEvent.click(screen.getByRole("button", { name: "Close" }))
         expect(dismiss).toHaveBeenCalledOnce()
     })

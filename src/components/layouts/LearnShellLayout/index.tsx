@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react"
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react"
 import { useTranslations } from "next-intl"
 import { usePathname, useRouter } from "@/i18n/navigation"
 import {
@@ -13,7 +13,6 @@ import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
 import { useQueryGlobalLeaderboardSwr } from "@/hooks/swr/useQueryGlobalLeaderboardSwr"
 import { useQueryMyCoursesSwr } from "@/hooks/swr/useQueryMyCoursesSwr"
 import { isLiveAssessmentRoute } from "@/modules/learn/is-live-assessment-route"
-import type { ComponentType } from "react"
 
 type LearnMobileViewContextValue = {
     readonly view: LearnMobileView
@@ -49,8 +48,8 @@ export const useLearnMobileView = (): LearnMobileViewContextValue => {
 export interface LearnShellLayoutProps {
     /** The course being learned, as its display id - every row is a path under it. */
     displayId: string
-    /** The routed surface, as a component. `RouteShell` made it out of the framework's children. */
-    surface: ComponentType
+    /** The routed surface; the pure frame binds it to the `page` leaf of its contract. */
+    surface: ReactNode
 }
 
 /** One row of the spine, before its label is resolved. */

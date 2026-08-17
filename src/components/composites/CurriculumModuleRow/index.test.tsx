@@ -44,7 +44,7 @@ describe("CurriculumModuleRow", () => {
         )
 
         const title = screen.getByText("Architecture foundations")
-        const chevron = title.previousElementSibling
+        const chevron = title.parentElement?.querySelector("[data-component=DisclosureIndicator]")
         expect(chevron).toHaveClass("text-foreground", "rotate-0")
         fireEvent.click(title)
         await waitFor(() => expect(chevron).toHaveClass("rotate-90"))
@@ -73,6 +73,8 @@ describe("CurriculumModuleRow", () => {
         render(<CurriculumModuleRow props={{ title: "Platform foundations: framework and request lifecycle" }} />)
 
         expect(screen.getByText("Platform foundations: framework and request lifecycle"))
-            .toHaveClass("text-sm", "font-medium")
+            .toHaveAttribute("data-size", "sm")
+        expect(screen.getByText("Platform foundations: framework and request lifecycle"))
+            .toHaveAttribute("data-weight", "medium")
     })
 })

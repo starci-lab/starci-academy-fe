@@ -99,11 +99,21 @@ export const requireExportJsdoc = {
     const check = (node) => {
       const declaration = node.declaration
       if (!declaration) return
-      const kinds = ["VariableDeclaration", "TSInterfaceDeclaration", "FunctionDeclaration", "TSTypeAliasDeclaration"]
+      const kinds = [
+        "VariableDeclaration",
+        "TSInterfaceDeclaration",
+        "FunctionDeclaration",
+        "TSTypeAliasDeclaration",
+        "ClassDeclaration",
+        "TSEnumDeclaration",
+      ]
       if (!kinds.includes(declaration.type) || hasBlock(node)) return
-      const id =
-        declaration.id || (declaration.declarations && declaration.declarations[0] && declaration.declarations[0].id)
-      context.report({ node: id || declaration, messageId: "jsdoc", data: { name: (id && id.name) || "this export" } })
+      const ids = declaration.type === "VariableDeclaration"
+        ? (declaration.declarations || []).map((item) => item.id).filter(Boolean)
+        : [declaration.id].filter(Boolean)
+      for (const id of ids.length > 0 ? ids : [declaration]) {
+        context.report({ node: id, messageId: "jsdoc", data: { name: id.name || "this export" } })
+      }
     }
     return { ExportNamedDeclaration: check, ExportDefaultDeclaration: check }
   },

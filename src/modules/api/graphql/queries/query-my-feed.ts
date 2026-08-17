@@ -29,6 +29,7 @@ const query1 = gql`
     }
 `
 
+/** Selects the current learner feed in the shared GraphQL executor. */
 export enum QueryMyFeed { Query1 = "query1" }
 
 /** Every supported dashboard-feed document keyed by its public variant. */

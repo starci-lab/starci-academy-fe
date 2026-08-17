@@ -36,6 +36,7 @@ const query1 = gql`
     }
 `
 
+/** Selects one headhunting company in the shared GraphQL executor. */
 export enum QueryHeadhuntingCompany { Query1 = "query1" }
 
 const queryHeadhuntingCompanyMap: Record<QueryHeadhuntingCompany, DocumentNode> = {

@@ -1,4 +1,4 @@
-import { Tree } from "@/components/branches/Tree"
+import { ModalBranch } from "@/components/branches/ModalBranch"
 import { _GlobalSearchResults } from "@/components/blocks/search/GlobalSearchResults/component"
 import { SearchCommandField } from "@/components/leaves/SearchCommandField"
 import { SelectionList } from "@/components/leaves/SelectionList"
@@ -6,7 +6,6 @@ import { Text } from "@/components/leaves/Text"
 import { Badge } from "@/components/leaves/Badge"
 import { Button } from "@/components/leaves/Button"
 import type { IconName } from "@/components/leaves/Icon"
-import { ModalShell } from "@/components/shells/ModalShell"
 import {
     defineContractComponent,
     defineContractProjection,
@@ -190,39 +189,40 @@ export const _GlobalSearchOverlay = ({ isOpen, state, copy, on }: GlobalSearchOv
                 : undefined,
     })
     return (
-        <ModalShell isOpen={isOpen} size="cover" onDismiss={() => on?.dismiss?.()}>
-            <Tree
-                contract="global-search-workspace"
-                render={defineContractComponent("global-search-workspace", {
-                    query: defineLeafComponent("search-command-field", {}, () => (
-                        <SearchCommandField
-                            props={{
-                                id: "global-search-command",
-                                value: state.query,
-                                label: copy.label,
-                                placeholder: copy.placeholder,
-                                clearLabel: copy.clearLabel,
-                                shortcut: copy.shortcut,
-                                activeDescendant: state.selectedResult,
-                                isPending: state.isPending,
-                            }}
-                            on={{
-                                change: on?.queryChange,
-                                clear: on?.clear,
-                                previous: on?.previous,
-                                next: on?.next,
-                                submit: on?.submit,
-                            }}
-                        />
-                    )),
-                    body: defineContractComponent("global-search-body", {
-                        scopes: scopeList,
-                        results: resultRegion,
-                        context,
-                    }),
-                })}
-            />
-        </ModalShell>
+        <ModalBranch
+            isOpen={isOpen}
+            size="cover"
+            contract="global-search-workspace"
+            render={defineContractComponent("global-search-workspace", {
+                query: defineLeafComponent("search-command-field", {}, () => (
+                    <SearchCommandField
+                        props={{
+                            id: "global-search-command",
+                            value: state.query,
+                            label: copy.label,
+                            placeholder: copy.placeholder,
+                            clearLabel: copy.clearLabel,
+                            shortcut: copy.shortcut,
+                            activeDescendant: state.selectedResult,
+                            isPending: state.isPending,
+                        }}
+                        on={{
+                            change: on?.queryChange,
+                            clear: on?.clear,
+                            previous: on?.previous,
+                            next: on?.next,
+                            submit: on?.submit,
+                        }}
+                    />
+                )),
+                body: defineContractComponent("global-search-body", {
+                    scopes: scopeList,
+                    results: resultRegion,
+                    context,
+                }),
+            })}
+            onDismiss={() => on?.dismiss?.()}
+        />
     )
 }
 

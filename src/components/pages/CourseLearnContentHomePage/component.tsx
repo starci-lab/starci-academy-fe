@@ -1,8 +1,8 @@
 import { Tree } from "@/components/branches/Tree"
-import { CurriculumModuleRow } from "@/components/leaves/CurriculumModuleRow"
+import { CurriculumModuleRow } from "@/components/composites/CurriculumModuleRow"
 import { Heading } from "@/components/leaves/Heading"
 import { Text } from "@/components/leaves/Text"
-import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
+import { defineCompositeComponent, defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 import type { CourseModule } from "@/modules/api/graphql/queries/types/course"
 
 /** Resolved copy owned by the Modules landing page. */
@@ -39,7 +39,7 @@ export const _CourseLearnContentHomePage = (input: CourseLearnContentHomeProps) 
                 <Heading props={{ content: input.labels.modules, level: 2 }} />
             )),
             module: input.state === "failed" ? [] : (input.modules ?? []).map((module) => (
-                defineLeafComponent("curriculum-module-row", {}, () => (
+                defineCompositeComponent("curriculum-module-row", {}, () => (
                     <CurriculumModuleRow
                         props={{ title: module.title, levelLabel: module.contentTier, previewLabel: `${module.numContents}` }}
                         on={{ press: () => input.onModule?.(module.id) }}

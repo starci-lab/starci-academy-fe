@@ -14,8 +14,9 @@ import {
     CurriculumModuleRow,
     type CurriculumLesson,
     type CurriculumLevel,
-} from "@/components/leaves/CurriculumModuleRow"
+} from "@/components/composites/CurriculumModuleRow"
 import {
+    defineCompositeComponent,
     defineContractComponent,
     defineContractProjection,
     defineLeafComponent,
@@ -271,7 +272,7 @@ const CourseModuleListView = ({ props, isLoading = false }: LeafProps<CourseModu
         contract="course-module-list"
         render={defineContractComponent("course-module-list", {
             module: props.modules.map((module) => defineContractComponent("course-module-row", {
-                module: defineLeafComponent("curriculum-module-row", {}, () => (
+                module: defineCompositeComponent("curriculum-module-row", {}, () => (
                     <CurriculumModuleRow
                         props={{
                             title: module.title,

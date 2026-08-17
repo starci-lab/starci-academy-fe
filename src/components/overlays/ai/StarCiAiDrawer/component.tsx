@@ -1,18 +1,19 @@
 import type { ComponentType } from "react"
-import { DrawerShell, type DrawerShellPlacement } from "@/components/shells/DrawerShell"
+import { DrawerBranch, type DrawerBranchPlacement } from "@/components/branches/DrawerBranch"
+import { defineContractProjection } from "@/components/contracts/props"
 
 /** Overlay lifecycle independent from chat transport state. */
 export type StarCiAiDrawerState = "closed" | "pending" | "ready" | "failed"
 
-/** Resolved shell geometry and accessible copy for the AI overlay. */
+/** Resolved branch geometry and accessible copy for the AI overlay. */
 export type StarCiAiDrawerData = {
     readonly isOpen: boolean
-    readonly placement: DrawerShellPlacement
+    readonly placement: DrawerBranchPlacement
     readonly title: string
     readonly description: string
 }
 
-/** Pure drawer input with the connected chat supplied as its mechanics body. */
+/** Pure drawer input with the connected chat supplied as its typed content projection. */
 export type StarCiAiDrawerProps = {
     readonly state: StarCiAiDrawerState
     readonly props: StarCiAiDrawerData
@@ -24,14 +25,14 @@ export type StarCiAiDrawerProps = {
 export const _StarCiAiDrawer = (input: StarCiAiDrawerProps) => {
     const Chat = input.chat
     return (
-        <DrawerShell
+        <DrawerBranch
             isOpen={input.props.isOpen}
             placement={input.props.placement}
             title={input.props.title}
+            contract="starci-ai-chat-stack"
+            render={defineContractProjection("starci-ai-chat-stack", () => <Chat />)}
             onDismiss={input.on?.dismiss ?? (() => undefined)}
-        >
-            <Chat />
-        </DrawerShell>
+        />
     )
 }
 

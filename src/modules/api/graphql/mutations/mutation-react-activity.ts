@@ -14,6 +14,7 @@ const mutation1 = gql`
     }
 `
 
+/** Selects activity-reaction updates in the shared GraphQL executor. */
 export enum MutationReactActivity { Mutation1 = "mutation1" }
 
 /** Every supported activity-reaction document keyed by its public variant. */

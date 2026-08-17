@@ -33,6 +33,7 @@ const mutation1 = gql`
     }
 `
 
+/** Selects content-reaction updates in the shared GraphQL executor. */
 export enum MutationReactContent { Mutation1 = "mutation1" }
 
 /** Every supported react-to-content document keyed by its finite variant. */

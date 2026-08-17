@@ -1,6 +1,6 @@
 "use client"
 
-import type { ComponentType } from "react"
+import type { ReactNode } from "react"
 import { usePathname, useRouter } from "@/i18n/navigation"
 import { useQueryCoursePersonalProjectSwr } from "@/hooks/swr/useQueryCoursePersonalProjectSwr"
 import { _PersonalProjectWorkspaceLayout } from "./component"
@@ -8,7 +8,7 @@ import { _PersonalProjectWorkspaceLayout } from "./component"
 /** Course identity and routed surface accepted by the segment shell. */
 export type PersonalProjectWorkspaceLayoutProps = {
     readonly displayId: string
-    readonly surface: ComponentType
+    readonly surface: ReactNode
 }
 
 /** Resolves the persistent milestone rail and navigates between its task routes. */

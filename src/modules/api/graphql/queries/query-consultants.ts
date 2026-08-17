@@ -72,6 +72,7 @@ const query1 = gql`
     }
 `
 
+/** Selects consultant discovery in the shared GraphQL executor. */
 export enum QueryConsultants { Query1 = "query1" }
 
 const queryConsultantsMap: Record<QueryConsultants, DocumentNode> = {

@@ -17,6 +17,7 @@ const mutation1 = gql`
     }
 `
 
+/** Selects content-AI session activity updates in the shared GraphQL executor. */
 export enum MutationTouchContentAiSession { Mutation1 = "mutation1" }
 
 /** Every supported conversation-touch document keyed by variant. */

@@ -14,6 +14,7 @@ const query1 = gql`
     }
 `
 
+/** Selects route resolution in the shared GraphQL executor. */
 export enum QueryResolveRoute {
     Query1 = "query1",
 }

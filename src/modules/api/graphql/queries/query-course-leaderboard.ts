@@ -77,6 +77,7 @@ const query1 = gql`
     }
 `
 
+/** Selects one course leaderboard in the shared GraphQL executor. */
 export enum QueryCourseLeaderboard { Query1 = "query1" }
 
 const queryCourseLeaderboardMap: Record<QueryCourseLeaderboard, DocumentNode> = {

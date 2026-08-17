@@ -11,7 +11,7 @@ describe("_PersonalProjectWorkspaceLayout", () => {
                     { id: "task-1", label: "Milestone 1 · Plan" },
                     { id: "task-2", label: "Milestone 1 · Build", isCurrent: true },
                 ]}
-                surface={Surface}
+                surface={<Surface />}
                 onTask={vi.fn()}
             />,
         )

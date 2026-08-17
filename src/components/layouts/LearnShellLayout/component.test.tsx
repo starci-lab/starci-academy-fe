@@ -16,7 +16,7 @@ const spine: LearnShellLayoutData["spine"] = {
 describe("_LearnShellLayout", () => {
     it("keeps the course spine beside an ordinary routed surface", () => {
         const { container } = render(
-            <_LearnShellLayout props={{ spine, isFullBleed: false }} surface={Surface} />,
+            <_LearnShellLayout props={{ spine, isFullBleed: false }} surface={<Surface />} />,
         )
 
         expect(screen.getByText("Reader surface")).toBeTruthy()
@@ -25,7 +25,7 @@ describe("_LearnShellLayout", () => {
 
     it("removes course furniture for a focused full-bleed session", () => {
         const { container } = render(
-            <_LearnShellLayout props={{ spine, isFullBleed: true }} surface={Surface} />,
+            <_LearnShellLayout props={{ spine, isFullBleed: true }} surface={<Surface />} />,
         )
 
         expect(screen.getByText("Reader surface")).toBeTruthy()
@@ -46,7 +46,7 @@ describe("_LearnShellLayout", () => {
                     ],
                 }}
                 on={{ openMobileTab }}
-                surface={Surface}
+                surface={<Surface />}
             />,
         )
 

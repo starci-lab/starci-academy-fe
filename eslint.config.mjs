@@ -12,6 +12,7 @@ import starciFe, {
     starciFeConfig,
 } from "./plugins/eslint-canon/index.mjs"
 // <<< sync-fe-lint.mjs -- canon rule wiring <<<
+
 import js from "@eslint/js"
 import globals from "globals"
 import tseslint from "typescript-eslint"
@@ -50,6 +51,7 @@ export default defineConfig([
     pluginReact.configs.flat.recommended,
     {
         plugins: { "react-hooks": pluginReactHooks },
+        settings: { react: { version: "detect" } },
         rules: {
             "react/display-name": "off",
             "react/react-in-jsx-scope": "off",

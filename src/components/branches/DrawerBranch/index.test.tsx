@@ -2,7 +2,8 @@ import { render } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import type { ReactNode } from "react"
 import type * as HeroUi from "@heroui/react"
-import { DrawerShell } from "./index"
+import { DrawerBranch } from "./index"
+import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
 type VendorPartProps = { readonly children?: ReactNode }
 type VendorContentProps = VendorPartProps & { readonly placement?: string }
@@ -30,17 +31,34 @@ vi.mock("@heroui/react", () => {
     return { Drawer: DrawerRoot }
 })
 
-describe("DrawerShell", () => {
+const drawerBody = (content: string) => defineContractComponent("stacked-peer-controls", {
+    control: [defineLeafComponent("button", {}, () => <>{content}</>)],
+})
+
+describe("DrawerBranch", () => {
     it("keeps right as the default placement", () => {
         const { getByTestId } = render(
-            <DrawerShell isOpen title={resolvedCopy.cartTitle} onDismiss={() => undefined}>{resolvedCopy.cartBody}</DrawerShell>,
+            <DrawerBranch
+                isOpen
+                title={resolvedCopy.cartTitle}
+                contract="stacked-peer-controls"
+                render={drawerBody(resolvedCopy.cartBody)}
+                onDismiss={() => undefined}
+            />,
         )
         expect(getByTestId("drawer-content")).toHaveAttribute("data-placement", "right")
     })
 
     it("passes bottom placement to the vendor drawer for the mobile AI sheet", () => {
         const { getByTestId } = render(
-            <DrawerShell isOpen placement="bottom" title={resolvedCopy.aiTitle} onDismiss={() => undefined}>{resolvedCopy.aiBody}</DrawerShell>,
+            <DrawerBranch
+                isOpen
+                placement="bottom"
+                title={resolvedCopy.aiTitle}
+                contract="stacked-peer-controls"
+                render={drawerBody(resolvedCopy.aiBody)}
+                onDismiss={() => undefined}
+            />,
         )
         expect(getByTestId("drawer-content")).toHaveAttribute("data-placement", "bottom")
     })

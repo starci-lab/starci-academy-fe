@@ -1,5 +1,6 @@
 import { Icon } from "@/components/leaves/Icon"
-import { DropdownShell } from "@/components/shells/DropdownShell"
+import { DropdownBranch } from "@/components/branches/DropdownBranch"
+import { defineLeafComponent } from "@/components/contracts/props"
 import type { Locale } from "@/i18n/config"
 
 /** One locale choice already resolved to its display label. */
@@ -22,7 +23,7 @@ export type LanguageMenuViewProps = {
 
 /** Pure single-select locale ListBox matching the legacy navbar disclosure. */
 export const _LanguageMenu = (input: LanguageMenuViewProps) => (
-    <DropdownShell
+    <DropdownBranch
         props={{
             label: input.props.label,
             selectionMode: "single",
@@ -32,7 +33,9 @@ export const _LanguageMenu = (input: LanguageMenuViewProps) => (
             }],
         }}
         on={{ action: (id) => input.on?.select?.(id) }}
-        trigger={<Icon props={{ name: "locale", role: "leading" }} />}
+        trigger={defineLeafComponent("icon", {}, () => (
+            <Icon props={{ name: "locale", role: "leading" }} />
+        ))}
     />
 )
 

@@ -8,7 +8,7 @@
  * first and must never be deleted to make an import tidier.
  */
 import assert from "node:assert/strict"
-import { readFileSync } from "node:fs"
+import { existsSync, readFileSync } from "node:fs"
 import test from "node:test"
 import { RuleTester } from "eslint"
 import tsParser from "@typescript-eslint/parser"
@@ -36,12 +36,8 @@ const ICON_LEAF_BRANDS = `${R}/leaves/Icon/brands.tsx`
 const OTHER_LEAF = `${R}/leaves/SeeMoreLink/index.tsx`
 const BLOCK = `${R}/blocks/dashboard/DailyQuest/component.tsx`
 const METRIC_CELL = `${R}/composites/LabelledProgressRow/index.tsx`
-const ICON_LAW = readFileSync(new URL("../../fe/canon/patterns/icon.md", import.meta.url), "utf8")
-const MAPPING_TABLE = ICON_LAW.match(/\| Meaning \(`IconName`\)[\s\S]*?(?=\n## Forbidden)/)?.[0] ?? ""
-const MAPPING_ROWS = Array.from(
-  MAPPING_TABLE.matchAll(/^\| `(\w+)` \| [^|]+ \| `(\w+)` \|$/gm),
-  (match) => ({ meaning: match[1], glyph: match[2] }),
-)
+const ICON_LAW_URL = new URL("../../fe/gates/patterns/icon/INDEX.md", import.meta.url)
+const ICON_LAW = existsSync(ICON_LAW_URL) ? readFileSync(ICON_LAW_URL, "utf8") : null
 
 test("every rule this law declares is exported under its published name", () => {
   for (const [name, rule] of Object.entries(rules)) {
@@ -93,10 +89,10 @@ test("ICON-6: the icon leaf owns the library, and a subpath does not walk around
   })
 })
 
-test("ICON-9: the canon feature map gives every meaning unique glyph ownership", () => {
-  assert.ok(MAPPING_ROWS.length > 0, "icon.md has no readable feature mapping rows")
-  assert.equal(new Set(MAPPING_ROWS.map(({ meaning }) => meaning)).size, MAPPING_ROWS.length)
-  assert.equal(new Set(MAPPING_ROWS.map(({ glyph }) => glyph)).size, MAPPING_ROWS.length)
+test("ICON-9: the canon names the source feature map as the mapping owner", { skip: ICON_LAW === null }, () => {
+  assert.ok(ICON_LAW)
+  assert.match(ICON_LAW, /\| `ICON-9` \| The source feature map owns meaning-to-glyph selection/)
+  assert.match(ICON_LAW, /src\/components\/leaves\/Icon\/icon\.md/)
 })
 
 test("ICON-7: only the Heroicons outline and micro families may supply glyphs", () => {

@@ -43,6 +43,8 @@ test("COMMENTS-1: an export opens with a documentation block", () => {
     valid: [
       "/** What this is for. */\nexport const X = 1",
       "/** A shape. */\nexport interface Y { a: string }",
+      "/** A runtime owner. */\nexport class Owner {}",
+      "/** A closed state. */\nexport enum State { Ready = 'ready' }",
       // internal helpers are not exports, and requiring a block on each makes a file of ceremony
       "const helper = () => 1\n/** The export. */\nexport const X = helper",
       // a re-export has no declaration to document
@@ -51,6 +53,9 @@ test("COMMENTS-1: an export opens with a documentation block", () => {
     invalid: [
       { code: "export const X = 1", errors: [{ messageId: "jsdoc" }] },
       { code: "export type Y = { a: string }", errors: [{ messageId: "jsdoc" }] },
+      { code: "export class Owner {}", errors: [{ messageId: "jsdoc" }] },
+      { code: "export enum State { Ready = 'ready' }", errors: [{ messageId: "jsdoc" }] },
+      { code: "export const A = 1, B = 2", errors: [{ messageId: "jsdoc" }, { messageId: "jsdoc" }] },
       // a line comment is not a documentation block
       { code: "// what this is\nexport const X = 1", errors: [{ messageId: "jsdoc" }] },
     ],

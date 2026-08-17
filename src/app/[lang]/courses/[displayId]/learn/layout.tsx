@@ -1,4 +1,3 @@
-import { RouteShell } from "@/components/shells/RouteShell"
 import { LearnShellLayout } from "@/components/layouts/LearnShellLayout"
 import type { ReactNode } from "react"
 
@@ -9,10 +8,9 @@ import type { ReactNode } from "react"
  * group and what a locked one looks like all live one tier down, where they can be rendered and
  * changed without a router.
  *
- * `RouteShell` is what turns the framework's `children` into the component the frame expects, and it
- * is the only component allowed to. The frame crosses to it as a component REFERENCE — a
- * `"use client"` import passed from a server file is a client reference, while an inline arrow
- * written here is a function and fails to serialise.
+ * The framework's routed node crosses the client boundary as serializable content. The frame binds
+ * that node to its `page` leaf inside a named contract; no component-level `children` slot or
+ * function conversion is required.
  */
 
 /** Props Next hands a segment layout. */
@@ -26,9 +24,7 @@ interface LearnLayoutProps {
 const LearnLayout = async (input: LearnLayoutProps) => {
     const { displayId } = await input.params
     return (
-        <RouteShell frame={LearnShellLayout} props={{ displayId }}>
-            {input.children}
-        </RouteShell>
+        <LearnShellLayout displayId={displayId} surface={input.children} />
     )
 }
 

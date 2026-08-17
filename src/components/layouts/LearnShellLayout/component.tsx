@@ -3,7 +3,7 @@ import { defineContractComponent, defineLeafComponent } from "@/components/contr
 import { learnSpine, type LearnSpineActions, type LearnSpineData } from "@/components/blocks/learn/LearnSpine/component"
 import { NavLink } from "@/components/leaves/NavLink"
 import type { IconName } from "@/components/leaves/Icon"
-import type { ComponentType } from "react"
+import type { ReactNode } from "react"
 
 /**
  * LAYOUT - `_LearnShellLayout`: the frame every learn surface is read inside.
@@ -69,8 +69,8 @@ export type LearnShellLayoutProps = {
     readonly props: LearnShellLayoutData
     readonly on?: LearnShellLayoutActions
     readonly isLoading?: boolean
-    /** The routed surface, as a component - the one thing the frame does not decide. */
-    readonly surface: ComponentType
+    /** The routed surface - the one thing the frame does not decide. */
+    readonly surface: ReactNode
 }
 
 /**
@@ -78,30 +78,27 @@ export type LearnShellLayoutProps = {
  *
  * @param input - {@link LearnShellLayoutProps}
  */
-export const _LearnShellLayout = (input: LearnShellLayoutProps) => {
-    const Surface = input.surface
-    return (
-        <Tree
-            contract="learn-shell-frame"
-            render={defineContractComponent("learn-shell-frame", {
-                ...(input.props.isFullBleed ? {} : {
-                    spine: learnSpine({ props: input.props.spine, on: input.on, isLoading: input.isLoading ?? false }),
+export const _LearnShellLayout = (input: LearnShellLayoutProps) => (
+    <Tree
+        contract="learn-shell-frame"
+        render={defineContractComponent("learn-shell-frame", {
+            ...(input.props.isFullBleed ? {} : {
+                spine: learnSpine({ props: input.props.spine, on: input.on, isLoading: input.isLoading ?? false }),
+            }),
+            body: defineLeafComponent("page", {}, () => <>{input.surface}</>),
+            ...((input.props.mobileTabs ?? []).length === 0 ? {} : {
+                bar: defineContractComponent("learn-mobile-tab-bar", {
+                    tab: (input.props.mobileTabs ?? []).map((tab) => defineLeafComponent("nav-link", { kind: "tab" }, () => (
+                        <NavLink
+                            props={{ label: tab.label, icon: tab.icon, kind: "tab", isCurrent: tab.isCurrent }}
+                            on={{ press: () => input.on?.openMobileTab?.(tab.id) }}
+                        />
+                    ))),
                 }),
-                body: defineLeafComponent("page", {}, () => <Surface />),
-                ...((input.props.mobileTabs ?? []).length === 0 ? {} : {
-                    bar: defineContractComponent("learn-mobile-tab-bar", {
-                        tab: (input.props.mobileTabs ?? []).map((tab) => defineLeafComponent("nav-link", { kind: "tab" }, () => (
-                            <NavLink
-                                props={{ label: tab.label, icon: tab.icon, kind: "tab", isCurrent: tab.isCurrent }}
-                                on={{ press: () => input.on?.openMobileTab?.(tab.id) }}
-                            />
-                        ))),
-                    }),
-                }),
-            })}
-        />
-    )
-}
+            }),
+        })}
+    />
+)
 
 /** Source-level tier marker. */
 export const meta = { shape: "layout", world: "pure", domain: "learn" } as const

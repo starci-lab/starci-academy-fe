@@ -1,8 +1,7 @@
 import { Avatar } from "@/components/leaves/Avatar"
 import { Icon, type IconName } from "@/components/leaves/Icon"
 import { Text } from "@/components/leaves/Text"
-import { Tree } from "@/components/branches/Tree"
-import { DropdownShell } from "@/components/shells/DropdownShell"
+import { DropdownBranch } from "@/components/branches/DropdownBranch"
 import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
 type AccountMenuFrame = {
@@ -52,11 +51,11 @@ export type AccountMenuViewProps =
 /**
  * BLOCK - the current account identity and the journeys it offers.
  *
- * DropdownShell owns only vendor mechanics. This block decides that a guest first sees an account
+ * DropdownBranch owns only vendor mechanics. This block decides that a guest first sees an account
  * summary, then chooses sign in or sign up; that decision is product behavior, not a leaf shape.
  */
 export const _AccountMenu = (input: AccountMenuViewProps) => (
-    <DropdownShell
+    <DropdownBranch
         props={{
             label: input.props.label,
             sections: input.state === "guest"
@@ -84,44 +83,43 @@ export const _AccountMenu = (input: AccountMenuViewProps) => (
             },
         }}
         trigger={input.state === "guest"
-            ? <Icon props={{ name: "account", role: "leading" }} />
-            : <Avatar
-                props={{ name: input.props.displayName, src: input.props.avatar, size: "sm" }}
-                isLoading={input.props.isIdentityLoading}
-            />}
+            ? defineLeafComponent("icon", {}, () => (
+                <Icon props={{ name: "account", role: "leading" }} />
+            ))
+            : defineLeafComponent("avatar", {}, () => (
+                <Avatar
+                    props={{ name: input.props.displayName, src: input.props.avatar, size: "sm" }}
+                    isLoading={input.props.isIdentityLoading}
+                />
+            ))}
         header={input.state === "guest"
-            ? (
+            ? defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
                 <Text
                     props={{ content: input.props.guestMessage, icon: "account", size: "sm", tone: "muted" }}
                 />
-            )
-            : (
-                <Tree
-                    contract="profile-avatar-name-handle-disclosure-row"
-                    render={defineContractComponent("profile-avatar-name-handle-disclosure-row", {
-                        avatar: defineLeafComponent("avatar", {}, () => (
-                            <Avatar
-                                props={{ name: input.props.displayName, src: input.props.avatar, size: "sm" }}
-                                isLoading={input.props.isIdentityLoading}
-                            />
-                        )),
-                        identity: defineContractComponent("profile-name-over-handle", {
-                            name: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
-                                <Text
-                                    props={{ content: input.props.displayName, size: "sm", weight: "semibold" }}
-                                    isLoading={input.props.isIdentityLoading}
-                                />
-                            )),
-                            handle: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                                <Text
-                                    props={{ content: input.props.email, size: "xs", tone: "muted" }}
-                                    isLoading={input.props.isIdentityLoading}
-                                />
-                            )),
-                        }),
-                    })}
-                />
-            )}
+            ))
+            : defineContractComponent("profile-avatar-name-handle-disclosure-row", {
+                avatar: defineLeafComponent("avatar", {}, () => (
+                    <Avatar
+                        props={{ name: input.props.displayName, src: input.props.avatar, size: "sm" }}
+                        isLoading={input.props.isIdentityLoading}
+                    />
+                )),
+                identity: defineContractComponent("profile-name-over-handle", {
+                    name: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
+                        <Text
+                            props={{ content: input.props.displayName, size: "sm", weight: "semibold" }}
+                            isLoading={input.props.isIdentityLoading}
+                        />
+                    )),
+                    handle: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                        <Text
+                            props={{ content: input.props.email, size: "xs", tone: "muted" }}
+                            isLoading={input.props.isIdentityLoading}
+                        />
+                    )),
+                }),
+            })}
     />
 )
 

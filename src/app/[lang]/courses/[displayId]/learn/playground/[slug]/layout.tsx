@@ -1,5 +1,4 @@
 import type { ReactNode } from "react"
-import { RouteShell } from "@/components/shells/RouteShell"
 import { PlaygroundSessionLayout } from "@/components/layouts/PlaygroundSessionLayout"
 
 /** Framework inputs for the persistent playground slug boundary. */
@@ -12,9 +11,7 @@ export type PlaygroundSlugLayoutProps = {
 const PlaygroundSlugLayout = async (input: PlaygroundSlugLayoutProps) => {
     const { displayId, slug } = await input.params
     return (
-        <RouteShell frame={PlaygroundSessionLayout} props={{ displayId, slug }}>
-            {input.children}
-        </RouteShell>
+        <PlaygroundSessionLayout displayId={displayId} slug={slug} surface={input.children} />
     )
 }
 

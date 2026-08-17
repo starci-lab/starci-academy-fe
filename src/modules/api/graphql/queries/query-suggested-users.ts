@@ -14,6 +14,7 @@ const query1 = gql`
     }
 `
 
+/** Selects suggested learner accounts in the shared GraphQL executor. */
 export enum QuerySuggestedUsers { Query1 = "query1" }
 
 /** Every supported suggested-user document keyed by its public variant. */
