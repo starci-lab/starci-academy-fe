@@ -1,12 +1,12 @@
 import { render } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import type { ReactNode } from "react"
+import type { PropsWithChildren } from "react"
 import type * as HeroUi from "@heroui/react"
 import { DrawerBranch } from "./index"
 import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
-type VendorPartProps = { readonly children?: ReactNode }
-type VendorContentProps = VendorPartProps & { readonly placement?: string }
+type VendorPartProps = PropsWithChildren
+type VendorContentProps = PropsWithChildren<{ readonly placement?: string }>
 
 const resolvedCopy = {
     cartTitle: String(["Cart"].join("")),

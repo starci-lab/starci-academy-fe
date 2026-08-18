@@ -12,23 +12,30 @@ const mocks = vi.hoisted(() => ({
     openChange: undefined as ((open: boolean) => void) | undefined,
 }))
 vi.mock("@heroui/react", () => {
-    const Root = ({ children, onOpenChange }: PropsWithChildren<{ onOpenChange: (open: boolean) => void }>) => {
+    const Root = (props: PropsWithChildren<{ onOpenChange: (open: boolean) => void }>) => {
+        const { children, onOpenChange } = props
         mocks.openChange = onOpenChange
         return <>{children}</>
     }
-    const Container = ({ children, size }: PropsWithChildren<{ size: string }>) => {
+    const Container = (props: PropsWithChildren<{ size: string }>) => {
+        const { children, size } = props
         mocks.size(size)
         return <div>{children}</div>
     }
     return { Modal: Object.assign(Root, {
-        Backdrop: ({ children }: PropsWithChildren) => <div>{children}</div>,
+        Backdrop: (props: PropsWithChildren) => {
+            const { children } = props
+            return <div>{children}</div>
+        },
         Container,
-        Dialog: ({ children, className }: PropsWithChildren<{ className?: string }>) => {
+        Dialog: (props: PropsWithChildren<{ className?: string }>) => {
+            const { children, className } = props
             mocks.dialogClassName(className)
             return <div role="dialog">{children}</div>
         },
         CloseTrigger: () => <button type="button" onClick={() => mocks.openChange?.(false)}>Close</button>,
-        Body: ({ children, className }: PropsWithChildren<{ className?: string }>) => {
+        Body: (props: PropsWithChildren<{ className?: string }>) => {
+            const { children, className } = props
             mocks.bodyClassName(className)
             return <div>{children}</div>
         },
