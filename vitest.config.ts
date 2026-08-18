@@ -28,6 +28,14 @@ export default defineConfig({
         include: [
             "src/**/*.test.{ts,tsx}",
         ],
+        coverage: {
+            provider: "v8",
+            reporter: [
+                "text-summary",
+                "lcov",
+            ],
+            reportsDirectory: "coverage",
+        },
     },
     resolve: {
         alias: {
