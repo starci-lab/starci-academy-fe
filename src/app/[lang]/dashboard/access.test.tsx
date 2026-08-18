@@ -13,8 +13,11 @@ vi.mock("next-intl", () => ({
 }))
 
 vi.mock("next/navigation", () => ({
-    useRouter: () => ({ replace: state.replace }),
     useSearchParams: () => new URLSearchParams(),
+}))
+
+vi.mock("@/i18n/navigation", () => ({
+    useRouter: () => ({ replace: state.replace }),
 }))
 
 vi.mock("@/hooks/auth/useSessionToken", () => ({

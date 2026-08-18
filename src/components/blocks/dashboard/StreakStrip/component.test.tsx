@@ -37,7 +37,7 @@ describe("_StreakStrip", () => {
         expect(container.textContent).toContain("Read content to start your streak")
         fireEvent.click(container.querySelector("[data-component=\"Button\"]")!)
         expect(learn).toHaveBeenCalledOnce()
-        expect(container.querySelector("[data-component=\"EmptyNotice\"]")).toBeNull()
+        expect(container.querySelector("[data-node=\"empty-notice-stack\"]")).toBeNull()
     })
 
     it("does not invent a tiny business glyph beside the settled streak facts", () => {

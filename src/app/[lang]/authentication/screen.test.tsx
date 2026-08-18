@@ -10,7 +10,7 @@ type AuthenticationPanelDoubleProps = {
     readonly onSignedIn?: () => void
 }
 
-vi.mock("next/navigation", () => ({
+vi.mock("@/i18n/navigation", () => ({
     useRouter: () => ({ replace: state.replace }),
 }))
 

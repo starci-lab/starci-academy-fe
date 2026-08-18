@@ -11,7 +11,7 @@ vi.mock("next-intl", () => ({
     },
 }))
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }))
+vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }))
 vi.mock("@/hooks", () => ({ useQueryMyKpisSwr: vi.fn() }))
 
 afterEach(() => {
@@ -33,7 +33,7 @@ describe("WeeklyGoals", () => {
         } as never)
 
         const { container } = render(<WeeklyGoals />)
-        const rows = container.querySelectorAll("[data-component=\"LabelledProgressRow\"]")
+        const rows = container.querySelectorAll("[data-node=\"label-fact-over-progress\"]")
         expect(rows).toHaveLength(6)
         expect(Array.from(rows, (row) => row.textContent)).toEqual([
             "labels.lessons0/5",
@@ -43,6 +43,6 @@ describe("WeeklyGoals", () => {
             "labels.flashcards0/20",
             "labels.milestones0/2",
         ])
-        expect(container.querySelector("[data-component=\"EmptyNotice\"]")).toBeNull()
+        expect(container.querySelector("[data-node=\"empty-notice-stack\"]")).toBeNull()
     })
 })

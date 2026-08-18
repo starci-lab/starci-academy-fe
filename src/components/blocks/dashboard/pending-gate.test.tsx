@@ -21,7 +21,7 @@ vi.mock("next-intl", () => ({
     useLocale: () => "en",
     useTranslations: (namespace: string) => (key: string) => `${namespace}:${key}`,
 }))
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }))
+vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }))
 vi.mock("@/hooks", () => ({
     useQueryMeSwr: vi.fn(),
     useMutateClaimWeeklyChallengeRewardSwr: vi.fn(),
@@ -93,7 +93,7 @@ describe("dashboard viewer-key gate", () => {
         const { container } = render(<Component />)
 
         expect(container.querySelector("[data-loading=\"true\"]")).not.toBeNull()
-        expect(container.querySelector("[data-component=\"EmptyNotice\"]")).toBeNull()
+        expect(container.querySelector("[data-node=\"empty-notice-stack\"]")).toBeNull()
     })
 
     it("keeps every overview region mounted while independent requests are unresolved", () => {
