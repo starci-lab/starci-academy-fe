@@ -33,14 +33,14 @@ describe("_JobReadinessWidget", () => {
         expect(container.querySelector("[data-component=\"SurfaceListCardSurface\"]")).toHaveAttribute("data-surface-context", "nested")
         expect(container.querySelector("[data-component=\"SurfaceListCard\"] [data-component=\"Heading\"]")).toBeNull()
         expect(container.querySelector("[data-node=\"job-readiness-list\"]")?.className).toContain("divide-y")
-        expect(container.querySelectorAll("[data-component=\"LabelledProgressRow\"]")).toHaveLength(2)
+        expect(container.querySelectorAll("[data-node=\"label-fact-over-progress\"]")).toHaveLength(2)
         fireEvent.click(screen.getByRole("button", { name: "Complete CV review" }))
         expect(act).toHaveBeenCalledOnce()
     })
 
     it("rests with all three legacy pillar rows", () => {
         const { container } = render(<_JobReadinessWidget state="pending" props={frame} />)
-        expect(container.querySelectorAll("[data-component=\"LabelledProgressRow\"]")).toHaveLength(3)
+        expect(container.querySelectorAll("[data-node=\"label-fact-over-progress\"]")).toHaveLength(3)
         expect(container.querySelector("[data-node=\"job-readiness-list\"]")).toBeInTheDocument()
         expect(container.querySelector("[data-component=\"Button\"][data-loading=\"true\"]")).toBeInTheDocument()
     })

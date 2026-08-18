@@ -16,15 +16,15 @@ afterEach(cleanup)
 describe("_WeeklyGoals", () => {
     it("keeps six metric rows while the week is still resting", () => {
         const { container } = render(<_WeeklyGoals state="pending" props={{ label: "Weekly goals" }} />)
-        expect(container.querySelectorAll("[data-component=\"LabelledProgressRow\"]")).toHaveLength(6)
+        expect(container.querySelectorAll("[data-node=\"label-fact-over-progress\"]")).toHaveLength(6)
         expect(container.querySelectorAll(
-            "[data-component=\"LabelledProgressRow\"] [data-component=\"Text\"][data-loading=\"true\"]",
+            "[data-node=\"label-fact-over-progress\"] [data-component=\"Text\"][data-loading=\"true\"]",
         )).toHaveLength(12)
         expect(container.querySelectorAll(
-            "[data-component=\"LabelledProgressRow\"] [data-component=\"Progress\"][data-loading=\"true\"]",
+            "[data-node=\"label-fact-over-progress\"] [data-component=\"Progress\"][data-loading=\"true\"]",
         )).toHaveLength(6)
         expect(container.querySelector(
-            "[data-component=\"LabelledProgressRow\"] [data-component=\"Icon\"]",
+            "[data-node=\"label-fact-over-progress\"] [data-component=\"Icon\"]",
         )).toBeNull()
         expect(container.querySelector("[data-component=\"SeeMoreLink\"]")).toBeNull()
     })
@@ -51,7 +51,7 @@ describe("_WeeklyGoals", () => {
         expect(grid?.className).toContain("grid-cols-2")
         expect(grid?.className).toContain("border")
         expect(screen.getByText("40% this week")).toBeTruthy()
-        const rows = container.querySelectorAll("[data-component=\"LabelledProgressRow\"]")
+        const rows = container.querySelectorAll("[data-node=\"label-fact-over-progress\"]")
         expect(rows).toHaveLength(6)
         expect(grid?.querySelector("[data-component=\"Icon\"]")).toBeNull()
     })

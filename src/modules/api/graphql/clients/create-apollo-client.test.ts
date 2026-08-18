@@ -14,18 +14,18 @@ import { createApolloClient, createLinkChain } from "./create-apollo-client"
 const chainOf = (chain: Array<ApolloLink>) => chain.map((link) => link.constructor.name)
 
 describe("createLinkChain", () => {
-    it("is retry, timeout, then http when anonymous", () => {
+    it("is retry, timeout, locale, then http when anonymous", () => {
         const chain = createLinkChain()
-        expect(chain).toHaveLength(3)
+        expect(chain).toHaveLength(4)
         expect(chain[0]).toBeInstanceOf(RetryLink)
-        expect(chain[2]).toBeInstanceOf(HttpLink)
+        expect(chain[3]).toBeInstanceOf(HttpLink)
     })
 
     it("inserts the bearer link before the terminal link when auth is asked for", () => {
         const chain = createLinkChain({ withAuth: true })
-        expect(chain).toHaveLength(4)
+        expect(chain).toHaveLength(5)
         expect(chain[0]).toBeInstanceOf(RetryLink)
-        expect(chain[3]).toBeInstanceOf(HttpLink)
+        expect(chain[4]).toBeInstanceOf(HttpLink)
     })
 
     it("adds exactly one link when auth is turned on", () => {

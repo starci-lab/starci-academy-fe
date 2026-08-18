@@ -78,9 +78,12 @@ describe("CourseDetailPage commerce actions", () => {
         vi.clearAllMocks()
     })
 
-    it("resolves all five intent labels at the connected boundary", () => {
+    it("resolves all eight intent labels at the connected boundary", () => {
         render(<CourseDetailPage displayId="system-design-mastery" />)
         expect(screen.getByTestId("rail-intent")).toHaveTextContent(JSON.stringify({
+            intentTabsLabel: "intentTabsLabel",
+            purchaseModeLabel: "purchaseModeLabel",
+            trialModeLabel: "trialModeLabel",
             purchaseTitle: "purchaseTitle",
             purchaseDescription: "purchaseDescription",
             trialTitle: "trialTitle",

@@ -60,10 +60,16 @@ describe("queryCoursesMap", () => {
         }
     })
 
+    it("selects the phase pricing and value propositions a list card renders", () => {
+        expect(documentText).toContain("pricingPhases")
+        expect(documentText).toContain("currentPhase")
+        expect(documentText).toContain("valuePropositions")
+    })
+
     it("does not reach into the related graphs a list card never renders", () => {
-        expect(documentText).not.toContain("pricingPhases")
-        expect(documentText).not.toContain("valuePropositions")
         expect(documentText).not.toContain("lessons")
+        expect(documentText).not.toContain("modules")
+        expect(documentText).not.toContain("qnas")
     })
 })
 

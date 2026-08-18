@@ -29,7 +29,7 @@ describe("_ChangelogList", () => {
         expect(list?.className).toContain("divide-separator")
         expect(list?.className).toContain("p-0")
         expect(list?.className).toContain("[&>*]:px-4")
-        expect(list?.querySelectorAll(":scope > [data-component=\"ChangelogEntryRow\"]")).toHaveLength(1)
+        expect(list?.querySelectorAll(":scope > [data-node=\"changelog-entry-row\"]")).toHaveLength(1)
     })
 
     it("reports which entry was opened", () => {
@@ -41,7 +41,7 @@ describe("_ChangelogList", () => {
 
     it("keeps four joined resting rows", () => {
         const { container } = render(<_ChangelogList state="pending" props={props} />)
-        expect(container.querySelectorAll("[data-component=\"ChangelogEntryRow\"]")).toHaveLength(4)
+        expect(container.querySelectorAll("[data-node=\"changelog-entry-row\"]")).toHaveLength(4)
     })
 
     it("hides the whole settled empty block", () => {

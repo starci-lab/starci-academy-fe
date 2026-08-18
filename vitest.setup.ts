@@ -27,3 +27,13 @@ if (typeof window !== "undefined" && typeof window.matchMedia !== "function") {
         dispatchEvent: () => false,
     })
 }
+
+// jsdom ships no `ResizeObserver` either, and HeroUI's scroll-shadow hook subscribes to one the
+// moment it mounts. A no-op observer is the honest stand-in: nothing in these tests resizes.
+if (typeof window !== "undefined" && typeof window.ResizeObserver !== "function") {
+    window.ResizeObserver = class {
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+    }
+}
