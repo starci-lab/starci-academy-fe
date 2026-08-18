@@ -1,8 +1,7 @@
-// >>> sync-fe-lint.mjs -- canon rule wiring, do not edit by hand >>>
 /*
- * The rules are authored in the trust tree and MIRRORED here by sync-fe-lint.mjs. Do not edit
- * anything under plugins/eslint-canon/ and do not add a rule to it: the next run overwrites the
- * folder, and a rule that exists only here is a second answer to a question canon already answers.
+ * The rules are authored in the trust tree and published as @starci/eslint-canon-fe. Do not add a
+ * rule here: a rule with no law in the tree is unaccountable, and a copy that lives in this
+ * repository enforces whatever the law was on the day it was copied.
  *
  * What this repository does own is the config below - which globs the rules apply to.
  */
@@ -10,8 +9,7 @@ import starciFe, {
     recommended as starciRecommended,
     linterOptions as starciLinterOptions,
     starciFeConfig,
-} from "./plugins/eslint-canon/index.mjs"
-// <<< sync-fe-lint.mjs -- canon rule wiring <<<
+} from "@starci/eslint-canon-fe"
 
 import js from "@eslint/js"
 import globals from "globals"
@@ -37,8 +35,6 @@ export default defineConfig([
             "**/.claude/**",
             // Disposable design evidence is reviewed by its owning workflow and never ships.
             "**/.artifacts/**",
-            // This generated mirror is tested at the Trust owner and verified byte-for-byte by sync.
-            "plugins/eslint-canon/**",
         ],
     },
     {
@@ -133,23 +129,6 @@ export default defineConfig([
             "jsx-a11y/no-static-element-interactions": "error",
             "jsx-a11y/label-has-associated-control": "error",
             "jsx-a11y/no-redundant-roles": "error",
-        },
-    },
-    {
-        /*
-         * Rule modules and their RuleTester twins are Node programs on the 2-space house indent of
-         * the plugin folder, not browser code on the app's 4-space indent.
-         *
-         * THE PATH IS `eslint-canon`, NOT `eslint`. The mirror folder was renamed when it became
-         * generated output and this glob was left behind, so it matched nothing - and a glob that
-         * matches nothing reports nothing, which is why it survived. The block above it registered
-         * the plugin against the same dead path with an EMPTY rule set and has been removed: it
-         * turned nothing on, and reading it suggested the folder was governed twice.
-         */
-        files: ["plugins/eslint-canon/**/*.{js,mjs,cjs}"],
-        languageOptions: { globals: globals.node },
-        rules: {
-            indent: "off",
         },
     },
     {
