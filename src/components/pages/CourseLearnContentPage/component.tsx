@@ -257,6 +257,8 @@ const ContentNextSteps = defineContractComponent("content-next-list", ContentNex
  */
 export const _CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
     const labels = input.props.labels
+    const reactions = input.props.reactions
+    const nextSteps = input.props.nextSteps ?? []
     const isLoading = input.state === "pending"
     const isLocked = input.state === "locked"
     const hasFailed = input.state === "failed"
@@ -324,7 +326,7 @@ export const _CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
      */
     const hasFooter = !isLoading && !isLocked && !hasFailed
     const footer = defineContractComponent("content-reader-footer", {
-        ...(input.props.reactions === undefined ? {} : {
+        ...(reactions === undefined ? {} : {
             reactions: defineContractProjection("content-reaction-card", () => (
                 <SurfaceCard
                     contract="content-reaction-card"
@@ -336,10 +338,10 @@ export const _CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                             <ReactionPicker
                                 props={{
                                     label: labels.reactionsLabel,
-                                    count: input.props.reactions?.count ?? 0,
-                                    selected: input.props.reactions?.selected,
-                                    isPending: input.props.reactions?.isPending,
-                                    labels: input.props.reactions?.labels ?? ({} as ReactionLabels),
+                                    count: reactions.count,
+                                    selected: reactions.selected,
+                                    isPending: reactions.isPending,
+                                    labels: reactions.labels,
                                 }}
                                 on={{ select: input.on?.selectReaction }}
                             />
@@ -361,10 +363,10 @@ export const _CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                 />
             )),
         }),
-        ...((input.props.nextSteps ?? []).length === 0 ? {} : {
+        ...(nextSteps.length === 0 ? {} : {
             next: defineContractProjection("content-next-list", () => (
                 <SurfaceListCard
-                    props={{ label: labels.nextTitle, steps: [...(input.props.nextSteps ?? [])] }}
+                    props={{ label: labels.nextTitle, steps: [...nextSteps] }}
                     contract="content-next-list"
                     render={ContentNextSteps}
                 />

@@ -310,7 +310,8 @@ export const _CoursesCatalogPage = (input: CoursesCatalogPageProps) => {
      * It stays omitted while the request is in flight and behind a notice, where there is no result
      * set to bound: a control that may never appear should not reserve a place by shimmering.
      */
-    const showsPager = !showsNotice && !isLoading && input.props.totalPages !== undefined
+    const totalPages = input.props.totalPages
+    const showsPager = !showsNotice && !isLoading && totalPages !== undefined
 
     return (
         <Tree
@@ -340,7 +341,7 @@ export const _CoursesCatalogPage = (input: CoursesCatalogPageProps) => {
                         <Pagination
                             props={{
                                 label: labels.pageLabel,
-                                total: input.props.totalPages ?? 1,
+                                total: totalPages,
                                 page: input.props.page ?? 1,
                                 previousLabel: labels.previousPageLabel,
                                 nextLabel: labels.nextPageLabel,

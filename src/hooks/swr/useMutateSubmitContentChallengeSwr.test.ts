@@ -48,4 +48,16 @@ describe("useMutateSubmitContentChallengeSwr", () => {
             })).rejects.toThrow("Repository required")
         })
     })
+
+    it("speaks for a server that refused without saying why", async () => {
+        mocks.mutationSubmitContentChallenge.mockResolvedValue({ data: undefined })
+        const { result } = renderHook(() => useMutateSubmitContentChallengeSwr())
+
+        await act(async () => {
+            await expect(result.current.trigger({
+                courseId: "course-1",
+                request: { challengeSubmissionId: "submission-1" },
+            })).rejects.toThrow("Challenge submission could not be started.")
+        })
+    })
 })

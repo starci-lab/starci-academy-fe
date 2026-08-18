@@ -80,4 +80,55 @@ describe("_ShellNav", () => {
         fireEvent.click(screen.getByRole("button", { name: "Account menu" }))
         expect(openSignIn).toHaveBeenCalledOnce()
     })
+
+    it("sends the brand back to the dashboard", () => {
+        const navigate = vi.fn()
+        const { container } = render(<_ShellNav props={props} on={{ navigate }} />)
+        const brand = container.querySelector("[data-component=\"Link\"][data-emphasis=\"brand\"]")
+        expect(brand).not.toBeNull()
+        fireEvent.click(brand as Element)
+        expect(navigate).toHaveBeenCalledWith("dashboard")
+    })
+
+    it("offers notifications only to a viewer who has some", () => {
+        const { rerender } = render(<_ShellNav props={props} />)
+        expect(screen.queryByRole("button", { name: "Notifications" })).toBeNull()
+
+        rerender(<_ShellNav props={{ ...props, isSignedIn: true }} />)
+        expect(screen.getByRole("button", { name: "Notifications" })).toBeTruthy()
+    })
+
+    it("opens the basket from the navbar while the panel stays the shell's", () => {
+        const openCart = vi.fn()
+        render(<_ShellNav props={props} on={{ openCart }} />)
+        fireEvent.click(screen.getByRole("button", { name: "Basket" }))
+        expect(openCart).toHaveBeenCalledOnce()
+    })
+
+    it("drops the whole bottom layer for a page that owns no tabs", () => {
+        const { container } = render(<_ShellNav props={{ ...props, tabs: undefined }} />)
+        expect(container.querySelector("[data-node=\"underlined-tab-strip\"]")).toBeNull()
+        expect(container.querySelector("[data-node=\"brand-links-then-tools-bar\"]")).toBeTruthy()
+    })
+
+    it("falls back to the overview tab when no page tab claims to be current", () => {
+        const selectTab = vi.fn()
+        render(
+            <_ShellNav
+                props={{ ...props, tabs: [{ id: "overview", label: "Overview", icon: "home" }, { id: "courses", label: "Courses", icon: "course" }] }}
+                on={{ selectTab }}
+            />,
+        )
+
+        expect(screen.getByRole("tab", { name: "Overview" })).toHaveAttribute("aria-selected", "true")
+        fireEvent.click(screen.getByRole("tab", { name: "Courses" }))
+        expect(selectTab).toHaveBeenCalledWith("courses")
+    })
+
+    it("reports the theme change the switch raises", () => {
+        const toggleTheme = vi.fn()
+        render(<_ShellNav props={props} on={{ toggleTheme }} />)
+        fireEvent.click(screen.getByRole("switch", { name: "Switch theme" }))
+        expect(toggleTheme).toHaveBeenCalled()
+    })
 })

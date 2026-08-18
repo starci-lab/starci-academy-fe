@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest"
 import {
     countGlobalSearchScope,
     flattenGlobalSearch,
+    GLOBAL_SEARCH_BUCKETS,
     GLOBAL_SEARCH_SCOPE_ENTITIES,
+    GLOBAL_SEARCH_SCOPES,
     parseGlobalSearchSnippet,
 } from "./global-search"
 import type { GlobalSearchData } from "@/modules/api/graphql/queries/types/global-search"
@@ -41,6 +43,36 @@ describe("global search domain", () => {
     it("counts displayed rows rather than inventing a server total", () => {
         expect(countGlobalSearchScope(data, "all")).toBe(8)
         expect(countGlobalSearchScope(data, "courses")).toBe(1)
+    })
+
+    it("offers the six scopes and the eight buckets the All order draws from", () => {
+        expect(GLOBAL_SEARCH_SCOPES).toEqual(["all", "courses", "learning", "practice", "projects", "foundations"])
+        expect(GLOBAL_SEARCH_BUCKETS).toHaveLength(8)
+        expect(GLOBAL_SEARCH_SCOPE_ENTITIES.courses).toEqual(["CourseEntity"])
+        expect(GLOBAL_SEARCH_SCOPE_ENTITIES.foundations).toEqual(["FoundationEntity"])
+    })
+
+    it("shows nothing rather than throwing before the first answer arrives", () => {
+        expect(flattenGlobalSearch(undefined, "all")).toEqual([])
+        expect(flattenGlobalSearch(null, "all")).toEqual([])
+        expect(countGlobalSearchScope(undefined, "all")).toBe(0)
+        expect(countGlobalSearchScope(null, "all")).toBe(0)
+    })
+
+    it("admits the practice and foundation buckets under their own scopes", () => {
+        expect(flattenGlobalSearch(data, "practice").map((result) => result.id)).toEqual(["challenge", "deck"])
+        expect(flattenGlobalSearch(data, "foundations").map((result) => result.key))
+            .toEqual(["foundations:foundation"])
+        expect(countGlobalSearchScope(data, "learning")).toBe(2)
+    })
+
+    it("falls back to the title when the backend returned no snippet text", () => {
+        const untexted: GlobalSearchData = {
+            ...data,
+            courses: [{ id: "c", displayId: "c", title: "Plain title", texts: [], path: "/courses/c" }],
+        }
+        expect(flattenGlobalSearch(untexted, "courses")[0]?.segments)
+            .toEqual([{ text: "Plain title", highlighted: false }])
     })
 
     it("recognizes only em markers and leaves hostile markup as text", () => {

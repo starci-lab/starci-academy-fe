@@ -29,4 +29,11 @@ describe("useMutateTouchContentAiSessionSwr", () => {
         await act(async () => expect(result.current.trigger({ sessionId: "session-1" }))
             .rejects.toThrow("missing"))
     })
+
+    it("speaks for a server that refused without saying why", async () => {
+        mocks.mutation.mockResolvedValue({ data: undefined })
+        const { result } = renderHook(() => useMutateTouchContentAiSessionSwr())
+        await act(async () => expect(result.current.trigger({ sessionId: "session-1" }))
+            .rejects.toThrow("Content-AI conversation recency could not be updated."))
+    })
 })

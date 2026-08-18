@@ -1,0 +1,74 @@
+/** @vitest-environment jsdom */
+import { afterEach, describe, expect, it, vi } from "vitest"
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import { _RecommendedCourses } from "./component"
+
+/**
+ * What these tests guard - the pure half's four situations, driven by props alone.
+ *
+ * The failure notice carries copy the caller may not have resolved, so it is asserted both with a
+ * sentence and without one: a card that renders `undefined` at a reader is worse than one that
+ * renders an empty line with a way out beside it.
+ */
+
+const frame = { label: "Recommended", errorMessage: "Could not load suggestions", retryLabel: "Retry" } as const
+
+/** One resolved recommendation row. */
+const row = {
+    id: "rust-basics",
+    title: "Rust basics",
+    price: "400,000",
+    originalPrice: "500,000",
+    discount: "−20%",
+    savings: "You save 100,000",
+    priceDetailLabel: "Why this price?",
+} as const
+
+afterEach(cleanup)
+
+describe("_RecommendedCourses", () => {
+    it("draws nothing when the situation is settled absence", () => {
+        const { container } = render(<_RecommendedCourses state="hidden" props={{ ...frame, rows: [] }} />)
+        expect(container).toBeEmptyDOMElement()
+    })
+
+    it("says what went wrong and offers the request again", () => {
+        const retry = vi.fn()
+        render(<_RecommendedCourses state="failed" props={{ ...frame, rows: [] }} on={{ retry }} />)
+        expect(screen.getByText("Could not load suggestions")).toBeInTheDocument()
+        fireEvent.click(screen.getByRole("button", { name: "Retry" }))
+        expect(retry).toHaveBeenCalledOnce()
+    })
+
+    it("still draws a way out when the caller resolved no failure sentence", () => {
+        const retry = vi.fn()
+        render(<_RecommendedCourses
+            state="failed"
+            props={{ label: "Recommended", rows: [], retryLabel: "Retry" }}
+            on={{ retry }}
+        />)
+        expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument()
+        expect(screen.queryByText("undefined")).toBeNull()
+    })
+
+    it("holds three resting rows so the card keeps its height", () => {
+        const { container } = render(<_RecommendedCourses state="pending" props={{ ...frame, rows: [] }} />)
+        expect(container.querySelectorAll("[data-node=\"recommended-course-row\"]")).toHaveLength(3)
+    })
+
+    it("reports opening a course and asking about its price as two different journeys", () => {
+        const open = vi.fn()
+        const openPriceDetail = vi.fn()
+        render(<_RecommendedCourses
+            state="ready"
+            props={{ ...frame, rows: [row] }}
+            on={{ "open:rust-basics": open, "priceDetail:rust-basics": openPriceDetail }}
+        />)
+        fireEvent.click(screen.getByText("Why this price?"))
+        expect(openPriceDetail).toHaveBeenCalledOnce()
+        expect(open).not.toHaveBeenCalled()
+
+        fireEvent.click(screen.getByRole("button", { name: "Rust basics" }))
+        expect(open).toHaveBeenCalledOnce()
+    })
+})

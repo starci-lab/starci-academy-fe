@@ -28,5 +28,15 @@ describe("queryGlobalSearchDetail", () => {
         expect(call.fetchPolicy).toBe("no-cache")
         expect(mocks.createApolloClient).toHaveBeenCalledWith({ withAuth: true })
     })
+
+    it("answers null rather than a half-built detail when the root came back empty", async () => {
+        const selection = { bucket: "courses", id: "one", displayId: "display-one" } as const
+        mocks.query.mockResolvedValue({ data: undefined })
+        await expect(queryGlobalSearchDetail(selection)).resolves.toBeNull()
+        mocks.query.mockResolvedValue({ data: { detail: null } })
+        await expect(queryGlobalSearchDetail(selection)).resolves.toBeNull()
+        mocks.query.mockResolvedValue({ data: { detail: { data: null } } })
+        await expect(queryGlobalSearchDetail(selection)).resolves.toBeNull()
+    })
 })
 

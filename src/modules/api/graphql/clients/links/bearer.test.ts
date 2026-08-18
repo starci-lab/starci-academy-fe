@@ -25,6 +25,10 @@ const fakeOperation = (): ApolloLink.Operation => {
     return operation as unknown as ApolloLink.Operation
 }
 
+/** The same fake, for an operation the document never gave a name. */
+const anonymousOperation = (): ApolloLink.Operation =>
+    ({ ...fakeOperation(), operationName: undefined }) as unknown as ApolloLink.Operation
+
 /** A downstream that answers immediately, so the link's return value is subscribable. */
 const forward = () => new Observable<ApolloLink.Result>((observer) => {
     observer.next({ data: {} })
@@ -86,6 +90,13 @@ describe("createAttachBearerTokenLink", () => {
         const line = String(log.mock.calls[0][0])
         expect(line).not.toContain("super-secret")
         expect(line).toContain("attached=true")
+    })
+
+    it("names an unnamed operation in the debug log rather than leaving a blank", () => {
+        const log = vi.spyOn(console, "log").mockImplementation(() => {})
+        createAttachBearerTokenLink({ getToken: () => undefined, debug: true })
+            .request(anonymousOperation(), forward)
+        expect(String(log.mock.calls[0][0])).toBe("[bearer] op=anonymous attached=false")
     })
 
     it("stays quiet unless debug is asked for", () => {

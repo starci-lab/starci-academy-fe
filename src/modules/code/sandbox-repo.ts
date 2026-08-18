@@ -41,8 +41,9 @@ export const normalizeSandboxPath = (path: string): string => {
 
 /** Resolve the synchronized repository identity without ever fetching GitHub from the browser. */
 export const sandboxRepoName = (githubBaseUrl: string): string => {
-    const withoutQuery = githubBaseUrl.split(/[?#]/, 1)[0] ?? ""
-    return withoutQuery.replace(/\/+$/, "").split("/").at(-1)?.replace(/\.git$/, "") ?? ""
+    const withoutQuery = githubBaseUrl.split(/[?#]/, 1)[0]
+    const trimmed = withoutQuery.replace(/\/+$/, "")
+    return trimmed.slice(trimmed.lastIndexOf("/") + 1).replace(/\.git$/, "")
 }
 
 /** Build the public MinIO object URL used by non-premium legacy sandbox lessons. */

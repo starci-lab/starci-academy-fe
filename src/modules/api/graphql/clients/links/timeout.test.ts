@@ -21,6 +21,11 @@ const answeringForward = () => new Observable<ApolloLink.Result>((observer) => {
     observer.complete()
 })
 
+/** A downstream that fails outright - a refused socket rather than a silent one. */
+const failingForward = () => new Observable<ApolloLink.Result>((observer) => {
+    observer.error(new Error("connection refused"))
+})
+
 beforeEach(() => {
     vi.useFakeTimers()
 })
@@ -63,6 +68,19 @@ describe("createTimeoutLink", () => {
         expect(completed).toBe(true)
         vi.advanceTimersByTime(5000)
         expect(failed).toBe(false)
+    })
+
+    it("passes a downstream failure through unchanged and stops the timer", () => {
+        vi.stubEnv("NEXT_PUBLIC_GRAPHQL_TIMEOUT", "1000")
+        const errors: Array<Error> = []
+        createTimeoutLink().request(operation, failingForward).subscribe({
+            next: () => {},
+            error: (error: Error) => errors.push(error),
+        })
+        expect(errors).toHaveLength(1)
+        expect(errors[0].message).toBe("connection refused")
+        vi.advanceTimersByTime(5000)
+        expect(errors).toHaveLength(1)
     })
 
     it("cancels the timer when the caller unsubscribes", () => {

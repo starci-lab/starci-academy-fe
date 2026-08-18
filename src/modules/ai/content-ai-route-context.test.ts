@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import {
     isContentAiRouteHidden,
+    isSameContentAiAnchor,
     normalizeContentAiPath,
     resolveContentAiAnchorRequest,
     resolveContentAiRouteAnchor,
@@ -43,5 +44,51 @@ describe("content-ai-route-context", () => {
         expect(isContentAiRouteHidden("/en/courses/a/learn/playground/react/session")).toBe(true)
         expect(isContentAiRouteHidden("/en/courses/a/learn/content/modules/m/contents/c/challenges/x")).toBe(false)
         expect(isContentAiRouteHidden("/en/courses/a/learn/content/b")).toBe(false)
+    })
+
+    it("collapses a bare locale, a hash and a trailing slash to the root", () => {
+        expect(normalizeContentAiPath("/en")).toBe("/")
+        expect(normalizeContentAiPath("/")).toBe("/")
+        expect(normalizeContentAiPath("/vi/dashboard#section")).toBe("/dashboard")
+        expect(normalizeContentAiPath("/dashboard/")).toBe("/dashboard")
+    })
+
+    it("ignores a segment keyword that names nothing after it", () => {
+        expect(resolveContentAiRouteAnchor("/challenges")).toEqual({ scope: "global", path: "/challenges" })
+        expect(resolveContentAiRouteAnchor("/tasks")).toEqual({ scope: "global", path: "/tasks" })
+        expect(resolveContentAiRouteAnchor("/contents")).toEqual({ scope: "global", path: "/contents" })
+        expect(resolveContentAiRouteAnchor("/foundations/category-1"))
+            .toEqual({ scope: "global", path: "/foundations/category-1" })
+        expect(resolveContentAiRouteAnchor("/courses")).toEqual({ scope: "global", path: "/courses" })
+    })
+
+    it("builds the request for every non-course scope from the anchor id alone", () => {
+        const path = "/anything"
+        expect(resolveContentAiAnchorRequest({ scope: "content", id: "c1", path }))
+            .toEqual({ scope: "content", contentId: "c1" })
+        expect(resolveContentAiAnchorRequest({ scope: "task", id: "t1", path }))
+            .toEqual({ scope: "task", taskId: "t1" })
+        expect(resolveContentAiAnchorRequest({ scope: "foundation", id: "f1", path }))
+            .toEqual({ scope: "foundation", foundationId: "f1" })
+        expect(resolveContentAiAnchorRequest({ scope: "global", path }))
+            .toEqual({ scope: "global" })
+    })
+
+    it("falls back to the global conversation when a scoped anchor lost its id", () => {
+        expect(resolveContentAiAnchorRequest({ scope: "content", path: "/contents" }))
+            .toEqual({ scope: "global" })
+    })
+
+    it("hides every route nested under authentication", () => {
+        expect(isContentAiRouteHidden("/authentication/callback")).toBe(true)
+        expect(isContentAiRouteHidden("/dashboard")).toBe(false)
+    })
+
+    it("treats grounding as unchanged only when scope, id and path all agree", () => {
+        const anchor = { scope: "content", id: "c1", path: "/contents/c1" } as const
+        expect(isSameContentAiAnchor(anchor, { ...anchor })).toBe(true)
+        expect(isSameContentAiAnchor(anchor, { ...anchor, scope: "task" })).toBe(false)
+        expect(isSameContentAiAnchor(anchor, { ...anchor, id: "c2" })).toBe(false)
+        expect(isSameContentAiAnchor(anchor, { ...anchor, path: "/contents/c1/notes" })).toBe(false)
     })
 })

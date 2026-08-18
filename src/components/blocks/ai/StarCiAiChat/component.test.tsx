@@ -95,4 +95,176 @@ describe("_StarCiAiChat", () => {
         fireEvent.click(screen.getByRole("button", { name: "Clear context" }))
         expect(clearContext).toHaveBeenCalledTimes(1)
     })
+
+    it("draws a plain answer with no fence and no partial marker", () => {
+        render(<_StarCiAiChat state="ready" props={{
+            ...props,
+            turns: [{ id: "turn-1", role: "assistant", body: "Because the request outlives the render." }],
+        }} />)
+        expect(screen.getByText("Because the request outlives the render.")).toBeInTheDocument()
+        expect(screen.queryByText("Partial answer")).not.toBeInTheDocument()
+    })
+
+    it("fences an unlabelled quote as code and marks an interrupted answer", () => {
+        render(<_StarCiAiChat state="streaming" props={{
+            ...props,
+            turns: [{ id: "turn-1", role: "assistant", body: "Here", quote: "abort()", isPartial: true }],
+        }} />)
+        expect(screen.getByText("abort()")).toBeInTheDocument()
+        expect(screen.getByText("Partial answer")).toBeInTheDocument()
+    })
+
+    it("speaks the pending state rather than resting, and withholds the composer", () => {
+        const { container } = render(<_StarCiAiChat state="sessionsPending" props={{ ...props, turns: [] }} />)
+        expect(screen.getByText("State sessionsPending")).toBeInTheDocument()
+        expect(container.querySelector("[data-node=starci-ai-composer]")).toBeNull()
+    })
+
+    it("withholds the composer while sessions are unavailable", () => {
+        const { container } = render(<_StarCiAiChat state="sessionsFailed" props={props} />)
+        expect(container.querySelector("[data-node=starci-ai-composer]")).toBeNull()
+        expect(screen.getByText("State sessionsFailed")).toBeInTheDocument()
+    })
+
+    it("shows the transcript rather than an empty list when history has no sessions", () => {
+        render(<_StarCiAiChat state="searchEmpty" props={{ ...props, mode: "history", sessions: [] }} />)
+        expect(screen.getByText("State searchEmpty")).toBeInTheDocument()
+        expect(screen.queryByRole("button", { name: "Async patterns · Just now" })).not.toBeInTheDocument()
+    })
+
+    it("offers no session controls until one session is actually chosen", () => {
+        const { container } = render(<_StarCiAiChat
+            state="historyReady"
+            props={{ ...props, mode: "history", activeSessionId: undefined }}
+        />)
+        expect(container.querySelector("[data-node=stacked-peer-controls]")).toBeNull()
+    })
+
+    it("reports rename, archive and delete from the chosen session", () => {
+        const rename = vi.fn()
+        const archive = vi.fn()
+        const remove = vi.fn()
+        render(<_StarCiAiChat
+            state="historyReady"
+            props={{ ...props, mode: "history" }}
+            on={{ rename, archive, delete: remove }}
+        />)
+        fireEvent.click(screen.getByRole("button", { name: "Rename" }))
+        fireEvent.click(screen.getByRole("button", { name: "Archive" }))
+        fireEvent.click(screen.getByRole("button", { name: "Delete" }))
+        expect(rename).toHaveBeenCalledTimes(1)
+        expect(archive).toHaveBeenCalledTimes(1)
+        expect(remove).toHaveBeenCalledTimes(1)
+    })
+
+    it.each(["renaming", "archiving"] as const)("marks the %s control as the one working", (state) => {
+        render(<_StarCiAiChat state={state} props={{ ...props, mode: "history" }} />)
+        const label = state === "renaming" ? "Rename" : "Archive"
+        expect(screen.getByRole("button", { name: label })).toHaveAttribute("data-action-pending", "true")
+        expect(screen.getByRole("button", { name: "Delete" })).toHaveAttribute("data-action-pending", "false")
+    })
+
+    it("replaces the session controls with a confirmation the reader has to mean", () => {
+        const confirmDelete = vi.fn()
+        const cancelDelete = vi.fn()
+        render(<_StarCiAiChat
+            state="deleteConfirm"
+            props={{ ...props, mode: "history" }}
+            on={{ confirmDelete, cancelDelete }}
+        />)
+        expect(screen.queryByRole("button", { name: "Rename" })).not.toBeInTheDocument()
+        fireEvent.click(screen.getByRole("button", { name: "Delete session" }))
+        fireEvent.click(screen.getByRole("button", { name: "Cancel" }))
+        expect(confirmDelete).toHaveBeenCalledTimes(1)
+        expect(cancelDelete).toHaveBeenCalledTimes(1)
+    })
+
+    it.each(["offline", "reconnecting"] as const)("stops the reader composing while %s", (state) => {
+        render(<_StarCiAiChat state={state} props={props} />)
+        expect(screen.getByLabelText("Ask StarCi AI")).toBeDisabled()
+        expect(screen.getByRole("button", { name: "Send" })).toBeDisabled()
+    })
+
+    it("offers a stop rather than a send while the answer is still streaming", () => {
+        const stop = vi.fn()
+        render(<_StarCiAiChat state="streaming" props={props} on={{ stop }} />)
+        expect(screen.queryByRole("button", { name: "Send" })).not.toBeInTheDocument()
+        fireEvent.click(screen.getByRole("button", { name: "Stop" }))
+        expect(stop).toHaveBeenCalledTimes(1)
+    })
+
+    it("offers a retry once the stream itself failed", () => {
+        const retry = vi.fn()
+        render(<_StarCiAiChat state="streamFailed" props={props} on={{ retry }} />)
+        fireEvent.click(screen.getByRole("button", { name: "Retry" }))
+        expect(retry).toHaveBeenCalledTimes(1)
+    })
+
+    it("refuses to send an empty draft and reports every keystroke of a real one", () => {
+        const changeDraft = vi.fn()
+        render(<_StarCiAiChat state="ready" props={{ ...props, draft: "   " }} on={{ changeDraft }} />)
+        expect(screen.getByRole("button", { name: "Send" })).toBeDisabled()
+        fireEvent.change(screen.getByLabelText("Ask StarCi AI"), { target: { value: "Explain this" } })
+        expect(changeDraft).toHaveBeenCalledWith("Explain this")
+    })
+
+    it("switches between the two bodies by name", () => {
+        const selectMode = vi.fn()
+        render(<_StarCiAiChat state="ready" props={props} on={{ selectMode }} />)
+        fireEvent.click(screen.getByRole("button", { name: "History" }))
+        fireEvent.click(screen.getByRole("button", { name: "General" }))
+        expect(selectMode).toHaveBeenNthCalledWith(1, "history")
+        expect(selectMode).toHaveBeenNthCalledWith(2, "general")
+    })
+
+    it("drops the whole context row when nothing grounds the conversation", () => {
+        const { container } = render(<_StarCiAiChat
+            state="ready"
+            props={{ ...props, contextSummary: undefined, selection: undefined }}
+        />)
+        expect(container.querySelector("[data-node=starci-ai-context-stack]")).toBeNull()
+        expect(screen.queryByRole("button", { name: "Clear context" })).not.toBeInTheDocument()
+    })
+
+    it("keeps a route summary without a clear control when no excerpt was picked", () => {
+        const { container } = render(<_StarCiAiChat state="ready" props={{ ...props, selection: undefined }} />)
+        expect(container.querySelector("[data-node=starci-ai-context-stack]")).not.toBeNull()
+        expect(screen.queryByRole("button", { name: "Clear context" })).not.toBeInTheDocument()
+    })
+
+    it("quotes a prose excerpt with no language claim of its own", () => {
+        render(<_StarCiAiChat state="ready" props={{
+            ...props,
+            selection: { kind: "prose", quote: "The reducer owns the transition." },
+        }} />)
+        expect(screen.getAllByText("The reducer owns the transition.").length).toBeGreaterThan(0)
+    })
+
+    it("quotes a pathless code excerpt without inventing an extension", () => {
+        render(<_StarCiAiChat state="ready" props={{
+            ...props,
+            selection: { kind: "code", quote: "controller.abort()" },
+        }} />)
+        expect(screen.getAllByText("controller.abort()").length).toBeGreaterThan(0)
+    })
+
+    it("says nothing about quota when there is no figure and nothing pending", () => {
+        render(<_StarCiAiChat state="ready" props={{ ...props, quotaLabel: undefined }} />)
+        expect(screen.queryByText("0 paid credits · free route available")).not.toBeInTheDocument()
+    })
+
+    it("rests the quota line while the allowance is still being counted", () => {
+        render(<_StarCiAiChat state="quotaPending" props={{ ...props, quotaLabel: undefined }} />)
+        expect(screen.getByLabelText("Ask StarCi AI")).not.toBeDisabled()
+    })
+
+    it("stays inert rather than throwing when the owner registered no intents", () => {
+        render(<_StarCiAiChat state="deleteConfirm" props={{ ...props, mode: "history" }} />)
+        expect(() => {
+            fireEvent.click(screen.getByRole("button", { name: "Delete session" }))
+            fireEvent.click(screen.getByRole("button", { name: "Cancel" }))
+            fireEvent.click(screen.getByRole("button", { name: "History" }))
+            fireEvent.click(screen.getByRole("button", { name: "Async patterns · Just now" }))
+        }).not.toThrow()
+    })
 })

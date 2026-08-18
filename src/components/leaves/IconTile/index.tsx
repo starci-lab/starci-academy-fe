@@ -73,7 +73,8 @@ export const IconTile = ({ props, isLoading = false }: IconTileProps) => {
     const size = props.size ?? "sm"
     // The artwork replaces the fill as well as the glyph: a soft plate behind a photograph is a
     // colour nobody sees, and it would tint the one pixel row where the image does not reach.
-    const showsImage = !isLoading && props.image !== undefined && props.image !== null && props.image !== ""
+    const image = props.image
+    const showsImage = !isLoading && image !== undefined && image !== null && image !== ""
     return (
         <span
             data-tier="leaf"
@@ -92,7 +93,7 @@ export const IconTile = ({ props, isLoading = false }: IconTileProps) => {
             {isLoading ? null : showsImage
                 // Decorative: the row states the course by name on the very next line, so a reader
                 // who cannot see the artwork gains nothing from hearing its file described.
-                ? <img src={props.image ?? ""} alt="" className={IMAGE_CLASSES} />
+                ? <img src={image} alt="" className={IMAGE_CLASSES} />
                 : <Icon props={{ name: props.icon, role: "leading" }} />}
         </span>
     )

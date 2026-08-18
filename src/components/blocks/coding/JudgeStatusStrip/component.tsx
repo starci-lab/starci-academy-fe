@@ -93,40 +93,43 @@ export type JudgeStatusStripProps =
  *
  * @param input - {@link JudgeStatusStripProps}
  */
-export const _JudgeStatusStrip = (input: JudgeStatusStripProps) => (
-    <Tree
-        contract="judge-status-strip"
-        render={defineContractComponent("judge-status-strip", {
-            mark: defineLeafComponent("status-dot", {}, () => (
-                <StatusDot
-                    props={{
-                        tone: VERDICT_TONE[input.state],
-                        label: input.props.verdictLabel,
-                    }}
-                />
-            )),
-            verdict: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
-                <Text props={{ content: input.props.verdictLabel, size: "sm", weight: "semibold" }} />
-            )),
-            detail: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                <Text props={{ content: input.props.detailLabel, size: "xs", tone: "muted" }} />
-            )),
-            ...(input.props.actionLabel === undefined ? {} : {
-                action: defineLeafComponent("button", {}, () => (
-                    <Button
+export const _JudgeStatusStrip = (input: JudgeStatusStripProps) => {
+    const actionLabel = input.props.actionLabel
+    return (
+        <Tree
+            contract="judge-status-strip"
+            render={defineContractComponent("judge-status-strip", {
+                mark: defineLeafComponent("status-dot", {}, () => (
+                    <StatusDot
                         props={{
-                            label: input.props.actionLabel ?? "",
-                            size: "sm",
-                            variant: input.state === "accepted" ? "primary" : "outline",
-                            ...(input.state === "accepted" ? { icon: "next" as const, iconPlacement: "trailing" as const } : {}),
+                            tone: VERDICT_TONE[input.state],
+                            label: input.props.verdictLabel,
                         }}
-                        on={{ press: input.on?.act }}
                     />
                 )),
-            }),
-        })}
-    />
-)
+                verdict: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
+                    <Text props={{ content: input.props.verdictLabel, size: "sm", weight: "semibold" }} />
+                )),
+                detail: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                    <Text props={{ content: input.props.detailLabel, size: "xs", tone: "muted" }} />
+                )),
+                ...(actionLabel === undefined ? {} : {
+                    action: defineLeafComponent("button", {}, () => (
+                        <Button
+                            props={{
+                                label: actionLabel,
+                                size: "sm",
+                                variant: input.state === "accepted" ? "primary" : "outline",
+                                ...(input.state === "accepted" ? { icon: "next" as const, iconPlacement: "trailing" as const } : {}),
+                            }}
+                            on={{ press: input.on?.act }}
+                        />
+                    )),
+                }),
+            })}
+        />
+    )
+}
 
 /** Source-level ownership marker. */
 export const meta = { world: "pure", domain: "coding" } as const

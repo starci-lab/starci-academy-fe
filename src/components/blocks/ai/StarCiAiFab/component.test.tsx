@@ -14,4 +14,31 @@ describe("StarCiAiFab", () => {
         fireEvent.click(trigger)
         expect(press).toHaveBeenCalledTimes(1)
     })
+
+    it("badges the trigger only while something is waiting to be read", () => {
+        const unread = render(<StarCiAiFab props={{ label: "StarCi AI", isOpen: false, hasUnread: true }} />)
+        const flagged = screen.getByRole("button", { name: "StarCi AI" })
+        expect(flagged).toHaveAttribute("data-unread", "true")
+        expect(flagged.querySelector("[data-component=\"Badge\"]")?.textContent).toBe("1")
+        unread.unmount()
+
+        render(<StarCiAiFab props={{ label: "StarCi AI", isOpen: false, hasUnread: false }} />)
+        const quiet = screen.getByRole("button", { name: "StarCi AI" })
+        expect(quiet).toHaveAttribute("data-unread", "false")
+        expect(quiet.querySelector("[data-component=\"Badge\"]")).toBeNull()
+    })
+
+    it("reads the trigger as expanded while the chat it opens is on screen", () => {
+        render(<StarCiAiFab props={{ label: "StarCi AI", isOpen: true }} />)
+        const trigger = screen.getByRole("button", { name: "StarCi AI" })
+        expect(trigger).toHaveAttribute("aria-expanded", "true")
+        expect(trigger).toHaveAttribute("data-unread", "false")
+    })
+
+    it("rests the mark and the name while the chat's own state is in flight", () => {
+        render(<StarCiAiFab props={{ label: "StarCi AI", isOpen: false }} isLoading />)
+        const trigger = screen.getByRole("button", { name: "StarCi AI" })
+        expect(trigger.querySelector("[data-component=\"Text\"]")).toHaveAttribute("data-loading", "true")
+        expect(trigger.textContent).not.toContain("StarCi AI")
+    })
 })

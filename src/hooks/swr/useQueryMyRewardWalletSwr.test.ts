@@ -109,4 +109,14 @@ describe("useQueryMyRewardWalletSwr", () => {
         expect(result.current.mutate).toBeTypeOf("function")
         expect(result.current.isLoading).toBe(false)
     })
+
+    it("asks for nothing at all while nobody is signed in", () => {
+        setSessionToken(undefined)
+        const { result } = renderHook(() => useQueryMyRewardWalletSwr(), { wrapper })
+        // A balance is nobody's until somebody is asking: the key is null, so a signed-out reader
+        // makes no request rather than one that is refused and retried on a backoff.
+        expect(mocks.queryMyRewardWallet).not.toHaveBeenCalled()
+        expect(result.current.isLoading).toBe(false)
+        expect(result.current.data).toBeUndefined()
+    })
 })

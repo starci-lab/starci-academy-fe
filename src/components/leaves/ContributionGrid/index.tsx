@@ -62,7 +62,8 @@ const makeWeeks = (
             cells.push({ date, count: source?.count ?? 0, label: source?.label ?? date, inYear })
             cursor.setUTCDate(cursor.getUTCDate() + 1)
         }
-        weeks.push({ id: cells[0]?.date ?? String(weeks.length), monthLabel, cells })
+        // The inner loop runs seven times unconditionally, so a week always opens on a dated cell.
+        weeks.push({ id: cells[0].date, monthLabel, cells })
     }
     return weeks
 }

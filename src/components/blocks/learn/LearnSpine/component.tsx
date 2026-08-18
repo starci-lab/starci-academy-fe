@@ -101,26 +101,27 @@ export type LearnSpineProps = {
  */
 export const learnSpine = ({ props, on, isLoading = false }: LearnSpineProps) => {
     const lockedLabel = props.lockedLabel
+    const resume = props.resume
     return (
         defineContractComponent("learn-spine-column", {
-            ...(props.resume === undefined ? {} : {
+            ...(resume === undefined ? {} : {
                 resume: defineContractProjection("learn-resume-card", () => (
                     <PressableSurface
                         contract="learn-resume-card"
-                        label={props.resume?.title ?? ""}
+                        label={resume.title}
                         press={on?.resume}
                         isRaised
                         render={defineContractComponent("learn-resume-card", {
                             label: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                                <Text props={{ content: props.resume?.label, size: "xs" }} />
+                                <Text props={{ content: resume.label, size: "xs" }} />
                             )),
                             progress: defineCompositeComponent("labelled-progress-row", {}, () => (
                                 <LabelledProgressRow
                                     props={{
                                         id: "resume",
-                                        title: props.resume?.title,
-                                        percent: props.resume?.percent,
-                                        percentText: props.resume?.percentText,
+                                        title: resume.title,
+                                        percent: resume.percent,
+                                        percentText: resume.percentText,
                                     }}
                                     isLoading={isLoading}
                                 />

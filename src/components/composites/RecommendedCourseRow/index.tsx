@@ -47,6 +47,7 @@ export type RecommendedCourseRowActions = {
  * @param input - {@link CompositeProps}
  */
 export const RecommendedCourseRow = ({ props, on, isLoading = false }: CompositeProps<RecommendedCourseRowData, RecommendedCourseRowActions>) => {
+    const priceDetailLabel = props.priceDetailLabel
     const price = defineContractComponent("price-discount-line", {
         price: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => <Text props={{ content: props.price, size: "sm", weight: "semibold" }} isLoading={isLoading} />),
         ...(props.originalPrice === undefined ? {} : { original: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: props.originalPrice, size: "xs", tone: "muted", isSuperseded: true }} isLoading={isLoading} />) }),
@@ -57,13 +58,13 @@ export const RecommendedCourseRow = ({ props, on, isLoading = false }: Composite
             <Text props={{ content: props.title, size: "md", weight: "semibold", isPressLabel: true }} isLoading={isLoading} />
         )),
         price,
-        ...(props.priceDetailLabel === undefined ? {} : {
+        ...(priceDetailLabel === undefined ? {} : {
             note: defineContractComponent("price-note-row", {
                 ...(props.savings === undefined ? {} : {
                     fact: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: props.savings, size: "xs", tone: "muted" }} isLoading={isLoading} />),
                 }),
                 action: defineLeafComponent("text-link", { size: "xs" }, () => (
-                    <TextLink props={{ label: props.priceDetailLabel ?? "", size: "xs" }} on={{ press: on?.openPriceDetail }} />
+                    <TextLink props={{ label: priceDetailLabel, size: "xs" }} on={{ press: on?.openPriceDetail }} />
                 )),
             }),
         }),

@@ -56,75 +56,78 @@ export type ShellNavProps = {
 }
 
 /** Draw the primary navbar and its optional page-tab bottom layer as one landmark. */
-export const _ShellNav = (input: ShellNavProps) => (
-    <Tree
-        contract="double-navbar"
-        render={defineContractComponent("double-navbar", {
-            primary: defineContractComponent("brand-links-then-tools-bar", {
-                navigation: defineContractComponent("inline-nav-links", {
-                    brand: defineLeafComponent("link", { emphasis: "brand" }, () => (
-                        <Link
-                            props={{ label: input.props.brand, emphasis: "brand" }}
-                            on={{ press: () => input.on?.navigate?.("dashboard") }}
+export const _ShellNav = (input: ShellNavProps) => {
+    const tabs = input.props.tabs
+    return (
+        <Tree
+            contract="double-navbar"
+            render={defineContractComponent("double-navbar", {
+                primary: defineContractComponent("brand-links-then-tools-bar", {
+                    navigation: defineContractComponent("inline-nav-links", {
+                        brand: defineLeafComponent("link", { emphasis: "brand" }, () => (
+                            <Link
+                                props={{ label: input.props.brand, emphasis: "brand" }}
+                                on={{ press: () => input.on?.navigate?.("dashboard") }}
+                            />
+                        )),
+                        routes: defineContractComponent("inline-route-links", {
+                            route: input.props.routes.map((route) => defineLeafComponent("nav-link", { kind: "route" }, () => (
+                                <NavLink
+                                    props={{ label: route.label, isCurrent: route.isCurrent, kind: "route" }}
+                                    on={{ press: () => input.on?.navigate?.(route.id) }}
+                                />
+                            ))),
+                        }),
+                    }),
+                    tools: defineContractComponent("inline-tool-row", {
+                        desktop: defineContractComponent("desktop-navbar-tools", {
+                            search: defineLeafComponent("pressable-input-like", {}, () => (
+                                <PressableInputLike
+                                    props={{ placeholder: input.props.searchPlaceholder, label: input.props.searchLabel, shortcut: input.props.searchShortcut }}
+                                    on={{ press: input.on?.openSearch }}
+                                />
+                            )),
+                            locale: defineLeafComponent("language-menu", {}, () => (
+                                <LanguageMenu />
+                            )),
+                            theme: defineLeafComponent("theme-switch", {}, () => (
+                                <ThemeSwitch
+                                    props={{ isDark: input.props.isDark, label: input.props.themeLabel }}
+                                    on={{ change: input.on?.toggleTheme }}
+                                />
+                            )),
+                        }),
+                        tool: [
+                            defineLeafComponent("icon-button", {}, () => (
+                                <IconButton props={{ icon: "cart", label: input.props.cartLabel }} on={{ press: input.on?.openCart }} />
+                            )),
+                            ...(input.props.isSignedIn ? [defineLeafComponent("icon-button", {}, () => (
+                                <IconButton props={{ icon: "notification", label: input.props.notificationLabel }} />
+                            ))] : []),
+                            defineLeafComponent("account-menu", {}, () => (
+                                <AccountMenu
+                                    on={{ signIn: input.on?.openSignIn, signUp: input.on?.openSignUp }}
+                                />
+                            )),
+                        ],
+                    }),
+                }),
+                bottom: tabs === undefined ? undefined : defineContractComponent("underlined-tab-strip", {
+                    tabs: defineLeafComponent("extended-tabs", {}, () => (
+                        <ExtendedTabs
+                            props={{
+                                label: input.props.brand,
+                                selectedKey: tabs.find((tab) => tab.isCurrent)?.id ?? "overview",
+                                tabs,
+                            }}
+                            on={{ select: input.on?.selectTab }}
                         />
                     )),
-                    routes: defineContractComponent("inline-route-links", {
-                        route: input.props.routes.map((route) => defineLeafComponent("nav-link", { kind: "route" }, () => (
-                            <NavLink
-                                props={{ label: route.label, isCurrent: route.isCurrent, kind: "route" }}
-                                on={{ press: () => input.on?.navigate?.(route.id) }}
-                            />
-                        ))),
-                    }),
                 }),
-                tools: defineContractComponent("inline-tool-row", {
-                    desktop: defineContractComponent("desktop-navbar-tools", {
-                        search: defineLeafComponent("pressable-input-like", {}, () => (
-                            <PressableInputLike
-                                props={{ placeholder: input.props.searchPlaceholder, label: input.props.searchLabel, shortcut: input.props.searchShortcut }}
-                                on={{ press: input.on?.openSearch }}
-                            />
-                        )),
-                        locale: defineLeafComponent("language-menu", {}, () => (
-                            <LanguageMenu />
-                        )),
-                        theme: defineLeafComponent("theme-switch", {}, () => (
-                            <ThemeSwitch
-                                props={{ isDark: input.props.isDark, label: input.props.themeLabel }}
-                                on={{ change: input.on?.toggleTheme }}
-                            />
-                        )),
-                    }),
-                    tool: [
-                        defineLeafComponent("icon-button", {}, () => (
-                            <IconButton props={{ icon: "cart", label: input.props.cartLabel }} on={{ press: input.on?.openCart }} />
-                        )),
-                        ...(input.props.isSignedIn ? [defineLeafComponent("icon-button", {}, () => (
-                            <IconButton props={{ icon: "notification", label: input.props.notificationLabel }} />
-                        ))] : []),
-                        defineLeafComponent("account-menu", {}, () => (
-                            <AccountMenu
-                                on={{ signIn: input.on?.openSignIn, signUp: input.on?.openSignUp }}
-                            />
-                        )),
-                    ],
-                }),
-            }),
-            bottom: input.props.tabs === undefined ? undefined : defineContractComponent("underlined-tab-strip", {
-                tabs: defineLeafComponent("extended-tabs", {}, () => (
-                    <ExtendedTabs
-                        props={{
-                            label: input.props.brand,
-                            selectedKey: input.props.tabs?.find((tab) => tab.isCurrent)?.id ?? "overview",
-                            tabs: input.props.tabs ?? [],
-                        }}
-                        on={{ select: input.on?.selectTab }}
-                    />
-                )),
-            }),
-        })}
-    />
-)
+            })}
+        />
+    )
+}
 
 /** Source-level tier marker for the pure shell layout. */
 export const meta = { world: "pure", domain: "shell" } as const

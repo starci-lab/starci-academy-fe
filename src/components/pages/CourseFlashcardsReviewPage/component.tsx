@@ -61,6 +61,7 @@ export const _CourseFlashcardsReviewPage = (input: CourseFlashcardsReviewPagePro
     const state = input.state
     const data = input.props
     const on = input.on
+    const resumeSessionId = data.resumeSessionId
     const isLoading = state === "pending"
     const header = defineContractComponent("centred-title-pair", {
         title: defineLeafComponent("heading", {}, () => (
@@ -102,9 +103,9 @@ export const _CourseFlashcardsReviewPage = (input: CourseFlashcardsReviewPagePro
             fact: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
                 <Text props={{ content: `${data.dueCount} ${data.dueLabel}`, size: "sm", weight: "medium" }} />
             )),
-            action: data.resumeSessionId !== undefined
+            action: resumeSessionId !== undefined
                 ? defineLeafComponent("button", {}, () => (
-                    <Button props={{ label: data.resumeLabel, variant: "primary" }} on={{ press: () => on.resume(data.resumeSessionId ?? "") }} />
+                    <Button props={{ label: data.resumeLabel, variant: "primary" }} on={{ press: () => on.resume(resumeSessionId) }} />
                 ))
                 : data.dueCount === 0
                     ? undefined

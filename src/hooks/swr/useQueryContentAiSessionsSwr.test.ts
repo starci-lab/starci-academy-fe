@@ -75,4 +75,21 @@ describe("useQueryContentAiSessionsSwr", () => {
         await waitFor(() => expect(result.current.error).toBeInstanceOf(Error))
         expect(result.current.data).toBeUndefined()
     })
+
+    it("resolves to null when the server answered without a payload", async () => {
+        mocks.queryContentAiSessions.mockResolvedValue({
+            data: { contentAiSessions: { success: false, message: "unauthorised", error: "UNAUTHENTICATED" } },
+        })
+        const { result } = renderHook(() => useQueryContentAiSessionsSwr(), { wrapper })
+        // `null` and not `undefined`: a viewer with no conversations is an answer, and the sidebar
+        // draws that differently from a list still on its way.
+        await waitFor(() => expect(result.current.data).toBeNull())
+        expect(result.current.error).toBeUndefined()
+    })
+
+    it("resolves to null when there is no response body at all", async () => {
+        mocks.queryContentAiSessions.mockResolvedValue({ data: undefined })
+        const { result } = renderHook(() => useQueryContentAiSessionsSwr(), { wrapper })
+        await waitFor(() => expect(result.current.data).toBeNull())
+    })
 })

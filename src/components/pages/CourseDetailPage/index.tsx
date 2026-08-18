@@ -120,14 +120,18 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
     // The payable price IS the open phase's price. Falling back to the list price when no phase is
     // open is not a guess: a course with no phase ladder sells at its list price, which is the same
     // number the ladder would have shown.
-    const personalPrice = isPersonalPrice(pricePreview.data ?? undefined)
-    const payable = personalPrice ? pricePreview.data?.discountedPriceVnd ?? 0 : openPhase?.price ?? course.originalPrice
-    const listPrice = personalPrice ? pricePreview.data?.originalPriceVnd ?? course.originalPrice : course.originalPrice
+    const preview = pricePreview.data ?? undefined
+    const personalPrice = isPersonalPrice(preview)
+    // `discountedPriceVnd` is the one field the personal-price rule itself dereferenced, so a
+    // preview that reached here carries it. The OTHER two are not guaranteed: the server answers
+    // some previews with only the two fields the rule reads, so their fallbacks still fire.
+    const payable = personalPrice ? preview.discountedPriceVnd : openPhase?.price ?? course.originalPrice
+    const listPrice = personalPrice ? preview.originalPriceVnd ?? course.originalPrice : course.originalPrice
     const isPaid = payable > 0
     const isInCart = (cartQuery.data ?? []).some((row) => row.courseId === course.id)
     const hasDiscount = payable < listPrice
     const discountPercent = personalPrice
-        ? pricePreview.data?.discountPercent ?? 0
+        ? preview.discountPercent ?? 0
         : hasDiscount ? Math.round((1 - payable / listPrice) * 100) : 0
 
     const selectSection = (section: CourseDetailSection) => {

@@ -110,4 +110,14 @@ describe("useQueryMyAiQuotaSwr", () => {
         expect(result.current.mutate).toBeTypeOf("function")
         expect(result.current.isLoading).toBe(false)
     })
+
+    it("asks for nothing at all while nobody is signed in", () => {
+        setSessionToken(undefined)
+        const { result } = renderHook(() => useQueryMyAiQuotaSwr(), { wrapper })
+        // A signed-out reader must not shimmer at an answer that is never coming: the key is null,
+        // so there is no request to retry and no loading state to be stuck in.
+        expect(mocks.queryMyAiQuota).not.toHaveBeenCalled()
+        expect(result.current.isLoading).toBe(false)
+        expect(result.current.data).toBeUndefined()
+    })
 })

@@ -106,6 +106,7 @@ export type CourseCatalogCardProps = BlockProps<CourseCatalogCardState, CourseCa
  */
 export const _CourseCatalogCard = (input: CourseCatalogCardProps) => {
     const isLoading = input.state === "pending"
+    const priceDetailLabel = input.props.priceDetailLabel
 
     const price = defineContractComponent("price-discount-line", {
         price: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
@@ -150,7 +151,7 @@ export const _CourseCatalogCard = (input: CourseCatalogCardProps) => {
         // WHAT IT SAVES AND WHY IT COSTS THIS ARE ONE THOUGHT, so they share a line rather than
         // stacking. Set on its own and a step larger, the question read louder than the saving it
         // was asking about, which is the rank the other way round.
-        ...(input.props.priceDetailLabel === undefined ? {} : {
+        ...(priceDetailLabel === undefined ? {} : {
             note: defineContractComponent("price-note-row", {
                 ...(input.props.savingsLabel === undefined ? {} : {
                     fact: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
@@ -162,7 +163,7 @@ export const _CourseCatalogCard = (input: CourseCatalogCardProps) => {
                 }),
                 action: defineLeafComponent("text-link", { size: "xs" }, () => (
                     <TextLink
-                        props={{ label: input.props.priceDetailLabel ?? "", size: "xs" }}
+                        props={{ label: priceDetailLabel, size: "xs" }}
                         on={{ press: input.on?.openPriceDetail }}
                     />
                 )),

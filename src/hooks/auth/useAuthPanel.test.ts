@@ -128,6 +128,26 @@ const stubLocation = ({ search }: LocationParams) => {
     return assign
 }
 
+/** The real `sessionStorage`, kept so a test that replaces it can hand it back. */
+const realSessionStorage = Object.getOwnPropertyDescriptor(window, "sessionStorage")
+
+/**
+ * Replace `sessionStorage` with one that refuses every operation.
+ *
+ * Private modes and storage disabled by policy do exactly this, and a sign-in that crashes because
+ * it could not remember something optional is worse than one that simply cannot finish an
+ * exchange.
+ */
+const stubHostileStorage = () => {
+    const refuse = (): never => {
+        throw new Error("storage disabled by policy")
+    }
+    Object.defineProperty(window, "sessionStorage", {
+        configurable: true,
+        value: { getItem: refuse, setItem: refuse, removeItem: refuse, clear: refuse },
+    })
+}
+
 beforeEach(() => {
     for (const mock of Object.values(mocks)) mock.mockReset()
     window.sessionStorage.clear()
@@ -137,6 +157,10 @@ beforeEach(() => {
 
 afterEach(() => {
     cleanup()
+    // Some tests replace `sessionStorage` with one that refuses; put the real one back.
+    if (realSessionStorage !== undefined) {
+        Object.defineProperty(window, "sessionStorage", realSessionStorage)
+    }
 })
 
 describe("useAuthPanel", () => {
@@ -406,5 +430,208 @@ describe("useAuthPanel", () => {
     it("does not exchange anything on an ordinary visit", () => {
         renderHook(() => useAuthPanel())
         expect(mocks.exchange).not.toHaveBeenCalled()
+    })
+
+    it("reports a refused code with the server's own message, and stays on the code step", async () => {
+        mocks.signInInit.mockResolvedValue(challenge("signInInit", "challenge-1", 300))
+        mocks.signInVerify.mockResolvedValue(refusal("signInVerifyOtp", "That code is wrong.", "BAD_OTP"))
+        const { result } = renderHook(() => useAuthPanel())
+
+        await act(async () => {
+            result.current.onSubmitDetails(details)
+        })
+        await waitFor(() => expect(result.current.step).toBe("code"))
+
+        await act(async () => {
+            result.current.onSubmitCode({ otp: "000000" })
+        })
+        await waitFor(() => expect(result.current.failure).toBeDefined())
+        expect(result.current.failure?.message).toBe("That code is wrong.")
+        expect(result.current.failure?.code).toBe("BAD_OTP")
+        expect(result.current.failure?.isTransport).toBe(false)
+        expect(result.current.step).toBe("code")
+        expect(result.current.isPending).toBe(false)
+        expect(getSessionToken()).toBeUndefined()
+    })
+
+    it("does not call a code wrong when the request never reached a verdict", async () => {
+        mocks.signInInit.mockResolvedValue(challenge("signInInit", "challenge-1", 300))
+        mocks.signInVerify.mockRejectedValue(new Error("network"))
+        const { result } = renderHook(() => useAuthPanel())
+
+        await act(async () => {
+            result.current.onSubmitDetails(details)
+        })
+        await waitFor(() => expect(result.current.step).toBe("code"))
+
+        await act(async () => {
+            result.current.onSubmitCode({ otp: "123456" })
+        })
+        await waitFor(() => expect(result.current.failure).toBeDefined())
+        expect(result.current.failure?.isTransport).toBe(true)
+        expect(result.current.failure?.message).toBeUndefined()
+        expect(result.current.step).toBe("code")
+    })
+
+    it("refuses a resend when no challenge is open", () => {
+        const { result } = renderHook(() => useAuthPanel())
+        act(() => {
+            result.current.onResend()
+        })
+        expect(mocks.signInResend).not.toHaveBeenCalled()
+        expect(result.current.isResending).toBe(false)
+    })
+
+    it("keeps the challenge and the count when a resend is refused", async () => {
+        mocks.signInInit.mockResolvedValue(challenge("signInInit", "challenge-1", 300))
+        mocks.signInResend.mockResolvedValue(refusal("signInResendOtp", "Too many codes.", "RATE_LIMITED"))
+        const { result } = renderHook(() => useAuthPanel())
+
+        await act(async () => {
+            result.current.onSubmitDetails(details)
+        })
+        await waitFor(() => expect(result.current.step).toBe("code"))
+
+        await act(async () => {
+            result.current.onResend()
+        })
+        await waitFor(() => expect(result.current.failure).toBeDefined())
+        expect(result.current.failure?.message).toBe("Too many codes.")
+        expect(result.current.failure?.code).toBe("RATE_LIMITED")
+        expect(result.current.isResending).toBe(false)
+        expect(result.current.sentCount).toBe(1)
+        expect(result.current.challengeId).toBe("challenge-1")
+    })
+
+    it("keeps the challenge when a resend never reached a verdict", async () => {
+        mocks.signInInit.mockResolvedValue(challenge("signInInit", "challenge-1", 300))
+        mocks.signInResend.mockRejectedValue(new Error("network"))
+        const { result } = renderHook(() => useAuthPanel())
+
+        await act(async () => {
+            result.current.onSubmitDetails(details)
+        })
+        await waitFor(() => expect(result.current.step).toBe("code"))
+
+        await act(async () => {
+            result.current.onResend()
+        })
+        await waitFor(() => expect(result.current.failure).toBeDefined())
+        expect(result.current.failure?.isTransport).toBe(true)
+        expect(result.current.isResending).toBe(false)
+        expect(result.current.sentCount).toBe(1)
+        expect(result.current.challengeId).toBe("challenge-1")
+    })
+
+    it("routes a sign-up resend to the sign-up operation, not the sign-in one", async () => {
+        mocks.signUpInit.mockResolvedValue(challenge("signUpInit", "challenge-9", 300))
+        mocks.signUpResend.mockResolvedValue(challenge("signUpResendOtp", "challenge-9", 120))
+        const { result } = renderHook(() => useAuthPanel({ initialMode: "signUp" }))
+
+        await act(async () => {
+            result.current.onSubmitDetails(details)
+        })
+        await waitFor(() => expect(result.current.step).toBe("code"))
+
+        await act(async () => {
+            result.current.onResend()
+        })
+        await waitFor(() => expect(result.current.sentCount).toBe(2))
+        expect(mocks.signUpResend).toHaveBeenCalledWith({ request: { challengeId: "challenge-9" } })
+        expect(mocks.signInResend).not.toHaveBeenCalled()
+    })
+
+    it("routes the reset journey's second step and resend to their own operations", async () => {
+        mocks.forgotInit.mockResolvedValue(challenge("forgotPasswordInit", "challenge-3", 300))
+        mocks.forgotResend.mockResolvedValue(challenge("forgotPasswordResendOtp", "challenge-4", 120))
+        mocks.forgotVerify.mockResolvedValue(session("forgotPasswordVerifyOtp", "token-reset"))
+        const { result } = renderHook(() => useAuthPanel({ initialMode: "forgotPassword" }))
+
+        await act(async () => {
+            result.current.onSubmitDetails({ email: details.email, password: "a-new-secret" })
+        })
+        await waitFor(() => expect(result.current.step).toBe("code"))
+
+        await act(async () => {
+            result.current.onResend()
+        })
+        await waitFor(() => expect(result.current.challengeId).toBe("challenge-4"))
+        expect(mocks.forgotResend).toHaveBeenCalledWith({ request: { challengeId: "challenge-3" } })
+
+        await act(async () => {
+            result.current.onSubmitCode({ otp: "222333" })
+        })
+        await waitFor(() => expect(result.current.step).toBe("done"))
+        expect(mocks.forgotVerify).toHaveBeenCalledWith({ request: { challengeId: "challenge-4", otp: "222333" } })
+        expect(mocks.signInVerify).not.toHaveBeenCalled()
+        expect(getSessionToken()).toBe("token-reset")
+    })
+
+    it("surfaces the provider's own refusal when the exchange is turned down", async () => {
+        window.sessionStorage.setItem("starci.auth.oauth-provider", "google")
+        stubLocation({ search: "?code=abc&state=xyz" })
+        mocks.exchange.mockResolvedValue(
+            refusal("exchangeCodeForToken", "That sign-in could not be completed.", "INVALID_GRANT"),
+        )
+        const { result } = renderHook(() => useAuthPanel())
+
+        await waitFor(() => expect(result.current.failure).toBeDefined())
+        expect(result.current.failure?.message).toBe("That sign-in could not be completed.")
+        expect(result.current.failure?.code).toBe("INVALID_GRANT")
+        expect(result.current.failure?.isTransport).toBe(false)
+        expect(result.current.isPending).toBe(false)
+        expect(result.current.step).toBe("details")
+        expect(getSessionToken()).toBeUndefined()
+    })
+
+    it("tells an exchange that never arrived apart from one the server turned down", async () => {
+        window.sessionStorage.setItem("starci.auth.oauth-provider", "google")
+        stubLocation({ search: "?code=abc&state=xyz" })
+        mocks.exchange.mockRejectedValue(new Error("network"))
+        const { result } = renderHook(() => useAuthPanel())
+
+        await waitFor(() => expect(result.current.failure).toBeDefined())
+        expect(result.current.failure?.isTransport).toBe(true)
+        expect(result.current.failure?.message).toBeUndefined()
+        expect(result.current.isPending).toBe(false)
+    })
+
+    it("cannot finish an exchange whose provider hint the browser refuses to hand back", async () => {
+        stubLocation({ search: "?code=abc&state=xyz" })
+        stubHostileStorage()
+        const { result } = renderHook(() => useAuthPanel())
+
+        // A browser that refuses storage still renders a working password form; only the OAuth leg
+        // is lost, and it is lost quietly rather than by guessing which provider issued the code.
+        expect(mocks.exchange).not.toHaveBeenCalled()
+        expect(result.current.failure).toBeUndefined()
+        expect(result.current.step).toBe("details")
+    })
+
+    it("still leaves for the provider when the browser refuses to remember which one", () => {
+        const assign = stubLocation({ search: "" })
+        stubHostileStorage()
+        const { result } = renderHook(() => useAuthPanel())
+
+        act(() => {
+            result.current.onOauthPress(KeycloakIdentityProvider.Github)
+        })
+        expect(String(assign.mock.calls[0][0])).toContain("/api/v1/keycloak/github/redirect")
+    })
+
+    it("ignores a code that arrives with no provider hint stored", () => {
+        stubLocation({ search: "?code=abc&state=xyz" })
+        const { result } = renderHook(() => useAuthPanel())
+        expect(mocks.exchange).not.toHaveBeenCalled()
+        expect(result.current.step).toBe("details")
+    })
+
+    it("ignores a callback that carries a provider hint but no state", () => {
+        window.sessionStorage.setItem("starci.auth.oauth-provider", "google")
+        stubLocation({ search: "?code=abc" })
+        renderHook(() => useAuthPanel())
+        expect(mocks.exchange).not.toHaveBeenCalled()
+        // The hint is left alone: the exchange it belongs to has not happened yet.
+        expect(window.sessionStorage.getItem("starci.auth.oauth-provider")).toBe("google")
     })
 })

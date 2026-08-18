@@ -52,4 +52,14 @@ describe("useMutateSubmitPersonalTaskAttemptSwr", () => {
                 .rejects.toThrow("Repository is not configured")
         })
     })
+
+    it("speaks for a server that refused without saying why", async () => {
+        mocks.mutateSubmitPersonalTaskAttempt.mockResolvedValue({ data: undefined })
+        const { result } = renderHook(() => useMutateSubmitPersonalTaskAttemptSwr())
+
+        await act(async () => {
+            await expect(result.current.trigger({ courseId: "course-1", taskId: "task-1" }))
+                .rejects.toThrow("Personal-project review could not be started.")
+        })
+    })
 })

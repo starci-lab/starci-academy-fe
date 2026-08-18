@@ -1,29 +1,160 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _CourseMockInterviewSetupPage } from "./component"
+import {
+    _CourseMockInterviewSetupPage,
+    type CourseMockInterviewSetupData,
+    type CourseMockInterviewSetupPageProps,
+} from "./component"
 
-const props = {
+/**
+ * What these tests guard: the green room is the last place a learner can still change their mind,
+ * so each choice has to say which one is currently theirs, a start already running must not be
+ * pressable a second time, and a failure has to replace the start with the only action that can
+ * clear it - a start offered over a failed load starts nothing.
+ */
+
+const copy: CourseMockInterviewSetupData = {
     title: "Mock interview",
     description: "Course-grounded practice",
     levelLabel: "Seniority",
     modeLabel: "Format",
-    levels: [{ id: "middle", label: "Middle" }],
-    modes: [{ id: "qna", label: "Technical Q&A" }],
+    levels: [
+        { id: "junior", label: "Junior" },
+        { id: "middle", label: "Middle" },
+    ],
+    modes: [
+        { id: "qna", label: "Technical Q&A" },
+        { id: "system-design", label: "System design" },
+    ],
     selectedLevel: "middle",
     selectedMode: "qna",
     startLabel: "Start interview",
     resumeLabel: "Resume interview",
     retryLabel: "Try again",
-} as const
+}
+
+const draw = (
+    state: CourseMockInterviewSetupPageProps["state"],
+    props: Partial<CourseMockInterviewSetupData> = {},
+    on?: CourseMockInterviewSetupPageProps["on"],
+) => render(<_CourseMockInterviewSetupPage state={state} props={{ ...copy, ...props }} on={on} />)
 
 describe("_CourseMockInterviewSetupPage", () => {
-    it("offers the persisted session instead of hiding it", () => {
-        const resume = vi.fn()
-        const { container } = render(<_CourseMockInterviewSetupPage state="resumable" props={{ ...props, status: "Session available" }} on={{ resume }} />)
+    it("fills the seniority and format the learner is currently on and leaves the alternatives open", () => {
+        draw("ready")
 
-        fireEvent.click(screen.getByText("Resume interview"))
-        expect(resume).toHaveBeenCalledOnce()
-        expect(screen.getByText("Session available")).toBeTruthy()
-        expect(container.querySelector("[data-node=\"course-mock-interview-setup-page\"]")).toBeTruthy()
+        expect(screen.getByRole("button", { name: "Middle" })).toHaveAttribute("data-variant", "primary")
+        expect(screen.getByRole("button", { name: "Junior" })).toHaveAttribute("data-variant", "ghost")
+        expect(screen.getByRole("button", { name: "Technical Q&A" })).toHaveAttribute("data-variant", "primary")
+        expect(screen.getByRole("button", { name: "System design" })).toHaveAttribute("data-variant", "ghost")
+    })
+
+    it.each([
+        ["Junior", "level", "junior"],
+        ["System design", "mode", "system-design"],
+    ] as const)("reports the %s press as a change to the interview's %s", (label, field, value) => {
+        const configure = vi.fn()
+        draw("ready", {}, { configure })
+
+        fireEvent.click(screen.getByRole("button", { name: label }))
+        expect(configure).toHaveBeenCalledWith(field, value)
+    })
+
+    it("rests the green room and refuses a start before the configuration has arrived", () => {
+        const start = vi.fn()
+        const { container } = draw("pending", {}, { start })
+
+        expect(container.querySelector("[data-component=Heading][data-loading=\"true\"]")).not.toBeNull()
+        expect(screen.getByRole("button", { name: "Junior" })).toBeDisabled()
+        fireEvent.click(screen.getByRole("button", { name: "Start interview" }))
+        expect(start).not.toHaveBeenCalled()
+    })
+
+    it("shows the start running and blocks a second press while the session is being created", () => {
+        const start = vi.fn()
+        draw("starting", {}, { start })
+        const control = screen.getByRole("button", { name: "Start interview" })
+
+        expect(control).toHaveAttribute("data-action-pending", "true")
+        expect(screen.getByRole("button", { name: "Middle" })).toBeDisabled()
+        fireEvent.click(control)
+        expect(start).not.toHaveBeenCalled()
+    })
+
+    it("starts the interview the learner configured when they take the main action", () => {
+        const start = vi.fn()
+        draw("ready", {}, { start })
+
+        fireEvent.click(screen.getByRole("button", { name: "Start interview" }))
+        expect(start).toHaveBeenCalledTimes(1)
+    })
+
+    it("offers the persisted session beside a fresh start and resumes it on request", () => {
+        const resume = vi.fn()
+        draw("resumable", { status: "A session is already open" }, { resume })
+
+        expect(screen.getByText("A session is already open")).toBeInTheDocument()
+        fireEvent.click(screen.getByRole("button", { name: "Resume interview" }))
+        expect(resume).toHaveBeenCalledTimes(1)
+    })
+
+    it("keeps the resume action out of every state that has no session to resume", () => {
+        draw("ready")
+
+        expect(screen.queryByRole("button", { name: "Resume interview" })).not.toBeInTheDocument()
+        expect(screen.getByRole("button", { name: "Start interview" })).toBeInTheDocument()
+    })
+
+    it("replaces the start with the only action that can clear a failed green room", () => {
+        const retry = vi.fn()
+        draw("failed", {}, { retry })
+
+        expect(screen.queryByRole("button", { name: "Start interview" })).not.toBeInTheDocument()
+        fireEvent.click(screen.getByRole("button", { name: "Try again" }))
+        expect(retry).toHaveBeenCalledTimes(1)
+    })
+
+    it.each([
+        ["failed", "alert"],
+        ["resumable", "status"],
+    ] as const)("interrupts the reader on the %s state by announcing its status line as a live %s", (state, role) => {
+        draw(state, { status: "A session is already open" })
+
+        expect(screen.getByRole(role)).toHaveTextContent("A session is already open")
+    })
+
+    it("carries no status line at all when the owner resolved none for this green room", () => {
+        draw("ready")
+
+        expect(screen.queryByRole("status")).not.toBeInTheDocument()
+        expect(screen.queryByRole("alert")).not.toBeInTheDocument()
+    })
+
+    it("ignores a seniority or format press when the owner wired no configure handler", () => {
+        const start = vi.fn()
+        draw("ready", {}, { start })
+
+        expect(() => {
+            fireEvent.click(screen.getByRole("button", { name: "Junior" }))
+            fireEvent.click(screen.getByRole("button", { name: "System design" }))
+        }).not.toThrow()
+        expect(start).not.toHaveBeenCalled()
+    })
+
+    it("stays inert rather than throwing when the owner registered no handlers", () => {
+        draw("resumable")
+
+        expect(() => {
+            fireEvent.click(screen.getByRole("button", { name: "Junior" }))
+            fireEvent.click(screen.getByRole("button", { name: "System design" }))
+            fireEvent.click(screen.getByRole("button", { name: "Start interview" }))
+            fireEvent.click(screen.getByRole("button", { name: "Resume interview" }))
+        }).not.toThrow()
+    })
+
+    it("stays inert rather than throwing when the failed green room was given no retry handler", () => {
+        draw("failed")
+
+        expect(() => fireEvent.click(screen.getByRole("button", { name: "Try again" }))).not.toThrow()
     })
 })

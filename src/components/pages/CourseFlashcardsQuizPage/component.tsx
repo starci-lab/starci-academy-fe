@@ -54,6 +54,7 @@ export const _CourseFlashcardsQuizPage = (input: CourseFlashcardsQuizPageProps) 
     const state = input.state
     const data = input.props
     const on = input.on
+    const resumeSessionId = data.resumeSessionId
     const isLoading = state === "pending"
     const levels = [
         { id: null, label: data.allLevelsLabel },
@@ -88,10 +89,10 @@ export const _CourseFlashcardsQuizPage = (input: CourseFlashcardsQuizPageProps) 
             fact: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
                 <Text props={{ content: `${data.cardCount} ${data.cardsLabel}`, size: "sm", tone: "muted" }} isLoading={isLoading} />
             )),
-            resume: data.resumeSessionId === undefined
+            resume: resumeSessionId === undefined
                 ? undefined
                 : defineLeafComponent("button", {}, () => (
-                    <Button props={{ label: data.resumeLabel, variant: "outline" }} on={{ press: () => on.resume(data.resumeSessionId ?? "") }} />
+                    <Button props={{ label: data.resumeLabel, variant: "outline" }} on={{ press: () => on.resume(resumeSessionId) }} />
                 )),
             modeLabel: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
                 <Text props={{ content: data.modeLabel, size: "sm", weight: "semibold" }} isLoading={isLoading} />

@@ -1,6 +1,6 @@
 /** @vitest-environment jsdom */
 import { act, renderHook, waitFor } from "@testing-library/react"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { useContentAiStream } from "./useContentAiStream"
 
 const socketHarness = vi.hoisted(() => {
@@ -29,19 +29,29 @@ const socketHarness = vi.hoisted(() => {
     return { handlers, managerHandlers, emit, socket, io: vi.fn(() => socket) }
 })
 
+/** Who the hook thinks is signed in. Mutable, because "nobody" is one of the states under test. */
+const session = vi.hoisted(() => ({ token: undefined as string | undefined }))
+
 vi.mock("next-intl", () => ({ useLocale: () => "vi" }))
 vi.mock("socket.io-client", () => ({ io: socketHarness.io }))
-vi.mock("../auth/useSessionToken", () => ({ useSessionToken: () => "test-token" }))
+vi.mock("../auth/useSessionToken", () => ({ useSessionToken: () => session.token }))
 
 beforeEach(() => {
+    session.token = "test-token"
     socketHarness.handlers.clear()
     socketHarness.managerHandlers.clear()
     socketHarness.emit.mockClear()
     socketHarness.io.mockClear()
+    socketHarness.socket.disconnect.mockClear()
     socketHarness.socket.connected = true
     vi.spyOn(crypto, "randomUUID")
         .mockReturnValueOnce("00000000-0000-4000-8000-000000000001")
         .mockReturnValueOnce("00000000-0000-4000-8000-000000000002")
+})
+
+afterEach(() => {
+    // The stream id spy is per-test; leaving it in place would queue answers across tests.
+    vi.restoreAllMocks()
 })
 
 describe("useContentAiStream", () => {
@@ -124,5 +134,136 @@ describe("useContentAiStream", () => {
 
         act(() => socketHarness.handlers.get("disconnect")?.())
         expect(result.current.state).toBe("reconnecting")
+    })
+
+    it("opens no socket at all while nobody is signed in", () => {
+        session.token = undefined
+        const { result } = renderHook(() => useContentAiStream())
+        expect(socketHarness.io).not.toHaveBeenCalled()
+        expect(result.current.state).toBe("idle")
+        expect(result.current.isConnected).toBe(false)
+    })
+
+    it("answers an ask with no socket immediately, rather than leaving the reader waiting", () => {
+        session.token = undefined
+        const onDone = vi.fn()
+        const { result } = renderHook(() => useContentAiStream())
+
+        act(() => result.current.ask({ sessionId: "session-1", question: "Hello", onDelta: vi.fn(), onDone }))
+        expect(onDone).toHaveBeenCalledWith("SOCKET_DISCONNECTED")
+        expect(socketHarness.emit).not.toHaveBeenCalled()
+        expect(result.current.isStreaming).toBe(false)
+    })
+
+    it("answers an ask on a socket that is not connected the same way", () => {
+        socketHarness.socket.connected = false
+        const onDone = vi.fn()
+        const { result } = renderHook(() => useContentAiStream())
+
+        act(() => result.current.ask({ sessionId: "session-1", question: "Hello", onDelta: vi.fn(), onDone }))
+        expect(onDone).toHaveBeenCalledWith("SOCKET_DISCONNECTED")
+        expect(socketHarness.emit).not.toHaveBeenCalled()
+    })
+
+    it("aborts the stream still running when a second ask arrives", () => {
+        const firstDone = vi.fn()
+        const secondDone = vi.fn()
+        const { result } = renderHook(() => useContentAiStream())
+
+        act(() => result.current.ask({
+            sessionId: "session-1", question: "First", onDelta: vi.fn(), onDone: firstDone,
+        }))
+        const firstStreamId = socketHarness.emit.mock.calls
+            .find(([event]) => event === "content_ai.ask.publication")?.[1].data.streamId as string
+
+        act(() => result.current.ask({
+            sessionId: "session-1", question: "Second", onDelta: vi.fn(), onDone: secondDone,
+        }))
+        // The server is told to stop the exact stream that is being replaced, and the reader who
+        // was waiting on it is told why rather than left with a half-written answer.
+        expect(socketHarness.emit).toHaveBeenCalledWith(
+            "content_ai.abort.publication",
+            { locale: "vi", data: { streamId: firstStreamId } },
+        )
+        expect(firstDone).toHaveBeenCalledWith("ABORTED")
+        expect(secondDone).not.toHaveBeenCalled()
+        expect(result.current.isStreaming).toBe(true)
+    })
+
+    it("keeps streaming while chunks are still arriving", () => {
+        const onDelta = vi.fn()
+        const onDone = vi.fn()
+        const { result } = renderHook(() => useContentAiStream())
+
+        act(() => result.current.ask({
+            sessionId: "session-1", question: "Explain", onDelta, onDone,
+        }))
+        const streamId = socketHarness.emit.mock.calls
+            .find(([event]) => event === "content_ai.ask.publication")?.[1].data.streamId as string
+
+        act(() => socketHarness.handlers.get("content_ai.chunk.subscription")?.({
+            data: { streamId, delta: "Abort", done: false },
+        }))
+        expect(onDelta).toHaveBeenCalledWith("Abort")
+        expect(onDone).not.toHaveBeenCalled()
+        expect(result.current.isStreaming).toBe(true)
+    })
+
+    it("ignores a chunk that carries no payload", () => {
+        const onDelta = vi.fn()
+        const onDone = vi.fn()
+        const { result } = renderHook(() => useContentAiStream())
+
+        act(() => result.current.ask({
+            sessionId: "session-1", question: "Explain", onDelta, onDone,
+        }))
+        act(() => socketHarness.handlers.get("content_ai.chunk.subscription")?.({}))
+        expect(onDelta).not.toHaveBeenCalled()
+        expect(onDone).not.toHaveBeenCalled()
+        expect(result.current.isStreaming).toBe(true)
+    })
+
+    it("ignores a chunk that arrives when nothing is being asked", () => {
+        const { result } = renderHook(() => useContentAiStream())
+        act(() => socketHarness.handlers.get("content_ai.chunk.subscription")?.({
+            data: { streamId: "orphan", delta: "stray", done: true },
+        }))
+        expect(result.current.isStreaming).toBe(false)
+    })
+
+    it("aborting with nothing running tells the server nothing", () => {
+        const { result } = renderHook(() => useContentAiStream())
+        act(() => result.current.abort())
+        expect(socketHarness.emit).not.toHaveBeenCalled()
+        expect(result.current.isStreaming).toBe(false)
+    })
+
+    it("ends the stream and closes the socket when the surface goes away", () => {
+        const onDone = vi.fn()
+        const { result, unmount } = renderHook(() => useContentAiStream())
+
+        act(() => result.current.ask({
+            sessionId: "session-1", question: "Explain", onDelta: vi.fn(), onDone,
+        }))
+        unmount()
+        expect(onDone).toHaveBeenCalledWith("SOCKET_DISCONNECTED")
+        expect(socketHarness.socket.disconnect).toHaveBeenCalled()
+    })
+
+    it("reports the manager's own reconnection lifecycle", async () => {
+        const { result } = renderHook(() => useContentAiStream())
+
+        act(() => socketHarness.handlers.get("connect_error")?.())
+        await waitFor(() => expect(result.current.state).toBe("reconnecting"))
+
+        act(() => socketHarness.handlers.get("connect")?.())
+        await waitFor(() => expect(result.current.isConnected).toBe(true))
+
+        act(() => socketHarness.managerHandlers.get("reconnect_attempt")?.())
+        await waitFor(() => expect(result.current.state).toBe("reconnecting"))
+
+        act(() => socketHarness.managerHandlers.get("reconnect_failed")?.())
+        await waitFor(() => expect(result.current.state).toBe("failed"))
+        expect(result.current.isConnected).toBe(false)
     })
 })

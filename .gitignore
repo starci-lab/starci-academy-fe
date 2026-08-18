@@ -41,3 +41,6 @@ yarn-error.log*
 
 # agent scratch: git worktrees and session state — a full copy of this repo
 .claude/
+
+# sonar-scanner working directory: generated analysis evidence, not product source
+.scannerwork/

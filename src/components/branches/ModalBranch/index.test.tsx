@@ -78,4 +78,31 @@ describe("ModalBranch", () => {
         fireEvent.click(screen.getByRole("button", { name: "Close" }))
         expect(dismiss).toHaveBeenCalledOnce()
     })
+
+    it("takes the middle width and no cover inset when the caller names no size", () => {
+        render(
+            <ModalBranch
+                isOpen
+                contract="stacked-peer-controls"
+                render={body}
+                onDismiss={() => undefined}
+            />,
+        )
+        expect(mocks.size).toHaveBeenCalledWith("md")
+        expect(mocks.dialogClassName).toHaveBeenCalledWith(undefined)
+    })
+
+    it("treats the surface opening as no outcome at all", () => {
+        const dismiss = vi.fn()
+        render(
+            <ModalBranch
+                isOpen
+                contract="stacked-peer-controls"
+                render={body}
+                onDismiss={dismiss}
+            />,
+        )
+        mocks.openChange?.(true)
+        expect(dismiss).not.toHaveBeenCalled()
+    })
 })

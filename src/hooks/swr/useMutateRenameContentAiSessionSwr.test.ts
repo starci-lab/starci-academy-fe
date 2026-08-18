@@ -30,4 +30,12 @@ describe("useMutateRenameContentAiSessionSwr", () => {
             sessionId: "session-1", title: "x",
         })).rejects.toThrow("title too long"))
     })
+
+    it("speaks for a server that refused without saying why", async () => {
+        mocks.mutation.mockResolvedValue({ data: undefined })
+        const { result } = renderHook(() => useMutateRenameContentAiSessionSwr())
+        await act(async () => expect(result.current.trigger({
+            sessionId: "session-1", title: "x",
+        })).rejects.toThrow("Content-AI conversation could not be renamed."))
+    })
 })

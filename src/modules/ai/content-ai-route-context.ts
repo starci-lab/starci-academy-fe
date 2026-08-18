@@ -13,7 +13,7 @@ export type ContentAiRouteAnchor = {
 
 /** Drop query/hash/locale so every caller compares the same path identity. */
 export const normalizeContentAiPath = (pathname: string): string => {
-    const clean = pathname.split(/[?#]/u, 1)[0] ?? "/"
+    const clean = pathname.split(/[?#]/u, 1)[0]
     const segments = clean.split("/").filter(Boolean)
     const withoutLocale = segments[0] === "en" || segments[0] === "vi" ? segments.slice(1) : segments
     return `/${withoutLocale.join("/")}`.replace(/\/$/u, "") || "/"

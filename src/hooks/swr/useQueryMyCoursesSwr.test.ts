@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { createElement, type PropsWithChildren } from "react"
-import { renderHook, waitFor } from "@testing-library/react"
+import { act, renderHook, waitFor } from "@testing-library/react"
 import { SWRConfig } from "swr"
 import { setSessionToken } from "../auth/useSessionToken"
 import { QUERY_MY_COURSES_SWR_KEY, useQueryMyCoursesSwr } from "./useQueryMyCoursesSwr"
@@ -106,5 +106,26 @@ describe("useQueryMyCoursesSwr", () => {
         await waitFor(() => expect(result.current.data).toEqual(rows))
         expect(result.current.mutate).toBeTypeOf("function")
         expect(result.current.isLoading).toBe(false)
+    })
+
+    it("asks for nothing at all while nobody is signed in", () => {
+        setSessionToken(undefined)
+        const { result } = renderHook(() => useQueryMyCoursesSwr(), { wrapper })
+        // This is the state the progress block draws as "sign in to see this": no request, no
+        // loading, no skeleton shimmering at somebody who is not waiting for anything.
+        expect(mocks.queryMyCourses).not.toHaveBeenCalled()
+        expect(result.current.isLoading).toBe(false)
+        expect(result.current.data).toBeUndefined()
+    })
+
+    it("never hands one viewer the enrolment fetched for another", async () => {
+        const { result } = renderHook(() => useQueryMyCoursesSwr(), { wrapper })
+        await waitFor(() => expect(result.current.data).toEqual(rows))
+
+        mocks.queryMyCourses.mockResolvedValue(responseWith([]))
+        act(() => setSessionToken("a-second-viewer"))
+
+        await waitFor(() => expect(result.current.data).toEqual([]))
+        expect(mocks.queryMyCourses).toHaveBeenCalledTimes(2)
     })
 })

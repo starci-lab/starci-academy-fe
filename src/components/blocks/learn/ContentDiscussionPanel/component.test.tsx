@@ -45,6 +45,16 @@ describe("_ContentDiscussionPanel", () => {
         expect(screen.getByRole("button", { name: "Posting" })).toBeDisabled()
     })
 
+    it("rests three comment rows and no composer while the discussion is in flight", () => {
+        const { container } = render(<_ContentDiscussionPanel state="pending" props={props} />)
+
+        expect(container.querySelectorAll("[data-node=content-discussion-comment-row]")).toHaveLength(3)
+        expect(screen.queryByText("How does this work?")).not.toBeInTheDocument()
+        expect(container.querySelectorAll("[data-component=\"Text\"][data-loading=\"true\"]").length)
+            .toBeGreaterThan(0)
+        expect(screen.queryByLabelText("Comment")).not.toBeInTheDocument()
+    })
+
     it("renders empty and failed answers with only failed retry", () => {
         const retry = vi.fn()
         const { rerender } = render(

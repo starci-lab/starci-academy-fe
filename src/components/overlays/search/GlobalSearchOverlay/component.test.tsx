@@ -81,6 +81,36 @@ describe("_GlobalSearchOverlay", () => {
         expect(retry).toHaveBeenCalledOnce()
     })
 
+    it("tells a search that matched nothing apart from one nobody has typed yet", () => {
+        const browseCourses = vi.fn()
+        render(<_GlobalSearchOverlay isOpen state={{ status: "empty", ...base, query: "zzz" }} copy={copy} on={{ browseCourses }} />)
+
+        expect(screen.getByText("Nothing")).toBeTruthy()
+        expect(screen.getByText("Try again")).toBeTruthy()
+        expect(screen.queryByText("Search all")).toBeNull()
+        fireEvent.click(screen.getByRole("button", { name: "Browse courses" }))
+        expect(browseCourses).toHaveBeenCalledOnce()
+    })
+
+    it("carries the selected result's own status into the context card", () => {
+        const result = { id: "courses:1", textValue: "System", title: "System", kindLabel: "Course" }
+        render(<_GlobalSearchOverlay isOpen state={{
+            status: "ready", ...base, query: "sys", results: [result], selectedResult: result.id,
+            detail: { status: "ready", id: result.id, title: "System detail", kindLabel: "Course", statusLabel: "Enrolled" },
+        }} copy={copy} />)
+
+        const card = document.querySelector("[data-node=\"global-search-context-card\"]")
+        expect(card?.querySelector("[data-component=\"Badge\"]")).toHaveTextContent("Enrolled")
+    })
+
+    it("reports the vendor's own way out as one dismissal", () => {
+        const dismiss = vi.fn()
+        render(<_GlobalSearchOverlay isOpen state={{ status: "idle", ...base }} copy={copy} on={{ dismiss }} />)
+
+        fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape", code: "Escape" })
+        expect(dismiss).toHaveBeenCalled()
+    })
+
     it("keeps query controls available in error state", () => {
         const retry = vi.fn()
         render(<_GlobalSearchOverlay isOpen state={{ status: "error", ...base, query: "sys" }} copy={copy} on={{ retry }} />)

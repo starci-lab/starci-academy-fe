@@ -29,7 +29,9 @@ export const ScrollViewport = ({
     boundary,
     render,
 }: ScrollViewportProps) => {
-    const viewportContract = boundary === "pricing-rail" ? "pricing-rail-scroll-viewport" : boundary
+    // One boundary is approved, so the viewport contract is that boundary's, named once here rather
+    // than selected: a second approved boundary widens the union and this line with it.
+    const viewportContract = "pricing-rail-scroll-viewport"
 
     return (
         <SurfaceCard

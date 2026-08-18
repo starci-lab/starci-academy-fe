@@ -36,4 +36,11 @@ describe("useMutateCreateContentAiSessionSwr", () => {
         const { result } = renderHook(() => useMutateCreateContentAiSessionSwr())
         await act(async () => expect(result.current.trigger({})).rejects.toThrow("not authenticated"))
     })
+
+    it("speaks for a server that refused without saying why", async () => {
+        mocks.mutation.mockResolvedValue({ data: undefined })
+        const { result } = renderHook(() => useMutateCreateContentAiSessionSwr())
+        await act(async () => expect(result.current.trigger({}))
+            .rejects.toThrow("Content-AI conversation could not be created."))
+    })
 })

@@ -30,4 +30,12 @@ describe("useMutateSetContentAiSessionArchivedSwr", () => {
             sessionId: "session-1", archived: false,
         })).rejects.toThrow("not owned"))
     })
+
+    it("speaks for a server that refused without saying why", async () => {
+        mocks.mutation.mockResolvedValue({ data: undefined })
+        const { result } = renderHook(() => useMutateSetContentAiSessionArchivedSwr())
+        await act(async () => expect(result.current.trigger({
+            sessionId: "session-1", archived: false,
+        })).rejects.toThrow("Content-AI archive state could not be changed."))
+    })
 })

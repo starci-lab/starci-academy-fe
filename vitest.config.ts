@@ -35,6 +35,24 @@ export default defineConfig({
                 "lcov",
             ],
             reportsDirectory: "coverage",
+            /*
+             * WITHOUT `include`, v8 reports only the files a test actually loaded, so a file
+             * nobody imports is absent from the denominator rather than counted as uncovered.
+             * Measured here: 484 files in the report against 653 real source files - 169 files
+             * scored nothing at all, and the headline read 99.21% lines while SonarQube, which
+             * analyses the whole of `src`, read 81.6%. The analyser was right.
+             *
+             * Naming the surface explicitly makes the local number mean the same thing as the
+             * analysed one. It moves the reported figure DOWN, which is the point: an untested
+             * file is uncovered, not invisible.
+             */
+            include: [
+                "src/**/*.{ts,tsx}",
+            ],
+            exclude: [
+                "src/**/*.test.{ts,tsx}",
+                "src/**/*.d.ts",
+            ],
         },
     },
     resolve: {

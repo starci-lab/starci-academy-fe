@@ -69,6 +69,7 @@ export const _CourseMockInterviewSessionPage = (input: CourseMockInterviewSessio
     const isPending = input.state === "connecting"
     const isBusy = input.state === "connecting" || input.state === "syncing"
     const canAnswer = input.state === "live"
+    const workspaceCode = input.props.workspaceCode
     const turn = input.props.turns.map((item) => defineContractComponent("centred-title-pair", {
         title: defineLeafComponent("heading", {}, () => (
             <Heading props={{ content: item.label, level: 3 }} />
@@ -176,12 +177,12 @@ export const _CourseMockInterviewSessionPage = (input: CourseMockInterviewSessio
                 workspaceTitle: defineLeafComponent("heading", {}, () => (
                     <Heading props={{ content: input.props.workspaceLabel, level: 2 }} isLoading={isPending} />
                 )),
-                workspace: input.props.workspaceCode === undefined
+                workspace: workspaceCode === undefined
                     ? defineLeafComponent("text", {}, () => (
                         <Text props={{ content: input.props.interviewerPendingLabel, size: "sm", tone: "muted" }} isLoading={isPending} />
                     ))
                     : defineLeafComponent("code-block", {}, () => (
-                        <CodeBlock props={{ code: input.props.workspaceCode ?? "" }} />
+                        <CodeBlock props={{ code: workspaceCode }} />
                     )),
             })}
         />

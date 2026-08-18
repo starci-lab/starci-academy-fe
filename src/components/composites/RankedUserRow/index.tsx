@@ -65,7 +65,8 @@ export const RankedUserRow = ({ props, on, isLoading = false }: CompositeProps<R
     const showsMovement = props.rankDelta !== undefined
     // Movement and follow are no longer rivals for one slot: the leaderboard page shows both, and
     // the dashboard preview shows neither a follow control nor the space one would take.
-    const showsFollow = props.isMe !== true && props.followLabel !== undefined
+    const followLabel = props.followLabel
+    const showsFollow = props.isMe !== true && followLabel !== undefined
     const name = isLoading || props.isMe === true
         ? defineLeafComponent("text", {}, () => (
             <Text
@@ -115,7 +116,7 @@ export const RankedUserRow = ({ props, on, isLoading = false }: CompositeProps<R
                 props={{
                     label: props.isFollowing === true
                         ? props.followingLabel ?? ""
-                        : props.followLabel ?? "",
+                        : followLabel,
                     size: "sm",
                     variant: props.isFollowing === true ? "secondary" : "primary",
                     isPending: props.isPending,

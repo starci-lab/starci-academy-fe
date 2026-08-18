@@ -25,4 +25,15 @@ describe("mutationSignOut", () => {
         expect(print(request.mutation)).toContain("mutation SignOut")
         expect(print(request.mutation)).toContain("signOut")
     })
+
+    it("sends no CSRF header at all when the browser holds no such cookie", async () => {
+        vi.spyOn(document, "cookie", "get").mockReturnValue("theme=dark")
+        await mutationSignOut()
+        expect(mocks.createApolloClient).toHaveBeenCalledWith({
+            withAuth: true,
+            withCredentials: true,
+            headers: { "x-csrf-token": undefined },
+        })
+        vi.restoreAllMocks()
+    })
 })

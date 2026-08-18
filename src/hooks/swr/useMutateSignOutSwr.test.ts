@@ -30,4 +30,12 @@ describe("useMutateSignOutSwr", () => {
         const fetcher = mocks.useSWRMutation.mock.calls[0]?.[1]
         await expect(fetcher()).rejects.toThrow("Denied")
     })
+
+    it("speaks for a server that refused without saying why", async () => {
+        mocks.mutationSignOut.mockResolvedValue({ data: undefined })
+        useMutateSignOutSwr()
+
+        const fetcher = mocks.useSWRMutation.mock.calls[0]?.[1]
+        await expect(fetcher()).rejects.toThrow("Sign out failed.")
+    })
 })

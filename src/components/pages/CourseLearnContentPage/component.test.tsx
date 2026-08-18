@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
+import { ReactionType } from "@/modules/api/graphql/queries/types/reactions"
 import { _CourseLearnContentPage, type CourseLearnContentPageData } from "./component"
 
 class TestResizeObserver implements ResizeObserver {
@@ -199,5 +200,146 @@ describe("_CourseLearnContentPage", () => {
         expect(container.querySelector("[data-node=source-workspace-root]")).not.toBeNull()
         fireEvent.click(screen.getByText("Source"))
         expect(selectSource).toHaveBeenCalledTimes(1)
+    })
+
+    it("joins the paywall to the preview inside the same paper and drops the whole footer", () => {
+        const act = vi.fn()
+        const { container } = render(
+            <_CourseLearnContentPage
+                state="locked"
+                props={{
+                    labels,
+                    title: "Paid lesson",
+                    body: "The opening paragraph",
+                    selectionHint: "Select any passage to ask about it",
+                    noticeMessage: "Enrol to keep reading",
+                    noticeActionLabel: "Enrol",
+                    nextSteps: [{ id: "next-1", label: "Next lesson" }],
+                    reactions: { count: 4, labels: { like: "Like", love: "Love", haha: "Haha", wow: "Wow", sad: "Sad", angry: "Angry" } },
+                }}
+                on={{ act }}
+            />,
+        )
+
+        const paper = container.querySelector("[data-node=content-reading-paper]")
+        expect(paper?.querySelector("[data-component=Article]")).not.toBeNull()
+        expect(screen.getByText("Enrol to keep reading")).toBeInTheDocument()
+        expect(screen.queryByText("Select any passage to ask about it")).not.toBeInTheDocument()
+        expect(container.querySelector("[data-node=content-reader-footer]")).toBeNull()
+        fireEvent.click(screen.getByRole("button", { name: /Enrol/ }))
+        expect(act).toHaveBeenCalledTimes(1)
+    })
+
+    it("keeps the paywall's way in even when no lock sentence was resolved", () => {
+        const act = vi.fn()
+        const { container } = render(
+            <_CourseLearnContentPage
+                state="locked"
+                props={{ labels, title: "Paid lesson", body: "The opening paragraph", noticeActionLabel: "Enrol" }}
+                on={{ act }}
+            />,
+        )
+
+        expect(container.querySelector("[data-node=empty-notice-stack]")).not.toBeNull()
+        fireEvent.click(screen.getByRole("button", { name: /Enrol/ }))
+        expect(act).toHaveBeenCalledTimes(1)
+    })
+
+    it("puts the selection hint, the reaction card and the destinations under an unlocked lesson", () => {
+        const selectReaction = vi.fn()
+        const changePage = vi.fn()
+        const { container } = render(
+            <_CourseLearnContentPage
+                state="ready"
+                props={{
+                    labels,
+                    title: "Current lesson",
+                    body: "Lesson body",
+                    selectionHint: "Select any passage to ask about it",
+                    reactions: {
+                        count: 12,
+                        selected: ReactionType.Like,
+                        isPending: false,
+                        labels: { like: "Like", love: "Love", haha: "Haha", wow: "Wow", sad: "Sad", angry: "Angry" },
+                    },
+                    nextSteps: [{ id: "next-1", label: "Records and tuples" }, { id: "next-2", label: "Pattern matching" }],
+                    page: 2,
+                    totalPages: 5,
+                }}
+                on={{ selectReaction, changePage }}
+            />,
+        )
+
+        expect(screen.getByText("Select any passage to ask about it")).toBeInTheDocument()
+        expect(screen.getByText("Was this useful?")).toBeInTheDocument()
+        expect(container.querySelector("[data-node=content-reaction-card]")).not.toBeNull()
+        expect(screen.getByText("Up next")).toBeInTheDocument()
+        expect(screen.getByText("Records and tuples")).toBeInTheDocument()
+        expect(container.querySelectorAll("[data-node=content-next-row]")).toHaveLength(2)
+
+        fireEvent.click(screen.getByRole("button", { name: "Reactions" }))
+        fireEvent.click(screen.getByRole("button", { name: "Love" }))
+        expect(selectReaction).toHaveBeenCalledWith(ReactionType.Love)
+
+        fireEvent.click(screen.getByRole("button", { name: "Next" }))
+        expect(changePage).toHaveBeenCalledWith(3)
+    })
+
+    it("measures course progress in the map panel and closes the modules the reader has not opened", () => {
+        const { container } = render(
+            <_CourseLearnContentPage
+                state="ready"
+                props={{
+                    labels,
+                    title: "Current lesson",
+                    body: "Lesson body",
+                    courseProgress: { label: "Course progress", value: 3, total: 12 },
+                    modules: [
+                        { id: "module-1", title: "Open module", countLabel: "4 lessons", isOpen: true },
+                        { id: "module-2", title: "Closed module", countLabel: "6 lessons", contents: [{ id: "hidden", title: "Hidden lesson" }] },
+                    ],
+                }}
+            />,
+        )
+
+        expect(screen.getByText("Course progress")).toBeInTheDocument()
+        expect(screen.getByText("3/12")).toBeInTheDocument()
+        expect(screen.queryByText("Hidden lesson")).not.toBeInTheDocument()
+        expect(container.querySelectorAll("[data-node=content-map-module]")).toHaveLength(2)
+        expect(container.querySelector("[data-component=ContentMapRow]")).toBeNull()
+    })
+
+    it("falls back to a wordless failure notice when the reader was given no sentence", () => {
+        const { container } = render(
+            <_CourseLearnContentPage state="failed" props={{ labels, outline: [{ id: "heading-1", label: "Heading" }] }} />,
+        )
+
+        expect(container.querySelector("[data-node=centred-empty-notice]")).not.toBeNull()
+        expect(container.querySelector("[data-node=content-outline-rail]")).toBeNull()
+        expect(screen.queryByRole("button")).not.toBeInTheDocument()
+    })
+
+    it("opens the bar for a single face that carries more than one example language", () => {
+        const selectLanguage = vi.fn()
+        const { container } = render(
+            <_CourseLearnContentPage
+                state="ready"
+                props={{
+                    labels,
+                    title: "Current lesson",
+                    body: "Lesson body",
+                    faces: [{ id: "reading", label: "Reading" }],
+                    selectedFace: "reading",
+                    languagesLabel: "Example language",
+                    languages: [{ id: "ts", label: "TypeScript" }, { id: "go", label: "Go" }],
+                    selectedLanguage: "ts",
+                }}
+                on={{ selectLanguage }}
+            />,
+        )
+
+        expect(container.querySelector("[data-node=dual-tabs-toolbar]")).not.toBeNull()
+        fireEvent.click(screen.getByText("Go"))
+        expect(selectLanguage).toHaveBeenCalledWith("go")
     })
 })

@@ -145,4 +145,124 @@ describe("_CourseDetailPage", () => {
         expect(screen.getByRole("tab", { name: "FAQ" })).toBeInTheDocument()
         expect(screen.getByText("No FAQs yet")).toBeInTheDocument()
     })
+
+    it("closes a not-found course without offering a retry that cannot help", () => {
+        render(<_CourseDetailPage
+            state="not-found"
+            props={{ labels, noticeMessage: "No such course", noticeActionLabel: "Try again" }}
+        />)
+        expect(screen.getByText("No such course")).toBeInTheDocument()
+        expect(screen.queryByRole("button", { name: "Try again" })).not.toBeInTheDocument()
+        expect(screen.queryByRole("tab", { name: "FAQ" })).not.toBeInTheDocument()
+    })
+
+    it("offers the one way out of a failed request and reports the press", () => {
+        const retry = vi.fn()
+        render(<_CourseDetailPage
+            state="failed"
+            props={{ labels, noticeMessage: "Could not load the course", noticeActionLabel: "Try again" }}
+            on={{ retry }}
+        />)
+        expect(screen.getByText("Could not load the course")).toBeInTheDocument()
+        fireEvent.click(screen.getByRole("button", { name: "Try again" }))
+        expect(retry).toHaveBeenCalledOnce()
+    })
+
+    it("survives a failure the owner resolved no words for", () => {
+        render(<_CourseDetailPage state="failed" props={{ labels }} />)
+        expect(document.querySelector("[data-node=\"empty-notice-stack\"]")).not.toBeNull()
+        expect(screen.queryByRole("button", { name: "Try again" })).not.toBeInTheDocument()
+    })
+
+    it("draws a course whose every optional region came back empty", () => {
+        render(<_CourseDetailPage state="ready" props={{ labels }} />)
+
+        expect(screen.getByRole("tab", { name: "Explore the course", selected: true })).toBeInTheDocument()
+        expect(screen.getByText("No reviews yet")).toBeInTheDocument()
+        expect(screen.getByText("No FAQs yet")).toBeInTheDocument()
+        expect(document.querySelectorAll("[data-node^=\"course-signal-card-\"]")).toHaveLength(0)
+        expect(document.querySelector("[data-node=\"course-module-row\"]")).toBeNull()
+    })
+
+    it("pins no mobile action bar for a course with no rail to mirror", () => {
+        render(<_CourseDetailPage state="ready" props={{ ...props, rail: undefined }} />)
+        expect(document.querySelector("[data-node=\"course-mobile-action-bar\"]")).toBeNull()
+    })
+
+    it("mirrors the rail's own price into the pinned bar", () => {
+        render(<_CourseDetailPage state="ready" props={props} />)
+        const bar = document.querySelector("[data-node=\"course-mobile-action-bar\"]")
+        expect(bar).not.toBeNull()
+        expect(bar).toHaveTextContent("1,250,000 ₫")
+        expect(within(bar as HTMLElement).getByRole("button", { name: "Enrol now" })).toBeInTheDocument()
+    })
+
+    it("rests the pinned price with the rail rather than guessing ahead of it", () => {
+        render(<_CourseDetailPage state="ready" props={{ ...props, railState: "price-pending" }} />)
+        const bar = document.querySelector("[data-node=\"course-mobile-action-bar\"]")
+        expect(bar).not.toBeNull()
+        expect(bar).not.toHaveTextContent("1,250,000 ₫")
+    })
+
+    it("keeps a non-pending rail state out of the pinned bar's resting shape", () => {
+        render(<_CourseDetailPage state="ready" props={{ ...props, railState: "checking-out" }} />)
+        expect(document.querySelector("[data-node=\"course-mobile-action-bar\"]")).toHaveTextContent("1,250,000 ₫")
+    })
+
+    it("hands the one buy action to both the rail and the pinned bar", () => {
+        const act = vi.fn()
+        render(<_CourseDetailPage state="ready" props={props} on={{ act }} />)
+        for (const control of screen.getAllByRole("button", { name: "Enrol now" })) {
+            fireEvent.click(control)
+        }
+        expect(act).toHaveBeenCalledTimes(2)
+    })
+
+    it("reports the cart, the trial and the price breakdown from the rail it owns", () => {
+        const addToCart = vi.fn()
+        const trial = vi.fn()
+        const openPriceDetail = vi.fn()
+        render(<_CourseDetailPage
+            state="ready"
+            props={{
+                ...props,
+                rail: {
+                    ...props.rail!,
+                    cartLabel: "Add to cart",
+                    trialLabel: "Preview the path",
+                    priceDetailLabel: "How is this priced?",
+                    intent: {
+                        intentTabsLabel: "Ways in",
+                        purchaseModeLabel: "Buy",
+                        trialModeLabel: "Preview",
+                        purchaseTitle: "Own the course",
+                        purchaseDescription: "Lifetime access.",
+                        trialTitle: "Look first",
+                        trialDescription: "Read the opening modules.",
+                        phaseDisclosureLabel: "Price phases",
+                    },
+                },
+            }}
+            on={{ addToCart, trial, openPriceDetail }}
+        />)
+
+        fireEvent.click(screen.getByRole("button", { name: "Add to cart" }))
+        fireEvent.click(screen.getByText("How is this priced?"))
+        fireEvent.click(screen.getByRole("tab", { name: "Preview" }))
+        fireEvent.click(screen.getByRole("button", { name: "Preview the path" }))
+
+        expect(addToCart).toHaveBeenCalledOnce()
+        expect(openPriceDetail).toHaveBeenCalledOnce()
+        expect(trial).toHaveBeenCalledOnce()
+    })
+
+    it("stays inert rather than throwing when the owner registered no actions", () => {
+        render(<_CourseDetailPage state="ready" props={props} />)
+        expect(() => {
+            fireEvent.click(screen.getByRole("tab", { name: "Content" }))
+            fireEvent.click(screen.getByText("Home"))
+            fireEvent.click(screen.getByText("Courses"))
+            fireEvent.click(screen.getAllByRole("button", { name: "Enrol now" })[0]!)
+        }).not.toThrow()
+    })
 })

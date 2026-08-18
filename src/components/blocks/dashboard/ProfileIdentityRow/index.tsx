@@ -14,8 +14,9 @@ export const ProfileIdentityRow = () => {
     const user = me.data
     const username = user?.username ?? user?.email?.split("@")[0]
     const displayName = user?.displayName?.trim() || username
+    // Only wired into the settled render below, which the guard proves has a resolved username.
     const openProfile = useCallback(() => {
-        if (username !== undefined) router.push(`/profile/${username}`)
+        router.push(`/profile/${username}`)
     }, [router, username])
 
     if (isLoading) return <_ProfileIdentityRow state="pending" />

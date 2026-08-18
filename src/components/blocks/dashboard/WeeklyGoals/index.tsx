@@ -47,7 +47,7 @@ const KPI_HREF = "/kpi"
  * @param item - One metric of the payload.
  * @param label - The already-resolved name of that metric.
  */
-const toRow = (item: MyKpiItem | undefined, key: MyKpiItem["key"], label: string): LabelledProgressRowData => {
+const toRow = (item: MyKpiItem | undefined, key: MyKpiItem["key"], label: string): LabelledProgressRowData & { readonly percent: number } => {
     const target = item?.target ?? DEFAULT_KPI_TARGETS[key]
     const current = item?.current ?? 0
     const percent = target > 0
@@ -108,7 +108,7 @@ export const WeeklyGoals = () => {
 
     const itemByKey = new Map((data?.items ?? []).map((item) => [item.key, item] as const))
     const rows = KPI_ORDER.map((key) => toRow(itemByKey.get(key), key, t(`labels.${key}`)))
-    const completed = rows.filter((row) => (row.percent ?? 0) >= 100).length
+    const completed = rows.filter((row) => row.percent >= 100).length
     const progress = KPI_ORDER.reduce((totals, key) => {
         const item = itemByKey.get(key)
         const target = item?.target ?? DEFAULT_KPI_TARGETS[key]

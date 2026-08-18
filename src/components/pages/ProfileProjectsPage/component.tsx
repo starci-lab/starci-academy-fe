@@ -29,9 +29,12 @@ export const _ProfileProjectsPage = ({ pinned, capstones, on }: ProfileProjectsP
             section: [
                 defineContractProjection("label-row-over-card", () => (
                     <SurfaceCard props={{ label: "Pinned projects", fact: pinned.state === "ready" ? `${pins.length} selected` : undefined, isFrameless: true }} contract="profile-project-card-grid" render={defineContractComponent("profile-project-card-grid", {
-                        card: pins.length > 0 ? pins.map((project) => defineContractProjection("profile-project-card", () => (
-                            <ProfileProjectCard props={{ title: project.title, description: project.description ?? undefined, kind: project.type, technologies: project.techStack.slice(0, 3), verified: project.isVerified }} on={project.url ? { press: () => on.openPinned(project.url ?? "") } : undefined} isLoading={pinned.state === "pending"} />
-                        ))) : [defineContractProjection("profile-project-card", () => (
+                        card: pins.length > 0 ? pins.map((project) => {
+                            const url = project.url
+                            return defineContractProjection("profile-project-card", () => (
+                                <ProfileProjectCard props={{ title: project.title, description: project.description ?? undefined, kind: project.type, technologies: project.techStack.slice(0, 3), verified: project.isVerified }} on={url ? { press: () => on.openPinned(url) } : undefined} isLoading={pinned.state === "pending"} />
+                            ))
+                        }) : [defineContractProjection("profile-project-card", () => (
                             <ProfileProjectCard props={{ title: pinned.state === "error" ? "Pinned projects couldn't be loaded." : "No pinned projects yet.", technologies: [] }} />
                         ))],
                     })} />

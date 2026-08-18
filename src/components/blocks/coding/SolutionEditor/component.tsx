@@ -93,6 +93,7 @@ export const _SolutionEditor = (input: SolutionEditorProps) => {
     const labels = input.props.labels
     const isBusy = input.state === "submitting"
     const testcases = input.props.testcases ?? []
+    const compilerMessage = input.props.compilerMessage
 
     const toolbar = defineContractComponent("editor-toolbar-row", {
         language: defineLeafComponent("select", {}, () => (
@@ -166,9 +167,9 @@ export const _SolutionEditor = (input: SolutionEditorProps) => {
                                 />
                             ))),
                         }),
-                        ...(input.props.compilerMessage === undefined ? {} : {
+                        ...(compilerMessage === undefined ? {} : {
                             message: defineLeafComponent("code-block", {}, () => (
-                                <CodeBlock props={{ code: input.props.compilerMessage ?? "" }} />
+                                <CodeBlock props={{ code: compilerMessage }} />
                             )),
                         }),
                     }),

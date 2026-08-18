@@ -138,13 +138,15 @@ export const _CoursePricingRail = (input: CoursePricingRailProps) => {
     const [selectedIntent, setSelectedIntent] = useState<"purchase" | "trial">("purchase")
     const cartLabel = input.props.cartLabel
     const trialLabel = input.props.trialLabel
+    const intent = input.props.intent
+    const priceDetailLabel = input.props.priceDetailLabel
     const isPricePending = input.state === "price-pending"
     const isAdding = input.state === "adding"
     const isTrialing = input.state === "trialing"
     const isCheckingOut = input.state === "checking-out"
     const phases = input.props.phases ?? []
     const activePhase = phases.find((phase) => phase.isActive === true)
-    const hasIntentSwitch = trialLabel !== undefined && input.props.intent !== undefined
+    const hasIntentSwitch = trialLabel !== undefined && intent !== undefined
     const visibleIntent = hasIntentSwitch ? selectedIntent : "purchase"
 
     const priceLine = defineContractComponent("price-discount-line", {
@@ -165,7 +167,7 @@ export const _CoursePricingRail = (input: CoursePricingRailProps) => {
 
     const pricePrimary = defineContractComponent("course-price-primary-group", {
         line: priceLine,
-        note: input.props.priceDetailLabel === undefined || isPricePending
+        note: priceDetailLabel === undefined || isPricePending
             ? undefined
             : defineContractComponent("price-note-row", {
                 fact: input.props.savingsLabel === undefined
@@ -175,7 +177,7 @@ export const _CoursePricingRail = (input: CoursePricingRailProps) => {
                     )),
                 action: defineLeafComponent("text-link", { size: "xs" }, () => (
                     <TextLink
-                        props={{ label: input.props.priceDetailLabel ?? "", size: "xs" }}
+                        props={{ label: priceDetailLabel, size: "xs" }}
                         on={{ press: input.on?.openPriceDetail }}
                     />
                 )),
@@ -208,12 +210,12 @@ export const _CoursePricingRail = (input: CoursePricingRailProps) => {
                     ? defineLeafComponent("choice-tabs", {}, () => (
                         <ChoiceTabs
                             props={{
-                                label: input.props.intent?.intentTabsLabel ?? input.props.title,
+                                label: intent.intentTabsLabel,
                                 selectedKey: visibleIntent,
                                 variant: "primary",
                                 tabs: [
-                                    { id: "purchase", label: input.props.intent?.purchaseModeLabel ?? input.props.ctaLabel },
-                                    { id: "trial", label: input.props.intent?.trialModeLabel ?? trialLabel },
+                                    { id: "purchase", label: intent.purchaseModeLabel },
+                                    { id: "trial", label: intent.trialModeLabel },
                                 ],
                             }}
                             on={{

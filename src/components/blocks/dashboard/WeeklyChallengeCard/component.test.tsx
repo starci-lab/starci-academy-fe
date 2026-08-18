@@ -60,4 +60,76 @@ describe("_WeeklyChallengeCard", () => {
         fireEvent.click(screen.getByRole("button", { name: frame.retryLabel }))
         expect(retry).toHaveBeenCalledOnce()
     })
+
+    it("drops the nested finisher surface when the challenge reports no finishers at all", () => {
+        const { container } = render(<_WeeklyChallengeCard state="ready" props={{
+            ...frame,
+            title: "Build an event store",
+            actionLabel: "Try now",
+            passedCountLabel: "0 learners passed",
+        }} />)
+        // Without a list to bound, the passed count is a plain line rather than a card label.
+        expect(container.querySelector("[data-node=\"weekly-challenge-finishers\"]")).toBeNull()
+        expect(container.querySelector("[data-component=\"SurfaceListCardSurface\"]")).toBeNull()
+        expect(screen.getByText("0 learners passed")).toBeInTheDocument()
+    })
+
+    /*
+     * The three labels below are optional in the data type, so the caller may settle a situation
+     * without resolving the words for it. The card must still draw its control rather than print
+     * `undefined` at a reader - an empty control is recoverable, a lying one is not.
+     */
+    it("draws a nameless badge rather than the word undefined once the reward is collected", () => {
+        const { container } = render(<_WeeklyChallengeCard state="ready" props={{
+            ...frame,
+            title: "Build an event store",
+            viewerPassed: true,
+            claimed: true,
+        }} />)
+        const badge = container.querySelector("[data-component=\"Badge\"]")
+        expect(badge).toBeInTheDocument()
+        expect(badge).toHaveTextContent("")
+        expect(screen.queryByText("undefined")).toBeNull()
+        expect(container.querySelector("[data-component=\"Button\"]")).toBeNull()
+    })
+
+    it("draws a nameless action rather than the word undefined while the reward is unclaimed", () => {
+        const act = vi.fn()
+        const { container } = render(<_WeeklyChallengeCard state="ready" props={{
+            ...frame,
+            title: "Build an event store",
+            viewerPassed: true,
+            claimed: false,
+            isClaiming: false,
+        }} on={{ act }} />)
+        const action = container.querySelector("[data-component=\"Button\"]")
+        expect(action).toBeInTheDocument()
+        expect(screen.queryByText("undefined")).toBeNull()
+        fireEvent.click(action as HTMLElement)
+        expect(act).toHaveBeenCalledOnce()
+    })
+
+    it("shuts the action while a claim is in flight", () => {
+        const act = vi.fn()
+        const { container } = render(<_WeeklyChallengeCard state="ready" props={{
+            ...frame,
+            title: "Build an event store",
+            actionLabel: "Claim 50 coins",
+            viewerPassed: true,
+            claimed: false,
+            isClaiming: true,
+        }} on={{ act }} />)
+        const action = container.querySelector("[data-component=\"Button\"]")
+        expect(action).toHaveAttribute("data-action-pending", "true")
+        expect(action).toBeDisabled()
+        fireEvent.click(action as HTMLElement)
+        expect(act).not.toHaveBeenCalled()
+    })
+
+    it("names its resting action when the caller resolved one, and nothing when it did not", () => {
+        const { container } = render(<_WeeklyChallengeCard state="pending" props={{ ...frame, actionLabel: "Try now" }} />)
+        expect(container.querySelector("[data-component=\"Button\"][data-loading=\"true\"]")).toHaveTextContent("Try now")
+        // The resting card names nothing that is not yet known, so it carries no glyph either.
+        expect(container.querySelector("[data-node=\"weekly-challenge-title\"] svg")).toBeNull()
+    })
 })

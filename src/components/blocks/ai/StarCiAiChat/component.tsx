@@ -134,6 +134,7 @@ const turnMarkdown = (turn: StarCiAiTurn, partialLabel: string): string => {
 /** Draw every AI-owner state from resolved fixture data; no transport or translation lives here. */
 export const _StarCiAiChat = (input: StarCiAiChatProps) => {
     const labels = input.props.labels
+    const selection = input.props.selection
     const isHistory = input.props.mode === "history" || HISTORY_STATES.has(input.state)
     const isLoading = input.state === "sessionsPending" || input.state === "historyPending"
     const stateTurn: StarCiAiTurn | undefined = ["ready", "historyReady", "streaming"].includes(input.state)
@@ -171,7 +172,7 @@ export const _StarCiAiChat = (input: StarCiAiChatProps) => {
                             context: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
                                 <Text props={{ content: input.props.contextSummary, size: "xs" }} />
                             )),
-                            clear: input.props.selection === undefined
+                            clear: selection === undefined
                                 ? undefined
                                 : defineLeafComponent("button", {}, () => (
                                     <Button
@@ -236,14 +237,14 @@ export const _StarCiAiChat = (input: StarCiAiChatProps) => {
                 <Tree
                     contract="starci-ai-composer"
                     render={defineContractComponent("starci-ai-composer", {
-                        selection: input.props.selection === undefined
+                        selection: selection === undefined
                             ? undefined
                             : defineLeafComponent("code-block", {}, () => (
                                 <CodeBlock
                                     props={{
-                                        code: input.props.selection?.quote ?? "",
-                                        language: input.props.selection?.kind === "code"
-                                            ? input.props.selection.path?.split(".").pop()
+                                        code: selection.quote,
+                                        language: selection.kind === "code"
+                                            ? selection.path?.split(".").pop()
                                             : undefined,
                                     }}
                                 />

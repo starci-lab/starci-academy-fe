@@ -60,12 +60,11 @@ const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" })
 /**
  * Read one signed movement as a direction.
  *
- * @param delta - Signed rank movement; missing or null resolves to the neutral reading.
+ * @param delta - Signed rank movement, already resolved to a number by the caller.
  */
-const directionOf = (delta?: number | null): RankDeltaDirection => {
-    const resolved = delta ?? 0
-    if (resolved > 0) return "up"
-    if (resolved < 0) return "down"
+const directionOf = (delta: number): RankDeltaDirection => {
+    if (delta > 0) return "up"
+    if (delta < 0) return "down"
     return "flat"
 }
 

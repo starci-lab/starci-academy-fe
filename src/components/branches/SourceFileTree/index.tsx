@@ -58,7 +58,7 @@ const sourceTreeNodes = (files: ReadonlyArray<SourceFileTreeFile>): ReadonlyArra
         const segments = path.slice(1).split("/")
         return {
             id: `folder:${path}`,
-            label: segments.at(-1) ?? path,
+            label: path.slice(path.lastIndexOf("/") + 1),
             kind: "folder",
             path,
             ancestors: segments.slice(0, -1).map((_, index) => `/${segments.slice(0, index + 1).join("/")}`),
@@ -69,7 +69,7 @@ const sourceTreeNodes = (files: ReadonlyArray<SourceFileTreeFile>): ReadonlyArra
         const segments = file.path.slice(1).split("/")
         return {
             id: `file:${file.path}`,
-            label: segments.at(-1) ?? file.path,
+            label: file.path.slice(file.path.lastIndexOf("/") + 1),
             kind: "file",
             path: file.path,
             ancestors: segments.slice(0, -1).map((_, index) => `/${segments.slice(0, index + 1).join("/")}`),

@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _CoursePricingRail } from "./component"
+import { ContractContent } from "@/components/branches/Tree"
+import { CoursePricingRail, _CoursePricingRail } from "./component"
 
 class ResizeObserverMock {
     observe() {}
@@ -158,5 +159,79 @@ describe("_CoursePricingRail", () => {
         for (const button of buttons) {
             expect(button).toHaveAttribute("data-action-pending", button.textContent === pendingLabel ? "true" : "false")
         }
+    })
+
+    it("draws a bare course as artwork, one price and one action and nothing else", () => {
+        render(
+            <_CoursePricingRail
+                state="ready"
+                props={{
+                    title: "Fullstack Mastery",
+                    coverUrl: "https://cdn.example/fullstack.png",
+                    price: "1,250,000 ₫",
+                    ctaLabel: "Enrol now",
+                }}
+            />,
+        )
+
+        expect(document.querySelector("[data-component=\"CoverImage\"]")).toHaveAttribute(
+            "data-fallback",
+            "false",
+        )
+        expect(screen.getByText("1,250,000 ₫")).toBeInTheDocument()
+        expect(document.querySelector("[data-component=\"Badge\"]")).toBeNull()
+        expect(document.querySelector("[data-node=\"price-note-row\"]")).toBeNull()
+        expect(
+            Array.from(document.querySelectorAll("[data-component=\"Button\"]"), (button) => button.textContent),
+        ).toEqual(["Enrol now"])
+        expect(screen.queryByText("13 learners enrolled")).toBeNull()
+        expect(screen.queryByText("Compare phases")).toBeNull()
+    })
+
+    it("opens the price breakdown from a course that has no saving to report", () => {
+        const openPriceDetail = vi.fn()
+        render(
+            <_CoursePricingRail
+                state="ready"
+                props={{ ...props, savingsLabel: undefined }}
+                on={{ openPriceDetail }}
+            />,
+        )
+
+        const note = document.querySelector("[data-node=\"price-note-row\"]")
+        expect(note?.childElementCount).toBe(1)
+        expect(screen.queryByText("Save 250,000 ₫")).toBeNull()
+        fireEvent.click(screen.getByRole("link", { name: "Why this price?" }))
+        expect(openPriceDetail).toHaveBeenCalledOnce()
+    })
+
+    it("refuses to split the rail's intent on a trial label with no copy to frame it", () => {
+        render(
+            <_CoursePricingRail
+                state="ready"
+                props={{ ...props, intent: undefined }}
+            />,
+        )
+
+        expect(screen.queryByRole("tablist")).toBeNull()
+        expect(screen.queryByRole("button", { name: "Trial" })).toBeNull()
+        expect(document.querySelector("[data-node=\"course-pricing-exploration-intent\"]")).toBeNull()
+        expect(document.querySelector("[data-node=\"course-pricing-purchase-copy\"]")).toBeNull()
+        fireEvent.click(screen.getByText("Fullstack Mastery"))
+        expect(screen.getByText("Pioneer")).toBeInTheDocument()
+    })
+
+    it("projects into a host that has already drawn the rail's surface", () => {
+        const act = vi.fn()
+        render(
+            <ContractContent
+                contract="course-pricing-rail"
+                render={CoursePricingRail({ state: "ready", props, on: { act } })}
+            />,
+        )
+
+        expect(document.querySelectorAll("[data-node=\"course-pricing-rail\"]")).toHaveLength(1)
+        fireEvent.click(screen.getByRole("button", { name: "Enrol now" }))
+        expect(act).toHaveBeenCalledOnce()
     })
 })

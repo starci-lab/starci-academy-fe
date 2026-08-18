@@ -53,4 +53,30 @@ describe("_LearnShellLayout", () => {
         fireEvent.click(screen.getByText("Contents"))
         expect(openMobileTab).toHaveBeenCalledWith("contents")
     })
+
+    it("draws no bottom bar for a surface that contributes no mobile panels", () => {
+        const { container } = render(
+            <_LearnShellLayout props={{ spine, isFullBleed: false, mobileTabs: [] }} surface={<Surface />} />,
+        )
+
+        expect(container.querySelector("[data-node=learn-mobile-tab-bar]")).toBeNull()
+        expect(container.querySelector("[data-node=learn-spine-column]")).not.toBeNull()
+    })
+
+    it("rests the resume card in the spine while the course is still arriving", () => {
+        const { container } = render(
+            <_LearnShellLayout
+                props={{
+                    spine: { ...spine, resume: { label: "Continue", title: "Module 2", percent: 40, percentText: "2/5" } },
+                    isFullBleed: false,
+                }}
+                surface={<Surface />}
+                isLoading
+            />,
+        )
+
+        expect(container.querySelector("[data-node=learn-resume-card]")).not.toBeNull()
+        expect(container.querySelectorAll("[data-loading=\"true\"]").length).toBeGreaterThan(0)
+        expect(screen.getByText("Reader surface")).toBeTruthy()
+    })
 })

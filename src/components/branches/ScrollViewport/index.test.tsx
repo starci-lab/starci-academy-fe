@@ -1,0 +1,39 @@
+import { render, screen } from "@testing-library/react"
+import { describe, expect, it } from "vitest"
+import { ScrollViewport } from "."
+import { defineContractProjection } from "@/components/contracts/props"
+
+/**
+ * What these tests guard.
+ *
+ * HeroUI does not ship its modal scrollbar as a standalone component, so this branch preserves the
+ * vendor mechanism rather than painting a parallel scrollbar: the boundary selects an approved
+ * maximum-height entry, that entry carries the vendor `scrollbar` utility, and the card around it
+ * is the one marked as keeping its boundary while the content inside moves.
+ *
+ * The rail itself is projected in already drawn, so the viewport must not rearrange it.
+ */
+
+const rail = defineContractProjection("course-pricing-rail", () => (
+    <p data-testid="rail-body">1.750.000 ₫</p>
+))
+
+describe("ScrollViewport", () => {
+    it("bounds the pricing rail in the approved scrolling entry inside one marked card", () => {
+        const { container } = render(<ScrollViewport boundary="pricing-rail" render={rail} />)
+
+        const viewport = container.querySelector("[data-node=\"pricing-rail-scroll-viewport\"]")
+        expect(viewport).not.toBeNull()
+        expect(viewport?.className).toContain("overflow-y-auto")
+        expect(viewport?.className).toContain("scrollbar")
+        expect(container.querySelector("[data-component=\"SurfaceCardSurface\"]")).toHaveAttribute("data-scroll-inside", "pricing-rail")
+    })
+
+    it("keeps the rail's own node and does not name the section around it", () => {
+        const { container } = render(<ScrollViewport boundary="pricing-rail" render={rail} />)
+
+        expect(container.querySelector("[data-node=\"course-pricing-rail\"]")).not.toBeNull()
+        expect(container.querySelector("[data-node=\"label-row-over-card\"]")).toBeNull()
+        expect(screen.getByTestId("rail-body")).toBeInTheDocument()
+    })
+})

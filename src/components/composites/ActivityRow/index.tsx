@@ -29,6 +29,8 @@ export type ActivityRowProps = CompositeProps<ActivityRowData, ActivityRowAction
 /** Draw one actor sentence, its optional reaction and quiet timestamp. */
 export const ActivityRow = ({ props, on, isLoading = false }: ActivityRowProps) => {
     const reactionLabels = props.reactionLabels
+    const target = props.target
+    const reactionLabel = props.reactionLabel
     const sentence = defineContractComponent("activity-actor-action-target-sentence", {
         actor: defineLeafComponent("text-link", { size: "sm" }, () => (
             <TextLink props={{ label: props.actor ?? "", size: "sm" }} on={{ press: on?.openActor }} />
@@ -36,18 +38,18 @@ export const ActivityRow = ({ props, on, isLoading = false }: ActivityRowProps) 
         action: defineLeafComponent("text", { size: "sm" }, () => (
             <Text props={{ content: props.action, size: "sm" }} isLoading={isLoading} />
         )),
-        ...(props.target === undefined ? {} : {
+        ...(target === undefined ? {} : {
             target: defineLeafComponent("text-link", { size: "sm" }, () => (
-                <TextLink props={{ label: props.target ?? "", size: "sm" }} on={{ press: on?.openTarget }} />
+                <TextLink props={{ label: target, size: "sm" }} on={{ press: on?.openTarget }} />
             )),
         }),
     })
     const body = defineContractComponent("activity-sentence-over-reaction", {
         sentence,
-        ...(props.reactionLabel === undefined || reactionLabels === undefined ? {} : {
+        ...(reactionLabel === undefined || reactionLabels === undefined ? {} : {
             reaction: defineLeafComponent("reaction-picker", {}, () => (
                 <ReactionPicker props={{
-                    label: props.reactionLabel ?? "",
+                    label: reactionLabel,
                     count: props.reactionCount ?? 0,
                     selected: props.selectedReaction,
                     labels: reactionLabels,

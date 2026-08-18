@@ -35,6 +35,10 @@ export default defineConfig([
             "**/.claude/**",
             // Disposable design evidence is reviewed by its owning workflow and never ships.
             "**/.artifacts/**",
+            // sonar-scanner's working directory: it vendors its own JS/TS analyzer bridge
+            // bundle underneath here, which is why linting it once ran ESLint out of memory
+            // trying to parse SonarQube's bundled compiler as if it were product source.
+            "**/.scannerwork/**",
         ],
     },
     {

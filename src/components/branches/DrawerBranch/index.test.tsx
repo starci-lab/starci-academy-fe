@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react"
+import { fireEvent, render } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import type { PropsWithChildren } from "react"
 import type * as HeroUi from "@heroui/react"
@@ -7,6 +7,9 @@ import { defineContractComponent, defineLeafComponent } from "@/components/contr
 
 type VendorPartProps = PropsWithChildren
 type VendorContentProps = PropsWithChildren<{ readonly placement?: string }>
+type VendorRootProps = PropsWithChildren<{ readonly onOpenChange: (open: boolean) => void }>
+
+const mocks = vi.hoisted(() => ({ openChange: undefined as ((open: boolean) => void) | undefined }))
 
 const resolvedCopy = {
     cartTitle: String(["Cart"].join("")),
@@ -18,7 +21,10 @@ const resolvedCopy = {
 void (undefined as unknown as typeof HeroUi)
 
 vi.mock("@heroui/react", () => {
-    const DrawerRoot = (input: VendorPartProps) => <div>{input.children}</div>
+    const DrawerRoot = (input: VendorRootProps) => {
+        mocks.openChange = input.onOpenChange
+        return <div>{input.children}</div>
+    }
     DrawerRoot.Backdrop = (input: VendorPartProps) => <div>{input.children}</div>
     DrawerRoot.Content = (input: VendorContentProps) => (
         <div data-testid="drawer-content" data-placement={input.placement}>{input.children}</div>
@@ -26,7 +32,7 @@ vi.mock("@heroui/react", () => {
     DrawerRoot.Dialog = (input: VendorPartProps) => <div>{input.children}</div>
     DrawerRoot.Header = (input: VendorPartProps) => <div>{input.children}</div>
     DrawerRoot.Heading = (input: VendorPartProps) => <h2>{input.children}</h2>
-    DrawerRoot.CloseTrigger = () => <button type="button">Close</button>
+    DrawerRoot.CloseTrigger = () => <button type="button" onClick={() => mocks.openChange?.(false)}>Close</button>
     DrawerRoot.Body = (input: VendorPartProps) => <div>{input.children}</div>
     return { Drawer: DrawerRoot }
 })
@@ -61,5 +67,39 @@ describe("DrawerBranch", () => {
             />,
         )
         expect(getByTestId("drawer-content")).toHaveAttribute("data-placement", "bottom")
+    })
+
+    it("reports every vendor way out as one dismissal and ignores the panel opening", () => {
+        const dismiss = vi.fn()
+        const { getByRole } = render(
+            <DrawerBranch
+                isOpen
+                title={resolvedCopy.cartTitle}
+                contract="stacked-peer-controls"
+                render={drawerBody(resolvedCopy.cartBody)}
+                onDismiss={dismiss}
+            />,
+        )
+
+        mocks.openChange?.(true)
+        expect(dismiss).not.toHaveBeenCalled()
+
+        fireEvent.click(getByRole("button", { name: "Close" }))
+        expect(dismiss).toHaveBeenCalledOnce()
+    })
+
+    it("names the panel itself and zeroes the vendor inset the interior already owns", () => {
+        const { getByRole, getByText } = render(
+            <DrawerBranch
+                isOpen
+                title={resolvedCopy.aiTitle}
+                contract="stacked-peer-controls"
+                render={drawerBody(resolvedCopy.aiBody)}
+                onDismiss={() => undefined}
+            />,
+        )
+
+        expect(getByRole("heading", { name: resolvedCopy.aiTitle })).toBeInTheDocument()
+        expect(getByText(resolvedCopy.aiBody).closest("[data-node=\"stacked-peer-controls\"]")).not.toBeNull()
     })
 })

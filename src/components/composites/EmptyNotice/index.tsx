@@ -49,6 +49,7 @@ export type EmptyNoticeProps = CompositeProps<EmptyNoticeData, EmptyNoticeAction
  */
 export const EmptyNotice = ({ props, on }: EmptyNoticeProps) => {
     const icon = props.icon
+    const actionLabel = props.actionLabel
     const content = defineContractComponent("empty-notice-stack", {
         mark: icon === undefined ? undefined : defineLeafComponent("icon-tile", {}, () => (
             <IconTile props={{ icon, tone: "neutral", size: "md" }} />
@@ -57,8 +58,8 @@ export const EmptyNotice = ({ props, on }: EmptyNoticeProps) => {
         description: props.description === undefined ? undefined : defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
             <Text props={{ content: props.description, tone: "muted", size: "xs" }} />
         )),
-        action: props.actionLabel === undefined ? undefined : defineLeafComponent("button", {}, () => (
-            <Button props={{ label: props.actionLabel ?? "", variant: "secondary", size: "sm", icon: "retry" }} on={{ press: on?.act }} />
+        action: actionLabel === undefined ? undefined : defineLeafComponent("button", {}, () => (
+            <Button props={{ label: actionLabel, variant: "secondary", size: "sm", icon: "retry" }} on={{ press: on?.act }} />
         )),
     })
     return <Tree contract="empty-notice-stack" render={content} />

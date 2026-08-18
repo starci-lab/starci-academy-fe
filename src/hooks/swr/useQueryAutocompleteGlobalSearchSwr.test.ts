@@ -32,4 +32,36 @@ describe("useQueryAutocompleteGlobalSearchSwr", () => {
         expect(mocks.query).toHaveBeenCalledWith({ query: "system", entities: ["CourseEntity"], size: 6 })
     })
 
+    it("searches every entity, and says so in the key, when no scope was named", async () => {
+        mocks.query.mockResolvedValue({ data: { autocompleteGlobalSearch: { data: empty } } })
+        const { result } = renderHook(
+            () => useQueryAutocompleteGlobalSearchSwr({ query: "system" }),
+            { wrapper },
+        )
+        await waitFor(() => expect(result.current.data).toEqual(empty))
+        // No `entities` field at all - an empty list would mean "search nothing", which is the
+        // opposite of what an unscoped search asks for.
+        expect(mocks.query).toHaveBeenCalledWith({ query: "system", size: 6 })
+    })
+
+    it("resolves to null when the server answered without a payload", async () => {
+        mocks.query.mockResolvedValue({
+            data: { autocompleteGlobalSearch: { success: false, message: "unavailable" } },
+        })
+        const { result } = renderHook(
+            () => useQueryAutocompleteGlobalSearchSwr({ query: "system" }),
+            { wrapper },
+        )
+        await waitFor(() => expect(result.current.data).toBeNull())
+        expect(result.current.error).toBeUndefined()
+    })
+
+    it("resolves to null when there is no response body at all", async () => {
+        mocks.query.mockResolvedValue({ data: undefined })
+        const { result } = renderHook(
+            () => useQueryAutocompleteGlobalSearchSwr({ query: "system" }),
+            { wrapper },
+        )
+        await waitFor(() => expect(result.current.data).toBeNull())
+    })
 })

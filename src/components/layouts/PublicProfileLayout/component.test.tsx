@@ -1,6 +1,6 @@
 /** @vitest-environment jsdom */
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { cleanup, render, screen } from "@testing-library/react"
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { _PublicProfileLayout, type PublicProfileLayoutProps } from "./component"
 
 vi.mock("@/components/blocks/profile/ProfileHero", () => ({
@@ -54,5 +54,57 @@ describe("_PublicProfileLayout", () => {
         render(<_PublicProfileLayout {...base} state="locked" />)
         expect(screen.queryByRole("tablist")).toBeNull()
         expect(screen.getByText("Private")).toBeTruthy()
+    })
+
+    it("keeps the identity rail beside a locked body and offers the way to browse", () => {
+        const browse = vi.fn()
+        const { container } = render(
+            <_PublicProfileLayout {...base} state="locked" on={{ ...base.on, browse }} />,
+        )
+
+        expect(container.querySelector("[data-testid=\"profile-hero\"]")).toBeTruthy()
+        expect(container.querySelector("[data-testid=\"profile-body\"]")).toBeNull()
+        expect(screen.getByText("Locked")).toBeTruthy()
+        fireEvent.click(screen.getByRole("button", { name: /Browse/ }))
+        expect(browse).toHaveBeenCalledOnce()
+    })
+
+    it("replaces the whole profile with a retry when the read failed", () => {
+        const retry = vi.fn()
+        const { container } = render(
+            <_PublicProfileLayout {...base} state="failed" on={{ ...base.on, retry }} />,
+        )
+
+        expect(container.querySelector("[data-testid=\"profile-hero\"]")).toBeNull()
+        expect(screen.queryByRole("tablist")).toBeNull()
+        expect(screen.getByText("Failed")).toBeTruthy()
+        fireEvent.click(screen.getByRole("button", { name: /Retry/ }))
+        expect(retry).toHaveBeenCalledOnce()
+    })
+
+    it("sends a reader home rather than retrying a profile that does not exist", () => {
+        const home = vi.fn()
+        const retry = vi.fn()
+        render(<_PublicProfileLayout {...base} state="not-found" on={{ ...base.on, home, retry }} />)
+
+        expect(screen.getByText("Missing")).toBeTruthy()
+        fireEvent.click(screen.getByRole("button", { name: /Home/ }))
+        expect(home).toHaveBeenCalledOnce()
+        expect(retry).not.toHaveBeenCalled()
+    })
+
+    it("keeps the same chrome while the profile is still loading", () => {
+        const { container } = render(<_PublicProfileLayout {...base} state="loading" />)
+
+        expect(container.querySelector("[data-node=\"profile-tabs-over-body\"]")).toBeTruthy()
+        expect(container.querySelector("[data-testid=\"profile-body\"]")).toBeTruthy()
+    })
+
+    it("reports a tab change to the connected owner", () => {
+        const selectTab = vi.fn()
+        render(<_PublicProfileLayout {...base} on={{ ...base.on, selectTab }} />)
+
+        fireEvent.click(screen.getByRole("tab", { name: "Projects" }))
+        expect(selectTab).toHaveBeenCalledWith("projects")
     })
 })

@@ -48,6 +48,7 @@ export type ProfileHeroProps = {
 export const _ProfileHero = (input: ProfileHeroProps) => {
     const isLoading = input.state === "pending"
     const factValues = [input.props.location, input.props.workMode].filter((value): value is string => Boolean(value))
+    const websiteUrl = input.props.websiteUrl
     const meta = [
         input.props.githubUrl === undefined ? undefined : defineLeafComponent("link", {}, () => (
             <Link props={{ label: "GitHub", externalHref: input.props.githubUrl, icon: "github" }} />
@@ -55,8 +56,8 @@ export const _ProfileHero = (input: ProfileHeroProps) => {
         input.props.linkedinUrl === undefined ? undefined : defineLeafComponent("link", {}, () => (
             <Link props={{ label: "LinkedIn", externalHref: input.props.linkedinUrl }} />
         )),
-        input.props.websiteUrl === undefined ? undefined : defineLeafComponent("link", {}, () => (
-            <Link props={{ label: input.props.websiteUrl ?? "", externalHref: input.props.websiteUrl, icon: "explore" }} />
+        websiteUrl === undefined ? undefined : defineLeafComponent("link", {}, () => (
+            <Link props={{ label: websiteUrl, externalHref: websiteUrl, icon: "explore" }} />
         )),
         defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
             <Text props={{ content: input.props.joinedLabel, size: "xs" }} isLoading={isLoading} />
