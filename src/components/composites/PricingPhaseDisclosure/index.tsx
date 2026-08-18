@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { DisclosureBranch } from "@/components/branches/DisclosureBranch"
+import { SurfaceAccordionCard } from "@/components/branches/SurfaceAccordionCard"
 import { DisclosureIndicator } from "@/components/leaves/DisclosureIndicator"
 import { Text } from "@/components/leaves/Text"
 import {
@@ -38,7 +38,7 @@ export type PricingPhaseDisclosureProps = CompositeProps<PricingPhaseDisclosureD
 export const PricingPhaseDisclosure = (input: PricingPhaseDisclosureProps) => {
     const [isOpen, setIsOpen] = useState(input.props.isOpen === true)
     return (
-        <DisclosureBranch
+        <SurfaceAccordionCard
             isOpen={isOpen}
             summaryContract="pricing-phase-disclosure-summary"
             summaryRender={defineContractComponent("pricing-phase-disclosure-summary", {

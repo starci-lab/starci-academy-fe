@@ -25,6 +25,7 @@ describe("_CourseLearnModulePage", () => {
             />,
         )
 
+        fireEvent.click(screen.getByRole("button", { name: "Async patterns" }))
         fireEvent.click(screen.getByRole("button", { name: "AbortController" }))
         expect(onContent).toHaveBeenCalledWith("content-1")
     })

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { DisclosureBranch } from "@/components/branches/DisclosureBranch"
+import { SurfaceAccordionCard } from "@/components/branches/SurfaceAccordionCard"
 import { PressableSurface } from "@/components/branches/PressableSurface"
 import { Tree } from "@/components/branches/Tree"
 import { Badge } from "@/components/leaves/Badge"
@@ -115,7 +115,7 @@ export const CurriculumModuleRow = (input: CurriculumModuleRowProps) => {
     }
 
     return (
-        <DisclosureBranch
+        <SurfaceAccordionCard
             isOpen={isOpen}
             summaryContract="curriculum-module-summary-row"
             summaryRender={summary}
