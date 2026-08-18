@@ -1148,7 +1148,7 @@ export const CONTRACTS = buildContracts({
         children: {
             finisher: { composite: "weekly-challenge-finisher-row", repeats: true, restingCount: 3 },
         },
-        why: "if you need a joined list of recent finisher rows.",
+        why: "if you need a joined list of recent finisher rows, capped to the resting count the card shows before a reader asks for more.",
     },
     "job-readiness-card": {
         classes: ["flex", "flex-col", "gap-3", "p-4"],
@@ -1230,7 +1230,7 @@ export const CONTRACTS = buildContracts({
             action: { leaf: "text", props: { size: "sm" } },
             target: { leaf: "text-link", props: { size: "sm" }, optional: true },
         },
-        why: "if you need a wrapping actor-action-target sentence carrying two actionable names.",
+        why: "if you need a sentence where the actor and target stay independently pressable links, with the plain-text action verb keeping them apart so a press cannot land on the wrong name.",
     },
     "contribution-calendar-stack": {
         classes: ["flex", "flex-col", "gap-3", "w-full"],
