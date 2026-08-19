@@ -5,6 +5,7 @@ import {fileURLToPath} from "node:url"
 
 const normalize = (file, cwd) => relative(cwd, file).replaceAll("\\", "/")
 const production = (file) => /^src\/.+\.(?:ts|tsx|js|jsx)$/.test(file)
+    && !/\.(?:test|spec|e2e-spec)\.[cm]?[jt]sx?$/.test(file)
 export const resolveBase = (env, args) => env.COVERAGE_BASE_SHA ?? (args.includes("--base") ? args[args.indexOf("--base") + 1] : undefined)
 
 export const lineCounts = (data) => {
