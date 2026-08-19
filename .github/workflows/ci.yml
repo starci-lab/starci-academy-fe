@@ -23,8 +23,13 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint:check
-      - run: npm run typecheck
+      # Build BEFORE typecheck. Next.js generates the route-level `PageProps` and
+      # `LayoutProps` types into .next/types during the build, and src/app/** refers
+      # to them, so a typecheck on a clean checkout fails with "Cannot find name
+      # 'PageProps'" on files that are perfectly correct. It passes locally only
+      # because a previous build left those types behind.
       - run: npm run build
+      - run: npm run typecheck
       - run: npm run test:ci
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
