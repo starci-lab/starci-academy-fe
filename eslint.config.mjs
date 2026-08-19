@@ -143,4 +143,8 @@ export default defineConfig([
         files: ["scripts/**/*.{js,mjs,cjs}"],
         languageOptions: { globals: globals.node },
     },
+    {
+        files: ["tests/e2e/**/*.{js,mjs,cjs}"],
+        languageOptions: { globals: globals.node },
+    },
 ])

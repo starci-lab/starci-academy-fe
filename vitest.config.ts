@@ -33,6 +33,8 @@ export default defineConfig({
             reporter: [
                 "text-summary",
                 "lcov",
+                "json-summary",
+                "json",
             ],
             reportsDirectory: "coverage",
             /*

@@ -2,6 +2,7 @@
   "name": "starci-academy-fe",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "npm@11.6.2",
   "scripts": {
     "dev": "next dev --hostname localhost --port 3000",
     "build": "next build",
@@ -10,7 +11,8 @@
     "lint:check": "eslint",
     "test": "vitest run",
     "test:unit": "vitest run",
-    "test:ci": "vitest run --coverage",
+    "test:ci": "vitest run --coverage && node scripts/write-patch-coverage.mjs",
+    "test:e2e": "node scripts/run-e2e-smoke.mjs",
     "sonar:check": "sonar-scanner-npm -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=600",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
