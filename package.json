@@ -13,7 +13,7 @@
     "test": "vitest run",
     "test:unit": "vitest run",
     "test:ci": "vitest run --coverage && node scripts/write-patch-coverage.mjs",
-    "test:e2e": "node scripts/run-e2e-smoke.mjs",
+    "test:e2e": "npm run build && node scripts/run-e2e-smoke.mjs",
     "sonar:check": "sonar-scanner-npm -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=600",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
