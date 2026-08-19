@@ -26,11 +26,11 @@ const waitForServer = async () => {
 
 try {
     if (!external) {
-        server = spawn(process.platform === "win32" ? "npm.cmd" : "npm", ["run", "start", "--", "--hostname", "127.0.0.1", "--port", port], {
+        server = spawn(process.execPath, ["node_modules/next/dist/bin/next", "start", "--hostname", "127.0.0.1", "--port", port], {
             cwd: process.cwd(),
             stdio: "inherit",
             env: {...process.env, PORT: port},
-            shell: process.platform === "win32",
+            shell: false,
         })
     }
     await waitForServer()
