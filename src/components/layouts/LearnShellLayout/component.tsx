@@ -87,7 +87,9 @@ export const _LearnShellLayout = (input: LearnShellLayoutProps) => {
                 ...(input.props.isFullBleed ? {} : {
                     spine: learnSpine({ props: input.props.spine, on: input.on, isLoading: input.isLoading ?? false }),
                 }),
-                body: defineLeafComponent("page", {}, () => <>{input.surface}</>),
+                body: defineContractComponent("learn-routed-body", {
+                    page: defineLeafComponent("page", {}, () => <>{input.surface}</>),
+                }),
                 ...(mobileTabs.length === 0 ? {} : {
                     bar: defineContractComponent("learn-mobile-tab-bar", {
                         tab: mobileTabs.map((tab) => defineLeafComponent("nav-link", { kind: "tab" }, () => (

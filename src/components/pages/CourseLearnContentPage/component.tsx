@@ -537,7 +537,9 @@ export const _CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
         <Tree
             contract="content-reader-frame"
             render={defineContractComponent("content-reader-frame", {
-                contents,
+                contents: defineContractComponent("learn-route-context-rail", {
+                    panel: contents,
+                }),
                 main: reader,
                 ...(outlineEntries.length === 0 ? {} : { outline }),
             })}

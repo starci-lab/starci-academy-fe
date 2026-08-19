@@ -103,7 +103,7 @@ export const learnSpine = ({ props, on, isLoading = false }: LearnSpineProps) =>
     const lockedLabel = props.lockedLabel
     const resume = props.resume
     return (
-        defineContractComponent("learn-spine-column", {
+        defineContractComponent("learn-course-navigation-rail", {
             ...(resume === undefined ? {} : {
                 resume: defineContractProjection("learn-resume-card", () => (
                     <PressableSurface

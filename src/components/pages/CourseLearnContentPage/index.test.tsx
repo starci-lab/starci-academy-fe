@@ -2,11 +2,11 @@ import {fireEvent, render, screen, waitFor} from "@testing-library/react"
 import {beforeEach, describe, expect, it, vi} from "vitest"
 
 const mocks = vi.hoisted(() => ({
-    content: {data: undefined as any, error: undefined as any, mutate: vi.fn()},
-    module: {data: undefined as any, error: undefined as any, mutate: vi.fn()},
-    reactions: {data: undefined as any, error: undefined as any, mutate: vi.fn()},
-    comments: {data: undefined as any, error: undefined as any, mutate: vi.fn()},
-    source: {data: undefined as any, error: undefined as any, dependencies: {}, mutate: vi.fn()},
+    content: {data: undefined as unknown, error: undefined as unknown, mutate: vi.fn()},
+    module: {data: undefined as unknown, error: undefined as unknown, mutate: vi.fn()},
+    reactions: {data: undefined as unknown, error: undefined as unknown, mutate: vi.fn()},
+    comments: {data: undefined as unknown, error: undefined as unknown, mutate: vi.fn()},
+    source: {data: undefined as unknown, error: undefined as unknown, dependencies: {}, mutate: vi.fn()},
     react: {isMutating: false, trigger: vi.fn()},
     submit: {isMutating: false, trigger: vi.fn(() => Promise.resolve({data: {createComment: {success: true}}}))},
     router: {push: vi.fn()},
@@ -28,8 +28,26 @@ vi.mock("@/hooks/swr/useMutateSubmitContentCommentSwr", () => ({useMutateSubmitC
 vi.mock("@/hooks/swr/useRepoSandpackFiles", () => ({useRepoSandpackFiles: () => mocks.source}))
 vi.mock("@/components/layouts/LearnShellLayout", () => ({useLearnMobileView: () => ({view: mocks.view})}))
 vi.mock("@/components/layouts/GlobalAiChatLayout", () => ({useGlobalAiChat: () => mocks.ai}))
-vi.mock("./component", () => ({
-    _CourseLearnContentPage: ({state, props, on}: any) => (
+
+type MockPageActions = {
+    readonly goCourse: () => void
+    readonly goModule: () => void
+    readonly changePage: (page: number) => void
+    readonly changeDiscussionDraft: (value: string) => void
+    readonly submitDiscussion: () => void
+    readonly retryDiscussion: () => void
+    readonly selectChallenge: () => void
+    readonly act?: () => void
+}
+
+type MockPageProps = {
+    readonly state: string
+    readonly props: { readonly title?: string, readonly noticeActionLabel?: string }
+    readonly on: MockPageActions
+}
+
+vi.mock("./component", () => {
+    const renderMockPage = ({state, props, on}: MockPageProps) => (
         <div>
             <output data-testid="state">{state}</output>
             <output data-testid="title">{props.title}</output>
@@ -42,8 +60,9 @@ vi.mock("./component", () => ({
             <button onClick={() => on.selectChallenge()}>challenge</button>
             {props.noticeActionLabel && <button onClick={() => on.act?.()}>{props.noticeActionLabel}</button>}
         </div>
-    ),
-}))
+    )
+    return {_CourseLearnContentPage: renderMockPage}
+})
 
 import {CourseLearnContentPage} from "./index"
 

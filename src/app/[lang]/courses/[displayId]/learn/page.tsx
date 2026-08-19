@@ -1,12 +1,12 @@
-import { CourseLearnTodayPage } from "@/components/pages/CourseLearnTodayPage"
+import { redirect } from "next/navigation"
 
 interface LearnIndexPageProps {
     params: Promise<{ lang: string, displayId: string }>
 }
 
 const LearnIndexPage = async ({ params }: LearnIndexPageProps) => {
-    const { displayId } = await params
-    return <CourseLearnTodayPage displayId={displayId} />
+    const { lang, displayId } = await params
+    redirect(`/${lang}/courses/${displayId}/learn/content`)
 }
 
 export default LearnIndexPage

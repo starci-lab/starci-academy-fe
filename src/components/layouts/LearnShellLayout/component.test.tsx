@@ -20,7 +20,8 @@ describe("_LearnShellLayout", () => {
         )
 
         expect(screen.getByText("Reader surface")).toBeTruthy()
-        expect(container.querySelector("[data-node=learn-spine-column]")).not.toBeNull()
+        expect(container.querySelector("[data-node=learn-course-navigation-rail]")).not.toBeNull()
+        expect(container.querySelector("[data-node=learn-routed-body]")).not.toBeNull()
     })
 
     it("removes course furniture for a focused full-bleed session", () => {
@@ -29,7 +30,7 @@ describe("_LearnShellLayout", () => {
         )
 
         expect(screen.getByText("Reader surface")).toBeTruthy()
-        expect(container.querySelector("[data-node=learn-spine-column]")).toBeNull()
+        expect(container.querySelector("[data-node=learn-course-navigation-rail]")).toBeNull()
     })
 
     it("reports mobile view changes through the dedicated action", () => {
@@ -60,7 +61,7 @@ describe("_LearnShellLayout", () => {
         )
 
         expect(container.querySelector("[data-node=learn-mobile-tab-bar]")).toBeNull()
-        expect(container.querySelector("[data-node=learn-spine-column]")).not.toBeNull()
+        expect(container.querySelector("[data-node=learn-course-navigation-rail]")).not.toBeNull()
     })
 
     it("rests the resume card in the spine while the course is still arriving", () => {

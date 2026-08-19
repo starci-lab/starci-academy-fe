@@ -71,14 +71,15 @@ export type LayoutClassName =
     | "md:[&>*:first-child]:overflow-y-auto"
     | "md:[&>*:nth-child(2)]:min-w-0" | "md:[&>*:nth-child(2)]:grow"
     | "[&>*]:min-w-0" | "[&>*]:grow" | "[&>*]:whitespace-nowrap"
-    | "md:[&>[data-node=learn-spine-column]]:w-72"
-    | "md:[&>[data-node=learn-spine-column]]:grow-0"
-    | "md:[&>[data-node=learn-spine-column]]:shrink-0"
-    | "md:[&>[data-node=learn-spine-column]]:sticky"
-    | "md:[&>[data-node=learn-spine-column]]:top-rail"
-    | "md:[&>[data-node=learn-spine-column]]:self-start"
-    | "md:[&>[data-node=learn-spine-column]]:max-h-rail"
-    | "md:[&>[data-node=learn-spine-column]]:overflow-y-auto"
+    | "md:[&>[data-node=learn-course-navigation-rail]]:w-64"
+    | "md:[&>[data-node=learn-course-navigation-rail]]:grow-0"
+    | "md:[&>[data-node=learn-course-navigation-rail]]:shrink-0"
+    | "md:[&>[data-node=learn-course-navigation-rail]]:sticky"
+    | "md:[&>[data-node=learn-course-navigation-rail]]:top-rail"
+    | "md:[&>[data-node=learn-course-navigation-rail]]:self-start"
+    | "md:[&>[data-node=learn-course-navigation-rail]]:max-h-rail"
+    | "md:[&>[data-node=learn-course-navigation-rail]]:overflow-y-auto"
+    | "md:[&>*:first-child]:w-80" | "md:[&>*:last-child]:w-64"
     | "md:[&>*:first-child]:sticky" | "md:[&>*:first-child]:top-rail"
     | "md:[&>*:first-child]:self-start" | "md:[&>*:first-child]:max-h-rail"
     | "md:[&>*:first-child]:overflow-y-auto"
@@ -406,30 +407,45 @@ export const CONTRACTS = buildContracts({
             "flex", "min-h-screen", "w-full", "min-w-0", "flex-col", "items-start",
             "[&>*]:min-w-0", "[&>*]:grow",
             "md:flex-row", "md:items-start",
-            "md:[&>[data-node=learn-spine-column]]:w-72",
-            "md:[&>[data-node=learn-spine-column]]:grow-0",
-            "md:[&>[data-node=learn-spine-column]]:shrink-0",
-            "md:[&>[data-node=learn-spine-column]]:sticky",
-            "md:[&>[data-node=learn-spine-column]]:top-rail",
-            "md:[&>[data-node=learn-spine-column]]:self-start",
-            "md:[&>[data-node=learn-spine-column]]:max-h-rail",
-            "md:[&>[data-node=learn-spine-column]]:overflow-y-auto",
+            "md:[&>[data-node=learn-course-navigation-rail]]:w-64",
+            "md:[&>[data-node=learn-course-navigation-rail]]:grow-0",
+            "md:[&>[data-node=learn-course-navigation-rail]]:shrink-0",
+            "md:[&>[data-node=learn-course-navigation-rail]]:sticky",
+            "md:[&>[data-node=learn-course-navigation-rail]]:top-rail",
+            "md:[&>[data-node=learn-course-navigation-rail]]:self-start",
+            "md:[&>[data-node=learn-course-navigation-rail]]:max-h-rail",
+            "md:[&>[data-node=learn-course-navigation-rail]]:overflow-y-auto",
         ],
         children: {
-            spine: { contract: "learn-spine-column", optional: true },
-            body: { leaf: "page" },
+            spine: { contract: "learn-course-navigation-rail", optional: true },
+            body: { contract: "learn-routed-body" },
             bar: { contract: "learn-mobile-tab-bar", optional: true },
         },
         why: "if you need a persistent side rail sitting beside a routed main body that swaps surfaces without the frame itself re-rendering.",
     },
-    "learn-spine-column": {
+    "learn-course-navigation-rail": {
         host: "nav",
         classes: ["hidden", "w-full", "min-w-0", "flex-col", "gap-4", "p-4", "md:flex"],
         children: {
             resume: { contract: "learn-resume-card", optional: true },
             group: { contract: "learn-nav-group", repeats: true, restingCount: 3 },
         },
-        why: "if you need a rail that puts where the learner left off above grouped navigation destinations.",
+        why: "if you need the compact course-mode navigation to keep grouped destinations and optional learner evidence in one persistent desktop rail.",
+    },
+    "learn-routed-body": {
+        classes: ["w-full", "min-w-0", "flex-1"],
+        children: {
+            page: { leaf: "page" },
+        },
+        why: "if you need one addressed learning page to own the flexible body while the enclosing course navigation remains mounted.",
+    },
+    "learn-route-context-rail": {
+        host: "aside",
+        classes: ["w-full", "min-w-0"],
+        children: {
+            panel: { contract: "content-map-panel" },
+        },
+        why: "if you need the active learning route to supply one auxiliary course map beside its routed body without moving that map into global navigation.",
     },
     "learn-nav-group": {
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-1"],
@@ -2020,20 +2036,20 @@ export const CONTRACTS = buildContracts({
      */
     "content-reader-frame": {
         classes: [
-            "mx-auto", "flex", "w-full", "min-w-0", "max-w-app-xl", "flex-col", "items-start", "gap-6", "px-6", "py-6",
-            "md:flex-row", "md:items-start", "md:gap-8",
-            "md:[&>*:first-child]:w-72", "md:[&>*:first-child]:shrink-0",
+            "flex", "w-full", "min-w-0", "flex-col", "items-start",
+            "md:flex-row", "md:items-start",
+            "md:[&>*:first-child]:w-80", "md:[&>*:first-child]:shrink-0",
             "md:[&>*:first-child]:sticky", "md:[&>*:first-child]:top-rail",
             "md:[&>*:first-child]:self-start", "md:[&>*:first-child]:max-h-rail",
             "md:[&>*:first-child]:overflow-y-auto",
             "md:[&>*:nth-child(2)]:min-w-0", "md:[&>*:nth-child(2)]:grow",
-            "md:[&>*:last-child]:w-72", "md:[&>*:last-child]:shrink-0",
+            "md:[&>*:last-child]:w-64", "md:[&>*:last-child]:shrink-0",
             "md:[&>*:last-child]:sticky", "md:[&>*:last-child]:top-rail",
             "md:[&>*:last-child]:self-start", "md:[&>*:last-child]:max-h-rail",
             "md:[&>*:last-child]:overflow-y-auto",
         ],
         children: {
-            contents: { contract: "content-map-panel" },
+            contents: { contract: "learn-route-context-rail" },
             main: { contract: "learn-content-page" },
             outline: { contract: "content-outline-rail", optional: true },
         },
@@ -2041,7 +2057,7 @@ export const CONTRACTS = buildContracts({
     },
     "content-map-panel": {
         host: "nav",
-        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4"],
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4", "p-4"],
         children: {
             progress: { composite: "labelled-progress-row" },
             search: { leaf: "search-box" },
@@ -2068,7 +2084,7 @@ export const CONTRACTS = buildContracts({
     },
     "content-outline-rail": {
         host: "nav",
-        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-2"],
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-2", "p-4"],
         children: {
             label: { leaf: "text", props: { size: "sm", tone: "muted" } },
             heading: { leaf: "nav-link", props: { kind: "section" }, repeats: true, restingCount: 5 },

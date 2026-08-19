@@ -11,7 +11,7 @@ import { learnSpine, type LearnSpineActions, type LearnSpineData } from "./compo
 
 /** Draw the block the way the learn frame draws it - as the frame's own child. */
 const renderSpine = (props: LearnSpineData, on?: LearnSpineActions, isLoading?: boolean) => render(
-    <Tree contract="learn-spine-column" render={learnSpine({ props, on, isLoading })} />,
+    <Tree contract="learn-course-navigation-rail" render={learnSpine({ props, on, isLoading })} />,
 )
 
 const groups: LearnSpineData["groups"] = [{
