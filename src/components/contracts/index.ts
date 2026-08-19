@@ -291,13 +291,87 @@ export const CONTRACTS = buildContracts({
         children: {
             header: { contract: "page-header-stack" },
             subtitle: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            dashboard: { contract: "course-learning-dashboard-grid", optional: true },
+            mobile: { contract: "course-learning-dashboard-mobile", optional: true },
+            notice: { composite: "empty-notice", optional: true },
+        },
+        why: "if you need today's one deterministic next move ahead of optional course and progress alternatives that remain alternate mobile compositions of the same route.",
+    },
+    "course-learning-dashboard-grid": {
+        classes: ["hidden", "w-full", "min-w-0", "md:flex", "md:flex-row", "md:items-start", "md:gap-8", "md:[&>*:first-child]:min-w-0", "md:[&>*:first-child]:grow", "md:[&>*:last-child]:w-80", "md:[&>*:last-child]:shrink-0", "md:[&>*:last-child]:sticky", "md:[&>*:last-child]:top-rail", "md:[&>*:last-child]:self-start"],
+        children: {
+            primary: { contract: "course-learning-dashboard-primary-column" },
+            signals: { contract: "course-learning-dashboard-signal-column" },
+        },
+        why: "if you need the course's primary progress and next actions to own the flexible column beside one sticky supporting-signal rail.",
+    },
+    "course-learning-dashboard-primary-column": {
+        classes: ["flex", "min-w-0", "flex-col", "gap-6"],
+        children: {
+            progress: { contract: "course-progress-overview" },
+            actions: { contract: "next-action-list" },
+        },
+        why: "if you need whole-course evidence kept directly above the ranked destinations it supports.",
+    },
+    "course-learning-dashboard-signal-column": {
+        classes: ["flex", "min-w-0", "flex-col", "gap-6"],
+        children: {
+            signals: { contract: "course-learning-signal-list" },
+            detail: { contract: "course-learning-signal-detail-stack" },
+        },
+        why: "if you need supporting course signals kept attached to the contextual detail of the selected signal.",
+    },
+    "course-learning-dashboard-mobile": {
+        classes: ["flex", "min-w-0", "flex-col", "gap-6", "md:hidden"],
+        children: {
             primary: { contract: "resume-item-card", optional: true },
             secondary: { contract: "resume-card-grid", optional: true },
             course: { contract: "resume-item-card", optional: true },
             progress: { contract: "label-fact-over-progress", optional: true },
-            notice: { composite: "empty-notice", optional: true },
         },
-        why: "if you need today's one deterministic next move ahead of optional course and progress alternatives that remain alternate mobile compositions of the same route.",
+        why: "if you need the Today, course and progress mobile faces to share one route while the desktop dashboard remains continuously visible.",
+    },
+    "course-progress-overview": {
+        classes: ["flex", "min-w-0", "flex-col", "gap-4", "p-4"],
+        children: {
+            completion: { contract: "label-fact-over-progress" },
+            support: { contract: "course-progress-support-facts", optional: true },
+        },
+        why: "if you need course completion to lead continuity and standing as one coordinated whole-course summary.",
+    },
+    "course-progress-support-facts": {
+        classes: ["grid", "grid-cols-2", "gap-4"],
+        children: {
+            continuity: { contract: "label-with-muted-fact-row" },
+            standing: { contract: "label-with-muted-fact-row" },
+        },
+        why: "if you need continuity and standing compared as two supporting facts beneath the primary completion measure.",
+    },
+    "course-learning-signal-list": {
+        classes: ["overflow-hidden", "divide-y", "divide-separator", "p-0", "[&>*]:px-4", "[&>*]:py-3", "[&>*:first-child]:pt-4", "[&>*:last-child]:pb-4"],
+        children: {
+            signal: { contract: "course-learning-signal-row", repeats: true, restingCount: 3 },
+        },
+        why: "if you need due review, study continuity and course standing aligned as one selectable supporting list.",
+    },
+    "course-learning-signal-row": {
+        classes: ["flex", "w-full", "min-w-0", "flex-row", "items-center", "gap-3", "[&>*:first-child]:min-w-0", "[&>*:first-child]:grow", "[&>*:last-child]:shrink-0"],
+        children: {
+            label: { leaf: "text", props: { size: "sm", weight: "medium" } },
+            fact: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            action: { leaf: "button", optional: true },
+        },
+        why: "if you need one course-learning signal's name and quiet current fact aligned with its contextual selection action.",
+    },
+    "course-learning-signal-detail-stack": {
+        classes: ["flex", "min-w-0", "flex-col", "gap-3", "p-4"],
+        children: {
+            title: { leaf: "heading" },
+            fact: { leaf: "text", props: { size: "sm", weight: "medium" } },
+            caption: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            action: { leaf: "see-more-link", optional: true },
+        },
+        why: "if you need one selected learning signal explained by its value, evidence caption and onward action.",
     },
     "course-learn-content-home-page": {
         host: "main",
@@ -1887,7 +1961,7 @@ export const CONTRACTS = buildContracts({
         children: {
             reactions: { contract: "content-reaction-card", optional: true },
             discussion: { contract: "content-discussion-panel", optional: true },
-            next: { contract: "content-next-list", optional: true },
+            next: { contract: "next-action-list", optional: true },
             pager: { leaf: "pagination", optional: true },
         },
         why: "if you need the run of block-level surfaces that follow a reading — reactions, discussion, next steps, pager — each optional and absent together on locked content.",
@@ -2017,27 +2091,30 @@ export const CONTRACTS = buildContracts({
     },
     /*
     /*
-     * PROPOSED - content-next-list and content-next-row. Target path on materialization: the locked table.
+     * `next-action-list` and `next-action-row` began in the content reader and now serve every
+     * ranked next-destination surface, including the course dashboard.
      *
      * Legacy draws an up-next card and a related-content list beneath the content. Both answer one
      * question - where does the reader go from here - so they are one joined list of destinations
      * rather than two surfaces. The row carries no completion mark: a tick would promise something
      * to finish, and these are places to open.
      */
-    "content-next-list": {
+    "next-action-list": {
         classes: ["overflow-hidden", "divide-y", "divide-separator", "p-0", "[&>*]:px-4", "[&>*]:py-3", "[&>*:first-child]:pt-4", "[&>*:last-child]:pb-4"],
         children: {
-            step: { contract: "content-next-row", repeats: true, restingCount: 2 },
+            step: { contract: "next-action-row", repeats: true, restingCount: 3 },
         },
         why: "if you need a joined list of where-to-go-next destinations sharing one surface with a full-width divider between each.",
     },
-    "content-next-row": {
+    "next-action-row": {
         classes: ["flex", "w-full", "flex-row", "items-center", "gap-3", "[&>*:first-child]:min-w-0", "[&>*:first-child]:grow"],
         children: {
             label: { leaf: "text", props: { size: "md" } },
+            kind: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
+            action: { leaf: "see-more-link", optional: true },
             disclosure: { leaf: "icon", optional: true },
         },
-        why: "if you need one next-destination row: a label owning the width and a trailing disclosure glyph, no completion mark.",
+        why: "if you need one prioritized next destination pairing its title and optional kind with one onward action or disclosure.",
     },
     "courses-catalog-page": {
         // The same measure and inset the dashboard and the leaderboard use. A catalog reached from

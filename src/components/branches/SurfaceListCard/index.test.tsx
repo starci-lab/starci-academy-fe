@@ -25,9 +25,9 @@ type RowActions = { readonly [key: string]: (() => void) | undefined }
 
 const RowsView = ({ props, on, isLoading = false }: LeafProps<RowData, RowActions>) => (
     <Tree
-        contract="content-next-list"
-        render={defineContractComponent("content-next-list", {
-            step: props.rows.map((row) => defineContractComponent("content-next-row", {
+        contract="next-action-list"
+        render={defineContractComponent("next-action-list", {
+            step: props.rows.map((row) => defineContractComponent("next-action-row", {
                 label: defineLeafComponent("text", { size: "md" }, () => (
                     <button type="button" data-loading={String(isLoading)} onClick={on?.[`open:${row}`]}>{row}</button>
                 )),
@@ -36,7 +36,7 @@ const RowsView = ({ props, on, isLoading = false }: LeafProps<RowData, RowAction
     />
 )
 
-const Rows = defineContractComponent("content-next-list", RowsView)
+const Rows = defineContractComponent("next-action-list", RowsView)
 
 const base: RowData = { label: "Course standings", rows: ["Ada", "Grace"] }
 
@@ -44,11 +44,11 @@ describe("SurfaceListCard", () => {
     it("names the list with a heading and hands the rows their own data and outcomes", () => {
         const open = vi.fn()
         const { container } = render(
-            <SurfaceListCard contract="content-next-list" render={Rows} props={base} on={{ "open:Ada": open }} />,
+            <SurfaceListCard contract="next-action-list" render={Rows} props={base} on={{ "open:Ada": open }} />,
         )
 
         expect(screen.getByRole("heading", { name: "Course standings" })).toBeInTheDocument()
-        expect(container.querySelectorAll("[data-node=\"content-next-row\"]")).toHaveLength(2)
+        expect(container.querySelectorAll("[data-node=\"next-action-row\"]")).toHaveLength(2)
         expect(container.querySelector("[data-node=\"label-with-muted-fact-row\"]")).toBeNull()
         fireEvent.click(screen.getByRole("button", { name: "Ada" }))
         expect(open).toHaveBeenCalledOnce()
@@ -57,7 +57,7 @@ describe("SurfaceListCard", () => {
     it("swaps the heading for a label-and-fact row once the list carries a status", () => {
         const { container } = render(
             <SurfaceListCard
-                contract="content-next-list"
+                contract="next-action-list"
                 render={Rows}
                 props={{ ...base, fact: "Updated 2 minutes ago" }}
             />,
@@ -72,7 +72,7 @@ describe("SurfaceListCard", () => {
     it("keeps the name as data without drawing it twice under a surface that already said it", () => {
         const { container } = render(
             <SurfaceListCard
-                contract="content-next-list"
+                contract="next-action-list"
                 render={Rows}
                 props={{ ...base, isLabelHidden: true, fact: "2 rows" }}
             />,
@@ -80,13 +80,13 @@ describe("SurfaceListCard", () => {
 
         expect(screen.queryByText("Course standings")).not.toBeInTheDocument()
         expect(screen.queryByText("2 rows")).not.toBeInTheDocument()
-        expect(container.querySelectorAll("[data-node=\"content-next-row\"]")).toHaveLength(2)
+        expect(container.querySelectorAll("[data-node=\"next-action-row\"]")).toHaveLength(2)
     })
 
     it("states its own surface context and verdict treatment on the card it draws", () => {
         const { container } = render(
             <SurfaceListCard
-                contract="content-next-list"
+                contract="next-action-list"
                 render={Rows}
                 props={{ ...base, isNested: true, isVerdict: true }}
             />,
@@ -99,7 +99,7 @@ describe("SurfaceListCard", () => {
     })
 
     it("defaults to a page-level, non-verdict surface with its own inset zeroed", () => {
-        const { container } = render(<SurfaceListCard contract="content-next-list" render={Rows} props={base} />)
+        const { container } = render(<SurfaceListCard contract="next-action-list" render={Rows} props={base} />)
 
         const surface = container.querySelector("[data-component=\"SurfaceListCardSurface\"]")
         expect(surface).toHaveAttribute("data-surface-context", "page")
@@ -111,7 +111,7 @@ describe("SurfaceListCard", () => {
         const act = vi.fn()
         render(
             <SurfaceListCard
-                contract="content-next-list"
+                contract="next-action-list"
                 render={Rows}
                 props={{ ...base, actionLabel: "See all standings", description: "Refreshed hourly" }}
                 on={{ act }}
@@ -126,7 +126,7 @@ describe("SurfaceListCard", () => {
     it("reserves the action's place while the list rests, before any outcome is wired", () => {
         const { container } = render(
             <SurfaceListCard
-                contract="content-next-list"
+                contract="next-action-list"
                 render={Rows}
                 props={{ ...base, actionLabel: "See all standings" }}
                 isLoading
@@ -134,13 +134,13 @@ describe("SurfaceListCard", () => {
         )
 
         expect(screen.getByRole("button", { name: /See all standings/ })).toHaveAttribute("data-loading", "true")
-        expect(container.querySelector("[data-node=\"content-next-row\"] button")).toHaveAttribute("data-loading", "true")
+        expect(container.querySelector("[data-node=\"next-action-row\"] button")).toHaveAttribute("data-loading", "true")
     })
 
     it("falls back to the description when the action would lead nowhere", () => {
         render(
             <SurfaceListCard
-                contract="content-next-list"
+                contract="next-action-list"
                 render={Rows}
                 props={{ ...base, actionLabel: "See all standings", description: "Refreshed hourly" }}
             />,
@@ -151,7 +151,7 @@ describe("SurfaceListCard", () => {
     })
 
     it("closes with nothing at all when the list has neither an action nor a description", () => {
-        const { container } = render(<SurfaceListCard contract="content-next-list" render={Rows} props={base} />)
+        const { container } = render(<SurfaceListCard contract="next-action-list" render={Rows} props={base} />)
 
         const frame = container.querySelector("[data-component=\"SurfaceListCard\"]")
         expect(frame?.children).toHaveLength(2)

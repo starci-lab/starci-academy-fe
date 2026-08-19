@@ -35,7 +35,7 @@ describe("CourseHeadhuntingCompanyPage", () => {
     it("rests three consultant rows and the company name while the profile arrives", () => {
         const { container } = render(<_CourseHeadhuntingCompanyPage state="pending" props={props} />)
 
-        expect(container.querySelectorAll("[data-node=\"content-next-list\"] > [data-component=\"Text\"][data-loading=\"true\"]")).toHaveLength(3)
+        expect(container.querySelectorAll("[data-node=\"next-action-list\"] > [data-component=\"Text\"][data-loading=\"true\"]")).toHaveLength(3)
         expect(container.querySelector("[data-component=\"Heading\"][data-loading=\"true\"]")).not.toBeNull()
         expect(container.querySelector("[data-component=\"TextLink\"]")).toBeNull()
     })
@@ -48,7 +48,7 @@ describe("CourseHeadhuntingCompanyPage", () => {
         )
 
         expect(screen.getByText("Not found.")).toBeInTheDocument()
-        expect(container.querySelector("[data-node=\"content-next-list\"]")).toBeNull()
+        expect(container.querySelector("[data-node=\"next-action-list\"]")).toBeNull()
         fireEvent.click(screen.getAllByRole("button", { name: /Back to partners/ })[1])
         expect(back).toHaveBeenCalledOnce()
         expect(retry).not.toHaveBeenCalled()
@@ -74,7 +74,7 @@ describe("CourseHeadhuntingCompanyPage", () => {
         expect(screen.queryByRole("button", { name: /Contact company/ })).not.toBeInTheDocument()
         expect(screen.getByText("No consultants.")).toBeInTheDocument()
         expect(screen.queryByText("Technology hiring")).not.toBeInTheDocument()
-        expect(container.querySelectorAll("[data-node=\"content-next-list\"] [data-node=\"empty-notice-stack\"]")).toHaveLength(1)
+        expect(container.querySelectorAll("[data-node=\"next-action-list\"] [data-node=\"empty-notice-stack\"]")).toHaveLength(1)
     })
 
     it("contacts the company and only the consultants who are reachable", () => {

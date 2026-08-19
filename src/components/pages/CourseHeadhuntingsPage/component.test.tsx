@@ -36,8 +36,8 @@ describe("CourseHeadhuntingsPage", () => {
     it("rests both directories rather than hiding the consultant list while loading", () => {
         const { container } = render(<_CourseHeadhuntingsPage state="pending" props={props} />)
 
-        expect(container.querySelectorAll("[data-node=\"content-next-list\"]")).toHaveLength(2)
-        expect(container.querySelectorAll("[data-node=\"content-next-list\"] > [data-component=\"Text\"][data-loading=\"true\"]")).toHaveLength(8)
+        expect(container.querySelectorAll("[data-node=\"next-action-list\"]")).toHaveLength(2)
+        expect(container.querySelectorAll("[data-node=\"next-action-list\"] > [data-component=\"Text\"][data-loading=\"true\"]")).toHaveLength(8)
         expect(container.querySelector("[data-component=\"TextLink\"]")).toBeNull()
     })
 
@@ -45,7 +45,7 @@ describe("CourseHeadhuntingsPage", () => {
         const { container } = render(<_CourseHeadhuntingsPage state="empty" props={props} />)
 
         expect(screen.getByText("No companies.")).toBeInTheDocument()
-        expect(container.querySelector("[data-node=\"content-next-list\"]")).toBeNull()
+        expect(container.querySelector("[data-node=\"next-action-list\"]")).toBeNull()
         expect(screen.queryByRole("button", { name: "Try again" })).not.toBeInTheDocument()
     })
 
@@ -96,7 +96,7 @@ describe("CourseHeadhuntingsPage", () => {
             <_CourseHeadhuntingsPage state="ready" props={{ ...props, consultants: [] }} />,
         )
 
-        expect(container.querySelectorAll("[data-node=\"content-next-list\"]")).toHaveLength(1)
+        expect(container.querySelectorAll("[data-node=\"next-action-list\"]")).toHaveLength(1)
         expect(screen.queryByText("Consultants")).not.toBeInTheDocument()
         expect(screen.getByText("Companies")).toBeInTheDocument()
     })

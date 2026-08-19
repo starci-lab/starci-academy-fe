@@ -79,8 +79,8 @@ const PENDING_QA_ROWS: ReadonlyArray<CourseQaThreadRow> = Array.from(
 
 const CourseQaList = ({ props, on, isLoading = false }: LeafProps<CourseQaListData, CourseQaListActions>) => {
     const steps = !isLoading && props.rows.length === 0
-        ? [defineContractProjection("content-next-row", () => <EmptyNotice props={{ message: props.emptyMessage }} />)]
-        : (isLoading ? PENDING_QA_ROWS : props.rows).map((row) => defineContractComponent("content-next-row", {
+        ? [defineContractProjection("next-action-row", () => <EmptyNotice props={{ message: props.emptyMessage }} />)]
+        : (isLoading ? PENDING_QA_ROWS : props.rows).map((row) => defineContractComponent("next-action-row", {
             label: defineLeafComponent("text", { size: "md" }, () => (
                 <Text
                     props={{
@@ -95,10 +95,10 @@ const CourseQaList = ({ props, on, isLoading = false }: LeafProps<CourseQaListDa
                 disclosure: defineLeafComponent("icon", {}, () => <Icon props={{ name: "disclosure", role: "chip" }} />),
             }),
         }))
-    return <Tree contract="content-next-list" render={defineContractComponent("content-next-list", { step: steps })} />
+    return <Tree contract="next-action-list" render={defineContractComponent("next-action-list", { step: steps })} />
 }
 
-const CourseQaListContent = defineContractComponent("content-next-list", CourseQaList)
+const CourseQaListContent = defineContractComponent("next-action-list", CourseQaList)
 
 /** Pure course Q&A list, inline ask form and one selected thread. */
 export const _CourseQaPage = (input: CourseQaPageProps) => {
@@ -185,7 +185,7 @@ export const _CourseQaPage = (input: CourseQaPageProps) => {
                             <Button props={{ label: input.props.backLabel, variant: "ghost", size: "sm" }} on={{ press: input.on?.closeThread }} />
                         )}
                         <SurfaceListCard
-                            contract="content-next-list"
+                            contract="next-action-list"
                             render={CourseQaListContent}
                             props={{ label, rows, emptyMessage: input.props.emptySearchMessage }}
                             on={input.props.selectedQuestion === undefined ? listActions : undefined}

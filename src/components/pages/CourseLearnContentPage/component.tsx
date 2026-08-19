@@ -233,9 +233,9 @@ type ContentNextStepsData = SurfaceListCardData & {
  */
 const ContentNextStepsView = ({ props }: LeafProps<ContentNextStepsData>) => (
     <Tree
-        contract="content-next-list"
-        render={defineContractComponent("content-next-list", {
-            step: props.steps.map((step) => defineContractComponent("content-next-row", {
+        contract="next-action-list"
+        render={defineContractComponent("next-action-list", {
+            step: props.steps.map((step) => defineContractComponent("next-action-row", {
                 label: defineLeafComponent("text", { size: "md" }, () => (
                     <Text props={{ content: step.label, size: "md" }} />
                 )),
@@ -248,7 +248,7 @@ const ContentNextStepsView = ({ props }: LeafProps<ContentNextStepsData>) => (
 )
 
 /** Stable component type branded for the exact list contract it implements. */
-const ContentNextSteps = defineContractComponent("content-next-list", ContentNextStepsView)
+const ContentNextSteps = defineContractComponent("next-action-list", ContentNextStepsView)
 
 /**
  * Draw one content.
@@ -364,10 +364,10 @@ export const _CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
             )),
         }),
         ...(nextSteps.length === 0 ? {} : {
-            next: defineContractProjection("content-next-list", () => (
+            next: defineContractProjection("next-action-list", () => (
                 <SurfaceListCard
                     props={{ label: labels.nextTitle, steps: [...nextSteps] }}
-                    contract="content-next-list"
+                    contract="next-action-list"
                     render={ContentNextSteps}
                 />
             )),

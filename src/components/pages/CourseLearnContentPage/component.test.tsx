@@ -275,7 +275,7 @@ describe("_CourseLearnContentPage", () => {
         expect(container.querySelector("[data-node=content-reaction-card]")).not.toBeNull()
         expect(screen.getByText("Up next")).toBeInTheDocument()
         expect(screen.getByText("Records and tuples")).toBeInTheDocument()
-        expect(container.querySelectorAll("[data-node=content-next-row]")).toHaveLength(2)
+        expect(container.querySelectorAll("[data-node=next-action-row]")).toHaveLength(2)
 
         fireEvent.click(screen.getByRole("button", { name: "Reactions" }))
         fireEvent.click(screen.getByRole("button", { name: "Love" }))

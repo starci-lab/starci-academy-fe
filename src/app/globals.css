@@ -177,6 +177,11 @@
     --radius: 0.5rem;
     --field-radius: 0.75rem;
 
+    /* Accepted Calm Command Center direction for layered course-dashboard surfaces. */
+    --dashboard-calm-elevation: 0 8px 28px oklch(21.03% 0.0059 354.13 / 0.07);
+    --dashboard-calm-duration: 180ms;
+    --dashboard-calm-easing: cubic-bezier(0.2, 0, 0, 1);
+
     /* Tooltips answer immediately - the vendor's 1500ms default reads as a broken hover. */
     --tooltip-delay: 0ms;
     --tooltip-close-delay: 0ms;
@@ -235,6 +240,10 @@
     --field-foreground: oklch(99.11% 0.0015 354.13);
     --field-placeholder: oklch(70.5% 0.003 354.13);
 
+    --dashboard-calm-elevation: 0 8px 28px oklch(21.03% 0.0059 354.13 / 0.07);
+    --dashboard-calm-duration: 180ms;
+    --dashboard-calm-easing: cubic-bezier(0.2, 0, 0, 1);
+
     --tooltip-delay: 0ms;
     --tooltip-close-delay: 0ms;
 }
@@ -277,6 +286,10 @@
         --field-background: oklch(21.03% 0.003 354.13);
         --field-foreground: oklch(99.11% 0.0015 354.13);
         --field-placeholder: oklch(70.5% 0.003 354.13);
+
+        --dashboard-calm-elevation: 0 8px 28px oklch(21.03% 0.0059 354.13 / 0.07);
+        --dashboard-calm-duration: 180ms;
+        --dashboard-calm-easing: cubic-bezier(0.2, 0, 0, 1);
     }
 }
 
@@ -402,4 +415,11 @@ body {
 .card[data-component="SurfaceListCardSurface"][data-surface-context="nested"] {
     border: 1px solid var(--border) !important;
     box-shadow: none !important;
+}
+
+/* The accepted dashboard direction layers its coordinated surfaces without changing their anatomy. */
+[data-node="course-learn-today-page"] .card[data-component="SurfaceCardSurface"],
+[data-node="course-learn-today-page"] .card[data-component="SurfaceListCardSurface"] {
+    box-shadow: var(--dashboard-calm-elevation);
+    transition: box-shadow var(--dashboard-calm-duration) var(--dashboard-calm-easing);
 }

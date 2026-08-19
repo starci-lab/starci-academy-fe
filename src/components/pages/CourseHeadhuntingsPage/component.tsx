@@ -59,9 +59,9 @@ const PENDING_DIRECTORY_ROWS: ReadonlyArray<HeadhuntingDirectoryRow> = Array.fro
 )
 
 const DirectoryList = ({ props, on, isLoading = false }: LeafProps<DirectoryListData, CourseHeadhuntingsPageActions>) => (
-    <Tree contract="content-next-list" render={defineContractComponent("content-next-list", {
+    <Tree contract="next-action-list" render={defineContractComponent("next-action-list", {
         step: (isLoading ? PENDING_DIRECTORY_ROWS : props.rows)
-            .map((row) => defineContractProjection("content-next-row", () => {
+            .map((row) => defineContractProjection("next-action-row", () => {
                 const label = [row.label, row.meta, row.actionLabel].filter((part) => part !== undefined).join(" · ")
                 const handler = row.actionLabel === undefined
                     ? on?.[`open:${row.id}`]
@@ -75,7 +75,7 @@ const DirectoryList = ({ props, on, isLoading = false }: LeafProps<DirectoryList
     })} />
 )
 
-const DirectoryListContent = defineContractComponent("content-next-list", DirectoryList)
+const DirectoryListContent = defineContractComponent("next-action-list", DirectoryList)
 
 /** Pure company search plus consultant contact directory. */
 export const _CourseHeadhuntingsPage = (input: CourseHeadhuntingsPageProps) => {
@@ -117,7 +117,7 @@ export const _CourseHeadhuntingsPage = (input: CourseHeadhuntingsPageProps) => {
                 directories: defineContractProjection("catalog-section-group", () => (
                     <>
                         <SurfaceListCard
-                            contract="content-next-list"
+                            contract="next-action-list"
                             render={DirectoryListContent}
                             props={{ label: input.props.companiesLabel, rows: input.props.companies }}
                             on={input.on}
@@ -125,7 +125,7 @@ export const _CourseHeadhuntingsPage = (input: CourseHeadhuntingsPageProps) => {
                         />
                         {input.props.consultants.length === 0 && !isLoading ? null : (
                             <SurfaceListCard
-                                contract="content-next-list"
+                                contract="next-action-list"
                                 render={DirectoryListContent}
                                 props={{ label: input.props.consultantsLabel, rows: input.props.consultants }}
                                 on={input.on}

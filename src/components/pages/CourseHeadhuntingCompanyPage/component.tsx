@@ -56,8 +56,8 @@ const PENDING_CONSULTANT_ROWS: ReadonlyArray<HeadhuntingDirectoryRow> = Array.fr
 
 const ConsultantList = ({ props, on, isLoading = false }: LeafProps<ConsultantListData, CourseHeadhuntingCompanyPageActions>) => {
     const steps = !isLoading && props.rows.length === 0
-        ? [defineContractProjection("content-next-row", () => <EmptyNotice props={{ message: props.emptyMessage }} />)]
-        : (isLoading ? PENDING_CONSULTANT_ROWS : props.rows).map((row) => defineContractProjection("content-next-row", () => {
+        ? [defineContractProjection("next-action-row", () => <EmptyNotice props={{ message: props.emptyMessage }} />)]
+        : (isLoading ? PENDING_CONSULTANT_ROWS : props.rows).map((row) => defineContractProjection("next-action-row", () => {
             const label = [row.label, row.meta, row.actionLabel].filter((part) => part !== undefined).join(" · ")
             const handler = row.isActionAvailable === true ? on?.[`contact:${row.id}`] : undefined
             return handler === undefined ? (
@@ -66,10 +66,10 @@ const ConsultantList = ({ props, on, isLoading = false }: LeafProps<ConsultantLi
                 <TextLink props={{ label, size: "md" }} on={{ press: handler }} />
             )
         }))
-    return <Tree contract="content-next-list" render={defineContractComponent("content-next-list", { step: steps })} />
+    return <Tree contract="next-action-list" render={defineContractComponent("next-action-list", { step: steps })} />
 }
 
-const ConsultantListContent = defineContractComponent("content-next-list", ConsultantList)
+const ConsultantListContent = defineContractComponent("next-action-list", ConsultantList)
 
 /** Pure company profile with real consultant contact actions and no company-level apply. */
 export const _CourseHeadhuntingCompanyPage = (input: CourseHeadhuntingCompanyPageProps) => {
@@ -112,7 +112,7 @@ export const _CourseHeadhuntingCompanyPage = (input: CourseHeadhuntingCompanyPag
                         {input.props.description === undefined ? null : <Text props={{ content: input.props.description, size: "md" }} isLoading={isLoading} />}
                         {input.props.address === undefined ? null : <Text props={{ content: input.props.address, size: "sm", tone: "muted" }} isLoading={isLoading} />}
                         <SurfaceListCard
-                            contract="content-next-list"
+                            contract="next-action-list"
                             render={ConsultantListContent}
                             props={{
                                 label: input.props.consultantsLabel,

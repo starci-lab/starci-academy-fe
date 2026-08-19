@@ -14,6 +14,45 @@ const props: CourseLearnTodayData = {
     primary: { id: "lesson", title: "Resume lesson", kind: "Lesson", actionLabel: "Continue" },
     secondary: [{ id: "cards", title: "Three cards due", kind: "Flashcards", actionLabel: "Review" }],
     course: { id: "modules", title: "Course modules", kind: "Course", actionLabel: "Open" },
+    dashboard: {
+        progress: {
+            state: "ready",
+            props: {
+                label: "Your progress",
+                completionLabel: "Course progress",
+                completionFact: "42% complete",
+                completionValue: 42,
+                continuityLabel: "Study continuity",
+                continuityFact: "6 days",
+                standingLabel: "Course standing",
+                standingFact: "Rank #18",
+            },
+        },
+        nextActions: {
+            state: "ready",
+            props: {
+                label: "Next actions",
+                actions: [{ id: "dashboard-next", title: "Dashboard next", kind: "Lesson", actionLabel: "Continue" }],
+            },
+        },
+        signals: {
+            state: "ready",
+            props: {
+                label: "Learning signals",
+                signals: [{ id: "review", label: "Due review", fact: "3 cards", actionLabel: "View", isSelected: true }],
+            },
+        },
+        signalDetail: {
+            state: "ready",
+            props: {
+                label: "Signal detail",
+                title: "Due review",
+                fact: "3 cards",
+                caption: "Three cards are ready.",
+                actionLabel: "Open details",
+            },
+        },
+    },
     emptyMessage: "No course",
     failedMessage: "Could not load",
     retryLabel: "Retry",
@@ -26,8 +65,10 @@ describe("_CourseLearnTodayPage", () => {
 
         expect(screen.getByText("Resume lesson")).toBeTruthy()
         expect(screen.getByText("Three cards due")).toBeTruthy()
-        expect(screen.queryByText("42% complete")).toBeNull()
-        fireEvent.click(screen.getByRole("link", { name: "Continue" }))
+        expect(screen.getByText("42% complete")).toBeTruthy()
+        const resume = screen.getByText("Resume lesson").closest("[data-node=resume-item-card]")?.querySelector("[role=link]")
+        expect(resume).not.toBeNull()
+        fireEvent.click(resume!)
         expect(open).toHaveBeenCalledWith("lesson")
     })
 
@@ -42,7 +83,7 @@ describe("_CourseLearnTodayPage", () => {
     it("switches to the progress composition", () => {
         render(<_CourseLearnTodayPage state="ready" mobileView="progress" props={props} />)
 
-        expect(screen.getByText("42% complete")).toBeTruthy()
+        expect(screen.getAllByText("42% complete").length).toBeGreaterThan(0)
         expect(screen.queryByText("Resume lesson")).toBeNull()
     })
 

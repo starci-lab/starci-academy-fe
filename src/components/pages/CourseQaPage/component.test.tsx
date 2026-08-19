@@ -41,9 +41,9 @@ describe("CourseQaPage", () => {
     it("rests four question rows while the board is in flight", () => {
         const { container } = render(<_CourseQaPage state="pending" props={props} />)
 
-        expect(container.querySelectorAll("[data-node=\"content-next-row\"]")).toHaveLength(4)
+        expect(container.querySelectorAll("[data-node=\"next-action-row\"]")).toHaveLength(4)
         expect(container.querySelectorAll("[data-component=\"Text\"][data-loading=\"true\"]").length).toBeGreaterThan(0)
-        expect(container.querySelector("[data-node=\"content-next-row\"] svg")).toBeNull()
+        expect(container.querySelector("[data-node=\"next-action-row\"] svg")).toBeNull()
     })
 
     it("replaces the list with a community notice once the board settles empty", () => {
@@ -51,7 +51,7 @@ describe("CourseQaPage", () => {
         const { container } = render(<_CourseQaPage state="empty" props={props} on={{ retry }} />)
 
         expect(screen.getByText("No questions yet.")).toBeInTheDocument()
-        expect(container.querySelector("[data-node=\"content-next-list\"]")).toBeNull()
+        expect(container.querySelector("[data-node=\"next-action-list\"]")).toBeNull()
         expect(screen.queryByRole("button", { name: "Try again" })).not.toBeInTheDocument()
         expect(retry).not.toHaveBeenCalled()
     })
@@ -88,7 +88,7 @@ describe("CourseQaPage", () => {
 
         expect(screen.getByText("Replies")).toBeInTheDocument()
         expect(screen.getByText("Through control flow · mentor")).toBeInTheDocument()
-        expect(container.querySelector("[data-node=\"content-next-row\"] svg")).toBeNull()
+        expect(container.querySelector("[data-node=\"next-action-row\"] svg")).toBeNull()
         expect(container.querySelector("[data-press-label=\"true\"]")).toBeNull()
         fireEvent.click(screen.getByRole("button", { name: "Back to questions" }))
         expect(closeThread).toHaveBeenCalledOnce()
@@ -97,7 +97,7 @@ describe("CourseQaPage", () => {
     it("marks an openable question row with a disclosure the reply rows never carry", () => {
         const { container } = render(<_CourseQaPage state="ready" props={props} on={{ openThread: vi.fn() }} />)
 
-        const row = container.querySelector("[data-node=\"content-next-row\"]")
+        const row = container.querySelector("[data-node=\"next-action-row\"]")
         expect(row?.querySelector("svg")).not.toBeNull()
         expect(row?.querySelector("[data-press-label=\"true\"]")).not.toBeNull()
         expect(screen.getByText("How does narrowing work? · learner · 2 replies")).toBeInTheDocument()
