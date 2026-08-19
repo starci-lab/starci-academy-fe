@@ -607,7 +607,7 @@
       "state": "empty-and-failed",
       "coverage": "not-applicable",
       "scenarioId": null,
-      "evidence": "Both states are owned by the locked _LeagueCard state discriminator, which this revision does not change; no candidate file touches that branch."
+      "evidence": "Both states are owned by the locked LeagueCardBase state discriminator, which this revision does not change; no candidate file touches that branch."
     },
     {
       "ownerId": "block-top-learners",

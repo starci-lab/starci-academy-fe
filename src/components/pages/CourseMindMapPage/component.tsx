@@ -47,7 +47,7 @@ export type CourseMindMapPageProps = {
 }
 
 /** Draw the server concept graph as a searchable, selectable and mobile-safe node field. */
-export const _CourseMindMapPage = (input: CourseMindMapPageProps) => {
+export const CourseMindMapPageBase = (input: CourseMindMapPageProps) => {
     const loading = input.state === "pending"
     const selected = input.props.nodes.find((node) => node.id === input.props.selectedId)
     const noResults = input.state === "ready" && input.props.nodes.length === 0

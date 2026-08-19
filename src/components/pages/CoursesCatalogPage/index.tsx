@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl"
 import { CoursePriceOverlay } from "@/components/overlays/courses/CoursePriceOverlay"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryCoursesSwr, useQueryMyCoursesSwr } from "@/hooks"
-import { _CoursesCatalogPage, type CoursesCatalogPageState } from "./component"
+import { CoursesCatalogPageBase, type CoursesCatalogPageState } from "./component"
 
 /** Courses per page. Three columns times three rows on a desktop grid. */
 const PAGE_SIZE = 9
@@ -202,7 +202,7 @@ export const CoursesCatalogPage = () => {
 
     return (
         <>
-            <_CoursesCatalogPage
+            <CoursesCatalogPageBase
                 state={state}
                 props={{
                     labels: {

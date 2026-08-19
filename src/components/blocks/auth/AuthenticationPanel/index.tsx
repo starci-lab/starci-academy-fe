@@ -4,7 +4,7 @@ import { useLocale, useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useAuthPanel } from "@/hooks/auth/useAuthPanel"
 import type { AuthFailure } from "@/hooks/auth/useAuthPanel"
-import { _AuthenticationPanel, type AuthMode } from "./component"
+import { AuthenticationPanelBase, type AuthMode } from "./component"
 
 /**
  * BLOCK - `AuthenticationPanel`, connected half.
@@ -125,7 +125,7 @@ export const AuthenticationPanel = ({ initialMode = "signIn", onSignedIn }: Auth
 
     if (panel.step === "done") {
         return (
-            <_AuthenticationPanel
+            <AuthenticationPanelBase
                 state="done"
                 props={{ ...frame, doneTitle: t(`${mode}.doneTitle`), doneHint: t(`${mode}.doneHint`) }}
                 on={on}
@@ -135,7 +135,7 @@ export const AuthenticationPanel = ({ initialMode = "signIn", onSignedIn }: Auth
 
     if (panel.step === "code") {
         return (
-            <_AuthenticationPanel
+            <AuthenticationPanelBase
                 state="code"
                 props={{
                     ...frame,
@@ -154,7 +154,7 @@ export const AuthenticationPanel = ({ initialMode = "signIn", onSignedIn }: Auth
     }
 
     return (
-        <_AuthenticationPanel
+        <AuthenticationPanelBase
             state="details"
             props={{
                 ...frame,

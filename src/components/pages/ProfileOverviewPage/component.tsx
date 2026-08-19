@@ -7,7 +7,7 @@ import { OverviewJobReadiness } from "@/components/blocks/profile/overview/Overv
 import { defineContractComponent, defineContractProjection } from "@/components/contracts/props"
 
 /** Keep the five legacy Overview owners and their independently settling request boundaries. */
-export const _ProfileOverviewPage = () => (
+export const ProfileOverviewPageBase = () => (
     <Tree contract="profile-main" render={defineContractComponent("profile-main", {
         section: [
             defineContractProjection("label-row-over-card", () => <OverviewJobReadiness />),

@@ -12,7 +12,7 @@ import {
     defineLeafComponent,
 } from "~candidate/components/contracts/props"
 import {
-    _CodingProblemList,
+    CodingProblemListBase,
     type CodingProblemListState,
     type CodingProblemRow,
 } from "~candidate/components/blocks/coding/CodingProblemList/component"
@@ -66,7 +66,7 @@ export type CodingDomainPageActions = {
     readonly recover?: () => void
 }
 
-/** Props for {@link _CodingDomainPage}. */
+/** Props for {@link CodingDomainPageBase}. */
 export type CodingDomainPageProps = {
     readonly props: CodingDomainPageData
     readonly on?: CodingDomainPageActions
@@ -77,7 +77,7 @@ export type CodingDomainPageProps = {
  *
  * @param input - {@link CodingDomainPageProps}
  */
-export const _CodingDomainPage = (input: CodingDomainPageProps) => {
+export const CodingDomainPageBase = (input: CodingDomainPageProps) => {
     const labels = input.props.labels
     const showsList = input.props.problems.state !== "empty" && input.props.problems.state !== "all-solved"
 
@@ -119,7 +119,7 @@ export const _CodingDomainPage = (input: CodingDomainPageProps) => {
                 }),
                 ...(showsList ? {
                     problems: defineContractProjection("marked-row-list", () => (
-                        <_CodingProblemList
+                        <CodingProblemListBase
                             state={input.props.problems.state}
                             props={{ problems: input.props.problems.items }}
                             on={{ open: input.on?.openProblem }}
@@ -131,7 +131,7 @@ export const _CodingDomainPage = (input: CodingDomainPageProps) => {
                     // records what actually lands in it; naming the other branch here would make
                     // the registry describe a tree that never renders.
                     notice: defineCompositeComponent("empty-notice", {}, () => (
-                        <_CodingProblemList
+                        <CodingProblemListBase
                             state={input.props.problems.state}
                             props={{
                                 noticeMessage: input.props.problems.noticeMessage,

@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
 import { useMutateAddToCartSwr, useQueryCoursePricePreviewSwr } from "@/hooks"
 import { isPersonalPrice } from "@/modules/utils/course-price"
-import { _CourseCatalogCard, type CourseCatalogCardData } from "./component"
+import { CourseCatalogCardBase, type CourseCatalogCardData } from "./component"
 
 /**
  * One catalog card, priced for the asking learner.
@@ -86,7 +86,7 @@ export const CourseCatalogCard = ({
         : course
 
     return (
-        <_CourseCatalogCard
+        <CourseCatalogCardBase
             state={cart.isMutating ? "adding" : state}
             props={{
                 ...priced,

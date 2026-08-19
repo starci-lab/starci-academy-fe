@@ -56,7 +56,7 @@ export type ShellNavProps = {
 }
 
 /** Draw the primary navbar and its optional page-tab bottom layer as one landmark. */
-export const _ShellNav = (input: ShellNavProps) => {
+export const ShellNavBase = (input: ShellNavProps) => {
     const tabs = input.props.tabs
     return (
         <Tree

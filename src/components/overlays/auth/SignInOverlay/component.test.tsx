@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _SignInOverlay } from "./component"
+import { SignInOverlayBase } from "./component"
 import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
 /**
@@ -47,9 +47,9 @@ const panel = defineContractComponent("centred-page-column", {
     body: [defineLeafComponent("form", {}, () => <form>Authentication panel</form>)],
 })
 
-describe("_SignInOverlay", () => {
+describe("SignInOverlayBase", () => {
     it("mounts the content under the contract the content itself declares", () => {
-        render(<_SignInOverlay isOpen render={panel} onDismiss={vi.fn()} />)
+        render(<SignInOverlayBase isOpen render={panel} onDismiss={vi.fn()} />)
 
         expect(mocks.contract).toHaveBeenCalledWith("centred-page-column")
         expect(mocks.size).toHaveBeenCalledWith("xs")
@@ -57,13 +57,13 @@ describe("_SignInOverlay", () => {
     })
 
     it("stays mounted and closed while the bar holds it shut", () => {
-        render(<_SignInOverlay isOpen={false} render={panel} onDismiss={vi.fn()} />)
+        render(<SignInOverlayBase isOpen={false} render={panel} onDismiss={vi.fn()} />)
         expect(screen.getByTestId("modal")).toHaveAttribute("data-open", "false")
     })
 
     it("hands every way out to the surface that mounted it", () => {
         const onDismiss = vi.fn()
-        render(<_SignInOverlay isOpen render={panel} onDismiss={onDismiss} />)
+        render(<SignInOverlayBase isOpen render={panel} onDismiss={onDismiss} />)
 
         fireEvent.click(screen.getByRole("button", { name: "Close" }))
         expect(onDismiss).toHaveBeenCalledOnce()

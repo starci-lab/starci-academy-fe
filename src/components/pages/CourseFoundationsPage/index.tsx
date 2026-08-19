@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryFoundationCategoriesSwr } from "@/hooks/swr/useQueryFoundationCategoriesSwr"
-import { _CourseFoundationsPage } from "./component"
+import { CourseFoundationsPageBase } from "./component"
 
 /** Route identity required by the connected foundations hub. */
 export type CourseFoundationsPageProps = { readonly displayId: string }
@@ -21,7 +21,7 @@ export const CourseFoundationsPage = ({ displayId }: CourseFoundationsPageProps)
             ? "pending"
             : (query.data?.data.length ?? 0) === 0 ? "empty" : "ready"
     return (
-        <_CourseFoundationsPage
+        <CourseFoundationsPageBase
             state={state}
             props={{
                 title: t("title"),

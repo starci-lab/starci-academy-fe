@@ -55,7 +55,7 @@ type FrameStub = {
 }
 
 vi.mock("./component", () => ({
-    _LearnShellLayout: (input: FrameStub) => (
+    LearnShellLayoutBase: (input: FrameStub) => (
         <>
             <output data-testid="spine">{JSON.stringify(input.props.spine)}</output>
             <output data-testid="tabs">{JSON.stringify(input.props.mobileTabs ?? null)}</output>

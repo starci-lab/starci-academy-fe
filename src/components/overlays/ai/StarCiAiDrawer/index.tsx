@@ -4,7 +4,7 @@ import { useCallback } from "react"
 import { useTranslations } from "next-intl"
 import { StarCiAiChat } from "@/components/blocks/ai/StarCiAiChat"
 import { useGlobalAiChat } from "@/modules/ai/global-ai-chat-context"
-import { _StarCiAiDrawer } from "./component"
+import { StarCiAiDrawerBase } from "./component"
 
 /** Resolve global owner state and responsive shell placement before drawing the pure overlay. */
 export const StarCiAiDrawer = () => {
@@ -12,7 +12,7 @@ export const StarCiAiDrawer = () => {
     const owner = useGlobalAiChat()
     const Chat = useCallback(() => <StarCiAiChat />, [])
     return (
-        <_StarCiAiDrawer
+        <StarCiAiDrawerBase
             state={owner.isOpen ? "ready" : "closed"}
             props={{
                 isOpen: owner.isOpen,

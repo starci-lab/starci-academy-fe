@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useTheme } from "next-themes"
 import fixture from "~candidate/fixtures/contact.json"
 import {
-    _ContactPage,
+    ContactPageBase,
     type ContactPageProps,
 } from "~candidate/components/pages/ContactPage/component"
 import type {
@@ -204,7 +204,7 @@ const StateMatrix = () => {
                 </button>
             </div>
             <div data-candidate-root="true" data-state-id={scenario.id} data-theme={theme}>
-                <_ContactPage {...candidate} />
+                <ContactPageBase {...candidate} />
             </div>
         </div>
     )

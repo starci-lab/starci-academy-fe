@@ -82,7 +82,7 @@ export type JudgeStatusStripActions = {
     readonly act?: () => void
 }
 
-/** Props for {@link _JudgeStatusStrip}. */
+/** Props for {@link JudgeStatusStripBase}. */
 export type JudgeStatusStripProps =
     BlockProps<JudgeVerdictState, JudgeStatusStripData> & {
         readonly on?: JudgeStatusStripActions
@@ -93,7 +93,7 @@ export type JudgeStatusStripProps =
  *
  * @param input - {@link JudgeStatusStripProps}
  */
-export const _JudgeStatusStrip = (input: JudgeStatusStripProps) => {
+export const JudgeStatusStripBase = (input: JudgeStatusStripProps) => {
     const actionLabel = input.props.actionLabel
     return (
         <Tree

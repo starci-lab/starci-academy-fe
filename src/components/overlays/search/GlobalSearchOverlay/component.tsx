@@ -1,5 +1,5 @@
 import { ModalBranch } from "@/components/branches/ModalBranch"
-import { _GlobalSearchResults } from "@/components/blocks/search/GlobalSearchResults/component"
+import { GlobalSearchResultsBase } from "@/components/blocks/search/GlobalSearchResults/component"
 import { SearchCommandField } from "@/components/leaves/SearchCommandField"
 import { SelectionList } from "@/components/leaves/SelectionList"
 import { Text } from "@/components/leaves/Text"
@@ -109,7 +109,7 @@ export type GlobalSearchOverlayViewProps = {
 }
 
 /** Pure rendering half for the large, keyboard-operated search workspace. */
-export const _GlobalSearchOverlay = ({ isOpen, state, copy, on }: GlobalSearchOverlayViewProps) => {
+export const GlobalSearchOverlayBase = ({ isOpen, state, copy, on }: GlobalSearchOverlayViewProps) => {
     const scopeList = defineLeafComponent("selection-list", {}, () => (
         <SelectionList
             props={{
@@ -127,13 +127,13 @@ export const _GlobalSearchOverlay = ({ isOpen, state, copy, on }: GlobalSearchOv
             on={{ select: on?.scopeSelect, activate: on?.scopeSelect }}
         />
     ))
-    const notice = state.status === "error"
-        ? { message: copy.errorMessage, description: copy.errorDescription, actionLabel: copy.retry, action: on?.retry }
-        : state.status === "empty"
-            ? { message: copy.emptyMessage, description: copy.emptyDescription, actionLabel: copy.browseCourses, action: on?.browseCourses }
-            : { message: copy.idleMessage, description: copy.idleDescription, actionLabel: copy.browseCourses, action: on?.browseCourses }
+    const notice = (() => {
+        if (state.status === "error") return { message: copy.errorMessage, description: copy.errorDescription, actionLabel: copy.retry, action: on?.retry }
+        if (state.status === "empty") return { message: copy.emptyMessage, description: copy.emptyDescription, actionLabel: copy.browseCourses, action: on?.browseCourses }
+        return { message: copy.idleMessage, description: copy.idleDescription, actionLabel: copy.browseCourses, action: on?.browseCourses }
+    })()
     const resultRegion = defineContractProjection("global-search-result-region", () => (
-        <_GlobalSearchResults
+        <GlobalSearchResultsBase
             props={{
                 label: copy.resultsLabel,
                 items: state.results.map((result) => ({
@@ -151,13 +151,12 @@ export const _GlobalSearchOverlay = ({ isOpen, state, copy, on }: GlobalSearchOv
             on={{ select: on?.resultPreview, recover: notice.action }}
         />
     ))
-    const detailTitle = state.detail.status === "idle"
-        ? undefined
-        : state.detail.status === "pending"
-            ? copy.detailLoading
-            : state.detail.status === "error"
-                ? copy.detailError
-                : state.detail.title
+    const detailTitle = (() => {
+        if (state.detail.status === "idle") return undefined
+        if (state.detail.status === "pending") return copy.detailLoading
+        if (state.detail.status === "error") return copy.detailError
+        return state.detail.title
+    })()
     const detailKind = state.detail.status === "idle" ? undefined : state.detail.kindLabel
     const detailDescription = state.detail.status === "ready" ? state.detail.description : undefined
     const detailStatus = state.detail.status === "ready" ? state.detail.statusLabel : undefined
@@ -175,18 +174,20 @@ export const _GlobalSearchOverlay = ({ isOpen, state, copy, on }: GlobalSearchOv
         status: detailStatus === undefined ? undefined : defineLeafComponent("badge", {}, () => (
             <Badge props={{ content: detailStatus, tone: "accent" }} />
         )),
-        action: state.detail.status === "error"
-            ? defineLeafComponent("button", {}, () => (
-                <Button props={{ label: copy.retry, variant: "secondary", size: "sm" }} on={{ press: on?.retry }} />
-            ))
-            : detailId !== undefined
-                ? defineLeafComponent("button", {}, () => (
-                    <Button
-                        props={{ label: copy.openResult, variant: "primary", size: "sm", icon: "next", iconPlacement: "trailing" }}
-                        on={{ press: () => on?.resultOpen?.(detailId) }}
-                    />
+        action: (() => {
+            if (state.detail.status === "error") {
+                return defineLeafComponent("button", {}, () => (
+                    <Button props={{ label: copy.retry, variant: "secondary", size: "sm" }} on={{ press: on?.retry }} />
                 ))
-                : undefined,
+            }
+            if (detailId === undefined) return undefined
+            return defineLeafComponent("button", {}, () => (
+                <Button
+                    props={{ label: copy.openResult, variant: "primary", size: "sm", icon: "next", iconPlacement: "trailing" }}
+                    on={{ press: () => on?.resultOpen?.(detailId) }}
+                />
+            ))
+        })(),
     })
     return (
         <ModalBranch

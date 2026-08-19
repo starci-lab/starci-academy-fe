@@ -1,7 +1,7 @@
 "use client"
-import { _CartPage } from "~candidate/components/pages/CartPage/component"
-import { _CartDrawer } from "~candidate/components/overlays/commerce/CartDrawer/component"
-import { _CheckoutOverlay } from "~candidate/components/overlays/commerce/CheckoutOverlay/component"
+import { CartPageBase } from "~candidate/components/pages/CartPage/component"
+import { CartDrawerBase } from "~candidate/components/overlays/commerce/CartDrawer/component"
+import { CheckoutOverlayBase } from "~candidate/components/overlays/commerce/CheckoutOverlay/component"
 import type { RenderedState } from "~candidate/states"
 
 /**
@@ -25,7 +25,7 @@ export interface RenderStateProps {
  * @param input - {@link RenderStateProps}
  */
 export const RenderState = (input: RenderStateProps) => {
-    if (input.state.surface === "page") return <_CartPage {...input.state.page} />
-    if (input.state.surface === "drawer") return <_CartDrawer {...input.state.drawer} />
-    return <_CheckoutOverlay {...input.state.checkout} />
+    if (input.state.surface === "page") return <CartPageBase {...input.state.page} />
+    if (input.state.surface === "drawer") return <CartDrawerBase {...input.state.drawer} />
+    return <CheckoutOverlayBase {...input.state.checkout} />
 }

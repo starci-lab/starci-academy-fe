@@ -23,7 +23,7 @@ const TrendingListView = ({ props, on, isLoading = false }: LeafProps<TrendingCo
 const TrendingList = defineContractComponent("trending-content-list", TrendingListView)
 
 /** Draw the ranked joined list while hiding settled absence. */
-export const _TrendingContents = (input: TrendingContentsProps) => input.state === "hidden" ? null : (
+export const TrendingContentsBase = (input: TrendingContentsProps) => input.state === "hidden" ? null : (
     <SurfaceListCard contract="trending-content-list" render={TrendingList} props={input.props} on={input.on} isLoading={input.state === "pending"} />
 )
 /** Source-level ownership marker for the pure discovery block. */

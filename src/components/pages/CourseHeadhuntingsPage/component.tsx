@@ -78,7 +78,7 @@ const DirectoryList = ({ props, on, isLoading = false }: LeafProps<DirectoryList
 const DirectoryListContent = defineContractComponent("next-action-list", DirectoryList)
 
 /** Pure company search plus consultant contact directory. */
-export const _CourseHeadhuntingsPage = (input: CourseHeadhuntingsPageProps) => {
+export const CourseHeadhuntingsPageBase = (input: CourseHeadhuntingsPageProps) => {
     const isLoading = input.state === "pending"
     const header = defineContractComponent("page-header-stack", {
         trail: defineLeafComponent("breadcrumbs", {}, () => (

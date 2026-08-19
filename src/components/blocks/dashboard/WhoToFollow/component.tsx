@@ -27,7 +27,7 @@ const SuggestedListView = ({ props, on, isLoading = false }: LeafProps<WhoToFoll
 const SuggestedList = defineContractComponent("suggested-user-list", SuggestedListView)
 
 /** Draw the joined suggestion list while hiding settled absence. */
-export const _WhoToFollow = (input: WhoToFollowProps) => input.state === "hidden" ? null : (
+export const WhoToFollowBase = (input: WhoToFollowProps) => input.state === "hidden" ? null : (
     <SurfaceListCard contract="suggested-user-list" render={SuggestedList} props={input.props} on={input.on} isLoading={input.state === "pending"} />
 )
 /** Source-level ownership marker for the pure social block. */

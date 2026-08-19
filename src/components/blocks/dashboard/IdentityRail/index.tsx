@@ -17,7 +17,7 @@ import { defineCompositeComponent, defineContractComponent } from "@/components/
  * WHAT IT DOES OWN is the seam between them, which is a contract, and the name over them, which is
  * copy. Nothing else.
  *
- * THE UNDERSCORE'S PROMISE IS LOCAL, NOT TRANSITIVE. There is no `_IdentityRail` because there is
+ * THE BASE SUFFIX'S PROMISE IS LOCAL, NOT TRANSITIVE. There is no `IdentityRailBase` because there is
  * nothing to resolve here; and a test rendering this mounts three blocks that fetch.
  */
 export const IdentityRail = () => {

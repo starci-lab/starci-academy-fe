@@ -3,7 +3,7 @@
 import { useSWRConfig } from "swr"
 import { useMutateRemoveFromCartSwr } from "@/hooks"
 import { QUERY_MY_CART_SWR_KEY } from "@/hooks/swr/useQueryMyCartSwr"
-import { _CartLine, type CartLineData } from "./component"
+import { CartLineBase, type CartLineData } from "./component"
 
 /**
  * One basket line, with the removal it owns.
@@ -41,7 +41,7 @@ export const CartLine = ({ state = "ready", line }: CartLineProps) => {
     const removal = useMutateRemoveFromCartSwr(state === "pending" ? undefined : line.courseId)
 
     return (
-        <_CartLine
+        <CartLineBase
             state={removal.isMutating ? "removing" : state}
             props={line}
             on={{

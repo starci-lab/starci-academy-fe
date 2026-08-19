@@ -171,7 +171,7 @@ export type CourseLearnContentPageActions = {
     readonly [key: string]: ((...args: Array<never>) => void) | undefined
 }
 
-/** Props for {@link _CourseLearnContentPage}. */
+/** Props for {@link CourseLearnContentPageBase}. */
 export type CourseLearnContentPageProps = {
     readonly state: CourseLearnContentPageState
     readonly props: CourseLearnContentPageData
@@ -217,7 +217,7 @@ const ContentNextSteps = defineContractComponent("content-next-list", ContentNex
  *
  * @param input - {@link CourseLearnContentPageProps}
  */
-export const _CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
+export const CourseLearnContentPageBase = (input: CourseLearnContentPageProps) => {
     const labels = input.props.labels
     const isLoading = input.state === "pending"
     const isLocked = input.state === "locked"

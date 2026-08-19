@@ -292,7 +292,7 @@ window.STARCI_REVIEW = {
                 { key: "catalog-search-count-view-row", why: "PROPOSED — query, result count and layout choice all narrow the same list, so they stay on one control row above it." },
             ],
             stateCoverage: [
-                { ownerId: "page-courses-catalog", state: "populated", coverage: "rendered", scenarioId: "direction-parity-first-default", evidence: "Legacy list branch of _CourseCatalogPage." },
+                { ownerId: "page-courses-catalog", state: "populated", coverage: "rendered", scenarioId: "direction-parity-first-default", evidence: "Legacy list branch of CourseCatalogPageBase." },
                 { ownerId: "page-courses-catalog", state: "skeleton", coverage: "deferred-to-preview", evidence: "Legacy CatalogLineCardSkeleton and CourseCardSkeleton prove the shape; not rendered in Plan." },
                 { ownerId: "page-courses-catalog", state: "empty", coverage: "deferred-to-preview", evidence: "Legacy splits plain-empty from filtered-empty with a clear-filter action." },
                 { ownerId: "page-courses-catalog", state: "filtered-empty", coverage: "deferred-to-preview", evidence: "courses.emptyFiltered.* keys in the legacy connected file." },

@@ -1,11 +1,11 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _CoursePersonalProjectTaskPage } from "./component"
+import { CoursePersonalProjectTaskPageBase } from "./component"
 
-describe("_CoursePersonalProjectTaskPage", () => {
+describe("CoursePersonalProjectTaskPageBase", () => {
     it("renders the backend task fact and submit action in the ready state", () => {
         render(
-            <_CoursePersonalProjectTaskPage
+            <CoursePersonalProjectTaskPageBase
                 state="ready"
                 props={{
                     title: "Build the API client",
@@ -25,7 +25,7 @@ describe("_CoursePersonalProjectTaskPage", () => {
 
     it("keeps the submit action pending while review is being enqueued", () => {
         render(
-            <_CoursePersonalProjectTaskPage
+            <CoursePersonalProjectTaskPageBase
                 state="submitting"
                 props={{
                     title: "Build the API client",
@@ -42,7 +42,7 @@ describe("_CoursePersonalProjectTaskPage", () => {
 
     it("replaces submission controls with a recovery action after failure", () => {
         render(
-            <_CoursePersonalProjectTaskPage
+            <CoursePersonalProjectTaskPageBase
                 state="failed"
                 props={{
                     title: "Personal project task",

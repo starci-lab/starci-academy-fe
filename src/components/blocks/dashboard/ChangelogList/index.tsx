@@ -3,7 +3,7 @@
 import { useLocale, useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryChangelogEntriesSwr } from "@/hooks"
-import { _ChangelogList, type ChangelogCategory } from "./component"
+import { ChangelogListBase, type ChangelogCategory } from "./component"
 
 const isCategory = (value: string): value is ChangelogCategory =>
     value === "feature" || value === "fix" || value === "announcement"
@@ -25,7 +25,7 @@ export const ChangelogList = () => {
     const byId = new Map(entries.map((entry) => [entry.id, entry]))
 
     return (
-        <_ChangelogList
+        <ChangelogListBase
             state={state}
             props={{
                 label: t("title"),

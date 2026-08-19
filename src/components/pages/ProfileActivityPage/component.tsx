@@ -1,6 +1,6 @@
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { Tree } from "@/components/branches/Tree"
-import { _ActivityFeed, type ActivityFeedProps } from "@/components/blocks/dashboard/ActivityFeed/component"
+import { ActivityFeedBase, type ActivityFeedProps } from "@/components/blocks/dashboard/ActivityFeed/component"
 import { ProfileAchievement } from "@/components/composites/ProfileAchievement"
 import { defineCompositeComponent, defineContractComponent, defineContractProjection } from "@/components/contracts/props"
 import type { ProfileAchievement as ProfileAchievementData } from "@/modules/api/graphql/queries/types/profile-evidence"
@@ -19,10 +19,10 @@ const Achievements = ({ achievementState, achievements }: ProfileActivityPagePro
     })} />
 }
 
-const Activity = ({ feed }: ProfileActivityPageProps) => <SurfaceCard props={{ label: "Activity", isFrameless: true }} contract="activity-feed-result" render={defineContractProjection("activity-feed-result", () => <_ActivityFeed {...feed} />)} />
+const Activity = ({ feed }: ProfileActivityPageProps) => <SurfaceCard props={{ label: "Activity", isFrameless: true }} contract="activity-feed-result" render={defineContractProjection("activity-feed-result", () => <ActivityFeedBase {...feed} />)} />
 
 /** Preserve legacy order: earned achievement proof before day-grouped chronological activity. */
-export const _ProfileActivityPage = (input: ProfileActivityPageProps) => <Tree contract="profile-main" render={defineContractComponent("profile-main", {
+export const ProfileActivityPageBase = (input: ProfileActivityPageProps) => <Tree contract="profile-main" render={defineContractComponent("profile-main", {
     section: [
         defineContractProjection("label-row-over-card", () => <Achievements {...input} />),
         defineContractProjection("label-row-over-card", () => <Activity {...input} />),

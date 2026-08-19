@@ -3,7 +3,7 @@
 import { useLocale, useTranslations } from "next-intl"
 import { usePathname, useRouter } from "@/i18n/navigation"
 import { LOCALES, type Locale } from "@/i18n/config"
-import { _LanguageMenu } from "./component"
+import { LanguageMenuBase } from "./component"
 
 /** Connected locale owner: keeps the current path while replacing only its locale prefix. */
 export const LanguageMenu = () => {
@@ -13,7 +13,7 @@ export const LanguageMenu = () => {
     const router = useRouter()
 
     return (
-        <_LanguageMenu
+        <LanguageMenuBase
             props={{
                 label: t("locale"),
                 selectedLocale: locale,

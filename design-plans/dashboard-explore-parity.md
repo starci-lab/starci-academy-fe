@@ -72,7 +72,7 @@ Ownership decisions:
 - `DashboardPage` does not fetch Explore data. It mounts `ExploreTab` only when Explore is active,
   preserving the legacy lazy-mount behaviour.
 - `FeedExplorer` owns feed tab/category state, infinite query, pagination, route resolution, and
-  reaction mutation. `_FeedExplorer` receives one explicit render state.
+  reaction mutation. `FeedExplorerBase` receives one explicit render state.
 - Activity roll-up and local-day grouping are product semantics, so they stay in the feed block
   resolver. They are not moved into a generic composite.
 - `TrendingContents` and `WhoToFollow` remain independent connected blocks because each has its
@@ -95,7 +95,7 @@ Ownership decisions:
 - `src/components/blocks/dashboard/WhoToFollow/component.tsx`
 - `src/components/blocks/dashboard/ActivityFeed/component.tsx`
 
-`index.tsx` is connected and resolves remote state. `component.tsx` is the pure `_X` half and
+`index.tsx` is connected and resolves remote state. `component.tsx` is the pure `XBase` half and
 accepts named `XProps`; do not use inline intersections in component parameters.
 
 ### Reusable rendering units

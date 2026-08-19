@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { _CourseFlashcardResultPage, type CourseFlashcardResultPageProps } from "./component"
+import { CourseFlashcardResultPageBase, type CourseFlashcardResultPageProps } from "./component"
 
 const makeInput = (): CourseFlashcardResultPageProps => ({
     state: "ready",
@@ -33,10 +33,10 @@ const makeInput = (): CourseFlashcardResultPageProps => ({
 
 afterEach(cleanup)
 
-describe("_CourseFlashcardResultPage", () => {
+describe("CourseFlashcardResultPageBase", () => {
     it("renders the persisted score, breakdown, weak topics, and retry path", () => {
         const input = makeInput()
-        const { container } = render(<_CourseFlashcardResultPage {...input} />)
+        const { container } = render(<CourseFlashcardResultPageBase {...input} />)
 
         expect(container.querySelector("[data-node=course-flashcard-result-page]")).toBeTruthy()
         expect(container.querySelectorAll("[data-node=flashcard-result-stat]")).toHaveLength(4)
@@ -49,7 +49,7 @@ describe("_CourseFlashcardResultPage", () => {
 
     it("uses the load retry action for a failed projection", () => {
         const input = { ...makeInput(), state: "failed" as const }
-        render(<_CourseFlashcardResultPage {...input} />)
+        render(<CourseFlashcardResultPageBase {...input} />)
 
         fireEvent.click(screen.getByRole("button", { name: "Try again" }))
         expect(input.on.retryLoad).toHaveBeenCalledOnce()

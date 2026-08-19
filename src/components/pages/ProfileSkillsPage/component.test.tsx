@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _ProfileSkillsPage, type ProfileSkillsPageProps } from "./component"
+import { ProfileSkillsPageBase, type ProfileSkillsPageProps } from "./component"
 
 /**
  * What these tests guard.
@@ -24,10 +24,10 @@ const ready: ProfileSkillsPageProps["props"] = {
     filterLabel: "Filters",
 }
 
-describe("_ProfileSkillsPage", () => {
+describe("ProfileSkillsPageBase", () => {
     it("keeps legacy metric, breakdown and solve-history order without generic evidence owner", () => {
         const select = vi.fn()
-        const { container } = render(<_ProfileSkillsPage state="ready" props={ready} on={{ select }} />)
+        const { container } = render(<ProfileSkillsPageBase state="ready" props={ready} on={{ select }} />)
         const text = container.textContent ?? ""
         expect(text.indexOf("Coding metrics")).toBeLessThan(text.indexOf("Stats"))
         expect(text.indexOf("Stats")).toBeLessThan(text.indexOf("Solve history"))
@@ -37,7 +37,7 @@ describe("_ProfileSkillsPage", () => {
     })
 
     it("rests four metrics and all three breakdown runs rather than collapsing the tab", () => {
-        const { container } = render(<_ProfileSkillsPage state="pending" props={ready} on={{}} />)
+        const { container } = render(<ProfileSkillsPageBase state="pending" props={ready} on={{}} />)
 
         expect(container.querySelectorAll("[data-node='profile-proof-metric']")).toHaveLength(4)
         expect(container.querySelectorAll("[data-node='profile-topic-chip-run'] [data-component='Badge']")).toHaveLength(4)
@@ -49,7 +49,7 @@ describe("_ProfileSkillsPage", () => {
     })
 
     it("keeps a failed tab readable and its controls inert when no outcomes are wired", () => {
-        render(<_ProfileSkillsPage state="error" props={{ ...ready, history: [] }} />)
+        render(<ProfileSkillsPageBase state="error" props={{ ...ready, history: [] }} />)
 
         expect(screen.getByText("Solve history")).toBeInTheDocument()
         expect(screen.getByRole("searchbox", { name: "Search solve history" })).toBeInTheDocument()
@@ -62,7 +62,7 @@ describe("_ProfileSkillsPage", () => {
         const select = vi.fn()
         const search = vi.fn()
         const filter = vi.fn()
-        render(<_ProfileSkillsPage state="ready" props={ready} on={{ select, search, filter }} />)
+        render(<ProfileSkillsPageBase state="ready" props={ready} on={{ select, search, filter }} />)
 
         expect(screen.getByText("1 results")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Shortest path" }))
@@ -74,7 +74,7 @@ describe("_ProfileSkillsPage", () => {
 
     it("tones a medium problem apart from an unclassified one and leaves the latter factless", () => {
         const { container } = render(
-            <_ProfileSkillsPage
+            <ProfileSkillsPageBase
                 state="ready"
                 props={{
                     ...ready,

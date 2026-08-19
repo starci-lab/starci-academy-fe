@@ -7,7 +7,7 @@ import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
 import { useQueryCourseQaCommentsSwr } from "@/hooks/swr/useQueryCourseQaCommentsSwr"
 import { useMutateCreateCourseQuestionSwr } from "@/hooks/swr/useMutateCreateCourseQuestionSwr"
 import type { CourseQaComment } from "@/modules/api/graphql/queries/query-course-qa-comments"
-import { _CourseQaPage, type CourseQaThreadRow } from "./component"
+import { CourseQaPageBase, type CourseQaThreadRow } from "./component"
 
 interface CourseQaPageProps { readonly displayId: string }
 
@@ -61,7 +61,7 @@ export const CourseQaPage = ({ displayId }: CourseQaPageProps) => {
     const state = failed ? "failed" : pending ? "pending" : allQuestions.length === 0 ? "empty" : "ready"
 
     return (
-        <_CourseQaPage
+        <CourseQaPageBase
             state={state}
             props={{
                 title: copy.title,

@@ -26,7 +26,7 @@ vi.mock("next-intl", () => ({
         values === undefined ? key : `${key}(${Object.values(values).join(",")})`,
 }))
 vi.mock("./component", () => ({
-    _CoursePriceOverlay: (input: OverlayMockInput) => (
+    CoursePriceOverlayBase: (input: OverlayMockInput) => (
         <section data-testid="surface" data-open={String(input.isOpen)}>
             {input.render.kind === "projection" ? input.render.project() : null}
         </section>

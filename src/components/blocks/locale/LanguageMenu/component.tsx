@@ -22,7 +22,7 @@ export type LanguageMenuViewProps = {
 }
 
 /** Pure single-select locale ListBox matching the legacy navbar disclosure. */
-export const _LanguageMenu = (input: LanguageMenuViewProps) => (
+export const LanguageMenuBase = (input: LanguageMenuViewProps) => (
     <DropdownBranch
         props={{
             label: input.props.label,

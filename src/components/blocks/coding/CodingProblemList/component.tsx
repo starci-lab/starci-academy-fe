@@ -70,7 +70,7 @@ export type CodingProblemListActions = {
     readonly recover?: () => void
 }
 
-/** Props for {@link _CodingProblemList}. */
+/** Props for {@link CodingProblemListBase}. */
 export type CodingProblemListProps =
     BlockProps<CodingProblemListState, CodingProblemListData> & {
         readonly on?: CodingProblemListActions
@@ -84,7 +84,7 @@ const RESTING_COUNT = 5
  *
  * @param input - {@link CodingProblemListProps}
  */
-export const _CodingProblemList = (input: CodingProblemListProps) => {
+export const CodingProblemListBase = (input: CodingProblemListProps) => {
     const isLoading = input.state === "pending"
     const showsNotice = input.state === "empty" || input.state === "all-solved"
 

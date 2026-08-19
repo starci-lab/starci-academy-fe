@@ -1,5 +1,5 @@
 "use client"
-import { _CourseLearnContentPage } from "~candidate/components/pages/CourseLearnContentPage/component"
+import { CourseLearnContentPageBase } from "~candidate/components/pages/CourseLearnContentPage/component"
 import type { RenderedState } from "~candidate/states"
 
 /**
@@ -28,4 +28,4 @@ export interface RenderStateProps {
  *
  * @param input - {@link RenderStateProps}
  */
-export const RenderState = (input: RenderStateProps) => <_CourseLearnContentPage {...input.state.props} />
+export const RenderState = (input: RenderStateProps) => <CourseLearnContentPageBase {...input.state.props} />

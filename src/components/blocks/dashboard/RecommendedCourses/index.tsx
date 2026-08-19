@@ -2,7 +2,7 @@
 import { useLocale, useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryRecommendedCoursesSwr } from "@/hooks"
-import { _RecommendedCourses } from "./component"
+import { RecommendedCoursesBase } from "./component"
 
 /** What the surrounding tab owns: which course is currently explaining its price. */
 export type RecommendedCoursesConnectedProps = {
@@ -55,13 +55,13 @@ export const RecommendedCourses = ({ onOpenPriceDetail }: RecommendedCoursesConn
     const props = { label: t("heading"), rows, errorMessage: t("failed"), retryLabel: t("retry") }
 
     if (query.error !== undefined && query.data === undefined) {
-        return <_RecommendedCourses state="failed" props={props} on={{ retry: () => { void query.mutate() } }} />
+        return <RecommendedCoursesBase state="failed" props={props} on={{ retry: () => { void query.mutate() } }} />
     }
-    if (query.data === undefined) return <_RecommendedCourses state="pending" props={props} />
-    if (rows.length === 0) return <_RecommendedCourses state="hidden" props={props} />
+    if (query.data === undefined) return <RecommendedCoursesBase state="pending" props={props} />
+    if (rows.length === 0) return <RecommendedCoursesBase state="hidden" props={props} />
 
     return (
-        <_RecommendedCourses
+        <RecommendedCoursesBase
             state="ready"
             props={props}
             on={{

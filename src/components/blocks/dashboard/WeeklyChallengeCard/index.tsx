@@ -4,7 +4,7 @@ import { useMemo, useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useMutateClaimWeeklyChallengeRewardSwr, useQueryWeeklyChallengeSwr } from "@/hooks"
-import { _WeeklyChallengeCard } from "./component"
+import { WeeklyChallengeCardBase } from "./component"
 
 const relativeLabel = (locale: string, iso: string) => {
     const formatter = new Intl.RelativeTimeFormat(locale, { numeric: "auto" })
@@ -51,7 +51,7 @@ export const WeeklyChallengeCard = () => {
     }
 
     return (
-        <_WeeklyChallengeCard
+        <WeeklyChallengeCardBase
             state={state}
             props={{
                 label: t("title"),

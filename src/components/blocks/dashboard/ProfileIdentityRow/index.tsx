@@ -3,7 +3,7 @@
 import { useCallback } from "react"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryMeSwr } from "@/hooks"
-import { _ProfileIdentityRow } from "./component"
+import { ProfileIdentityRowBase } from "./component"
 
 /** Connected dashboard identity anchor backed by the authenticated `me` query. */
 export const ProfileIdentityRow = () => {
@@ -19,12 +19,12 @@ export const ProfileIdentityRow = () => {
         router.push(`/profile/${username}`)
     }, [router, username])
 
-    if (isLoading) return <_ProfileIdentityRow state="pending" />
+    if (isLoading) return <ProfileIdentityRowBase state="pending" />
     if (hasFailed || user == null || username === undefined || displayName === undefined) {
-        return <_ProfileIdentityRow state="empty" />
+        return <ProfileIdentityRowBase state="empty" />
     }
     return (
-        <_ProfileIdentityRow
+        <ProfileIdentityRowBase
             state="settled"
             props={{
                 displayName,

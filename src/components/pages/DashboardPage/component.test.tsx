@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _DashboardPage } from "./component"
+import { DashboardPageBase } from "./component"
 
 /**
  * What these tests guard.
@@ -30,9 +30,9 @@ vi.mock("@/components/blocks/dashboard/CommunityTab", () => stub("CommunityTab")
 
 const unavailableMessage = "That dashboard panel is not available."
 
-describe("_DashboardPage", () => {
+describe("DashboardPageBase", () => {
     it("keeps the identity rail above the shortcuts in every panel", () => {
-        const { container } = render(<_DashboardPage props={{ selectedTab: "overview", unavailableMessage }} />)
+        const { container } = render(<DashboardPageBase props={{ selectedTab: "overview", unavailableMessage }} />)
 
         const rail = container.querySelector("[data-node=\"dashboard-rail\"]")
         const railText = rail?.innerHTML ?? ""
@@ -42,7 +42,7 @@ describe("_DashboardPage", () => {
     })
 
     it("draws the eight legacy overview blocks in their published reading order", () => {
-        const { container } = render(<_DashboardPage props={{ selectedTab: "overview", unavailableMessage }} />)
+        const { container } = render(<DashboardPageBase props={{ selectedTab: "overview", unavailableMessage }} />)
 
         const main = container.querySelector("[data-node=\"dashboard-main\"]")
         const order = Array.from(main?.querySelectorAll("[data-testid]") ?? []).map((node) => node.getAttribute("data-testid"))
@@ -59,7 +59,7 @@ describe("_DashboardPage", () => {
     })
 
     it("reaches the explore panel and nothing else", () => {
-        render(<_DashboardPage props={{ selectedTab: "explore", unavailableMessage }} />)
+        render(<DashboardPageBase props={{ selectedTab: "explore", unavailableMessage }} />)
 
         expect(screen.getByTestId("ExploreTab")).toBeInTheDocument()
         expect(screen.queryByTestId("ContinueLearning")).not.toBeInTheDocument()
@@ -67,21 +67,21 @@ describe("_DashboardPage", () => {
     })
 
     it("reaches the courses panel and nothing else", () => {
-        render(<_DashboardPage props={{ selectedTab: "courses", unavailableMessage }} />)
+        render(<DashboardPageBase props={{ selectedTab: "courses", unavailableMessage }} />)
 
         expect(screen.getByTestId("CoursesTab")).toBeInTheDocument()
         expect(screen.queryByTestId("ExploreTab")).not.toBeInTheDocument()
     })
 
     it("reaches the community panel and nothing else", () => {
-        render(<_DashboardPage props={{ selectedTab: "community", unavailableMessage }} />)
+        render(<DashboardPageBase props={{ selectedTab: "community", unavailableMessage }} />)
 
         expect(screen.getByTestId("CommunityTab")).toBeInTheDocument()
         expect(screen.queryByTestId("CoursesTab")).not.toBeInTheDocument()
     })
 
     it("settles an unpublished tab as a centred notice instead of an empty main", () => {
-        const { container } = render(<_DashboardPage props={{ selectedTab: "invoices", unavailableMessage }} />)
+        const { container } = render(<DashboardPageBase props={{ selectedTab: "invoices", unavailableMessage }} />)
 
         expect(screen.getByText(unavailableMessage)).toBeInTheDocument()
         expect(container.querySelector("[data-node=\"centred-empty-notice\"]")).not.toBeNull()

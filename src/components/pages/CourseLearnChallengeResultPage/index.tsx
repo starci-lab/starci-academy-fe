@@ -9,7 +9,7 @@ import { useQueryContentChallengeFeedbacksSwr } from "@/hooks/swr/useQueryConten
 import { useQueryContentSwr } from "@/hooks/swr/useQueryContentSwr"
 import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
 import { useQueryModuleSwr } from "@/hooks/swr/useQueryModuleSwr"
-import { _CourseLearnChallengeResultPage } from "./component"
+import { CourseLearnChallengeResultPageBase } from "./component"
 
 /** Route identity required to resolve one deliverable's grading result. */
 export type CourseLearnChallengeResultPageProps = {
@@ -75,7 +75,7 @@ export const CourseLearnChallengeResultPage = (input: CourseLearnChallengeResult
     )
 
     return (
-        <_CourseLearnChallengeResultPage
+        <CourseLearnChallengeResultPageBase
             state={failed ? "failed" : pending ? "pending" : "ready"}
             props={{
                 title: deliverable?.title ?? challenge?.title ?? contentText("failedMessage"),

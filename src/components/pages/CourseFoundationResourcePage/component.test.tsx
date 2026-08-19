@@ -1,12 +1,12 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _CourseFoundationResourcePage } from "./component"
+import { CourseFoundationResourcePageBase } from "./component"
 
-describe("_CourseFoundationResourcePage", () => {
+describe("CourseFoundationResourcePageBase", () => {
     it("preserves backend-authored resource content and opens real practice", () => {
         const openPlayground = vi.fn()
         const { container } = render(
-            <_CourseFoundationResourcePage
+            <CourseFoundationResourcePageBase
                 state="ready"
                 props={{
                     resource: {

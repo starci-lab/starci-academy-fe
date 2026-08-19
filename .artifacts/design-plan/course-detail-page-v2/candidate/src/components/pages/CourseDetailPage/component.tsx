@@ -112,7 +112,7 @@ export type CourseDetailPageActions = {
 /** The situations the page can be in. */
 export type CourseDetailPageState = "pending" | "ready" | "not-found" | "failed"
 
-/** Props for {@link _CourseDetailPage}. */
+/** Props for {@link CourseDetailPageBase}. */
 export type CourseDetailPageProps = {
     /** The business situation, which picks the tree. */
     readonly state: CourseDetailPageState
@@ -140,7 +140,7 @@ const RESTING = {
  *
  * @param input - {@link CourseDetailPageProps}
  */
-export const _CourseDetailPage = (input: CourseDetailPageProps) => {
+export const CourseDetailPageBase = (input: CourseDetailPageProps) => {
     if (input.state === "not-found" || input.state === "failed") {
         return (
             <EmptyNotice

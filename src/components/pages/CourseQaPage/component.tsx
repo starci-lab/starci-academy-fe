@@ -101,7 +101,7 @@ const CourseQaList = ({ props, on, isLoading = false }: LeafProps<CourseQaListDa
 const CourseQaListContent = defineContractComponent("next-action-list", CourseQaList)
 
 /** Pure course Q&A list, inline ask form and one selected thread. */
-export const _CourseQaPage = (input: CourseQaPageProps) => {
+export const CourseQaPageBase = (input: CourseQaPageProps) => {
     const isLoading = input.state === "pending"
     const rows = input.props.selectedQuestion === undefined ? input.props.questions : input.props.replies
     const label = input.props.selectedQuestion === undefined ? input.props.questionsLabel : input.props.repliesLabel

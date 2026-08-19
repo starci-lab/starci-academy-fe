@@ -5,7 +5,7 @@ import { useRouter } from "@/i18n/navigation"
 import { useQueryCoursePersonalProjectSwr } from "@/hooks/swr/useQueryCoursePersonalProjectSwr"
 import { useQueryPersonalTaskAttemptFeedbacksSwr } from "@/hooks/swr/useQueryPersonalTaskAttemptFeedbacksSwr"
 import { useQueryPersonalTaskAttemptsSwr } from "@/hooks/swr/useQueryPersonalTaskAttemptsSwr"
-import { _CoursePersonalProjectResultPage } from "./component"
+import { CoursePersonalProjectResultPageBase } from "./component"
 
 /** Route identity needed to resolve one task's attempt history. */
 export type CoursePersonalProjectResultPageProps = {
@@ -74,7 +74,7 @@ export const CoursePersonalProjectResultPage = ({ displayId, taskId }: CoursePer
     }))
 
     return (
-        <_CoursePersonalProjectResultPage
+        <CoursePersonalProjectResultPageBase
             state={state}
             props={{
                 title: task?.title ?? copy.fallbackTitle,

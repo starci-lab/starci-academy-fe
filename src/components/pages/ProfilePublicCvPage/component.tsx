@@ -26,7 +26,7 @@ const CvNotice = (input: ProfilePublicCvPageProps) => <Tree contract="empty-noti
 })} />
 
 /** Public CV parity: same paper while loading/ready and honest no-file, uncompiled and error outcomes. */
-export const _ProfilePublicCvPage = (input: ProfilePublicCvPageProps) => <Tree contract="profile-main" render={defineContractComponent("profile-main", {
+export const ProfilePublicCvPageBase = (input: ProfilePublicCvPageProps) => <Tree contract="profile-main" render={defineContractComponent("profile-main", {
     section: [defineContractProjection("label-row-over-card", () => <SurfaceCard props={{ label: input.props.label, isFrameless: true }} contract={input.state === "ready" || input.state === "pending" ? "profile-cv-page" : "empty-notice-card"} render={input.state === "ready" || input.state === "pending" ? defineContractProjection("profile-cv-page", () => <ReadyCv {...input} />) : defineContractProjection("empty-notice-card", () => <CvNotice {...input} />)} />)],
 })} />
 

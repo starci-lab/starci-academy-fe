@@ -84,7 +84,7 @@ const WeeklyChallengeFinisherRow = ({ props, isLoading = false }: FinisherRowPro
 )
 
 /** Draw the featured weekly challenge without owning its query or routes. */
-export const _WeeklyChallengeCard = (input: WeeklyChallengeCardProps) => {
+export const WeeklyChallengeCardBase = (input: WeeklyChallengeCardProps) => {
     const isLoading = input.state === "pending"
     if (input.state === "failed" || input.state === "empty") {
         const failed = input.state === "failed"

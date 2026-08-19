@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import type { Playground } from "@/modules/api/graphql/queries/query-playground"
-import { _CoursePlaygroundSetupPage, type CoursePlaygroundSetupPageProps } from "./component"
+import { CoursePlaygroundSetupPageBase, type CoursePlaygroundSetupPageProps } from "./component"
 
 /**
  * What these tests guard: one server-created session read through six states. The reader may only
@@ -46,14 +46,14 @@ const draw = (
     props: Partial<CoursePlaygroundSetupPageProps["props"]> = {},
     on: CoursePlaygroundSetupPageProps["on"] = handlers(),
 ) => render(
-    <_CoursePlaygroundSetupPage
+    <CoursePlaygroundSetupPageBase
         state={state}
         props={{ ...copy, playground: playground(), ...props }}
         on={on}
     />,
 )
 
-describe("_CoursePlaygroundSetupPage", () => {
+describe("CoursePlaygroundSetupPageBase", () => {
     it("names the playground the server returned and numbers the preparation it asks for", () => {
         const { container } = draw("unpaired")
 

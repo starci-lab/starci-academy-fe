@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl"
 import { useQueryMeSwr } from "@/hooks/swr/useQueryMeSwr"
 import { useQueryUserProfileSwr } from "@/hooks/swr/useQueryUserProfileSwr"
 import { useMutateSetFollowSwr } from "@/hooks/swr/useMutateSetFollowSwr"
-import { _ProfileHero } from "./component"
+import { ProfileHeroBase } from "./component"
 
 /** Connected identity rail: resolves viewer context, CTA precedence and share/follow behavior. */
 export const ProfileHero = () => {
@@ -54,7 +54,7 @@ export const ProfileHero = () => {
     }
 
     return (
-        <_ProfileHero
+        <ProfileHeroBase
             state={profile.data === undefined ? "pending" : "ready"}
             props={{
                 name: user?.displayName?.trim() || user?.username || "",

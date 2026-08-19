@@ -39,7 +39,7 @@ const ActivityListView = ({ props, on, isLoading = false }: LeafProps<ActivityLi
 const ActivityList = defineContractComponent("activity-feed-list", ActivityListView)
 
 /** Draw local-day joined activity lists or one explicit result notice. */
-export const _ActivityFeed = (input: ActivityFeedProps) => {
+export const ActivityFeedBase = (input: ActivityFeedProps) => {
     if (input.state === "filteredEmpty" || input.state === "platformEmpty" || input.state === "failed") {
         return <Tree contract="activity-feed-result" render={defineContractComponent("activity-feed-result", {
             notice: defineContractProjection("empty-notice-card", () => (

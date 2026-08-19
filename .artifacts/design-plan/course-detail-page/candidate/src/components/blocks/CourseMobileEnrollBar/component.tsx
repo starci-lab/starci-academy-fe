@@ -36,7 +36,7 @@ export type CourseMobileEnrollBarActions = {
     readonly act?: () => void
 }
 
-/** Props for {@link _CourseMobileEnrollBar}. */
+/** Props for {@link CourseMobileEnrollBarBase}. */
 export type CourseMobileEnrollBarProps = {
     /** What the bar draws. */
     readonly props: CourseMobileEnrollBarData
@@ -49,7 +49,7 @@ export type CourseMobileEnrollBarProps = {
  *
  * @param input - {@link CourseMobileEnrollBarProps}
  */
-export const _CourseMobileEnrollBar = (input: CourseMobileEnrollBarProps) => {
+export const CourseMobileEnrollBarBase = (input: CourseMobileEnrollBarProps) => {
     const priceLine = defineContract("price-discount-line", [
         <Text key="price" props={{ content: input.props.price, size: "sm", weight: "semibold" }} />,
         input.props.originalPrice === undefined

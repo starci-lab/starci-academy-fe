@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _CourseHeadhuntingsPage } from "./component"
+import { CourseHeadhuntingsPageBase } from "./component"
 
 /**
  * What these tests guard.
@@ -28,13 +28,13 @@ const props = {
 
 describe("CourseHeadhuntingsPage", () => {
     it("renders proven company and consultant directory rows", () => {
-        render(<_CourseHeadhuntingsPage state="ready" props={props} />)
+        render(<CourseHeadhuntingsPageBase state="ready" props={props} />)
         expect(screen.getByText(/Acme Talent/)).toBeInTheDocument()
         expect(screen.getByText(/Alex/)).toBeInTheDocument()
     })
 
     it("rests both directories rather than hiding the consultant list while loading", () => {
-        const { container } = render(<_CourseHeadhuntingsPage state="pending" props={props} />)
+        const { container } = render(<CourseHeadhuntingsPageBase state="pending" props={props} />)
 
         expect(container.querySelectorAll("[data-node=\"next-action-list\"]")).toHaveLength(2)
         expect(container.querySelectorAll("[data-node=\"next-action-list\"] > [data-component=\"Text\"][data-loading=\"true\"]")).toHaveLength(8)
@@ -42,7 +42,7 @@ describe("CourseHeadhuntingsPage", () => {
     })
 
     it("replaces both directories with a talents notice when nothing is published", () => {
-        const { container } = render(<_CourseHeadhuntingsPage state="empty" props={props} />)
+        const { container } = render(<CourseHeadhuntingsPageBase state="empty" props={props} />)
 
         expect(screen.getByText("No companies.")).toBeInTheDocument()
         expect(container.querySelector("[data-node=\"next-action-list\"]")).toBeNull()
@@ -51,7 +51,7 @@ describe("CourseHeadhuntingsPage", () => {
 
     it("offers the way back from a failed directory", () => {
         const retry = vi.fn()
-        render(<_CourseHeadhuntingsPage state="failed" props={props} on={{ retry }} />)
+        render(<CourseHeadhuntingsPageBase state="failed" props={props} on={{ retry }} />)
 
         expect(screen.getByText("Could not load companies.")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Try again" }))
@@ -64,7 +64,7 @@ describe("CourseHeadhuntingsPage", () => {
         const search = vi.fn()
         const course = vi.fn()
         const { container } = render(
-            <_CourseHeadhuntingsPage
+            <CourseHeadhuntingsPageBase
                 state="ready"
                 props={{
                     ...props,
@@ -93,7 +93,7 @@ describe("CourseHeadhuntingsPage", () => {
 
     it("drops the consultant surface entirely when the course has no consultants", () => {
         const { container } = render(
-            <_CourseHeadhuntingsPage state="ready" props={{ ...props, consultants: [] }} />,
+            <CourseHeadhuntingsPageBase state="ready" props={{ ...props, consultants: [] }} />,
         )
 
         expect(container.querySelectorAll("[data-node=\"next-action-list\"]")).toHaveLength(1)

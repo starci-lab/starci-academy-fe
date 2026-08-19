@@ -74,7 +74,7 @@ export type SolutionEditorActions = {
     readonly submit?: () => void
 }
 
-/** Props for {@link _SolutionEditor}. */
+/** Props for {@link SolutionEditorBase}. */
 export type SolutionEditorProps =
     BlockProps<SolutionEditorState, SolutionEditorData> & {
         readonly on?: SolutionEditorActions
@@ -91,7 +91,7 @@ const LANGUAGE_ID = "coding-solution-language"
  *
  * @param input - {@link SolutionEditorProps}
  */
-export const _SolutionEditor = (input: SolutionEditorProps) => {
+export const SolutionEditorBase = (input: SolutionEditorProps) => {
     const labels = input.props.labels
     const isBusy = input.state === "submitting"
     const testcases = input.props.testcases ?? []

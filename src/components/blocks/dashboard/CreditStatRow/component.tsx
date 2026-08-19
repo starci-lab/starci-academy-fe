@@ -10,7 +10,7 @@ export type CreditStatRowProps =
     }
 
 /** Render the credit row without reading request or locale state. */
-export const _CreditStatRow = (input: CreditStatRowProps) => input.state === "empty" ? null : (
+export const CreditStatRowBase = (input: CreditStatRowProps) => input.state === "empty" ? null : (
     <IconLabelFactRow
         props={{
             icon: "credit",

@@ -18,7 +18,7 @@ export type ProfileChallengesPageProps = {
 const formatDate = (value: string) => Number.isNaN(Date.parse(value)) ? value : new Intl.DateTimeFormat("en", { month: "short", day: "2-digit" }).format(new Date(value))
 
 /** Challenges parity: headline standing and a flat, recruiter-scannable list of passed proof. */
-export const _ProfileChallengesPage = ({ strength, submissions, on }: ProfileChallengesPageProps) => {
+export const ProfileChallengesPageBase = ({ strength, submissions, on }: ProfileChallengesPageProps) => {
     const rows = submissions.state === "pending"
         ? Array.from({ length: 3 }, (_, index): ProfileSolvedChallenge => ({ id: `pending-${index}`, title: "", passedAt: "" }))
         : submissions.data

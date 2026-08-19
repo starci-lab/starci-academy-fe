@@ -58,7 +58,7 @@ export type OrderSummaryLabels = {
     readonly unavailable: string
 }
 
-/** Props for {@link _OrderSummary}. */
+/** Props for {@link OrderSummaryBase}. */
 export type OrderSummaryProps = BlockProps<OrderSummaryState, OrderSummaryData>
 
 /**
@@ -66,7 +66,7 @@ export type OrderSummaryProps = BlockProps<OrderSummaryState, OrderSummaryData>
  *
  * @param input - {@link OrderSummaryProps}
  */
-export const _OrderSummary = (input: OrderSummaryProps) => {
+export const OrderSummaryBase = (input: OrderSummaryProps) => {
     const isLoading = input.state === "pending"
     const labels = input.props.labels
 

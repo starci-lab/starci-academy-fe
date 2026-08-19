@@ -12,7 +12,7 @@ import {
 } from "@/hooks"
 import { useSessionToken } from "@/hooks/auth/useSessionToken"
 import { QUERY_MY_CART_SWR_KEY } from "@/hooks/swr/useQueryMyCartSwr"
-import { _CartPage, type CartPageState } from "./component"
+import { CartPageBase, type CartPageState } from "./component"
 import { type CartLineData } from "@/components/blocks/commerce/CartLine/component"
 
 /**
@@ -99,7 +99,7 @@ export const CartPage = () => {
                     : lines.length === 0 ? "empty" : "ready"
 
     return (
-        <_CartPage
+        <CartPageBase
             state={state}
             props={{
                 labels: {

@@ -8,7 +8,7 @@ import {
     defineLeafComponent,
     defineContractProjection,
 } from "@/components/contracts/props"
-import { _OrderSummary, type OrderSummaryLabels } from "@/components/blocks/commerce/OrderSummary/component"
+import { OrderSummaryBase, type OrderSummaryLabels } from "@/components/blocks/commerce/OrderSummary/component"
 
 /**
  * OVERLAY - `CheckoutOverlay`: how to pay, and what that decision costs.
@@ -98,7 +98,7 @@ export type CheckoutOverlayActions = {
     readonly pay?: () => void
 }
 
-/** Props for {@link _CheckoutOverlay}. */
+/** Props for {@link CheckoutOverlayBase}. */
 export type CheckoutOverlayProps = {
     readonly props: CheckoutOverlayData
     readonly on?: CheckoutOverlayActions
@@ -109,7 +109,7 @@ export type CheckoutOverlayProps = {
  *
  * @param input - {@link CheckoutOverlayProps}
  */
-export const _CheckoutOverlay = (input: CheckoutOverlayProps) => {
+export const CheckoutOverlayBase = (input: CheckoutOverlayProps) => {
     const labels = input.props.labels
     const isInstalments = input.props.plan === "instalments"
     const cycles = input.props.cycles ?? []
@@ -135,7 +135,7 @@ export const _CheckoutOverlay = (input: CheckoutOverlayProps) => {
                     />
                 )),
                 summary: defineContractProjection("order-summary-stack", () => (
-                    <_OrderSummary
+                    <OrderSummaryBase
                         state="ready"
                         props={{
                             labels: labels.summary,

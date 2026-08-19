@@ -53,7 +53,7 @@ type FrameStub = {
 }
 
 vi.mock("./component", () => ({
-    _PlaygroundSessionLayout: (input: FrameStub) => (
+    PlaygroundSessionLayoutBase: (input: FrameStub) => (
         <>
             <output data-testid="frame-state">{input.state}</output>
             <button type="button" onClick={input.onRetry}>{input.retryLabel}</button>

@@ -26,7 +26,7 @@ export type CourseFoundationsPageProps = {
 }
 
 /** Draw the live foundation category catalog in pending, ready, empty and failed states. */
-export const _CourseFoundationsPage = (input: CourseFoundationsPageProps) => {
+export const CourseFoundationsPageBase = (input: CourseFoundationsPageProps) => {
     const loading = input.state === "pending"
     const categories: ReadonlyArray<FoundationCategoryRow> = loading && input.props.categories.length === 0
         ? Array.from({ length: 4 }, (_, index) => ({ id: `pending-${index}`, title: "", description: null }))

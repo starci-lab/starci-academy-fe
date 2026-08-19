@@ -10,7 +10,7 @@ import { CartDrawer } from "@/components/overlays/commerce/CartDrawer"
 import { GlobalSearchOverlay, type GlobalSearchOpenIntent } from "@/components/overlays/search/GlobalSearchOverlay"
 import { useSessionToken } from "@/hooks/auth/useSessionToken"
 import { useSessionRefresh } from "@/hooks/auth/useSessionRefresh"
-import { _ShellNav, type ShellNavRoute, type ShellNavTab } from "./component"
+import { ShellNavBase, type ShellNavRoute, type ShellNavTab } from "./component"
 import type { IconName } from "@/components/leaves/Icon"
 import type { AuthMode } from "@/components/blocks/auth/AuthenticationPanel/component"
 
@@ -139,7 +139,7 @@ export const ShellNav = () => {
 
     return (
         <>
-            <_ShellNav
+            <ShellNavBase
                 props={{
                     brand: t("brand"),
                     routes,

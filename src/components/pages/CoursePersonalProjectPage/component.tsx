@@ -30,7 +30,7 @@ export type CoursePersonalProjectPageProps = {
 }
 
 /** Draws the personal-project overview without owning transport or routing. */
-export const _CoursePersonalProjectPage = (input: CoursePersonalProjectPageProps) => {
+export const CoursePersonalProjectPageBase = (input: CoursePersonalProjectPageProps) => {
     const loading = input.state === "pending"
     const tasks: ReadonlyArray<CoursePersonalProjectTaskRow> = loading && input.props.tasks.length === 0
         ? Array.from({ length: 4 }, (_, index) => ({ id: `pending-${index}`, label: "", isCurrent: false }))

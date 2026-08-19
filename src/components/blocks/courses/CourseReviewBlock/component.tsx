@@ -106,7 +106,7 @@ const CourseReviewList = defineContractComponent("course-review-list", CourseRev
  * @param input - The rating and the page of reviews.
  * @returns The review region.
  */
-export const _CourseReviewBlock = ({
+export const CourseReviewBlockBase = ({
     props,
     state,
 }: BlockProps<CourseReviewBlockState, CourseReviewBlockData>) => {

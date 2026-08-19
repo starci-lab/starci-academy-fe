@@ -7,7 +7,7 @@ vi.mock("next-intl", () => ({ useLocale: () => "en", useTranslations: () => (key
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: m.push }) }))
 vi.mock("@/hooks", () => ({ useQueryCoursesSwr: () => m.catalog, useQueryMyCoursesSwr: () => m.mine }))
 vi.mock("@/components/overlays/courses/CoursePriceOverlay", () => ({ CoursePriceOverlay: ({ isOpen, onDismiss }: PriceOverlayInput) => isOpen ? <button onClick={onDismiss}>dismiss</button> : null }))
-vi.mock("./component", () => ({ _CoursesCatalogPage: ({ state, on }: TestPageInput) => <><output data-testid="state">{state}</output><button onClick={on.goHome}>home</button><button onClick={() => on.search("x")}>search</button><button onClick={() => on.changeView("line")}>line</button><button onClick={() => on.recover()}>recover</button><button onClick={() => on["view:c1"]?.()}>view</button></> }))
+vi.mock("./component", () => ({ CoursesCatalogPageBase: ({ state, on }: TestPageInput) => <><output data-testid="state">{state}</output><button onClick={on.goHome}>home</button><button onClick={() => on.search("x")}>search</button><button onClick={() => on.changeView("line")}>line</button><button onClick={() => on.recover()}>recover</button><button onClick={() => on["view:c1"]?.()}>view</button></> }))
 import { CoursesCatalogPage } from "./index"
 beforeEach(() => { vi.clearAllMocks(); m.catalog.data = undefined; m.catalog.error = undefined; m.mine.data = []; Object.defineProperty(window, "localStorage", { configurable: true, value: { getItem: vi.fn(), setItem: vi.fn() } }) })
 describe("CoursesCatalogPage route", () => {

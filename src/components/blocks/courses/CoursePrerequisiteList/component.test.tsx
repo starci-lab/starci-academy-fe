@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-import { _CoursePrerequisiteList } from "./component"
+import { CoursePrerequisiteListBase } from "./component"
 
 const prerequisites = [
     { id: "js", requirement: "Comfortable with JavaScript syntax" },
@@ -8,9 +8,9 @@ const prerequisites = [
     { id: "http", requirement: "Knows what an HTTP request is" },
 ]
 
-describe("_CoursePrerequisiteList", () => {
+describe("CoursePrerequisiteListBase", () => {
     it("numbers every requirement in the order the course stores them", () => {
-        render(<_CoursePrerequisiteList state="required" props={{ prerequisites }} />)
+        render(<CoursePrerequisiteListBase state="required" props={{ prerequisites }} />)
 
         const list = screen.getByRole("list")
         expect(list.tagName).toBe("OL")
@@ -26,7 +26,7 @@ describe("_CoursePrerequisiteList", () => {
 
     it("draws nothing at all for a course that asks for nothing", () => {
         const { container } = render(
-            <_CoursePrerequisiteList state="none" props={{ prerequisites: [] }} />,
+            <CoursePrerequisiteListBase state="none" props={{ prerequisites: [] }} />,
         )
 
         expect(container).toBeEmptyDOMElement()
@@ -35,7 +35,7 @@ describe("_CoursePrerequisiteList", () => {
 
     it("still draws nothing when a course carries requirements it no longer asks for", () => {
         const { container } = render(
-            <_CoursePrerequisiteList state="none" props={{ prerequisites }} />,
+            <CoursePrerequisiteListBase state="none" props={{ prerequisites }} />,
         )
 
         expect(container).toBeEmptyDOMElement()

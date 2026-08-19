@@ -8,7 +8,7 @@ import { useQueryContentChallengeProgressSwr } from "@/hooks/swr/useQueryContent
 import { useQueryContentSwr } from "@/hooks/swr/useQueryContentSwr"
 import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
 import {
-    _CourseLearnChallengePage,
+    CourseLearnChallengePageBase,
     type CourseLearnChallengePageState,
 } from "./component"
 
@@ -80,7 +80,7 @@ export const CourseLearnChallengePage = (input: CourseLearnChallengePageProps) =
     }
 
     return (
-        <_CourseLearnChallengePage
+        <CourseLearnChallengePageBase
             state={state}
             props={{
                 title: challenge?.title ?? contentText("failedMessage"),

@@ -63,7 +63,7 @@ export type ContinueLearningNotice = ContinueLearningFrame & {
     readonly actionLabel: string
 }
 
-/** Props for {@link _ContinueLearning}, discriminated by the situation. */
+/** Props for {@link ContinueLearningBase}, discriminated by the situation. */
 export type ContinueLearningProps =
     | { readonly state: "pending"; readonly props: ContinueLearningFrame }
     | { readonly state: "onboarding"; readonly props: ContinueLearningNotice }
@@ -93,7 +93,7 @@ type ContinueLearningInput = ContinueLearningProps & { readonly on?: ContinueLea
  *
  * @param input - {@link ContinueLearningInput}
  */
-export const _ContinueLearning = (input: ContinueLearningInput) => {
+export const ContinueLearningBase = (input: ContinueLearningInput) => {
     if (input.state === "onboarding" || input.state === "empty" || input.state === "failed") {
         return (
             <SurfaceCard props={{ label: input.props.label }} contract="empty-notice-card"

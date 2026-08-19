@@ -17,8 +17,9 @@ import { CoursePriceOverlay } from "@/components/overlays/courses/CoursePriceOve
 import { isPersonalPrice } from "@/modules/utils/course-price"
 import { useSessionToken } from "@/hooks/auth/useSessionToken"
 import { QUERY_MY_CART_SWR_KEY } from "@/hooks/swr/useQueryMyCartSwr"
-import { _CourseDetailPage, type CourseDetailSection } from "./component"
+import { CourseDetailPageBase, type CourseDetailSection } from "./component"
 import type { CourseDetail, CourseModule } from "@/modules/api/graphql/queries/types/course"
+import type { CoursePricePreview } from "@/modules/api/graphql/queries/types/course-price-preview"
 
 /**
  * The connected half: resolve one course and hand the presentational half a settled situation.
@@ -42,6 +43,20 @@ export interface CourseDetailPageProps {
      * built from `course.id` therefore reaches the not-found notice.
      */
     displayId: string
+}
+
+const payablePriceOf = (personalPrice: CoursePricePreview | undefined, openPrice: number | undefined, originalPrice: number) => personalPrice?.discountedPriceVnd ?? openPrice ?? originalPrice
+const listPriceOf = (personalPrice: CoursePricePreview | undefined, originalPrice: number) => personalPrice?.originalPriceVnd ?? originalPrice
+const discountPercentOf = (personalPrice: CoursePricePreview | undefined, payable: number, listPrice: number) => {
+    if (personalPrice !== undefined) return personalPrice.discountPercent ?? 0
+    if (payable >= listPrice) return 0
+    return Math.round((1 - payable / listPrice) * 100)
+}
+const sectionTargetOf = (section: CourseDetailSection, sections: NodeListOf<HTMLElement>) => {
+    if (section === "overview") return document.querySelector<HTMLElement>("[data-node=\"course-hero-heading\"]")
+    if (section === "curriculum") return sections.item(2)
+    if (section === "reviews") return sections.item(3)
+    return sections.item(4)
 }
 
 /** Sum a number across every content of every module. */
@@ -102,15 +117,15 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
 
     if (query.error !== undefined && query.data === undefined) {
         return (
-            <_CourseDetailPage
+            <CourseDetailPageBase
                 state="failed"
                 props={{ labels, noticeMessage: t("failed"), noticeActionLabel: t("retry") }}
                 on={{ retry: () => { void query.mutate() } }}
             />
         )
     }
-    if (query.data === undefined) return <_CourseDetailPage state="pending" props={{ labels }} />
-    if (query.data === null) return <_CourseDetailPage state="not-found" props={{ labels, noticeMessage: t("notFound") }} />
+    if (query.data === undefined) return <CourseDetailPageBase state="pending" props={{ labels }} />
+    if (query.data === null) return <CourseDetailPageBase state="not-found" props={{ labels, noticeMessage: t("notFound") }} />
 
     const course: CourseDetail = query.data
     const modules = byOrder(course.modules ?? [])
@@ -125,28 +140,23 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
     // `discountedPriceVnd` is the one field the personal-price rule itself dereferenced, so a
     // preview that reached here carries it. The OTHER two are not guaranteed: the server answers
     // some previews with only the two fields the rule reads, so their fallbacks still fire.
-    const payable = personalPrice ? preview.discountedPriceVnd : openPhase?.price ?? course.originalPrice
-    const listPrice = personalPrice ? preview.originalPriceVnd ?? course.originalPrice : course.originalPrice
+    const payable = payablePriceOf(personalPrice ? preview : undefined, openPhase?.price, course.originalPrice)
+    const listPrice = personalPrice ? listPriceOf(preview, course.originalPrice) : course.originalPrice
     const isPaid = payable > 0
     const isInCart = (cartQuery.data ?? []).some((row) => row.courseId === course.id)
     const hasDiscount = payable < listPrice
-    const discountPercent = personalPrice
-        ? preview.discountPercent ?? 0
-        : hasDiscount ? Math.round((1 - payable / listPrice) * 100) : 0
+    const discountPercent = discountPercentOf(personalPrice ? preview : undefined, payable, listPrice)
 
     const selectSection = (section: CourseDetailSection) => {
         setSelectedSection(section)
         const sections = document.querySelectorAll<HTMLElement>("[data-node=\"course-section\"]")
-        const target = section === "overview"
-            ? document.querySelector<HTMLElement>("[data-node=\"course-hero-heading\"]")
-            : section === "curriculum" ? sections.item(2)
-                : section === "reviews" ? sections.item(3) : sections.item(4)
+        const target = sectionTargetOf(section, sections)
         target?.scrollIntoView({ behavior: "smooth", block: "start" })
     }
 
     return (
         <>
-            <_CourseDetailPage
+            <CourseDetailPageBase
                 state="ready"
                 props={{
                     labels,

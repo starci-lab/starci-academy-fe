@@ -26,7 +26,7 @@ export type StarCiAiSelectionAskProps =
     | { readonly state: "ready"; readonly props: StarCiAiSelectionAskData; readonly on?: StarCiAiSelectionAskActions }
 
 /** Draw actions tied to one validated quote; invalid or stale selections have no surface. */
-export const _StarCiAiSelectionAsk = (input: StarCiAiSelectionAskProps) => {
+export const StarCiAiSelectionAskBase = (input: StarCiAiSelectionAskProps) => {
     if (input.state === "hidden") return null
     return (
         <Tree

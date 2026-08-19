@@ -103,7 +103,7 @@ export type ContactMessageFormActions = {
     readonly recover?: () => void
 }
 
-/** Props for {@link _ContactMessageForm}. */
+/** Props for {@link ContactMessageFormBase}. */
 export type ContactMessageFormProps =
     BlockProps<ContactMessageFormState, ContactMessageFormData> & {
         readonly on?: ContactMessageFormActions
@@ -122,7 +122,7 @@ const FIELD_IDS = {
  *
  * @param input - {@link ContactMessageFormProps}
  */
-export const _ContactMessageForm = (input: ContactMessageFormProps) => {
+export const ContactMessageFormBase = (input: ContactMessageFormProps) => {
     const labels = input.props.labels
     const refusals = input.props.refusals
     const isBusy = input.state === "submitting"

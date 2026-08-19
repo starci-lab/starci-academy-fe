@@ -103,7 +103,7 @@ export type AuthDoneCopy = {
     readonly doneHint: string
 }
 
-/** Props for {@link _AuthenticationPanel}, discriminated by the step. */
+/** Props for {@link AuthenticationPanelBase}, discriminated by the step. */
 export type AuthenticationPanelProps =
     | {
         readonly state: "details"
@@ -150,7 +150,7 @@ type AuthenticationPanelInput = AuthenticationPanelProps & {
  *
  * @param input - {@link AuthenticationPanelInput}
  */
-export const _AuthenticationPanel = (input: AuthenticationPanelInput) => {
+export const AuthenticationPanelBase = (input: AuthenticationPanelInput) => {
     const values = useRef({ ...EMPTY_VALUES })
     const [hasConfirmationMismatch, setHasConfirmationMismatch] = useState(false)
 

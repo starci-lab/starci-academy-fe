@@ -36,7 +36,7 @@ export type DashboardPageData = {
     readonly unavailableMessage: string
 }
 
-/** Props for {@link _DashboardPage}. */
+/** Props for {@link DashboardPageBase}. */
 export type DashboardPageProps = {
     readonly props: DashboardPageData
 }
@@ -46,7 +46,7 @@ export type DashboardPageProps = {
  *
  * @param input - {@link DashboardPageProps}
  */
-export const _DashboardPage = (input: DashboardPageProps) => {
+export const DashboardPageBase = (input: DashboardPageProps) => {
     /**
      * WHO THE READER IS COMES FIRST, WHERE THEY MIGHT GO COMES LAST. The rail is read top-down on
      * arrival, and standing is the thing a reader checks every visit; the shortcuts are the thing

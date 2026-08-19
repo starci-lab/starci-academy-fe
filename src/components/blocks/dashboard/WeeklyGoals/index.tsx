@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryMyKpisSwr } from "@/hooks"
 import { type MyKpiItem } from "@/modules/api/graphql/queries/types/my-kpis"
-import { _WeeklyGoals } from "./component"
+import { WeeklyGoalsBase } from "./component"
 import type { LabelledProgressRowData } from "@/components/composites/LabelledProgressRow"
 
 /** Stable display order: a weekly board is six known product metrics, never a server-sized list. */
@@ -93,7 +93,7 @@ export const WeeklyGoals = () => {
 
     if (kpis.error !== undefined && kpis.error !== null) {
         return (
-            <_WeeklyGoals
+            <WeeklyGoalsBase
                 state="failed"
                 props={{ label, message: t("failed"), retryLabel: t("retry") }}
                 on={{ retry }}
@@ -103,7 +103,7 @@ export const WeeklyGoals = () => {
 
     const data = kpis.data
     if (data === undefined) {
-        return <_WeeklyGoals state="pending" props={{ label }} />
+        return <WeeklyGoalsBase state="pending" props={{ label }} />
     }
 
     const itemByKey = new Map((data?.items ?? []).map((item) => [item.key, item] as const))
@@ -130,7 +130,7 @@ export const WeeklyGoals = () => {
         : t("resetIn", { days: remaining.days, hours: remaining.hours })
 
     return (
-        <_WeeklyGoals
+        <WeeklyGoalsBase
             state="ready"
             props={{
                 label,

@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _CourseMockInterviewSessionPage, type CourseMockInterviewSessionData } from "./component"
+import { CourseMockInterviewSessionPageBase, type CourseMockInterviewSessionData } from "./component"
 
 /**
  * What these tests guard.
@@ -32,11 +32,11 @@ const props: CourseMockInterviewSessionData = {
     workspaceLabel: "Question workspace",
 }
 
-describe("_CourseMockInterviewSessionPage", () => {
+describe("CourseMockInterviewSessionPageBase", () => {
     it("emits answer and finish intents while keeping restored turns visible", () => {
         const answer = vi.fn()
         const finish = vi.fn()
-        const { container } = render(<_CourseMockInterviewSessionPage state="live" props={props} on={{ answer, finish }} />)
+        const { container } = render(<CourseMockInterviewSessionPageBase state="live" props={props} on={{ answer, finish }} />)
 
         fireEvent.change(screen.getByPlaceholderText("Answer here"), { target: { value: "New answer" } })
         fireEvent.click(screen.getByText("Finish and grade"))
@@ -50,7 +50,7 @@ describe("_CourseMockInterviewSessionPage", () => {
     })
 
     it("refuses the answer box and the finish action while the room is still connecting", () => {
-        const { container } = render(<_CourseMockInterviewSessionPage state="connecting" props={props} on={{ ask: vi.fn() }} />)
+        const { container } = render(<CourseMockInterviewSessionPageBase state="connecting" props={props} on={{ ask: vi.fn() }} />)
 
         expect(screen.getByPlaceholderText("Answer here")).toBeDisabled()
         expect(screen.getByRole("button", { name: /Answer and continue/ })).toHaveAttribute("data-action-pending", "true")
@@ -60,7 +60,7 @@ describe("_CourseMockInterviewSessionPage", () => {
     })
 
     it("states the live connection once the room is answering", () => {
-        render(<_CourseMockInterviewSessionPage state="live" props={props} />)
+        render(<CourseMockInterviewSessionPageBase state="live" props={props} />)
 
         expect(screen.getByText("Connected")).toHaveAttribute("aria-live", "polite")
         expect(screen.getByRole("heading", { name: "Distributed cache" })).toBeInTheDocument()
@@ -70,7 +70,7 @@ describe("_CourseMockInterviewSessionPage", () => {
     it("swaps answering for retrying once the transport failed, and says so assertively", () => {
         const retry = vi.fn()
         const { container } = render(
-            <_CourseMockInterviewSessionPage
+            <CourseMockInterviewSessionPageBase
                 state="failed"
                 props={{ ...props, notice: "The interview connection dropped." }}
                 on={{ retry }}
@@ -86,7 +86,7 @@ describe("_CourseMockInterviewSessionPage", () => {
     })
 
     it("keeps an expired room readable without raising the announcement", () => {
-        const { container } = render(<_CourseMockInterviewSessionPage state="expired" props={{ ...props, notice: "Time is up." }} />)
+        const { container } = render(<CourseMockInterviewSessionPageBase state="expired" props={{ ...props, notice: "Time is up." }} />)
 
         expect(screen.getByText("Time is up.")).toHaveAttribute("aria-live", "polite")
         expect(container.querySelector("[data-component=\"Text\"][data-tone=\"accent\"]")).not.toBeNull()
@@ -97,7 +97,7 @@ describe("_CourseMockInterviewSessionPage", () => {
         const abort = vi.fn()
         const leave = vi.fn()
         const { container } = render(
-            <_CourseMockInterviewSessionPage
+            <CourseMockInterviewSessionPageBase
                 state="syncing"
                 props={{
                     ...props,

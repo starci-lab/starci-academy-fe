@@ -1,6 +1,6 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { _LanguageMenu } from "./component"
+import { LanguageMenuBase } from "./component"
 
 class TestResizeObserver implements ResizeObserver {
     observe = () => undefined
@@ -12,11 +12,11 @@ globalThis.ResizeObserver = TestResizeObserver
 
 afterEach(cleanup)
 
-describe("_LanguageMenu", () => {
+describe("LanguageMenuBase", () => {
     it("renders one controlled active locale and reports the selected option", async () => {
         const select = vi.fn()
         render(
-            <_LanguageMenu
+            <LanguageMenuBase
                 props={{
                     label: "Language",
                     selectedLocale: "vi",

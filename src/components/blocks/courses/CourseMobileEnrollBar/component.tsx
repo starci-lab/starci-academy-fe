@@ -50,7 +50,7 @@ export type CourseMobileEnrollBarActions = {
 /** The situations the bar can be in - the rail's, because it shows the rail's number. */
 export type CourseMobileEnrollBarState = "ready" | "price-pending"
 
-/** Props for {@link _CourseMobileEnrollBar}. */
+/** Props for {@link CourseMobileEnrollBarBase}. */
 export type CourseMobileEnrollBarProps = {
     /** The business situation, which picks the tree. */
     readonly state: CourseMobileEnrollBarState
@@ -65,7 +65,7 @@ export type CourseMobileEnrollBarProps = {
  *
  * @param input - {@link CourseMobileEnrollBarProps}
  */
-export const _CourseMobileEnrollBar = (input: CourseMobileEnrollBarProps) => {
+export const CourseMobileEnrollBarBase = (input: CourseMobileEnrollBarProps) => {
     const isPricePending = input.state === "price-pending"
     return (
         <Tree
@@ -95,7 +95,7 @@ export const _CourseMobileEnrollBar = (input: CourseMobileEnrollBarProps) => {
 
 /** The bar, branded for the slot that holds it. See the rail for why this is a projection. */
 export const CourseMobileEnrollBar = (input: CourseMobileEnrollBarProps) =>
-    defineContractProjection("course-mobile-action-bar", () => <_CourseMobileEnrollBar {...input} />)
+    defineContractProjection("course-mobile-action-bar", () => <CourseMobileEnrollBarBase {...input} />)
 
 /** Source-level ownership marker. */
 export const meta = { world: "pure", domain: "courses" } as const

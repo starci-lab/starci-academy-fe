@@ -1,13 +1,13 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _StarCiAiSelectionAsk } from "./component"
+import { StarCiAiSelectionAskBase } from "./component"
 
-describe("_StarCiAiSelectionAsk", () => {
+describe("StarCiAiSelectionAskBase", () => {
     it("renders exact selected code and keeps append/tangent mutually explicit", () => {
         const append = vi.fn()
         const tangent = vi.fn()
         render(
-            <_StarCiAiSelectionAsk
+            <StarCiAiSelectionAskBase
                 state="ready"
                 props={{
                     selection: { kind: "code", quote: "controller.abort()", path: "src/useTodos.ts" },
@@ -28,7 +28,7 @@ describe("_StarCiAiSelectionAsk", () => {
 
     it("labels a code quote with the language its own file extension names", () => {
         const { container } = render(
-            <_StarCiAiSelectionAsk
+            <StarCiAiSelectionAskBase
                 state="ready"
                 props={{
                     selection: { kind: "code", quote: "controller.abort()", path: "src/useTodos.ts" },
@@ -45,7 +45,7 @@ describe("_StarCiAiSelectionAsk", () => {
 
     it("names no language for a code quote that came from no file", () => {
         const { container } = render(
-            <_StarCiAiSelectionAsk
+            <StarCiAiSelectionAskBase
                 state="ready"
                 props={{
                     selection: { kind: "code", quote: "controller.abort()" },
@@ -62,7 +62,7 @@ describe("_StarCiAiSelectionAsk", () => {
 
     it("names no language for a prose quote, whatever file the reader was on", () => {
         const { container } = render(
-            <_StarCiAiSelectionAsk
+            <StarCiAiSelectionAskBase
                 state="ready"
                 props={{
                     selection: { kind: "prose", quote: "A promise settles once.", path: "lesson.md" },
@@ -81,7 +81,7 @@ describe("_StarCiAiSelectionAsk", () => {
         const append = vi.fn()
         const dismiss = vi.fn()
         render(
-            <_StarCiAiSelectionAsk
+            <StarCiAiSelectionAskBase
                 state="ready"
                 props={{
                     selection: { kind: "prose", quote: "A promise settles once." },
@@ -99,7 +99,7 @@ describe("_StarCiAiSelectionAsk", () => {
     })
 
     it("renders nothing when no valid selection exists", () => {
-        const { container } = render(<_StarCiAiSelectionAsk state="hidden" />)
+        const { container } = render(<StarCiAiSelectionAskBase state="hidden" />)
         expect(container).toBeEmptyDOMElement()
     })
 })

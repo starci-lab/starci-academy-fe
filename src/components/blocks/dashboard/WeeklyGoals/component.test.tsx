@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { cleanup, render, screen } from "@testing-library/react"
-import { _WeeklyGoals } from "./component"
+import { WeeklyGoalsBase } from "./component"
 
 /**
  * What these tests guard.
@@ -13,9 +13,9 @@ import { _WeeklyGoals } from "./component"
 
 afterEach(cleanup)
 
-describe("_WeeklyGoals", () => {
+describe("WeeklyGoalsBase", () => {
     it("keeps six metric rows while the week is still resting", () => {
-        const { container } = render(<_WeeklyGoals state="pending" props={{ label: "Weekly goals" }} />)
+        const { container } = render(<WeeklyGoalsBase state="pending" props={{ label: "Weekly goals" }} />)
         expect(container.querySelectorAll("[data-node=\"label-fact-over-progress\"]")).toHaveLength(6)
         expect(container.querySelectorAll(
             "[data-node=\"label-fact-over-progress\"] [data-component=\"Text\"][data-loading=\"true\"]",
@@ -31,7 +31,7 @@ describe("_WeeklyGoals", () => {
 
     it("draws the summary above the legacy two-column bordered grid", () => {
         const { container } = render(
-            <_WeeklyGoals
+            <WeeklyGoalsBase
                 state="ready"
                 props={{
                     label: "Weekly goals",
@@ -59,7 +59,7 @@ describe("_WeeklyGoals", () => {
     it("offers a way back when the week could not be read", () => {
         const retry = vi.fn()
         render(
-            <_WeeklyGoals
+            <WeeklyGoalsBase
                 state="failed"
                 props={{ label: "Weekly goals", message: "Could not load", retryLabel: "Retry" }}
                 on={{ retry }}

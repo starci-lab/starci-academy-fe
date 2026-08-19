@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
 import { useQueryMyContributionCalendarSwr } from "@/hooks"
-import { _OverviewContributions } from "./component"
+import { OverviewContributionsBase } from "./component"
 
 const longestRun = (dates: ReadonlyArray<string>) => {
     const active = new Set(dates)
@@ -44,7 +44,7 @@ export const OverviewContributions = () => {
                 : "ready"
 
     return (
-        <_OverviewContributions
+        <OverviewContributionsBase
             state={state}
             props={{
                 label: t("title"),

@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import {
-    _StarCiAiChat,
+    StarCiAiChatBase,
     STARCI_AI_CHAT_STATES,
     type StarCiAiChatData,
     type StarCiAiChatState,
@@ -46,18 +46,18 @@ const props: StarCiAiChatData = {
     quotaLabel: "0 paid credits · free route available",
 }
 
-describe("_StarCiAiChat", () => {
+describe("StarCiAiChatBase", () => {
     it("has one named fixture for all 21 owner states", () => {
         expect(STARCI_AI_CHAT_STATES).toHaveLength(21)
         for (const state of STARCI_AI_CHAT_STATES) {
-            const { unmount } = render(<_StarCiAiChat state={state} props={props} />)
+            const { unmount } = render(<StarCiAiChatBase state={state} props={props} />)
             expect(document.querySelector("[data-node=starci-ai-drawer-column]")).toBeTruthy()
             unmount()
         }
     })
 
     it("quotes selected code inside the user turn and keeps context to one row", () => {
-        const { container } = render(<_StarCiAiChat state="ready" props={props} />)
+        const { container } = render(<StarCiAiChatBase state="ready" props={props} />)
         expect(screen.queryByRole("button", { name: "Code coach" })).not.toBeInTheDocument()
         expect(screen.getAllByText("const controller = new AbortController()").length).toBeGreaterThan(0)
         expect(container.querySelectorAll("[data-node=starci-ai-context-stack]")).toHaveLength(1)
@@ -69,7 +69,7 @@ describe("_StarCiAiChat", () => {
         (state) => {
             const retry = vi.fn()
             const send = vi.fn()
-            render(<_StarCiAiChat state={state} props={props} on={{ retry, send }} />)
+            render(<StarCiAiChatBase state={state} props={props} on={{ retry, send }} />)
             expect(screen.getByLabelText("Ask StarCi AI")).not.toBeDisabled()
             const action = screen.getByRole("button", { name: state === "quotaRejected" ? "Retry" : "Send" })
             expect(action).not.toBeDisabled()
@@ -80,7 +80,7 @@ describe("_StarCiAiChat", () => {
 
     it("history owns the body and hides chat context, quote and composer", () => {
         const selectSession = vi.fn()
-        const { container } = render(<_StarCiAiChat state="historyReady" props={{ ...props, mode: "history" }} on={{ selectSession }} />)
+        const { container } = render(<StarCiAiChatBase state="historyReady" props={{ ...props, mode: "history" }} on={{ selectSession }} />)
         const session = screen.getByRole("button", { name: "Async patterns · Just now" })
         fireEvent.click(session)
         expect(selectSession).toHaveBeenCalledWith("session-1")
@@ -91,13 +91,13 @@ describe("_StarCiAiChat", () => {
 
     it("clears selected grounding from the compact context row", () => {
         const clearContext = vi.fn()
-        render(<_StarCiAiChat state="ready" props={props} on={{ clearContext }} />)
+        render(<StarCiAiChatBase state="ready" props={props} on={{ clearContext }} />)
         fireEvent.click(screen.getByRole("button", { name: "Clear context" }))
         expect(clearContext).toHaveBeenCalledTimes(1)
     })
 
     it("draws a plain answer with no fence and no partial marker", () => {
-        render(<_StarCiAiChat state="ready" props={{
+        render(<StarCiAiChatBase state="ready" props={{
             ...props,
             turns: [{ id: "turn-1", role: "assistant", body: "Because the request outlives the render." }],
         }} />)
@@ -106,7 +106,7 @@ describe("_StarCiAiChat", () => {
     })
 
     it("fences an unlabelled quote as code and marks an interrupted answer", () => {
-        render(<_StarCiAiChat state="streaming" props={{
+        render(<StarCiAiChatBase state="streaming" props={{
             ...props,
             turns: [{ id: "turn-1", role: "assistant", body: "Here", quote: "abort()", isPartial: true }],
         }} />)
@@ -115,25 +115,25 @@ describe("_StarCiAiChat", () => {
     })
 
     it("speaks the pending state rather than resting, and withholds the composer", () => {
-        const { container } = render(<_StarCiAiChat state="sessionsPending" props={{ ...props, turns: [] }} />)
+        const { container } = render(<StarCiAiChatBase state="sessionsPending" props={{ ...props, turns: [] }} />)
         expect(screen.getByText("State sessionsPending")).toBeInTheDocument()
         expect(container.querySelector("[data-node=starci-ai-composer]")).toBeNull()
     })
 
     it("withholds the composer while sessions are unavailable", () => {
-        const { container } = render(<_StarCiAiChat state="sessionsFailed" props={props} />)
+        const { container } = render(<StarCiAiChatBase state="sessionsFailed" props={props} />)
         expect(container.querySelector("[data-node=starci-ai-composer]")).toBeNull()
         expect(screen.getByText("State sessionsFailed")).toBeInTheDocument()
     })
 
     it("shows the transcript rather than an empty list when history has no sessions", () => {
-        render(<_StarCiAiChat state="searchEmpty" props={{ ...props, mode: "history", sessions: [] }} />)
+        render(<StarCiAiChatBase state="searchEmpty" props={{ ...props, mode: "history", sessions: [] }} />)
         expect(screen.getByText("State searchEmpty")).toBeInTheDocument()
         expect(screen.queryByRole("button", { name: "Async patterns · Just now" })).not.toBeInTheDocument()
     })
 
     it("offers no session controls until one session is actually chosen", () => {
-        const { container } = render(<_StarCiAiChat
+        const { container } = render(<StarCiAiChatBase
             state="historyReady"
             props={{ ...props, mode: "history", activeSessionId: undefined }}
         />)
@@ -144,7 +144,7 @@ describe("_StarCiAiChat", () => {
         const rename = vi.fn()
         const archive = vi.fn()
         const remove = vi.fn()
-        render(<_StarCiAiChat
+        render(<StarCiAiChatBase
             state="historyReady"
             props={{ ...props, mode: "history" }}
             on={{ rename, archive, delete: remove }}
@@ -158,7 +158,7 @@ describe("_StarCiAiChat", () => {
     })
 
     it.each(["renaming", "archiving"] as const)("marks the %s control as the one working", (state) => {
-        render(<_StarCiAiChat state={state} props={{ ...props, mode: "history" }} />)
+        render(<StarCiAiChatBase state={state} props={{ ...props, mode: "history" }} />)
         const label = state === "renaming" ? "Rename" : "Archive"
         expect(screen.getByRole("button", { name: label })).toHaveAttribute("data-action-pending", "true")
         expect(screen.getByRole("button", { name: "Delete" })).toHaveAttribute("data-action-pending", "false")
@@ -167,7 +167,7 @@ describe("_StarCiAiChat", () => {
     it("replaces the session controls with a confirmation the reader has to mean", () => {
         const confirmDelete = vi.fn()
         const cancelDelete = vi.fn()
-        render(<_StarCiAiChat
+        render(<StarCiAiChatBase
             state="deleteConfirm"
             props={{ ...props, mode: "history" }}
             on={{ confirmDelete, cancelDelete }}
@@ -180,14 +180,14 @@ describe("_StarCiAiChat", () => {
     })
 
     it.each(["offline", "reconnecting"] as const)("stops the reader composing while %s", (state) => {
-        render(<_StarCiAiChat state={state} props={props} />)
+        render(<StarCiAiChatBase state={state} props={props} />)
         expect(screen.getByLabelText("Ask StarCi AI")).toBeDisabled()
         expect(screen.getByRole("button", { name: "Send" })).toBeDisabled()
     })
 
     it("offers a stop rather than a send while the answer is still streaming", () => {
         const stop = vi.fn()
-        render(<_StarCiAiChat state="streaming" props={props} on={{ stop }} />)
+        render(<StarCiAiChatBase state="streaming" props={props} on={{ stop }} />)
         expect(screen.queryByRole("button", { name: "Send" })).not.toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Stop" }))
         expect(stop).toHaveBeenCalledTimes(1)
@@ -195,14 +195,14 @@ describe("_StarCiAiChat", () => {
 
     it("offers a retry once the stream itself failed", () => {
         const retry = vi.fn()
-        render(<_StarCiAiChat state="streamFailed" props={props} on={{ retry }} />)
+        render(<StarCiAiChatBase state="streamFailed" props={props} on={{ retry }} />)
         fireEvent.click(screen.getByRole("button", { name: "Retry" }))
         expect(retry).toHaveBeenCalledTimes(1)
     })
 
     it("refuses to send an empty draft and reports every keystroke of a real one", () => {
         const changeDraft = vi.fn()
-        render(<_StarCiAiChat state="ready" props={{ ...props, draft: "   " }} on={{ changeDraft }} />)
+        render(<StarCiAiChatBase state="ready" props={{ ...props, draft: "   " }} on={{ changeDraft }} />)
         expect(screen.getByRole("button", { name: "Send" })).toBeDisabled()
         fireEvent.change(screen.getByLabelText("Ask StarCi AI"), { target: { value: "Explain this" } })
         expect(changeDraft).toHaveBeenCalledWith("Explain this")
@@ -210,7 +210,7 @@ describe("_StarCiAiChat", () => {
 
     it("switches between the two bodies by name", () => {
         const selectMode = vi.fn()
-        render(<_StarCiAiChat state="ready" props={props} on={{ selectMode }} />)
+        render(<StarCiAiChatBase state="ready" props={props} on={{ selectMode }} />)
         fireEvent.click(screen.getByRole("button", { name: "History" }))
         fireEvent.click(screen.getByRole("button", { name: "General" }))
         expect(selectMode).toHaveBeenNthCalledWith(1, "history")
@@ -218,7 +218,7 @@ describe("_StarCiAiChat", () => {
     })
 
     it("drops the whole context row when nothing grounds the conversation", () => {
-        const { container } = render(<_StarCiAiChat
+        const { container } = render(<StarCiAiChatBase
             state="ready"
             props={{ ...props, contextSummary: undefined, selection: undefined }}
         />)
@@ -227,13 +227,13 @@ describe("_StarCiAiChat", () => {
     })
 
     it("keeps a route summary without a clear control when no excerpt was picked", () => {
-        const { container } = render(<_StarCiAiChat state="ready" props={{ ...props, selection: undefined }} />)
+        const { container } = render(<StarCiAiChatBase state="ready" props={{ ...props, selection: undefined }} />)
         expect(container.querySelector("[data-node=starci-ai-context-stack]")).not.toBeNull()
         expect(screen.queryByRole("button", { name: "Clear context" })).not.toBeInTheDocument()
     })
 
     it("quotes a prose excerpt with no language claim of its own", () => {
-        render(<_StarCiAiChat state="ready" props={{
+        render(<StarCiAiChatBase state="ready" props={{
             ...props,
             selection: { kind: "prose", quote: "The reducer owns the transition." },
         }} />)
@@ -241,7 +241,7 @@ describe("_StarCiAiChat", () => {
     })
 
     it("quotes a pathless code excerpt without inventing an extension", () => {
-        render(<_StarCiAiChat state="ready" props={{
+        render(<StarCiAiChatBase state="ready" props={{
             ...props,
             selection: { kind: "code", quote: "controller.abort()" },
         }} />)
@@ -249,17 +249,17 @@ describe("_StarCiAiChat", () => {
     })
 
     it("says nothing about quota when there is no figure and nothing pending", () => {
-        render(<_StarCiAiChat state="ready" props={{ ...props, quotaLabel: undefined }} />)
+        render(<StarCiAiChatBase state="ready" props={{ ...props, quotaLabel: undefined }} />)
         expect(screen.queryByText("0 paid credits · free route available")).not.toBeInTheDocument()
     })
 
     it("rests the quota line while the allowance is still being counted", () => {
-        render(<_StarCiAiChat state="quotaPending" props={{ ...props, quotaLabel: undefined }} />)
+        render(<StarCiAiChatBase state="quotaPending" props={{ ...props, quotaLabel: undefined }} />)
         expect(screen.getByLabelText("Ask StarCi AI")).not.toBeDisabled()
     })
 
     it("stays inert rather than throwing when the owner registered no intents", () => {
-        render(<_StarCiAiChat state="deleteConfirm" props={{ ...props, mode: "history" }} />)
+        render(<StarCiAiChatBase state="deleteConfirm" props={{ ...props, mode: "history" }} />)
         expect(() => {
             fireEvent.click(screen.getByRole("button", { name: "Delete session" }))
             fireEvent.click(screen.getByRole("button", { name: "Cancel" }))

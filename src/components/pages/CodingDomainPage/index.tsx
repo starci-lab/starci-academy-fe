@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryCodingProblemsSwr } from "@/hooks/swr/useQueryCodingProblemsSwr"
 import { useQueryMyCodingProgressSwr } from "@/hooks/swr/useQueryMyCodingProgressSwr"
-import { _CodingDomainPage } from "./component"
+import { CodingDomainPageBase } from "./component"
 
 /** Props for {@link CodingDomainPage}. */
 export interface CodingDomainPageProps {
@@ -59,7 +59,7 @@ export const CodingDomainPage = ({ domain }: CodingDomainPageProps) => {
                 : "ready" as const
 
     return (
-        <_CodingDomainPage
+        <CodingDomainPageBase
             props={{
                 labels: {
                     navHome: t("navHome"),

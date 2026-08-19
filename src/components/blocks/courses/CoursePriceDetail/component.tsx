@@ -54,7 +54,7 @@ export type CoursePriceDetailData = {
     readonly unavailableMessage?: string
 }
 
-/** Props for {@link _CoursePriceDetail}. */
+/** Props for {@link CoursePriceDetailBase}. */
 export type CoursePriceDetailProps = BlockProps<CoursePriceDetailState, CoursePriceDetailData>
 
 /** The mark each line wears. The last line is what is actually owed, so it reads as settled. */
@@ -70,7 +70,7 @@ const LINE_ICONS: Readonly<Record<string, "cart" | "reward" | "complete">> = {
  *
  * @param input - {@link CoursePriceDetailProps}
  */
-export const _CoursePriceDetail = (input: CoursePriceDetailProps) => {
+export const CoursePriceDetailBase = (input: CoursePriceDetailProps) => {
     const isLoading = input.state === "pending"
     const lines = input.props.lines ?? []
 

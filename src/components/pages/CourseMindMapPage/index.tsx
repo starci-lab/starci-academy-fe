@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryCourseMindMapSwr } from "@/hooks/swr/useQueryCourseMindMapSwr"
 import type { MindMapLink, MindMapNode } from "@/modules/api/graphql/queries/query-course-mind-map"
-import { _CourseMindMapPage, type CourseMindMapNodeView, type CourseMindMapPageState } from "./component"
+import { CourseMindMapPageBase, type CourseMindMapNodeView, type CourseMindMapPageState } from "./component"
 
 /** Course route identity consumed by the connected concept map. */
 export type CourseMindMapPageProps = { readonly displayId: string }
@@ -63,7 +63,7 @@ export const CourseMindMapPage = ({ displayId }: CourseMindMapPageProps) => {
     const state: CourseMindMapPageState = graph.error !== undefined ? "failed" : graph.data === undefined ? "pending" : allNodes.length === 0 ? "empty" : "ready"
 
     return (
-        <_CourseMindMapPage
+        <CourseMindMapPageBase
             state={state}
             props={{
                 title: t("title"),

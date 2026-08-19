@@ -10,16 +10,16 @@ import {
     defineLeafComponent,
 } from "~candidate/components/contracts/props"
 import {
-    _ContactChannelTile,
+    ContactChannelTileBase,
     type ContactChannelTileData,
 } from "~candidate/components/blocks/contact/ContactChannelTile/component"
 import {
-    _ContactMessageForm,
+    ContactMessageFormBase,
     type ContactMessageFormData,
     type ContactMessageFormState,
 } from "~candidate/components/blocks/contact/ContactMessageForm/component"
 import {
-    _FounderConversationPanel,
+    FounderConversationPanelBase,
     type FounderConversationPanelData,
     type FounderConversationPanelState,
 } from "~candidate/components/blocks/contact/FounderConversationPanel/component"
@@ -111,7 +111,7 @@ export type ContactPageActions = {
     readonly recoverForm?: () => void
 }
 
-/** Props for {@link _ContactPage}. */
+/** Props for {@link ContactPageBase}. */
 export type ContactPageProps = {
     readonly session: ContactPageSession
     readonly props: ContactPageData
@@ -123,7 +123,7 @@ export type ContactPageProps = {
  *
  * @param input - {@link ContactPageProps}
  */
-export const _ContactPage = (input: ContactPageProps) => {
+export const ContactPageBase = (input: ContactPageProps) => {
     const labels = input.props.labels
 
     const intro = defineContractComponent("contact-intro-stack", {
@@ -156,7 +156,7 @@ export const _ContactPage = (input: ContactPageProps) => {
 
     const channels = defineContractComponent("contact-channel-strip", {
         channel: input.props.channels.map((channel) => defineContractProjection("contact-channel-tile", () => (
-            <_ContactChannelTile
+            <ContactChannelTileBase
                 state="ready"
                 props={channel}
                 onOpen={() => input.on?.openChannel?.(channel.id)}
@@ -178,7 +178,7 @@ export const _ContactPage = (input: ContactPageProps) => {
                 // for a door this reader does not have.
                 ...(input.session === "signed-in" && conversation !== undefined ? {
                     conversation: defineContractProjection("founder-conversation-panel", () => (
-                        <_FounderConversationPanel
+                        <FounderConversationPanelBase
                             state={conversation.state}
                             props={conversation.props}
                             on={{
@@ -191,7 +191,7 @@ export const _ContactPage = (input: ContactPageProps) => {
                 } : {}),
                 ...(input.session === "guest" && form !== undefined ? {
                     form: defineContractProjection("contact-message-form", () => (
-                        <_ContactMessageForm
+                        <ContactMessageFormBase
                             state={form.state}
                             props={form.props}
                             on={{

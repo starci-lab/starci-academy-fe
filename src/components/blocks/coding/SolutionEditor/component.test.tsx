@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _SolutionEditor, type SolutionEditorData, type TestcaseOutcome } from "./component"
+import { SolutionEditorBase, type SolutionEditorData, type TestcaseOutcome } from "./component"
 
 class TestResizeObserver implements ResizeObserver {
     observe = () => undefined
@@ -51,9 +51,9 @@ const languageField = () => {
 
 const toneOf = (text: string) => screen.getByText(text).closest("[data-component=\"Badge\"]")
 
-describe("_SolutionEditor", () => {
+describe("SolutionEditorBase", () => {
     it("hands the reader a writable editor in the chosen language and no console yet", () => {
-        render(<_SolutionEditor state="ready" props={props} on={{}} />)
+        render(<SolutionEditorBase state="ready" props={props} on={{}} />)
 
         expect(editorHost()).toHaveAttribute("data-language", "python")
         expect(chosenLanguage()).toHaveTextContent("Python")
@@ -67,7 +67,7 @@ describe("_SolutionEditor", () => {
     it("reports running and submitting as two separate acts", () => {
         const run = vi.fn()
         const submit = vi.fn()
-        render(<_SolutionEditor state="ready" props={props} on={{ run, submit }} />)
+        render(<SolutionEditorBase state="ready" props={props} on={{ run, submit }} />)
 
         fireEvent.click(screen.getByRole("button", { name: "Run" }))
         fireEvent.click(screen.getByRole("button", { name: "Submit" }))
@@ -77,7 +77,7 @@ describe("_SolutionEditor", () => {
 
     it("reports the language the writer switched to rather than switching it itself", () => {
         const changeLanguage = vi.fn()
-        render(<_SolutionEditor state="ready" props={props} on={{ changeLanguage }} />)
+        render(<SolutionEditorBase state="ready" props={props} on={{ changeLanguage }} />)
 
         fireEvent.change(languageField(), { target: { value: "cpp" } })
         expect(changeLanguage).toHaveBeenCalledWith("cpp")
@@ -85,7 +85,7 @@ describe("_SolutionEditor", () => {
     })
 
     it("leaves the toolbar inert when the page reported nothing at all", () => {
-        render(<_SolutionEditor state="ready" props={props} />)
+        render(<SolutionEditorBase state="ready" props={props} />)
 
         const run = screen.getByRole("button", { name: "Run" })
         const submit = screen.getByRole("button", { name: "Submit" })
@@ -98,7 +98,7 @@ describe("_SolutionEditor", () => {
     })
 
     it("closes the toolbar and the editor while a submission is in flight", () => {
-        render(<_SolutionEditor state="submitting" props={props} on={{}} />)
+        render(<SolutionEditorBase state="submitting" props={props} on={{}} />)
 
         const submit = screen.getByRole("button", { name: "Submitting" })
         expect(submit).toHaveAttribute("data-action-pending", "true")
@@ -110,7 +110,7 @@ describe("_SolutionEditor", () => {
     })
 
     it("opens the console only once the judge has cases to report", () => {
-        render(<_SolutionEditor state="judged" props={{ ...props, testcases }} on={{}} />)
+        render(<SolutionEditorBase state="judged" props={{ ...props, testcases }} on={{}} />)
 
         expect(consoleTray()).toBeInTheDocument()
         expect(toneOf("#1")).toHaveAttribute("data-tone", "success")
@@ -121,7 +121,7 @@ describe("_SolutionEditor", () => {
 
     it("prints the compiler's own words under the cases when it refused the source", () => {
         render(
-            <_SolutionEditor
+            <SolutionEditorBase
                 state="judged"
                 props={{
                     ...props,
@@ -137,7 +137,7 @@ describe("_SolutionEditor", () => {
     })
 
     it("keeps the console closed when the judge reported an empty case run", () => {
-        render(<_SolutionEditor state="judged" props={{ ...props, testcases: [] }} on={{}} />)
+        render(<SolutionEditorBase state="judged" props={{ ...props, testcases: [] }} on={{}} />)
 
         expect(consoleTray()).toBeNull()
         expect(editorHost()).toBeInTheDocument()

@@ -7,7 +7,7 @@ import {
     normalizeContentAiSelection,
     type ContentAiSelectionContext,
 } from "@/modules/ai/content-ai-selection-context"
-import { _StarCiAiSelectionAsk } from "./component"
+import { StarCiAiSelectionAskBase } from "./component"
 
 type ActiveSelection = {
     readonly context: ContentAiSelectionContext
@@ -50,9 +50,9 @@ export const StarCiAiSelectionAsk = () => {
         return () => document.removeEventListener("selectionchange", readSelection)
     }, [])
 
-    if (active === undefined) return <_StarCiAiSelectionAsk state="hidden" />
+    if (active === undefined) return <StarCiAiSelectionAskBase state="hidden" />
     return (
-        <_StarCiAiSelectionAsk
+        <StarCiAiSelectionAskBase
             state="ready"
             props={{
                 selection: active.context,

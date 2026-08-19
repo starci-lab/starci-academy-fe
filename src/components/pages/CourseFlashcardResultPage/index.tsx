@@ -4,7 +4,7 @@ import { useLocale } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryFlashcardSessionResultSwr } from "@/hooks/swr/useQueryFlashcardSessionResultSwr"
 import type { FlashcardSessionMode } from "@/modules/api/graphql/queries/query-my-in-progress-flashcard-session"
-import { _CourseFlashcardResultPage } from "./component"
+import { CourseFlashcardResultPageBase } from "./component"
 
 /** Stable result-route identity required by the connected result page. */
 export type CourseFlashcardResultPageProps = {
@@ -75,7 +75,7 @@ export const CourseFlashcardResultPage = ({ displayId, sessionId, mode }: Course
     const overviewRoute = `/courses/${displayId}/learn/flashcards/${mode}`
 
     return (
-        <_CourseFlashcardResultPage
+        <CourseFlashcardResultPageBase
             state={state}
             data={{
                 mode,

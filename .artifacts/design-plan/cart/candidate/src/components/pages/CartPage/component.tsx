@@ -11,8 +11,8 @@ import {
     defineContractProjection,
     defineLeafComponent,
 } from "~candidate/components/contracts/props"
-import { _CartLine, type CartLineData } from "~candidate/components/blocks/commerce/CartLine/component"
-import { _OrderSummary, type OrderSummaryLabels } from "~candidate/components/blocks/commerce/OrderSummary/component"
+import { CartLineBase, type CartLineData } from "~candidate/components/blocks/commerce/CartLine/component"
+import { OrderSummaryBase, type OrderSummaryLabels } from "~candidate/components/blocks/commerce/OrderSummary/component"
 
 /**
  * PAGE - `CartPage`: the basket, with room to read it.
@@ -93,7 +93,7 @@ export type CartPageActions = {
     readonly [key: string]: ((...args: Array<never>) => void) | undefined
 }
 
-/** Props for {@link _CartPage}. */
+/** Props for {@link CartPageBase}. */
 export type CartPageProps = {
     readonly state: CartPageState
     readonly props: CartPageData
@@ -108,7 +108,7 @@ const RESTING_COUNT = 3
  *
  * @param input - {@link CartPageProps}
  */
-export const _CartPage = (input: CartPageProps) => {
+export const CartPageBase = (input: CartPageProps) => {
     const labels = input.props.labels
     const isLoading = input.state === "pending"
     const showsNotice = input.state === "empty" || input.state === "failed"
@@ -139,7 +139,7 @@ export const _CartPage = (input: CartPageProps) => {
 
     const lineList = defineContractComponent("cart-line-list", {
         line: lines.map((line) => defineContractProjection("cart-line-row", () => (
-            <_CartLine
+            <CartLineBase
                 state={
                     isLoading
                         ? "pending"
@@ -152,7 +152,7 @@ export const _CartPage = (input: CartPageProps) => {
     })
 
     const summary = defineContractProjection("order-summary-stack", () => (
-        <_OrderSummary
+        <OrderSummaryBase
             state={isLoading ? "pending" : input.props.hasPricingFailed === true ? "failed" : "ready"}
             props={{
                 labels: labels.summary,

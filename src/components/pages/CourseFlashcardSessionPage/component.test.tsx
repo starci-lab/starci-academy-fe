@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import {
-    _CourseFlashcardSessionPage,
+    CourseFlashcardSessionPageBase,
     type CourseFlashcardSessionPageActions,
     type CourseFlashcardSessionPageData,
     type CourseFlashcardSessionPageProps,
@@ -52,10 +52,10 @@ const draw = (
     data: Partial<CourseFlashcardSessionPageData> = {},
 ) => {
     const on = handlers()
-    return { on, ...render(<_CourseFlashcardSessionPage state={state} data={{ ...card, ...data }} on={on} />) }
+    return { on, ...render(<CourseFlashcardSessionPageBase state={state} data={{ ...card, ...data }} on={on} />) }
 }
 
-describe("_CourseFlashcardSessionPage", () => {
+describe("CourseFlashcardSessionPageBase", () => {
     it("shows the prompt, the deck it came from and how far through the session the reader is", () => {
         const { container } = draw("active")
 

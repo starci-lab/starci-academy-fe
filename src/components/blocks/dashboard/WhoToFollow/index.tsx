@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "@/i18n/navigation"
 import { useTranslations } from "next-intl"
 import { useMutateSetFollowSwr, useQueryResolveRouteSwr, useQuerySuggestedUsersSwr } from "@/hooks"
-import { _WhoToFollow } from "./component"
+import { WhoToFollowBase } from "./component"
 
 /** Load suggestions and own per-user route and follow mutations. */
 export const WhoToFollow = () => {
@@ -17,7 +17,7 @@ export const WhoToFollow = () => {
     const [pending, setPending] = useState<string>()
     const available = query.data ?? []
     if (query.error !== undefined || query.data === null || (query.data !== undefined && available.length === 0)) {
-        return <_WhoToFollow state="hidden" props={{ label: t("whoToFollow"), users: [] }} />
+        return <WhoToFollowBase state="hidden" props={{ label: t("whoToFollow"), users: [] }} />
     }
     const users = available.slice(0, 4).map((user) => ({
         id: user.globalId,
@@ -59,7 +59,7 @@ export const WhoToFollow = () => {
             } finally { setPending(undefined) }
         }],
     ]))
-    return <_WhoToFollow state={query.data === undefined ? "pending" : "ready"} props={{ label: t("whoToFollow"), users }} on={on} />
+    return <WhoToFollowBase state={query.data === undefined ? "pending" : "ready"} props={{ label: t("whoToFollow"), users }} on={on} />
 }
 /** Source-level ownership marker for the connected social block. */
 export const meta = { world: "connected", domain: "social" } as const

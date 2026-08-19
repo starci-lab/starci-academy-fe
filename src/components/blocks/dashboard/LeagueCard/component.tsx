@@ -60,7 +60,7 @@ const LeagueListContentView = ({ props, on, isLoading = false }: LeafProps<Leagu
 const LeagueListContent = defineContractComponent("ranked-user-list", LeagueListContentView)
 
 /** Draw weekly league standing and local request outcomes. */
-export const _LeagueCard = (input: LeagueCardProps) => {
+export const LeagueCardBase = (input: LeagueCardProps) => {
     if (input.state === "empty" || input.state === "failed") {
         const message = input.state === "empty" ? input.props.emptyMessage : input.props.errorMessage
         return (

@@ -3,7 +3,7 @@
 import type { ReactNode } from "react"
 import { usePathname, useRouter } from "@/i18n/navigation"
 import { useQueryCoursePersonalProjectSwr } from "@/hooks/swr/useQueryCoursePersonalProjectSwr"
-import { _PersonalProjectWorkspaceLayout } from "./component"
+import { PersonalProjectWorkspaceLayoutBase } from "./component"
 
 /** Course identity and routed surface accepted by the segment shell. */
 export type PersonalProjectWorkspaceLayoutProps = {
@@ -28,7 +28,7 @@ export const PersonalProjectWorkspaceLayout = (input: PersonalProjectWorkspaceLa
             isCurrent: task.id === currentTaskId,
         })))
     return (
-        <_PersonalProjectWorkspaceLayout
+        <PersonalProjectWorkspaceLayoutBase
             milestones={milestones}
             surface={input.surface}
             onTask={(taskId) => router.push(`/courses/${input.displayId}/learn/personal-project/tasks/${taskId}`)}

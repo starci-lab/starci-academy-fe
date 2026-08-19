@@ -2,11 +2,11 @@
 import { afterEach, describe, expect, it } from "vitest"
 import { cleanup, fireEvent, render } from "@testing-library/react"
 import { vi } from "vitest"
-import { _StreakStrip } from "./component"
+import { StreakStripBase } from "./component"
 
 afterEach(cleanup)
 
-describe("_StreakStrip", () => {
+describe("StreakStripBase", () => {
     it("keeps the seven-day run beside the production prompt when activity is zero", () => {
         const learn = vi.fn()
         const days = Array.from({ length: 7 }, (_unused, index) => ({
@@ -16,7 +16,7 @@ describe("_StreakStrip", () => {
             active: false,
         }))
         const { container } = render(
-            <_StreakStrip
+            <StreakStripBase
                 state="ready"
                 props={{
                     label: "Streak",
@@ -42,7 +42,7 @@ describe("_StreakStrip", () => {
 
     it("does not invent a tiny business glyph beside the settled streak facts", () => {
         const { container } = render(
-            <_StreakStrip
+            <StreakStripBase
                 state="ready"
                 props={{
                     label: "Streak",
@@ -67,7 +67,7 @@ describe("_StreakStrip", () => {
 
     it("rests the same seven-day prompt shape while pending", () => {
         const { container } = render(
-            <_StreakStrip
+            <StreakStripBase
                 state="pending"
                 props={{ label: "Streak", message: "Read content", actionLabel: "Learn content" }}
             />,

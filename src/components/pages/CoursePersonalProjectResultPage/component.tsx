@@ -27,7 +27,7 @@ export type CoursePersonalProjectResultPageProps = {
 }
 
 /** Draws pending, graded, empty and failed task-result states. */
-export const _CoursePersonalProjectResultPage = (input: CoursePersonalProjectResultPageProps) => {
+export const CoursePersonalProjectResultPageBase = (input: CoursePersonalProjectResultPageProps) => {
     const loading = input.state === "pending"
     const attempts = input.state === "ready"
         ? [

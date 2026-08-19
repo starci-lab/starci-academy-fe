@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _CourseMindMapPage, type CourseMindMapNodeView, type CourseMindMapPageProps } from "./component"
+import { CourseMindMapPageBase, type CourseMindMapNodeView, type CourseMindMapPageProps } from "./component"
 
 /**
  * What these tests guard: three different absences that all draw an empty canvas. A graph the course
@@ -45,14 +45,14 @@ const draw = (
     props: Partial<CourseMindMapPageProps["props"]> = {},
     on: CourseMindMapPageProps["on"] = handlers(),
 ) => render(
-    <_CourseMindMapPage
+    <CourseMindMapPageBase
         state={state}
         props={{ ...copy, nodes: [node()], selectedId: "node-1", ...props }}
         on={on}
     />,
 )
 
-describe("_CourseMindMapPage", () => {
+describe("CourseMindMapPageBase", () => {
     it("draws the graph scale, the selected node's detail and its route into real content", () => {
         const { container } = draw("ready")
 

@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _LearnShellLayout, type LearnShellLayoutData } from "./component"
+import { LearnShellLayoutBase, type LearnShellLayoutData } from "./component"
 
 const Surface = () => <div>Reader surface</div>
 
@@ -13,10 +13,10 @@ const spine: LearnShellLayoutData["spine"] = {
     }],
 }
 
-describe("_LearnShellLayout", () => {
+describe("LearnShellLayoutBase", () => {
     it("keeps the course spine beside an ordinary routed surface", () => {
         const { container } = render(
-            <_LearnShellLayout props={{ spine, isFullBleed: false }} surface={<Surface />} />,
+            <LearnShellLayoutBase props={{ spine, isFullBleed: false }} surface={<Surface />} />,
         )
 
         expect(screen.getByText("Reader surface")).toBeTruthy()
@@ -26,7 +26,7 @@ describe("_LearnShellLayout", () => {
 
     it("removes course furniture for a focused full-bleed session", () => {
         const { container } = render(
-            <_LearnShellLayout props={{ spine, isFullBleed: true }} surface={<Surface />} />,
+            <LearnShellLayoutBase props={{ spine, isFullBleed: true }} surface={<Surface />} />,
         )
 
         expect(screen.getByText("Reader surface")).toBeTruthy()
@@ -36,7 +36,7 @@ describe("_LearnShellLayout", () => {
     it("reports mobile view changes through the dedicated action", () => {
         const openMobileTab = vi.fn()
         render(
-            <_LearnShellLayout
+            <LearnShellLayoutBase
                 props={{
                     spine,
                     isFullBleed: false,
@@ -57,7 +57,7 @@ describe("_LearnShellLayout", () => {
 
     it("draws no bottom bar for a surface that contributes no mobile panels", () => {
         const { container } = render(
-            <_LearnShellLayout props={{ spine, isFullBleed: false, mobileTabs: [] }} surface={<Surface />} />,
+            <LearnShellLayoutBase props={{ spine, isFullBleed: false, mobileTabs: [] }} surface={<Surface />} />,
         )
 
         expect(container.querySelector("[data-node=learn-mobile-tab-bar]")).toBeNull()
@@ -66,7 +66,7 @@ describe("_LearnShellLayout", () => {
 
     it("rests the resume card in the spine while the course is still arriving", () => {
         const { container } = render(
-            <_LearnShellLayout
+            <LearnShellLayoutBase
                 props={{
                     spine: { ...spine, resume: { label: "Continue", title: "Module 2", percent: 40, percentText: "2/5" } },
                     isFullBleed: false,

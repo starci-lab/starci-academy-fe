@@ -70,7 +70,7 @@ export type CourseCatalogCardActions = {
     readonly view?: () => void
 }
 
-/** Props for {@link _CourseCatalogCard}. */
+/** Props for {@link CourseCatalogCardBase}. */
 export type CourseCatalogCardProps = BlockProps<CourseCatalogCardState, CourseCatalogCardData> & {
     readonly on?: CourseCatalogCardActions
 }
@@ -80,7 +80,7 @@ export type CourseCatalogCardProps = BlockProps<CourseCatalogCardState, CourseCa
  *
  * @param input - {@link CourseCatalogCardProps}
  */
-export const _CourseCatalogCard = (input: CourseCatalogCardProps) => {
+export const CourseCatalogCardBase = (input: CourseCatalogCardProps) => {
     const isLoading = input.state === "pending"
 
     const price = defineContractComponent("price-discount-line", {

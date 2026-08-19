@@ -16,7 +16,7 @@ export type CodingDetail = {
 export type ProfileCodingProblemPageProps = { readonly state: "pending" | "ready" | "error", readonly detail?: CodingDetail | null, readonly on: { readonly back: () => void, readonly retry: () => void } }
 
 /** Legacy coding proof: statement and accepted-submission summary; never invent source code absent from the API. */
-export const _ProfileCodingProblemPage = ({ state, detail, on }: ProfileCodingProblemPageProps) => {
+export const ProfileCodingProblemPageBase = ({ state, detail, on }: ProfileCodingProblemPageProps) => {
     const problem = detail?.problem
     const submission = detail?.submission
     const loading = state === "pending"

@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryFoundationSwr } from "@/hooks/swr/useQueryFoundationSwr"
-import { _CourseFoundationResourcePage } from "./component"
+import { CourseFoundationResourcePageBase } from "./component"
 
 /** Route identities required by the connected foundation resource reader. */
 export type CourseFoundationResourcePageProps = { readonly displayId: string; readonly categoryId: string; readonly foundationId: string }
@@ -15,7 +15,7 @@ export const CourseFoundationResourcePage = ({ displayId, categoryId, foundation
     const query = useQueryFoundationSwr({ displayId: foundationId })
     const state = query.error !== undefined ? "failed" : query.data === undefined ? "pending" : query.data === null ? "not-found" : "ready"
     return (
-        <_CourseFoundationResourcePage
+        <CourseFoundationResourcePageBase
             state={state}
             props={{
                 resource: query.data,

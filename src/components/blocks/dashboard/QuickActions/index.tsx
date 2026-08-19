@@ -3,13 +3,13 @@
 import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import type { IconName } from "@/components/leaves/Icon"
-import { _QuickActions } from "./component"
+import { QuickActionsBase } from "./component"
 
 /**
  * BLOCK - `QuickActions`: the rail of shortcuts beside the reading column.
  *
  * IT READS NO REQUEST, but translation and routing still make this the connected half. The pure
- * `_QuickActions` twin receives resolved labels and reports an id; only this file knows which
+ * `QuickActionsBase` twin receives resolved labels and reports an id; only this file knows which
  * locale is active and what navigation means.
  *
  * ORDERED BY EVERYDAY FREQUENCY, not alphabetically and not by section. The rail exists to save a
@@ -37,7 +37,7 @@ export const QuickActions = () => {
     const t = useTranslations("shell")
     const router = useRouter()
     return (
-        <_QuickActions
+        <QuickActionsBase
             props={{
                 label: t("quickActions"),
                 items: ACTIONS.map((action) => ({

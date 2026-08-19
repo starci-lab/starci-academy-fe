@@ -68,7 +68,7 @@ const ProfileHistory = (input: ProfileSkillsPageProps) => {
 }
 
 /** Dedicated legacy coding anatomy: metric ribbon, gathered breakdowns, then searchable history. */
-export const _ProfileSkillsPage = (input: ProfileSkillsPageProps) => <Tree contract="profile-main" render={defineContractComponent("profile-main", {
+export const ProfileSkillsPageBase = (input: ProfileSkillsPageProps) => <Tree contract="profile-main" render={defineContractComponent("profile-main", {
     section: [
         defineContractProjection("label-row-over-card", () => <ProfileMetrics {...input} />),
         defineContractProjection("label-row-over-card", () => <ProfileStats {...input} />),

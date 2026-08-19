@@ -93,7 +93,7 @@ const CourseLeaderboardList = ({ props, isLoading = false }: LeafProps<CourseLea
 const CourseLeaderboardListContent = defineContractComponent("ranked-user-list", CourseLeaderboardList)
 
 /** Pure course leaderboard with category, viewer standing, snapshot time and honest data states. */
-export const _CourseLeaderboardPage = (input: CourseLeaderboardPageProps) => {
+export const CourseLeaderboardPageBase = (input: CourseLeaderboardPageProps) => {
     const isLoading = input.state === "pending"
     const board = input.props.board
     const header = defineContractComponent("page-header-stack", {

@@ -50,7 +50,7 @@ export type CourseFlashcardResultPageProps = {
 }
 
 /** Renders the stable review/quiz result URL with score, history, and onward actions. */
-export const _CourseFlashcardResultPage = (input: CourseFlashcardResultPageProps) => {
+export const CourseFlashcardResultPageBase = (input: CourseFlashcardResultPageProps) => {
     const { state, data, on } = input
     const isLoading = state === "pending"
     const statValues = [

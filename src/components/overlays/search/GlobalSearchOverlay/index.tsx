@@ -14,7 +14,7 @@ import {
     type GlobalSearchScope,
 } from "@/modules/search/global-search"
 import {
-    _GlobalSearchOverlay,
+    GlobalSearchOverlayBase,
     type GlobalSearchOverlayRenderState,
     type GlobalSearchResultView,
 } from "./component"
@@ -102,17 +102,28 @@ export const GlobalSearchOverlay = ({ intent, on }: GlobalSearchOverlayProps) =>
         icon: SCOPE_ICONS[id],
         count: countGlobalSearchScope(search.data, id),
     }))
-    const status: GlobalSearchOverlayRenderState["status"] = query.trim().length === 0
-        ? "idle"
-        : search.error !== undefined
-            ? "error"
-            : search.isLoading && results.length === 0
-                ? "pending-empty"
-                : search.isValidating && results.length > 0
-                    ? "pending-stale"
-                    : results.length === 0
-                        ? "empty"
-                        : "ready"
+    const status: GlobalSearchOverlayRenderState["status"] = (() => {
+        if (query.trim().length === 0) return "idle"
+        if (search.error !== undefined) return "error"
+        if (search.isLoading && results.length === 0) return "pending-empty"
+        if (search.isValidating && results.length > 0) return "pending-stale"
+        return results.length === 0 ? "empty" : "ready"
+    })()
+    const detailState: GlobalSearchOverlayRenderState["detail"] = (() => {
+        if (selected === undefined) return { status: "idle" as const }
+        if (detail.error !== undefined) return { status: "error" as const, kindLabel: t(`kinds.${selected.bucket}`) }
+        if (detail.isLoading || detail.data === undefined) return { status: "pending" as const, kindLabel: t(`kinds.${selected.bucket}`) }
+        if (detail.data === null) return { status: "error" as const, kindLabel: t(`kinds.${selected.bucket}`) }
+        const selectedStatus = resultStatusKey(selected)
+        return {
+            status: "ready" as const,
+            id: selected.key,
+            title: detail.data.title,
+            description: detail.data.description ?? undefined,
+            kindLabel: t(`kinds.${selected.bucket}`),
+            statusLabel: selectedStatus === undefined ? undefined : t(`status.${selectedStatus}`),
+        }
+    })()
     const state: GlobalSearchOverlayRenderState = {
         status,
         query,
@@ -121,24 +132,7 @@ export const GlobalSearchOverlay = ({ intent, on }: GlobalSearchOverlayProps) =>
         results: resultViews,
         selectedResult,
         isPending: search.isLoading || search.isValidating,
-        detail: selected === undefined
-            ? { status: "idle" }
-            : detail.error !== undefined
-                ? { status: "error", kindLabel: t(`kinds.${selected.bucket}`) }
-                : detail.isLoading || detail.data === undefined
-                    ? { status: "pending", kindLabel: t(`kinds.${selected.bucket}`) }
-                    : detail.data === null
-                        ? { status: "error", kindLabel: t(`kinds.${selected.bucket}`) }
-                        : {
-                            status: "ready",
-                            id: selected.key,
-                            title: detail.data.title,
-                            description: detail.data.description ?? undefined,
-                            kindLabel: t(`kinds.${selected.bucket}`),
-                            statusLabel: resultStatusKey(selected) === undefined
-                                ? undefined
-                                : t(`status.${resultStatusKey(selected)!}`),
-                        },
+        detail: detailState,
     }
 
     const openResult = useCallback((key: string) => {
@@ -155,7 +149,7 @@ export const GlobalSearchOverlay = ({ intent, on }: GlobalSearchOverlayProps) =>
     }, [results, selectedResult])
 
     return (
-        <_GlobalSearchOverlay
+        <GlobalSearchOverlayBase
             isOpen={isOpen}
             state={state}
             copy={{

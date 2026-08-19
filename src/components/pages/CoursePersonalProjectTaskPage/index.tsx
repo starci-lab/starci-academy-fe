@@ -5,7 +5,7 @@ import { useRouter } from "@/i18n/navigation"
 import { useMutateSubmitPersonalTaskAttemptSwr } from "@/hooks/swr/useMutateSubmitPersonalTaskAttemptSwr"
 import { useQueryCoursePersonalProjectSwr } from "@/hooks/swr/useQueryCoursePersonalProjectSwr"
 import { useQueryPersonalTaskAttemptsSwr } from "@/hooks/swr/useQueryPersonalTaskAttemptsSwr"
-import { _CoursePersonalProjectTaskPage } from "./component"
+import { CoursePersonalProjectTaskPageBase } from "./component"
 
 /** Route identity needed to resolve and submit one personal-project task. */
 export type CoursePersonalProjectTaskPageProps = {
@@ -70,7 +70,7 @@ export const CoursePersonalProjectTaskPage = ({ displayId, taskId }: CoursePerso
     }
 
     return (
-        <_CoursePersonalProjectTaskPage
+        <CoursePersonalProjectTaskPageBase
             state={state}
             props={{
                 title: task?.title ?? copy.fallbackTitle,

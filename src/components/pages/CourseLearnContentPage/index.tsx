@@ -21,7 +21,7 @@ import {
 import { sandboxFileCode, type SandboxCodeSelection } from "@/modules/code/sandbox-repo"
 import type { SandpackFiles } from "@codesandbox/sandpack-react"
 import {
-    _CourseLearnContentPage,
+    CourseLearnContentPageBase,
     type ContentOutlineEntry,
     type CourseLearnContentPageState,
 } from "@/components/pages/CourseLearnContentPage/component"
@@ -58,6 +58,18 @@ export interface CourseLearnContentPageProps {
     moduleId: string
     /** The content being read. */
     contentId: string
+}
+
+const mobileViewOf = (isMobile: boolean, view: string): "contents" | "lesson" | "outline" | undefined => {
+    if (!isMobile) return undefined
+    if (view === "contents" || view === "outline") return view
+    return "lesson"
+}
+const discussionStateOf = (failed: boolean, pending: boolean, submitting: boolean, commentCount: number) => {
+    if (failed) return "failed" as const
+    if (pending) return "pending" as const
+    if (submitting) return "submitting" as const
+    return commentCount === 0 ? "empty" as const : "ready" as const
 }
 
 /** Markdown headings, in order, with the depth the outline indents by. */
@@ -177,22 +189,14 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
     })), [comments.data?.comments, locale, t])
     const discussionFailed = discussionError || comments.error !== undefined || comments.data === null
     const discussionPending = comments.data === undefined && comments.error === undefined
-    const discussionState = discussionFailed
-        ? "failed"
-        : discussionPending
-            ? "pending"
-            : submitComment.isMutating
-                ? "submitting"
-                : discussionComments.length === 0
-                    ? "empty"
-                    : "ready"
+    const discussionState = discussionStateOf(discussionFailed, discussionPending, submitComment.isMutating, discussionComments.length)
 
     const openContent = (id: string) => {
         router.push(`/courses/${input.displayId}/learn/content/modules/${input.moduleId}/contents/${id}`)
     }
 
     return (
-        <_CourseLearnContentPage
+        <CourseLearnContentPageBase
             state={state}
             props={{
                 labels: {
@@ -210,9 +214,7 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                     reactionPrompt: t("reactionPrompt"),
                     nextTitle: t("nextTitle"),
                 },
-                mobileView: isMobile
-                    ? view === "contents" || view === "outline" ? view : "lesson"
-                    : undefined,
+                mobileView: mobileViewOf(isMobile, view),
                 title: content.data?.title,
                 faces: [
                     { id: "reading", label: t("readingFace"), icon: "course" },

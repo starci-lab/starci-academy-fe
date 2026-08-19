@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryMyJobReadinessSwr } from "@/hooks"
-import { _JobReadinessWidget, type JobReadinessMetric } from "./component"
+import { JobReadinessWidgetBase, type JobReadinessMetric } from "./component"
 
 /** Connected half: resolves the strongest readiness track and product navigation. */
 export const JobReadinessWidget = () => {
@@ -26,7 +26,7 @@ export const JobReadinessWidget = () => {
     const percentile = readiness.data?.foundation.codingPercentile
 
     return (
-        <_JobReadinessWidget
+        <JobReadinessWidgetBase
             state={state}
             props={{
                 label: t("title"),

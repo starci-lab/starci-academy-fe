@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { _CourseFlashcardsReviewPage, type CourseFlashcardsReviewPageProps } from "./component"
+import { CourseFlashcardsReviewPageBase, type CourseFlashcardsReviewPageProps } from "./component"
 
 /**
  * What these tests guard.
@@ -41,10 +41,10 @@ const makeInput = (): CourseFlashcardsReviewPageProps => ({
 
 afterEach(cleanup)
 
-describe("_CourseFlashcardsReviewPage", () => {
+describe("CourseFlashcardsReviewPageBase", () => {
     it("starts the cross-deck due session and a selected deck", () => {
         const input = makeInput()
-        const { container } = render(<_CourseFlashcardsReviewPage {...input} />)
+        const { container } = render(<CourseFlashcardsReviewPageBase {...input} />)
 
         expect(container.querySelector("[data-node=course-flashcards-review-page]")).toBeTruthy()
         expect(container.querySelectorAll("[data-node=flashcard-review-deck-card]")).toHaveLength(1)
@@ -59,7 +59,7 @@ describe("_CourseFlashcardsReviewPage", () => {
 
     it("rests four deck cards and withholds the due card until the queue is known", () => {
         const input = makeInput()
-        const { container } = render(<_CourseFlashcardsReviewPage {...input} state="pending" />)
+        const { container } = render(<CourseFlashcardsReviewPageBase {...input} state="pending" />)
 
         expect(container.querySelectorAll("[data-node=flashcard-review-deck-card]")).toHaveLength(4)
         expect(container.querySelector("[data-node=flashcard-review-due-card]")).toBeNull()
@@ -69,7 +69,7 @@ describe("_CourseFlashcardsReviewPage", () => {
 
     it("replaces the whole overview when nothing is due and nothing is published", () => {
         const input = makeInput()
-        const { container } = render(<_CourseFlashcardsReviewPage {...input} state="empty" />)
+        const { container } = render(<CourseFlashcardsReviewPageBase {...input} state="empty" />)
 
         expect(screen.getByText("Empty")).toBeInTheDocument()
         expect(container.querySelector("[data-node=flashcard-review-deck-card]")).toBeNull()
@@ -79,7 +79,7 @@ describe("_CourseFlashcardsReviewPage", () => {
 
     it("offers the way back from a failed deck load", () => {
         const input = makeInput()
-        render(<_CourseFlashcardsReviewPage {...input} state="failed" />)
+        render(<CourseFlashcardsReviewPageBase {...input} state="failed" />)
 
         expect(screen.getByText("Failed")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Retry" }))
@@ -89,7 +89,7 @@ describe("_CourseFlashcardsReviewPage", () => {
     it("resumes an unfinished session instead of starting a new one", () => {
         const input = makeInput()
         const { container } = render(
-            <_CourseFlashcardsReviewPage
+            <CourseFlashcardsReviewPageBase
                 {...input}
                 props={{ ...input.props, resumeSessionId: "session-4" }}
             />,
@@ -104,7 +104,7 @@ describe("_CourseFlashcardsReviewPage", () => {
     it("leaves the due card actionless when the queue is empty and still routes to the quiz face", () => {
         const input = makeInput()
         const { container } = render(
-            <_CourseFlashcardsReviewPage {...input} props={{ ...input.props, dueCount: 0, decks: [] }} />,
+            <CourseFlashcardsReviewPageBase {...input} props={{ ...input.props, dueCount: 0, decks: [] }} />,
         )
 
         const dueCard = container.querySelector("[data-node=flashcard-review-due-card]")

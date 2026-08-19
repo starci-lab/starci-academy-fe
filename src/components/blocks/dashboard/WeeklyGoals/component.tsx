@@ -31,7 +31,7 @@ export type WeeklyGoalsExit = {
     readonly editLabel: string
 }
 
-/** Props for {@link _WeeklyGoals}, discriminated by the situation. */
+/** Props for {@link WeeklyGoalsBase}, discriminated by the situation. */
 export type WeeklyGoalsProps =
     | { readonly state: "pending"; readonly props: WeeklyGoalsFrame }
     | {
@@ -70,7 +70,7 @@ type WeeklyGoalsInput = WeeklyGoalsProps & { readonly on?: WeeklyGoalsActions }
  *
  * @param input - {@link WeeklyGoalsInput}
  */
-export const _WeeklyGoals = (input: WeeklyGoalsInput) => {
+export const WeeklyGoalsBase = (input: WeeklyGoalsInput) => {
     if (input.state === "failed") {
         return (
             <SurfaceCard props={{ label: input.props.label }} contract="empty-notice-card"

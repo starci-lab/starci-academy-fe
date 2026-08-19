@@ -132,7 +132,7 @@ const turnMarkdown = (turn: StarCiAiTurn, partialLabel: string): string => {
 }
 
 /** Draw every AI-owner state from resolved fixture data; no transport or translation lives here. */
-export const _StarCiAiChat = (input: StarCiAiChatProps) => {
+export const StarCiAiChatBase = (input: StarCiAiChatProps) => {
     const labels = input.props.labels
     const selection = input.props.selection
     const isHistory = input.props.mode === "history" || HISTORY_STATES.has(input.state)
@@ -144,6 +144,58 @@ export const _StarCiAiChat = (input: StarCiAiChatProps) => {
     const disablesComposer = input.state === "offline" || input.state === "reconnecting"
     const showsComposer = !isHistory && input.state !== "sessionsPending" && input.state !== "sessionsFailed"
     const showsSessionActions = isHistory && input.props.activeSessionId !== undefined
+    const contextNode = (() => {
+        if (isHistory || input.props.contextSummary === undefined) return undefined
+        const clear = selection === undefined
+            ? undefined
+            : defineLeafComponent("button", {}, () => (
+                <Button
+                    props={{ label: labels.clearContext, variant: "ghost", size: "sm" }}
+                    on={{ press: input.on?.clearContext }}
+                />
+            ))
+        return defineContractComponent("starci-ai-context-stack", {
+            context: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                <Text props={{ content: input.props.contextSummary, size: "xs" }} />
+            )),
+            clear,
+        })
+    })()
+    const turnNodes = (() => {
+        if (isHistory && input.props.sessions.length > 0) {
+            return input.props.sessions.map((session) => defineLeafComponent("button", {}, () => (
+                <Button
+                    key={session.id}
+                    props={{
+                        label: `${session.title} · ${session.updatedLabel}`,
+                        variant: session.id === input.props.activeSessionId ? "secondary" : "ghost",
+                    }}
+                    on={{ press: () => input.on?.selectSession?.(session.id) }}
+                />
+            )))
+        }
+        if (renderedTurns.length === 0 && isLoading) {
+            return Array.from({ length: 4 }, (_unused, index) => defineLeafComponent("article", {}, () => (
+                <Article key={`pending-${index}`} props={{}} isLoading />
+            )))
+        }
+        return renderedTurns.map((turn) => defineLeafComponent("article", {}, () => (
+            <Article key={turn.id} props={{ body: turnMarkdown(turn, labels.partial) }} />
+        )))
+    })()
+    const sendOrStop = (() => {
+        if (input.state === "streaming") return <Button props={{ label: labels.stop, variant: "primary" }} on={{ press: input.on?.stop }} />
+        if (stateNeedsRetry(input.state)) return <Button props={{ label: labels.retry, variant: "primary" }} on={{ press: input.on?.retry }} />
+        return <Button
+            props={{
+                label: labels.send,
+                variant: "primary",
+                icon: "send",
+                disabled: disablesComposer || input.props.draft.trim() === "",
+            }}
+            on={{ press: input.on?.send }}
+        />
+    })()
 
     return (
         <>
@@ -166,43 +218,9 @@ export const _StarCiAiChat = (input: StarCiAiChatProps) => {
                             )),
                         ],
                     }),
-                    context: isHistory || input.props.contextSummary === undefined
-                        ? undefined
-                        : defineContractComponent("starci-ai-context-stack", {
-                            context: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                                <Text props={{ content: input.props.contextSummary, size: "xs" }} />
-                            )),
-                            clear: selection === undefined
-                                ? undefined
-                                : defineLeafComponent("button", {}, () => (
-                                    <Button
-                                        props={{ label: labels.clearContext, variant: "ghost", size: "sm" }}
-                                        on={{ press: input.on?.clearContext }}
-                                    />
-                                )),
-                        }),
+                    context: contextNode,
                     chat: defineContractComponent("starci-ai-turn-list", {
-                        turn: isHistory && input.props.sessions.length > 0
-                            ? input.props.sessions.map((session) => defineLeafComponent("button", {}, () => (
-                                <Button
-                                    key={session.id}
-                                    props={{
-                                        label: `${session.title} · ${session.updatedLabel}`,
-                                        variant: session.id === input.props.activeSessionId ? "secondary" : "ghost",
-                                    }}
-                                    on={{ press: () => input.on?.selectSession?.(session.id) }}
-                                />
-                            )))
-                            : renderedTurns.length === 0 && isLoading
-                                ? Array.from({ length: 4 }, (_unused, index) => defineLeafComponent("article", {}, () => (
-                                    <Article key={`pending-${index}`} props={{}} isLoading />
-                                )))
-                                : renderedTurns.map((turn) => defineLeafComponent("article", {}, () => (
-                                    <Article
-                                        key={turn.id}
-                                        props={{ body: turnMarkdown(turn, labels.partial) }}
-                                    />
-                                ))),
+                        turn: turnNodes,
                     }),
                 })}
             />
@@ -259,21 +277,7 @@ export const _StarCiAiChat = (input: StarCiAiChatProps) => {
                                 onChange={(event) => input.on?.changeDraft?.(event.target.value)}
                             />
                         )),
-                        sendOrStop: defineLeafComponent("button", {}, () => (
-                            input.state === "streaming"
-                                ? <Button props={{ label: labels.stop, variant: "primary" }} on={{ press: input.on?.stop }} />
-                                : stateNeedsRetry(input.state)
-                                    ? <Button props={{ label: labels.retry, variant: "primary" }} on={{ press: input.on?.retry }} />
-                                    : <Button
-                                        props={{
-                                            label: labels.send,
-                                            variant: "primary",
-                                            icon: "send",
-                                            disabled: disablesComposer || input.props.draft.trim() === "",
-                                        }}
-                                        on={{ press: input.on?.send }}
-                                    />
-                        )),
+                        sendOrStop: defineLeafComponent("button", {}, () => sendOrStop),
                         quota: input.state === "quotaPending" || input.props.quotaLabel !== undefined
                             ? defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
                                 <Text

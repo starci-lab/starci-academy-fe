@@ -65,7 +65,7 @@ export type CourseMockInterviewSessionPageProps = {
 }
 
 /** Full-bleed, presentational interview room. Runtime data and transport stay in the connected twin. */
-export const _CourseMockInterviewSessionPage = (input: CourseMockInterviewSessionPageProps) => {
+export const CourseMockInterviewSessionPageBase = (input: CourseMockInterviewSessionPageProps) => {
     const isPending = input.state === "connecting"
     const isBusy = input.state === "connecting" || input.state === "syncing"
     const canAnswer = input.state === "live"

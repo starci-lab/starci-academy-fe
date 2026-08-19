@@ -8,8 +8,8 @@ import {
     defineLeafComponent,
 } from "~candidate/components/contracts/props"
 import { DrawerShell } from "~candidate/components/shells/DrawerShell"
-import { _CartLine, type CartLineData } from "~candidate/components/blocks/commerce/CartLine/component"
-import { _OrderSummary, type OrderSummaryLabels } from "~candidate/components/blocks/commerce/OrderSummary/component"
+import { CartLineBase, type CartLineData } from "~candidate/components/blocks/commerce/CartLine/component"
+import { OrderSummaryBase, type OrderSummaryLabels } from "~candidate/components/blocks/commerce/OrderSummary/component"
 
 /**
  * OVERLAY - `CartDrawer`: the same basket, reached without leaving the page being read.
@@ -85,7 +85,7 @@ export type CartDrawerActions = {
     readonly [key: string]: ((...args: Array<never>) => void) | undefined
 }
 
-/** Props for {@link _CartDrawer}. */
+/** Props for {@link CartDrawerBase}. */
 export type CartDrawerProps = {
     readonly state: CartDrawerState
     readonly props: CartDrawerData
@@ -100,7 +100,7 @@ const RESTING_COUNT = 3
  *
  * @param input - {@link CartDrawerProps}
  */
-export const _CartDrawer = (input: CartDrawerProps) => {
+export const CartDrawerBase = (input: CartDrawerProps) => {
     const labels = input.props.labels
     const isLoading = input.state === "pending"
     const showsNotice = input.state === "empty" || input.state === "failed"
@@ -123,7 +123,7 @@ export const _CartDrawer = (input: CartDrawerProps) => {
                     ...(showsNotice ? {} : {
                         lines: defineContractComponent("cart-line-list", {
                             line: lines.map((line) => defineContractProjection("cart-line-row", () => (
-                                <_CartLine
+                                <CartLineBase
                                     state={
                                         isLoading
                                             ? "pending"
@@ -139,7 +139,7 @@ export const _CartDrawer = (input: CartDrawerProps) => {
                     }),
                     ...(showsNotice ? {} : {
                         summary: defineContractProjection("order-summary-stack", () => (
-                            <_OrderSummary
+                            <OrderSummaryBase
                                 state={
                                     isLoading
                                         ? "pending"

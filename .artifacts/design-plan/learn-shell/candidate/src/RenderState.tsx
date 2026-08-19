@@ -1,6 +1,6 @@
 "use client"
 import { Heading } from "@/components/leaves/Heading"
-import { _LearnShellLayout } from "~candidate/components/layouts/LearnShellLayout/component"
+import { LearnShellLayoutBase } from "~candidate/components/layouts/LearnShellLayout/component"
 import type { RenderedState } from "~candidate/states"
 
 /**
@@ -30,5 +30,5 @@ export interface RenderStateProps {
  * @param input - {@link RenderStateProps}
  */
 export const RenderState = (input: RenderStateProps) => (
-    <_LearnShellLayout {...input.state.props} surface={Surface} />
+    <LearnShellLayoutBase {...input.state.props} surface={Surface} />
 )

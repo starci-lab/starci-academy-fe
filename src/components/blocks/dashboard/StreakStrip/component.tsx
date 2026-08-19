@@ -33,7 +33,7 @@ export type StreakStripFrame = {
 
 /** The figure the week adds up to. */
 /**
- * Props for {@link _StreakStrip}, discriminated by the situation.
+ * Props for {@link StreakStripBase}, discriminated by the situation.
  *
  * `state="empty"` carrying a week does not compile, and `state="ready"` without one does not
  * either - which is what "the data of the state it is in" means when the compiler holds it rather
@@ -74,7 +74,7 @@ type StreakStripInput = StreakStripProps & { readonly on?: StreakStripActions }
  *
  * @param input - {@link StreakStripInput}
  */
-export const _StreakStrip = (input: StreakStripInput) => {
+export const StreakStripBase = (input: StreakStripInput) => {
     if (input.state === "failed") {
         return (
             <SurfaceCard props={{ label: input.props.label }} contract="empty-notice-card"

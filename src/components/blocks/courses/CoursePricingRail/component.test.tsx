@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { ContractContent } from "@/components/branches/Tree"
-import { CoursePricingRail, _CoursePricingRail } from "./component"
+import { CoursePricingRail, CoursePricingRailBase } from "./component"
 
 class ResizeObserverMock {
     observe() {}
@@ -40,12 +40,12 @@ const props = {
     },
 }
 
-describe("_CoursePricingRail", () => {
+describe("CoursePricingRailBase", () => {
     it("keeps one surface while separating purchase and exploration intent", () => {
         const act = vi.fn()
         const trial = vi.fn()
         const addToCart = vi.fn()
-        render(<_CoursePricingRail state="ready" props={props} on={{ act, trial, addToCart }} />)
+        render(<CoursePricingRailBase state="ready" props={props} on={{ act, trial, addToCart }} />)
 
         expect(document.querySelector("[data-component=\"CoursePricingRailScroll\"]")).toBeNull()
         const surface = document.querySelector("[data-component=\"SurfaceCardSurface\"]")
@@ -115,7 +115,7 @@ describe("_CoursePricingRail", () => {
 
     it("omits optional exploration and disclosure when their data is absent", () => {
         render(
-            <_CoursePricingRail
+            <CoursePricingRailBase
                 state="ready"
                 props={{ ...props, trialLabel: undefined, phases: [], intent: undefined }}
             />,
@@ -128,7 +128,7 @@ describe("_CoursePricingRail", () => {
     it("keeps the cart action available as the legacy add/remove toggle", () => {
         const addToCart = vi.fn()
         render(
-            <_CoursePricingRail
+            <CoursePricingRailBase
                 state="ready"
                 props={{ ...props, isInCart: true, cartLabel: "Remove from cart" }}
                 on={{ addToCart }}
@@ -143,7 +143,7 @@ describe("_CoursePricingRail", () => {
     })
 
     it("rests only the unresolved price", () => {
-        render(<_CoursePricingRail state="price-pending" props={{ ...props, price: undefined }} />)
+        render(<CoursePricingRailBase state="price-pending" props={{ ...props, price: undefined }} />)
         expect(screen.getByText("100 seats left in Early")).toBeInTheDocument()
         expect(screen.queryByText("1,250,000 ₫")).toBeNull()
     })
@@ -153,7 +153,7 @@ describe("_CoursePricingRail", () => {
         ["adding", "Add to cart"],
         ["trialing", "Trial"],
     ] as const)("keeps pending ownership on only the %s action", (state, pendingLabel) => {
-        render(<_CoursePricingRail state={state} props={props} />)
+        render(<CoursePricingRailBase state={state} props={props} />)
         if (state === "trialing") fireEvent.click(screen.getByRole("tab", { name: "Trial" }))
         const buttons = document.querySelectorAll("[data-component=\"Button\"]")
         for (const button of buttons) {
@@ -163,7 +163,7 @@ describe("_CoursePricingRail", () => {
 
     it("draws a bare course as artwork, one price and one action and nothing else", () => {
         render(
-            <_CoursePricingRail
+            <CoursePricingRailBase
                 state="ready"
                 props={{
                     title: "Fullstack Mastery",
@@ -191,7 +191,7 @@ describe("_CoursePricingRail", () => {
     it("opens the price breakdown from a course that has no saving to report", () => {
         const openPriceDetail = vi.fn()
         render(
-            <_CoursePricingRail
+            <CoursePricingRailBase
                 state="ready"
                 props={{ ...props, savingsLabel: undefined }}
                 on={{ openPriceDetail }}
@@ -207,7 +207,7 @@ describe("_CoursePricingRail", () => {
 
     it("refuses to split the rail's intent on a trial label with no copy to frame it", () => {
         render(
-            <_CoursePricingRail
+            <CoursePricingRailBase
                 state="ready"
                 props={{ ...props, intent: undefined }}
             />,

@@ -71,7 +71,7 @@ export type ContactChannelTileData = {
     readonly label: string
 }
 
-/** Props for {@link _ContactChannelTile}. */
+/** Props for {@link ContactChannelTileBase}. */
 export type ContactChannelTileProps = BlockProps<ContactChannelTileState, ContactChannelTileData> & {
     /** Called when the reader chooses this channel. */
     readonly onOpen?: () => void
@@ -82,7 +82,7 @@ export type ContactChannelTileProps = BlockProps<ContactChannelTileState, Contac
  *
  * @param input - {@link ContactChannelTileProps}
  */
-export const _ContactChannelTile = (input: ContactChannelTileProps) => (
+export const ContactChannelTileBase = (input: ContactChannelTileProps) => (
     <PressableSurface
         contract="contact-channel-tile"
         label={input.props.label}

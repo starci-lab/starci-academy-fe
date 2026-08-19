@@ -10,7 +10,7 @@ import { useMutateGradeMockInterviewSessionSwr } from "@/hooks/swr/useMutateGrad
 import { useMutateSyncMockInterviewSessionTurnsSwr } from "@/hooks/swr/useMutateSyncMockInterviewSessionTurnsSwr"
 import { useMockInterviewSocketIo } from "@/hooks/socketio/useMockInterviewSocketIo"
 import type { MockInterviewTurn } from "@/modules/api/graphql/queries/query-my-in-progress-mock-interview-session"
-import { _CourseMockInterviewSessionPage, type CourseMockInterviewSessionState } from "./component"
+import { CourseMockInterviewSessionPageBase, type CourseMockInterviewSessionState } from "./component"
 
 /** Route identity required to restore one durable interview room. */
 export type CourseMockInterviewSessionPageProps = {
@@ -19,6 +19,37 @@ export type CourseMockInterviewSessionPageProps = {
 }
 
 const PHASES = ["requirements", "estimation", "highLevel", "deepDive", "tradeoffs"] as const
+
+type InterviewStateInputs = {
+    loadFailed: boolean
+    pending: boolean
+    session: unknown
+    hydrated: boolean
+    expired: boolean
+    missing: boolean
+    syncing: boolean
+    grading: boolean
+}
+
+const resolveInterviewState = (input: InterviewStateInputs): CourseMockInterviewSessionState => {
+    if (input.loadFailed) return "failed"
+    if (input.pending || (input.session !== null && input.hydrated)) return "connecting"
+    if (input.expired || input.missing) return "expired"
+    if (input.syncing || input.grading) return "syncing"
+    return "live"
+}
+
+type InterviewStateCopy = { connecting: string; reconnecting: string; syncing: string; grading: string; expired: string; failed: string }
+
+const resolveInterviewStateLabel = (state: CourseMockInterviewSessionState, copy: InterviewStateCopy, promptTitle: string | undefined, grading: boolean, syncing: boolean, socketState: string): string => {
+    if (grading) return copy.grading
+    if (syncing) return copy.syncing
+    if (socketState === "reconnecting" || socketState === "failed") return copy.reconnecting
+    if (state === "connecting") return copy.connecting
+    if (state === "expired") return copy.expired
+    if (state === "failed") return copy.failed
+    return promptTitle ?? copy.connecting
+}
 
 const COPY = {
     en: {
@@ -262,32 +293,15 @@ export const CourseMockInterviewSessionPage = ({ displayId, sessionId }: CourseM
     const loadFailed = course.error !== undefined || inProgress.error !== undefined || attempt.error !== undefined || course.data === null
     const pending = !loadFailed && (course.data === undefined || inProgress.data === undefined || attempt.data === undefined)
     const missing = !pending && session === null && attempt.data === null
-    const state: CourseMockInterviewSessionState = loadFailed
-        ? "failed"
-        : pending || (session !== null && hydratedSessionId !== sessionId)
-            ? "connecting"
-            : expired || missing
-                ? "expired"
-                : sync.isMutating || grade.isMutating
-                    ? "syncing"
-                    : "live"
-    const stateLabel = grade.isMutating
-        ? copy.grading
-        : sync.isMutating
-            ? copy.syncing
-            : socket.state === "reconnecting" || socket.state === "failed"
-                ? copy.reconnecting
-                : state === "connecting"
-                    ? copy.connecting
-                    : state === "expired"
-                        ? copy.expired
-                        : state === "failed"
-                            ? copy.failed
-                            : session?.promptTitle ?? copy.connecting
+    const state = resolveInterviewState({
+        loadFailed, pending, session, hydrated: hydratedSessionId !== sessionId,
+        expired, missing, syncing: sync.isMutating, grading: grade.isMutating,
+    })
+    const stateLabel = resolveInterviewStateLabel(state, copy, session?.promptTitle, grade.isMutating, sync.isMutating, socket.state)
     const activeSeed = isDesign ? undefined : session?.seedQuestions[questionIndex]
 
     return (
-        <_CourseMockInterviewSessionPage
+        <CourseMockInterviewSessionPageBase
             state={state}
             props={{
                 title: copy.title,

@@ -44,3 +44,4 @@ yarn-error.log*
 
 # sonar-scanner working directory: generated analysis evidence, not product source
 .scannerwork/
+.sonar/

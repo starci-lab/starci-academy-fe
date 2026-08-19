@@ -10,7 +10,7 @@ import {
 } from "@/hooks"
 import { queryResolveRoute } from "@/modules/api/graphql/queries/query-resolve-route"
 import type { MyResumeRefRow } from "@/modules/api/graphql/queries/types/my-resume"
-import { _ContinueLearning, type ResumeItem } from "./component"
+import { ContinueLearningBase, type ResumeItem } from "./component"
 
 const MAX_ITEMS = 3
 const MAX_CHALLENGES = 1
@@ -42,7 +42,7 @@ export const ContinueLearning = () => {
 
     if (lessons.error !== undefined || challenges.error !== undefined) {
         return (
-            <_ContinueLearning
+            <ContinueLearningBase
                 state="failed"
                 props={{ ...notice, message: t("continueLearning.failed") }}
                 on={{ act: onBrowse }}
@@ -51,7 +51,7 @@ export const ContinueLearning = () => {
     }
 
     if (lessons.data === undefined || challenges.data === undefined) {
-        return <_ContinueLearning state="pending" props={{ label }} />
+        return <ContinueLearningBase state="pending" props={{ label }} />
     }
 
     // The API calls this entity a lesson; StarCi Academy calls it content in every reader-facing
@@ -76,7 +76,7 @@ export const ContinueLearning = () => {
 
     if (items.length > 0) {
         return (
-            <_ContinueLearning
+            <ContinueLearningBase
                 state="ready"
                 props={{ label, items, resumeLabel: t("continueLearning.resume") }}
                 on={{ resume: onResume }}
@@ -85,12 +85,12 @@ export const ContinueLearning = () => {
     }
 
     if (courses.data === undefined && courses.error === undefined) {
-        return <_ContinueLearning state="pending" props={{ label }} />
+        return <ContinueLearningBase state="pending" props={{ label }} />
     }
 
     const hasNoCourses = courses.data !== undefined && courses.data !== null && courses.data.length === 0
     return (
-        <_ContinueLearning
+        <ContinueLearningBase
             state={hasNoCourses ? "onboarding" : "empty"}
             props={{
                 ...notice,

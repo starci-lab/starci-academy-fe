@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useTheme } from "next-themes"
 import fixture from "~candidate/fixtures/catalog.json"
 import {
-    _CoursesCatalogPage,
+    CoursesCatalogPageBase,
     type CoursesCatalogPageProps,
     type CoursesCatalogPageState,
 } from "~candidate/components/pages/CoursesCatalogPage/component"
@@ -197,7 +197,7 @@ const StateMatrix = () => {
                     data-theme={theme}
                     className="rounded-2xl border border-separator p-4"
                 >
-                    <_CoursesCatalogPage {...candidate} />
+                    <CoursesCatalogPageBase {...candidate} />
                 </div>
             </div>
         </div>

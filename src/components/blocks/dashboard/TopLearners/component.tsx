@@ -60,7 +60,7 @@ const TopLearnersListContentView = ({ props, on, isLoading = false }: LeafProps<
 const TopLearnersListContent = defineContractComponent("ranked-user-list", TopLearnersListContentView)
 
 /** Draw the global leaderboard and local follow outcomes. */
-export const _TopLearners = (input: TopLearnersProps) => {
+export const TopLearnersBase = (input: TopLearnersProps) => {
     if (input.state === "empty" || input.state === "failed") {
         const message = input.state === "empty" ? input.props.emptyMessage : input.props.errorMessage
         return (

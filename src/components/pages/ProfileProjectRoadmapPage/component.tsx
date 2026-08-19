@@ -12,7 +12,7 @@ import type { ProfileCapstone } from "@/modules/api/graphql/queries/types/profil
 export type ProfileProjectRoadmapPageProps = { readonly state: "pending" | "ready" | "error"; readonly project?: ProfileCapstone; readonly onBack: () => void }
 
 /** Dedicated capstone detail: summary/progress remains above an ordered milestone roadmap. */
-export const _ProfileProjectRoadmapPage = ({ state, project, onBack }: ProfileProjectRoadmapPageProps) => {
+export const ProfileProjectRoadmapPageBase = ({ state, project, onBack }: ProfileProjectRoadmapPageProps) => {
     const value = Math.round((project?.completedTasks ?? 0) / Math.max(1, project?.totalTasks ?? 0) * 100)
     const milestones = state === "pending" ? Array.from({ length: 4 }, (_, index) => ({ milestoneGlobalId: `pending-${index}`, title: "", position: index, totalTasks: 0, passedTasks: 0, tasks: [] })) : project?.milestones ?? []
     return <Tree contract="profile-main" render={defineContractComponent("profile-main", { section: [

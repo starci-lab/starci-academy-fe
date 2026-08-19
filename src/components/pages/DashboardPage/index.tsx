@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation"
 import { useRouter } from "@/i18n/navigation"
 import { useSessionRefresh } from "@/hooks/auth/useSessionRefresh"
 import { useSessionToken } from "@/hooks/auth/useSessionToken"
-import { _DashboardPage } from "./component"
+import { DashboardPageBase } from "./component"
 
 /**
  * PAGE - `DashboardPage`, connected half.
@@ -37,7 +37,7 @@ export const DashboardPage = () => {
     if (session.isRestoring || token === undefined) return null
 
     return (
-        <_DashboardPage
+        <DashboardPageBase
             props={{ selectedTab, unavailableMessage: t("unavailable") }}
         />
     )

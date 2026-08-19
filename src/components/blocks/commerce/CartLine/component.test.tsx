@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _CartLine } from "./component"
+import { CartLineBase } from "./component"
 
 const discounted = {
     courseId: "course-1",
@@ -21,9 +21,9 @@ const listPrice = {
     removeLabel: "Remove Git Foundations from cart",
 }
 
-describe("_CartLine", () => {
+describe("CartLineBase", () => {
     it("leads with the payable price and qualifies it with the struck list price and the saving", () => {
-        render(<_CartLine state="ready" props={discounted} />)
+        render(<CartLineBase state="ready" props={discounted} />)
 
         expect(screen.getByText("Fullstack Mastery")).toHaveAttribute("data-weight", "semibold")
         expect(screen.getByText("Advanced")).toHaveAttribute("data-size", "xs")
@@ -40,7 +40,7 @@ describe("_CartLine", () => {
     })
 
     it("omits the struck price, the saving and the tier line for a course at list price", () => {
-        render(<_CartLine state="ready" props={listPrice} />)
+        render(<CartLineBase state="ready" props={listPrice} />)
 
         expect(screen.getByText("400,000 ₫")).toBeInTheDocument()
         expect(document.querySelector("[data-superseded=\"true\"]")).toBeNull()
@@ -55,7 +55,7 @@ describe("_CartLine", () => {
     })
 
     it("draws the artwork fallback for a course whose cover has not been set at all", () => {
-        render(<_CartLine state="ready" props={{ ...listPrice, cover: undefined }} />)
+        render(<CartLineBase state="ready" props={{ ...listPrice, cover: undefined }} />)
 
         expect(document.querySelector("[data-component=\"CoverImage\"]")).toHaveAttribute(
             "data-fallback",
@@ -65,7 +65,7 @@ describe("_CartLine", () => {
 
     it("takes the course out of the basket when the removal glyph is pressed", () => {
         const remove = vi.fn()
-        render(<_CartLine state="ready" props={discounted} on={{ remove }} />)
+        render(<CartLineBase state="ready" props={discounted} on={{ remove }} />)
 
         fireEvent.click(screen.getByRole("button", { name: "Remove Fullstack Mastery from cart" }))
         expect(remove).toHaveBeenCalledOnce()
@@ -73,14 +73,14 @@ describe("_CartLine", () => {
 
     it("refuses a second press while this line's own removal is already in flight", () => {
         const remove = vi.fn()
-        render(<_CartLine state="removing" props={discounted} on={{ remove }} />)
+        render(<CartLineBase state="removing" props={discounted} on={{ remove }} />)
 
         fireEvent.click(screen.getByRole("button", { name: "Remove Fullstack Mastery from cart" }))
         expect(remove).not.toHaveBeenCalled()
     })
 
     it("survives a press on a line nobody is listening to", () => {
-        render(<_CartLine state="ready" props={discounted} />)
+        render(<CartLineBase state="ready" props={discounted} />)
 
         fireEvent.click(screen.getByRole("button", { name: "Remove Fullstack Mastery from cart" }))
         expect(screen.getByText("Fullstack Mastery")).toBeInTheDocument()
@@ -88,7 +88,7 @@ describe("_CartLine", () => {
 
     it("rests the name, the tier, the price and the artwork while the line is a resting shape", () => {
         render(
-            <_CartLine
+            <CartLineBase
                 state="pending"
                 props={{
                     courseId: "resting",
@@ -107,7 +107,7 @@ describe("_CartLine", () => {
     })
 
     it("rests every optional figure the line still carries while it is pending", () => {
-        render(<_CartLine state="pending" props={discounted} />)
+        render(<CartLineBase state="pending" props={discounted} />)
 
         expect(document.querySelectorAll("[data-component=\"Text\"][data-loading=\"true\"]")).toHaveLength(4)
         expect(document.querySelector("[data-component=\"Badge\"]")).toHaveAttribute(

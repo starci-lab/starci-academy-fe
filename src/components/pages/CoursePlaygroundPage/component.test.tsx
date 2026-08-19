@@ -1,12 +1,12 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _CoursePlaygroundPage } from "./component"
+import { CoursePlaygroundPageBase } from "./component"
 
-describe("_CoursePlaygroundPage", () => {
+describe("CoursePlaygroundPageBase", () => {
     it("renders the backend catalog through its canonical contract", () => {
         const openSetup = vi.fn()
         const { container } = render(
-            <_CoursePlaygroundPage
+            <CoursePlaygroundPageBase
                 state="ready"
                 props={{
                     title: "Playground",

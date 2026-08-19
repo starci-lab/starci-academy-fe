@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { Icon, type IconName } from "@/components/leaves/Icon"
-import { _DomainMasteryGrid, type DomainMastery } from "./component"
+import { DomainMasteryGridBase, type DomainMastery } from "./component"
 
 const domains: ReadonlyArray<DomainMastery> = [
     {
@@ -49,10 +49,10 @@ const noticeMark = () => document.querySelector("[data-component=\"IconTile\"]")
 
 const meterValues = () => screen.getAllByRole("progressbar").map((bar) => bar.getAttribute("aria-valuenow"))
 
-describe("_DomainMasteryGrid", () => {
+describe("DomainMasteryGridBase", () => {
     it("rests six inert topic cards while both answers are in flight", () => {
         const open = vi.fn()
-        render(<_DomainMasteryGrid state="pending" props={{ domains }} on={{ open }} />)
+        render(<DomainMasteryGridBase state="pending" props={{ domains }} on={{ open }} />)
 
         const cards = screen.getAllByRole("button")
         expect(cards).toHaveLength(6)
@@ -68,7 +68,7 @@ describe("_DomainMasteryGrid", () => {
     })
 
     it("draws each topic's standing as a percentage of its own catalog", () => {
-        render(<_DomainMasteryGrid state="ready" props={{ domains }} />)
+        render(<DomainMasteryGridBase state="ready" props={{ domains }} />)
 
         expect(screen.getByText("Arrays")).toHaveAttribute("data-weight", "semibold")
         expect(screen.getByText("9 / 12 problems")).toHaveAttribute("data-tone", "muted")
@@ -78,7 +78,7 @@ describe("_DomainMasteryGrid", () => {
 
     it("opens the topic the reader chose", () => {
         const open = vi.fn()
-        render(<_DomainMasteryGrid state="ready" props={{ domains }} on={{ open }} />)
+        render(<DomainMasteryGridBase state="ready" props={{ domains }} on={{ open }} />)
 
         fireEvent.click(screen.getByRole("button", { name: "Graphs, 0 of 8 solved" }))
         expect(open).toHaveBeenCalledWith("graphs")
@@ -88,7 +88,7 @@ describe("_DomainMasteryGrid", () => {
     })
 
     it("keeps a card pressable when the page named no opener for it", () => {
-        render(<_DomainMasteryGrid state="ready" props={{ domains }} on={{}} />)
+        render(<DomainMasteryGridBase state="ready" props={{ domains }} on={{}} />)
         const card = screen.getByRole("button", { name: "Arrays, 9 of 12 solved" })
         fireEvent.click(card)
         expect(card).toBeEnabled()
@@ -96,7 +96,7 @@ describe("_DomainMasteryGrid", () => {
     })
 
     it("keeps a card pressable when the page reported nothing at all", () => {
-        render(<_DomainMasteryGrid state="ready" props={{ domains: [domains[0]] }} />)
+        render(<DomainMasteryGridBase state="ready" props={{ domains: [domains[0]] }} />)
         const card = screen.getByRole("button", { name: "Arrays, 9 of 12 solved" })
         fireEvent.click(card)
         expect(card).toBeEnabled()
@@ -104,7 +104,7 @@ describe("_DomainMasteryGrid", () => {
     })
 
     it("empties the field rather than inventing topics when the catalog sent none", () => {
-        render(<_DomainMasteryGrid state="ready" props={{}} />)
+        render(<DomainMasteryGridBase state="ready" props={{}} />)
         const grid = document.querySelector("[data-node=\"domain-mastery-grid\"]")
         expect(grid).toBeInTheDocument()
         expect(grid?.children).toHaveLength(0)
@@ -112,7 +112,7 @@ describe("_DomainMasteryGrid", () => {
     })
 
     it("still names every topic when the personal figures failed, and claims no standing", () => {
-        render(<_DomainMasteryGrid state="progress-failed" props={{ domains }} />)
+        render(<DomainMasteryGridBase state="progress-failed" props={{ domains }} />)
 
         expect(screen.getByText("Arrays")).toBeInTheDocument()
         expect(screen.getByText("Geometry")).toBeInTheDocument()
@@ -122,7 +122,7 @@ describe("_DomainMasteryGrid", () => {
     it("asks a signed-out reader to sign in rather than drawing an empty field", () => {
         const recover = vi.fn()
         render(
-            <_DomainMasteryGrid
+            <DomainMasteryGridBase
                 state="guest"
                 props={{
                     noticeMessage: "Sign in to see your topics",
@@ -142,7 +142,7 @@ describe("_DomainMasteryGrid", () => {
 
     it("offers a failed catalog a retry, and keeps it inert without a handler", () => {
         render(
-            <_DomainMasteryGrid
+            <DomainMasteryGridBase
                 state="catalog-failed"
                 props={{ noticeMessage: "The topics could not be loaded", noticeActionLabel: "Try again" }}
             />,
@@ -156,7 +156,7 @@ describe("_DomainMasteryGrid", () => {
     })
 
     it("settles an empty catalog with the practice mark and no words to show", () => {
-        render(<_DomainMasteryGrid state="empty" props={{}} />)
+        render(<DomainMasteryGridBase state="empty" props={{}} />)
 
         expect(glyphOf(noticeMark())).toBe(glyphNamed("practice"))
         expect(screen.queryByRole("button")).toBeNull()

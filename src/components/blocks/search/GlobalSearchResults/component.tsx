@@ -55,7 +55,7 @@ const ResultsListView = ({ props, on, isLoading = false }: LeafProps<GlobalSearc
 const ResultsList = defineContractComponent("global-search-surface-list", ResultsListView)
 
 /** Draw a label-less nested list surface, or replace the whole middle region with EmptyNotice. */
-export const _GlobalSearchResults = (input: GlobalSearchResultsProps) => (
+export const GlobalSearchResultsBase = (input: GlobalSearchResultsProps) => (
     <Tree
         contract="global-search-result-region"
         render={defineContractComponent("global-search-result-region", {

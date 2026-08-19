@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryCoursesCheckoutPreviewSwr, useQueryMyCartSwr } from "@/hooks"
 import { useSessionToken } from "@/hooks/auth/useSessionToken"
-import { _CartDrawer, type CartDrawerState } from "./component"
+import { CartDrawerBase, type CartDrawerState } from "./component"
 import { type CartLineData } from "@/components/blocks/commerce/CartLine/component"
 
 /**
@@ -85,7 +85,7 @@ export const CartDrawer = ({ isOpen, onDismiss }: CartDrawerProps) => {
                     : lines.length === 0 ? "empty" : "ready"
 
     return (
-        <_CartDrawer
+        <CartDrawerBase
             state={state}
             props={{
                 labels: {

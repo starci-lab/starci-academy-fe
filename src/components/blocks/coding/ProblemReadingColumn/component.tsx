@@ -66,7 +66,7 @@ export type ProblemReadingColumnActions = {
     readonly selectTab?: (tab: string) => void
 }
 
-/** Props for {@link _ProblemReadingColumn}. */
+/** Props for {@link ProblemReadingColumnBase}. */
 export type ProblemReadingColumnProps =
     BlockProps<ProblemReadingColumnState, ProblemReadingColumnData> & {
         readonly on?: ProblemReadingColumnActions
@@ -77,7 +77,7 @@ export type ProblemReadingColumnProps =
  *
  * @param input - {@link ProblemReadingColumnProps}
  */
-export const _ProblemReadingColumn = (input: ProblemReadingColumnProps) => {
+export const ProblemReadingColumnBase = (input: ProblemReadingColumnProps) => {
     const isLoading = input.state === "pending"
     const labels = input.props.tabLabels
     const tags = input.props.tags ?? []

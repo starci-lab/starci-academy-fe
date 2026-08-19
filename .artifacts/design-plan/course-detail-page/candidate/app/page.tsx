@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useTheme } from "next-themes"
 import fixture from "~candidate/fixtures/course-detail.json"
 import {
-    _CourseDetailPage,
+    CourseDetailPageBase,
     type CourseDetailPageProps,
 } from "~candidate/components/pages/CourseDetailPage/component"
 
@@ -163,7 +163,7 @@ const StateMatrix = () => {
                     data-theme={theme}
                     className="rounded-2xl border border-separator p-4"
                 >
-                    <_CourseDetailPage {...scenario.build()} />
+                    <CourseDetailPageBase {...scenario.build()} />
                 </div>
             </div>
         </div>

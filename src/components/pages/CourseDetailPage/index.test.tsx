@@ -98,7 +98,7 @@ vi.mock("./component", () => {
     const intents = ["act", "trial", "addToCart", "openPriceDetail", "navigateHome", "navigateCourses", "retry"]
     const sections = ["overview", "curriculum", "reviews", "faq"]
     return {
-        _CourseDetailPage: (input: ConnectedProps) => (
+        CourseDetailPageBase: (input: ConnectedProps) => (
             <>
                 <output data-testid="state">{input.state}</output>
                 <output data-testid="resolved">{JSON.stringify(input.props ?? {})}</output>

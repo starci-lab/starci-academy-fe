@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { cleanup, render, screen } from "@testing-library/react"
-import { _DailyQuest } from "./component"
+import { DailyQuestBase } from "./component"
 
 /**
  * What these tests guard - that the reward is offered exactly once.
@@ -23,10 +23,10 @@ const tasks = [
 
 afterEach(cleanup)
 
-describe("_DailyQuest", () => {
+describe("DailyQuestBase", () => {
     it("says what the day is worth while it is unfinished, and offers nothing to press", () => {
         const { container } = render(
-            <_DailyQuest
+            <DailyQuestBase
                 state="open"
                 props={{ label: "Today's quest", tasks, rewardLine: "Complete every task to earn 20 coins" }}
             />,
@@ -39,7 +39,7 @@ describe("_DailyQuest", () => {
     it("offers the reward once the day is done", () => {
         const claim = vi.fn()
         render(
-            <_DailyQuest
+            <DailyQuestBase
                 state="claimable"
                 props={{ label: "Today's quest", tasks, rewardLine: "unused", claimLabel: "Claim 20 coins" }}
                 on={{ claim }}
@@ -50,7 +50,7 @@ describe("_DailyQuest", () => {
 
     it("stops offering it once it has been taken", () => {
         const { container } = render(
-            <_DailyQuest
+            <DailyQuestBase
                 state="claimed"
                 props={{ label: "Today's quest", tasks, rewardLine: "unused", claimedLine: "Reward claimed" }}
                 on={{ claim: () => {} }}
@@ -62,7 +62,7 @@ describe("_DailyQuest", () => {
 
     it("draws one row per task", () => {
         const { container } = render(
-            <_DailyQuest state="open" props={{ label: "Today's quest", tasks, rewardLine: "x" }} />,
+            <DailyQuestBase state="open" props={{ label: "Today's quest", tasks, rewardLine: "x" }} />,
         )
         expect(container.querySelectorAll("[data-node=\"task-mark-title-fact-row\"]")).toHaveLength(2)
         const surface = container.querySelector("[data-component=\"SurfaceListCardSurface\"]")
@@ -97,7 +97,7 @@ describe("_DailyQuest", () => {
             { id: "passChallenge", title: "Pass a challenge", percent: 0, percentText: "0/1" },
         ]
         const { container } = render(
-            <_DailyQuest state="open" props={{ label: "Today's quest", tasks: completedTasks, rewardLine: "x" }} />,
+            <DailyQuestBase state="open" props={{ label: "Today's quest", tasks: completedTasks, rewardLine: "x" }} />,
         )
         expect(container.querySelectorAll("svg.text-success-soft-foreground")).toHaveLength(1)
         const pending = container.querySelector(
@@ -109,7 +109,7 @@ describe("_DailyQuest", () => {
     })
 
     it("keeps the card its own size while the day is still on its way", () => {
-        const { container } = render(<_DailyQuest state="pending" props={{ label: "Today's quest" }} />)
+        const { container } = render(<DailyQuestBase state="pending" props={{ label: "Today's quest" }} />)
         // Resting rows stand in for real ones so the card does not jump when they land.
         expect(container.querySelectorAll("[data-node=\"task-mark-title-fact-row\"]")).toHaveLength(5)
         const restingTitles = container.querySelectorAll(
@@ -127,7 +127,7 @@ describe("_DailyQuest", () => {
     it("offers a way back when the day could not be read", () => {
         const retry = vi.fn()
         render(
-            <_DailyQuest
+            <DailyQuestBase
                 state="failed"
                 props={{ label: "Today's quest", message: "Could not load", retryLabel: "Retry" }}
                 on={{ retry }}

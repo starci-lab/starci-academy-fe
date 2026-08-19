@@ -19,7 +19,7 @@ import {
     type ContentLanguageTab,
 } from "@/components/blocks/learn/ContentTabRow/component"
 import {
-    _ContentDiscussionPanel,
+    ContentDiscussionPanelBase,
     type ContentDiscussionPanelData,
     type ContentDiscussionPanelState,
 } from "@/components/blocks/learn/ContentDiscussionPanel/component"
@@ -209,7 +209,7 @@ export type CourseLearnContentPageActions = {
     readonly goModule?: () => void
 }
 
-/** Props for {@link _CourseLearnContentPage}. */
+/** Props for {@link CourseLearnContentPageBase}. */
 export type CourseLearnContentPageProps = {
     readonly state: CourseLearnContentPageState
     readonly props: CourseLearnContentPageData
@@ -255,7 +255,7 @@ const ContentNextSteps = defineContractComponent("next-action-list", ContentNext
  *
  * @param input - {@link CourseLearnContentPageProps}
  */
-export const _CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
+export const CourseLearnContentPageBase = (input: CourseLearnContentPageProps) => {
     const labels = input.props.labels
     const reactions = input.props.reactions
     const nextSteps = input.props.nextSteps ?? []
@@ -352,7 +352,7 @@ export const _CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
         }),
         ...(discussion === undefined ? {} : {
             discussion: defineContractProjection("content-discussion-panel", () => (
-                <_ContentDiscussionPanel
+                <ContentDiscussionPanelBase
                     state={discussion.state}
                     props={discussion.props}
                     on={{

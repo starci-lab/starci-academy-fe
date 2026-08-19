@@ -50,7 +50,7 @@ type DrawerStub = {
 }
 
 vi.mock("./component", () => ({
-    _CartDrawer: (input: DrawerStub) => (
+    CartDrawerBase: (input: DrawerStub) => (
         <>
             <output data-testid="state">{input.state}</output>
             <output data-testid="props">{JSON.stringify(input.props)}</output>

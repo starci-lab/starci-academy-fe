@@ -1,6 +1,6 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { _AccountMenu } from "./component"
+import { AccountMenuBase } from "./component"
 
 class TestResizeObserver implements ResizeObserver {
     observe = () => undefined
@@ -12,12 +12,12 @@ globalThis.ResizeObserver = TestResizeObserver
 
 afterEach(cleanup)
 
-describe("_AccountMenu", () => {
+describe("AccountMenuBase", () => {
     it("keeps the guest summary outside the actionable ListBox", async () => {
         const signIn = vi.fn()
         const signUp = vi.fn()
         render(
-            <_AccountMenu
+            <AccountMenuBase
                 state="guest"
                 props={{
                     label: "Account",
@@ -45,7 +45,7 @@ describe("_AccountMenu", () => {
         const navigate = vi.fn()
         const signOut = vi.fn()
         render(
-            <_AccountMenu
+            <AccountMenuBase
                 state="signedIn"
                 props={{
                     label: "Account",

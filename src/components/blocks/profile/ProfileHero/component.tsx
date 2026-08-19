@@ -45,7 +45,7 @@ export type ProfileHeroProps = {
 }
 
 /** Draw the complete identity rail without resolving profile behavior. */
-export const _ProfileHero = (input: ProfileHeroProps) => {
+export const ProfileHeroBase = (input: ProfileHeroProps) => {
     const isLoading = input.state === "pending"
     const factValues = [input.props.location, input.props.workMode].filter((value): value is string => Boolean(value))
     const websiteUrl = input.props.websiteUrl

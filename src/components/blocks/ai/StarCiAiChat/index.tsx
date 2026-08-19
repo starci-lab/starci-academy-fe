@@ -23,7 +23,7 @@ import {
     parseContentAiQuestion,
 } from "@/modules/ai/content-ai-selection-context"
 import {
-    _StarCiAiChat,
+    StarCiAiChatBase,
     STARCI_AI_CHAT_STATES,
     type StarCiAiChatState,
     type StarCiAiMode,
@@ -33,6 +33,40 @@ import {
 type StarCiAiAttempt = {
     readonly userId: string
     readonly assistantId: string
+}
+
+type StarCiAiGeneralStateInput = {
+    readonly hasAnchor: boolean
+    readonly isStreaming: boolean
+    readonly sessionsLoading: boolean
+    readonly sessionsFailed: boolean
+    readonly hasActiveSession: boolean
+    readonly streamState: string
+    readonly quotaLoading: boolean
+    readonly remainingWeek?: number
+}
+
+const resolveHistoryState = (isLoading: boolean, hasError: boolean, sessionCount: number): StarCiAiChatState => {
+    if (isLoading) return "historyPending"
+    if (hasError) return "historyFailed"
+    return sessionCount === 0 ? "searchEmpty" : "historyReady"
+}
+
+const resolveGeneralState = (input: StarCiAiGeneralStateInput): StarCiAiChatState => {
+    if (!input.hasAnchor || input.sessionsLoading) return "sessionsPending"
+    if (input.isStreaming) return "streaming"
+    if (input.sessionsFailed) return "sessionsFailed"
+    if (!input.hasActiveSession) return "noSession"
+    if (input.streamState === "reconnecting" || input.streamState === "connecting" || input.streamState === "idle") return "reconnecting"
+    if (input.streamState === "failed") return "offline"
+    if (input.quotaLoading) return "quotaPending"
+    return input.remainingWeek === 0 ? "zeroPaidCredits" : "ready"
+}
+
+const resolveStreamErrorState = (error: string): StarCiAiChatState => {
+    if (error === "ABORTED") return "aborted"
+    if (error === "SOCKET_DISCONNECTED") return "reconnecting"
+    return /quota|credit/iu.test(error) ? "quotaRejected" : "streamFailed"
 }
 
 /** Resolve persisted conversations, advisory credits and one authenticated stream into the pure chat. */
@@ -101,26 +135,17 @@ export const StarCiAiChat = () => {
     const turns = [...persistedTurns, ...localTurns]
     const historyMode = mode === "history"
     const state: StarCiAiChatState = historyMode
-        ? sessions.isLoading ? "historyPending" : sessions.error !== undefined ? "historyFailed" : (sessions.data?.sessions.length ?? 0) === 0 ? "searchEmpty" : "historyReady"
-        : terminalState ?? (anchorRequest === null
-            ? "sessionsPending"
-            : stream.isStreaming
-                ? "streaming"
-                : sessions.isLoading
-                    ? "sessionsPending"
-                    : sessions.error !== undefined
-                        ? "sessionsFailed"
-                        : activeSessionId === undefined
-                            ? "noSession"
-                            : stream.state === "reconnecting" || stream.state === "connecting"
-                                ? "reconnecting"
-                                : stream.state === "failed"
-                                    ? "offline"
-                                    : stream.state === "idle"
-                                        ? "reconnecting"
-                                        : quota.isLoading
-                                            ? "quotaPending"
-                                            : quota.data?.credit.remainingWeek === 0 ? "zeroPaidCredits" : "ready")
+        ? resolveHistoryState(sessions.isLoading, sessions.error !== undefined, sessions.data?.sessions.length ?? 0)
+        : terminalState ?? resolveGeneralState({
+            hasAnchor: anchorRequest !== null,
+            isStreaming: stream.isStreaming,
+            sessionsLoading: sessions.isLoading,
+            sessionsFailed: sessions.error !== undefined,
+            hasActiveSession: activeSessionId !== undefined,
+            streamState: stream.state,
+            quotaLoading: quota.isLoading,
+            remainingWeek: quota.data?.credit.remainingWeek,
+        })
 
     const refreshSessions = async () => {
         await sessions.mutate()
@@ -204,11 +229,7 @@ export const StarCiAiChat = () => {
             onDelta: (delta) => setLocalTurns((current) => current.map((turn) => turn.id === assistantId ? { ...turn, body: `${turn.body}${delta}` } : turn)),
             onDone: (error) => {
                 if (error !== undefined) {
-                    const next = error === "ABORTED"
-                        ? "aborted"
-                        : error === "SOCKET_DISCONNECTED"
-                            ? "reconnecting"
-                            : /quota|credit/iu.test(error) ? "quotaRejected" : "streamFailed"
+                    const next = resolveStreamErrorState(error)
                     failedAttempt.current = { userId: userTurn.id, assistantId }
                     if (next === "quotaRejected") {
                         setLocalTurns((current) => current.filter((turn) => turn.id !== userTurn.id && turn.id !== assistantId))
@@ -247,9 +268,15 @@ export const StarCiAiChat = () => {
         confirmDelete: t("actions.confirmDelete"), cancel: t("actions.cancel"), partial: t("partial"),
         states: Object.fromEntries(STARCI_AI_CHAT_STATES.map((name) => [name, t(`states.${name}`)])) as Readonly<Record<StarCiAiChatState, string>>,
     }
+    let quotaLabel: string | undefined
+    if (!quota.isLoading) {
+        quotaLabel = quota.data === null || quota.data === undefined
+            ? t("quota.unavailable")
+            : t("quota.remaining", { remaining: quota.data.credit.remainingWeek })
+    }
 
     return (
-        <_StarCiAiChat
+        <StarCiAiChatBase
             state={state}
             props={{
                 labels,
@@ -265,11 +292,7 @@ export const StarCiAiChat = () => {
                 selection: owner.codeContext,
                 draft,
                 draftKey,
-                quotaLabel: quota.isLoading
-                    ? undefined
-                    : quota.data === null || quota.data === undefined
-                        ? t("quota.unavailable")
-                        : t("quota.remaining", { remaining: quota.data.credit.remainingWeek }),
+                quotaLabel,
             }}
             on={{
                 selectMode: setMode,

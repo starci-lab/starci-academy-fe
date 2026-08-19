@@ -28,7 +28,7 @@ export type CoursePlaygroundPageProps = {
 }
 
 /** Draw the backend-owned playground catalog without a parallel local catalog. */
-export const _CoursePlaygroundPage = (input: CoursePlaygroundPageProps) => {
+export const CoursePlaygroundPageBase = (input: CoursePlaygroundPageProps) => {
     const loading = input.state === "pending"
     const rows: ReadonlyArray<PlaygroundSummary> = loading && input.props.playgrounds.length === 0
         ? Array.from({ length: 4 }, (_, index) => ({ id: `pending-${index}`, slug: `pending-${index}`, title: "", icon: null, stepCount: 0 }))

@@ -6,7 +6,7 @@ import { useRouter } from "@/i18n/navigation"
 import { useQueryCodingDomainSummarySwr } from "@/hooks/swr/useQueryCodingDomainSummarySwr"
 import { useQueryMyCodingProgressSwr } from "@/hooks/swr/useQueryMyCodingProgressSwr"
 import { useSessionToken } from "@/hooks/auth/useSessionToken"
-import { _CodingPracticeHubPage } from "./component"
+import { CodingPracticeHubPageBase } from "./component"
 
 /**
  * The practice hub, connected.
@@ -63,35 +63,20 @@ export const CodingPracticeHubPage = () => {
     const pending = summary.data === undefined && !catalogFailed
     const progressFailed = progress.error !== undefined || progress.data === null
 
-    const state = pending
-        ? "pending" as const
-        : token === undefined
-            ? "guest" as const
-            : catalogFailed
-                ? "catalog-failed" as const
-                : domains.length === 0
-                    ? "empty" as const
-                    : progressFailed
-                        ? "progress-failed" as const
-                        : "ready" as const
+    let state: "pending" | "guest" | "catalog-failed" | "empty" | "progress-failed" | "ready" = "ready"
+    if (pending) state = "pending"
+    else if (token === undefined) state = "guest"
+    else if (catalogFailed) state = "catalog-failed"
+    else if (domains.length === 0) state = "empty"
+    else if (progressFailed) state = "progress-failed"
 
-    const notice = state === "guest"
-        ? {
-            noticeMessage: t("guestMessage"),
-            noticeDescription: t("guestDetail"),
-            noticeActionLabel: t("guestAction"),
-        }
-        : state === "catalog-failed"
-            ? {
-                noticeMessage: t("catalogFailed"),
-                noticeActionLabel: t("retry"),
-            }
-            : state === "empty"
-                ? { noticeMessage: t("noDomains") }
-                : {}
+    let notice: { noticeMessage?: string; noticeDescription?: string; noticeActionLabel?: string } = {}
+    if (state === "guest") notice = { noticeMessage: t("guestMessage"), noticeDescription: t("guestDetail"), noticeActionLabel: t("guestAction") }
+    else if (state === "catalog-failed") notice = { noticeMessage: t("catalogFailed"), noticeActionLabel: t("retry") }
+    else if (state === "empty") notice = { noticeMessage: t("noDomains") }
 
     return (
-        <_CodingPracticeHubPage
+        <CodingPracticeHubPageBase
             session={token === undefined ? "guest" : "signed-in"}
             props={{
                 labels: {

@@ -8,7 +8,7 @@ import { mutationSubmitCodingSolution } from "@/modules/api/graphql/mutations/mu
 import { type EditorTelemetry } from "@/components/leaves/CodeEditor"
 import { type JudgeVerdictState } from "@/components/blocks/coding/JudgeStatusStrip/component"
 import { type ProblemReadingTab } from "@/components/blocks/coding/ProblemReadingColumn/component"
-import { _CodingProblemPage } from "./component"
+import { CodingProblemPageBase } from "./component"
 
 /** Props for {@link CodingProblemPage}. */
 export interface CodingProblemPageProps {
@@ -100,7 +100,7 @@ export const CodingProblemPage = ({ slug }: CodingProblemPageProps) => {
             : t("tabEmpty")
 
     return (
-        <_CodingProblemPage
+        <CodingProblemPageBase
             props={{
                 reading: {
                     state: problem.data === undefined ? "pending" : "ready",

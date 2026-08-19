@@ -45,7 +45,7 @@ export type CourseMockInterviewSetupPageProps = {
 }
 
 /** Draw the setup, resumable, loading and failed green-room states. */
-export const _CourseMockInterviewSetupPage = (input: CourseMockInterviewSetupPageProps) => {
+export const CourseMockInterviewSetupPageBase = (input: CourseMockInterviewSetupPageProps) => {
     const loading = input.state === "pending"
     const starting = input.state === "starting"
     const level = input.props.levels.map((choice) => defineLeafComponent("button", {}, () => (

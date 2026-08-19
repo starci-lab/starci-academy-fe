@@ -1,11 +1,11 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _CoursePersonalProjectResultPage } from "./component"
+import { CoursePersonalProjectResultPageBase } from "./component"
 
-describe("_CoursePersonalProjectResultPage", () => {
+describe("CoursePersonalProjectResultPageBase", () => {
     it("keeps attempt history before latest structured feedback", () => {
         const { container } = render(
-            <_CoursePersonalProjectResultPage
+            <CoursePersonalProjectResultPageBase
                 state="ready"
                 props={{
                     title: "Build the API client",
@@ -31,7 +31,7 @@ describe("_CoursePersonalProjectResultPage", () => {
 
     it("renders an honest empty state when no graded attempt exists", () => {
         render(
-            <_CoursePersonalProjectResultPage
+            <CoursePersonalProjectResultPageBase
                 state="empty"
                 props={{
                     title: "Task result",

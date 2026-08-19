@@ -6,7 +6,7 @@ import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
 import { useQueryHeadhuntingCompanySwr } from "@/hooks/swr/useQueryHeadhuntingCompanySwr"
 import { useQueryConsultantsSwr } from "@/hooks/swr/useQueryConsultantsSwr"
 import type { Consultant } from "@/modules/api/graphql/queries/query-consultants"
-import { _CourseHeadhuntingCompanyPage } from "./component"
+import { CourseHeadhuntingCompanyPageBase } from "./component"
 
 interface CourseHeadhuntingCompanyPageProps {
     readonly displayId: string
@@ -65,7 +65,7 @@ export const CourseHeadhuntingCompanyPage = ({ displayId, companyId }: CourseHea
     }))
 
     return (
-        <_CourseHeadhuntingCompanyPage
+        <CourseHeadhuntingCompanyPageBase
             state={state}
             props={{
                 title: company.data?.title ?? copy.fallback,

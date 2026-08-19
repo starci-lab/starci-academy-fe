@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { ReactionType } from "@/modules/api/graphql/queries/types/reactions"
-import { _CourseLearnContentPage, type CourseLearnContentPageData } from "./component"
+import { CourseLearnContentPageBase, type CourseLearnContentPageData } from "./component"
 
 class TestResizeObserver implements ResizeObserver {
     observe = () => undefined
@@ -46,7 +46,7 @@ const discussion = {
     },
 }
 
-describe("_CourseLearnContentPage", () => {
+describe("CourseLearnContentPageBase", () => {
     it("shows one selected mobile panel and keeps all three panels on desktop", () => {
         const props: CourseLearnContentPageData = {
             labels,
@@ -56,7 +56,7 @@ describe("_CourseLearnContentPage", () => {
             outline: [{ id: "heading-1", label: "Heading" }],
         }
         const { container, rerender } = render(
-            <_CourseLearnContentPage state="ready" props={props} />,
+            <CourseLearnContentPageBase state="ready" props={props} />,
         )
 
         expect(container.querySelector("[data-node=content-map-panel]")).not.toBeNull()
@@ -70,7 +70,7 @@ describe("_CourseLearnContentPage", () => {
         ] as const
         for (const [mobileView, node] of cases) {
             rerender(
-                <_CourseLearnContentPage state="ready" props={{ ...props, mobileView }} />,
+                <CourseLearnContentPageBase state="ready" props={{ ...props, mobileView }} />,
             )
             expect(container.firstElementChild?.getAttribute("data-node")).toBe(node)
             expect(container.querySelectorAll("[data-node=content-map-panel]")).toHaveLength(mobileView === "contents" ? 1 : 0)
@@ -82,7 +82,7 @@ describe("_CourseLearnContentPage", () => {
     it("opens a module-map content through the page-owned action", () => {
         const openContent = vi.fn()
         render(
-            <_CourseLearnContentPage
+            <CourseLearnContentPageBase
                 state="ready"
                 props={{
                     labels,
@@ -110,7 +110,7 @@ describe("_CourseLearnContentPage", () => {
         const goCourse = vi.fn()
         const goModule = vi.fn()
         render(
-            <_CourseLearnContentPage
+            <CourseLearnContentPageBase
                 state="ready"
                 props={{ labels, title: "Current lesson", body: "Lesson body" }}
                 on={{ goCourse, goModule }}
@@ -126,7 +126,7 @@ describe("_CourseLearnContentPage", () => {
     it("offers the failed reader recovery action", () => {
         const act = vi.fn()
         render(
-            <_CourseLearnContentPage
+            <CourseLearnContentPageBase
                 state="failed"
                 props={{
                     labels,
@@ -144,7 +144,7 @@ describe("_CourseLearnContentPage", () => {
     it("keeps the visible discussion inside the unlocked lesson footer", () => {
         const submitDiscussion = vi.fn()
         const { container } = render(
-            <_CourseLearnContentPage
+            <CourseLearnContentPageBase
                 state="ready"
                 props={{ labels, title: "Current lesson", body: "Lesson body", discussion }}
                 on={{ submitDiscussion }}
@@ -161,7 +161,7 @@ describe("_CourseLearnContentPage", () => {
     it("switches the lesson body to the approved Source face", () => {
         const selectSource = vi.fn()
         const { container } = render(
-            <_CourseLearnContentPage
+            <CourseLearnContentPageBase
                 state="ready"
                 props={{
                     labels,
@@ -205,7 +205,7 @@ describe("_CourseLearnContentPage", () => {
     it("joins the paywall to the preview inside the same paper and drops the whole footer", () => {
         const act = vi.fn()
         const { container } = render(
-            <_CourseLearnContentPage
+            <CourseLearnContentPageBase
                 state="locked"
                 props={{
                     labels,
@@ -233,7 +233,7 @@ describe("_CourseLearnContentPage", () => {
     it("keeps the paywall's way in even when no lock sentence was resolved", () => {
         const act = vi.fn()
         const { container } = render(
-            <_CourseLearnContentPage
+            <CourseLearnContentPageBase
                 state="locked"
                 props={{ labels, title: "Paid lesson", body: "The opening paragraph", noticeActionLabel: "Enrol" }}
                 on={{ act }}
@@ -249,7 +249,7 @@ describe("_CourseLearnContentPage", () => {
         const selectReaction = vi.fn()
         const changePage = vi.fn()
         const { container } = render(
-            <_CourseLearnContentPage
+            <CourseLearnContentPageBase
                 state="ready"
                 props={{
                     labels,
@@ -287,7 +287,7 @@ describe("_CourseLearnContentPage", () => {
 
     it("measures course progress in the map panel and closes the modules the reader has not opened", () => {
         const { container } = render(
-            <_CourseLearnContentPage
+            <CourseLearnContentPageBase
                 state="ready"
                 props={{
                     labels,
@@ -311,7 +311,7 @@ describe("_CourseLearnContentPage", () => {
 
     it("falls back to a wordless failure notice when the reader was given no sentence", () => {
         const { container } = render(
-            <_CourseLearnContentPage state="failed" props={{ labels, outline: [{ id: "heading-1", label: "Heading" }] }} />,
+            <CourseLearnContentPageBase state="failed" props={{ labels, outline: [{ id: "heading-1", label: "Heading" }] }} />,
         )
 
         expect(container.querySelector("[data-node=centred-empty-notice]")).not.toBeNull()
@@ -322,7 +322,7 @@ describe("_CourseLearnContentPage", () => {
     it("opens the bar for a single face that carries more than one example language", () => {
         const selectLanguage = vi.fn()
         const { container } = render(
-            <_CourseLearnContentPage
+            <CourseLearnContentPageBase
                 state="ready"
                 props={{
                     labels,

@@ -14,7 +14,7 @@ export type CourseLearnModulePageProps = {
 }
 
 /** Draw one selected module and its authored content run. */
-export const _CourseLearnModulePage = (input: CourseLearnModulePageProps) => (
+export const CourseLearnModulePageBase = (input: CourseLearnModulePageProps) => (
     <Tree contract="course-learn-module-page" render={defineContractComponent("course-learn-module-page", {
         title: defineLeafComponent("heading", {}, () => (
             <Heading props={{ content: input.title, level: 1 }} isLoading={input.state === "pending"} />

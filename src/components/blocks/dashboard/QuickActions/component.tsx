@@ -21,7 +21,7 @@ export type QuickActionsProps = {
 }
 
 /** Render the quick-action rail from resolved copy and destinations. */
-export const _QuickActions = (input: QuickActionsProps) => (
+export const QuickActionsBase = (input: QuickActionsProps) => (
     <SurfaceCard
         props={{ label: input.props.label, isFrameless: true }}
         contract="stacked-peer-controls"

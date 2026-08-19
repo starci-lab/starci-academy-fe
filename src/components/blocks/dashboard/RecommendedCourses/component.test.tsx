@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
-import { _RecommendedCourses } from "./component"
+import { RecommendedCoursesBase } from "./component"
 
 /**
  * What these tests guard - the pure half's four situations, driven by props alone.
@@ -26,15 +26,15 @@ const row = {
 
 afterEach(cleanup)
 
-describe("_RecommendedCourses", () => {
+describe("RecommendedCoursesBase", () => {
     it("draws nothing when the situation is settled absence", () => {
-        const { container } = render(<_RecommendedCourses state="hidden" props={{ ...frame, rows: [] }} />)
+        const { container } = render(<RecommendedCoursesBase state="hidden" props={{ ...frame, rows: [] }} />)
         expect(container).toBeEmptyDOMElement()
     })
 
     it("says what went wrong and offers the request again", () => {
         const retry = vi.fn()
-        render(<_RecommendedCourses state="failed" props={{ ...frame, rows: [] }} on={{ retry }} />)
+        render(<RecommendedCoursesBase state="failed" props={{ ...frame, rows: [] }} on={{ retry }} />)
         expect(screen.getByText("Could not load suggestions")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Retry" }))
         expect(retry).toHaveBeenCalledOnce()
@@ -42,7 +42,7 @@ describe("_RecommendedCourses", () => {
 
     it("still draws a way out when the caller resolved no failure sentence", () => {
         const retry = vi.fn()
-        render(<_RecommendedCourses
+        render(<RecommendedCoursesBase
             state="failed"
             props={{ label: "Recommended", rows: [], retryLabel: "Retry" }}
             on={{ retry }}
@@ -52,14 +52,14 @@ describe("_RecommendedCourses", () => {
     })
 
     it("holds three resting rows so the card keeps its height", () => {
-        const { container } = render(<_RecommendedCourses state="pending" props={{ ...frame, rows: [] }} />)
+        const { container } = render(<RecommendedCoursesBase state="pending" props={{ ...frame, rows: [] }} />)
         expect(container.querySelectorAll("[data-node=\"recommended-course-row\"]")).toHaveLength(3)
     })
 
     it("reports opening a course and asking about its price as two different journeys", () => {
         const open = vi.fn()
         const openPriceDetail = vi.fn()
-        render(<_RecommendedCourses
+        render(<RecommendedCoursesBase
             state="ready"
             props={{ ...frame, rows: [row] }}
             on={{ "open:rust-basics": open, "priceDetail:rust-basics": openPriceDetail }}

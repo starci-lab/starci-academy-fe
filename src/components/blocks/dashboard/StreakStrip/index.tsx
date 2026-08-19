@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryMyWeeklyStatsSwr } from "@/hooks"
 import { type MyWeeklyStatsDay } from "@/modules/api/graphql/queries/types/my-weekly-stats"
-import { _StreakStrip } from "./component"
+import { StreakStripBase } from "./component"
 import type { DayCellData } from "@/components/leaves/DayCell"
 
 /**
@@ -81,7 +81,7 @@ export const StreakStrip = () => {
     // shimmer for as long as the backend was unreachable.
     if (weekly.error !== undefined && weekly.error !== null) {
         return (
-            <_StreakStrip
+            <StreakStripBase
                 state="failed"
                 props={{ label, message: t("failed"), retryLabel: t("retry") }}
                 on={{ retry: () => void weekly.mutate() }}
@@ -92,7 +92,7 @@ export const StreakStrip = () => {
     const onLearn = () => router.push("/courses")
     if (stats === undefined) {
         return (
-            <_StreakStrip
+            <StreakStripBase
                 state="pending"
                 props={{ label, message: t("empty"), actionLabel: t("action") }}
                 on={{ learn: onLearn }}
@@ -104,7 +104,7 @@ export const StreakStrip = () => {
     const streak = stats?.streak ?? 0
 
     return (
-        <_StreakStrip
+        <StreakStripBase
             state="ready"
             props={{
                 label,

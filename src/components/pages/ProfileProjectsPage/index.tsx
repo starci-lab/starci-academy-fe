@@ -5,7 +5,7 @@ import { useRouter } from "@/i18n/navigation"
 import { useQueryProfileEvidenceSwr } from "@/hooks/swr/useQueryProfileEvidenceSwr"
 import { useQueryUserProfileSwr } from "@/hooks/swr/useQueryUserProfileSwr"
 import type { ProfileCapstone, ProfilePinnedProject } from "@/modules/api/graphql/queries/types/profile-evidence"
-import { _ProfileProjectsPage, type EvidenceState } from "./component"
+import { ProfileProjectsPageBase, type EvidenceState } from "./component"
 
 /** The three things this page reads off any evidence query, whatever it fetched. */
 type EvidenceQuery<T> = {
@@ -27,7 +27,7 @@ export const ProfileProjectsPage = () => {
     const profile = useQueryUserProfileSwr(username)
     const pinned = useQueryProfileEvidenceSwr<ReadonlyArray<ProfilePinnedProject>>("pinned-projects", profile.data?.id)
     const capstones = useQueryProfileEvidenceSwr<ReadonlyArray<ProfileCapstone>>("capstones", profile.data?.id)
-    return <_ProfileProjectsPage pinned={stateOf(pinned, profile.isLoading)} capstones={stateOf(capstones, profile.isLoading)} on={{
+    return <ProfileProjectsPageBase pinned={stateOf(pinned, profile.isLoading)} capstones={stateOf(capstones, profile.isLoading)} on={{
         openPinned: (url) => window.open(url, "_blank", "noopener,noreferrer"),
         openCapstone: (id) => router.push(`/profile/${username}/projects/${id}`),
     }} />

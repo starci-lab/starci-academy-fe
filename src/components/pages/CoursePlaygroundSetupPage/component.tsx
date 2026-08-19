@@ -35,7 +35,7 @@ export type CoursePlaygroundSetupPageProps = {
 }
 
 /** Draw setup and pairing as states of one server-created playground session. */
-export const _CoursePlaygroundSetupPage = (input: CoursePlaygroundSetupPageProps) => {
+export const CoursePlaygroundSetupPageBase = (input: CoursePlaygroundSetupPageProps) => {
     const loading = input.state === "loading"
     const failed = input.state === "failed"
     const paired = input.state === "paired" || input.state === "ready"

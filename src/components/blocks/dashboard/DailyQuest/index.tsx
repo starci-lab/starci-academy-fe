@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl"
 import { useQueryMyDailyQuestSwr } from "@/hooks"
 import { type MyDailyQuestTask } from "@/modules/api/graphql/queries/types/my-daily-quest"
-import { _DailyQuest } from "./component"
+import { DailyQuestBase } from "./component"
 import type { LabelledProgressRowData } from "@/components/composites/LabelledProgressRow"
 
 /**
@@ -50,7 +50,7 @@ export const DailyQuest = () => {
 
     if (quest.error !== undefined && quest.error !== null) {
         return (
-            <_DailyQuest
+            <DailyQuestBase
                 state="failed"
                 props={{ label, message: t("failed"), retryLabel: t("retry") }}
                 on={{ retry }}
@@ -60,10 +60,10 @@ export const DailyQuest = () => {
 
     const data = quest.data
     if (data === undefined) {
-        return <_DailyQuest state="pending" props={{ label }} />
+        return <DailyQuestBase state="pending" props={{ label }} />
     }
     if (data === null || data.tasks.length === 0) {
-        return <_DailyQuest state="empty" props={{ label, message: t("empty") }} />
+        return <DailyQuestBase state="empty" props={{ label, message: t("empty") }} />
     }
 
     const body = {
@@ -72,12 +72,12 @@ export const DailyQuest = () => {
     }
 
     if (data.claimed) {
-        return <_DailyQuest state="claimed" props={{ label, ...body, claimedLine: t("claimed") }} />
+        return <DailyQuestBase state="claimed" props={{ label, ...body, claimedLine: t("claimed") }} />
     }
     if (data.allDone) {
-        return <_DailyQuest state="claimable" props={{ label, ...body, claimLabel: t("claim") }} />
+        return <DailyQuestBase state="claimable" props={{ label, ...body, claimLabel: t("claim") }} />
     }
-    return <_DailyQuest state="open" props={{ label, ...body }} />
+    return <DailyQuestBase state="open" props={{ label, ...body }} />
 }
 
 /** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */

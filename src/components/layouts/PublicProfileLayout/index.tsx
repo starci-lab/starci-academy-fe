@@ -8,7 +8,7 @@ import { useQueryMeSwr } from "@/hooks/swr/useQueryMeSwr"
 import { useQueryPublicUserCvSwr } from "@/hooks/swr/useQueryPublicUserCvSwr"
 import { useQueryUserProfileSwr } from "@/hooks/swr/useQueryUserProfileSwr"
 import type { ExtendedTab } from "@/components/leaves/ExtendedTabs"
-import { _PublicProfileLayout } from "./component"
+import { PublicProfileLayoutBase } from "./component"
 
 /** Framework-layout boundary input. */
 export type PublicProfileLayoutBoundaryProps = { readonly content: ReactNode }
@@ -56,7 +56,7 @@ export const PublicProfileLayout = ({ content }: PublicProfileLayoutBoundaryProp
 
     const Body = useCallback(() => <>{content}</>, [content])
     return (
-        <_PublicProfileLayout
+        <PublicProfileLayoutBase
             state={state}
             props={{
                 notFoundMessage: t("notFound"),

@@ -6,7 +6,7 @@ import { useRouter } from "@/i18n/navigation"
 import { useQueryContentSwr } from "~candidate/hooks/swr/useQueryContentSwr"
 import { useQueryModuleSwr } from "~candidate/hooks/swr/useQueryModuleSwr"
 import {
-    _CourseLearnContentPage,
+    CourseLearnContentPageBase,
     type ContentOutlineEntry,
     type CourseLearnContentPageState,
 } from "~candidate/components/pages/CourseLearnContentPage/component"
@@ -95,7 +95,7 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
     }
 
     return (
-        <_CourseLearnContentPage
+        <CourseLearnContentPageBase
             state={state}
             props={{
                 labels: {

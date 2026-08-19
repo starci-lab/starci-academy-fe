@@ -143,7 +143,7 @@ window.STARCI_REVIEW = {
             ],
             blockTree: [
                 "Tree routed-page-main                              �  <main>   (locked)",
-                "����� _CourseDetailPage (page)",
+                "����� CourseDetailPageBase (page)",
                 "    ����� Tree course-detail-page                    �  <div>    � � proposed",
                 "        �S���� Tree course-breadcrumb-row             �  <nav>    � � proposed",
                 "        �S���� Tree main-then-rail                    �  <div>    � � proposed",
@@ -156,14 +156,14 @@ window.STARCI_REVIEW = {
                 "        �   �   ����� Tree course-section            �  <section>",
                 "        �   �       ����� course-module-list <ol> > course-module-row <li>",
                 "        �   �           ����� CurriculumModuleRow (leaf, <details>) � � proposed",
-                "        �   ����� _CoursePricingRail (block)         � � proposed",
+                "        �   ����� CoursePricingRailBase (block)         � � proposed",
                 "        �       ����� Tree course-pricing-rail       �  <aside>  � � proposed",
                 "        �           �S���� CoverImage (leaf)          � � proposed, shared with the catalog run",
                 "        �           �S���� course-price-block > price-discount-line (locked)",
                 "        �           �S���� pricing-phase-ladder <ol> > pricing-phase-row <li>",
                 "        �           �S���� Button (locked leaf)",
                 "        �           ����� Text (locked leaf)",
-                "        ����� _CourseMobileEnrollBar (block)         � � proposed",
+                "        ����� CourseMobileEnrollBarBase (block)         � � proposed",
                 "            ����� Tree course-mobile-action-bar      �  <div>    � � proposed",
             ].join("\n"),
             contracts: [

@@ -46,7 +46,7 @@ export type CoursePrerequisiteListData = {
  * @param input - The requirements to draw.
  * @returns The ordered prerequisite list.
  */
-export const _CoursePrerequisiteList = ({
+export const CoursePrerequisiteListBase = ({
     props,
     state,
 }: BlockProps<CoursePrerequisiteListState, CoursePrerequisiteListData>) => (

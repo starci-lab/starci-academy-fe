@@ -14,11 +14,11 @@ import {
 } from "~candidate/components/contracts/props"
 import { Pagination } from "~candidate/components/leaves/Pagination"
 import {
-    _CourseCatalogCard,
+    CourseCatalogCardBase,
     type CourseCatalogCardData,
 } from "~candidate/components/blocks/CourseCatalogCard/component"
 import {
-    _EnrolledCourseCard,
+    EnrolledCourseCardBase,
     type EnrolledCourseCardData,
 } from "~candidate/components/blocks/EnrolledCourseCard/component"
 
@@ -114,7 +114,7 @@ export type CoursesCatalogPageActions = {
     readonly [key: string]: ((...args: Array<never>) => void) | undefined
 }
 
-/** Props for {@link _CoursesCatalogPage}. */
+/** Props for {@link CoursesCatalogPageBase}. */
 export type CoursesCatalogPageProps = {
     readonly state: CoursesCatalogPageState
     readonly props: CoursesCatalogPageData
@@ -129,7 +129,7 @@ const RESTING_COUNT = 3
  *
  * @param input - {@link CoursesCatalogPageProps}
  */
-export const _CoursesCatalogPage = (input: CoursesCatalogPageProps) => {
+export const CoursesCatalogPageBase = (input: CoursesCatalogPageProps) => {
     const labels = input.props.labels
     const isLoading = input.state === "pending"
     const owned = input.props.owned ?? []
@@ -190,7 +190,7 @@ export const _CoursesCatalogPage = (input: CoursesCatalogPageProps) => {
         )),
         grid: defineContractComponent("catalog-card-grid", {
             course: owned.map((course) => defineContractProjection("enrolled-course-card", () => (
-                <_EnrolledCourseCard
+                <EnrolledCourseCardBase
                     state={isLoading ? "pending" : "ready"}
                     props={course}
                     on={{ resume: input.on?.[`resume:${course.id}`] }}
@@ -205,7 +205,7 @@ export const _CoursesCatalogPage = (input: CoursesCatalogPageProps) => {
         )),
         grid: defineContractComponent("catalog-card-grid", {
             course: (isLoading ? restingCards : discover).map((course) => defineContractProjection("catalog-card", () => (
-                <_CourseCatalogCard
+                <CourseCatalogCardBase
                     state={isLoading ? "pending" : "ready"}
                     props={course}
                     on={{ view: input.on?.[`view:${course.id}`] }}

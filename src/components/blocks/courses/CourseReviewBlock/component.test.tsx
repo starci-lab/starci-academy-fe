@@ -1,11 +1,11 @@
 import { render, screen, waitFor } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-import { _CourseReviewBlock } from "./component"
+import { CourseReviewBlockBase } from "./component"
 
 describe("CourseReviewBlock", () => {
     it("joins learner opinions in one list card with yellow rating stars", async () => {
         render(
-            <_CourseReviewBlock
+            <CourseReviewBlockBase
                 state="rated"
                 props={{
                     averageScore: 4.5,
@@ -36,7 +36,7 @@ describe("CourseReviewBlock", () => {
 
     it("keeps a score-only review as a row without inventing a comment for it", () => {
         render(
-            <_CourseReviewBlock
+            <CourseReviewBlockBase
                 state="rated"
                 props={{
                     averageScore: 4,
@@ -61,7 +61,7 @@ describe("CourseReviewBlock", () => {
 
     it("says nobody has reviewed yet instead of drawing a zero beside five empty marks", () => {
         render(
-            <_CourseReviewBlock
+            <CourseReviewBlockBase
                 state="unrated"
                 props={{
                     averageScore: 0,

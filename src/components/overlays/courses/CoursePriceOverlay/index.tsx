@@ -2,14 +2,14 @@
 
 import { useLocale, useTranslations } from "next-intl"
 import {
-    _CoursePriceDetail,
+    CoursePriceDetailBase,
     type CoursePriceDetailState,
     type CoursePriceLine,
 } from "@/components/blocks/courses/CoursePriceDetail/component"
 import { defineContractProjection } from "@/components/contracts/props"
 import { useQueryCoursePricePreviewSwr } from "@/hooks"
 import { isPersonalPrice } from "@/modules/utils/course-price"
-import { _CoursePriceOverlay } from "./component"
+import { CoursePriceOverlayBase } from "./component"
 
 /**
  * OVERLAY - `CoursePriceOverlay`, connected half.
@@ -105,11 +105,11 @@ export const CoursePriceOverlay = ({ courseId, title, isOpen, onDismiss }: Cours
             })
 
     return (
-        <_CoursePriceOverlay
+        <CoursePriceOverlayBase
             isOpen={isOpen}
             onDismiss={onDismiss}
             render={defineContractProjection("course-price-detail-stack", () => (
-                <_CoursePriceDetail
+                <CoursePriceDetailBase
                     state={state}
                     props={{
                         title,

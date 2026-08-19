@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryMeSwr, useQueryMyLeagueSwr } from "@/hooks"
 import type { RankedUserVerdict } from "@/components/composites/RankedUserRow"
-import { _LeagueCard } from "./component"
+import { LeagueCardBase } from "./component"
 
 /** Fetch and resolve the viewer's weekly league. */
 export const LeagueCard = () => {
@@ -79,12 +79,12 @@ export const LeagueCard = () => {
         retryLabel: t("retry"),
     }
     if (query.error !== undefined && query.data === undefined) {
-        return <_LeagueCard state="failed" props={props} on={{ retry: () => { void query.mutate() } }} />
+        return <LeagueCardBase state="failed" props={props} on={{ retry: () => { void query.mutate() } }} />
     }
-    if (query.data === undefined) return <_LeagueCard state="pending" props={props} />
-    if (rows.length === 0) return <_LeagueCard state="empty" props={props} />
+    if (query.data === undefined) return <LeagueCardBase state="pending" props={props} />
+    if (rows.length === 0) return <LeagueCardBase state="empty" props={props} />
     return (
-        <_LeagueCard
+        <LeagueCardBase
             state="ready"
             props={props}
             on={{

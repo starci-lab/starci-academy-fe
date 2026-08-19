@@ -21,7 +21,7 @@ import type { ContractComponent } from "@/components/contracts/props"
  * being a column.
  */
 
-/** Props for {@link _CoursePriceOverlay}. */
+/** Props for {@link CoursePriceOverlayBase}. */
 export type CoursePriceOverlayProps<K extends ContractKey> = {
     /** Whether the surface is on screen. Owned by whoever mounts it, never by the surface. */
     readonly isOpen: boolean
@@ -36,7 +36,7 @@ export type CoursePriceOverlayProps<K extends ContractKey> = {
  *
  * @param input - {@link CoursePriceOverlayProps}
  */
-export const _CoursePriceOverlay = <const K extends ContractKey>(input: CoursePriceOverlayProps<K>) => (
+export const CoursePriceOverlayBase = <const K extends ContractKey>(input: CoursePriceOverlayProps<K>) => (
     <ModalBranch
         isOpen={input.isOpen}
         size="sm"

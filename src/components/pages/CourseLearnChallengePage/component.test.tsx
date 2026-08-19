@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _CourseLearnChallengePage, type CourseLearnChallengePageProps } from "./component"
+import { CourseLearnChallengePageBase, type CourseLearnChallengePageProps } from "./component"
 
 const baseProps: CourseLearnChallengePageProps["props"] = {
     title: "Repository challenge",
@@ -20,9 +20,9 @@ const baseProps: CourseLearnChallengePageProps["props"] = {
     resultLabel: "Read result",
 }
 
-describe("_CourseLearnChallengePage", () => {
+describe("CourseLearnChallengePageBase", () => {
     it("rests the challenge facts and controls while pending", () => {
-        const { container } = render(<_CourseLearnChallengePage state="pending" props={baseProps} />)
+        const { container } = render(<CourseLearnChallengePageBase state="pending" props={baseProps} />)
 
         expect(container.querySelector("[data-node=course-learn-challenge-page]")).toBeTruthy()
         expect(container.querySelector("h1")).toHaveAttribute("data-loading", "true")
@@ -33,7 +33,7 @@ describe("_CourseLearnChallengePage", () => {
         const changeUrl = vi.fn()
         const submit = vi.fn()
         render(
-            <_CourseLearnChallengePage
+            <CourseLearnChallengePageBase
                 state="ready"
                 props={baseProps}
                 on={{ changeUrl, submit }}
@@ -49,7 +49,7 @@ describe("_CourseLearnChallengePage", () => {
     })
 
     it("locks submission while the approved transport is running", () => {
-        render(<_CourseLearnChallengePage state="submitting" props={baseProps} />)
+        render(<CourseLearnChallengePageBase state="submitting" props={baseProps} />)
 
         expect(screen.getByLabelText("API repository")).toBeDisabled()
         expect(screen.getByRole("button", { name: "Submitting" })).toBeDisabled()
@@ -58,7 +58,7 @@ describe("_CourseLearnChallengePage", () => {
     it("opens an authored deliverable result after the challenge has passed", () => {
         const openResult = vi.fn()
         render(
-            <_CourseLearnChallengePage
+            <CourseLearnChallengePageBase
                 state="passed"
                 props={baseProps}
                 on={{ openResult }}
@@ -73,7 +73,7 @@ describe("_CourseLearnChallengePage", () => {
     it("exposes one recovery action after a load or submit failure", () => {
         const retry = vi.fn()
         render(
-            <_CourseLearnChallengePage
+            <CourseLearnChallengePageBase
                 state="failed"
                 props={{ ...baseProps, notice: "Submission refused" }}
                 on={{ retry }}

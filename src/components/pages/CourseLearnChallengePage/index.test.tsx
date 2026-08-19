@@ -5,7 +5,7 @@ const m = vi.hoisted(() => ({ data: undefined as unknown, error: undefined as un
 vi.mock("next-intl", () => ({ useLocale: () => "en", useTranslations: () => (key: string) => key }))
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: m.push, replace: m.replace }) }))
 vi.mock("@/hooks/swr/useQueryCourseSwr", () => ({ useQueryCourseSwr: () => ({ data: m.data, error: m.error, mutate: m.mutate }) }))
-vi.mock("./component", () => ({ _CourseLearnChallengePage: ({ state }: TestPageInput) => <output data-testid="state">{state}</output> }))
+vi.mock("./component", () => ({ CourseLearnChallengePageBase: ({ state }: TestPageInput) => <output data-testid="state">{state}</output> }))
 import { CourseLearnChallengePage } from "./index"
 beforeEach(() => { vi.clearAllMocks(); m.data = undefined; m.error = undefined })
 describe("CourseLearnChallengePage route", () => {

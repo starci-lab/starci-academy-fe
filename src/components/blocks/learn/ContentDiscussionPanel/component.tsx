@@ -60,7 +60,7 @@ const PENDING_COMMENTS: ReadonlyArray<ContentDiscussionComment> = Array.from(
 )
 
 /** Draws top-level lesson comments and their composer without reading transport. */
-export const _ContentDiscussionPanel = (input: ContentDiscussionPanelProps) => {
+export const ContentDiscussionPanelBase = (input: ContentDiscussionPanelProps) => {
     const isLoading = input.state === "pending"
     const isSubmitting = input.state === "submitting"
     const comments = isLoading ? PENDING_COMMENTS : input.props.comments

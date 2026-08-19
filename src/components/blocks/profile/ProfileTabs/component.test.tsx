@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _ProfileTabs, type ProfileTabsData } from "./component"
+import { ProfileTabsBase, type ProfileTabsData } from "./component"
 
 const tabs: ProfileTabsData = {
     label: "Profile sections",
@@ -12,9 +12,9 @@ const tabs: ProfileTabsData = {
     ],
 }
 
-describe("_ProfileTabs", () => {
+describe("ProfileTabsBase", () => {
     it("draws every profile destination inside the profile-owned strip and marks the current one", () => {
-        const { container } = render(<_ProfileTabs props={tabs} />)
+        const { container } = render(<ProfileTabsBase props={tabs} />)
 
         expect(container.querySelector("[data-node=\"underlined-tab-strip\"]")).not.toBeNull()
         expect(screen.getByRole("tablist", { name: "Profile sections" })).not.toBeNull()
@@ -29,14 +29,14 @@ describe("_ProfileTabs", () => {
 
     it("reports the pressed destination key to its owner", () => {
         const select = vi.fn()
-        render(<_ProfileTabs props={tabs} on={{ select }} />)
+        render(<ProfileTabsBase props={tabs} on={{ select }} />)
 
         fireEvent.click(screen.getByText("Challenges"))
         expect(select).toHaveBeenCalledExactlyOnceWith("challenges")
     })
 
     it("stays on the owner-controlled destination when no owner listens to the strip", () => {
-        render(<_ProfileTabs props={tabs} />)
+        render(<ProfileTabsBase props={tabs} />)
 
         fireEvent.click(screen.getByText("Courses"))
         expect(screen.getByRole("tab", { name: "Overview" })).toHaveAttribute("aria-selected", "true")

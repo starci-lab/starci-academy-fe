@@ -14,7 +14,7 @@ import {
     defineLeafComponent,
 } from "~candidate/components/contracts/props"
 import {
-    _DomainMasteryGrid,
+    DomainMasteryGridBase,
     type DomainMastery,
     type DomainMasteryGridState,
 } from "~candidate/components/blocks/coding/DomainMasteryGrid/component"
@@ -84,7 +84,7 @@ export type CodingPracticeHubActions = {
     readonly openStanding?: () => void
 }
 
-/** Props for {@link _CodingPracticeHubPage}. */
+/** Props for {@link CodingPracticeHubPageBase}. */
 export type CodingPracticeHubPageProps = {
     readonly session: CodingPracticeHubSession
     readonly props: CodingPracticeHubData
@@ -96,7 +96,7 @@ export type CodingPracticeHubPageProps = {
  *
  * @param input - {@link CodingPracticeHubPageProps}
  */
-export const _CodingPracticeHubPage = (input: CodingPracticeHubPageProps) => {
+export const CodingPracticeHubPageBase = (input: CodingPracticeHubPageProps) => {
     const labels = input.props.labels
     const resume = input.props.resume
     const standing = input.props.standing
@@ -141,7 +141,7 @@ export const _CodingPracticeHubPage = (input: CodingPracticeHubPageProps) => {
                     }),
                 }),
                 domains: defineContractProjection("domain-mastery-grid", () => (
-                    <_DomainMasteryGrid
+                    <DomainMasteryGridBase
                         state={input.session === "guest" ? "guest" : input.props.domains.state}
                         props={{ domains: input.props.domains.items }}
                         on={{ open: input.on?.openDomain }}

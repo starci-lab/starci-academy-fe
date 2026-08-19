@@ -46,7 +46,7 @@ type LayoutStub = {
 }
 
 vi.mock("./component", () => ({
-    _PublicProfileLayout: (input: LayoutStub) => {
+    PublicProfileLayoutBase: (input: LayoutStub) => {
         const Body = input.body
         return (
             <>

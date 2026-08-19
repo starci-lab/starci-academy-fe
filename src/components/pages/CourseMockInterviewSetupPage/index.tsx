@@ -6,7 +6,7 @@ import { useRouter } from "@/i18n/navigation"
 import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
 import { useQueryMyInProgressMockInterviewSessionSwr } from "@/hooks/swr/useQueryMyInProgressMockInterviewSessionSwr"
 import { useMutateStartMockInterviewSessionSwr } from "@/hooks/swr/useMutateStartMockInterviewSessionSwr"
-import { _CourseMockInterviewSetupPage } from "./component"
+import { CourseMockInterviewSetupPageBase } from "./component"
 
 /** Route-owned input for the connected setup page. */
 export type CourseMockInterviewSetupPageProps = { readonly displayId: string }
@@ -87,7 +87,7 @@ export const CourseMockInterviewSetupPage = ({ displayId }: CourseMockInterviewS
     const resumableSessionId = inProgress.data?.sessionId
 
     return (
-        <_CourseMockInterviewSetupPage
+        <CourseMockInterviewSetupPageBase
             state={state}
             props={{
                 title: copy.title,

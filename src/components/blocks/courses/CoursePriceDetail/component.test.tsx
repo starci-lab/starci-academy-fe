@@ -1,6 +1,6 @@
 import { render } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-import { _CoursePriceDetail } from "./component"
+import { CoursePriceDetailBase } from "./component"
 
 const reckoning = [
     { id: "list", label: "List price", value: "1.290.000 ₫" },
@@ -20,9 +20,9 @@ const marks = (root: HTMLElement) =>
 const sentences = (root: HTMLElement) =>
     Array.from(root.querySelectorAll("[data-component=\"Text\"][data-size=\"sm\"]"), (text) => text.textContent)
 
-describe("_CoursePriceDetail", () => {
+describe("CoursePriceDetailBase", () => {
     it("reads the reckoning top to bottom, ending with what the learner owes", () => {
-        const { container } = render(<_CoursePriceDetail
+        const { container } = render(<CoursePriceDetailBase
             state="ready"
             props={{ title: "Backend basics", lines: [...reckoning] }}
         />)
@@ -36,7 +36,7 @@ describe("_CoursePriceDetail", () => {
     })
 
     it("marks the two prices alike, the reduction differently and the payable line as settled", () => {
-        const { container } = render(<_CoursePriceDetail state="ready" props={{ lines: [...reckoning] }} />)
+        const { container } = render(<CoursePriceDetailBase state="ready" props={{ lines: [...reckoning] }} />)
         const [list, phase, loyalty, payable] = marks(container)
         expect(phase).toBe(list)
         expect(loyalty).not.toBe(list)
@@ -45,7 +45,7 @@ describe("_CoursePriceDetail", () => {
     })
 
     it("falls back to the price mark for a line the product has not named", () => {
-        const { container } = render(<_CoursePriceDetail state="ready" props={{ lines: [
+        const { container } = render(<CoursePriceDetailBase state="ready" props={{ lines: [
             { id: "list", label: "List price", value: "1.290.000 ₫" },
             { id: "referral", label: "Referral", value: "-50.000 ₫" },
         ] }} />)
@@ -54,18 +54,18 @@ describe("_CoursePriceDetail", () => {
     })
 
     it("draws an empty reckoning rather than a hole when no lines arrived", () => {
-        const { container } = render(<_CoursePriceDetail state="ready" props={{ title: "Backend basics" }} />)
+        const { container } = render(<CoursePriceDetailBase state="ready" props={{ title: "Backend basics" }} />)
         expect(rows(container)).toHaveLength(0)
         expect(container.querySelector("[data-node=\"stacked-stat-rows\"]")).toBeInTheDocument()
     })
 
     it("omits the reason and the forward look when neither applies", () => {
-        const { container } = render(<_CoursePriceDetail state="ready" props={{ lines: [...reckoning] }} />)
+        const { container } = render(<CoursePriceDetailBase state="ready" props={{ lines: [...reckoning] }} />)
         expect(sentences(container)).toEqual([])
     })
 
     it("reads the reason and the forward look as sentences under the reckoning", () => {
-        const { container } = render(<_CoursePriceDetail
+        const { container } = render(<CoursePriceDetailBase
             state="ready"
             props={{
                 lines: [...reckoning],
@@ -80,7 +80,7 @@ describe("_CoursePriceDetail", () => {
     })
 
     it("replaces the whole reckoning with a notice when the price cannot be personalised", () => {
-        const { container } = render(<_CoursePriceDetail
+        const { container } = render(<CoursePriceDetailBase
             state="unavailable"
             props={{ title: "Backend basics", lines: [...reckoning], unavailableMessage: "Sign in to see your price" }}
         />)
@@ -90,7 +90,7 @@ describe("_CoursePriceDetail", () => {
     })
 
     it("rests the title, every amount and the reason while the reckoning is in flight", () => {
-        const { container } = render(<_CoursePriceDetail
+        const { container } = render(<CoursePriceDetailBase
             state="pending"
             props={{ lines: [...reckoning], reason: "Loyalty applies" }}
         />)

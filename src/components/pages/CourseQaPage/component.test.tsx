@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _CourseQaPage } from "./component"
+import { CourseQaPageBase } from "./component"
 
 /**
  * What these tests guard.
@@ -33,13 +33,13 @@ const props = {
 
 describe("CourseQaPage", () => {
     it("renders the course question list and the real ask control", () => {
-        render(<_CourseQaPage state="ready" props={props} />)
+        render(<CourseQaPageBase state="ready" props={props} />)
         expect(screen.getByText(/How does narrowing work/)).toBeInTheDocument()
         expect(screen.getByRole("button", { name: /Ask a question/ })).toBeDisabled()
     })
 
     it("rests four question rows while the board is in flight", () => {
-        const { container } = render(<_CourseQaPage state="pending" props={props} />)
+        const { container } = render(<CourseQaPageBase state="pending" props={props} />)
 
         expect(container.querySelectorAll("[data-node=\"next-action-row\"]")).toHaveLength(4)
         expect(container.querySelectorAll("[data-component=\"Text\"][data-loading=\"true\"]").length).toBeGreaterThan(0)
@@ -48,7 +48,7 @@ describe("CourseQaPage", () => {
 
     it("replaces the list with a community notice once the board settles empty", () => {
         const retry = vi.fn()
-        const { container } = render(<_CourseQaPage state="empty" props={props} on={{ retry }} />)
+        const { container } = render(<CourseQaPageBase state="empty" props={props} on={{ retry }} />)
 
         expect(screen.getByText("No questions yet.")).toBeInTheDocument()
         expect(container.querySelector("[data-node=\"next-action-list\"]")).toBeNull()
@@ -58,7 +58,7 @@ describe("CourseQaPage", () => {
 
     it("offers the way back from a failed board", () => {
         const retry = vi.fn()
-        render(<_CourseQaPage state="failed" props={props} on={{ retry }} />)
+        render(<CourseQaPageBase state="failed" props={props} on={{ retry }} />)
 
         expect(screen.getByText("Could not load questions.")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Try again" }))
@@ -66,7 +66,7 @@ describe("CourseQaPage", () => {
     })
 
     it("says nothing matched rather than drawing an empty surface as a result", () => {
-        render(<_CourseQaPage state="ready" props={{ ...props, questions: [] }} />)
+        render(<CourseQaPageBase state="ready" props={{ ...props, questions: [] }} />)
 
         expect(screen.getByText("No matches.")).toBeInTheDocument()
         expect(screen.getByText("Questions")).toBeInTheDocument()
@@ -75,7 +75,7 @@ describe("CourseQaPage", () => {
     it("reads one opened thread and closes it back to the question list", () => {
         const closeThread = vi.fn()
         const { container } = render(
-            <_CourseQaPage
+            <CourseQaPageBase
                 state="ready"
                 props={{
                     ...props,
@@ -95,7 +95,7 @@ describe("CourseQaPage", () => {
     })
 
     it("marks an openable question row with a disclosure the reply rows never carry", () => {
-        const { container } = render(<_CourseQaPage state="ready" props={props} on={{ openThread: vi.fn() }} />)
+        const { container } = render(<CourseQaPageBase state="ready" props={props} on={{ openThread: vi.fn() }} />)
 
         const row = container.querySelector("[data-node=\"next-action-row\"]")
         expect(row?.querySelector("svg")).not.toBeNull()
@@ -109,7 +109,7 @@ describe("CourseQaPage", () => {
         const ask = vi.fn()
         const course = vi.fn()
         const { container } = render(
-            <_CourseQaPage
+            <CourseQaPageBase
                 state="ready"
                 props={{ ...props, draft: "Why does this narrow?" }}
                 on={{ search, changeDraft, ask, course }}
@@ -133,7 +133,7 @@ describe("CourseQaPage", () => {
 
     it("holds the ask control pending and locks the draft while a question is in flight", () => {
         render(
-            <_CourseQaPage
+            <CourseQaPageBase
                 state="ready"
                 props={{ ...props, draft: "Why does this narrow?", isSubmitting: true }}
                 on={{ ask: vi.fn() }}

@@ -12,7 +12,7 @@ import {
     defineLeafComponent,
 } from "@/components/contracts/props"
 import {
-    _DomainMasteryGrid,
+    DomainMasteryGridBase,
     type DomainMastery,
     type DomainMasteryGridState,
 } from "@/components/blocks/coding/DomainMasteryGrid/component"
@@ -90,7 +90,7 @@ export type CodingPracticeHubActions = {
     readonly openStanding?: () => void
 }
 
-/** Props for {@link _CodingPracticeHubPage}. */
+/** Props for {@link CodingPracticeHubPageBase}. */
 export type CodingPracticeHubPageProps = {
     readonly session: CodingPracticeHubSession
     readonly props: CodingPracticeHubData
@@ -102,7 +102,7 @@ export type CodingPracticeHubPageProps = {
  *
  * @param input - {@link CodingPracticeHubPageProps}
  */
-export const _CodingPracticeHubPage = (input: CodingPracticeHubPageProps) => {
+export const CodingPracticeHubPageBase = (input: CodingPracticeHubPageProps) => {
     const labels = input.props.labels
     const resume = input.props.resume
     const standing = input.props.standing
@@ -147,7 +147,7 @@ export const _CodingPracticeHubPage = (input: CodingPracticeHubPageProps) => {
                     }),
                 }),
                 domains: defineContractProjection("domain-mastery-grid", () => (
-                    <_DomainMasteryGrid
+                    <DomainMasteryGridBase
                         state={input.session === "guest" ? "guest" : input.props.domains.state}
                         // The whole payload, not just the list. Forwarding only `items` dropped the
                         // three notice fields, and the block then drew a notice with no words in it

@@ -8,7 +8,7 @@ vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: m.push, replace:
 vi.mock("@/hooks/auth/useSessionToken", () => ({ useSessionToken: () => m.token }))
 vi.mock("@/hooks/auth/useSessionRefresh", () => ({ useSessionRefresh: () => ({ isRestoring: m.restoring }) }))
 vi.mock("@/hooks", () => ({ useQueryMeSwr: () => m.me, useQueryMyLeagueSwr: () => m.weekly, useQueryGlobalLeaderboardSwr: () => m.global, useMutateSetFollowSwr: () => ({ trigger: m.follow }) }))
-vi.mock("./component", () => ({ _LeaguePage: ({ state, on }: TestPageInput) => <><output data-testid="state">{state}</output><button onClick={() => on.selectScope("global")}>global</button><button onClick={on.goHome}>home</button><button onClick={on.climb}>climb</button><button onClick={on.retry}>retry</button></> }))
+vi.mock("./component", () => ({ LeaguePageBase: ({ state, on }: TestPageInput) => <><output data-testid="state">{state}</output><button onClick={() => on.selectScope("global")}>global</button><button onClick={on.goHome}>home</button><button onClick={on.climb}>climb</button><button onClick={on.retry}>retry</button></> }))
 import { LeaguePage } from "./index"
 beforeEach(() => { vi.clearAllMocks(); m.token = "token"; m.restoring = false; m.weekly.data = undefined; m.weekly.error = undefined; m.global.data = undefined })
 describe("LeaguePage route", () => {

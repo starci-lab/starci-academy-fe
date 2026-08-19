@@ -16,7 +16,7 @@ export type ProfileTabsActions = { readonly select?: (key: string) => void }
 type ProfileTabsInput = { readonly props: ProfileTabsData, readonly on?: ProfileTabsActions }
 
 /** Draw profile-owned route chrome without borrowing the global navbar owner. */
-export const _ProfileTabs = (input: ProfileTabsInput) => (
+export const ProfileTabsBase = (input: ProfileTabsInput) => (
     <Tree contract="underlined-tab-strip" render={defineContractComponent("underlined-tab-strip", {
         tabs: defineLeafComponent("extended-tabs", {}, () => (
             <ExtendedTabs props={input.props} on={{ select: input.on?.select }} />

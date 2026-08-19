@@ -22,7 +22,7 @@ export type CoursePersonalProjectTaskPageProps = {
 }
 
 /** Draws task loading, submission and recovery states without fetching data. */
-export const _CoursePersonalProjectTaskPage = (input: CoursePersonalProjectTaskPageProps) => {
+export const CoursePersonalProjectTaskPageBase = (input: CoursePersonalProjectTaskPageProps) => {
     const loading = input.state === "pending"
     const failed = input.state === "failed"
     const controls = failed

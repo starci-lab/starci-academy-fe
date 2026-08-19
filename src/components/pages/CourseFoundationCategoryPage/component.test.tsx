@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import type { Foundation } from "@/modules/api/graphql/queries/query-foundations"
-import { _CourseFoundationCategoryPage, type CourseFoundationCategoryPageProps } from "./component"
+import { CourseFoundationCategoryPageBase, type CourseFoundationCategoryPageProps } from "./component"
 
 /**
  * What these tests guard: the resource a reader picks is opened by its DISPLAY id, not its uuid -
@@ -38,9 +38,9 @@ const draw = (
     state: CourseFoundationCategoryPageProps["state"],
     foundations: ReadonlyArray<Foundation>,
     on?: CourseFoundationCategoryPageProps["on"],
-) => render(<_CourseFoundationCategoryPage state={state} props={{ ...copy, foundations }} on={on} />)
+) => render(<CourseFoundationCategoryPageBase state={state} props={{ ...copy, foundations }} on={on} />)
 
-describe("_CourseFoundationCategoryPage", () => {
+describe("CourseFoundationCategoryPageBase", () => {
     it("keeps backend resource titles and forwards the selected display identity", () => {
         const openResource = vi.fn()
         const { container } = draw("ready", [foundation()], { openResource })

@@ -7,7 +7,7 @@ import { useRouter } from "@/i18n/navigation"
 import { useQueryMyCoursesSwr, useQueryResolveRouteSwr } from "@/hooks"
 import type { MyCourseRow } from "@/modules/api/graphql/queries/types/my-courses"
 import type { CourseProgressRowData } from "@/components/composites/CourseProgressRow"
-import { _MyCoursesProgress } from "./component"
+import { MyCoursesProgressBase } from "./component"
 
 const percent = (completed: number, total: number) => total <= 0 ? 0 : Math.min(100, Math.max(0, Math.round((completed / total) * 100)))
 const overall = (value: number) => Number.isFinite(value) ? Math.min(100, Math.max(0, Math.round(value))) : 0
@@ -59,9 +59,9 @@ export const MyCoursesProgress = () => {
         isPending: pendingId === course.globalId,
     }))
     const props = { label: t("heading"), rows, emptyMessage: t("empty"), errorMessage: t("failed"), retryLabel: t("retry") }
-    if (query.error !== undefined && query.data === undefined) return <_MyCoursesProgress state="failed" props={props} on={{ retry }} />
-    if (query.data === undefined) return <_MyCoursesProgress state="pending" props={props} />
-    if (rows.length === 0) return <_MyCoursesProgress state="empty" props={props} on={{ retry }} />
+    if (query.error !== undefined && query.data === undefined) return <MyCoursesProgressBase state="failed" props={props} on={{ retry }} />
+    if (query.data === undefined) return <MyCoursesProgressBase state="pending" props={props} />
+    if (rows.length === 0) return <MyCoursesProgressBase state="empty" props={props} on={{ retry }} />
     const on = Object.fromEntries(rows.map((row) => [`open:${row.id}`, async () => {
         setPendingId(row.id)
         try {
@@ -70,7 +70,7 @@ export const MyCoursesProgress = () => {
             if (path !== null && path !== undefined) router.push(withoutLocale(path, locale))
         } finally { setPendingId(undefined) }
     }]))
-    return <_MyCoursesProgress state="ready" props={props} on={on} />
+    return <MyCoursesProgressBase state="ready" props={props} on={on} />
 }
 
 /** Source-level ownership marker. */

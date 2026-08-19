@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import { useTranslations } from "next-intl"
 import { usePathname, useRouter } from "@/i18n/navigation"
 import {
-    _LearnShellLayout,
+    LearnShellLayoutBase,
     type LearnMobileTab,
     type LearnMobileView,
 } from "./component"
@@ -158,7 +158,7 @@ export const LearnShellLayout = (input: LearnShellLayoutProps) => {
 
     return (
         <LearnMobileViewContext.Provider value={{ view: mobileView, openView: setMobileView }}>
-            <_LearnShellLayout
+            <LearnShellLayoutBase
                 props={{
                     spine: {
                         lockedLabel: t("locked"),

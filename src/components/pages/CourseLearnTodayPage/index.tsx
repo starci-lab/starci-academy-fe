@@ -16,10 +16,25 @@ import { useQueryResolveRouteSwr } from "@/hooks/swr/useQueryResolveRouteSwr"
 import { useLearnMobileView } from "@/components/layouts/LearnShellLayout"
 import type { CourseLearningSignal } from "@/components/blocks/learn/CourseLearningSignals"
 import type { CourseNextAction } from "@/components/blocks/learn/CourseNextActions"
-import { _CourseLearnTodayPage, type CourseLearnTodayItem } from "./component"
+import { CourseLearnTodayPageBase, type CourseLearnTodayItem } from "./component"
 
 /** Route identity required by the connected course dashboard. */
 export type CourseLearnTodayPageProps = { readonly displayId: string }
+type TodayResumeInterview = { readonly sessionId: string; readonly promptTitle: string }
+type TodayResumeItem = { readonly globalId: string; readonly label: string }
+type TodayTranslator = (key: string, values?: Record<string, string | number | Date>) => string
+
+const primaryActionOf = (activeInterview: TodayResumeInterview | undefined, challenge: TodayResumeItem | undefined, lesson: TodayResumeItem | undefined, courseTitle: string | undefined, t: TodayTranslator): CourseLearnTodayItem => {
+    if (activeInterview !== undefined) return { id: "interview-resume", title: activeInterview.promptTitle, kind: t("kinds.interview"), actionLabel: t("resume") }
+    if (challenge !== undefined) return { id: "resolve:" + challenge.globalId, title: challenge.label, kind: t("kinds.challenge"), actionLabel: t("resume") }
+    if (lesson !== undefined) return { id: "resolve:" + lesson.globalId, title: lesson.label, kind: t("kinds.lesson"), actionLabel: t("resume") }
+    return { id: "modules", title: courseTitle ?? t("modules"), kind: t("kinds.course"), actionLabel: t("open") }
+}
+const pageStateOf = (failed: boolean, pending: boolean, course: unknown) => {
+    if (failed) return "failed" as const
+    if (pending) return "pending" as const
+    return course === null ? "empty" as const : "ready" as const
+}
 
 /** Rank live learning facts into the accepted course-dashboard composition. */
 export const CourseLearnTodayPage = ({ displayId }: CourseLearnTodayPageProps) => {
@@ -46,33 +61,7 @@ export const CourseLearnTodayPage = ({ displayId }: CourseLearnTodayPageProps) =
         ? interview.data
         : undefined
 
-    const primary: CourseLearnTodayItem = activeInterview !== undefined
-        ? {
-            id: "interview-resume",
-            title: activeInterview.promptTitle,
-            kind: t("kinds.interview"),
-            actionLabel: t("resume"),
-        }
-        : challenges.data?.[0] !== undefined
-            ? {
-                id: "resolve:" + challenges.data[0].globalId,
-                title: challenges.data[0].label,
-                kind: t("kinds.challenge"),
-                actionLabel: t("resume"),
-            }
-            : lessons.data?.[0] !== undefined
-                ? {
-                    id: "resolve:" + lessons.data[0].globalId,
-                    title: lessons.data[0].label,
-                    kind: t("kinds.lesson"),
-                    actionLabel: t("resume"),
-                }
-                : {
-                    id: "modules",
-                    title: course.data?.title ?? t("modules"),
-                    kind: t("kinds.course"),
-                    actionLabel: t("open"),
-                }
+    const primary = primaryActionOf(activeInterview, challenges.data?.[0], lessons.data?.[0], course.data?.title, t)
 
     const dueCount = decks.data?.reduce((total, deck) => total + (deck.dueCount ?? 0), 0) ?? 0
     const secondary: Array<CourseLearnTodayItem> = []
@@ -104,10 +93,7 @@ export const CourseLearnTodayPage = ({ displayId }: CourseLearnTodayPageProps) =
     const pending = course.data === undefined || myCourses.data === undefined
     const failed = (course.error !== undefined && course.data === undefined)
         || (myCourses.error !== undefined && myCourses.data === undefined)
-    const state = failed ? "failed" as const
-        : pending ? "pending" as const
-            : course.data === null ? "empty" as const
-                : "ready" as const
+    const state = pageStateOf(failed, pending, course.data)
     const view = mobile.view === "course" || mobile.view === "progress" ? mobile.view : "today"
     const auxiliaryPending = lessons.data === undefined
         || challenges.data === undefined
@@ -216,7 +202,7 @@ export const CourseLearnTodayPage = ({ displayId }: CourseLearnTodayPageProps) =
                 : "ready" as const
 
     return (
-        <_CourseLearnTodayPage
+        <CourseLearnTodayPageBase
             state={state}
             mobileView={view}
             props={{

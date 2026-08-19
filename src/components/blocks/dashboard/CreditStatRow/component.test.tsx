@@ -1,17 +1,17 @@
 /** @vitest-environment jsdom */
 import { describe, expect, it } from "vitest"
 import { render, screen } from "@testing-library/react"
-import { _CreditStatRow } from "./component"
+import { CreditStatRowBase } from "./component"
 
-describe("_CreditStatRow", () => {
+describe("CreditStatRowBase", () => {
     it("renders resolved credit copy without request or locale providers", () => {
-        render(<_CreditStatRow state="settled" props={{ label: "AI credit", value: "40/50" }} />)
+        render(<CreditStatRowBase state="settled" props={{ label: "AI credit", value: "40/50" }} />)
         expect(screen.getByText("AI credit")).toBeTruthy()
         expect(screen.getByText("40/50")).toBeTruthy()
     })
 
     it("turns the pending situation into a resting value leaf", () => {
-        const { container } = render(<_CreditStatRow state="pending" props={{ label: "AI credit" }} />)
+        const { container } = render(<CreditStatRowBase state="pending" props={{ label: "AI credit" }} />)
         expect(container.querySelector("[data-component=\"Text\"][data-loading=\"true\"]")).toBeTruthy()
     })
 })

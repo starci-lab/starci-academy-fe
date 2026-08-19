@@ -30,7 +30,7 @@ vi.mock("@/hooks/auth/useSessionRefresh", () => ({
 }))
 
 vi.mock("@/components/pages/DashboardPage/component", () => ({
-    _DashboardPage: () => <p data-part="dashboard">Dashboard</p>,
+    DashboardPageBase: () => <p data-part="dashboard">Dashboard</p>,
 }))
 
 afterEach(() => {

@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl"
 import { useQueryMyWeeklyStatsSwr } from "@/hooks"
-import { _StreakStatRow } from "./component"
+import { StreakStatRowBase } from "./component"
 
 /**
  * BLOCK - `StreakStatRow`: the standing streak figure, on the identity rail.
@@ -24,10 +24,10 @@ export const StreakStatRow = () => {
     // the backend is unreachable - which is exactly what a signed-out reader sees.
     const hasFailed = weekly.error !== undefined && weekly.error !== null
     const isLoading = weekly.data === undefined && !hasFailed
-    if (isLoading) return <_StreakStatRow state="pending" props={{ label: t("streak") }} />
-    if (hasFailed || !weekly.data) return <_StreakStatRow state="empty" />
+    if (isLoading) return <StreakStatRowBase state="pending" props={{ label: t("streak") }} />
+    if (hasFailed || !weekly.data) return <StreakStatRowBase state="empty" />
 
-    return <_StreakStatRow state="settled" props={{ label: t("streak"), value: t("days", { count: weekly.data.streak ?? 0 }) }} />
+    return <StreakStatRowBase state="settled" props={{ label: t("streak"), value: t("days", { count: weekly.data.streak ?? 0 }) }} />
 }
 
 /** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */

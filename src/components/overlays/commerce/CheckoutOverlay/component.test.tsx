@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _CheckoutOverlay, type CheckoutOverlayLabels } from "./component"
+import { CheckoutOverlayBase, type CheckoutOverlayLabels } from "./component"
 
 /**
  * What these tests guard.
@@ -30,10 +30,10 @@ const cycles = [
     { id: "cycle-2", name: "Second cycle · in 30 days · 50%", amount: "1.375.000 ₫" },
 ]
 
-describe("_CheckoutOverlay", () => {
+describe("CheckoutOverlayBase", () => {
     it("opens on paying at once, with no schedule, no surcharge and no warning", () => {
         render(
-            <_CheckoutOverlay
+            <CheckoutOverlayBase
                 props={{ labels, isOpen: true, plan: "full", subtotal: "2.950.000 ₫", savings: "-200.000 ₫", total: "2.750.000 ₫", cycles }}
             />,
         )
@@ -47,7 +47,7 @@ describe("_CheckoutOverlay", () => {
 
     it("draws the schedule and the warning only once paying over time is chosen", () => {
         render(
-            <_CheckoutOverlay
+            <CheckoutOverlayBase
                 props={{
                     labels,
                     isOpen: true,
@@ -67,7 +67,7 @@ describe("_CheckoutOverlay", () => {
     })
 
     it("marks only the cycle that is actually due", () => {
-        render(<_CheckoutOverlay props={{ labels, isOpen: true, plan: "instalments", cycles }} />)
+        render(<CheckoutOverlayBase props={{ labels, isOpen: true, plan: "instalments", cycles }} />)
 
         const rows = document.querySelectorAll("[data-node=\"ordered-step-row\"]")
         expect(rows[0].querySelector("[data-component=\"StatusDot\"]")).not.toBeNull()
@@ -75,7 +75,7 @@ describe("_CheckoutOverlay", () => {
     })
 
     it("draws no empty ladder when paying over time carries no cycles yet", () => {
-        render(<_CheckoutOverlay props={{ labels, isOpen: true, plan: "instalments" }} />)
+        render(<CheckoutOverlayBase props={{ labels, isOpen: true, plan: "instalments" }} />)
 
         expect(document.querySelector("[data-node=\"ordered-step-ladder\"]")).toBeNull()
         expect(screen.getByText("Nothing is charged automatically.")).toBeInTheDocument()
@@ -83,7 +83,7 @@ describe("_CheckoutOverlay", () => {
 
     it("reports the plan the reader switched to", () => {
         const choosePlan = vi.fn()
-        render(<_CheckoutOverlay props={{ labels, isOpen: true, plan: "full" }} on={{ choosePlan }} />)
+        render(<CheckoutOverlayBase props={{ labels, isOpen: true, plan: "full" }} on={{ choosePlan }} />)
 
         fireEvent.click(screen.getByText("Pay over time"))
         expect(choosePlan).toHaveBeenCalledWith("instalments")
@@ -92,7 +92,7 @@ describe("_CheckoutOverlay", () => {
     it("hands off to the provider on the press and says so while it is in flight", () => {
         const pay = vi.fn()
         const { rerender } = render(
-            <_CheckoutOverlay props={{ labels, isOpen: true, plan: "full" }} on={{ pay }} />,
+            <CheckoutOverlayBase props={{ labels, isOpen: true, plan: "full" }} on={{ pay }} />,
         )
 
         const control = screen.getByRole("button", { name: /Pay 2\.750\.000/ })
@@ -100,12 +100,12 @@ describe("_CheckoutOverlay", () => {
         fireEvent.click(control)
         expect(pay).toHaveBeenCalledOnce()
 
-        rerender(<_CheckoutOverlay props={{ labels, isOpen: true, plan: "full", isPaying: true }} on={{ pay }} />)
+        rerender(<CheckoutOverlayBase props={{ labels, isOpen: true, plan: "full", isPaying: true }} on={{ pay }} />)
         expect(screen.getByRole("button", { name: /Pay 2\.750\.000/ })).toHaveAttribute("data-action-pending", "true")
     })
 
     it("stays dismissable when nothing is listening for the way out", () => {
-        render(<_CheckoutOverlay props={{ labels, isOpen: true, plan: "full" }} />)
+        render(<CheckoutOverlayBase props={{ labels, isOpen: true, plan: "full" }} />)
 
         expect(screen.getByRole("dialog")).toBeInTheDocument()
         expect(() => fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape", code: "Escape" })).not.toThrow()
@@ -113,7 +113,7 @@ describe("_CheckoutOverlay", () => {
 
     it("reports the vendor's own way out to the surface that mounted it", () => {
         const dismiss = vi.fn()
-        render(<_CheckoutOverlay props={{ labels, isOpen: true, plan: "full" }} on={{ dismiss }} />)
+        render(<CheckoutOverlayBase props={{ labels, isOpen: true, plan: "full" }} on={{ dismiss }} />)
 
         fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape", code: "Escape" })
         expect(dismiss).toHaveBeenCalled()

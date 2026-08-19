@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { usePlaygroundSession } from "@/components/layouts/PlaygroundSessionLayout"
-import { _CoursePlaygroundSetupPage, type CoursePlaygroundSetupState } from "./component"
+import { CoursePlaygroundSetupPageBase, type CoursePlaygroundSetupState } from "./component"
 
 /** Course and playground route identities consumed by setup. */
 export type CoursePlaygroundSetupPageProps = { readonly displayId: string; readonly slug: string }
@@ -13,15 +13,15 @@ export const CoursePlaygroundSetupPage = ({ displayId, slug }: CoursePlaygroundS
     const t = useTranslations("learn.playground")
     const router = useRouter()
     const session = usePlaygroundSession()
-    const state: CoursePlaygroundSetupState = session.failed || session.startFailed
-        ? "failed"
-        : session.isLoading ? "loading"
-            : session.isStarting ? "starting"
-                : session.session === null ? "unpaired"
-                    : session.agentConnected ? "ready" : "paired"
+    let state: CoursePlaygroundSetupState = "paired"
+    if (session.failed || session.startFailed) state = "failed"
+    else if (session.isLoading) state = "loading"
+    else if (session.isStarting) state = "starting"
+    else if (session.session === null) state = "unpaired"
+    else if (session.agentConnected) state = "ready"
 
     return (
-        <_CoursePlaygroundSetupPage
+        <CoursePlaygroundSetupPageBase
             state={state}
             props={{
                 playground: session.playground,

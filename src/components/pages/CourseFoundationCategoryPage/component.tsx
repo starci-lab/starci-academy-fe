@@ -24,7 +24,7 @@ export type CourseFoundationCategoryPageProps = {
 }
 
 /** Draw one searchable foundation category and all query result states. */
-export const _CourseFoundationCategoryPage = (input: CourseFoundationCategoryPageProps) => {
+export const CourseFoundationCategoryPageBase = (input: CourseFoundationCategoryPageProps) => {
     const loading = input.state === "pending"
     const rows: ReadonlyArray<FoundationRow> = loading && input.props.foundations.length === 0
         ? Array.from({ length: 6 }, (_, index) => ({ id: `pending-${index}`, displayId: `pending-${index}`, title: "", description: null }))

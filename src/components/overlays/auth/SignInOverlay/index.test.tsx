@@ -33,7 +33,7 @@ type OverlayStub = {
 }
 
 vi.mock("./component", () => ({
-    _SignInOverlay: (input: OverlayStub) => (
+    SignInOverlayBase: (input: OverlayStub) => (
         <section data-testid="surface" data-open={String(input.isOpen)}>
             <button type="button" onClick={input.onDismiss}>Close</button>
             {input.render.project?.()}

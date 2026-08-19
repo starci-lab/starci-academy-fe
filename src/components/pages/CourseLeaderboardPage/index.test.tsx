@@ -9,7 +9,7 @@ vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: m.push }) }))
 vi.mock("@/hooks/swr/useQueryCourseSwr", () => ({ useQueryCourseSwr: () => m.course }))
 vi.mock("@/hooks/swr/useQueryMeSwr", () => ({ useQueryMeSwr: () => m.me }))
 vi.mock("@/hooks/swr/useQueryCourseLeaderboardSwr", () => ({ useQueryCourseLeaderboardSwr: () => m.board }))
-vi.mock("./component", () => ({ _CourseLeaderboardPage: ({ state, on }: TestPageInput) => <><output data-testid="state">{state}</output><button onClick={on.course}>course</button><button onClick={() => on.selectCategory("challenge")}>category</button><button onClick={on.climb}>climb</button><button onClick={on.retry}>retry</button></> }))
+vi.mock("./component", () => ({ CourseLeaderboardPageBase: ({ state, on }: TestPageInput) => <><output data-testid="state">{state}</output><button onClick={on.course}>course</button><button onClick={() => on.selectCategory("challenge")}>category</button><button onClick={on.climb}>climb</button><button onClick={on.retry}>retry</button></> }))
 import { CourseLeaderboardPage } from "./index"
 beforeEach(() => { vi.clearAllMocks(); m.course.data = { id: "c1", title: "Course" }; m.course.error = undefined; m.me.data = { username: "me" }; m.board.data = undefined; m.board.error = undefined })
 describe("CourseLeaderboardPage route", () => {

@@ -10,7 +10,7 @@ import {
 import { useQueryMyFlashcardStatsSwr } from "@/hooks/swr/useQueryMyFlashcardStatsSwr"
 import { useQueryMyInProgressFlashcardSessionSwr } from "@/hooks/swr/useQueryMyInProgressFlashcardSessionSwr"
 import { useMutateStartFlashcardSessionSwr } from "@/hooks/swr/useMutateStartFlashcardSessionSwr"
-import { _CourseFlashcardsReviewPage } from "./component"
+import { CourseFlashcardsReviewPageBase } from "./component"
 
 /** Route identity required by the connected flashcard review overview. */
 export type CourseFlashcardsReviewPageProps = { readonly displayId: string }
@@ -109,7 +109,7 @@ export const CourseFlashcardsReviewPage = ({ displayId }: CourseFlashcardsReview
     }
 
     return (
-        <_CourseFlashcardsReviewPage
+        <CourseFlashcardsReviewPageBase
             state={state}
             props={{
                 title: copy.title,

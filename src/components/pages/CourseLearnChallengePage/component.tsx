@@ -45,7 +45,7 @@ export type CourseLearnChallengePageProps = {
 }
 
 /** Draws the challenge brief, deliverables and all approved submission states without fetching. */
-export const _CourseLearnChallengePage = (input: CourseLearnChallengePageProps) => {
+export const CourseLearnChallengePageBase = (input: CourseLearnChallengePageProps) => {
     const loading = input.state === "pending"
     const controls = input.state === "failed"
         ? [

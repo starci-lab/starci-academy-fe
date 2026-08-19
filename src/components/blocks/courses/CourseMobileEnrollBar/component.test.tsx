@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { ContractContent } from "@/components/branches/Tree"
-import { CourseMobileEnrollBar, _CourseMobileEnrollBar } from "./component"
+import { CourseMobileEnrollBar, CourseMobileEnrollBarBase } from "./component"
 
 const discounted = {
     price: "1,250,000 ₫",
@@ -11,10 +11,10 @@ const discounted = {
 
 const priceLine = () => document.querySelector("[data-node=\"price-discount-line\"]")
 
-describe("_CourseMobileEnrollBar", () => {
+describe("CourseMobileEnrollBarBase", () => {
     it("pins the payable price beside one action and reports the press", () => {
         const act = vi.fn()
-        render(<_CourseMobileEnrollBar state="ready" props={discounted} on={{ act }} />)
+        render(<CourseMobileEnrollBarBase state="ready" props={discounted} on={{ act }} />)
 
         expect(screen.getByText("1,250,000 ₫")).toHaveAttribute("data-superseded", "false")
         expect(screen.getByText("1,500,000 ₫")).toHaveAttribute("data-superseded", "true")
@@ -27,14 +27,14 @@ describe("_CourseMobileEnrollBar", () => {
     })
 
     it("never repeats the saving badge the rail already carries", () => {
-        render(<_CourseMobileEnrollBar state="ready" props={discounted} />)
+        render(<CourseMobileEnrollBarBase state="ready" props={discounted} />)
 
         expect(document.querySelector("[data-component=\"Badge\"]")).toBeNull()
     })
 
     it("shows one figure alone for a course sold at list price", () => {
         render(
-            <_CourseMobileEnrollBar
+            <CourseMobileEnrollBarBase
                 state="ready"
                 props={{ price: "400,000 ₫", ctaLabel: "Enrol now" }}
             />,
@@ -47,7 +47,7 @@ describe("_CourseMobileEnrollBar", () => {
 
     it("withholds the struck list price while the viewer's own price is still resolving", () => {
         render(
-            <_CourseMobileEnrollBar
+            <CourseMobileEnrollBarBase
                 state="price-pending"
                 props={{ ...discounted, price: undefined }}
             />,

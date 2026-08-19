@@ -4,7 +4,7 @@ import { useLocale } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
 import { useQueryMockInterviewAttemptBySessionSwr } from "@/hooks/swr/useQueryMockInterviewAttemptBySessionSwr"
-import { _CourseMockInterviewResultPage, type CourseMockInterviewResultState } from "./component"
+import { CourseMockInterviewResultPageBase, type CourseMockInterviewResultState } from "./component"
 
 /** Route identity required to resolve one persisted interview attempt. */
 export type CourseMockInterviewResultPageProps = {
@@ -57,7 +57,7 @@ export const CourseMockInterviewResultPage = ({ displayId, sessionId }: CourseMo
     const setupPath = `/courses/${displayId}/learn/mock-interview`
 
     return (
-        <_CourseMockInterviewResultPage
+        <CourseMockInterviewResultPageBase
             state={state}
             props={{
                 title: copy.title,

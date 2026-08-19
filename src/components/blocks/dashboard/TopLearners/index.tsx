@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useMutateSetFollowSwr, useQueryGlobalLeaderboardSwr, useQueryMeSwr } from "@/hooks"
 import { fromGlobalId } from "@/modules/utils/global-id"
-import { _TopLearners } from "./component"
+import { TopLearnersBase } from "./component"
 
 /** Fetch global standing and own optimistic follow rollback. */
 export const TopLearners = () => {
@@ -63,10 +63,10 @@ export const TopLearners = () => {
         retryLabel: t("retry"),
     }
     if (query.error !== undefined && data === undefined) {
-        return <_TopLearners state="failed" props={props} on={{ retry: () => { void query.mutate() } }} />
+        return <TopLearnersBase state="failed" props={props} on={{ retry: () => { void query.mutate() } }} />
     }
-    if (data === undefined) return <_TopLearners state="pending" props={props} />
-    if (data === null || data.entries.length === 0) return <_TopLearners state="empty" props={props} />
+    if (data === undefined) return <TopLearnersBase state="pending" props={props} />
+    if (data === null || data.entries.length === 0) return <TopLearnersBase state="empty" props={props} />
     const on = Object.fromEntries(rows.flatMap((row) => [
         [
             `open:${row.id}`,
@@ -96,7 +96,7 @@ export const TopLearners = () => {
         ],
     ]))
     return (
-        <_TopLearners
+        <TopLearnersBase
             state="ready"
             props={props}
             on={{ seeMore: () => router.push("/league"), ...on }}

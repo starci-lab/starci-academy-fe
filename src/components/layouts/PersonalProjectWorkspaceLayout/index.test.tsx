@@ -34,7 +34,7 @@ type LayoutStub = {
 }
 
 vi.mock("./component", () => ({
-    _PersonalProjectWorkspaceLayout: (input: LayoutStub) => (
+    PersonalProjectWorkspaceLayoutBase: (input: LayoutStub) => (
         <>
             <output data-testid="rail">{JSON.stringify(input.milestones)}</output>
             <output data-testid="loading">{String(input.isLoading)}</output>

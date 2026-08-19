@@ -41,7 +41,7 @@ const CourseListView = ({ props, on, isLoading = false }: LeafProps<MyCoursesPro
 const CourseList = defineContractComponent("course-progress-list", CourseListView)
 
 /** Draw enrolled-course progress, keeping every request outcome local to the block. */
-export const _MyCoursesProgress = (input: MyCoursesProgressProps) => {
+export const MyCoursesProgressBase = (input: MyCoursesProgressProps) => {
     if (input.state === "empty" || input.state === "failed") {
         const message = input.state === "empty" ? input.props.emptyMessage : input.props.errorMessage
         return <SurfaceCard props={{ label: input.props.label }} contract="empty-notice-card" render={defineContractComponent("empty-notice-card", {

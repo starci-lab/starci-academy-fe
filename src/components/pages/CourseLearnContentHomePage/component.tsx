@@ -25,7 +25,7 @@ export type CourseLearnContentHomeProps = {
 }
 
 /** Draw the course's authored module collection under its stable route identity. */
-export const _CourseLearnContentHomePage = (input: CourseLearnContentHomeProps) => {
+export const CourseLearnContentHomePageBase = (input: CourseLearnContentHomeProps) => {
     const loading = input.state === "pending"
     return (
         <Tree contract="course-learn-content-home-page" render={defineContractComponent("course-learn-content-home-page", {

@@ -43,7 +43,7 @@ export type DailyQuestBody = {
     readonly rewardLine: string
 }
 
-/** Props for {@link _DailyQuest}, discriminated by the situation. */
+/** Props for {@link DailyQuestBase}, discriminated by the situation. */
 export type DailyQuestProps =
     | { readonly state: "pending"; readonly props: DailyQuestFrame }
     | { readonly state: "empty"; readonly props: DailyQuestFrame & { readonly message: string } }
@@ -126,7 +126,7 @@ type DailyQuestInput = DailyQuestProps & { readonly on?: DailyQuestActions }
  *
  * @param input - {@link DailyQuestInput}
  */
-export const _DailyQuest = (input: DailyQuestInput) => {
+export const DailyQuestBase = (input: DailyQuestInput) => {
     if (input.state === "failed") {
         return (
             <SurfaceCard props={{ label: input.props.label }} contract="empty-notice-card"

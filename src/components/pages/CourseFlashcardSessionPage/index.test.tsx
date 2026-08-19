@@ -9,7 +9,7 @@ vi.mock("@/hooks/swr/useQueryMyInProgressFlashcardSessionSwr", () => ({ useQuery
 vi.mock("@/hooks/swr/useQueryFlashcardSessionResultSwr", () => ({ useQueryFlashcardSessionResultSwr: () => m.result }))
 vi.mock("@/hooks/swr/useMutateSyncFlashcardSessionSwr", () => ({ useMutateSyncFlashcardSessionSwr: () => m.sync, useMutateRateFlashcardSwr: () => m.rate }))
 vi.mock("@/hooks/swr/useMutateCompleteFlashcardSessionSwr", () => ({ useMutateCompleteFlashcardSessionSwr: () => m.complete }))
-vi.mock("./component", () => ({ _CourseFlashcardSessionPage: ({ state, on }: TestPageInput) => <><output data-testid="state">{state}</output><button onClick={on.reveal}>reveal</button><button onClick={() => on.rate(2)}>rate</button><button onClick={on.retry}>retry</button><button onClick={on.leave}>leave</button></> }))
+vi.mock("./component", () => ({ CourseFlashcardSessionPageBase: ({ state, on }: TestPageInput) => <><output data-testid="state">{state}</output><button onClick={on.reveal}>reveal</button><button onClick={() => on.rate(2)}>rate</button><button onClick={on.retry}>retry</button><button onClick={on.leave}>leave</button></> }))
 import { CourseFlashcardSessionPage } from "./index"
 beforeEach(() => { vi.clearAllMocks(); m.course.data = { id: "c1" }; m.course.error = undefined; m.session.data = undefined; m.session.error = undefined; m.result.data = undefined; m.result.error = undefined; m.sync.error = undefined; m.rate.error = undefined; m.complete.error = undefined; m.sync.isMutating = false; m.rate.isMutating = false; m.complete.isMutating = false })
 describe("CourseFlashcardSessionPage route", () => {

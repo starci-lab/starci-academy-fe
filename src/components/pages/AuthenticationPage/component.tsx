@@ -9,7 +9,7 @@ export type AuthenticationPageActions = {
     readonly signedIn?: () => void
 }
 
-/** Props for {@link _AuthenticationPage}. */
+/** Props for {@link AuthenticationPageBase}. */
 export type AuthenticationPageProps = {
     readonly on?: AuthenticationPageActions
 }
@@ -19,7 +19,7 @@ export type AuthenticationPageProps = {
  *
  * @param input - {@link AuthenticationPageProps}
  */
-export const _AuthenticationPage = ({ on }: AuthenticationPageProps) => {
+export const AuthenticationPageBase = ({ on }: AuthenticationPageProps) => {
     const cardContent = defineContractComponent("authentication-panel-card", {
         panel: defineContractProjection("centred-page-column", () => (
             <AuthenticationPanel onSignedIn={on?.signedIn} />

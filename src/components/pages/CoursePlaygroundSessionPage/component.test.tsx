@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import type { PlaygroundStep } from "@/modules/api/graphql/queries/query-playground"
-import { _CoursePlaygroundSessionPage, type CoursePlaygroundSessionPageProps } from "./component"
+import { CoursePlaygroundSessionPageBase, type CoursePlaygroundSessionPageProps } from "./component"
 
 /**
  * What these tests guard: progress in this workspace belongs to the server. The verify action is
@@ -45,14 +45,14 @@ const draw = (
     props: Partial<CoursePlaygroundSessionPageProps["props"]> = {},
     on: CoursePlaygroundSessionPageProps["on"] = handlers(),
 ) => render(
-    <_CoursePlaygroundSessionPage
+    <CoursePlaygroundSessionPageBase
         state={state}
         props={{ ...copy, steps: [step()], selectedStepIndex: 0, passedStepIndexes: [], ...props }}
         on={on}
     />,
 )
 
-describe("_CoursePlaygroundSessionPage", () => {
+describe("CoursePlaygroundSessionPageBase", () => {
     it("titles the workspace by the selected step and shows the command and hint it needs", () => {
         const { container } = draw("live")
 

@@ -61,7 +61,7 @@ vi.mock("./component", () => {
             {props.noticeActionLabel && <button onClick={() => on.act?.()}>{props.noticeActionLabel}</button>}
         </div>
     )
-    return {_CourseLearnContentPage: renderMockPage}
+    return {CourseLearnContentPageBase: renderMockPage}
 })
 
 import {CourseLearnContentPage} from "./index"

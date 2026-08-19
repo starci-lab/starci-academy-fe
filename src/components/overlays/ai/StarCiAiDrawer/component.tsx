@@ -22,7 +22,7 @@ export type StarCiAiDrawerProps = {
 }
 
 /** Compose the global chat inside the shared focus/backdrop mechanics. */
-export const _StarCiAiDrawer = (input: StarCiAiDrawerProps) => {
+export const StarCiAiDrawerBase = (input: StarCiAiDrawerProps) => {
     const Chat = input.chat
     return (
         <DrawerBranch

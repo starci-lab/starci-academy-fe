@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-import { _OrderSummary } from "./component"
+import { OrderSummaryBase } from "./component"
 
 const labels = {
     subtotal: "Subtotal",
@@ -18,10 +18,10 @@ const rows = () =>
 
 const totalRow = () => document.querySelector("[data-node=\"order-total-row\"]")
 
-describe("_OrderSummary", () => {
+describe("OrderSummaryBase", () => {
     it("names every component of the order above the figure the reader owes", () => {
         render(
-            <_OrderSummary
+            <OrderSummaryBase
                 state="ready"
                 props={{
                     labels,
@@ -46,7 +46,7 @@ describe("_OrderSummary", () => {
 
     it("omits the saving and the surcharge rather than announcing zero of either", () => {
         render(
-            <_OrderSummary
+            <OrderSummaryBase
                 state="ready"
                 props={{ labels, subtotal: "1,200,000 ₫", total: "1,200,000 ₫" }}
             />,
@@ -60,7 +60,7 @@ describe("_OrderSummary", () => {
 
     it("draws a saving without a surcharge for an order paid at once", () => {
         render(
-            <_OrderSummary
+            <OrderSummaryBase
                 state="ready"
                 props={{
                     labels,
@@ -76,7 +76,7 @@ describe("_OrderSummary", () => {
     })
 
     it("rests every figure while the pricing request is still in flight", () => {
-        render(<_OrderSummary state="pending" props={{ labels }} />)
+        render(<OrderSummaryBase state="pending" props={{ labels }} />)
 
         expect(screen.getByText("Subtotal")).toHaveAttribute("data-loading", "false")
         expect(screen.getByText("Total")).toHaveAttribute("data-loading", "false")
@@ -86,7 +86,7 @@ describe("_OrderSummary", () => {
 
     it("replaces the figures with the unavailable line when pricing failed, keeping the labels", () => {
         render(
-            <_OrderSummary
+            <OrderSummaryBase
                 state="failed"
                 props={{
                     labels,

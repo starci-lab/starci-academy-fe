@@ -55,7 +55,7 @@ export type CourseFlashcardSessionPageProps = {
 }
 
 /** Renders one focused review/quiz card and its finite lifecycle controls. */
-export const _CourseFlashcardSessionPage = (input: CourseFlashcardSessionPageProps) => {
+export const CourseFlashcardSessionPageBase = (input: CourseFlashcardSessionPageProps) => {
     const { state, data, on } = input
     const isLoading = state === "pending"
     const settledFailure = state === "failed" || state === "expired"

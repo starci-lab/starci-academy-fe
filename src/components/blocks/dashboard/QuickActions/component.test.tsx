@@ -1,12 +1,12 @@
 /** @vitest-environment jsdom */
 import { describe, expect, it } from "vitest"
 import { render, screen } from "@testing-library/react"
-import { _QuickActions } from "./component"
+import { QuickActionsBase } from "./component"
 
-describe("_QuickActions", () => {
+describe("QuickActionsBase", () => {
     it("renders resolved shortcuts without locale or router providers", () => {
         render(
-            <_QuickActions
+            <QuickActionsBase
                 props={{
                     label: "Quick access",
                     items: [{ id: "course", icon: "course", label: "Browse courses" }],

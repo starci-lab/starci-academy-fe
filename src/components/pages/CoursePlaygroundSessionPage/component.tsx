@@ -39,7 +39,7 @@ export type CoursePlaygroundSessionPageProps = {
 }
 
 /** Draw a live playground whose progress advances only from server `step:verified` events. */
-export const _CoursePlaygroundSessionPage = (input: CoursePlaygroundSessionPageProps) => {
+export const CoursePlaygroundSessionPageBase = (input: CoursePlaygroundSessionPageProps) => {
     const current = input.props.steps[input.props.selectedStepIndex]
     const commandHint = current?.commandHint ?? undefined
     const actionHint = current?.actionHint ?? undefined

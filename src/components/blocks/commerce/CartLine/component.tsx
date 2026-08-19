@@ -58,7 +58,7 @@ export type CartLineActions = {
     readonly remove?: () => void
 }
 
-/** Props for {@link _CartLine}. */
+/** Props for {@link CartLineBase}. */
 export type CartLineProps = BlockProps<CartLineState, CartLineData> & {
     readonly on?: CartLineActions
 }
@@ -68,7 +68,7 @@ export type CartLineProps = BlockProps<CartLineState, CartLineData> & {
  *
  * @param input - {@link CartLineProps}
  */
-export const _CartLine = (input: CartLineProps) => {
+export const CartLineBase = (input: CartLineProps) => {
     const isLoading = input.state === "pending"
 
     return (

@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _CourseLearnChallengeResultPage, type CourseLearnChallengeResultPageProps } from "./component"
+import { CourseLearnChallengeResultPageBase, type CourseLearnChallengeResultPageProps } from "./component"
 
 const baseProps: CourseLearnChallengeResultPageProps["props"] = {
     title: "API repository",
@@ -20,9 +20,9 @@ const baseProps: CourseLearnChallengeResultPageProps["props"] = {
     nextLabel: "Next content",
 }
 
-describe("_CourseLearnChallengeResultPage", () => {
+describe("CourseLearnChallengeResultPageBase", () => {
     it("rests the result surface while grading is pending", () => {
-        const { container } = render(<_CourseLearnChallengeResultPage state="pending" props={baseProps} />)
+        const { container } = render(<CourseLearnChallengeResultPageBase state="pending" props={baseProps} />)
 
         expect(container.querySelector("[data-node=course-learn-challenge-result-page]")).toBeTruthy()
         expect(container.querySelector("h1")).toHaveAttribute("data-loading", "true")
@@ -34,7 +34,7 @@ describe("_CourseLearnChallengeResultPage", () => {
         const retry = vi.fn()
         const next = vi.fn()
         render(
-            <_CourseLearnChallengeResultPage
+            <CourseLearnChallengeResultPageBase
                 state="ready"
                 props={baseProps}
                 on={{ retry, next }}
@@ -55,7 +55,7 @@ describe("_CourseLearnChallengeResultPage", () => {
     it("replaces result actions with reload after a query failure", () => {
         const reload = vi.fn()
         render(
-            <_CourseLearnChallengeResultPage
+            <CourseLearnChallengeResultPageBase
                 state="failed"
                 props={{ ...baseProps, notice: "Result unavailable" }}
                 on={{ reload }}

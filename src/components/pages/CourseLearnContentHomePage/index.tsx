@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
-import { _CourseLearnContentHomePage } from "./component"
+import { CourseLearnContentHomePageBase } from "./component"
 
 /** Course identity required by the connected Modules landing page. */
 export interface CourseLearnContentHomePageProps { readonly displayId: string }
@@ -15,7 +15,7 @@ export const CourseLearnContentHomePage = ({ displayId }: CourseLearnContentHome
     const course = useQueryCourseSwr({ displayId })
     const state = course.error ? "failed" : course.data === undefined ? "pending" : "ready"
     return (
-        <_CourseLearnContentHomePage
+        <CourseLearnContentHomePageBase
             state={state}
             labels={{
                 title: t("title"),

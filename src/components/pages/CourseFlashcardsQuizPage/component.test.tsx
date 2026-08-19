@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { _CourseFlashcardsQuizPage, type CourseFlashcardsQuizPageProps } from "./component"
+import { CourseFlashcardsQuizPageBase, type CourseFlashcardsQuizPageProps } from "./component"
 
 /**
  * What these tests guard.
@@ -43,10 +43,10 @@ const makeInput = (): CourseFlashcardsQuizPageProps => ({
 
 afterEach(cleanup)
 
-describe("_CourseFlashcardsQuizPage", () => {
+describe("CourseFlashcardsQuizPageBase", () => {
     it("selects the deep/staff configuration and starts the quiz", () => {
         const input = makeInput()
-        const { container } = render(<_CourseFlashcardsQuizPage {...input} />)
+        const { container } = render(<CourseFlashcardsQuizPageBase {...input} />)
 
         expect(container.querySelector("[data-node=course-flashcards-quiz-page]")).toBeTruthy()
         expect(container.querySelector("[data-node=flashcard-quiz-configuration]")).toBeTruthy()
@@ -60,7 +60,7 @@ describe("_CourseFlashcardsQuizPage", () => {
 
     it("keeps the whole configuration standing while the deck count is still arriving", () => {
         const input = makeInput()
-        const { container } = render(<_CourseFlashcardsQuizPage {...input} state="pending" />)
+        const { container } = render(<CourseFlashcardsQuizPageBase {...input} state="pending" />)
 
         expect(container.querySelector("[data-node=flashcard-quiz-configuration]")).toBeTruthy()
         expect(container.querySelectorAll("[data-component=Button][data-loading=true]")).toHaveLength(8)
@@ -70,7 +70,7 @@ describe("_CourseFlashcardsQuizPage", () => {
 
     it("replaces the configuration with an empty notice that offers no dead start button", () => {
         const input = makeInput()
-        const { container } = render(<_CourseFlashcardsQuizPage {...input} state="empty" />)
+        const { container } = render(<CourseFlashcardsQuizPageBase {...input} state="empty" />)
 
         expect(container.querySelector("[data-node=flashcard-quiz-configuration]")).toBeNull()
         expect(screen.getByText("Empty")).toBeInTheDocument()
@@ -80,7 +80,7 @@ describe("_CourseFlashcardsQuizPage", () => {
 
     it("offers the way back from a failed deck load", () => {
         const input = makeInput()
-        render(<_CourseFlashcardsQuizPage {...input} state="failed" />)
+        render(<CourseFlashcardsQuizPageBase {...input} state="failed" />)
 
         expect(screen.getByText("Failed")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Retry" }))
@@ -90,7 +90,7 @@ describe("_CourseFlashcardsQuizPage", () => {
     it("resumes an unfinished session and can still leave for the review face", () => {
         const input = makeInput()
         render(
-            <_CourseFlashcardsQuizPage
+            <CourseFlashcardsQuizPageBase
                 {...input}
                 props={{ ...input.props, resumeSessionId: "session-9", selectedMode: "deep", selectedLevel: "senior" }}
             />,

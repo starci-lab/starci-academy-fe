@@ -7,11 +7,11 @@ vi.mock("@/components/blocks/profile/overview/OverviewContributions", () => ({ O
 vi.mock("@/components/blocks/profile/overview/OverviewChallengeSkills", () => ({ OverviewChallengeSkills: () => <div>Challenge skills owner</div> }))
 vi.mock("@/components/blocks/profile/overview/OverviewCodeSkills", () => ({ OverviewCodeSkills: () => <div>Practice skills owner</div> }))
 
-import { _ProfileOverviewPage } from "./component"
+import { ProfileOverviewPageBase } from "./component"
 
-describe("_ProfileOverviewPage", () => {
+describe("ProfileOverviewPageBase", () => {
     it("keeps the five legacy owners in order and pairs only the two skill summaries", () => {
-        const { container } = render(<_ProfileOverviewPage />)
+        const { container } = render(<ProfileOverviewPageBase />)
         const copy = screen.getAllByText(/owner$/).map((node) => node.textContent)
 
         expect(copy).toEqual([

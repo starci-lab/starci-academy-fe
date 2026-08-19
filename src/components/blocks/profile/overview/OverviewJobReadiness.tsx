@@ -1,7 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { _JobReadinessWidget, type JobReadinessBand, type JobReadinessMetric } from "@/components/blocks/dashboard/JobReadinessWidget/component"
+import { JobReadinessWidgetBase, type JobReadinessBand, type JobReadinessMetric } from "@/components/blocks/dashboard/JobReadinessWidget/component"
 import { useOverviewEvidence } from "./useOverviewEvidence"
 import { clamp } from "./shared"
 
@@ -18,9 +18,9 @@ export const OverviewJobReadiness = () => {
     const retry = () => { void request.mutate() }
     const common = { label: t("profile.evidence.job-readiness.label"), emptyMessage: t("jobReadiness.empty"), errorMessage: t("jobReadiness.error"), retryLabel: t("jobReadiness.retry") }
 
-    if (request.error) return <_JobReadinessWidget state="failed" props={common} on={{ retry }} />
-    if (request.isLoading) return <_JobReadinessWidget state="pending" props={common} />
-    if (!track) return <_JobReadinessWidget state="empty" props={common} />
+    if (request.error) return <JobReadinessWidgetBase state="failed" props={common} on={{ retry }} />
+    if (request.isLoading) return <JobReadinessWidgetBase state="pending" props={common} />
+    if (!track) return <JobReadinessWidgetBase state="empty" props={common} />
 
     const metrics: ReadonlyArray<JobReadinessMetric> = [
         { id: "capstone", label: t("jobReadiness.metric.capstone"), score: clamp(track.capstoneScore), scoreLabel: `${clamp(track.capstoneScore)}%` },
@@ -28,5 +28,5 @@ export const OverviewJobReadiness = () => {
         { id: "cv", label: t("jobReadiness.metric.cv"), score: clamp(track.cvScore), scoreLabel: `${clamp(track.cvScore)}%` },
     ]
     const trackBand = band(track.band)
-    return <_JobReadinessWidget state="ready" props={{ ...common, courseTitle: track.courseTitle, depthScore: clamp(track.depthScore), depthScoreLabel: `${clamp(track.depthScore)}% · ${track.courseTitle}`, band: trackBand, bandLabel: t(`jobReadiness.band.${trackBand}`), percentileLabel: request.data?.foundation?.codingPercentile == null ? undefined : t("jobReadiness.foundationPercentile", { percent: request.data.foundation.codingPercentile }), metrics }} />
+    return <JobReadinessWidgetBase state="ready" props={{ ...common, courseTitle: track.courseTitle, depthScore: clamp(track.depthScore), depthScoreLabel: `${clamp(track.depthScore)}% · ${track.courseTitle}`, band: trackBand, bandLabel: t(`jobReadiness.band.${trackBand}`), percentileLabel: request.data?.foundation?.codingPercentile == null ? undefined : t("jobReadiness.foundationPercentile", { percent: request.data.foundation.codingPercentile }), metrics }} />
 }

@@ -8,7 +8,7 @@ import { useQueryHeadhuntingCompaniesSwr } from "@/hooks/swr/useQueryHeadhunting
 import { useQueryHeadhuntingCompanySuggestionsSwr } from "@/hooks/swr/useQueryHeadhuntingCompanySuggestionsSwr"
 import { useQueryConsultantsSwr } from "@/hooks/swr/useQueryConsultantsSwr"
 import type { Consultant } from "@/modules/api/graphql/queries/query-consultants"
-import { _CourseHeadhuntingsPage } from "./component"
+import { CourseHeadhuntingsPageBase } from "./component"
 
 interface CourseHeadhuntingsPageProps { readonly displayId: string }
 
@@ -73,7 +73,7 @@ export const CourseHeadhuntingsPage = ({ displayId }: CourseHeadhuntingsPageProp
     ])
 
     return (
-        <_CourseHeadhuntingsPage
+        <CourseHeadhuntingsPageBase
             state={state}
             props={{
                 title: copy.title,

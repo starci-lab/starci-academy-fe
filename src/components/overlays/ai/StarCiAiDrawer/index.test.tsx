@@ -29,7 +29,7 @@ type DrawerStub = {
 }
 
 vi.mock("./component", () => ({
-    _StarCiAiDrawer: (input: DrawerStub) => {
+    StarCiAiDrawerBase: (input: DrawerStub) => {
         const Chat = input.chat
         return (
             <>

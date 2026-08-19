@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
 import { useQueryPlaygroundsSwr } from "@/hooks/swr/useQueryPlaygroundsSwr"
-import { _CoursePlaygroundPage, type CoursePlaygroundPageState } from "./component"
+import { CoursePlaygroundPageBase, type CoursePlaygroundPageState } from "./component"
 
 /** Course route identity required by the connected playground catalog. */
 export type CoursePlaygroundPageProps = { readonly displayId: string }
@@ -22,7 +22,7 @@ export const CoursePlaygroundPage = ({ displayId }: CoursePlaygroundPageProps) =
     const state: CoursePlaygroundPageState = failed ? "failed" : pending ? "pending" : rows.length === 0 ? "empty" : "ready"
 
     return (
-        <_CoursePlaygroundPage
+        <CoursePlaygroundPageBase
             state={state}
             props={{
                 title: t("title"),

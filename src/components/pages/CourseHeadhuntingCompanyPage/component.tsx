@@ -72,7 +72,7 @@ const ConsultantList = ({ props, on, isLoading = false }: LeafProps<ConsultantLi
 const ConsultantListContent = defineContractComponent("next-action-list", ConsultantList)
 
 /** Pure company profile with real consultant contact actions and no company-level apply. */
-export const _CourseHeadhuntingCompanyPage = (input: CourseHeadhuntingCompanyPageProps) => {
+export const CourseHeadhuntingCompanyPageBase = (input: CourseHeadhuntingCompanyPageProps) => {
     const isLoading = input.state === "pending"
     const header = defineContractComponent("page-header-stack", {
         trail: defineLeafComponent("breadcrumbs", {}, () => (

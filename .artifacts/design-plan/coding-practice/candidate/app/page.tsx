@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react"
 import { useTheme } from "next-themes"
 import fixture from "~candidate/fixtures/coding.json"
-import { _CodingPracticeHubPage } from "~candidate/components/pages/CodingPracticeHubPage/component"
-import { _CodingDomainPage } from "~candidate/components/pages/CodingDomainPage/component"
-import { _CodingProblemPage } from "~candidate/components/pages/CodingProblemPage/component"
+import { CodingPracticeHubPageBase } from "~candidate/components/pages/CodingPracticeHubPage/component"
+import { CodingDomainPageBase } from "~candidate/components/pages/CodingDomainPage/component"
+import { CodingProblemPageBase } from "~candidate/components/pages/CodingProblemPage/component"
 import type { JudgeVerdictState } from "~candidate/components/blocks/coding/JudgeStatusStrip/component"
 import type { CodingProblemListState } from "~candidate/components/blocks/coding/CodingProblemList/component"
 import type { DomainMasteryGridState } from "~candidate/components/blocks/coding/DomainMasteryGrid/component"
@@ -45,7 +45,7 @@ const hubScene = (
     state: DomainMasteryGridState,
     extra: { session?: "guest" | "signed-in", resume?: boolean, standing?: boolean } = {},
 ) => (
-    <_CodingPracticeHubPage
+    <CodingPracticeHubPageBase
         session={extra.session ?? "signed-in"}
         props={{
             labels: hub.labels,
@@ -58,7 +58,7 @@ const hubScene = (
 
 /** A domain page whose problem list is in one named situation. */
 const domainScene = (state: CodingProblemListState) => (
-    <_CodingDomainPage
+    <CodingDomainPageBase
         props={{
             labels: domain.labels,
             percent: domain.percent,
@@ -84,7 +84,7 @@ const problemScene = (
         compiler?: boolean,
     } = {},
 ) => (
-    <_CodingProblemPage
+    <CodingProblemPageBase
         props={{
             reading: {
                 state: extra.reading ?? "ready",

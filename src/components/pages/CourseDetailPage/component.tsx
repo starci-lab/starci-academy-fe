@@ -2,8 +2,8 @@ import { CONTRACTS } from "@/components/contracts"
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { Tree } from "@/components/branches/Tree"
 import { SurfaceListCard, type SurfaceListCardData } from "@/components/branches/SurfaceListCard"
-import { _CoursePrerequisiteList, type CoursePrerequisite } from "@/components/blocks/courses/CoursePrerequisiteList/component"
-import { _CourseReviewBlock, type CourseReview } from "@/components/blocks/courses/CourseReviewBlock/component"
+import { CoursePrerequisiteListBase, type CoursePrerequisite } from "@/components/blocks/courses/CoursePrerequisiteList/component"
+import { CourseReviewBlockBase, type CourseReview } from "@/components/blocks/courses/CourseReviewBlock/component"
 import { CourseValuePropositionList } from "@/components/blocks/courses/CourseValuePropositionList/component"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { ChoiceTabs } from "@/components/leaves/ChoiceTabs"
@@ -192,7 +192,7 @@ export type CourseDetailPageActions = {
 /** The situations the page can be in. */
 export type CourseDetailPageState = "pending" | "ready" | "not-found" | "failed"
 
-/** Props for {@link _CourseDetailPage}. */
+/** Props for {@link CourseDetailPageBase}. */
 export type CourseDetailPageProps = {
     /** The business situation, which picks the tree. */
     readonly state: CourseDetailPageState
@@ -201,6 +201,9 @@ export type CourseDetailPageProps = {
     /** What the page reports. */
     readonly on?: CourseDetailPageActions
 }
+
+const reviewStateOf = (total: number | undefined): "unrated" | "rated" => (total ?? 0) === 0 ? "unrated" : "rated"
+const mobileEnrollStateOf = (railState: CourseDetailPageProps["props"]["railState"]): "price-pending" | "ready" => railState === "price-pending" ? "price-pending" : "ready"
 
 /**
  * How many resting rows each run shows while its values are unknown.
@@ -260,7 +263,7 @@ type CoursePrerequisiteListData = SurfaceListCardData & {
 
 /** The ordered run of requirements, drawn inside the surface branch body. */
 const CoursePrerequisiteListView = ({ props }: LeafProps<CoursePrerequisiteListData>) => (
-    <_CoursePrerequisiteList state="required" props={{ prerequisites: props.prerequisites }} />
+    <CoursePrerequisiteListBase state="required" props={{ prerequisites: props.prerequisites }} />
 )
 
 /** Stable component type branded for the exact prerequisite contract it implements. */
@@ -322,7 +325,7 @@ const CourseFaqList = defineContractComponent("course-faq-list", CourseFaqListVi
  *
  * @param input - {@link CourseDetailPageProps}
  */
-export const _CourseDetailPage = (input: CourseDetailPageProps) => {
+export const CourseDetailPageBase = (input: CourseDetailPageProps) => {
     if (input.state === "not-found" || input.state === "failed") {
         return (
             <EmptyNotice
@@ -430,8 +433,8 @@ export const _CourseDetailPage = (input: CourseDetailPageProps) => {
                     <Heading props={{ content: input.props.labels.reviewsTitle, level: 2 }} />
                 )),
                 body: defineContractProjection("course-review-block", () => (
-                    <_CourseReviewBlock
-                        state={(input.props.reviewTotal ?? 0) === 0 ? "unrated" : "rated"}
+                    <CourseReviewBlockBase
+                        state={reviewStateOf(input.props.reviewTotal)}
                         props={{
                             averageScore: input.props.averageScore ?? 0,
                             total: input.props.reviewTotal ?? 0,
@@ -488,7 +491,7 @@ export const _CourseDetailPage = (input: CourseDetailPageProps) => {
                     }),
                 }),
                 action: input.props.rail === undefined ? undefined : CourseMobileEnrollBar({
-                    state: input.props.railState === "price-pending" ? "price-pending" : "ready",
+                    state: mobileEnrollStateOf(input.props.railState),
                     props: {
                         price: input.props.rail.price,
                         originalPrice: input.props.rail.originalPrice,

@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import {
-    _CoursePersonalProjectPage,
+    CoursePersonalProjectPageBase,
     type CoursePersonalProjectPageProps,
     type CoursePersonalProjectTaskRow,
 } from "./component"
@@ -29,14 +29,14 @@ const draw = (
     props: Partial<CoursePersonalProjectPageProps["props"]> = {},
     on?: CoursePersonalProjectPageProps["on"],
 ) => render(
-    <_CoursePersonalProjectPage
+    <CoursePersonalProjectPageBase
         state={state}
         props={{ ...copy, tasks, progressText: "1/2 tasks completed", completionPercent: 50, ...props }}
         on={on}
     />,
 )
 
-describe("_CoursePersonalProjectPage", () => {
+describe("CoursePersonalProjectPageBase", () => {
     it("keeps progress facts before ordered task destinations", () => {
         const { container } = draw("ready", {}, { openTask: vi.fn() })
 

@@ -6,7 +6,7 @@ import type { QueryMyFeedItemData } from "@/modules/api/graphql/queries/types/my
 import { ActivityType } from "@/modules/api/graphql/queries/types/my-feed"
 import { ReactionType } from "@/modules/api/graphql/queries/types/reactions"
 import type { ActivityDayData, ActivityFeedActions } from "./component"
-import { _ActivityFeed } from "./component"
+import { ActivityFeedBase } from "./component"
 
 /** Remote activity rows and state resolved by the feed controller. */
 export type ActivityFeedConnectedProps = {
@@ -91,7 +91,7 @@ export const ActivityFeed = (input: ActivityFeedConnectedProps) => {
         }
         return [...groups.values()]
     }, [input.items, input.reactingId, locale, t])
-    return <_ActivityFeed state={input.state} props={{
+    return <ActivityFeedBase state={input.state} props={{
         days,
         message: input.message,
         description: input.description,

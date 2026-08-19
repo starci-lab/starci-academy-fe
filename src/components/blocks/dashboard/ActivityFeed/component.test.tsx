@@ -2,7 +2,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { ReactionType } from "@/modules/api/graphql/queries/types/reactions"
-import { _ActivityFeed } from "./component"
+import { ActivityFeedBase } from "./component"
 
 /**
  * What these tests guard - that the row reports WHICH reaction, not merely that one happened.
@@ -40,9 +40,9 @@ const activityRow = (id: string, actor: string) => ({
 
 afterEach(cleanup)
 
-describe("_ActivityFeed", () => {
+describe("ActivityFeedBase", () => {
     it("draws one joined list per day, labelled by the day it names", () => {
-        const { container } = render(<_ActivityFeed state="ready" props={{
+        const { container } = render(<ActivityFeedBase state="ready" props={{
             message: "",
             days: [
                 { id: "1", label: "Today", rows: [activityRow("a1", "Ada")] },
@@ -58,7 +58,7 @@ describe("_ActivityFeed", () => {
     })
 
     it("holds two resting day groups of three rows so the column keeps its height", () => {
-        const { container } = render(<_ActivityFeed state="pending" props={{ message: "", days: [] }} />)
+        const { container } = render(<ActivityFeedBase state="pending" props={{ message: "", days: [] }} />)
         expect(container.querySelectorAll("[data-node=\"activity-day-group\"]")).toHaveLength(2)
         expect(container.querySelectorAll("[data-node=\"activity-actor-body-time-row\"]")).toHaveLength(6)
     })
@@ -69,7 +69,7 @@ describe("_ActivityFeed", () => {
         ["platformEmpty" as const],
     ])("replaces the whole stream with one notice in the %s situation", (state) => {
         const resultAction = vi.fn()
-        const { container } = render(<_ActivityFeed
+        const { container } = render(<ActivityFeedBase
             state={state}
             props={{
                 message: "Nothing to show",
@@ -89,7 +89,7 @@ describe("_ActivityFeed", () => {
     it("reports the chosen reaction, from the row it was chosen on", async () => {
         const reactFirst = vi.fn()
         const reactSecond = vi.fn()
-        render(<_ActivityFeed
+        render(<ActivityFeedBase
             state="ready"
             props={{ message: "", days: [{
                 id: "1",
@@ -108,7 +108,7 @@ describe("_ActivityFeed", () => {
 
     it("reports taking a reaction back as a null choice, not as a second one", async () => {
         const react = vi.fn()
-        render(<_ActivityFeed
+        render(<ActivityFeedBase
             state="ready"
             props={{ message: "", days: [{
                 id: "1",
@@ -127,7 +127,7 @@ describe("_ActivityFeed", () => {
     it("reports opening the actor and opening the target as two different journeys", () => {
         const openActor = vi.fn()
         const openTarget = vi.fn()
-        render(<_ActivityFeed
+        render(<ActivityFeedBase
             state="ready"
             props={{ message: "", days: [{ id: "1", label: "Today", rows: [activityRow("a1", "Ada")] }] }}
             on={{ "actor:a1": openActor, "target:a1": openTarget }}

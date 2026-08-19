@@ -6,11 +6,11 @@ import { Text } from "@/components/leaves/Text"
 import { Tree, defineContract } from "~candidate/components/branches/Tree"
 import { CurriculumModuleRow, type CurriculumLesson } from "~candidate/components/leaves/CurriculumModuleRow"
 import {
-    _CoursePricingRail,
+    CoursePricingRailBase,
     type CoursePricingRailData,
     type CoursePricingRailState,
 } from "~candidate/components/blocks/CoursePricingRail/component"
-import { _CourseMobileEnrollBar } from "~candidate/components/blocks/CourseMobileEnrollBar/component"
+import { CourseMobileEnrollBarBase } from "~candidate/components/blocks/CourseMobileEnrollBar/component"
 
 /**
  * PAGE - `CourseDetailPage`: what the course is, what it promises, what it contains, and one place
@@ -103,7 +103,7 @@ export type CourseDetailPageActions = {
 /** The situations the page can be in. */
 export type CourseDetailPageState = "pending" | "ready" | "not-found" | "failed"
 
-/** Props for {@link _CourseDetailPage}. */
+/** Props for {@link CourseDetailPageBase}. */
 export type CourseDetailPageProps = {
     /** The business situation, which picks the tree. */
     readonly state: CourseDetailPageState
@@ -121,7 +121,7 @@ const RESTING_MODULE_COUNT = 5
  *
  * @param input - {@link CourseDetailPageProps}
  */
-export const _CourseDetailPage = (input: CourseDetailPageProps) => {
+export const CourseDetailPageBase = (input: CourseDetailPageProps) => {
     if (input.state === "not-found" || input.state === "failed") {
         return (
             <EmptyNotice
@@ -236,7 +236,7 @@ export const _CourseDetailPage = (input: CourseDetailPageProps) => {
                     render={defineContract("main-then-rail", [
                         <Tree key="main" contract="course-narrative-column" render={narrative} />,
                         input.props.rail === undefined ? null : (
-                            <_CoursePricingRail
+                            <CoursePricingRailBase
                                 key="rail"
                                 state={input.props.railState ?? "ready"}
                                 props={input.props.rail}
@@ -246,7 +246,7 @@ export const _CourseDetailPage = (input: CourseDetailPageProps) => {
                     ])}
                 />,
                 input.props.rail === undefined ? null : (
-                    <_CourseMobileEnrollBar
+                    <CourseMobileEnrollBarBase
                         key="action"
                         props={{
                             price: input.props.rail.price,

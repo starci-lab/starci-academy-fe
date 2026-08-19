@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _PersonalProjectWorkspaceLayout } from "./component"
+import { PersonalProjectWorkspaceLayoutBase } from "./component"
 
 /**
  * What these tests guard.
@@ -13,10 +13,10 @@ import { _PersonalProjectWorkspaceLayout } from "./component"
 
 const Surface = () => <div>Task workspace</div>
 
-describe("_PersonalProjectWorkspaceLayout", () => {
+describe("PersonalProjectWorkspaceLayoutBase", () => {
     it("keeps milestone navigation beside the routed personal-project surface", () => {
         render(
-            <_PersonalProjectWorkspaceLayout
+            <PersonalProjectWorkspaceLayoutBase
                 milestones={[
                     { id: "task-1", label: "Milestone 1 · Plan" },
                     { id: "task-2", label: "Milestone 1 · Build", isCurrent: true },
@@ -33,7 +33,7 @@ describe("_PersonalProjectWorkspaceLayout", () => {
     it("routes a pressed milestone to the task the rail names", () => {
         const onTask = vi.fn()
         render(
-            <_PersonalProjectWorkspaceLayout
+            <PersonalProjectWorkspaceLayoutBase
                 milestones={[
                     { id: "task-1", label: "Milestone 1 · Plan" },
                     { id: "task-2", label: "Milestone 1 · Build", isCurrent: true },
@@ -49,7 +49,7 @@ describe("_PersonalProjectWorkspaceLayout", () => {
 
     it("rests four milestones rather than showing an empty roadmap while it loads", () => {
         const { container } = render(
-            <_PersonalProjectWorkspaceLayout milestones={[]} surface={<Surface />} isLoading />,
+            <PersonalProjectWorkspaceLayoutBase milestones={[]} surface={<Surface />} isLoading />,
         )
 
         expect(container.querySelectorAll("[data-component=NavLink]")).toHaveLength(4)
@@ -59,7 +59,7 @@ describe("_PersonalProjectWorkspaceLayout", () => {
 
     it("keeps the milestones it already has while a later read is in flight", () => {
         const { container } = render(
-            <_PersonalProjectWorkspaceLayout
+            <PersonalProjectWorkspaceLayoutBase
                 milestones={[{ id: "task-1", label: "Milestone 1 · Plan" }]}
                 surface={<Surface />}
                 isLoading
@@ -72,7 +72,7 @@ describe("_PersonalProjectWorkspaceLayout", () => {
 
     it("draws an empty rail only once the project settled with no roadmap at all", () => {
         const { container } = render(
-            <_PersonalProjectWorkspaceLayout milestones={[]} surface={<Surface />} />,
+            <PersonalProjectWorkspaceLayoutBase milestones={[]} surface={<Surface />} />,
         )
 
         expect(container.querySelectorAll("[data-component=NavLink]")).toHaveLength(0)

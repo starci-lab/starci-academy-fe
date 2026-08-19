@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _ProfileHero, type ProfileHeroData } from "./component"
+import { ProfileHeroBase, type ProfileHeroData } from "./component"
 
 const settled: ProfileHeroData = {
     name: "Ada Lovelace",
@@ -38,9 +38,9 @@ const facts = (root: HTMLElement) =>
 const metaItems = (root: HTMLElement) =>
     Array.from(root.querySelectorAll("[data-node=\"profile-meta-list\"] > *"), (item) => item.textContent)
 
-describe("_ProfileHero", () => {
+describe("ProfileHeroBase", () => {
     it("draws the whole identity rail when every public field is present", () => {
-        const { container } = render(<_ProfileHero state="ready" props={settled} />)
+        const { container } = render(<ProfileHeroBase state="ready" props={settled} />)
 
         expect(container.querySelector("[data-node=\"profile-hero-rail\"]")).not.toBeNull()
         expect(screen.getByRole("heading", { name: "Ada Lovelace" })).toBeInTheDocument()
@@ -56,7 +56,7 @@ describe("_ProfileHero", () => {
     })
 
     it("lists each supplied external destination as a link, followed by the joined date", () => {
-        const { container } = render(<_ProfileHero state="ready" props={settled} />)
+        const { container } = render(<ProfileHeroBase state="ready" props={settled} />)
 
         expect(metaItems(container)).toEqual(["GitHub", "LinkedIn", "https://ada.dev", "Joined March 2024"])
         expect(screen.getByRole("link", { name: "GitHub" })).toHaveAttribute("href", "https://github.com/ada")
@@ -65,7 +65,7 @@ describe("_ProfileHero", () => {
     })
 
     it("drops the role, bio, fact run and every link when the profile carries none of them", () => {
-        const { container } = render(<_ProfileHero state="ready" props={bare} />)
+        const { container } = render(<ProfileHeroBase state="ready" props={bare} />)
 
         expect(container.querySelector("[data-node=\"profile-fact-run\"]")).toBeNull()
         expect(screen.queryByRole("link")).toBeNull()
@@ -75,7 +75,7 @@ describe("_ProfileHero", () => {
     })
 
     it("keeps a single-fact run when only one of location and work mode is public", () => {
-        const { container } = render(<_ProfileHero state="ready" props={{ ...bare, workMode: "Hybrid" }} />)
+        const { container } = render(<ProfileHeroBase state="ready" props={{ ...bare, workMode: "Hybrid" }} />)
 
         expect(facts(container)).toEqual(["Hybrid"])
     })
@@ -83,7 +83,7 @@ describe("_ProfileHero", () => {
     it("reports the primary press and the share press to its owner", () => {
         const primary = vi.fn()
         const share = vi.fn()
-        render(<_ProfileHero state="ready" props={settled} on={{ primary, share }} />)
+        render(<ProfileHeroBase state="ready" props={settled} on={{ primary, share }} />)
 
         fireEvent.click(screen.getByRole("button", { name: "Follow" }))
         expect(primary).toHaveBeenCalledOnce()
@@ -95,7 +95,7 @@ describe("_ProfileHero", () => {
     it("blocks the primary action while the follow change is still in flight", () => {
         const primary = vi.fn()
         const { container } = render(
-            <_ProfileHero state="ready" props={{ ...settled, primaryPending: true }} on={{ primary }} />,
+            <ProfileHeroBase state="ready" props={{ ...settled, primaryPending: true }} on={{ primary }} />,
         )
 
         const button = container.querySelector("[data-component=\"Button\"]")
@@ -105,7 +105,7 @@ describe("_ProfileHero", () => {
     })
 
     it("rests the avatar, identity, proof and joined line while the profile is in flight", () => {
-        const { container } = render(<_ProfileHero state="pending" props={settled} />)
+        const { container } = render(<ProfileHeroBase state="pending" props={settled} />)
 
         expect(container.querySelector("[data-component=\"Avatar\"]")).toHaveAttribute("data-loading", "true")
         expect(container.querySelector("[data-component=\"Heading\"]")).toHaveAttribute("data-loading", "true")
@@ -118,7 +118,7 @@ describe("_ProfileHero", () => {
     })
 
     it("still draws the rail when no owner listens to its actions", () => {
-        render(<_ProfileHero state="ready" props={settled} />)
+        render(<ProfileHeroBase state="ready" props={settled} />)
 
         fireEvent.click(screen.getByRole("button", { name: "Follow" }))
         fireEvent.click(screen.getByRole("button", { name: "Share profile" }))

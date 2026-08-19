@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
-import { _MyCoursesProgress } from "./component"
+import { MyCoursesProgressBase } from "./component"
 
 /**
  * What these tests guard - the pure half's four situations, driven by props alone.
@@ -40,10 +40,10 @@ const row = {
 
 afterEach(cleanup)
 
-describe("_MyCoursesProgress", () => {
+describe("MyCoursesProgressBase", () => {
     it("draws one pressable row per course, with all three dimensions named and counted", () => {
         const open = vi.fn()
-        const { container } = render(<_MyCoursesProgress
+        const { container } = render(<MyCoursesProgressBase
             state="ready"
             props={{ ...frame, rows: [row] }}
             on={{ "open:course-1": open }}
@@ -58,13 +58,13 @@ describe("_MyCoursesProgress", () => {
     })
 
     it("badges a course the reader is only trying", () => {
-        render(<_MyCoursesProgress state="ready" props={{ ...frame, rows: [{ ...row, isTrial: true }] }} />)
+        render(<MyCoursesProgressBase state="ready" props={{ ...frame, rows: [{ ...row, isTrial: true }] }} />)
         expect(screen.getByText("Trial")).toBeInTheDocument()
     })
 
     it("shuts a row whose destination is still being resolved", () => {
         const open = vi.fn()
-        render(<_MyCoursesProgress
+        render(<MyCoursesProgressBase
             state="ready"
             props={{ ...frame, rows: [{ ...row, isPending: true }] }}
             on={{ "open:course-1": open }}
@@ -76,7 +76,7 @@ describe("_MyCoursesProgress", () => {
     })
 
     it("holds two resting rows, with no trial badge and nothing pressable, while courses load", () => {
-        const { container } = render(<_MyCoursesProgress state="pending" props={{ ...frame, rows: [] }} />)
+        const { container } = render(<MyCoursesProgressBase state="pending" props={{ ...frame, rows: [] }} />)
         const rows = container.querySelectorAll("[data-node=\"course-progress-row\"]")
         expect(rows).toHaveLength(2)
         expect(screen.queryByText("Trial")).toBeNull()
@@ -85,7 +85,7 @@ describe("_MyCoursesProgress", () => {
 
     it("says the shelf is bare, and still offers the request again", () => {
         const retry = vi.fn()
-        render(<_MyCoursesProgress state="empty" props={{ ...frame, rows: [] }} on={{ retry }} />)
+        render(<MyCoursesProgressBase state="empty" props={{ ...frame, rows: [] }} on={{ retry }} />)
         expect(screen.getByText("Nothing enrolled yet")).toBeInTheDocument()
         expect(screen.queryByText("Could not load your courses")).toBeNull()
         fireEvent.click(screen.getByRole("button", { name: "Retry" }))
@@ -94,7 +94,7 @@ describe("_MyCoursesProgress", () => {
 
     it("says what went wrong, and offers the request again", () => {
         const retry = vi.fn()
-        render(<_MyCoursesProgress state="failed" props={{ ...frame, rows: [] }} on={{ retry }} />)
+        render(<MyCoursesProgressBase state="failed" props={{ ...frame, rows: [] }} on={{ retry }} />)
         expect(screen.getByText("Could not load your courses")).toBeInTheDocument()
         expect(screen.queryByText("Nothing enrolled yet")).toBeNull()
         fireEvent.click(screen.getByRole("button", { name: "Retry" }))
@@ -104,7 +104,7 @@ describe("_MyCoursesProgress", () => {
     it("keeps the notice empty rather than printing the word undefined at a reader", () => {
         // Both sentences are optional in the data type, so a caller can settle a situation without
         // resolving the words for it. Drawing nothing is recoverable; drawing "undefined" is not.
-        const { container } = render(<_MyCoursesProgress state="empty" props={{ label: "My courses", rows: [] }} />)
+        const { container } = render(<MyCoursesProgressBase state="empty" props={{ label: "My courses", rows: [] }} />)
         expect(container.querySelector("[data-node=\"empty-notice-stack\"]")).toBeInTheDocument()
         expect(screen.queryByText("undefined")).toBeNull()
         expect(container.querySelector("button")).toBeNull()

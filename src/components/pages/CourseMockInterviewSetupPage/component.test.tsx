@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import {
-    _CourseMockInterviewSetupPage,
+    CourseMockInterviewSetupPageBase,
     type CourseMockInterviewSetupData,
     type CourseMockInterviewSetupPageProps,
 } from "./component"
@@ -37,9 +37,9 @@ const draw = (
     state: CourseMockInterviewSetupPageProps["state"],
     props: Partial<CourseMockInterviewSetupData> = {},
     on?: CourseMockInterviewSetupPageProps["on"],
-) => render(<_CourseMockInterviewSetupPage state={state} props={{ ...copy, ...props }} on={on} />)
+) => render(<CourseMockInterviewSetupPageBase state={state} props={{ ...copy, ...props }} on={on} />)
 
-describe("_CourseMockInterviewSetupPage", () => {
+describe("CourseMockInterviewSetupPageBase", () => {
     it("fills the seniority and format the learner is currently on and leaves the alternatives open", () => {
         draw("ready")
 

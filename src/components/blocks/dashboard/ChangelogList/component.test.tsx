@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _ChangelogList } from "./component"
+import { ChangelogListBase } from "./component"
 
 const props = {
     label: "What's new",
@@ -17,9 +17,9 @@ const props = {
     }],
 } as const
 
-describe("_ChangelogList", () => {
+describe("ChangelogListBase", () => {
     it("renders joined semantic rows with full-width separators", () => {
-        const { container } = render(<_ChangelogList state="ready" props={props} />)
+        const { container } = render(<ChangelogListBase state="ready" props={props} />)
         expect(screen.getByText("12/08/2026")).toBeInTheDocument()
         expect(screen.getByText("Feature").closest("[data-tone]")).toHaveAttribute("data-tone", "success")
         expect(screen.getByText("Faster avatars")).toBeInTheDocument()
@@ -34,18 +34,18 @@ describe("_ChangelogList", () => {
 
     it("reports which entry was opened", () => {
         const open = vi.fn()
-        render(<_ChangelogList state="ready" props={props} on={{ open }} />)
+        render(<ChangelogListBase state="ready" props={props} on={{ open }} />)
         fireEvent.click(screen.getByText("Faster avatars"))
         expect(open).toHaveBeenCalledWith("one")
     })
 
     it("keeps four joined resting rows", () => {
-        const { container } = render(<_ChangelogList state="pending" props={props} />)
+        const { container } = render(<ChangelogListBase state="pending" props={props} />)
         expect(container.querySelectorAll("[data-node=\"changelog-entry-row\"]")).toHaveLength(4)
     })
 
     it("hides the whole settled empty block", () => {
-        const { container } = render(<_ChangelogList state="empty" props={props} />)
+        const { container } = render(<ChangelogListBase state="empty" props={props} />)
         expect(container).toBeEmptyDOMElement()
     })
 })

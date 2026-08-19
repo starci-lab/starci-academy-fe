@@ -19,7 +19,7 @@ export type PersonalProjectWorkspaceLayoutProps = {
 }
 
 /** Keeps milestone navigation mounted around dashboard, task and result surfaces. */
-export const _PersonalProjectWorkspaceLayout = (input: PersonalProjectWorkspaceLayoutProps) => {
+export const PersonalProjectWorkspaceLayoutBase = (input: PersonalProjectWorkspaceLayoutProps) => {
     const milestones: ReadonlyArray<PersonalProjectWorkspaceMilestone> = input.isLoading === true && input.milestones.length === 0
         ? Array.from({ length: 4 }, (_, index) => ({ id: `pending-${index}`, label: "", isCurrent: false }))
         : input.milestones

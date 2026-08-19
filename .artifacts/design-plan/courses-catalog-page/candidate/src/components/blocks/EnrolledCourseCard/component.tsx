@@ -73,7 +73,7 @@ export type EnrolledCourseCardActions = {
     readonly resume?: () => void
 }
 
-/** Props for {@link _EnrolledCourseCard}. */
+/** Props for {@link EnrolledCourseCardBase}. */
 export type EnrolledCourseCardProps = BlockProps<EnrolledCourseCardState, EnrolledCourseCardData> & {
     readonly on?: EnrolledCourseCardActions
 }
@@ -83,7 +83,7 @@ export type EnrolledCourseCardProps = BlockProps<EnrolledCourseCardState, Enroll
  *
  * @param input - {@link EnrolledCourseCardProps}
  */
-export const _EnrolledCourseCard = (input: EnrolledCourseCardProps) => {
+export const EnrolledCourseCardBase = (input: EnrolledCourseCardProps) => {
     const isLoading = input.state === "pending"
 
     const body = defineContractComponent("enrolled-course-body", {

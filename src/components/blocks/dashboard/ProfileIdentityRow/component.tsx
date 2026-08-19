@@ -15,7 +15,7 @@ export type ProfileIdentityRowProps =
     }
 
 /** Pure identity anchor; request and route ownership stay in the connected half. */
-export const _ProfileIdentityRow = (input: ProfileIdentityRowProps) => {
+export const ProfileIdentityRowBase = (input: ProfileIdentityRowProps) => {
     if (input.state === "empty") return null
     if (input.state === "pending") {
         return <ProfileRow props={{}} isLoading />

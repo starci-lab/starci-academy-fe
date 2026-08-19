@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
-import { _PublicProfileLayout, type PublicProfileLayoutProps } from "./component"
+import { PublicProfileLayoutBase, type PublicProfileLayoutProps } from "./component"
 
 vi.mock("@/components/blocks/profile/ProfileHero", () => ({
     ProfileHero: () => <div data-testid="profile-hero" />,
@@ -39,9 +39,9 @@ const base: PublicProfileLayoutProps = {
     body: () => <div data-testid="profile-body" />,
 }
 
-describe("_PublicProfileLayout", () => {
+describe("PublicProfileLayoutBase", () => {
     it("owns profile tabs above the identity-and-evidence body", () => {
-        const { container } = render(<_PublicProfileLayout {...base} />)
+        const { container } = render(<PublicProfileLayoutBase {...base} />)
         const profileChrome = container.querySelector("[data-node=\"profile-tabs-over-body\"]")
         expect(profileChrome).toBeTruthy()
         expect(profileChrome?.querySelector("[data-node=\"underlined-tab-strip\"]")).toBeTruthy()
@@ -51,7 +51,7 @@ describe("_PublicProfileLayout", () => {
     })
 
     it("suppresses route chrome for a locked visitor", () => {
-        render(<_PublicProfileLayout {...base} state="locked" />)
+        render(<PublicProfileLayoutBase {...base} state="locked" />)
         expect(screen.queryByRole("tablist")).toBeNull()
         expect(screen.getByText("Private")).toBeTruthy()
     })
@@ -59,7 +59,7 @@ describe("_PublicProfileLayout", () => {
     it("keeps the identity rail beside a locked body and offers the way to browse", () => {
         const browse = vi.fn()
         const { container } = render(
-            <_PublicProfileLayout {...base} state="locked" on={{ ...base.on, browse }} />,
+            <PublicProfileLayoutBase {...base} state="locked" on={{ ...base.on, browse }} />,
         )
 
         expect(container.querySelector("[data-testid=\"profile-hero\"]")).toBeTruthy()
@@ -72,7 +72,7 @@ describe("_PublicProfileLayout", () => {
     it("replaces the whole profile with a retry when the read failed", () => {
         const retry = vi.fn()
         const { container } = render(
-            <_PublicProfileLayout {...base} state="failed" on={{ ...base.on, retry }} />,
+            <PublicProfileLayoutBase {...base} state="failed" on={{ ...base.on, retry }} />,
         )
 
         expect(container.querySelector("[data-testid=\"profile-hero\"]")).toBeNull()
@@ -85,7 +85,7 @@ describe("_PublicProfileLayout", () => {
     it("sends a reader home rather than retrying a profile that does not exist", () => {
         const home = vi.fn()
         const retry = vi.fn()
-        render(<_PublicProfileLayout {...base} state="not-found" on={{ ...base.on, home, retry }} />)
+        render(<PublicProfileLayoutBase {...base} state="not-found" on={{ ...base.on, home, retry }} />)
 
         expect(screen.getByText("Missing")).toBeTruthy()
         fireEvent.click(screen.getByRole("button", { name: /Home/ }))
@@ -94,7 +94,7 @@ describe("_PublicProfileLayout", () => {
     })
 
     it("keeps the same chrome while the profile is still loading", () => {
-        const { container } = render(<_PublicProfileLayout {...base} state="loading" />)
+        const { container } = render(<PublicProfileLayoutBase {...base} state="loading" />)
 
         expect(container.querySelector("[data-node=\"profile-tabs-over-body\"]")).toBeTruthy()
         expect(container.querySelector("[data-testid=\"profile-body\"]")).toBeTruthy()
@@ -102,7 +102,7 @@ describe("_PublicProfileLayout", () => {
 
     it("reports a tab change to the connected owner", () => {
         const selectTab = vi.fn()
-        render(<_PublicProfileLayout {...base} on={{ ...base.on, selectTab }} />)
+        render(<PublicProfileLayoutBase {...base} on={{ ...base.on, selectTab }} />)
 
         fireEvent.click(screen.getByRole("tab", { name: "Projects" }))
         expect(selectTab).toHaveBeenCalledWith("projects")

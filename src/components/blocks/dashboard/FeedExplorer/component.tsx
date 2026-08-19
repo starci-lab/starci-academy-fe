@@ -28,7 +28,7 @@ export type FeedExplorerActions = {
 export type FeedExplorerProps = { readonly props: FeedExplorerData; readonly on?: FeedExplorerActions }
 
 /** Pure Explore feed arrangement. Requests and navigation stay in the connected half. */
-export const _FeedExplorer = (input: FeedExplorerProps) => (
+export const FeedExplorerBase = (input: FeedExplorerProps) => (
     <Tree contract="feed-explorer" render={defineContractComponent("feed-explorer", {
         trending: defineContractProjection("trending-content-list", () => <TrendingContents />),
         stream: defineContractComponent("feed-stream", {

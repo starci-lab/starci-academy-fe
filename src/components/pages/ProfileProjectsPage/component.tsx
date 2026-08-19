@@ -17,7 +17,7 @@ export type ProfileProjectsPageProps = {
 const percent = (done: number, total: number) => `${Math.round(done / Math.max(1, total) * 100)}%`
 
 /** Projects parity: showcase tiles first, then one joined list of verified capstone journeys. */
-export const _ProfileProjectsPage = ({ pinned, capstones, on }: ProfileProjectsPageProps) => {
+export const ProfileProjectsPageBase = ({ pinned, capstones, on }: ProfileProjectsPageProps) => {
     const pins = pinned.state === "pending"
         ? Array.from({ length: 2 }, (_, index): ProfilePinnedProject => ({ id: `pending-${index}`, type: "", title: "", techStack: [], orderIndex: index, isVerified: false }))
         : pinned.data

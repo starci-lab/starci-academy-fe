@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, within } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import {
-    _CourseMockInterviewResultPage,
+    CourseMockInterviewResultPageBase,
     type CourseMockInterviewResultData,
     type CourseMockInterviewResultPageProps,
 } from "./component"
@@ -49,9 +49,9 @@ const draw = (
     state: CourseMockInterviewResultPageProps["state"],
     props: Partial<CourseMockInterviewResultData> = {},
     on?: CourseMockInterviewResultPageProps["on"],
-) => render(<_CourseMockInterviewResultPage state={state} props={{ ...copy, ...props }} on={on} />)
+) => render(<CourseMockInterviewResultPageBase state={state} props={{ ...copy, ...props }} on={on} />)
 
-describe("_CourseMockInterviewResultPage", () => {
+describe("CourseMockInterviewResultPageBase", () => {
     it("reports the graded outcome, the rubric behind it and the evidence behind the rubric", () => {
         const { container } = draw("ready")
 

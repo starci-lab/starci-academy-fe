@@ -1,12 +1,12 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _CourseLearnModulePage } from "./component"
+import { CourseLearnModulePageBase } from "./component"
 
-describe("_CourseLearnModulePage", () => {
+describe("CourseLearnModulePageBase", () => {
     it("opens a lesson from the module disclosure", () => {
         const onContent = vi.fn()
         render(
-            <_CourseLearnModulePage
+            <CourseLearnModulePageBase
                 state="ready"
                 title="Async patterns"
                 label="Contents"

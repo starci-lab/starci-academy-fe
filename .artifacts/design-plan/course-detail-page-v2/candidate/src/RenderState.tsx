@@ -1,7 +1,7 @@
 "use client"
 import { Tree } from "@/components/branches/Tree"
 import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
-import { _CourseDetailPage } from "@/components/pages/CourseDetailPage/component"
+import { CourseDetailPageBase } from "@/components/pages/CourseDetailPage/component"
 import type { RenderedState } from "~candidate/states"
 
 /**
@@ -34,7 +34,7 @@ export const RenderState = (input: RenderStateProps) => (
     <Tree
         contract="routed-page-main"
         render={defineContractComponent("routed-page-main", {
-            page: defineLeafComponent("page", {}, () => <_CourseDetailPage {...input.state.props} />),
+            page: defineLeafComponent("page", {}, () => <CourseDetailPageBase {...input.state.props} />),
         })}
     />
 )

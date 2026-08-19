@@ -10,7 +10,7 @@ vi.mock("@/hooks/swr/useQueryMockInterviewAttemptBySessionSwr", () => ({ useQuer
 vi.mock("@/hooks/swr/useMutateSyncMockInterviewSessionTurnsSwr", () => ({ useMutateSyncMockInterviewSessionTurnsSwr: () => m.sync }))
 vi.mock("@/hooks/swr/useMutateGradeMockInterviewSessionSwr", () => ({ useMutateGradeMockInterviewSessionSwr: () => m.grade }))
 vi.mock("@/hooks/socketio/useMockInterviewSocketIo", () => ({ useMockInterviewSocketIo: () => m.socket }))
-vi.mock("./component", () => ({ _CourseMockInterviewSessionPage: ({ state, on }: TestPageInput) => <><output data-testid="state">{state}</output><button onClick={on.retry}>retry</button><button onClick={on.leave}>leave</button><button onClick={on.abort}>abort</button></> }))
+vi.mock("./component", () => ({ CourseMockInterviewSessionPageBase: ({ state, on }: TestPageInput) => <><output data-testid="state">{state}</output><button onClick={on.retry}>retry</button><button onClick={on.leave}>leave</button><button onClick={on.abort}>abort</button></> }))
 import { CourseMockInterviewSessionPage } from "./index"
 beforeEach(() => { vi.clearAllMocks(); m.course.data = undefined; m.course.error = undefined; m.session.data = undefined; m.session.error = undefined; m.attempt.data = undefined; m.attempt.error = undefined })
 describe("CourseMockInterviewSessionPage route", () => {

@@ -57,7 +57,7 @@ export type CourseFlashcardsReviewPageProps = {
 }
 
 /** Renders the legacy review hierarchy without fetching or routing internally. */
-export const _CourseFlashcardsReviewPage = (input: CourseFlashcardsReviewPageProps) => {
+export const CourseFlashcardsReviewPageBase = (input: CourseFlashcardsReviewPageProps) => {
     const state = input.state
     const data = input.props
     const on = input.on

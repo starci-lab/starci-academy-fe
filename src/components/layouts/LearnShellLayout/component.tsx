@@ -6,7 +6,7 @@ import type { IconName } from "@/components/leaves/Icon"
 import type { ReactNode } from "react"
 
 /**
- * LAYOUT - `_LearnShellLayout`: the frame every learn surface is read inside.
+ * LAYOUT - `LearnShellLayoutBase`: the frame every learn surface is read inside.
  *
  * Target path on materialization: `src/components/layouts/LearnShellLayout/component.tsx`.
  *
@@ -64,7 +64,7 @@ export type LearnShellLayoutActions = LearnSpineActions & {
     readonly openMobileTab?: (id: string) => void
 }
 
-/** Props for {@link _LearnShellLayout}. */
+/** Props for {@link LearnShellLayoutBase}. */
 export type LearnShellLayoutProps = {
     readonly props: LearnShellLayoutData
     readonly on?: LearnShellLayoutActions
@@ -78,7 +78,7 @@ export type LearnShellLayoutProps = {
  *
  * @param input - {@link LearnShellLayoutProps}
  */
-export const _LearnShellLayout = (input: LearnShellLayoutProps) => {
+export const LearnShellLayoutBase = (input: LearnShellLayoutProps) => {
     const mobileTabs = input.props.mobileTabs ?? []
     return (
         <Tree

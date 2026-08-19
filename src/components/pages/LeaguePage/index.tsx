@@ -9,7 +9,7 @@ import { useSessionToken } from "@/hooks/auth/useSessionToken"
 import { useMutateSetFollowSwr, useQueryGlobalLeaderboardSwr, useQueryMeSwr, useQueryMyLeagueSwr } from "@/hooks"
 import { fromGlobalId } from "@/modules/utils/global-id"
 import type { RankedUserRowData, RankedUserVerdict } from "@/components/composites/RankedUserRow"
-import { _LeaguePage, type LeagueScope } from "./component"
+import { LeaguePageBase, type LeagueScope } from "./component"
 
 /**
  * PAGE - `LeaguePage`, connected half.
@@ -31,6 +31,16 @@ const PODIUM_SIZE = 3
  * State that only React knows loses all three. `?tab=` on the dashboard already works this way.
  */
 const SCOPES = ["weekly", "global"] as const
+
+const rankVerdict = (delta: number | null): RankedUserVerdict | undefined => {
+    if (delta === null || delta === 0) return undefined
+    return delta > 0 ? "success" : "danger"
+}
+
+const movementLabel = (delta: number | null, t: (key: string, values?: Record<string, string | number | Date>) => string): string => {
+    if (delta === null || delta === 0) return t("noMovement")
+    return delta > 0 ? t("up", { count: delta }) : t("down", { count: Math.abs(delta) })
+}
 
 /** Resolve the viewer standing and the ranked board for whichever scope is selected. */
 export const LeaguePage = () => {
@@ -100,9 +110,7 @@ export const LeaguePage = () => {
     const weeklyRows: ReadonlyArray<RankedUserRowData> = weeklyEntries.slice(PODIUM_SIZE).map((entry) => {
         const isMe = entry.userGlobalId === mine?.userGlobalId
         const username = entry.username ?? t("anonymous")
-        const verdict: RankedUserVerdict | undefined = entry.rankDelta === null || entry.rankDelta === 0
-            ? undefined
-            : entry.rankDelta > 0 ? "success" : "danger"
+        const verdict = rankVerdict(entry.rankDelta)
         return {
             id: entry.userGlobalId,
             rank: entry.rank,
@@ -111,11 +119,7 @@ export const LeaguePage = () => {
             avatar: entry.avatar,
             points: t("points", { count: entry.weekPoints }),
             rankDelta: entry.rankDelta,
-            movementLabel: entry.rankDelta === null || entry.rankDelta === 0
-                ? t("noMovement")
-                : entry.rankDelta > 0
-                    ? t("up", { count: entry.rankDelta })
-                    : t("down", { count: Math.abs(entry.rankDelta) }),
+            movementLabel: movementLabel(entry.rankDelta, t),
             verdict,
             isMe,
             // The weekly board is followable too. `myLeague` carries no follow state, so the
@@ -255,13 +259,13 @@ export const LeaguePage = () => {
     if (session.isRestoring || token === undefined) return null
 
     if (query.error !== undefined && query.data === undefined) {
-        return <_LeaguePage state="failed" props={props} on={on} />
+        return <LeaguePageBase state="failed" props={props} on={on} />
     }
-    if (query.data === undefined) return <_LeaguePage state="pending" props={props} on={on} />
+    if (query.data === undefined) return <LeaguePageBase state="pending" props={props} on={on} />
     if (board.podium.length === 0 && board.rows.length === 0) {
-        return <_LeaguePage state="empty" props={props} on={on} />
+        return <LeaguePageBase state="empty" props={props} on={on} />
     }
-    return <_LeaguePage state="ready" props={props} on={on} />
+    return <LeaguePageBase state="ready" props={props} on={on} />
 }
 
 /** Source-level tier marker. */

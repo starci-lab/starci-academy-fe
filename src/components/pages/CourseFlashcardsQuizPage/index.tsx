@@ -7,7 +7,7 @@ import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
 import { useQueryFlashcardDecksByCourseSwr } from "@/hooks/swr/useQueryFlashcardDecksByCourseSwr"
 import { useQueryMyInProgressFlashcardSessionSwr } from "@/hooks/swr/useQueryMyInProgressFlashcardSessionSwr"
 import { useMutateStartFlashcardSessionSwr } from "@/hooks/swr/useMutateStartFlashcardSessionSwr"
-import { _CourseFlashcardsQuizPage } from "./component"
+import { CourseFlashcardsQuizPageBase } from "./component"
 
 /** Route identity required by the connected flashcard quiz setup. */
 export type CourseFlashcardsQuizPageProps = { readonly displayId: string }
@@ -93,7 +93,7 @@ export const CourseFlashcardsQuizPage = ({ displayId }: CourseFlashcardsQuizPage
     }
 
     return (
-        <_CourseFlashcardsQuizPage
+        <CourseFlashcardsQuizPageBase
             state={state}
             props={{
                 title: copy.title,

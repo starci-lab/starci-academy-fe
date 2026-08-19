@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
-import { _AuthenticationPanel, type AuthenticationPanelProps } from "./component"
+import { AuthenticationPanelBase, type AuthenticationPanelProps } from "./component"
 
 afterEach(cleanup)
 
@@ -114,10 +114,10 @@ const doneProps: Extract<AuthenticationPanelProps, { state: "done" }> = {
     },
 }
 
-describe("_AuthenticationPanel", () => {
+describe("AuthenticationPanelBase", () => {
     it("ports the legacy sign-up anatomy: two password fields and a real checkbox", () => {
         const openLegal = vi.fn()
-        const { container } = render(<_AuthenticationPanel {...signUpProps} on={{ openLegal }} />)
+        const { container } = render(<AuthenticationPanelBase {...signUpProps} on={{ openLegal }} />)
 
         expect(screen.getByLabelText("Choose a password").getAttribute("autocomplete")).toBe("new-password")
         expect(screen.getByLabelText("Confirm password").getAttribute("autocomplete")).toBe("new-password")
@@ -131,7 +131,7 @@ describe("_AuthenticationPanel", () => {
 
     it("does not submit sign-up until the confirmation matches", () => {
         const submitDetails = vi.fn()
-        render(<_AuthenticationPanel {...signUpProps} on={{ submitDetails }} />)
+        render(<AuthenticationPanelBase {...signUpProps} on={{ submitDetails }} />)
 
         fireEvent.change(screen.getByLabelText("Email"), { target: { value: "reader@example.com" } })
         fireEvent.change(screen.getByLabelText("Choose a password"), { target: { value: "correct-secret" } })
@@ -151,7 +151,7 @@ describe("_AuthenticationPanel", () => {
             ...signUpProps,
             props: { ...signUpProps.props, isPending: true },
         } satisfies typeof signUpProps
-        const { container } = render(<_AuthenticationPanel {...pending} />)
+        const { container } = render(<AuthenticationPanelBase {...pending} />)
 
         const submit = screen.getByRole("button", { name: "Create account" })
         expect(submit.getAttribute("data-action-pending")).toBe("true")
@@ -159,7 +159,7 @@ describe("_AuthenticationPanel", () => {
     })
 
     it("separates independent credential blocks with the local gap", () => {
-        const { container } = render(<_AuthenticationPanel {...signUpProps} />)
+        const { container } = render(<AuthenticationPanelBase {...signUpProps} />)
         const credentials = container.querySelector("[data-node='stacked-peer-controls']")
 
         // The controls are small blocks of one function inside one block, so their seam
@@ -170,7 +170,7 @@ describe("_AuthenticationPanel", () => {
     })
 
     it("keeps OAuth shortcuts outlined instead of styling them as secondary actions", () => {
-        render(<_AuthenticationPanel {...signUpProps} />)
+        render(<AuthenticationPanelBase {...signUpProps} />)
 
         expect(screen.getByRole("button", { name: "Sign In With Google" })).toHaveAttribute("data-variant", "outline")
         expect(screen.getByRole("button", { name: "Sign In With GitHub" })).toHaveAttribute("data-variant", "outline")
@@ -178,7 +178,7 @@ describe("_AuthenticationPanel", () => {
 
     it("names the provider each shortcut hands off to", () => {
         const oauthPress = vi.fn()
-        render(<_AuthenticationPanel {...signUpProps} on={{ oauthPress }} />)
+        render(<AuthenticationPanelBase {...signUpProps} on={{ oauthPress }} />)
 
         fireEvent.click(screen.getByRole("button", { name: "Sign In With Google" }))
         expect(oauthPress).toHaveBeenLastCalledWith("google")
@@ -189,7 +189,7 @@ describe("_AuthenticationPanel", () => {
 
     it("reports the privacy link separately from the terms one", () => {
         const openLegal = vi.fn()
-        render(<_AuthenticationPanel {...signUpProps} on={{ openLegal }} />)
+        render(<AuthenticationPanelBase {...signUpProps} on={{ openLegal }} />)
 
         fireEvent.click(screen.getByRole("link", { name: "Privacy Policy" }))
         expect(openLegal).toHaveBeenCalledWith("privacy")
@@ -201,7 +201,7 @@ describe("_AuthenticationPanel", () => {
             ...signUpProps,
             props: { ...signUpProps.props, hasAgreedToTerms: false },
         } satisfies typeof signUpProps
-        render(<_AuthenticationPanel {...unagreed} on={{ changeAgreedToTerms }} />)
+        render(<AuthenticationPanelBase {...unagreed} on={{ changeAgreedToTerms }} />)
 
         fireEvent.click(screen.getByRole("checkbox", { name: "I agree to the terms" }))
         expect(changeAgreedToTerms).toHaveBeenCalledWith(true)
@@ -212,18 +212,18 @@ describe("_AuthenticationPanel", () => {
             ...signUpProps,
             props: { ...signUpProps.props, hasAgreedToTerms: false },
         } satisfies typeof signUpProps
-        const { unmount } = render(<_AuthenticationPanel {...unagreed} />)
+        const { unmount } = render(<AuthenticationPanelBase {...unagreed} />)
         expect(screen.getByRole("button", { name: "Create account" })).toBeDisabled()
         unmount()
 
         // Signing in and resetting a password agree to nothing new, so nothing gates them.
-        render(<_AuthenticationPanel {...signInProps} />)
+        render(<AuthenticationPanelBase {...signInProps} />)
         expect(screen.getByRole("button", { name: "Sign in" })).toBeEnabled()
     })
 
     it("clears the mismatch the moment the confirmation is edited again", () => {
         const submitDetails = vi.fn()
-        render(<_AuthenticationPanel {...signUpProps} on={{ submitDetails }} />)
+        render(<AuthenticationPanelBase {...signUpProps} on={{ submitDetails }} />)
 
         fireEvent.change(screen.getByLabelText("Choose a password"), { target: { value: "correct-secret" } })
         fireEvent.change(screen.getByLabelText("Confirm password"), { target: { value: "wrong" } })
@@ -239,7 +239,7 @@ describe("_AuthenticationPanel", () => {
     it("draws the sign-in journey as one password, a remembered session and a way to the reset", () => {
         const changeMode = vi.fn()
         const changeRememberMe = vi.fn()
-        render(<_AuthenticationPanel {...signInProps} on={{ changeMode, changeRememberMe }} />)
+        render(<AuthenticationPanelBase {...signInProps} on={{ changeMode, changeRememberMe }} />)
 
         expect(screen.getByLabelText("Password").getAttribute("autocomplete")).toBe("current-password")
         expect(screen.queryByLabelText("Confirm password")).toBeNull()
@@ -256,13 +256,13 @@ describe("_AuthenticationPanel", () => {
     })
 
     it("omits the hint entirely when the journey has nothing to say about the password", () => {
-        render(<_AuthenticationPanel {...signInProps} />)
+        render(<AuthenticationPanelBase {...signInProps} />)
         expect(screen.getByLabelText("Password").getAttribute("aria-describedby")).toBeNull()
     })
 
     it("submits the sign-in details without asking for a confirmation", () => {
         const submitDetails = vi.fn()
-        render(<_AuthenticationPanel {...signInProps} on={{ submitDetails }} />)
+        render(<AuthenticationPanelBase {...signInProps} on={{ submitDetails }} />)
 
         fireEvent.change(screen.getByLabelText("Email"), { target: { value: "reader@example.com" } })
         fireEvent.change(screen.getByLabelText("Password"), { target: { value: "secret" } })
@@ -272,7 +272,7 @@ describe("_AuthenticationPanel", () => {
 
     it("draws the reset journey with a new password, no confirmation and no exit to itself", () => {
         const changeMode = vi.fn()
-        render(<_AuthenticationPanel {...forgotProps} on={{ changeMode }} />)
+        render(<AuthenticationPanelBase {...forgotProps} on={{ changeMode }} />)
 
         expect(screen.getByLabelText("New password").getAttribute("autocomplete")).toBe("new-password")
         expect(screen.queryByLabelText("Confirm password")).toBeNull()
@@ -288,7 +288,7 @@ describe("_AuthenticationPanel", () => {
             ...signInProps,
             props: { ...signInProps.props, statusMessage: "Those details do not match.", isError: true },
         } satisfies typeof signInProps
-        const { unmount } = render(<_AuthenticationPanel {...refused} />)
+        const { unmount } = render(<AuthenticationPanelBase {...refused} />)
         expect(screen.getByRole("alert")).toHaveTextContent("Those details do not match.")
         unmount()
 
@@ -296,7 +296,7 @@ describe("_AuthenticationPanel", () => {
             ...signInProps,
             props: { ...signInProps.props, statusMessage: "Sending your code…", isError: false },
         } satisfies typeof signInProps
-        render(<_AuthenticationPanel {...informing} />)
+        render(<AuthenticationPanelBase {...informing} />)
         expect(screen.queryByRole("alert")).toBeNull()
         expect(screen.getByRole("status")).toHaveTextContent("Sending your code…")
     })
@@ -306,7 +306,7 @@ describe("_AuthenticationPanel", () => {
             ...signInProps,
             props: { ...signInProps.props, isPending: true },
         } satisfies typeof signInProps
-        render(<_AuthenticationPanel {...pending} />)
+        render(<AuthenticationPanelBase {...pending} />)
 
         expect(screen.getByLabelText("Email")).toBeDisabled()
         expect(screen.getByLabelText("Password")).toBeDisabled()
@@ -315,7 +315,7 @@ describe("_AuthenticationPanel", () => {
     })
 
     it("submits nothing and throws nothing when the panel is wired to no one", () => {
-        render(<_AuthenticationPanel {...signInProps} />)
+        render(<AuthenticationPanelBase {...signInProps} />)
         fireEvent.click(screen.getByRole("button", { name: "Sign in" }))
         fireEvent.click(screen.getByRole("checkbox", { name: "Remember me" }))
         fireEvent.click(screen.getByRole("link", { name: "Forgot Password?" }))
@@ -326,7 +326,7 @@ describe("_AuthenticationPanel", () => {
 
     it("draws the code step as one box, and sends what was typed in it", () => {
         const submitCode = vi.fn()
-        render(<_AuthenticationPanel {...codeProps} on={{ submitCode }} />)
+        render(<AuthenticationPanelBase {...codeProps} on={{ submitCode }} />)
 
         const box = screen.getByLabelText("One-time code")
         expect(box.getAttribute("autocomplete")).toBe("one-time-code")
@@ -340,7 +340,7 @@ describe("_AuthenticationPanel", () => {
     it("offers a fresh code and a way back to the address, as two separate choices", () => {
         const resend = vi.fn()
         const changeMode = vi.fn()
-        render(<_AuthenticationPanel {...codeProps} on={{ resend, changeMode }} />)
+        render(<AuthenticationPanelBase {...codeProps} on={{ resend, changeMode }} />)
 
         fireEvent.click(screen.getByRole("link", { name: "Send another code" }))
         expect(resend).toHaveBeenCalledTimes(1)
@@ -354,7 +354,7 @@ describe("_AuthenticationPanel", () => {
             ...codeProps,
             props: { ...codeProps.props, statusMessage: "That code is wrong.", isError: true },
         } satisfies typeof codeProps
-        render(<_AuthenticationPanel {...refused} />)
+        render(<AuthenticationPanelBase {...refused} />)
         expect(screen.getByRole("alert")).toHaveTextContent("That code is wrong.")
     })
 
@@ -363,7 +363,7 @@ describe("_AuthenticationPanel", () => {
             ...codeProps,
             props: { ...codeProps.props, isPending: true },
         } satisfies typeof codeProps
-        const { container } = render(<_AuthenticationPanel {...pending} />)
+        const { container } = render(<AuthenticationPanelBase {...pending} />)
 
         expect(screen.getByLabelText("One-time code")).toBeDisabled()
         const submit = screen.getByRole("button", { name: "Verify" })
@@ -373,7 +373,7 @@ describe("_AuthenticationPanel", () => {
     })
 
     it("submits nothing and throws nothing on the code step with no one wired up", () => {
-        render(<_AuthenticationPanel {...codeProps} />)
+        render(<AuthenticationPanelBase {...codeProps} />)
         fireEvent.click(screen.getByRole("button", { name: "Verify" }))
         fireEvent.click(screen.getByRole("link", { name: "Send another code" }))
         fireEvent.click(screen.getByRole("link", { name: "Use another email" }))
@@ -381,7 +381,7 @@ describe("_AuthenticationPanel", () => {
     })
 
     it("draws the confirmation as a statement, with no form left to fill in", () => {
-        render(<_AuthenticationPanel {...doneProps} />)
+        render(<AuthenticationPanelBase {...doneProps} />)
 
         expect(screen.getByText("You are signed in")).toBeTruthy()
         expect(screen.getByText("Taking you back to where you were")).toBeTruthy()
@@ -402,7 +402,7 @@ describe("_AuthenticationPanel", () => {
                 <button type="button" onClick={() => on?.follow?.("newsletter")}>Third phrase</button>
             ),
         }))
-        const { _AuthenticationPanel: Panel } = await import("./component")
+        const { AuthenticationPanelBase: Panel } = await import("./component")
 
         render(<Panel {...signUpProps} on={{ openLegal }} />)
         fireEvent.click(screen.getByRole("button", { name: "Third phrase" }))
@@ -417,7 +417,7 @@ describe("_AuthenticationPanel", () => {
             ...doneProps,
             props: { ...doneProps.props, statusMessage: "Your password has been changed.", isError: false },
         } satisfies typeof doneProps
-        render(<_AuthenticationPanel {...withStatus} />)
+        render(<AuthenticationPanelBase {...withStatus} />)
         expect(screen.getByRole("status")).toHaveTextContent("Your password has been changed.")
     })
 })

@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import {
-    _ContentDiscussionPanel,
+    ContentDiscussionPanelBase,
     type ContentDiscussionPanelData,
 } from "./component"
 
@@ -21,12 +21,12 @@ const props: ContentDiscussionPanelData = {
     comments: [{ id: "comment-1", author: "Ada", meta: "Today", body: "How does this work?" }],
 }
 
-describe("_ContentDiscussionPanel", () => {
+describe("ContentDiscussionPanelBase", () => {
     it("renders typed ready comments and emits composer actions", () => {
         const changeDraft = vi.fn()
         const submit = vi.fn()
         const { container } = render(
-            <_ContentDiscussionPanel state="ready" props={props} on={{ changeDraft, submit }} />,
+            <ContentDiscussionPanelBase state="ready" props={props} on={{ changeDraft, submit }} />,
         )
 
         expect(container.querySelector("[data-node=content-discussion-panel]")).toBeTruthy()
@@ -39,14 +39,14 @@ describe("_ContentDiscussionPanel", () => {
     })
 
     it("keeps the composer visible and locked while submitting", () => {
-        render(<_ContentDiscussionPanel state="submitting" props={props} />)
+        render(<ContentDiscussionPanelBase state="submitting" props={props} />)
 
         expect(screen.getByLabelText("Comment")).toBeDisabled()
         expect(screen.getByRole("button", { name: "Posting" })).toBeDisabled()
     })
 
     it("rests three comment rows and no composer while the discussion is in flight", () => {
-        const { container } = render(<_ContentDiscussionPanel state="pending" props={props} />)
+        const { container } = render(<ContentDiscussionPanelBase state="pending" props={props} />)
 
         expect(container.querySelectorAll("[data-node=content-discussion-comment-row]")).toHaveLength(3)
         expect(screen.queryByText("How does this work?")).not.toBeInTheDocument()
@@ -58,13 +58,13 @@ describe("_ContentDiscussionPanel", () => {
     it("renders empty and failed answers with only failed retry", () => {
         const retry = vi.fn()
         const { rerender } = render(
-            <_ContentDiscussionPanel state="empty" props={{ ...props, draft: "", comments: [] }} />,
+            <ContentDiscussionPanelBase state="empty" props={{ ...props, draft: "", comments: [] }} />,
         )
         expect(screen.getByText("No comments yet.")).toBeInTheDocument()
         expect(screen.getByLabelText("Comment")).toBeInTheDocument()
 
         rerender(
-            <_ContentDiscussionPanel
+            <ContentDiscussionPanelBase
                 state="failed"
                 props={{ ...props, draft: "", comments: [] }}
                 on={{ retry }}

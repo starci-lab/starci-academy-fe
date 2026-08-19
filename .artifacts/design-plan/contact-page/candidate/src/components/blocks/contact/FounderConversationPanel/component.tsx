@@ -108,7 +108,7 @@ export type FounderConversationPanelActions = {
     readonly recover?: () => void
 }
 
-/** Props for {@link _FounderConversationPanel}. */
+/** Props for {@link FounderConversationPanelBase}. */
 export type FounderConversationPanelProps =
     BlockProps<FounderConversationPanelState, FounderConversationPanelData> & {
         readonly on?: FounderConversationPanelActions
@@ -125,7 +125,7 @@ const RESTING_COUNT = 3
  *
  * @param input - {@link FounderConversationPanelProps}
  */
-export const _FounderConversationPanel = (input: FounderConversationPanelProps) => {
+export const FounderConversationPanelBase = (input: FounderConversationPanelProps) => {
     const labels = input.props.labels
     const isResting = input.state === "resting"
     const isSending = input.state === "sending"

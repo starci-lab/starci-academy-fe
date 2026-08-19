@@ -135,13 +135,13 @@
       },
       "coverage": "rendered",
       "componentTree": [
-        "_CartPage",
+        "CartPageBase",
         "Tree(cart-page-column)",
         "page-header-stack",
         "cart-line-list",
-        "_CartLine",
+        "CartLineBase",
         "order-summary-stack",
-        "_OrderSummary",
+        "OrderSummaryBase",
         "stacked-peer-controls"
       ],
       "contracts": [
@@ -192,13 +192,13 @@
       },
       "coverage": "rendered",
       "componentTree": [
-        "_CartPage",
+        "CartPageBase",
         "Tree(cart-page-column)",
         "page-header-stack",
         "cart-line-list",
-        "_CartLine",
+        "CartLineBase",
         "order-summary-stack",
-        "_OrderSummary",
+        "OrderSummaryBase",
         "stacked-peer-controls"
       ],
       "contracts": [
@@ -249,13 +249,13 @@
       },
       "coverage": "rendered",
       "componentTree": [
-        "_CartPage",
+        "CartPageBase",
         "Tree(cart-page-column)",
         "page-header-stack",
         "cart-line-list",
-        "_CartLine",
+        "CartLineBase",
         "order-summary-stack",
-        "_OrderSummary",
+        "OrderSummaryBase",
         "stacked-peer-controls"
       ],
       "contracts": [
@@ -306,13 +306,13 @@
       },
       "coverage": "rendered",
       "componentTree": [
-        "_CartPage",
+        "CartPageBase",
         "Tree(cart-page-column)",
         "page-header-stack",
         "cart-line-list",
-        "_CartLine",
+        "CartLineBase",
         "order-summary-stack",
-        "_OrderSummary",
+        "OrderSummaryBase",
         "stacked-peer-controls"
       ],
       "contracts": [
@@ -363,13 +363,13 @@
       },
       "coverage": "rendered",
       "componentTree": [
-        "_CartPage",
+        "CartPageBase",
         "Tree(cart-page-column)",
         "page-header-stack",
         "cart-line-list",
-        "_CartLine",
+        "CartLineBase",
         "order-summary-stack",
-        "_OrderSummary",
+        "OrderSummaryBase",
         "stacked-peer-controls"
       ],
       "contracts": [
@@ -420,13 +420,13 @@
       },
       "coverage": "rendered",
       "componentTree": [
-        "_CartPage",
+        "CartPageBase",
         "Tree(cart-page-column)",
         "page-header-stack",
         "cart-line-list",
-        "_CartLine",
+        "CartLineBase",
         "order-summary-stack",
-        "_OrderSummary",
+        "OrderSummaryBase",
         "stacked-peer-controls"
       ],
       "contracts": [
@@ -477,13 +477,13 @@
       },
       "coverage": "rendered",
       "componentTree": [
-        "_CartPage",
+        "CartPageBase",
         "Tree(cart-page-column)",
         "page-header-stack",
         "cart-line-list",
-        "_CartLine",
+        "CartLineBase",
         "order-summary-stack",
-        "_OrderSummary",
+        "OrderSummaryBase",
         "stacked-peer-controls"
       ],
       "contracts": [
@@ -534,13 +534,13 @@
       },
       "coverage": "rendered",
       "componentTree": [
-        "_CartPage",
+        "CartPageBase",
         "Tree(cart-page-column)",
         "page-header-stack",
         "cart-line-list",
-        "_CartLine",
+        "CartLineBase",
         "order-summary-stack",
-        "_OrderSummary",
+        "OrderSummaryBase",
         "stacked-peer-controls"
       ],
       "contracts": [
@@ -591,12 +591,12 @@
       },
       "coverage": "rendered",
       "componentTree": [
-        "_CartDrawer",
+        "CartDrawerBase",
         "DrawerShell",
         "Tree(cart-drawer-column)",
         "cart-line-list",
-        "_CartLine",
-        "_OrderSummary"
+        "CartLineBase",
+        "OrderSummaryBase"
       ],
       "contracts": [
         "cart-drawer-column",
@@ -641,12 +641,12 @@
       },
       "coverage": "rendered",
       "componentTree": [
-        "_CartDrawer",
+        "CartDrawerBase",
         "DrawerShell",
         "Tree(cart-drawer-column)",
         "cart-line-list",
-        "_CartLine",
-        "_OrderSummary"
+        "CartLineBase",
+        "OrderSummaryBase"
       ],
       "contracts": [
         "cart-drawer-column",
@@ -691,10 +691,10 @@
       },
       "coverage": "rendered",
       "componentTree": [
-        "_CheckoutOverlay",
+        "CheckoutOverlayBase",
         "ModalShell",
         "Tree(checkout-panel-column)",
-        "_OrderSummary",
+        "OrderSummaryBase",
         "ordered-step-ladder",
         "ordered-step-row"
       ],
@@ -741,10 +741,10 @@
       },
       "coverage": "rendered",
       "componentTree": [
-        "_CheckoutOverlay",
+        "CheckoutOverlayBase",
         "ModalShell",
         "Tree(checkout-panel-column)",
-        "_OrderSummary",
+        "OrderSummaryBase",
         "ordered-step-ladder",
         "ordered-step-row"
       ],

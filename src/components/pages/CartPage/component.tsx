@@ -13,7 +13,7 @@ import {
 } from "@/components/contracts/props"
 import { CartLine } from "@/components/blocks/commerce/CartLine"
 import { type CartLineData } from "@/components/blocks/commerce/CartLine/component"
-import { _OrderSummary, type OrderSummaryLabels } from "@/components/blocks/commerce/OrderSummary/component"
+import { OrderSummaryBase, type OrderSummaryLabels } from "@/components/blocks/commerce/OrderSummary/component"
 
 /**
  * PAGE - `CartPage`: the basket, with room to read it.
@@ -94,7 +94,7 @@ export type CartPageActions = {
     readonly browse?: () => void
 }
 
-/** Props for {@link _CartPage}. */
+/** Props for {@link CartPageBase}. */
 export type CartPageProps = {
     readonly state: CartPageState
     readonly props: CartPageData
@@ -109,7 +109,7 @@ const RESTING_COUNT = 3
  *
  * @param input - {@link CartPageProps}
  */
-export const _CartPage = (input: CartPageProps) => {
+export const CartPageBase = (input: CartPageProps) => {
     const labels = input.props.labels
     const isLoading = input.state === "pending"
     const showsNotice = input.state === "empty" || input.state === "failed"
@@ -145,7 +145,7 @@ export const _CartPage = (input: CartPageProps) => {
     })
 
     const summary = defineContractProjection("order-summary-stack", () => (
-        <_OrderSummary
+        <OrderSummaryBase
             state={isLoading ? "pending" : input.props.hasPricingFailed === true ? "failed" : "ready"}
             props={{
                 labels: labels.summary,

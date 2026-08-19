@@ -6,7 +6,7 @@ vi.mock("next-intl", () => ({ useLocale: () => "en", useTranslations: () => (key
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: m.push, replace: m.replace }) }))
 
 vi.mock("@/hooks/swr/useQueryCourseSwr", () => ({ useQueryCourseSwr: () => ({ data: m.data, error: m.error, mutate: m.mutate }) }))
-vi.mock("./component", () => ({ _CourseQaPage: ({ state }: TestPageInput) => <output data-testid="state">{state}</output> }))
+vi.mock("./component", () => ({ CourseQaPageBase: ({ state }: TestPageInput) => <output data-testid="state">{state}</output> }))
 import { CourseQaPage } from "./index"
 beforeEach(() => { vi.clearAllMocks(); m.data = undefined; m.error = undefined })
 describe("CourseQaPage route", () => {

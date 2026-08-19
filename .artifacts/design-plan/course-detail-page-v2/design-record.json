@@ -301,7 +301,7 @@
       "coverage": "rendered",
       "componentTree": [
         "Tree routed-page-main -> main (locked)",
-        "_CourseDetailPage -> Tree course-detail-page -> div",
+        "CourseDetailPageBase -> Tree course-detail-page -> div",
         "Tree course-breadcrumb-row -> nav",
         "Tree main-then-rail -> div",
         "Tree course-hero -> section",
@@ -309,9 +309,9 @@
         "Tree course-section -> section (x2)",
         "course-promise-list -> ul; course-promise-row -> li",
         "course-module-list -> ol; course-module-row -> li; CurriculumModuleRow -> details/summary",
-        "_CoursePricingRail -> Tree course-pricing-rail -> aside",
+        "CoursePricingRailBase -> Tree course-pricing-rail -> aside",
         "CoverImage; course-price-block -> div; price-discount-line -> div (locked); pricing-phase-ladder -> ol; pricing-phase-row -> li; Button; Text",
-        "_CourseMobileEnrollBar -> Tree course-mobile-action-bar -> div (display: none at this viewport)"
+        "CourseMobileEnrollBarBase -> Tree course-mobile-action-bar -> div (display: none at this viewport)"
       ],
       "contracts": [
         "routed-page-main",
@@ -335,9 +335,9 @@
         "course-mobile-action-bar"
       ],
       "props": [
-        "_CourseDetailPage state=ready",
-        "_CoursePricingRail state=ready",
-        "_CourseMobileEnrollBar state=ready",
+        "CourseDetailPageBase state=ready",
+        "CoursePricingRailBase state=ready",
+        "CourseMobileEnrollBarBase state=ready",
         "CurriculumModuleRow isLoading=false, lessons present on modules 1-4 and absent on module 5"
       ],
       "tokens": [
@@ -385,7 +385,7 @@
         "price-discount-line"
       ],
       "props": [
-        "_CourseMobileEnrollBar state=ready, price and originalPrice are the rail's own resolved strings"
+        "CourseMobileEnrollBarBase state=ready, price and originalPrice are the rail's own resolved strings"
       ],
       "tokens": [
         "bg-background",
@@ -427,8 +427,8 @@
         "course-mobile-action-bar"
       ],
       "props": [
-        "_CoursePricingRail state=price-pending",
-        "_CourseMobileEnrollBar state=price-pending"
+        "CoursePricingRailBase state=price-pending",
+        "CourseMobileEnrollBarBase state=price-pending"
       ],
       "tokens": [
         "bg-surface",
@@ -466,7 +466,7 @@
         "price-discount-line"
       ],
       "props": [
-        "_CoursePricingRail state=ready with phases: [], savingsLabel and scarcityLabel absent"
+        "CoursePricingRailBase state=ready with phases: [], savingsLabel and scarcityLabel absent"
       ],
       "tokens": [
         "bg-surface",
@@ -506,7 +506,7 @@
         "course-module-row"
       ],
       "props": [
-        "_CourseDetailPage state=pending",
+        "CourseDetailPageBase state=pending",
         "every leaf receives isLoading=true"
       ],
       "tokens": [
@@ -544,7 +544,7 @@
         "empty-notice-stack"
       ],
       "props": [
-        "_CourseDetailPage state=not-found, noticeActionLabel deliberately not passed"
+        "CourseDetailPageBase state=not-found, noticeActionLabel deliberately not passed"
       ],
       "tokens": [
         "text-muted"
@@ -580,7 +580,7 @@
         "empty-notice-stack"
       ],
       "props": [
-        "_CourseDetailPage state=failed, on.retry wired"
+        "CourseDetailPageBase state=failed, on.retry wired"
       ],
       "tokens": [
         "text-muted"
@@ -681,7 +681,7 @@
   ],
   "blockTrees": [
     "Tree routed-page-main -> <main> (locked)",
-    "  _CourseDetailPage (page)",
+    "  CourseDetailPageBase (page)",
     "    Tree course-detail-page -> <div>",
     "      Tree course-breadcrumb-row -> <nav>",
     "      Tree main-then-rail -> <div>",
@@ -690,9 +690,9 @@
     "          Tree course-stat-chip-run -> <ul> > course-stat-chip -> <li> > Badge",
     "          Tree course-section -> <section> > course-promise-list <ul> > course-promise-row <li>",
     "          Tree course-section -> <section> > course-module-list <ol> > course-module-row <li> > CurriculumModuleRow <details>",
-    "        _CoursePricingRail -> Tree course-pricing-rail -> <aside>",
+    "        CoursePricingRailBase -> Tree course-pricing-rail -> <aside>",
     "          CoverImage; course-price-block > price-discount-line (locked); pricing-phase-ladder <ol> > pricing-phase-row <li>; Button; Text",
-    "      _CourseMobileEnrollBar -> Tree course-mobile-action-bar -> <div>"
+    "      CourseMobileEnrollBarBase -> Tree course-mobile-action-bar -> <div>"
   ],
   "contracts": [
     {

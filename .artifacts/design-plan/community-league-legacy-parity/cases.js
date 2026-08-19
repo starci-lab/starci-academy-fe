@@ -309,7 +309,7 @@ const SHARED_UNKNOWNS = [
 
 const STATE_COVERAGE = (prefix) => [
   { ownerId: prefix + ":weekly", state: "populated", coverage: "rendered", scenarioId: "community", evidence: "Legacy LeagueCardContent row mapping." },
-  { ownerId: prefix + ":weekly", state: "loading | empty | failed", coverage: "deferred-to-preview", scenarioId: "community", evidence: "Existing _LeagueCard already discriminates pending/empty/failed." },
+  { ownerId: prefix + ":weekly", state: "loading | empty | failed", coverage: "deferred-to-preview", scenarioId: "community", evidence: "Existing LeagueCardBase already discriminates pending/empty/failed." },
   { ownerId: prefix + ":global", state: "populated", coverage: "rendered", scenarioId: "community", evidence: "Legacy GlobalBoard row mapping." },
   { ownerId: prefix + ":global", state: "following | pending | rollback", coverage: "deferred-to-preview", scenarioId: "community", evidence: "TopLearners optimistic override map." },
   { ownerId: prefix + ":page", state: "populated", coverage: "rendered", scenarioId: "league-page", evidence: "Legacy LeaguePage tab + board composition." },

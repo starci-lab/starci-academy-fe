@@ -80,7 +80,7 @@ const JobReadinessListContent = ({ props, isLoading = false }: LeafProps<JobRead
 const JobReadinessList = defineContractComponent("job-readiness-list", JobReadinessListContent)
 
 /** Draw the learner's strongest-track readiness without owning routing or fetching. */
-export const _JobReadinessWidget = (input: JobReadinessWidgetProps) => {
+export const JobReadinessWidgetBase = (input: JobReadinessWidgetProps) => {
     if (input.state === "failed" || input.state === "empty") {
         const failed = input.state === "failed"
         return (

@@ -54,7 +54,7 @@ export type AccountMenuViewProps =
  * DropdownBranch owns only vendor mechanics. This block decides that a guest first sees an account
  * summary, then chooses sign in or sign up; that decision is product behavior, not a leaf shape.
  */
-export const _AccountMenu = (input: AccountMenuViewProps) => (
+export const AccountMenuBase = (input: AccountMenuViewProps) => (
     <DropdownBranch
         props={{
             label: input.props.label,

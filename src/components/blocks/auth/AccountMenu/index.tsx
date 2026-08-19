@@ -6,7 +6,7 @@ import { useRouter } from "@/i18n/navigation"
 import { setSessionToken, useSessionToken } from "@/hooks/auth/useSessionToken"
 import { QUERY_ME_SWR_KEY, useQueryMeSwr } from "@/hooks/swr/useQueryMeSwr"
 import { useMutateSignOutSwr } from "@/hooks/swr/useMutateSignOutSwr"
-import { _AccountMenu, type AccountMenuDestination } from "./component"
+import { AccountMenuBase, type AccountMenuDestination } from "./component"
 
 /** Authentication-overlay callbacks supplied by the shell composition. */
 export type AccountMenuProps = {
@@ -32,7 +32,7 @@ export const AccountMenu = (input: AccountMenuProps) => {
 
     if (token === undefined) {
         return (
-            <_AccountMenu
+            <AccountMenuBase
                 state="guest"
                 props={{
                     label: t("account"),
@@ -54,7 +54,7 @@ export const AccountMenu = (input: AccountMenuProps) => {
     ]
 
     return (
-        <_AccountMenu
+        <AccountMenuBase
             state="signedIn"
             props={{
                 label: t("account"),

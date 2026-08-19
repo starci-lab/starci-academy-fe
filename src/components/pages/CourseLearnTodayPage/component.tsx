@@ -183,7 +183,7 @@ const mobileContent = (
 }
 
 /** Draw the mobile alternatives and the accepted desktop command-center dashboard. */
-export const _CourseLearnTodayPage = (input: CourseLearnTodayPageProps) => {
+export const CourseLearnTodayPageBase = (input: CourseLearnTodayPageProps) => {
     const isLoading = input.state === "pending"
     const placeholder: CourseLearnTodayItem = {
         id: "pending",

@@ -68,7 +68,7 @@ export type CourseMockInterviewResultPageProps = {
 }
 
 /** Presentational debrief for a URL-addressable graded interview attempt. */
-export const _CourseMockInterviewResultPage = (input: CourseMockInterviewResultPageProps) => {
+export const CourseMockInterviewResultPageBase = (input: CourseMockInterviewResultPageProps) => {
     const loading = input.state === "grading"
     const ready = input.state === "ready"
     const action = [

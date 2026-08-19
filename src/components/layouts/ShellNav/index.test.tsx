@@ -83,7 +83,7 @@ vi.mock("@/components/overlays/search/GlobalSearchOverlay", () => ({
         : <button type="button" onClick={on?.dismissed}>Search from {intent.source}</button>,
 }))
 vi.mock("./component", () => ({
-    _ShellNav: (input: ShellNavMockInput) => (
+    ShellNavBase: (input: ShellNavMockInput) => (
         <div>
             <span data-testid="theme">{`${input.props.themeLabel}/${String(input.props.isDark)}`}</span>
             <span data-testid="signed-in">{String(input.props.isSignedIn)}</span>

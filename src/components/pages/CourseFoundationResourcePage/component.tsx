@@ -23,7 +23,7 @@ export type CourseFoundationResourcePageProps = {
 }
 
 /** Draw one live foundation resource, including not-found and retryable failure states. */
-export const _CourseFoundationResourcePage = (input: CourseFoundationResourcePageProps) => {
+export const CourseFoundationResourcePageBase = (input: CourseFoundationResourcePageProps) => {
     const loading = input.state === "pending"
     const unavailable = input.state === "not-found" || input.state === "failed"
     const notice = unavailable

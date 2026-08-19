@@ -3,7 +3,7 @@
 import { useLocale } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryCoursePersonalProjectSwr } from "@/hooks/swr/useQueryCoursePersonalProjectSwr"
-import { _CoursePersonalProjectPage } from "./component"
+import { CoursePersonalProjectPageBase } from "./component"
 
 /** Course route identity required by the personal-project dashboard. */
 export type CoursePersonalProjectPageProps = { readonly displayId: string }
@@ -62,7 +62,7 @@ export const CoursePersonalProjectPage = ({ displayId }: CoursePersonalProjectPa
             isCurrent: task.id === currentTaskId,
         })))
     return (
-        <_CoursePersonalProjectPage
+        <CoursePersonalProjectPageBase
             state={state}
             props={{
                 title: copy.title,

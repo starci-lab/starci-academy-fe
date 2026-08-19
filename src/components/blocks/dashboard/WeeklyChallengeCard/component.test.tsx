@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _WeeklyChallengeCard } from "./component"
+import { WeeklyChallengeCardBase } from "./component"
 
 const frame = {
     label: "Weekly challenge",
@@ -9,10 +9,10 @@ const frame = {
     retryLabel: "Retry",
 } as const
 
-describe("_WeeklyChallengeCard", () => {
+describe("WeeklyChallengeCardBase", () => {
     it("draws challenge facts, viewer outcome and recent finishers as distinct rows", () => {
         const act = vi.fn()
-        const { container } = render(<_WeeklyChallengeCard state="ready" props={{
+        const { container } = render(<WeeklyChallengeCardBase state="ready" props={{
             ...frame,
             title: "Build an event store",
             endsInLabel: "Ends in 5d 8h",
@@ -42,27 +42,27 @@ describe("_WeeklyChallengeCard", () => {
     })
 
     it("rests with the same header, status and three-finisher cardinality", () => {
-        const { container } = render(<_WeeklyChallengeCard state="pending" props={frame} />)
+        const { container } = render(<WeeklyChallengeCardBase state="pending" props={frame} />)
         expect(container.querySelectorAll("[data-node=\"weekly-challenge-finisher-row\"]")).toHaveLength(3)
         expect(container.querySelectorAll("[data-component=\"StatRow\"]")).toHaveLength(0)
         expect(container.querySelector("[data-component=\"Button\"][data-loading=\"true\"]")).toBeInTheDocument()
     })
 
     it("keeps the labelled slot mounted when no event is active", () => {
-        render(<_WeeklyChallengeCard state="empty" props={frame} />)
+        render(<WeeklyChallengeCardBase state="empty" props={frame} />)
         expect(screen.getByText(frame.label)).toBeInTheDocument()
         expect(screen.getByText(frame.emptyMessage)).toBeInTheDocument()
     })
 
     it("reports retry from the failed state", () => {
         const retry = vi.fn()
-        render(<_WeeklyChallengeCard state="failed" props={frame} on={{ retry }} />)
+        render(<WeeklyChallengeCardBase state="failed" props={frame} on={{ retry }} />)
         fireEvent.click(screen.getByRole("button", { name: frame.retryLabel }))
         expect(retry).toHaveBeenCalledOnce()
     })
 
     it("drops the nested finisher surface when the challenge reports no finishers at all", () => {
-        const { container } = render(<_WeeklyChallengeCard state="ready" props={{
+        const { container } = render(<WeeklyChallengeCardBase state="ready" props={{
             ...frame,
             title: "Build an event store",
             actionLabel: "Try now",
@@ -80,7 +80,7 @@ describe("_WeeklyChallengeCard", () => {
      * `undefined` at a reader - an empty control is recoverable, a lying one is not.
      */
     it("draws a nameless badge rather than the word undefined once the reward is collected", () => {
-        const { container } = render(<_WeeklyChallengeCard state="ready" props={{
+        const { container } = render(<WeeklyChallengeCardBase state="ready" props={{
             ...frame,
             title: "Build an event store",
             viewerPassed: true,
@@ -95,7 +95,7 @@ describe("_WeeklyChallengeCard", () => {
 
     it("draws a nameless action rather than the word undefined while the reward is unclaimed", () => {
         const act = vi.fn()
-        const { container } = render(<_WeeklyChallengeCard state="ready" props={{
+        const { container } = render(<WeeklyChallengeCardBase state="ready" props={{
             ...frame,
             title: "Build an event store",
             viewerPassed: true,
@@ -111,7 +111,7 @@ describe("_WeeklyChallengeCard", () => {
 
     it("shuts the action while a claim is in flight", () => {
         const act = vi.fn()
-        const { container } = render(<_WeeklyChallengeCard state="ready" props={{
+        const { container } = render(<WeeklyChallengeCardBase state="ready" props={{
             ...frame,
             title: "Build an event store",
             actionLabel: "Claim 50 coins",
@@ -127,7 +127,7 @@ describe("_WeeklyChallengeCard", () => {
     })
 
     it("names its resting action when the caller resolved one, and nothing when it did not", () => {
-        const { container } = render(<_WeeklyChallengeCard state="pending" props={{ ...frame, actionLabel: "Try now" }} />)
+        const { container } = render(<WeeklyChallengeCardBase state="pending" props={{ ...frame, actionLabel: "Try now" }} />)
         expect(container.querySelector("[data-component=\"Button\"][data-loading=\"true\"]")).toHaveTextContent("Try now")
         // The resting card names nothing that is not yet known, so it carries no glyph either.
         expect(container.querySelector("[data-node=\"weekly-challenge-title\"] svg")).toBeNull()

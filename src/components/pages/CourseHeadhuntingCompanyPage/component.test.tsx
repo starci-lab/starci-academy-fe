@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _CourseHeadhuntingCompanyPage } from "./component"
+import { CourseHeadhuntingCompanyPageBase } from "./component"
 
 /**
  * What these tests guard.
@@ -27,13 +27,13 @@ const props = {
 
 describe("CourseHeadhuntingCompanyPage", () => {
     it("offers contact without inventing a company application", () => {
-        render(<_CourseHeadhuntingCompanyPage state="ready" props={props} />)
+        render(<CourseHeadhuntingCompanyPageBase state="ready" props={props} />)
         expect(screen.getByRole("button", { name: /Contact company/ })).toBeInTheDocument()
         expect(screen.queryByText(/apply/i)).not.toBeInTheDocument()
     })
 
     it("rests three consultant rows and the company name while the profile arrives", () => {
-        const { container } = render(<_CourseHeadhuntingCompanyPage state="pending" props={props} />)
+        const { container } = render(<CourseHeadhuntingCompanyPageBase state="pending" props={props} />)
 
         expect(container.querySelectorAll("[data-node=\"next-action-list\"] > [data-component=\"Text\"][data-loading=\"true\"]")).toHaveLength(3)
         expect(container.querySelector("[data-component=\"Heading\"][data-loading=\"true\"]")).not.toBeNull()
@@ -44,7 +44,7 @@ describe("CourseHeadhuntingCompanyPage", () => {
         const back = vi.fn()
         const retry = vi.fn()
         const { container } = render(
-            <_CourseHeadhuntingCompanyPage state="not-found" props={props} on={{ back, retry }} />,
+            <CourseHeadhuntingCompanyPageBase state="not-found" props={props} on={{ back, retry }} />,
         )
 
         expect(screen.getByText("Not found.")).toBeInTheDocument()
@@ -56,7 +56,7 @@ describe("CourseHeadhuntingCompanyPage", () => {
 
     it("offers the way back from a failed company load", () => {
         const retry = vi.fn()
-        render(<_CourseHeadhuntingCompanyPage state="failed" props={props} on={{ retry }} />)
+        render(<CourseHeadhuntingCompanyPageBase state="failed" props={props} on={{ retry }} />)
 
         expect(screen.getByText("Could not load company.")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: /Try again/ }))
@@ -65,7 +65,7 @@ describe("CourseHeadhuntingCompanyPage", () => {
 
     it("keeps a contactless partner to one back control and says the roster is empty", () => {
         const { container } = render(
-            <_CourseHeadhuntingCompanyPage
+            <CourseHeadhuntingCompanyPageBase
                 state="ready"
                 props={{ ...props, contactLabel: undefined, description: undefined, consultants: [] }}
             />,
@@ -83,7 +83,7 @@ describe("CourseHeadhuntingCompanyPage", () => {
         const contact = vi.fn()
         const course = vi.fn()
         render(
-            <_CourseHeadhuntingCompanyPage
+            <CourseHeadhuntingCompanyPageBase
                 state="ready"
                 props={{
                     ...props,

@@ -1,6 +1,6 @@
 import { cleanup, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _LeagueCard } from "./component"
+import { LeagueCardBase } from "./component"
 
 vi.mock("@iconify/react", () => ({
     Icon: (props: Readonly<Record<string, unknown>>) => <span {...props} />,
@@ -15,9 +15,9 @@ const frame = {
     retryLabel: "Retry",
 } as const
 
-describe("_LeagueCard", () => {
+describe("LeagueCardBase", () => {
     it("renders the approved standing, nested cohort and movement verdict", () => {
-        const { container } = render(<_LeagueCard state="ready" props={{
+        const { container } = render(<LeagueCardBase state="ready" props={{
             ...frame,
             rows: [{
                 id: "self",
@@ -39,12 +39,12 @@ describe("_LeagueCard", () => {
     })
 
     it("preserves five ranked rows while loading", () => {
-        const { container } = render(<_LeagueCard state="pending" props={{ ...frame, rows: [] }} />)
+        const { container } = render(<LeagueCardBase state="pending" props={{ ...frame, rows: [] }} />)
         expect(container.querySelectorAll("[data-node^=\"ranked-user-row\"]")).toHaveLength(5)
     })
 
     it("squares the list only while some row is actually drawing a verdict band", () => {
-        const withVerdict = render(<_LeagueCard state="ready" props={{
+        const withVerdict = render(<LeagueCardBase state="ready" props={{
             ...frame,
             rows: [{ id: "one", rank: 1, name: "Ada", points: "13 XP", rankDelta: 2, verdict: "success" }],
         }} />)
@@ -52,7 +52,7 @@ describe("_LeagueCard", () => {
             .toHaveAttribute("data-verdict", "true")
         cleanup()
 
-        const withoutVerdict = render(<_LeagueCard state="ready" props={{
+        const withoutVerdict = render(<LeagueCardBase state="ready" props={{
             ...frame,
             rows: [{ id: "one", rank: 1, name: "Ada", points: "13 XP", rankDelta: 0, movementLabel: "No movement" }],
         }} />)
@@ -64,12 +64,12 @@ describe("_LeagueCard", () => {
         // `emptyMessage` and `errorMessage` are both optional, so a caller can settle a situation
         // without resolving the sentence for it. The card must draw nothing, never "undefined".
         const bare = { label: "Weekly league", standing: frame.standing, rows: [] }
-        const empty = render(<_LeagueCard state="empty" props={bare} />)
+        const empty = render(<LeagueCardBase state="empty" props={bare} />)
         expect(empty.container.querySelector("[data-node=\"empty-notice-stack\"]")).toBeInTheDocument()
         expect(empty.queryByText("undefined")).toBeNull()
         cleanup()
 
-        const failed = render(<_LeagueCard state="failed" props={bare} />)
+        const failed = render(<LeagueCardBase state="failed" props={bare} />)
         expect(failed.queryByText("undefined")).toBeNull()
         expect(failed.container.querySelector("button")).toBeNull()
     })

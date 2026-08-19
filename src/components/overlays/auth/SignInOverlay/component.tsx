@@ -19,7 +19,7 @@ import type { ContractComponent } from "@/components/contracts/props"
  * about how a modal behaves.
  */
 
-/** Props for {@link _SignInOverlay}. */
+/** Props for {@link SignInOverlayBase}. */
 export type SignInOverlayProps<K extends ContractKey> = {
     /** Whether the surface is on screen. Owned by whoever mounts it, never by the surface. */
     readonly isOpen: boolean
@@ -34,7 +34,7 @@ export type SignInOverlayProps<K extends ContractKey> = {
  *
  * @param input - {@link SignInOverlayProps}
  */
-export const _SignInOverlay = <const K extends ContractKey>(input: SignInOverlayProps<K>) => (
+export const SignInOverlayBase = <const K extends ContractKey>(input: SignInOverlayProps<K>) => (
     <ModalBranch
         isOpen={input.isOpen}
         size="xs"

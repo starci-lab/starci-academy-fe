@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _StarCiAiDrawer } from "./component"
+import { StarCiAiDrawerBase } from "./component"
 
 type DrawerBranchMockProps = {
     readonly isOpen: boolean
@@ -19,11 +19,11 @@ vi.mock("@/components/branches/DrawerBranch", () => ({
     ),
 }))
 
-describe("_StarCiAiDrawer", () => {
+describe("StarCiAiDrawerBase", () => {
     it("mounts one chat body in the requested responsive placement", () => {
         const Chat = () => <div>Conversation</div>
         const { container } = render(
-            <_StarCiAiDrawer
+            <StarCiAiDrawerBase
                 state="ready"
                 props={{ isOpen: true, placement: "bottom", title: "StarCi AI", description: "Assistant" }}
                 chat={Chat}
@@ -37,7 +37,7 @@ describe("_StarCiAiDrawer", () => {
         const dismiss = vi.fn()
         const Chat = () => <div>Conversation</div>
         render(
-            <_StarCiAiDrawer
+            <StarCiAiDrawerBase
                 state="ready"
                 props={{ isOpen: true, placement: "right", title: "StarCi AI", description: "Assistant" }}
                 on={{ dismiss }}
@@ -52,7 +52,7 @@ describe("_StarCiAiDrawer", () => {
     it("keeps the panel dismissable even when no owner is listening", () => {
         const Chat = () => <div>Conversation</div>
         render(
-            <_StarCiAiDrawer
+            <StarCiAiDrawerBase
                 state="closed"
                 props={{ isOpen: false, placement: "right", title: "StarCi AI", description: "Assistant" }}
                 chat={Chat}

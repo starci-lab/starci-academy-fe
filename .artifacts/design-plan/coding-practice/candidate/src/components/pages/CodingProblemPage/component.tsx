@@ -6,17 +6,17 @@ import {
     defineContractProjection,
 } from "~candidate/components/contracts/props"
 import {
-    _JudgeStatusStrip,
+    JudgeStatusStripBase,
     type JudgeStatusStripData,
     type JudgeVerdictState,
 } from "~candidate/components/blocks/coding/JudgeStatusStrip/component"
 import {
-    _ProblemReadingColumn,
+    ProblemReadingColumnBase,
     type ProblemReadingColumnData,
     type ProblemReadingColumnState,
 } from "~candidate/components/blocks/coding/ProblemReadingColumn/component"
 import {
-    _SolutionEditor,
+    SolutionEditorBase,
     type SolutionEditorData,
     type SolutionEditorState,
 } from "~candidate/components/blocks/coding/SolutionEditor/component"
@@ -68,7 +68,7 @@ export type CodingProblemPageActions = {
     readonly submit?: () => void
 }
 
-/** Props for {@link _CodingProblemPage}. */
+/** Props for {@link CodingProblemPageBase}. */
 export type CodingProblemPageProps = {
     readonly props: CodingProblemPageData
     readonly on?: CodingProblemPageActions
@@ -79,12 +79,12 @@ export type CodingProblemPageProps = {
  *
  * @param input - {@link CodingProblemPageProps}
  */
-export const _CodingProblemPage = (input: CodingProblemPageProps) => (
+export const CodingProblemPageBase = (input: CodingProblemPageProps) => (
     <Tree
         contract="coding-problem-page"
         render={defineContractComponent("coding-problem-page", {
             reading: defineContractProjection("problem-reading-column", () => (
-                <_ProblemReadingColumn
+                <ProblemReadingColumnBase
                     state={input.props.reading.state}
                     props={input.props.reading.props}
                     on={{ selectTab: input.on?.selectTab }}
@@ -92,14 +92,14 @@ export const _CodingProblemPage = (input: CodingProblemPageProps) => (
             )),
             work: defineContractComponent("problem-work-column", {
                 verdict: defineContractProjection("judge-status-strip", () => (
-                    <_JudgeStatusStrip
+                    <JudgeStatusStripBase
                         state={input.props.verdict.state}
                         props={input.props.verdict.props}
                         on={{ act: input.on?.verdictAct }}
                     />
                 )),
                 work: defineContractProjection("editor-over-console", () => (
-                    <_SolutionEditor
+                    <SolutionEditorBase
                         state={input.props.editor.state}
                         props={input.props.editor.props}
                         on={{

@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryModuleSwr } from "@/hooks/swr/useQueryModuleSwr"
-import { _CourseLearnModulePage } from "./component"
+import { CourseLearnModulePageBase } from "./component"
 
 /** Route identity required to load one enrolled module. */
 export interface CourseLearnModulePageConnectedProps { readonly displayId: string; readonly moduleId: string }
@@ -14,7 +14,7 @@ export const CourseLearnModulePage = ({ displayId, moduleId }: CourseLearnModule
     const router = useRouter()
     const module = useQueryModuleSwr({ id: moduleId })
     return (
-        <_CourseLearnModulePage
+        <CourseLearnModulePageBase
             state={module.error ? "failed" : module.data === undefined ? "pending" : "ready"}
             title={module.data?.title}
             module={module.data ?? undefined}

@@ -10,7 +10,7 @@ export type RewardStatRowProps =
     }
 
 /** Render the reward row without reading request or locale state. */
-export const _RewardStatRow = (input: RewardStatRowProps) => input.state === "empty" ? null : (
+export const RewardStatRowBase = (input: RewardStatRowProps) => input.state === "empty" ? null : (
     <IconLabelFactRow
         props={{
             icon: "reward",

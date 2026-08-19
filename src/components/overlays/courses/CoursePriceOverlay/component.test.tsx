@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _CoursePriceOverlay } from "./component"
+import { CoursePriceOverlayBase } from "./component"
 import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
 /**
@@ -40,9 +40,9 @@ const reckoning = defineContractComponent("stacked-peer-controls", {
     control: [defineLeafComponent("button", {}, () => <span>1.750.000 ₫</span>)],
 })
 
-describe("_CoursePriceOverlay", () => {
+describe("CoursePriceOverlayBase", () => {
     it("reads the reckoning at the measure a two-column amount needs", () => {
-        render(<_CoursePriceOverlay isOpen render={reckoning} onDismiss={vi.fn()} />)
+        render(<CoursePriceOverlayBase isOpen render={reckoning} onDismiss={vi.fn()} />)
 
         expect(mocks.size).toHaveBeenCalledWith("sm")
         expect(mocks.contract).toHaveBeenCalledWith("stacked-peer-controls")
@@ -50,7 +50,7 @@ describe("_CoursePriceOverlay", () => {
     })
 
     it("draws no surface of its own around a body that is already framed", () => {
-        const { container } = render(<_CoursePriceOverlay isOpen render={reckoning} onDismiss={vi.fn()} />)
+        const { container } = render(<CoursePriceOverlayBase isOpen render={reckoning} onDismiss={vi.fn()} />)
 
         expect(container.querySelector("[data-component=\"SurfaceCardSurface\"]")).toBeNull()
         expect(container.querySelector("[data-component=\"SurfaceListCard\"]")).toBeNull()
@@ -58,7 +58,7 @@ describe("_CoursePriceOverlay", () => {
 
     it("hands every way out to whatever mounted the surface", () => {
         const onDismiss = vi.fn()
-        render(<_CoursePriceOverlay isOpen={false} render={reckoning} onDismiss={onDismiss} />)
+        render(<CoursePriceOverlayBase isOpen={false} render={reckoning} onDismiss={onDismiss} />)
 
         expect(screen.getByTestId("modal")).toHaveAttribute("data-open", "false")
         fireEvent.click(screen.getByRole("button", { name: "Close" }))

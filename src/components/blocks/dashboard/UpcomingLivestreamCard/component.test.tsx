@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
-import { _UpcomingLivestreamCard } from "./component"
+import { UpcomingLivestreamCardBase } from "./component"
 
 /**
  * What these tests guard - the pure half's four situations, driven by props alone.
@@ -15,15 +15,15 @@ const frame = { label: "Upcoming sessions", errorMessage: "Could not load sessio
 
 afterEach(cleanup)
 
-describe("_UpcomingLivestreamCard", () => {
+describe("UpcomingLivestreamCardBase", () => {
     it("draws nothing when the situation is settled absence", () => {
-        const { container } = render(<_UpcomingLivestreamCard state="hidden" props={{ ...frame, rows: [] }} />)
+        const { container } = render(<UpcomingLivestreamCardBase state="hidden" props={{ ...frame, rows: [] }} />)
         expect(container).toBeEmptyDOMElement()
     })
 
     it("says what went wrong and offers the request again", () => {
         const retry = vi.fn()
-        render(<_UpcomingLivestreamCard state="failed" props={{ ...frame, rows: [] }} on={{ retry }} />)
+        render(<UpcomingLivestreamCardBase state="failed" props={{ ...frame, rows: [] }} on={{ retry }} />)
         expect(screen.getByText("Could not load sessions")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Retry" }))
         expect(retry).toHaveBeenCalledOnce()
@@ -31,7 +31,7 @@ describe("_UpcomingLivestreamCard", () => {
 
     it("still draws a way out when the caller resolved no failure sentence", () => {
         const retry = vi.fn()
-        render(<_UpcomingLivestreamCard
+        render(<UpcomingLivestreamCardBase
             state="failed"
             props={{ label: "Upcoming sessions", rows: [], retryLabel: "Retry" }}
             on={{ retry }}
@@ -41,13 +41,13 @@ describe("_UpcomingLivestreamCard", () => {
     })
 
     it("holds three resting rows so the card keeps its height", () => {
-        const { container } = render(<_UpcomingLivestreamCard state="pending" props={{ ...frame, rows: [] }} />)
+        const { container } = render(<UpcomingLivestreamCardBase state="pending" props={{ ...frame, rows: [] }} />)
         expect(container.querySelectorAll("[data-node=\"upcoming-livestream-row\"]")).toHaveLength(3)
     })
 
     it("draws one pressable row per settled session", () => {
         const open = vi.fn()
-        const { container } = render(<_UpcomingLivestreamCard
+        const { container } = render(<UpcomingLivestreamCardBase
             state="ready"
             props={{ ...frame, rows: [{ id: "r1", title: "Kickoff", subtitle: "Rust basics", time: "Sep 1, 10:00" }] }}
             on={{ "open:r1": open }}

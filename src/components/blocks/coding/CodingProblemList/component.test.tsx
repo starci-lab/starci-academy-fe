@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { Icon, type IconName } from "@/components/leaves/Icon"
-import { _CodingProblemList, type CodingProblemRow } from "./component"
+import { CodingProblemListBase, type CodingProblemRow } from "./component"
 
 const problems: ReadonlyArray<CodingProblemRow> = [
     {
@@ -35,10 +35,10 @@ const glyphNamed = (name: IconName) => {
 
 const noticeMark = () => document.querySelector("[data-component=\"IconTile\"]")
 
-describe("_CodingProblemList", () => {
+describe("CodingProblemListBase", () => {
     it("rests five inert rows while the topic's problems are in flight", () => {
         const open = vi.fn()
-        render(<_CodingProblemList state="pending" props={{ problems }} on={{ open }} />)
+        render(<CodingProblemListBase state="pending" props={{ problems }} on={{ open }} />)
 
         const rows = screen.getAllByRole("button")
         expect(rows).toHaveLength(5)
@@ -56,7 +56,7 @@ describe("_CodingProblemList", () => {
 
     it("lists each problem with its mark, title and fact, and opens the one pressed", () => {
         const open = vi.fn()
-        render(<_CodingProblemList state="ready" props={{ problems }} on={{ open }} />)
+        render(<CodingProblemListBase state="ready" props={{ problems }} on={{ open }} />)
 
         expect(screen.getAllByRole("button")).toHaveLength(2)
         expect(screen.getByText("Two Sum")).toHaveAttribute("data-size", "sm")
@@ -76,7 +76,7 @@ describe("_CodingProblemList", () => {
     })
 
     it("keeps a row pressable when the page named no opener for it", () => {
-        render(<_CodingProblemList state="ready" props={{ problems }} on={{}} />)
+        render(<CodingProblemListBase state="ready" props={{ problems }} on={{}} />)
         const row = screen.getByRole("button", { name: "Two Sum, solved" })
         fireEvent.click(row)
         expect(row).toBeEnabled()
@@ -84,7 +84,7 @@ describe("_CodingProblemList", () => {
     })
 
     it("keeps a row pressable when the page reported nothing at all", () => {
-        render(<_CodingProblemList state="ready" props={{ problems: [problems[1]] }} />)
+        render(<CodingProblemListBase state="ready" props={{ problems: [problems[1]] }} />)
         const row = screen.getByRole("button", { name: "Median of Two Sorted Arrays, not solved" })
         fireEvent.click(row)
         expect(row).toBeEnabled()
@@ -92,7 +92,7 @@ describe("_CodingProblemList", () => {
     })
 
     it("settles into an empty list rather than a notice when the topic sent no problems", () => {
-        render(<_CodingProblemList state="ready" props={{}} />)
+        render(<CodingProblemListBase state="ready" props={{}} />)
         const list = document.querySelector("[data-node=\"marked-row-list\"]")
         expect(list).toBeInTheDocument()
         expect(list?.children).toHaveLength(0)
@@ -102,7 +102,7 @@ describe("_CodingProblemList", () => {
     it("says why an empty topic is empty and offers the way back", () => {
         const recover = vi.fn()
         render(
-            <_CodingProblemList
+            <CodingProblemListBase
                 state="empty"
                 props={{
                     noticeMessage: "No problems in this topic yet",
@@ -121,7 +121,7 @@ describe("_CodingProblemList", () => {
     })
 
     it("marks a finished topic as complete and can settle with no words and no way out", () => {
-        render(<_CodingProblemList state="all-solved" props={{}} />)
+        render(<CodingProblemListBase state="all-solved" props={{}} />)
 
         expect(glyphOf(noticeMark())).toBe(glyphNamed("complete"))
         expect(screen.queryByRole("button")).toBeNull()
@@ -132,7 +132,7 @@ describe("_CodingProblemList", () => {
 
     it("keeps the finished-topic action inert when no recovery was wired", () => {
         render(
-            <_CodingProblemList
+            <CodingProblemListBase
                 state="all-solved"
                 props={{ noticeMessage: "Every problem solved", noticeActionLabel: "Choose another topic" }}
             />,

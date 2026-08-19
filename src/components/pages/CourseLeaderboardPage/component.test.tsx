@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { _CourseLeaderboardPage } from "./component"
+import { CourseLeaderboardPageBase } from "./component"
 
 /**
  * What these tests guard.
@@ -55,7 +55,7 @@ const rankedBoard = {
 
 describe("CourseLeaderboardPage", () => {
     it("keeps category context and an honest empty result", () => {
-        render(<_CourseLeaderboardPage state="empty" props={props} />)
+        render(<CourseLeaderboardPageBase state="empty" props={props} />)
         expect(screen.getByRole("heading", { name: "Course leaderboard" })).toBeInTheDocument()
         expect(screen.getByText("Total XP")).toBeInTheDocument()
         expect(screen.getByText("No learners are ranked in this course yet.")).toBeInTheDocument()
@@ -64,7 +64,7 @@ describe("CourseLeaderboardPage", () => {
     it("invites an unranked course to be climbed rather than retried", () => {
         const climb = vi.fn()
         const retry = vi.fn()
-        render(<_CourseLeaderboardPage state="empty" props={props} on={{ climb, retry }} />)
+        render(<CourseLeaderboardPageBase state="empty" props={props} on={{ climb, retry }} />)
 
         fireEvent.click(screen.getByRole("button", { name: /Continue learning/ }))
         expect(climb).toHaveBeenCalledOnce()
@@ -74,7 +74,7 @@ describe("CourseLeaderboardPage", () => {
     it("offers the way back from a failed board read", () => {
         const climb = vi.fn()
         const retry = vi.fn()
-        render(<_CourseLeaderboardPage state="failed" props={props} on={{ climb, retry }} />)
+        render(<CourseLeaderboardPageBase state="failed" props={props} on={{ climb, retry }} />)
 
         expect(screen.getByText("Could not load the course leaderboard.")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: /Try again/ }))
@@ -84,7 +84,7 @@ describe("CourseLeaderboardPage", () => {
 
     it("draws standing, podium, ranked rows, the gap marker and the viewer's own row", () => {
         const { container } = render(
-            <_CourseLeaderboardPage
+            <CourseLeaderboardPageBase
                 state="ready"
                 props={{ ...props, board: rankedBoard, updatedAtLabel: "Updated 2 minutes ago" }}
             />,
@@ -100,7 +100,7 @@ describe("CourseLeaderboardPage", () => {
 
     it("omits the gap marker and the viewer row when the whole ranking is on screen", () => {
         const { container } = render(
-            <_CourseLeaderboardPage
+            <CourseLeaderboardPageBase
                 state="ready"
                 props={{ ...props, board: { ...rankedBoard, ellipsisLabel: undefined, selfRow: undefined } }}
             />,
@@ -113,7 +113,7 @@ describe("CourseLeaderboardPage", () => {
 
     it("rests the ranked rows while the board is in flight", () => {
         const { container } = render(
-            <_CourseLeaderboardPage state="pending" props={{ ...props, board: rankedBoard }} />,
+            <CourseLeaderboardPageBase state="pending" props={{ ...props, board: rankedBoard }} />,
         )
 
         expect(container.querySelectorAll("[data-loading=\"true\"]").length).toBeGreaterThan(0)
@@ -125,7 +125,7 @@ describe("CourseLeaderboardPage", () => {
         const course = vi.fn()
         const climb = vi.fn()
         render(
-            <_CourseLeaderboardPage
+            <CourseLeaderboardPageBase
                 state="ready"
                 props={{ ...props, board: rankedBoard }}
                 on={{ selectCategory, course, climb }}

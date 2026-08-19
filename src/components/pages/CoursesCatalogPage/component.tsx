@@ -112,7 +112,7 @@ export type CoursesCatalogPageActions = {
     readonly [key: string]: ((...args: Array<never>) => void) | undefined
 }
 
-/** Props for {@link _CoursesCatalogPage}. */
+/** Props for {@link CoursesCatalogPageBase}. */
 export type CoursesCatalogPageProps = {
     readonly state: CoursesCatalogPageState
     readonly props: CoursesCatalogPageData
@@ -158,7 +158,7 @@ const CatalogLineList = defineContractComponent("catalog-card-list", CatalogLine
  *
  * @param input - {@link CoursesCatalogPageProps}
  */
-export const _CoursesCatalogPage = (input: CoursesCatalogPageProps) => {
+export const CoursesCatalogPageBase = (input: CoursesCatalogPageProps) => {
     const labels = input.props.labels
     const isLoading = input.state === "pending"
     const discover = input.props.discover ?? []

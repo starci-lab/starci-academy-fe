@@ -96,7 +96,7 @@ const ChangelogContentView = ({ props, on, isLoading = false }: ChangelogContent
 const ChangelogContent = defineContractComponent("changelog-list", ChangelogContentView)
 
 /** Draw the product changelog as a joined history without owning fetching or navigation. */
-export const _ChangelogList = (input: ChangelogListProps) => {
+export const ChangelogListBase = (input: ChangelogListProps) => {
     if (input.state === "empty") return null
 
     const isLoading = input.state === "pending"

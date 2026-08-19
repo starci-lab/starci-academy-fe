@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
-import { _ProfileChallengeSubmissionPage } from "./component"
+import { ProfileChallengeSubmissionPageBase } from "./component"
 
 /**
  * What these tests guard.
@@ -13,16 +13,16 @@ import { _ProfileChallengeSubmissionPage } from "./component"
 
 const rows = (container: HTMLElement) => container.querySelectorAll("[data-node='evidence-title-subtitle-fact-row']")
 
-describe("_ProfileChallengeSubmissionPage", () => {
+describe("ProfileChallengeSubmissionPageBase", () => {
     it("keeps submitted proof, attempts and structured feedback in legacy order", () => {
-        const html = renderToStaticMarkup(<_ProfileChallengeSubmissionPage state="ready" detail={{ title: "Resilient checkout", courseTitle: "Frontend Engineering", submissionUrl: "https://example.com/proof", attempts: [{ attemptNumber: 3, score: 94 }], feedbacks: [{ message: "Reliability", severity: "Strong" }] }} onBack={vi.fn()} />)
+        const html = renderToStaticMarkup(<ProfileChallengeSubmissionPageBase state="ready" detail={{ title: "Resilient checkout", courseTitle: "Frontend Engineering", submissionUrl: "https://example.com/proof", attempts: [{ attemptNumber: 3, score: 94 }], feedbacks: [{ message: "Reliability", severity: "Strong" }] }} onBack={vi.fn()} />)
         expect(html.indexOf("Submitted proof")).toBeLessThan(html.indexOf("Attempts"))
         expect(html.indexOf("Attempts")).toBeLessThan(html.indexOf("Structured feedback"))
         expect(html).toContain("https://example.com/proof")
     })
 
     it("rests three attempts, three feedbacks and a placeholder proof link while loading", () => {
-        const { container } = render(<_ProfileChallengeSubmissionPage state="pending" onBack={vi.fn()} />)
+        const { container } = render(<ProfileChallengeSubmissionPageBase state="pending" onBack={vi.fn()} />)
 
         expect(rows(container)).toHaveLength(6)
         expect(screen.getByRole("button", { name: "← Challenges" })).toBeInTheDocument()
@@ -31,7 +31,7 @@ describe("_ProfileChallengeSubmissionPage", () => {
     })
 
     it("drops the proof card and says both lists are unknown when the proof failed to load", () => {
-        render(<_ProfileChallengeSubmissionPage state="error" detail={null} onBack={vi.fn()} />)
+        render(<ProfileChallengeSubmissionPageBase state="error" detail={null} onBack={vi.fn()} />)
 
         expect(screen.getByRole("heading", { name: "Challenge proof couldn't be loaded" })).toBeInTheDocument()
         expect(screen.queryByText("Submitted proof")).not.toBeInTheDocument()
@@ -40,7 +40,7 @@ describe("_ProfileChallengeSubmissionPage", () => {
     })
 
     it("tells a reader the submission is simply not public rather than broken", () => {
-        render(<_ProfileChallengeSubmissionPage state="ready" onBack={vi.fn()} />)
+        render(<ProfileChallengeSubmissionPageBase state="ready" onBack={vi.fn()} />)
 
         expect(screen.getByRole("heading", { name: "Challenge proof not found" })).toBeInTheDocument()
         expect(screen.getByText("This submission is not public.")).toBeInTheDocument()
@@ -49,7 +49,7 @@ describe("_ProfileChallengeSubmissionPage", () => {
     it("returns to the owning course listing through the back action", () => {
         const onBack = vi.fn()
         render(
-            <_ProfileChallengeSubmissionPage
+            <ProfileChallengeSubmissionPageBase
                 state="ready"
                 detail={{ title: "Resilient checkout", courseTitle: "Frontend Engineering" }}
                 onBack={onBack}
@@ -62,7 +62,7 @@ describe("_ProfileChallengeSubmissionPage", () => {
 
     it("numbers an unlabelled attempt, withholds Passed from a zero score and keeps an ungraded row factless", () => {
         const { container } = render(
-            <_ProfileChallengeSubmissionPage
+            <ProfileChallengeSubmissionPageBase
                 state="ready"
                 detail={{
                     title: "Rate limiter",

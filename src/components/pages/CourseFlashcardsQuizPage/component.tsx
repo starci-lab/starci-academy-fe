@@ -50,7 +50,7 @@ export type CourseFlashcardsQuizPageProps = {
 }
 
 /** Renders the legacy quiz setup hierarchy without fetching or routing internally. */
-export const _CourseFlashcardsQuizPage = (input: CourseFlashcardsQuizPageProps) => {
+export const CourseFlashcardsQuizPageBase = (input: CourseFlashcardsQuizPageProps) => {
     const state = input.state
     const data = input.props
     const on = input.on

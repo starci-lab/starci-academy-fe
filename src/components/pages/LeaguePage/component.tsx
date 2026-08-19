@@ -115,7 +115,7 @@ const LeagueListContent = defineContractComponent("ranked-user-followable-list",
  * the WHOLE thing beneath the title, because weekly and global are two different competitions
  * rather than two filters over one.
  */
-export const _LeaguePage = (input: LeaguePageProps) => {
+export const LeaguePageBase = (input: LeaguePageProps) => {
     const isLoading = input.state === "pending"
     const board = input.props.board
     const scope = defineContractComponent("scope-switch-row", {

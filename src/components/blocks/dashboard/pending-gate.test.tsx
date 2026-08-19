@@ -15,7 +15,7 @@ import { StreakStatRow } from "./StreakStatRow"
 import { StreakStrip } from "./StreakStrip"
 import { WeeklyChallengeCard } from "./WeeklyChallengeCard"
 import { WeeklyGoals } from "./WeeklyGoals"
-import { _DashboardPage } from "@/components/pages/DashboardPage/component"
+import { DashboardPageBase } from "@/components/pages/DashboardPage/component"
 
 vi.mock("next-intl", () => ({
     useLocale: () => "en",
@@ -98,7 +98,7 @@ describe("dashboard viewer-key gate", () => {
 
     it("keeps every overview region mounted while independent requests are unresolved", () => {
         const { getByText } = render(
-            <_DashboardPage props={{ selectedTab: "overview", unavailableMessage: "Unavailable" }} />,
+            <DashboardPageBase props={{ selectedTab: "overview", unavailableMessage: "Unavailable" }} />,
         )
 
         for (const label of [
