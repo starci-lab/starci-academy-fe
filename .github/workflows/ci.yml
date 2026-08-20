@@ -30,7 +30,13 @@ jobs:
       # because a previous build left those types behind.
       - run: npm run build
       - run: npm run typecheck
-      - run: npm run test:ci
+      - name: Unit tests with mature coverage
+        env:
+          COVERAGE_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || github.sha }}
+        run: npm run test:ci
+      # E2E is a separate behavior lane and never contributes to Sonar coverage.
+      - name: End-to-end behavior
+        run: npm run test:e2e
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
@@ -42,7 +48,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
-      - name: Enforce SonarQube quality gate
+      - name: Strict sonar-quality-gate proof
         uses: SonarSource/sonarqube-quality-gate-action@v1
         timeout-minutes: 10
         env:
