@@ -374,16 +374,83 @@ export const CONTRACTS = buildContracts({
         },
         why: "if you need one selected learning signal explained by its value, evidence caption and onward action.",
     },
-    "course-learn-content-home-page": {
+    "course-content-home-frame": {
+        classes: [
+            "flex", "w-full", "min-w-0", "flex-col", "items-start",
+            "md:flex-row", "md:items-start", "md:gap-8",
+            "md:[&>*:first-child]:w-80", "md:[&>*:first-child]:shrink-0",
+            "md:[&>*:first-child]:sticky", "md:[&>*:first-child]:top-rail",
+            "md:[&>*:first-child]:self-start", "md:[&>*:first-child]:max-h-rail",
+            "md:[&>*:first-child]:overflow-y-auto",
+            "md:[&>*:last-child]:min-w-0", "md:[&>*:last-child]:grow",
+        ],
+        children: {
+            map: { contract: "learn-route-context-rail" },
+            overview: { contract: "course-content-home-overview-page" },
+        },
+        why: "if you need one sticky course map to keep its desktop measure beside a flexible content overview that becomes the next row in narrow viewports.",
+    },
+    "course-content-home-overview-page": {
         host: "main",
-        classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "flex-col", "gap-4", "px-6", "py-6"],
+        classes: ["mx-auto", "flex", "w-full", "max-w-app-lg", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            header: { contract: "page-header-stack" },
+            meta: { contract: "course-content-meta-row", optional: true },
+            gates: { contract: "course-content-gate-run", optional: true },
+            resume: { contract: "course-content-resume-progress" },
+            nudges: { contract: "course-content-nudge-run", optional: true },
+            module: { contract: "course-content-current-module-path", optional: true },
+            notice: { composite: "empty-notice", optional: true },
+        },
+        why: "if you need course identity to lead through optional catalogue and learner facts into one continuation decision and only the current authored module path.",
+    },
+    "course-content-meta-row": {
+        classes: ["flex", "w-full", "min-w-0", "flex-row", "flex-wrap", "items-center", "gap-3"],
+        children: {
+            fact: { leaf: "text", props: { size: "sm", tone: "muted" }, repeats: true, restingCount: 3 },
+        },
+        why: "if you need optional module, study-time and learner facts to wrap as peers without competing with course identity.",
+    },
+    "course-content-gate-run": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3"],
+        children: {
+            gate: { leaf: "text", props: { size: "sm" }, repeats: true, restingCount: 2 },
+        },
+        why: "if you need learner eligibility notices to remain together before continuation evidence instead of replacing the page.",
+    },
+    "course-content-resume-progress": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3"],
+        children: {
+            eyebrow: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            target: { leaf: "heading" },
+            action: { leaf: "button", optional: true },
+            progress: { leaf: "progress" },
+            fact: { leaf: "text", props: { size: "sm", tone: "muted" } },
+        },
+        why: "if you need the next learning target, its action and honest completion evidence to read as one continuation decision.",
+    },
+    "course-content-nudge-run": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3"],
+        children: {
+            nudge: { leaf: "text", props: { size: "sm", tone: "muted" }, repeats: true, restingCount: 2 },
+        },
+        why: "if you need learner-specific aids kept between the continuation decision and the current module without becoming primary navigation.",
+    },
+    "course-content-current-module-path": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3"],
         children: {
             title: { leaf: "heading" },
-            description: { leaf: "text", props: { size: "sm" } },
-            modulesTitle: { leaf: "heading", optional: true },
-            module: { composite: "curriculum-module-row", repeats: true, restingCount: 3, optional: true },
+            lesson: { contract: "course-content-lesson-row", repeats: true, restingCount: 4 },
         },
-        why: "if you need a Modules landing page that names the enrolled course, explains the collection and keeps every authored module in one scannable run across ready, loading and failure states.",
+        why: "if you need the current module label followed by its lesson destinations while the adjacent course map retains the complete curriculum.",
+    },
+    "course-content-lesson-row": {
+        classes: ["flex", "w-full", "min-w-0", "flex-row", "items-center", "gap-3", "[&>*:first-child]:min-w-0", "[&>*:first-child]:grow", "[&>*:last-child]:shrink-0"],
+        children: {
+            lesson: { leaf: "nav-link", props: { kind: "section" } },
+            fact: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
+        },
+        why: "if you need one lesson destination aligned with optional completion, difficulty or premium evidence that never becomes a separate control.",
     },
     "course-learn-module-page": {
         host: "main",
@@ -503,17 +570,60 @@ export const CONTRACTS = buildContracts({
         why: "if you need a project result page ordered as attempt evidence, optional feedback and one closing retry action outside both evidence groups.",
     },
     "course-personal-project-page": {
-        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4", "px-6", "py-6"],
+        host: "main",
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            header: { contract: "page-header-stack" },
+            github: { contract: "course-personal-project-github-status", optional: true },
+            next: { contract: "course-personal-project-next-task", optional: true },
+            completion: { contract: "course-personal-project-completion-summary" },
+            milestone: { contract: "course-personal-project-current-milestone", optional: true },
+            notice: { composite: "empty-notice", optional: true },
+        },
+        why: "if you need a capstone dashboard ordered from project identity through the next task and whole-project evidence into only the current milestone's tasks.",
+    },
+    "course-personal-project-github-status": {
+        classes: ["flex", "w-full", "min-w-0", "flex-row", "flex-wrap", "items-center", "gap-3"],
+        children: {
+            repository: { leaf: "text", props: { size: "sm", weight: "medium" } },
+            branch: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
+            status: { leaf: "text", props: { size: "xs", tone: "muted" } },
+        },
+        why: "if you need repository identity, optional branch and connection state to remain one compact fact attached to project identity.",
+    },
+    "course-personal-project-next-task": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3"],
+        children: {
+            position: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
+            title: { leaf: "heading", optional: true },
+            action: { leaf: "button", optional: true },
+            completed: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+        },
+        why: "if you need the next executable project task and its action to be replaced in place by one all-complete message.",
+    },
+    "course-personal-project-completion-summary": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3"],
+        children: {
+            label: { leaf: "text", props: { size: "sm", weight: "medium" } },
+            progress: { leaf: "progress" },
+            fact: { leaf: "text", props: { size: "sm", tone: "muted" }, repeats: true, restingCount: 3 },
+        },
+        why: "if you need whole-project completion to stay paired with task, submission and score facts rather than being inferred from the current milestone.",
+    },
+    "course-personal-project-current-milestone": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4"],
         children: {
             title: { leaf: "heading" },
-            description: { leaf: "text", props: { size: "sm", tone: "muted" } },
-            progress: { leaf: "progress" },
-            fact: { leaf: "text", props: { size: "sm", tone: "muted" } },
-            task: { leaf: "nav-link", props: { kind: "section" }, repeats: true, restingCount: 4 },
-            notice: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
-            retry: { leaf: "button", optional: true },
+            tasks: { contract: "course-personal-project-current-task-grid" },
         },
-        why: "if you need a capstone overview ordered from identity through completion into its tasks, with empty and failed notices retaining the same page shape.",
+        why: "if you need the current milestone identity to introduce its own bounded task destination grid.",
+    },
+    "course-personal-project-current-task-grid": {
+        classes: ["grid", "w-full", "min-w-0", "grid-cols-1", "sm:grid-cols-2", "gap-4"],
+        children: {
+            task: { leaf: "nav-link", props: { kind: "section" }, repeats: true, restingCount: 4 },
+        },
+        why: "if you need four project task destinations to keep comparable responsive columns without flattening them into workspace navigation.",
     },
     "course-foundations-page": {
         host: "main",

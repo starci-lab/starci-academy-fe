@@ -24,7 +24,7 @@ const coursePersonalProjectQuery = gql`
                     id
                     title
                     orderIndex
-                    tasks { id title type maxScore completed lastScore }
+                    tasks { id title type maxScore completed lastScore numAttempts }
                 }
                 progress { tasksCompleted tasksTotal completionPercent }
                 currentTask { kind id milestoneId }

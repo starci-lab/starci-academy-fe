@@ -729,10 +729,27 @@
             }
         },
         "contentHome": {
-            "title": "C\u00e1c m\u00f4-\u0111un c\u1ee7a kh\u00f3a h\u1ecdc",
-            "description": "Ch\u1ecdn m\u1ed9t m\u00f4-\u0111un \u0111\u1ec3 ti\u1ebfp t\u1ee5c h\u1ecdc.",
-            "modules": "M\u00f4-\u0111un",
-            "moduleCount": "{count} m\u00f4-\u0111un"
+            "title": "N\u1ed9i dung kh\u00f3a h\u1ecdc",
+            "breadcrumbLabel": "L\u1ed9 tr\u00ecnh n\u1ed9i dung kh\u00f3a h\u1ecdc",
+            "breadcrumbCourse": "Kh\u00f3a h\u1ecdc",
+            "moduleCount": "{count} m\u00f4-\u0111un",
+            "studyHours": "{hours} gi\u1edd h\u1ecdc",
+            "learnerCount": "{count} h\u1ecdc vi\u00ean",
+            "trialNotice": "B\u1ea1n \u0111ang h\u1ecdc th\u1eed kh\u00f3a n\u00e0y. B\u00e0i h\u1ecdc tr\u1ea3 ph\u00ed s\u1ebd kh\u00f3a cho \u0111\u1ebfn khi ghi danh.",
+            "resumeEyebrow": "Ti\u1ebfp t\u1ee5c h\u1ecdc",
+            "resumeFallback": "B\u1eaft \u0111\u1ea7u v\u1edbi b\u00e0i h\u1ecdc \u0111\u1ea7u ti\u00ean",
+            "resumeComplete": "\u0110\u00e3 ho\u00e0n th\u00e0nh n\u1ed9i dung kh\u00f3a h\u1ecdc",
+            "resumeAction": "Ti\u1ebfp t\u1ee5c",
+            "progressLabel": "Ti\u1ebfn \u0111\u1ed9 n\u1ed9i dung kh\u00f3a h\u1ecdc",
+            "progressFact": "\u0110\u00e3 \u0111\u1ecdc {lessonsRead}/{lessonsTotal} b\u00e0i \u00b7 ho\u00e0n th\u00e0nh {challengesCompleted}/{challengesTotal} th\u1eed th\u00e1ch",
+            "currentModule": "M\u00f4-\u0111un hi\u1ec7n t\u1ea1i \u00b7 {module}",
+            "lessonFact": "{minutes} ph\u00fat \u00b7 {status}",
+            "lessonRead": "\u0110\u00e3 \u0111\u1ecdc",
+            "lessonUnread": "Ch\u01b0a \u0111\u1ecdc",
+            "lessonPremium": "Tr\u1ea3 ph\u00ed",
+            "empty": "Kh\u00f3a h\u1ecdc n\u00e0y ch\u01b0a c\u00f3 b\u00e0i h\u1ecdc.",
+            "failed": "Kh\u00f4ng t\u1ea3i \u0111\u01b0\u1ee3c n\u1ed9i dung kh\u00f3a h\u1ecdc.",
+            "retry": "Th\u1eed l\u1ea1i"
         },
         "module": {
             "contents": "B\u00e0i h\u1ecdc"

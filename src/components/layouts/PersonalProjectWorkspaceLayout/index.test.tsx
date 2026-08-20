@@ -5,11 +5,10 @@ import { PersonalProjectWorkspaceLayout } from "."
 /**
  * What these tests guard.
  *
- * The connected half turns one project answer into a flat rail of task destinations: milestones in
- * their declared order, each task labelled by the milestone it belongs to, and exactly one of them
- * marked current. Which one is current is decided by the ROUTE first and by the project's own
- * pointer only when the route names none - a rail that trusted the pointer while the reader is
- * standing on another task would highlight the wrong row.
+ * The connected half turns one project answer into a milestone rail rather than flattening task
+ * titles into navigation. Each milestone routes to its current task when it owns that pointer, or
+ * to its first task otherwise. The route outranks the project's pointer while a reader is already
+ * standing on a task.
  */
 
 const mocks = vi.hoisted(() => ({
@@ -65,12 +64,11 @@ describe("PersonalProjectWorkspaceLayout", () => {
         vi.clearAllMocks()
     })
 
-    it("flattens milestones into task destinations in their declared order", () => {
+    it("keeps one destination per milestone in declared order", () => {
         render(<PersonalProjectWorkspaceLayout displayId="system-design" surface={<div />} />)
 
-        expect(rail().map((row) => row.id)).toEqual(["task-1", "task-2", "task-3"])
-        expect(rail()[0].label).toBe("Plan · Scope")
-        expect(rail()[2].label).toBe("Ship · Deploy")
+        expect(rail().map((row) => row.id)).toEqual(["task-2", "task-3"])
+        expect(rail().map((row) => row.label)).toEqual(["Plan", "Ship"])
     })
 
     it("marks the project's own pointer current while the route names no task", () => {

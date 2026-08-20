@@ -8,6 +8,7 @@ export type PersonalProjectTask = {
     readonly maxScore: number
     readonly completed: boolean
     readonly lastScore: number
+    readonly numAttempts: number
 }
 
 /** Ordered milestone and its personal-project tasks. */

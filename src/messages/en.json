@@ -729,10 +729,27 @@
             }
         },
         "contentHome": {
-            "title": "Course modules",
-            "description": "Choose a module to continue learning.",
-            "modules": "Modules",
-            "moduleCount": "{count} modules"
+            "title": "Course content",
+            "breadcrumbLabel": "Course content path",
+            "breadcrumbCourse": "Course",
+            "moduleCount": "{count} modules",
+            "studyHours": "{hours} study hours",
+            "learnerCount": "{count} learners",
+            "trialNotice": "You are previewing this course. Premium lessons remain locked until enrollment.",
+            "resumeEyebrow": "Continue learning",
+            "resumeFallback": "Start with the first lesson",
+            "resumeComplete": "Course content complete",
+            "resumeAction": "Continue",
+            "progressLabel": "Course content progress",
+            "progressFact": "{lessonsRead}/{lessonsTotal} lessons read · {challengesCompleted}/{challengesTotal} challenges completed",
+            "currentModule": "Current module · {module}",
+            "lessonFact": "{minutes} min · {status}",
+            "lessonRead": "Read",
+            "lessonUnread": "Unread",
+            "lessonPremium": "Premium",
+            "empty": "This course does not have authored lessons yet.",
+            "failed": "Course content could not be loaded.",
+            "retry": "Try again"
         },
         "module": {
             "contents": "Lessons"

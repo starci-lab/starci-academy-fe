@@ -22,11 +22,15 @@ export const PersonalProjectWorkspaceLayout = (input: PersonalProjectWorkspaceLa
     const milestones = (project.data?.milestones ?? [])
         .slice()
         .sort((left, right) => left.orderIndex - right.orderIndex)
-        .flatMap((milestone) => milestone.tasks.map((task) => ({
-            id: task.id,
-            label: `${milestone.title} · ${task.title}`,
-            isCurrent: task.id === currentTaskId,
-        })))
+        .flatMap((milestone) => {
+            const currentTask = milestone.tasks.find((task) => task.id === currentTaskId)
+            const destination = currentTask ?? milestone.tasks[0]
+            return destination === undefined ? [] : [{
+                id: destination.id,
+                label: milestone.title,
+                isCurrent: currentTask !== undefined,
+            }]
+        })
     return (
         <PersonalProjectWorkspaceLayoutBase
             milestones={milestones}

@@ -44,6 +44,7 @@ describe("queryCoursePersonalProject", () => {
         const operation = mocks.query.mock.calls[0][0]
         expect(print(operation.query)).toContain("query CoursePersonalProject")
         expect(print(operation.query)).toContain("myCourseOutline")
+        expect(print(operation.query)).toContain("numAttempts")
         expect(operation.variables).toEqual({ request: { courseId: "course-1" } })
     })
 
