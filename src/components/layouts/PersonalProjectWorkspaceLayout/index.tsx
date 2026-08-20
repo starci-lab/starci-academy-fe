@@ -1,6 +1,7 @@
 "use client"
 
-import type { ReactNode } from "react"
+import { useMemo, useState, type ReactNode } from "react"
+import { useLocale } from "next-intl"
 import { usePathname, useRouter } from "@/i18n/navigation"
 import { useQueryCoursePersonalProjectSwr } from "@/hooks/swr/useQueryCoursePersonalProjectSwr"
 import { PersonalProjectWorkspaceLayoutBase } from "./component"
@@ -13,8 +14,11 @@ export type PersonalProjectWorkspaceLayoutProps = {
 
 /** Resolves the persistent milestone rail and navigates between its task routes. */
 export const PersonalProjectWorkspaceLayout = (input: PersonalProjectWorkspaceLayoutProps) => {
+    const locale = useLocale()
     const pathname = usePathname()
     const router = useRouter()
+    const [collapsed, setCollapsed] = useState(false)
+    const [query, setQuery] = useState("")
     const project = useQueryCoursePersonalProjectSwr(input.displayId)
     const routeTaskId = pathname.match(/\/personal-project\/tasks\/([^/]+)/)?.[1]
     const currentTaskId = routeTaskId
@@ -28,14 +32,42 @@ export const PersonalProjectWorkspaceLayout = (input: PersonalProjectWorkspaceLa
             return destination === undefined ? [] : [{
                 id: destination.id,
                 label: milestone.title,
+                fact: `${milestone.tasks.filter((task) => task.completed).length}/${milestone.tasks.length}`,
                 isCurrent: currentTask !== undefined,
             }]
         })
+    const visibleMilestones = useMemo(() => {
+        const normalized = query.trim().toLocaleLowerCase(locale)
+        return normalized === "" ? milestones : milestones.filter((milestone) => (
+            milestone.label.toLocaleLowerCase(locale).includes(normalized)
+        ))
+    }, [locale, milestones, query])
+    const copy = locale === "vi"
+        ? {
+            title: "Tiến độ", // vn-ok: Vietnamese runtime copy while shared message catalogs are frozen.
+            search: "Tìm task...", // vn-ok: Vietnamese runtime copy while shared message catalogs are frozen.
+            searchLabel: "Tìm milestone", // vn-ok: Vietnamese runtime copy while shared message catalogs are frozen.
+            clear: "Xóa tìm kiếm", // vn-ok: Vietnamese runtime copy while shared message catalogs are frozen.
+            collapse: "Thu gọn mục lục dự án", // vn-ok: Vietnamese runtime copy while shared message catalogs are frozen.
+            expand: "Mở mục lục dự án", // vn-ok: Vietnamese runtime copy while shared message catalogs are frozen.
+            fact: "nhiệm vụ", // vn-ok: Vietnamese runtime copy while shared message catalogs are frozen.
+        }
+        : { title: "Progress", search: "Search tasks...", searchLabel: "Search milestones", clear: "Clear search", collapse: "Collapse project outline", expand: "Expand project outline", fact: "tasks" }
     return (
         <PersonalProjectWorkspaceLayoutBase
-            milestones={milestones}
+            milestones={visibleMilestones}
             surface={input.surface}
+            progress={{
+                label: copy.title,
+                value: project.data?.progress?.completionPercent,
+                fact: `${project.data?.progress?.tasksCompleted ?? 0}/${project.data?.progress?.tasksTotal ?? 0} ${copy.fact}`,
+            }}
+            search={{ placeholder: copy.search, label: copy.searchLabel, clearLabel: copy.clear }}
+            collapsed={collapsed}
+            toggleLabel={collapsed ? copy.expand : copy.collapse}
             onTask={(taskId) => router.push(`/courses/${input.displayId}/learn/personal-project/tasks/${taskId}`)}
+            onSearch={setQuery}
+            onToggle={() => setCollapsed((value) => !value)}
             isLoading={project.data === undefined && project.error === undefined}
         />
     )

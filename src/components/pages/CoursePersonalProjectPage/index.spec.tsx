@@ -22,7 +22,7 @@ type PageStubProps = {
         readonly nextTask?: { readonly id: string; readonly position: string; readonly title: string }
         readonly completionFacts: ReadonlyArray<string>
         readonly milestoneTitle?: string
-        readonly tasks: ReadonlyArray<{ readonly id: string; readonly label: string; readonly isCurrent?: boolean }>
+        readonly tasks: ReadonlyArray<{ readonly id: string; readonly title: string; readonly status: string; readonly actionLabel: string; readonly isCurrent?: boolean }>
         readonly notice?: string
     }
     readonly on?: {

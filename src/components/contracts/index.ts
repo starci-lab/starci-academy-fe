@@ -28,7 +28,7 @@ export type LayoutClassName =
     | "flex" | "grid" | "flex-col" | "flex-row" | "flex-wrap" | "flex-nowrap" | "overflow-hidden" | "relative"
     | "min-h-0" | "overflow-y-auto" | "overscroll-contain" | "scrollbar"
     | "items-center" | "items-baseline" | "items-start" | "items-end"
-    | "justify-between" | "justify-center" | "[&>*]:w-full"
+    | "justify-between" | "justify-center" | "justify-end" | "[&>*]:w-full"
     | "gap-1" | "gap-2" | "gap-3" | "gap-4" | "gap-6" | "gap-8"
     | "grid-cols-1" | "grid-cols-2" | "sm:grid-cols-2" | "sm:grid-cols-4" | "lg:grid-cols-3"
     | "sm:flex-row" | "sm:items-start" | "sm:justify-between"
@@ -87,6 +87,21 @@ export type LayoutClassName =
     | "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:self-start"
     | "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:max-h-rail"
     | "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:overflow-y-auto"
+    | "md:[&>[data-node=personal-project-milestone-rail]]:w-80"
+    | "md:[&>[data-node=personal-project-milestone-rail]]:grow-0"
+    | "md:[&>[data-node=personal-project-milestone-rail]]:shrink-0"
+    | "md:[&>[data-node=personal-project-milestone-rail]]:sticky"
+    | "md:[&>[data-node=personal-project-milestone-rail]]:top-rail"
+    | "md:[&>[data-node=personal-project-milestone-rail]]:self-start"
+    | "md:[&>[data-node=personal-project-milestone-rail]]:max-h-rail"
+    | "md:[&>[data-node=personal-project-milestone-rail]]:overflow-y-auto"
+    | "md:[&>[data-node=personal-project-milestone-rail-collapsed]]:w-16"
+    | "md:[&>[data-node=personal-project-milestone-rail-collapsed]]:grow-0"
+    | "md:[&>[data-node=personal-project-milestone-rail-collapsed]]:shrink-0"
+    | "md:[&>[data-node=personal-project-milestone-rail-collapsed]]:sticky"
+    | "md:[&>[data-node=personal-project-milestone-rail-collapsed]]:top-rail"
+    | "md:[&>[data-node=personal-project-milestone-rail-collapsed]]:self-start"
+    | "md:[&>[data-node=personal-project-milestone-rail-collapsed]]:max-h-rail"
     | "md:[&>*:first-child]:w-80" | "md:[&>*:last-child]:w-64"
     | "md:[&>*:first-child]:sticky" | "md:[&>*:first-child]:top-rail"
     | "md:[&>*:first-child]:self-start" | "md:[&>*:first-child]:max-h-rail"
@@ -610,15 +625,55 @@ export const CONTRACTS = buildContracts({
     "personal-project-workspace-frame": {
         classes: [
             "flex", "min-h-screen", "w-full", "min-w-0", "flex-col", "items-start",
-            "md:flex-row", "md:items-start", "md:gap-8",
-            "md:[&>*:first-child]:w-72", "md:[&>*:first-child]:shrink-0",
-            "[&>*:last-child]:min-w-0", "[&>*:last-child]:grow",
+            "[&>*]:min-w-0", "[&>*]:grow", "md:flex-row", "md:items-start",
+            "md:[&>[data-node=personal-project-milestone-rail]]:w-80",
+            "md:[&>[data-node=personal-project-milestone-rail]]:grow-0",
+            "md:[&>[data-node=personal-project-milestone-rail]]:shrink-0",
+            "md:[&>[data-node=personal-project-milestone-rail]]:sticky",
+            "md:[&>[data-node=personal-project-milestone-rail]]:top-rail",
+            "md:[&>[data-node=personal-project-milestone-rail]]:self-start",
+            "md:[&>[data-node=personal-project-milestone-rail]]:max-h-rail",
+            "md:[&>[data-node=personal-project-milestone-rail]]:overflow-y-auto",
+            "md:[&>[data-node=personal-project-milestone-rail-collapsed]]:w-16",
+            "md:[&>[data-node=personal-project-milestone-rail-collapsed]]:grow-0",
+            "md:[&>[data-node=personal-project-milestone-rail-collapsed]]:shrink-0",
+            "md:[&>[data-node=personal-project-milestone-rail-collapsed]]:sticky",
+            "md:[&>[data-node=personal-project-milestone-rail-collapsed]]:top-rail",
+            "md:[&>[data-node=personal-project-milestone-rail-collapsed]]:self-start",
+            "md:[&>[data-node=personal-project-milestone-rail-collapsed]]:max-h-rail",
         ],
         children: {
-            milestone: { leaf: "nav-link", props: { kind: "section" }, repeats: true, restingCount: 4 },
-            body: { leaf: "page" },
+            rail: { contract: ["personal-project-milestone-rail", "personal-project-milestone-rail-collapsed"] },
+            body: { contract: "learn-routed-body" },
         },
-        why: "if you need a persistent milestone-nav rail beside a routed workspace body that survives navigation between its routes.",
+        why: "if you need one bounded milestone rail beside a routed workspace body without flattening its rows into flex siblings.",
+    },
+    "personal-project-milestone-rail": {
+        host: "nav",
+        classes: ["hidden", "w-full", "min-w-0", "flex-col", "gap-4", "border-separator", "p-4", "md:flex", "md:border-r"],
+        children: {
+            toggle: { contract: "learn-course-rail-collapse-toggle" },
+            title: { leaf: "text", props: { size: "sm", weight: "medium" } },
+            progress: { leaf: "progress" },
+            fact: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            search: { leaf: "search-box" },
+            milestone: { contract: "personal-project-milestone-row", repeats: true, restingCount: 4 },
+        },
+        why: "if project completion, search and milestone destinations belong to one independently scrolling desktop rail.",
+    },
+    "personal-project-milestone-rail-collapsed": {
+        host: "nav",
+        classes: ["hidden", "w-full", "min-w-0", "flex-col", "items-center", "gap-4", "border-separator", "p-2", "md:flex", "md:border-r"],
+        children: { toggle: { contract: "learn-course-rail-collapse-toggle" } },
+        why: "if the project rail compacts while the routed project body retains its reading width.",
+    },
+    "personal-project-milestone-row": {
+        classes: ["flex", "w-full", "min-w-0", "flex-row", "items-center", "gap-2", "border-b", "border-separator", "py-3", "[&>*:first-child]:min-w-0", "[&>*:first-child]:grow", "[&>*:last-child]:shrink-0"],
+        children: {
+            link: { leaf: "nav-link", props: { kind: "section" } },
+            fact: { leaf: "text", props: { size: "xs", tone: "muted" } },
+        },
+        why: "if a milestone destination and its completed-task count must remain comparable down one roadmap.",
     },
     "course-personal-project-task-page": {
         classes: ["mx-auto", "flex", "w-full", "max-w-app-lg", "flex-col", "gap-6", "px-6", "py-6"],
@@ -640,7 +695,7 @@ export const CONTRACTS = buildContracts({
     },
     "course-personal-project-page": {
         host: "main",
-        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6", "px-6", "py-6"],
+        classes: ["flex", "w-full", "min-w-0", "max-w-6xl", "flex-col", "gap-6", "px-6", "py-6"],
         children: {
             header: { contract: "page-header-stack" },
             github: { contract: "course-personal-project-github-status", optional: true },
@@ -661,7 +716,7 @@ export const CONTRACTS = buildContracts({
         why: "if you need repository identity, optional branch and connection state to remain one compact fact attached to project identity.",
     },
     "course-personal-project-next-task": {
-        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3"],
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "rounded-3xl", "border", "border-separator", "p-6"],
         children: {
             position: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
             title: { leaf: "heading", optional: true },
@@ -690,9 +745,18 @@ export const CONTRACTS = buildContracts({
     "course-personal-project-current-task-grid": {
         classes: ["grid", "w-full", "min-w-0", "grid-cols-1", "sm:grid-cols-2", "gap-4"],
         children: {
-            task: { leaf: "nav-link", props: { kind: "section" }, repeats: true, restingCount: 4 },
+            task: { contract: "course-personal-project-task-card", repeats: true, restingCount: 4 },
         },
         why: "if you need four project task destinations to keep comparable responsive columns without flattening them into workspace navigation.",
+    },
+    "course-personal-project-task-card": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "rounded-2xl", "border", "border-separator", "p-4"],
+        children: {
+            title: { leaf: "heading" },
+            status: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            action: { leaf: "button" },
+        },
+        why: "if each current-milestone task keeps its title, state and destination as one bounded comparable card.",
     },
     "course-foundations-page": {
         host: "main",

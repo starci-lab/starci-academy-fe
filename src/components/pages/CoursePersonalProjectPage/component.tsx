@@ -3,7 +3,6 @@ import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { Breadcrumbs } from "@/components/leaves/Breadcrumbs"
 import { Button } from "@/components/leaves/Button"
 import { Heading } from "@/components/leaves/Heading"
-import { NavLink } from "@/components/leaves/NavLink"
 import { Progress } from "@/components/leaves/Progress"
 import { Text } from "@/components/leaves/Text"
 import {
@@ -15,7 +14,9 @@ import {
 /** One task destination in the current milestone. */
 export type CoursePersonalProjectTaskRow = {
     readonly id: string
-    readonly label: string
+    readonly title: string
+    readonly status: string
+    readonly actionLabel: string
     readonly isCurrent?: boolean
 }
 
@@ -55,7 +56,7 @@ export type CoursePersonalProjectPageProps = {
 export const CoursePersonalProjectPageBase = (input: CoursePersonalProjectPageProps) => {
     const loading = input.state === "pending"
     const tasks: ReadonlyArray<CoursePersonalProjectTaskRow> = loading && input.props.tasks.length === 0
-        ? Array.from({ length: 4 }, (_, index) => ({ id: `pending-${index}`, label: "" }))
+        ? Array.from({ length: 4 }, (_, index) => ({ id: `pending-${index}`, title: "", status: "", actionLabel: input.props.continueLabel }))
         : input.props.tasks
     const header = defineContractComponent("page-header-stack", {
         trail: input.props.courseTitle === undefined && !loading ? undefined : defineLeafComponent("breadcrumbs", {}, () => (
@@ -126,13 +127,21 @@ export const CoursePersonalProjectPageBase = (input: CoursePersonalProjectPagePr
                 <Heading props={{ content: input.props.milestoneTitle, level: 2 }} isLoading={loading} />
             )),
             tasks: defineContractComponent("course-personal-project-current-task-grid", {
-                task: tasks.map((task) => defineLeafComponent("nav-link", { kind: "section" }, () => (
-                    <NavLink
-                        props={{ label: task.label, kind: "section", isCurrent: task.isCurrent }}
-                        on={loading ? undefined : { press: () => input.on?.openTask?.(task.id) }}
-                        isLoading={loading}
-                    />
-                ))),
+                task: tasks.map((task) => defineContractComponent("course-personal-project-task-card", {
+                    title: defineLeafComponent("heading", {}, () => (
+                        <Heading props={{ content: task.title, level: 3 }} isLoading={loading} />
+                    )),
+                    status: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                        <Text props={{ content: task.status, size: "xs", tone: "muted" }} isLoading={loading} />
+                    )),
+                    action: defineLeafComponent("button", {}, () => (
+                        <Button
+                            props={{ label: task.actionLabel, variant: "tertiary", size: "sm", icon: "next", iconPlacement: "trailing" }}
+                            on={loading ? undefined : { press: () => input.on?.openTask?.(task.id) }}
+                            isLoading={loading}
+                        />
+                    )),
+                })),
             }),
         })
     const notice = input.props.notice === undefined

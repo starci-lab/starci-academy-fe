@@ -7,8 +7,8 @@ import {
 } from "./component"
 
 const tasks: ReadonlyArray<CoursePersonalProjectTaskRow> = [
-    { id: "task-1", label: "1. Plan · Completed" },
-    { id: "task-2", label: "2. Build · Next task", isCurrent: true },
+    { id: "task-1", title: "1. Plan", status: "Completed", actionLabel: "Continue" },
+    { id: "task-2", title: "2. Build", status: "Next task", actionLabel: "Continue", isCurrent: true },
 ]
 
 const baseProps: CoursePersonalProjectPageProps["props"] = {
@@ -38,7 +38,7 @@ describe("CoursePersonalProjectPageBase", () => {
         const text = container.textContent ?? ""
 
         expect(text.indexOf("Build the service")).toBeLessThan(text.indexOf("1/2 tasks completed"))
-        expect(text.indexOf("1/2 tasks completed")).toBeLessThan(text.indexOf("1. Plan · Completed"))
+        expect(text.indexOf("1/2 tasks completed")).toBeLessThan(text.indexOf("1. Plan"))
         expect(screen.getByText("3 submissions")).toBeInTheDocument()
         expect(screen.getByText("Average score 18/20")).toBeInTheDocument()
     })
@@ -47,8 +47,9 @@ describe("CoursePersonalProjectPageBase", () => {
         const openTask = vi.fn()
         draw("ready", {}, { openTask })
 
-        fireEvent.click(screen.getByRole("button", { name: "Continue" }))
-        fireEvent.click(screen.getByText("1. Plan · Completed"))
+        const actions = screen.getAllByRole("button", { name: "Continue" })
+        fireEvent.click(actions[0])
+        fireEvent.click(actions[1])
         expect(openTask).toHaveBeenNthCalledWith(1, "task-2")
         expect(openTask).toHaveBeenNthCalledWith(2, "task-1")
     })
@@ -62,14 +63,14 @@ describe("CoursePersonalProjectPageBase", () => {
             tasks: [],
         })
 
-        expect(container.querySelectorAll("[data-component=NavLink]")).toHaveLength(4)
+        expect(container.querySelectorAll("[data-node=course-personal-project-task-card]")).toHaveLength(4)
     })
 
     it("replaces the next action with completion copy when no task remains", () => {
         draw("ready", { nextTask: undefined })
 
         expect(screen.getByText("All tasks complete")).toBeInTheDocument()
-        expect(screen.queryByRole("button", { name: "Continue" })).not.toBeInTheDocument()
+        expect(screen.getAllByRole("button", { name: "Continue" })).toHaveLength(2)
     })
 
     it("retains the page header and offers recovery after a failed query", () => {

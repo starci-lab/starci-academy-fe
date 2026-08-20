@@ -22,12 +22,13 @@ vi.mock("@/i18n/navigation", () => ({
     usePathname: () => mocks.pathname,
     useRouter: () => ({ push: mocks.push }),
 }))
+vi.mock("next-intl", () => ({ useLocale: () => "en" }))
 vi.mock("@/hooks/swr/useQueryCoursePersonalProjectSwr", () => ({
     useQueryCoursePersonalProjectSwr: () => ({ data: mocks.data, error: mocks.error }),
 }))
 
 type LayoutStub = {
-    readonly milestones: ReadonlyArray<{ readonly id: string, readonly label: string, readonly isCurrent?: boolean }>
+    readonly milestones: ReadonlyArray<{ readonly id: string, readonly label: string, readonly fact: string, readonly isCurrent?: boolean }>
     readonly onTask?: (id: string) => void
     readonly isLoading?: boolean
 }
@@ -54,6 +55,7 @@ const rail = () => JSON.parse(screen.getByTestId("rail").textContent ?? "[]") as
     readonly id: string
     readonly label: string
     readonly isCurrent?: boolean
+    readonly fact: string
 }>
 
 describe("PersonalProjectWorkspaceLayout", () => {
@@ -69,6 +71,7 @@ describe("PersonalProjectWorkspaceLayout", () => {
 
         expect(rail().map((row) => row.id)).toEqual(["task-2", "task-3"])
         expect(rail().map((row) => row.label)).toEqual(["Plan", "Ship"])
+        expect(rail().map((row) => row.fact)).toEqual(["0/2", "0/1"])
     })
 
     it("marks the project's own pointer current while the route names no task", () => {

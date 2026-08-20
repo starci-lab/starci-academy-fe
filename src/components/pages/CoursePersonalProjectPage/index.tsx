@@ -24,6 +24,7 @@ const COPY = {
         empty: "This course does not have personal-project tasks yet.",
         failed: "Personal project could not be loaded.",
         retry: "Try again",
+        openTask: "Continue",
         tasksCompleted: (completed: number, total: number) => `${completed}/${total} tasks completed`,
         submissions: (count: number) => `${count} submissions`,
         average: (score: string) => `Average score ${score}`,
@@ -42,6 +43,7 @@ const COPY = {
         empty: "Khoá học này chưa có bài đồ án cá nhân.", // vn-ok: Vietnamese runtime copy while shared message catalogs are frozen.
         failed: "Không thể tải đồ án cá nhân.", // vn-ok: Vietnamese runtime copy while shared message catalogs are frozen.
         retry: "Thử lại", // vn-ok: Vietnamese runtime copy while shared message catalogs are frozen.
+        openTask: "Tiếp tục", // vn-ok: Vietnamese runtime copy while shared message catalogs are frozen.
         tasksCompleted: (completed: number, total: number) => `Đã hoàn thành ${completed}/${total} bài`, // vn-ok: Vietnamese runtime copy while shared message catalogs are frozen.
         submissions: (count: number) => `${count} lượt nộp`, // vn-ok: Vietnamese runtime copy while shared message catalogs are frozen.
         average: (score: string) => `Điểm trung bình ${score}`, // vn-ok: Vietnamese runtime copy while shared message catalogs are frozen.
@@ -54,6 +56,7 @@ type ProjectCopy = {
     readonly notStarted: string
     readonly empty: string
     readonly failed: string
+    readonly openTask: string
     readonly tasksCompleted: (completed: number, total: number) => string
     readonly submissions: (count: number) => string
     readonly average: (score: string) => string
@@ -122,7 +125,9 @@ export const CoursePersonalProjectPage = ({ displayId }: CoursePersonalProjectPa
         const status = taskStatusOf(task, index, currentIndex, currentTaskId, copy)
         return {
             id: task.id,
-            label: `${index + 1}. ${task.title} · ${status}`,
+            title: `${index + 1}. ${task.title}`,
+            status,
+            actionLabel: copy.openTask,
             isCurrent: task.id === currentTaskId,
         }
     })

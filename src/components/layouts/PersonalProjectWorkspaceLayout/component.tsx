@@ -1,12 +1,17 @@
 import type { ReactNode } from "react"
 import { Tree } from "@/components/branches/Tree"
+import { IconButton } from "@/components/leaves/IconButton"
 import { NavLink } from "@/components/leaves/NavLink"
+import { Progress } from "@/components/leaves/Progress"
+import { SearchBox } from "@/components/leaves/SearchBox"
+import { Text } from "@/components/leaves/Text"
 import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
 /** One task destination retained in the personal-project workspace rail. */
 export type PersonalProjectWorkspaceMilestone = {
     readonly id: string
     readonly label: string
+    readonly fact: string
     readonly isCurrent?: boolean
 }
 
@@ -14,27 +19,63 @@ export type PersonalProjectWorkspaceMilestone = {
 export type PersonalProjectWorkspaceLayoutProps = {
     readonly milestones: ReadonlyArray<PersonalProjectWorkspaceMilestone>
     readonly surface: ReactNode
+    readonly progress: { readonly label: string; readonly value?: number; readonly fact: string }
+    readonly search: { readonly placeholder: string; readonly label: string; readonly clearLabel: string }
+    readonly collapsed?: boolean
+    readonly toggleLabel: string
     readonly onTask?: (id: string) => void
+    readonly onSearch?: (query: string) => void
+    readonly onToggle?: () => void
     readonly isLoading?: boolean
 }
 
 /** Keeps milestone navigation mounted around dashboard, task and result surfaces. */
 export const PersonalProjectWorkspaceLayoutBase = (input: PersonalProjectWorkspaceLayoutProps) => {
     const milestones: ReadonlyArray<PersonalProjectWorkspaceMilestone> = input.isLoading === true && input.milestones.length === 0
-        ? Array.from({ length: 4 }, (_, index) => ({ id: `pending-${index}`, label: "", isCurrent: false }))
+        ? Array.from({ length: 4 }, (_, index) => ({ id: `pending-${index}`, label: "", fact: "", isCurrent: false }))
         : input.milestones
-    return (
-        <Tree
-            contract="personal-project-workspace-frame"
-            render={defineContractComponent("personal-project-workspace-frame", {
-                milestone: milestones.map((milestone) => defineLeafComponent("nav-link", { kind: "section" }, () => (
+    const toggle = defineContractComponent("learn-course-rail-collapse-toggle", {
+        control: defineLeafComponent("icon-button", {}, () => (
+            <IconButton props={{ icon: "collapseRail", label: input.toggleLabel, isActive: input.collapsed }} on={{ press: input.onToggle }} />
+        )),
+    })
+    const rail = input.collapsed === true
+        ? defineContractComponent("personal-project-milestone-rail-collapsed", { toggle })
+        : defineContractComponent("personal-project-milestone-rail", {
+            toggle,
+            title: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
+                <Text props={{ content: input.progress.label, size: "sm", weight: "medium" }} isLoading={input.isLoading} />
+            )),
+            progress: defineLeafComponent("progress", {}, () => (
+                <Progress props={{ value: input.progress.value, label: input.progress.label }} isLoading={input.isLoading} />
+            )),
+            fact: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                <Text props={{ content: input.progress.fact, size: "xs", tone: "muted" }} isLoading={input.isLoading} />
+            )),
+            search: defineLeafComponent("search-box", {}, () => (
+                <SearchBox props={input.search} on={{ search: input.onSearch }} />
+            )),
+            milestone: milestones.map((milestone) => defineContractComponent("personal-project-milestone-row", {
+                link: defineLeafComponent("nav-link", { kind: "section" }, () => (
                     <NavLink
                         props={{ label: milestone.label, kind: "section", isCurrent: milestone.isCurrent }}
                         on={{ press: () => input.onTask?.(milestone.id) }}
                         isLoading={input.isLoading}
                     />
-                ))),
-                body: defineLeafComponent("page", {}, () => <>{input.surface}</>),
+                )),
+                fact: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                    <Text props={{ content: milestone.fact, size: "xs", tone: "muted" }} isLoading={input.isLoading} />
+                )),
+            })),
+        })
+    return (
+        <Tree
+            contract="personal-project-workspace-frame"
+            render={defineContractComponent("personal-project-workspace-frame", {
+                rail,
+                body: defineContractComponent("learn-routed-body", {
+                    page: defineLeafComponent("page", {}, () => <>{input.surface}</>),
+                }),
             })}
         />
     )
