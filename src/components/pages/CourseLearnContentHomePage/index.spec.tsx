@@ -116,4 +116,13 @@ describe("CourseLearnContentHomePage", () => {
         view.rerender(<CourseLearnContentHomePage displayId="system-design" />)
         expect(screen.queryByRole("heading", { level: 2, name: "Consistent hashing" })).not.toBeInTheDocument()
     })
+    it("covers zero progress denominators and premium/read labels", () => {
+        mocks.outline.data = {
+            course: { id: "course-1", displayId: "system-design", title: "System Design Mastery" },
+            modules: [{ id: "module-1", title: "Foundations", orderIndex: 1, isPremium: false, lessons: [{ id: "lesson-1", displayId: "hashing", title: "Consistent hashing", minutesRead: 0, difficulty: "beginner", isPremium: true, isRead: true, challenges: [{ id: "challenge-1", title: "Challenge", difficulty: "easy", maxScore: 1, status: "notStarted", lastScore: 0, completed: false }] }] }],
+            milestones: [], progress: { lessonsRead: 0, lessonsTotal: 0, challengesCompleted: 0, challengesTotal: 0, tasksCompleted: 0, tasksTotal: 0, completionPercent: 0 }, currentTask: null, nextContentTask: { kind: "challenge", id: "challenge-1", milestoneId: null },
+        } as never
+        render(<CourseLearnContentHomePage displayId="system-design" />)
+        expect(screen.getByRole("heading", { level: 2, name: "Challenge" })).toBeVisible()
+    })
 })

@@ -31,6 +31,13 @@ test("marks zero changed production files not applicable", () => {
     })
 })
 
+test("keeps the colocated i18n helper in the test-support lane", () => {
+    assert.deepEqual(buildPatchSummary({}, ["src/i18n/test-utils.tsx"], "C:/repo"), {
+        notApplicable: true,
+        reason: "no changed production files",
+    })
+})
+
 test("fails uncovered changed lines instead of synthesizing 100 percent", () => {
     const report = file("C:/repo/src/changed.ts", {
         0: {start: {line: 1}, end: {line: 1}},

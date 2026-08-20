@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { CoursePersonalProjectTaskPage } from "./index"
-type StateProps = { state: string }
+type StateProps = { state: string; on?: { submit?: () => void; retry?: () => void; back?: () => void } }
 
 const useQueryCoursePersonalProjectSwr = vi.hoisted(() => vi.fn())
 const useQueryPersonalTaskAttemptsSwr = vi.hoisted(() => vi.fn())
@@ -13,7 +13,7 @@ vi.mock("@/hooks/swr/useMutateSubmitPersonalTaskAttemptSwr", () => ({ useMutateS
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }))
 vi.mock("next-intl", () => ({ useLocale: () => "en" }))
 vi.mock("./component", () => ({
-    CoursePersonalProjectTaskPageBase: ({ state }: StateProps) => <div data-testid="state">{state}</div>,
+    CoursePersonalProjectTaskPageBase: ({ state, on }: StateProps) => <><div data-testid="state">{state}</div><button onClick={on?.submit}>submit</button><button onClick={on?.retry}>retry</button><button onClick={on?.back}>back</button></>,
 }))
 
 const project = {
@@ -43,5 +43,14 @@ describe("CoursePersonalProjectTaskPage", () => {
         useMutateSubmitPersonalTaskAttemptSwr.mockReturnValue({ ...submission, trigger: vi.fn() })
         render(<CoursePersonalProjectTaskPage displayId="course" taskId="task-1" />)
         expect(screen.getByTestId("state")).toHaveTextContent(state)
+    })
+    it("dispatches task submission actions", () => {
+        useQueryCoursePersonalProjectSwr.mockReturnValue(project)
+        const trigger = vi.fn().mockResolvedValue({})
+        useMutateSubmitPersonalTaskAttemptSwr.mockReturnValue({ error: undefined, isMutating: false, trigger })
+        render(<CoursePersonalProjectTaskPage displayId="course" taskId="task-1" />)
+        screen.getByText("submit").click()
+        screen.getByText("retry").click()
+        screen.getByText("back").click()
     })
 })
