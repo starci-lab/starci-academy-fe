@@ -6,7 +6,6 @@ import {
 } from "next/navigation"
 import {
     getTranslations,
-    setRequestLocale,
 } from "next-intl/server"
 import {
     hasLocale,
@@ -28,7 +27,6 @@ export const generateMetadata = async ({
 }: PageProps<"/[lang]/courses">): Promise<Metadata> => {
     const { lang } = await params
     if (!hasLocale(routing.locales, lang)) notFound()
-    setRequestLocale(lang)
     const t = await getTranslations("courses.catalog")
     const config = readSeoConfig()
     const title = t("title")

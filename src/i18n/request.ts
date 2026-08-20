@@ -1,5 +1,6 @@
 import { getRequestConfig } from "next-intl/server"
 import { hasLocale } from "next-intl"
+import { lang } from "next/root-params"
 import { routing } from "./routing"
 
 /**
@@ -28,8 +29,8 @@ import { routing } from "./routing"
  */
 const TIME_ZONE = "Asia/Ho_Chi_Minh"
 
-export default getRequestConfig(async ({ requestLocale }) => {
-    const requested = await requestLocale
+export default getRequestConfig(async () => {
+    const requested = await lang()
     const locale = hasLocale(routing.locales, requested) ? requested : routing.defaultLocale
     return {
         locale,

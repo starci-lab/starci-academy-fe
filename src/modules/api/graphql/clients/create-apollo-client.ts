@@ -1,4 +1,5 @@
 import { ApolloClient, ApolloLink, InMemoryCache } from "@apollo/client"
+import type { OperationVariables } from "@apollo/client"
 import { type GraphQLHeaders } from "../types"
 import { createRetryLink } from "./links/retry"
 import { createTimeoutLink } from "./links/timeout"
@@ -28,6 +29,20 @@ export interface CreateApolloClientParams {
     signal?: AbortSignal
     /** When true, the links log what they do. */
     debug?: boolean
+}
+
+/** Apollo client surface with the application's typed operation methods. */
+export class StarCiApolloClient extends ApolloClient {
+    override query!: <TData, TVariables extends OperationVariables = OperationVariables>(options: ApolloClient.QueryOptions<TData, TVariables>) => Promise<ApolloClient.QueryResult<TData>>
+    override mutate!: <TData, TVariables extends OperationVariables = OperationVariables>(options: ApolloClient.MutateOptions<TData, TVariables>) => Promise<ApolloClient.MutateResult<TData>>
+
+    constructor(...args: ConstructorParameters<typeof ApolloClient>) {
+        super(...args)
+        const query = this.query
+        const mutate = this.mutate
+        this.query = (options) => query(options)
+        this.mutate = (options) => mutate(options)
+    }
 }
 
 /**
@@ -73,7 +88,7 @@ export const createLinkChain = ({
  * request. A shared long-lived client would have to be rebuilt for each of those anyway, and
  * would quietly let one caller's abort signal cancel another caller's request.
  */
-export const createApolloClient = (params: CreateApolloClientParams = {}) => new ApolloClient({
+export const createApolloClient = (params: CreateApolloClientParams = {}) => new StarCiApolloClient({
     link: ApolloLink.from(createLinkChain(params)),
     // Required by Apollo even when unused; `no-cache` means nothing is ever written to it.
     cache: new InMemoryCache(),

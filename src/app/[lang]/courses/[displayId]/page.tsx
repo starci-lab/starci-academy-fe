@@ -9,7 +9,6 @@ import {
 } from "next-intl"
 import {
     getTranslations,
-    setRequestLocale,
 } from "next-intl/server"
 import { CourseDetailPage } from "@/components/pages/CourseDetailPage"
 import {
@@ -46,7 +45,6 @@ export const generateMetadata = async ({
 }: CourseDetailRouteProps): Promise<Metadata> => {
     const { lang, displayId } = await params
     if (!hasLocale(routing.locales, lang)) notFound()
-    setRequestLocale(lang)
     const t = await getTranslations("courses.catalog")
     const config = readSeoConfig()
     const path = `/courses/${encodeURIComponent(displayId)}`

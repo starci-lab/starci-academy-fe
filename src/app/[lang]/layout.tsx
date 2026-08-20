@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
-import { getMessages, getTranslations, setRequestLocale } from "next-intl/server"
+import { getMessages, getTranslations } from "next-intl/server"
 import { hasLocale } from "next-intl"
 import { routing } from "@/i18n/routing"
 import {
@@ -27,9 +27,8 @@ import "../globals.css"
  * `/en/dashboard` and `/vi/dashboard` at compile time, and every screen behind this shell is
  * session-gated - each one renders nothing at all until a token exists in the browser. So the
  * prerender produces empty pages, and it fails while producing them, twice over: `useSearchParams`
- * forces a client bailout that a prerendered page must wrap in Suspense, and next-intl reports
- * ENVIRONMENT_FALLBACK because static rendering needs `setRequestLocale` in every page rather than
- * once in the shell.
+ * forces a client bailout that a prerendered page must wrap in Suspense, and the route locale now
+ * comes from Next's `next/root-params` integration rather than a per-page request-locale override.
  *
  * Both are fixable. Neither is worth fixing to pre-build a blank screen.
  */
@@ -45,7 +44,6 @@ export const dynamic = "force-dynamic"
 export const generateMetadata = async ({ params }: LayoutProps<"/[lang]">): Promise<Metadata> => {
     const { lang } = await params
     if (!hasLocale(routing.locales, lang)) notFound()
-    setRequestLocale(lang)
     const t = await getTranslations("app")
     const config = readSeoConfig()
     const title = t("title")
@@ -87,7 +85,6 @@ const LocaleLayout = async ({ children, params }: LayoutProps<"/[lang]">) => {
     // request to fall back silently - falling back would serve English at a Vietnamese-looking URL
     // and quietly make every such link wrong.
     if (!hasLocale(routing.locales, lang)) notFound()
-    setRequestLocale(lang)
     const messages = await getMessages()
     return (
         // `suppressHydrationWarning` is required by the theme switch and by nothing else: the
