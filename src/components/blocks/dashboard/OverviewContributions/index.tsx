@@ -9,7 +9,7 @@ const longestRun = (dates: ReadonlyArray<string>) => {
     const active = new Set(dates)
     let longest = 0
     let current = 0
-    const ordered = [...dates].sort()
+    const ordered = [...dates].sort((left, right) => left.localeCompare(right))
     for (const iso of ordered) {
         const before = new Date(`${iso}T00:00:00Z`)
         before.setUTCDate(before.getUTCDate() - 1)

@@ -21,7 +21,7 @@ export const QUERY_COURSES_CHECKOUT_PREVIEW_SWR_KEY = ["QUERY_COURSES_CHECKOUT_P
  */
 export const useQueryCoursesCheckoutPreviewSwr = (courseIds: ReadonlyArray<string>) => {
     const viewer = useViewerKey()
-    const ordered = [...courseIds].sort()
+    const ordered = [...courseIds].sort((left, right) => left.localeCompare(right))
     return useSWR<CoursesCheckoutPreviewData | null>(
         viewer === undefined || ordered.length === 0
             ? null

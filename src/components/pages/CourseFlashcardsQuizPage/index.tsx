@@ -59,7 +59,8 @@ const labels = (locale: string) => locale === "vi" ? {
 const shuffle = <T,>(values: ReadonlyArray<T>): Array<T> => {
     const result = [...values]
     for (let index = result.length - 1; index > 0; index -= 1) {
-        const swapIndex = Math.floor(Math.random() * (index + 1))
+        const random = globalThis.crypto.getRandomValues(new Uint32Array(1))[0]
+        const swapIndex = random % (index + 1)
         ;[result[index], result[swapIndex]] = [result[swapIndex], result[index]]
     }
     return result
