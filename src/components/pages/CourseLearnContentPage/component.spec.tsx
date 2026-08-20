@@ -61,6 +61,7 @@ describe("CourseLearnContentPageBase", () => {
 
         expect(container.querySelector("[data-node=content-map-panel]")).not.toBeNull()
         expect(container.querySelector("[data-node=learn-content-page]")).not.toBeNull()
+        expect(container.querySelector("[data-node=learn-content-page] > [data-node=content-reader-inner]")).not.toBeNull()
         expect(container.querySelector("[data-node=content-outline-rail]")).not.toBeNull()
 
         const cases = [
@@ -104,6 +105,29 @@ describe("CourseLearnContentPageBase", () => {
 
         fireEvent.click(screen.getByText("Next lesson"))
         expect(openContent).toHaveBeenCalledWith("content-2")
+    })
+
+    it("renders source-backed lesson context and submits course-map search", () => {
+        const searchContent = vi.fn()
+        render(
+            <CourseLearnContentPageBase
+                state="ready"
+                props={{
+                    labels,
+                    title: "Current lesson",
+                    description: "Why dependency inversion matters in production.",
+                    facts: ["20 min · Read"],
+                    body: "Lesson body",
+                }}
+                on={{ searchContent }}
+            />,
+        )
+
+        expect(screen.getByText("Why dependency inversion matters in production.")).toBeInTheDocument()
+        expect(screen.getByText("20 min · Read")).toBeInTheDocument()
+        fireEvent.change(screen.getByRole("searchbox", { name: "Search contents" }), { target: { value: "database" } })
+        fireEvent.submit(screen.getByRole("search"))
+        expect(searchContent).toHaveBeenCalledWith("database")
     })
 
     it("routes both breadcrumb identities through named actions", () => {

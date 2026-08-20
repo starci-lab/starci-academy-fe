@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryContentSwr } from "@/hooks/swr/useQueryContentSwr"
 import { useQueryModuleSwr } from "@/hooks/swr/useQueryModuleSwr"
+import { useQueryCourseOutlineSwr } from "@/hooks/swr/useQueryCourseOutlineSwr"
 import { useQueryContentReactionsSwr } from "@/hooks/swr/useQueryContentReactionsSwr"
 import { useMutateReactContentSwr } from "@/hooks/swr/useMutateReactContentSwr"
 import { useQueryContentCommentsSwr } from "@/hooks/swr/useQueryContentCommentsSwr"
@@ -19,6 +20,7 @@ import {
     CONTENT_AI_SELECTION_MIN,
 } from "@/modules/ai/content-ai-selection-context"
 import { sandboxFileCode, type SandboxCodeSelection } from "@/modules/code/sandbox-repo"
+import { filterCourseOutlineModules } from "@/modules/learn/course-outline"
 import type { SandpackFiles } from "@codesandbox/sandpack-react"
 import {
     CourseLearnContentPageBase,
@@ -118,11 +120,13 @@ const outlineOf = (body: string): Array<ContentOutlineEntry> => {
  */
 export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
     const t = useTranslations("learn.content")
+    const contentHomeT = useTranslations("learn.contentHome")
     const locale = useLocale()
     const reactionText = useTranslations("dashboard.explore.reactions")
     const router = useRouter()
     const content = useQueryContentSwr({ id: input.contentId })
     const module = useQueryModuleSwr({ id: input.moduleId })
+    const courseOutline = useQueryCourseOutlineSwr(input.displayId)
     const reactions = useQueryContentReactionsSwr(input.contentId)
     const react = useMutateReactContentSwr()
     const comments = useQueryContentCommentsSwr({ contentId: input.contentId })
@@ -133,6 +137,7 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
     const [discussionDraft, setDiscussionDraft] = useState("")
     const [discussionDraftKey, setDiscussionDraftKey] = useState(0)
     const [discussionError, setDiscussionError] = useState(false)
+    const [contentSearch, setContentSearch] = useState("")
     const [selectedFace, setSelectedFace] = useState<ContentFaceId>("reading")
     const [sourceFiles, setSourceFiles] = useState<SandpackFiles>({})
     const [activeSourcePath, setActiveSourcePath] = useState("")
@@ -186,7 +191,7 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
     }, [source.data])
 
     const body = content.data?.body
-    const outline = useMemo(() => body === undefined ? [] : outlineOf(body), [body])
+    const pageOutline = useMemo(() => body === undefined ? [] : outlineOf(body), [body])
 
     // The reader's place in the module: the pager counts contents, and the module states how many.
     const contents = module.data?.contents ?? []
@@ -199,6 +204,19 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
         () => [...(content.data?.challenges ?? [])].sort((first, second) => first.orderIndex - second.orderIndex),
         [content.data?.challenges],
     )
+    const filteredCourseModules = useMemo(
+        () => filterCourseOutlineModules(courseOutline.data?.modules ?? [], contentSearch),
+        [contentSearch, courseOutline.data?.modules],
+    )
+    const lessonRoutes = useMemo(() => new Map(
+        (courseOutline.data?.modules ?? []).flatMap((courseModule) => courseModule.lessons.map((lesson) => [
+            lesson.id,
+            courseModule.id,
+        ] as const)),
+    ), [courseOutline.data?.modules])
+    const activeLesson = courseOutline.data?.modules
+        .flatMap((courseModule) => courseModule.lessons)
+        .find((lesson) => lesson.id === input.contentId)
     const discussionComments = useMemo(() => (comments.data?.comments ?? []).map((comment) => ({
         id: comment.id,
         author: comment.author.username,
@@ -213,7 +231,8 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
     const discussionState = discussionStateOf(discussionFailed, discussionPending, submitComment.isMutating, discussionComments.length)
 
     const openContent = (id: string) => {
-        router.push(`/courses/${input.displayId}/learn/content/modules/${input.moduleId}/contents/${id}`)
+        const targetModuleId = lessonRoutes.get(id) ?? input.moduleId
+        router.push(`/courses/${input.displayId}/learn/content/modules/${targetModuleId}/contents/${id}`)
     }
 
     let act: (() => void) | undefined
@@ -224,6 +243,7 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
             void Promise.all([
                 content.mutate(),
                 module.mutate(),
+                courseOutline.mutate(),
                 reactions.mutate(),
             ])
         }
@@ -250,6 +270,13 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                 },
                 mobileView: mobileViewOf(isMobile, view),
                 title: content.data?.title,
+                description: content.data?.description ?? undefined,
+                facts: content.data == null ? [] : [contentHomeT("lessonFact", {
+                    minutes: content.data.minutesRead,
+                    status: activeLesson?.isRead === true
+                        ? contentHomeT("lessonRead")
+                        : contentHomeT("lessonUnread"),
+                })],
                 faces: [
                     { id: "reading", label: t("readingFace"), icon: "course" },
                     ...(hasSource ? [{ id: "source" as const, label: t("sourceFace"), icon: "practice" as const }] : []),
@@ -290,7 +317,7 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                 // in the same place, with the same one way out.
                 noticeMessage: noticeTextOf(isLocked, hasFailed, t("lockedMessage"), t("failedMessage")),
                 noticeActionLabel: noticeTextOf(isLocked, hasFailed, t("lockedAction"), t("failedAction")),
-                outline,
+                outline: pageOutline,
                 nextSteps: [
                     ...challenges.map((challenge) => ({ id: challenge.id, label: challenge.title })),
                     ...(ordered[position + 1] === undefined
@@ -328,17 +355,36 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                         comments: discussionComments,
                     },
                 },
-                modules: module.data === null || module.data === undefined ? [] : [{
-                    id: module.data.id,
-                    title: module.data.title,
-                    countLabel: t("moduleCount", { total: module.data.numContents }),
-                    isOpen: true,
-                    contents: ordered.map((sibling) => ({
-                        id: sibling.id,
-                        title: sibling.title,
-                        isCurrent: sibling.id === input.contentId,
+                courseProgress: courseOutline.data === null || courseOutline.data === undefined ? undefined : {
+                    label: contentHomeT("progressLabel"),
+                    value: courseOutline.data.progress.lessonsRead,
+                    total: courseOutline.data.progress.lessonsTotal,
+                },
+                modules: courseOutline.data === null || courseOutline.data === undefined
+                    ? module.data === null || module.data === undefined ? [] : [{
+                        id: module.data.id,
+                        title: module.data.title,
+                        countLabel: t("moduleCount", { total: module.data.numContents }),
+                        isOpen: true,
+                        contents: ordered.map((sibling) => ({
+                            id: sibling.id,
+                            title: sibling.title,
+                            isCurrent: sibling.id === input.contentId,
+                        })),
+                    }]
+                    : filteredCourseModules.map((courseModule) => ({
+                        id: courseModule.id,
+                        title: courseModule.title,
+                        countLabel: t("moduleCount", { total: courseModule.lessons.length }),
+                        isOpen: contentSearch.trim() !== "" || courseModule.id === input.moduleId,
+                        contents: courseModule.lessons.map((lesson) => ({
+                            id: lesson.id,
+                            title: lesson.title,
+                            meta: t("minutes", { minutes: lesson.minutesRead }),
+                            isComplete: lesson.isRead,
+                            isCurrent: lesson.id === input.contentId,
+                        })),
                     })),
-                }],
                 page: position === -1 ? 1 : position + 1,
                 totalPages: ordered.length === 0 ? 1 : ordered.length,
             }}
@@ -348,6 +394,7 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                     if (target === undefined) return
                     openContent(target.id)
                 },
+                searchContent: setContentSearch,
                 openContent,
                 goCourse: () => router.push(`/courses/${input.displayId}`),
                 goModule: () => router.push(`/courses/${input.displayId}/learn/content/modules/${input.moduleId}`),

@@ -117,6 +117,10 @@ export type CourseLearnContentPageData = {
     /** Undefined keeps the desktop three-column frame; a value selects exactly one mobile panel. */
     readonly mobileView?: Extract<LearnMobileView, "contents" | "lesson" | "outline">
     readonly title?: string
+    /** Source-authored lesson summary shown directly under the routed title. */
+    readonly description?: string
+    /** Compact source-backed facts such as read state and estimated reading time. */
+    readonly facts?: ReadonlyArray<string>
     /** The faces this content carries. One face means the bar states the obvious, so it is absent. */
     readonly faces?: ReadonlyArray<ContentFace>
     readonly selectedFace?: ContentFaceId
@@ -203,6 +207,7 @@ export type CourseLearnContentPageActions = {
     readonly changeDiscussionDraft?: (value: string) => void
     readonly submitDiscussion?: () => void
     readonly retryDiscussion?: () => void
+    readonly searchContent?: (query: string) => void
     readonly openContent?: (contentId: string) => void
     readonly act?: () => void
     readonly goCourse?: () => void
@@ -432,6 +437,7 @@ export const CourseLearnContentPageBase = (input: CourseLearnContentPageProps) =
                     label: labels.searchLabel,
                     clearLabel: labels.searchClearLabel,
                 }}
+                on={{ search: input.on?.searchContent }}
             />
         )),
         module: (input.props.modules ?? []).map((module) => defineContractComponent("content-map-module", {
@@ -495,32 +501,46 @@ export const CourseLearnContentPageBase = (input: CourseLearnContentPageProps) =
         : readingBody
 
     const reader = defineContractComponent("learn-content-page", {
-        header,
-        /*
+        inner: defineContractComponent("content-reader-inner", {
+            header,
+            ...(input.props.description === undefined ? {} : {
+                description: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                    <Text props={{ content: input.props.description, size: "sm", tone: "muted" }} isLoading={isLoading} />
+                )),
+            }),
+            ...((input.props.facts ?? []).length === 0 ? {} : {
+                meta: defineContractComponent("course-content-meta-row", {
+                    fact: (input.props.facts ?? []).map((fact) => defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                        <Text props={{ content: fact, size: "sm", tone: "muted" }} isLoading={isLoading} />
+                    ))),
+                }),
+            }),
+            /*
                  * The bar is real at every state, which is the legacy decision this restores: the
                  * faces come from the route rather than from the content body, so they are already
                  * true while the body is still arriving. A single face is still not a choice - a
                  * one-tab bar reads as a control that does not work.
                  */
-        ...(faces.length > 1 || (input.props.languages ?? []).length > 1 ? {
-            faces: contentTabRow(
-                {
-                    facesLabel: labels.facesLabel,
-                    faces,
-                    selectedFace: input.props.selectedFace,
-                    languagesLabel: input.props.languagesLabel,
-                    languages: input.props.languages,
-                    selectedLanguage: input.props.selectedLanguage,
-                },
-                {
-                    selectReading: input.on?.selectReading,
-                    selectSource: input.on?.selectSource,
-                    selectChallenge: input.on?.selectChallenge,
-                    selectLanguage: input.on?.selectLanguage,
-                },
-            ),
-        } : {}),
-        body: visibleBody,
+            ...(faces.length > 1 || (input.props.languages ?? []).length > 1 ? {
+                faces: contentTabRow(
+                    {
+                        facesLabel: labels.facesLabel,
+                        faces,
+                        selectedFace: input.props.selectedFace,
+                        languagesLabel: input.props.languagesLabel,
+                        languages: input.props.languages,
+                        selectedLanguage: input.props.selectedLanguage,
+                    },
+                    {
+                        selectReading: input.on?.selectReading,
+                        selectSource: input.on?.selectSource,
+                        selectChallenge: input.on?.selectChallenge,
+                        selectLanguage: input.on?.selectLanguage,
+                    },
+                ),
+            } : {}),
+            body: visibleBody,
+        }),
     })
 
     if (input.props.mobileView === "contents") {

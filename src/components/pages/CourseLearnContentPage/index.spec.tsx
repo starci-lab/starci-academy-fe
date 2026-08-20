@@ -4,6 +4,7 @@ import {beforeEach, describe, expect, it, vi} from "vitest"
 const mocks = vi.hoisted(() => ({
     content: {data: undefined as unknown, error: undefined as unknown, mutate: vi.fn()},
     module: {data: undefined as unknown, error: undefined as unknown, mutate: vi.fn()},
+    outline: {data: undefined as unknown, error: undefined as unknown, mutate: vi.fn()},
     reactions: {data: undefined as unknown, error: undefined as unknown, mutate: vi.fn()},
     comments: {data: undefined as unknown, error: undefined as unknown, mutate: vi.fn()},
     source: {data: undefined as unknown, error: undefined as unknown, dependencies: {}, mutate: vi.fn()},
@@ -21,6 +22,7 @@ vi.mock("next-intl", () => ({
 vi.mock("@/i18n/navigation", () => ({useRouter: () => mocks.router}))
 vi.mock("@/hooks/swr/useQueryContentSwr", () => ({useQueryContentSwr: () => mocks.content}))
 vi.mock("@/hooks/swr/useQueryModuleSwr", () => ({useQueryModuleSwr: () => mocks.module}))
+vi.mock("@/hooks/swr/useQueryCourseOutlineSwr", () => ({useQueryCourseOutlineSwr: () => mocks.outline}))
 vi.mock("@/hooks/swr/useQueryContentReactionsSwr", () => ({useQueryContentReactionsSwr: () => mocks.reactions}))
 vi.mock("@/hooks/swr/useMutateReactContentSwr", () => ({useMutateReactContentSwr: () => mocks.react}))
 vi.mock("@/hooks/swr/useQueryContentCommentsSwr", () => ({useQueryContentCommentsSwr: () => mocks.comments}))
@@ -36,13 +38,21 @@ type MockPageActions = {
     readonly changeDiscussionDraft: (value: string) => void
     readonly submitDiscussion: () => void
     readonly retryDiscussion: () => void
+    readonly searchContent: (query: string) => void
     readonly selectChallenge: () => void
     readonly act?: () => void
 }
 
 type MockPageProps = {
     readonly state: string
-    readonly props: { readonly title?: string, readonly noticeActionLabel?: string }
+    readonly props: {
+        readonly title?: string
+        readonly description?: string
+        readonly facts?: ReadonlyArray<string>
+        readonly noticeActionLabel?: string
+        readonly courseProgress?: { readonly value: number, readonly total: number }
+        readonly modules?: ReadonlyArray<{ readonly id: string, readonly title: string }>
+    }
     readonly on: MockPageActions
 }
 
@@ -51,12 +61,17 @@ vi.mock("./component", () => {
         <div>
             <output data-testid="state">{state}</output>
             <output data-testid="title">{props.title}</output>
+            <output data-testid="description">{props.description}</output>
+            <output data-testid="facts">{props.facts?.join(" · ")}</output>
+            <output data-testid="progress">{props.courseProgress === undefined ? "" : `${props.courseProgress.value}/${props.courseProgress.total}`}</output>
+            <output data-testid="modules">{props.modules?.map((module) => module.title).join("|")}</output>
             <button onClick={() => on.goCourse()}>course</button>
             <button onClick={() => on.goModule()}>module</button>
             <button onClick={() => on.changePage(2)}>next</button>
             <button onClick={() => on.changeDiscussionDraft("hello")}>draft</button>
             <button onClick={() => on.submitDiscussion()}>submit</button>
             <button onClick={() => on.retryDiscussion()}>retry</button>
+            <button onClick={() => on.searchContent("database")}>search</button>
             <button onClick={() => on.selectChallenge()}>challenge</button>
             {props.noticeActionLabel && <button onClick={() => on.act?.()}>{props.noticeActionLabel}</button>}
         </div>
@@ -73,6 +88,8 @@ describe("CourseLearnContentPage route", () => {
         mocks.content.error = undefined
         mocks.module.data = undefined
         mocks.module.error = undefined
+        mocks.outline.data = undefined
+        mocks.outline.error = undefined
         mocks.reactions.data = undefined
         mocks.reactions.error = undefined
         mocks.comments.data = undefined
@@ -108,15 +125,26 @@ describe("CourseLearnContentPage route", () => {
             isSandbox: true, githubBaseUrl: "https://github.test", githubDir: "/src", challenges: [{id: "challenge", title: "Try", orderIndex: 1}],
         }
         mocks.module.data = {id: "module", title: "Module", numContents: 2, contents: [{id: "content", title: "Lesson", orderIndex: 1}, {id: "next", title: "Next", orderIndex: 2}]}
+        mocks.outline.data = {
+            progress: {lessonsRead: 12, lessonsTotal: 95},
+            modules: [
+                {id: "module", title: "Backend", lessons: [{id: "content", title: "Lesson", minutesRead: 20, isRead: true}]},
+                {id: "database-module", title: "Database", lessons: [{id: "database-lesson", title: "Indexes", minutesRead: 18, isRead: false}]},
+            ],
+        }
         mocks.reactions.data = {total: 1, myReaction: null}
         mocks.comments.data = {comments: []}
         mocks.source.data = {files: {"main.ts": "const x = 1"}}
         const view = render(<CourseLearnContentPage displayId="course" moduleId="module" contentId="content" />)
         expect(screen.getByTestId("state")).toHaveTextContent("ready")
+        expect(screen.getByTestId("progress")).toHaveTextContent("12/95")
+        expect(screen.getByTestId("modules")).toHaveTextContent("Backend|Database")
         fireEvent.click(screen.getByText("course"))
         fireEvent.click(screen.getByText("module"))
         fireEvent.click(screen.getByText("next"))
         fireEvent.click(screen.getByText("challenge"))
+        fireEvent.click(screen.getByText("search"))
+        expect(screen.getByTestId("modules")).toHaveTextContent("Database")
         expect(mocks.router.push).toHaveBeenCalled()
 
         fireEvent.click(screen.getByText("draft"))

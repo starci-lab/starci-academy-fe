@@ -66,6 +66,24 @@ export type LayoutClassName =
     | "md:[&>[data-node=global-search-result-region]]:grow"
     | "md:[&>[data-node=global-search-context-card]]:w-72"
     | "md:[&>[data-node=global-search-context-card]]:shrink-0"
+    | "md:[&>[data-node=learn-route-context-rail]]:w-80"
+    | "md:[&>[data-node=learn-route-context-rail]]:shrink-0"
+    | "md:[&>[data-node=learn-route-context-rail]]:sticky"
+    | "md:[&>[data-node=learn-route-context-rail]]:top-rail"
+    | "md:[&>[data-node=learn-route-context-rail]]:self-start"
+    | "md:[&>[data-node=learn-route-context-rail]]:max-h-rail"
+    | "md:[&>[data-node=learn-route-context-rail]]:overflow-y-auto"
+    | "md:[&>[data-node=learn-content-page]]:min-w-0"
+    | "md:[&>[data-node=learn-content-page]]:grow"
+    | "md:[&>[data-node=learn-content-page]]:max-h-rail"
+    | "md:[&>[data-node=learn-content-page]]:overflow-y-auto"
+    | "md:[&>[data-node=content-outline-rail]]:w-64"
+    | "md:[&>[data-node=content-outline-rail]]:shrink-0"
+    | "md:[&>[data-node=content-outline-rail]]:sticky"
+    | "md:[&>[data-node=content-outline-rail]]:top-rail"
+    | "md:[&>[data-node=content-outline-rail]]:self-start"
+    | "md:[&>[data-node=content-outline-rail]]:max-h-rail"
+    | "md:[&>[data-node=content-outline-rail]]:overflow-y-auto"
     | "md:[&>*:first-child]:w-72" | "md:[&>*:first-child]:shrink-0"
     | "md:[&>*:last-child]:min-w-0" | "md:[&>*:last-child]:grow"
     | "md:[&>*:first-child]:overflow-y-auto"
@@ -2388,15 +2406,24 @@ export const CONTRACTS = buildContracts({
         classes: [
             "flex", "w-full", "min-w-0", "flex-col", "items-start",
             "md:flex-row", "md:items-start",
-            "md:[&>*:first-child]:w-80", "md:[&>*:first-child]:shrink-0",
-            "md:[&>*:first-child]:sticky", "md:[&>*:first-child]:top-rail",
-            "md:[&>*:first-child]:self-start", "md:[&>*:first-child]:max-h-rail",
-            "md:[&>*:first-child]:overflow-y-auto",
-            "md:[&>*:nth-child(2)]:min-w-0", "md:[&>*:nth-child(2)]:grow",
-            "md:[&>*:last-child]:w-64", "md:[&>*:last-child]:shrink-0",
-            "md:[&>*:last-child]:sticky", "md:[&>*:last-child]:top-rail",
-            "md:[&>*:last-child]:self-start", "md:[&>*:last-child]:max-h-rail",
-            "md:[&>*:last-child]:overflow-y-auto",
+            "md:[&>[data-node=learn-route-context-rail]]:w-80",
+            "md:[&>[data-node=learn-route-context-rail]]:shrink-0",
+            "md:[&>[data-node=learn-route-context-rail]]:sticky",
+            "md:[&>[data-node=learn-route-context-rail]]:top-rail",
+            "md:[&>[data-node=learn-route-context-rail]]:self-start",
+            "md:[&>[data-node=learn-route-context-rail]]:max-h-rail",
+            "md:[&>[data-node=learn-route-context-rail]]:overflow-y-auto",
+            "md:[&>[data-node=learn-content-page]]:min-w-0",
+            "md:[&>[data-node=learn-content-page]]:grow",
+            "md:[&>[data-node=learn-content-page]]:max-h-rail",
+            "md:[&>[data-node=learn-content-page]]:overflow-y-auto",
+            "md:[&>[data-node=content-outline-rail]]:w-64",
+            "md:[&>[data-node=content-outline-rail]]:shrink-0",
+            "md:[&>[data-node=content-outline-rail]]:sticky",
+            "md:[&>[data-node=content-outline-rail]]:top-rail",
+            "md:[&>[data-node=content-outline-rail]]:self-start",
+            "md:[&>[data-node=content-outline-rail]]:max-h-rail",
+            "md:[&>[data-node=content-outline-rail]]:overflow-y-auto",
         ],
         children: {
             contents: { contract: "learn-route-context-rail" },
@@ -2447,13 +2474,22 @@ export const CONTRACTS = buildContracts({
         // than being posted inside somebody else's - which is what let a review harness draw a
         // second one, and what a rule caught before any of it was seen.
         host: "main",
+        classes: ["flex", "w-full", "min-w-0", "flex-col"],
+        children: {
+            inner: { contract: "content-reader-inner" },
+        },
+        why: "if you need the flexible, independently scrolling page owner inside the two-rail content reader frame.",
+    },
+    "content-reader-inner": {
         classes: ["mx-auto", "flex", "w-full", "max-w-app-md", "flex-col", "gap-6", "px-6", "py-6"],
         children: {
             header: { contract: "page-header-stack" },
+            description: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+            meta: { contract: "course-content-meta-row", optional: true },
             faces: { contract: "dual-tabs-toolbar", optional: true },
             body: { contract: ["content-reading-column", "centred-empty-notice", "source-workspace-root"] },
         },
-        why: "if you need one learning content measure whose body swaps between the selected reading face, source workspace, lock notice or failure notice.",
+        why: "if you need one centered learning content measure whose body swaps between reading, source workspace, lock notice or failure notice.",
     },
     /*
     /*
