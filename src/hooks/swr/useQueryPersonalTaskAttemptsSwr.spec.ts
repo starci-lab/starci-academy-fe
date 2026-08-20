@@ -36,7 +36,7 @@ beforeEach(() => {
     mocks.queryPersonalTaskAttempts.mockResolvedValue({
         data: {
             userPersonalTaskAttempts: {
-                success: true, message: "ok", data: { data: attempts, total: 2 },
+                success: true, message: "ok", data: { data: attempts, count: 2 },
             },
         },
     })
@@ -59,7 +59,7 @@ describe("useQueryPersonalTaskAttemptsSwr", () => {
         const hook = renderHook(() => useQueryPersonalTaskAttemptsSwr("course-1", "task-1"))
         const resting = keyOf()
         expect(resting).toEqual([
-            QUERY_PERSONAL_TASK_ATTEMPTS_SWR_KEY, expect.any(String), "course-1", "task-1",
+            QUERY_PERSONAL_TASK_ATTEMPTS_SWR_KEY, expect.any(String), "course-1", "task-1", 0,
         ])
 
         renderHook(() => useQueryPersonalTaskAttemptsSwr("course-1", "task-2"))
@@ -70,9 +70,9 @@ describe("useQueryPersonalTaskAttemptsSwr", () => {
         expect(keyOf()).not.toEqual(resting)
     })
 
-    it("asks newest attempt first and hands back the rows, not the envelope", async () => {
+    it("asks newest attempt first and preserves count with the rows", async () => {
         renderHook(() => useQueryPersonalTaskAttemptsSwr("course-1", "task-1"))
-        await expect(fetcherOf()()).resolves.toEqual(attempts)
+        await expect(fetcherOf()()).resolves.toEqual({ data: attempts, count: 2 })
         expect(mocks.queryPersonalTaskAttempts).toHaveBeenCalledWith({
             courseId: "course-1",
             taskId: "task-1",
@@ -80,18 +80,27 @@ describe("useQueryPersonalTaskAttemptsSwr", () => {
         })
     })
 
+    it("names and requests the selected history page", async () => {
+        renderHook(() => useQueryPersonalTaskAttemptsSwr("course-1", "task-1", 1))
+        expect(keyOf()).toEqual([
+            QUERY_PERSONAL_TASK_ATTEMPTS_SWR_KEY, expect.any(String), "course-1", "task-1", 1,
+        ])
+        await fetcherOf()()
+        expect(mocks.queryPersonalTaskAttempts.mock.calls[0][0].filters.pageNumber).toBe(1)
+    })
+
     it("settles an absent payload as an empty list, because the caller counts the entries", async () => {
         mocks.queryPersonalTaskAttempts.mockResolvedValue({
             data: { userPersonalTaskAttempts: { success: false, message: "denied" } },
         })
         renderHook(() => useQueryPersonalTaskAttemptsSwr("course-1", "task-1"))
-        await expect(fetcherOf()()).resolves.toEqual([])
+        await expect(fetcherOf()()).resolves.toEqual({ count: 0, data: [] })
     })
 
     it("settles a missing response body as an empty list too", async () => {
         mocks.queryPersonalTaskAttempts.mockResolvedValue({ data: undefined })
         renderHook(() => useQueryPersonalTaskAttemptsSwr("course-1", "task-1"))
-        await expect(fetcherOf()()).resolves.toEqual([])
+        await expect(fetcherOf()()).resolves.toEqual({ count: 0, data: [] })
     })
 
     it("sends empty ids rather than the word undefined if it is ever run without them", async () => {

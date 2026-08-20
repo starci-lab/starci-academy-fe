@@ -11,6 +11,59 @@ export type PersonalProjectTask = {
     readonly numAttempts: number
 }
 
+/** Full authored task document returned by the enrolled task-detail query. */
+export type PersonalProjectTaskDetail = PersonalProjectTask & {
+    readonly displayId: string
+    readonly description: string
+    readonly hint: string
+    readonly difficulty?: string | null
+    readonly verified?: string | null
+    readonly criterias: ReadonlyArray<{
+        readonly id: string
+        readonly text: string
+        readonly hint: string
+        readonly orderIndex: number
+        readonly score: number
+    }>
+    readonly briefs: ReadonlyArray<{
+        readonly id: string
+        readonly lang: string
+        readonly body: string
+        readonly orderIndex: number
+    }>
+    readonly codeImplementations: ReadonlyArray<{
+        readonly id: string
+        readonly lang: string
+        readonly guide: string
+        readonly example: string
+        readonly orderIndex: number
+    }>
+}
+
+/** Enrollment-owned repository settings exposed without returning its secret token. */
+export type PersonalProjectRepositorySettings = {
+    readonly githubUrl?: string | null
+    readonly branch?: string | null
+    readonly tokenLast4?: string | null
+}
+
+/** One selectable grading model from the public model catalog. */
+export type PersonalProjectGradingModel = {
+    readonly model: string
+    readonly provider: string
+    readonly category: string
+    readonly complimentary: boolean
+    readonly available: boolean
+    readonly supportedTasks: ReadonlyArray<string>
+}
+
+/** Settled data needed by the task brief and its persistent submission panel. */
+export type PersonalProjectTaskWorkspace = {
+    readonly task: PersonalProjectTaskDetail
+    readonly repository: PersonalProjectRepositorySettings
+    readonly models: ReadonlyArray<PersonalProjectGradingModel>
+}
+
 /** Ordered milestone and its personal-project tasks. */
 export type PersonalProjectMilestone = {
     readonly id: string
@@ -81,6 +134,12 @@ export type QueryPersonalTaskAttemptsResponse = {
     }>
 }
 
+/** Count and newest-first rows returned by one attempt-history page. */
+export type PersonalTaskAttemptsPage = {
+    readonly count: number
+    readonly data: ReadonlyArray<PersonalTaskAttempt>
+}
+
 /** Authored-order page request for one attempt's feedback. */
 export type QueryPersonalTaskAttemptFeedbacksRequest = {
     readonly attemptId: string
@@ -102,10 +161,53 @@ export type QueryPersonalTaskAttemptFeedbacksResponse = {
 /** Minimal backend-proven request for one task review. */
 export type SubmitPersonalTaskAttemptRequest = {
     readonly courseId: string
-    readonly taskId: string
+    readonly taskId?: string
+    readonly githubUrl?: string | null
+    readonly branch?: string | null
+    readonly selectedModel?: string
+    readonly selectedModelProvider?: string
+    readonly lang?: string
 }
 
 /** GraphQL envelope containing the asynchronous grading job id. */
 export type SubmitPersonalTaskAttemptResponse = {
     readonly reviewPersonalProjectTask: GraphQLResponse<{ readonly jobId: string }>
+}
+
+/** Partial repository-settings patch; the token remains write-only. */
+export type SyncPersonalProjectGithubRequest = {
+    readonly courseId: string
+    readonly githubUrl?: string | null
+    readonly branch?: string | null
+    readonly githubToken?: string | null
+    readonly clearGithubToken?: boolean | null
+}
+
+/** GraphQL acknowledgement for a repository-settings patch. */
+export type SyncPersonalProjectGithubResponse = {
+    readonly syncPersonalProjectGithub: GraphQLResponse<boolean>
+}
+
+/** GraphQL task-detail envelope. */
+export type QueryPersonalProjectTaskResponse = {
+    readonly task: GraphQLResponse<PersonalProjectTaskDetail>
+}
+
+/** GraphQL enrollment-settings envelope. */
+export type QueryPersonalProjectRepositoryResponse = {
+    readonly courseEnrollmentStatus: GraphQLResponse<{
+        readonly isEnrolled: boolean
+        readonly enrollment?: {
+            readonly personalProjectGithubUrl?: string | null
+            readonly personalProjectGithubBranch?: string | null
+            readonly personalProjectGithubTokenLast4?: string | null
+        } | null
+    }>
+}
+
+/** GraphQL grading-model catalog envelope. */
+export type QueryPersonalProjectGradingModelsResponse = {
+    readonly aiModels: GraphQLResponse<{
+        readonly gradableModels: ReadonlyArray<PersonalProjectGradingModel>
+    }>
 }

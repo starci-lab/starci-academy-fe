@@ -8,8 +8,13 @@ import type {
     QueryPersonalTaskAttemptFeedbacksResponse,
     QueryPersonalTaskAttemptsRequest,
     QueryPersonalTaskAttemptsResponse,
+    QueryPersonalProjectGradingModelsResponse,
+    QueryPersonalProjectRepositoryResponse,
+    QueryPersonalProjectTaskResponse,
     SubmitPersonalTaskAttemptRequest,
     SubmitPersonalTaskAttemptResponse,
+    SyncPersonalProjectGithubRequest,
+    SyncPersonalProjectGithubResponse,
 } from "./types/course-personal-project"
 
 const coursePersonalProjectQuery = gql`
@@ -81,6 +86,79 @@ const submitPersonalTaskAttemptMutation = gql`
     }
 `
 
+const personalProjectTaskQuery = gql`
+    query PersonalProjectTask($request: TaskRequest!) {
+        task(request: $request) {
+            success
+            message
+            error
+            data {
+                id
+                displayId
+                title
+                description
+                hint
+                type
+                maxScore
+                difficulty
+                verified
+                criterias { id text hint orderIndex score }
+                briefs { id lang body orderIndex }
+                codeImplementations { id lang guide example orderIndex }
+            }
+        }
+    }
+`
+
+const personalProjectRepositoryQuery = gql`
+    query PersonalProjectRepository($request: CourseEnrollmentStatusRequest!) {
+        courseEnrollmentStatus(request: $request) {
+            success
+            message
+            error
+            data {
+                isEnrolled
+                enrollment {
+                    personalProjectGithubUrl
+                    personalProjectGithubBranch
+                    personalProjectGithubTokenLast4
+                }
+            }
+        }
+    }
+`
+
+const personalProjectGradingModelsQuery = gql`
+    query PersonalProjectGradingModels {
+        aiModels {
+            success
+            message
+            error
+            data {
+                gradableModels {
+                    model
+                    provider
+                    category
+                    complimentary
+                    available
+                    supportedTasks
+                }
+            }
+        }
+    }
+`
+
+const syncPersonalProjectGithubMutation = gql`
+    mutation SyncPersonalProjectGithub($request: SyncPersonalProjectGithubRequest!) {
+        syncPersonalProjectGithub(request: $request) {
+            success
+            message
+            error
+            data
+        }
+    }
+`
+
 /** Shared authenticated Apollo options for the personal-project operation family. */
 export type PersonalProjectTransportOptions = {
     readonly headers?: GraphQLHeaders
@@ -133,9 +211,68 @@ export const mutateSubmitPersonalTaskAttempt = async (
     request: SubmitPersonalTaskAttemptRequest,
     options: PersonalProjectTransportOptions = {},
 ) => {
-    const apollo = createApolloClient({ withAuth: true, ...options })
+    const apollo = createApolloClient({
+        withAuth: true,
+        ...options,
+        headers: { "X-Course-Id": request.courseId, ...options.headers },
+    })
     return apollo.mutate<SubmitPersonalTaskAttemptResponse>({
         mutation: submitPersonalTaskAttemptMutation,
+        variables: { request },
+    })
+}
+
+/** Reads the complete authored task document used by the project workspace. */
+export const queryPersonalProjectTask = async (
+    taskId: string,
+    courseId: string,
+    options: PersonalProjectTransportOptions = {},
+) => {
+    const apollo = createApolloClient({
+        withAuth: true,
+        ...options,
+        headers: { "X-Course-Id": courseId, ...options.headers },
+    })
+    return apollo.query<QueryPersonalProjectTaskResponse>({
+        query: personalProjectTaskQuery,
+        variables: { request: { id: taskId } },
+    })
+}
+
+/** Reads the current enrollment's repository settings without exposing its token. */
+export const queryPersonalProjectRepository = async (
+    courseId: string,
+    options: PersonalProjectTransportOptions = {},
+) => {
+    const apollo = createApolloClient({ withAuth: true, ...options })
+    return apollo.query<QueryPersonalProjectRepositoryResponse>({
+        query: personalProjectRepositoryQuery,
+        variables: { request: { courseId } },
+    })
+}
+
+/** Reads live grading-model choices and their availability. */
+export const queryPersonalProjectGradingModels = async (
+    options: PersonalProjectTransportOptions = {},
+) => {
+    const apollo = createApolloClient({ withAuth: true, ...options })
+    return apollo.query<QueryPersonalProjectGradingModelsResponse>({
+        query: personalProjectGradingModelsQuery,
+    })
+}
+
+/** Persists repository, branch or private-token settings on the enrollment. */
+export const mutateSyncPersonalProjectGithub = async (
+    request: SyncPersonalProjectGithubRequest,
+    options: PersonalProjectTransportOptions = {},
+) => {
+    const apollo = createApolloClient({
+        withAuth: true,
+        ...options,
+        headers: { "X-Course-Id": request.courseId, ...options.headers },
+    })
+    return apollo.mutate<SyncPersonalProjectGithubResponse>({
+        mutation: syncPersonalProjectGithubMutation,
         variables: { request },
     })
 }

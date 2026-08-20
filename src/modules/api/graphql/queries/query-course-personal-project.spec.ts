@@ -2,7 +2,11 @@ import { print } from "graphql"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import {
     mutateSubmitPersonalTaskAttempt,
+    mutateSyncPersonalProjectGithub,
     queryCoursePersonalProject,
+    queryPersonalProjectGradingModels,
+    queryPersonalProjectRepository,
+    queryPersonalProjectTask,
     queryPersonalTaskAttemptFeedbacks,
     queryPersonalTaskAttempts,
 } from "./query-course-personal-project"
@@ -31,6 +35,30 @@ beforeEach(() => {
     mocks.mutate.mockResolvedValue({ data: undefined })
     mocks.queryCourse.mockReset()
     mocks.queryCourse.mockResolvedValue({ data: { course: { data: { id: "course-1" } } } })
+})
+
+describe("personal-project workspace transport", () => {
+    it("reads authored task, enrollment repository and live grading models", async () => {
+        await queryPersonalProjectTask("task-1", "course-1")
+        await queryPersonalProjectRepository("course-1")
+        await queryPersonalProjectGradingModels()
+
+        expect(print(mocks.query.mock.calls[0][0].query)).toContain("query PersonalProjectTask")
+        expect(mocks.query.mock.calls[0][0].variables).toEqual({ request: { id: "task-1" } })
+        expect(mocks.createApolloClient).toHaveBeenCalledWith(expect.objectContaining({
+            headers: { "X-Course-Id": "course-1" },
+        }))
+        expect(print(mocks.query.mock.calls[1][0].query)).toContain("personalProjectGithubTokenLast4")
+        expect(mocks.query.mock.calls[1][0].variables).toEqual({ request: { courseId: "course-1" } })
+        expect(print(mocks.query.mock.calls[2][0].query)).toContain("gradableModels")
+    })
+
+    it("syncs only the repository settings named by the caller", async () => {
+        const request = { courseId: "course-1", branch: "main", githubToken: "secret" }
+        await mutateSyncPersonalProjectGithub(request)
+        expect(print(mocks.mutate.mock.calls[0][0].mutation)).toContain("syncPersonalProjectGithub")
+        expect(mocks.mutate.mock.calls[0][0].variables).toEqual({ request })
+    })
 })
 
 describe("queryCoursePersonalProject", () => {
