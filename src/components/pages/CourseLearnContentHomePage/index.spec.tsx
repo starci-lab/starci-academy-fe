@@ -103,4 +103,17 @@ describe("CourseLearnContentHomePage", () => {
             "/courses/system-design/learn/content/modules/module-1/contents/lesson-1",
         )
     })
+
+    it("keeps failure and empty outline states distinct", () => {
+        const settledOutline = mocks.outline.data
+        const view = render(<CourseLearnContentHomePage displayId="system-design" />)
+        mocks.outline.data = undefined as never
+        mocks.outline.error = new Error("offline") as never
+        view.rerender(<CourseLearnContentHomePage displayId="system-design" />)
+        expect(screen.queryByRole("heading", { level: 2, name: "Consistent hashing" })).not.toBeInTheDocument()
+        mocks.outline.error = undefined
+        mocks.outline.data = { ...settledOutline, modules: [] }
+        view.rerender(<CourseLearnContentHomePage displayId="system-design" />)
+        expect(screen.queryByRole("heading", { level: 2, name: "Consistent hashing" })).not.toBeInTheDocument()
+    })
 })
