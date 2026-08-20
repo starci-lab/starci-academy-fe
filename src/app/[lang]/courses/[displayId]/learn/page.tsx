@@ -1,4 +1,4 @@
-import { CourseLearnTodayPage } from "@/components/pages/CourseLearnTodayPage"
+import { CourseLearnContentHomePage } from "@/components/pages/CourseLearnContentHomePage"
 
 interface LearnIndexPageProps {
     params: Promise<{ lang: string, displayId: string }>
@@ -6,7 +6,7 @@ interface LearnIndexPageProps {
 
 const LearnIndexPage = async ({ params }: LearnIndexPageProps) => {
     const { displayId } = await params
-    return <CourseLearnTodayPage displayId={displayId} />
+    return <CourseLearnContentHomePage displayId={displayId} />
 }
 
 export default LearnIndexPage

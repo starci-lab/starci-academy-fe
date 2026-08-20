@@ -41,6 +41,7 @@ type SpineRow = { readonly id: string, readonly isCurrent?: boolean, readonly is
 type FrameStub = {
     readonly props: {
         readonly spine: {
+            readonly home: SpineRow
             readonly groups: ReadonlyArray<{ readonly id: string, readonly rows: ReadonlyArray<SpineRow> }>
             readonly resume?: Readonly<Record<string, unknown>>
             readonly isCollapsed: boolean
@@ -90,6 +91,7 @@ const Surface = () => {
 const spine = () => JSON.parse(screen.getByTestId("spine").textContent ?? "{}") as FrameStub["props"]["spine"]
 const tabs = () => JSON.parse(screen.getByTestId("tabs").textContent ?? "null") as FrameStub["props"]["mobileTabs"]
 const rowById = (id: string) => spine().groups.flatMap((group) => group.rows).find((row) => row.id === id)
+const home = () => spine().home
 
 const readerPath = "/courses/system-design/learn/content/modules/module-1/contents/content-1"
 
@@ -107,7 +109,8 @@ describe("LearnShellLayout", () => {
     it("draws the reference product's three groups in their published order", () => {
         render(<LearnShellLayout displayId="system-design" surface={<Surface />} />)
         expect(spine().groups.map((group) => group.id)).toEqual(["path", "practice", "track"])
-        expect(spine().groups[0].rows.map((row) => row.id)).toEqual(["home", "content", "personalProject"])
+        expect(home().id).toBe("home")
+        expect(spine().groups[0].rows.map((row) => row.id)).toEqual(["content", "personalProject"])
     })
 
     it("marks the row whose route the learner is standing on", () => {
@@ -120,12 +123,12 @@ describe("LearnShellLayout", () => {
 
     it("marks Home only on the bare learn route", () => {
         const { unmount } = render(<LearnShellLayout displayId="system-design" surface={<Surface />} />)
-        expect(rowById("home")?.isCurrent).toBe(true)
+        expect(home().isCurrent).toBe(true)
         unmount()
 
         mocks.pathname = "/courses/system-design/learn/content"
         render(<LearnShellLayout displayId="system-design" surface={<Surface />} />)
-        expect(rowById("home")?.isCurrent).toBe(false)
+        expect(home().isCurrent).toBe(false)
         expect(rowById("content")?.isCurrent).toBe(true)
     })
 

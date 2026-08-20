@@ -9,6 +9,7 @@ const spine: LearnShellLayoutData["spine"] = {
     collapseLabel: "Collapse",
     expandLabel: "Expand",
     isCollapsed: false,
+    home: { id: "home", label: "Home", icon: "home" },
     groups: [{
         id: "path",
         label: "Path",

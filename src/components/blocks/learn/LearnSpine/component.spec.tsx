@@ -32,6 +32,7 @@ const base: LearnSpineData = {
     collapseLabel: "Collapse",
     expandLabel: "Expand",
     isCollapsed: false,
+    home: { id: "home", label: "Home", icon: "home", isCurrent: false },
     groups,
 }
 
@@ -49,6 +50,7 @@ describe("learnSpine", () => {
     it("names every group and every destination it offers", () => {
         renderSpine(base)
         expect(screen.getByText("Your path")).toBeInTheDocument()
+        expect(screen.getByText("Home")).toBeInTheDocument()
         expect(screen.getByText("Modules")).toBeInTheDocument()
         expect(screen.getByText("Leaderboard")).toBeInTheDocument()
     })
@@ -97,6 +99,7 @@ describe("learnSpine", () => {
             collapseLabel: "Collapse",
             expandLabel: "Expand",
             isCollapsed: false,
+            home: { id: "home", label: "Home", icon: "home" },
             groups: [{ id: "path", label: "Your path", rows: [{ id: "leaderboard", label: "Leaderboard", icon: "community" }] }],
         })
         expect(container.querySelectorAll("[data-node=learn-nav-row]")).toHaveLength(1)

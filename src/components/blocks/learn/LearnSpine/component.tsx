@@ -75,6 +75,8 @@ export type LearnSpineData = {
     readonly expandLabel: string
     /** Whether the rail currently shows icons without visible labels. */
     readonly isCollapsed: boolean
+    /** The bare course destination, independent from every labelled ListBox section. */
+    readonly home: LearnSpineRow
     /** Where the learner left off, when there is somewhere to go back to. */
     readonly resume?: {
         readonly label: string
@@ -109,23 +111,27 @@ export type LearnSpineProps = {
  */
 export const learnSpineCollapsed = ({ props, on }: LearnSpineProps) => (
     defineContractComponent("learn-course-navigation-rail-collapsed", {
-        toggle: defineLeafComponent("icon-button", {}, () => (
-            <IconButton
-                props={{ icon: "collapseRail", label: props.expandLabel, isActive: true }}
-                on={{ press: on?.toggleCollapse }}
-            />
-        )),
+        toggle: defineContractComponent("learn-course-rail-collapse-toggle", {
+            control: defineLeafComponent("icon-button", {}, () => (
+                <IconButton
+                    props={{ icon: "collapseRail", label: props.expandLabel, isActive: true }}
+                    on={{ press: on?.toggleCollapse }}
+                />
+            )),
+        }),
+        home: defineContractComponent("learn-course-home-navigation-row", {
+            link: defineLeafComponent("nav-link", { kind: "route" }, () => (
+                <NavLink
+                    props={{ label: props.home.label, icon: props.home.icon, kind: "route", isCurrent: props.home.isCurrent, showLabel: false }}
+                    on={{ press: () => on?.openRow?.(props.home.id) }}
+                />
+            )),
+        }),
         group: props.groups.map((group) => defineContractComponent("learn-nav-group-collapsed", {
             row: group.rows.map((row) => defineContractComponent("learn-nav-row-collapsed", {
                 link: defineLeafComponent("nav-link", { kind: "route" }, () => (
                     <NavLink
-                        props={{
-                            label: row.label,
-                            icon: row.icon,
-                            kind: "route",
-                            isCurrent: row.isCurrent,
-                            showLabel: false,
-                        }}
+                        props={{ label: row.label, icon: row.icon, kind: "route", isCurrent: row.isCurrent, showLabel: false }}
                         on={{ press: () => on?.openRow?.(row.id) }}
                     />
                 )),
@@ -144,12 +150,14 @@ export const learnSpine = ({ props, on, isLoading = false }: LearnSpineProps) =>
     const resume = props.resume
     return (
         defineContractComponent("learn-course-navigation-rail", {
-            toggle: defineLeafComponent("icon-button", {}, () => (
-                <IconButton
-                    props={{ icon: "collapseRail", label: props.collapseLabel }}
-                    on={{ press: on?.toggleCollapse }}
-                />
-            )),
+            toggle: defineContractComponent("learn-course-rail-collapse-toggle", {
+                control: defineLeafComponent("icon-button", {}, () => (
+                    <IconButton
+                        props={{ icon: "collapseRail", label: props.collapseLabel }}
+                        on={{ press: on?.toggleCollapse }}
+                    />
+                )),
+            }),
             ...(resume === undefined ? {} : {
                 resume: defineContractProjection("learn-resume-card", () => (
                     <PressableSurface
@@ -176,6 +184,14 @@ export const learnSpine = ({ props, on, isLoading = false }: LearnSpineProps) =>
                     />
                 )),
             }),
+            home: defineContractComponent("learn-course-home-navigation-row", {
+                link: defineLeafComponent("nav-link", { kind: "route" }, () => (
+                    <NavLink
+                        props={{ label: props.home.label, icon: props.home.icon, kind: "route", isCurrent: props.home.isCurrent }}
+                        on={{ press: () => on?.openRow?.(props.home.id) }}
+                    />
+                )),
+            }),
             group: props.groups.map((group) => defineContractComponent("learn-nav-group", {
                 label: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
                     <Text props={{ content: group.label, size: "xs" }} />
@@ -183,19 +199,10 @@ export const learnSpine = ({ props, on, isLoading = false }: LearnSpineProps) =>
                 row: group.rows.map((row) => defineContractComponent("learn-nav-row", {
                     link: defineLeafComponent("nav-link", { kind: "route" }, () => (
                         <NavLink
-                            props={{
-                                label: row.label,
-                                icon: row.icon,
-                                kind: "route",
-                                isCurrent: row.isCurrent,
-                            }}
+                            props={{ label: row.label, icon: row.icon, kind: "route", isCurrent: row.isCurrent }}
                             on={{ press: () => on?.openRow?.(row.id) }}
                         />
                     )),
-                    /*
-                 * A lock and a count compete for one place, and the lock wins: a learner reading a
-                 * due count on a mode they cannot open has been told the wrong thing twice.
-                 */
                     ...(row.isLocked === true ? {
                         fact: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
                             <Text props={{ content: lockedLabel, size: "xs" }} />

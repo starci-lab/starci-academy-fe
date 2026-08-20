@@ -523,7 +523,8 @@ export const CONTRACTS = buildContracts({
         host: "nav",
         classes: ["hidden", "w-full", "min-w-0", "flex-col", "gap-4", "p-4", "md:flex"],
         children: {
-            toggle: { leaf: "icon-button" },
+            toggle: { contract: "learn-course-rail-collapse-toggle" },
+            home: { contract: "learn-course-home-navigation-row" },
             resume: { contract: "learn-resume-card", optional: true },
             group: { contract: "learn-nav-group", repeats: true, restingCount: 3 },
         },
@@ -533,10 +534,25 @@ export const CONTRACTS = buildContracts({
         host: "nav",
         classes: ["hidden", "w-full", "min-w-0", "flex-col", "gap-4", "p-2", "md:flex"],
         children: {
-            toggle: { leaf: "icon-button" },
+            toggle: { contract: "learn-course-rail-collapse-toggle" },
+            home: { contract: "learn-course-home-navigation-row" },
             group: { contract: "learn-nav-group-collapsed", repeats: true, restingCount: 3 },
         },
         why: "if you need every course destination retained as an accessible icon while visible labels and trailing evidence are compacted.",
+    },
+    "learn-course-home-navigation-row": {
+        classes: ["flex", "w-full", "min-w-0", "items-center"],
+        children: {
+            link: { leaf: "nav-link", props: { kind: "route" } },
+        },
+        why: "if the course-local Home destination must exact-match the bare learn route without activating on nested learning routes.",
+    },
+    "learn-course-rail-collapse-toggle": {
+        classes: ["flex", "w-full", "justify-end"],
+        children: {
+            control: { leaf: "icon-button" },
+        },
+        why: "if a persistent course rail changes in place between its labelled and compact icon presentations.",
     },
     "learn-routed-body": {
         classes: ["w-full", "min-w-0", "flex-1"],

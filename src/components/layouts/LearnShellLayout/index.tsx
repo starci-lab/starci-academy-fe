@@ -68,7 +68,6 @@ const GROUPS: ReadonlyArray<{ id: string, rows: ReadonlyArray<SpineRoute> }> = [
     {
         id: "path",
         rows: [
-            { id: "home", icon: "home", at: "/learn" },
             { id: "content", icon: "course", at: "/learn/content" },
             { id: "personalProject", icon: "practice", at: "/learn/personal-project", requiresEnrollment: true },
         ],
@@ -154,9 +153,7 @@ export const LearnShellLayout = (input: LearnShellLayoutProps) => {
             id: row.id,
             label: t(`rows.${row.id}`),
             icon: row.icon,
-            isCurrent: row.id === "home"
-                ? pathname === `${base}/learn`
-                : pathname.startsWith(`${base}${row.at}`),
+            isCurrent: pathname.startsWith(`${base}${row.at}`),
             isLocked: row.requiresEnrollment === true && enrollmentKnown && course.data?.isEnrolled !== true,
             fact: row.id === "leaderboard" && viewerRank !== null && viewerRank !== undefined
                 ? `#${viewerRank}`
@@ -175,6 +172,12 @@ export const LearnShellLayout = (input: LearnShellLayoutProps) => {
                         collapseLabel: t("collapse"),
                         expandLabel: t("expand"),
                         isCollapsed: isSpineCollapsed,
+                        home: {
+                            id: "home",
+                            label: t("rows.home"),
+                            icon: "home",
+                            isCurrent: pathname === `${base}/learn`,
+                        },
                         groups,
                         ...(enrolledCourse === undefined ? {} : {
                             resume: {
@@ -197,6 +200,10 @@ export const LearnShellLayout = (input: LearnShellLayoutProps) => {
                 }}
                 on={{
                     openRow: (id: string) => {
+                        if (id === "home") {
+                            router.push(`${base}/learn`)
+                            return
+                        }
                         const row = GROUPS.flatMap((group) => group.rows).find((candidate) => candidate.id === id)
                         if (row === undefined) return
                         router.push(`${base}${row.at}`)
