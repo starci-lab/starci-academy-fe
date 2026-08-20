@@ -13,6 +13,13 @@ export type CoursePersonalProjectTaskPageProps = {
     readonly taskId: string
 }
 
+const taskPageStateOf = (submissionFailed: boolean, submitting: boolean, loadFailed: boolean, pending: boolean) => {
+    if (submissionFailed) return "failed" as const
+    if (submitting) return "submitting" as const
+    if (loadFailed) return "failed" as const
+    return pending ? "pending" as const : "ready" as const
+}
+
 const COPY = {
     en: {
         fallbackTitle: "Personal project task",
@@ -47,15 +54,12 @@ export const CoursePersonalProjectTaskPage = ({ displayId, taskId }: CoursePerso
     const submission = useMutateSubmitPersonalTaskAttemptSwr()
     const failedToLoad = project.error !== undefined
         || (project.data !== undefined && (project.data === null || task === undefined))
-    const state = submission.error !== undefined
-        ? "failed"
-        : submission.isMutating
-            ? "submitting"
-            : failedToLoad
-                ? "failed"
-                : project.data === undefined
-                    ? "pending"
-                    : "ready"
+    const state = taskPageStateOf(
+        submission.error !== undefined,
+        submission.isMutating,
+        failedToLoad,
+        project.data === undefined,
+    )
 
     const submit = async () => {
         const courseId = project.data?.course.id

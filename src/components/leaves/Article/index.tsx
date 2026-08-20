@@ -65,7 +65,13 @@ const NODE_CLASSES = {
 } as const
 
 /** How many lines rest while the body is in flight, and how wide each one is. */
-const RESTING_WIDTHS = ["w-3/4", "w-full", "w-full", "w-5/6", "w-2/3"] as const
+const RESTING_WIDTHS = [
+    { id: "resting-1", width: "w-3/4" },
+    { id: "resting-2", width: "w-full" },
+    { id: "resting-3", width: "w-full" },
+    { id: "resting-4", width: "w-5/6" },
+    { id: "resting-5", width: "w-2/3" },
+] as const
 const RESTING_LINE = skeletonVariants({ animationType: "shimmer" }).base({
     className: "h-6 select-none rounded text-transparent",
 })
@@ -80,6 +86,7 @@ const RESTING_LINE = skeletonVariants({ animationType: "shimmer" }).base({
  * that renames it to what it actually is, the same way a fixture is narrowed at its boundary.
  */
 type MarkdownNode = {
+    readonly id: string
     readonly type: string
     readonly value?: string
     readonly depth?: number
@@ -109,12 +116,13 @@ const flagAt = (record: Record<string, unknown>, key: string): boolean | undefin
  * where a value crosses from outside the program to inside it is exactly the seam worth checking,
  * and a node with no `type` is not a node - it is dropped rather than drawn as an empty line.
  */
-const toNode = (value: unknown): MarkdownNode | undefined => {
+const toNode = (value: unknown, id = "node"): MarkdownNode | undefined => {
     if (!isRecord(value)) return undefined
     const type = stringAt(value, "type")
     if (type === undefined) return undefined
     const rawParts = value["children"]
     return {
+        id,
         type,
         value: stringAt(value, "value"),
         depth: numberAt(value, "depth"),
@@ -122,7 +130,7 @@ const toNode = (value: unknown): MarkdownNode | undefined => {
         url: stringAt(value, "url"),
         ordered: flagAt(value, "ordered"),
         parts: Array.isArray(rawParts)
-            ? rawParts.map(toNode).filter((part): part is MarkdownNode => part !== undefined)
+            ? rawParts.map((part, index) => toNode(part, `${id}-${index}`)).filter((part): part is MarkdownNode => part !== undefined)
             : [],
     }
 }
@@ -141,8 +149,8 @@ const plainText = (node: MarkdownNode): string =>
  * comes back.
  */
 const inline = (nodes: ReadonlyArray<MarkdownNode>): ReactNode =>
-    nodes.map((node, index) => {
-        const key = `${node.type}-${index}`
+    nodes.map((node) => {
+        const key = node.id
         switch (node.type) {
         case "strong":
             return <strong key={key} className={NODE_CLASSES.strong}>{inline(node.parts)}</strong>
@@ -173,16 +181,16 @@ const block = (node: MarkdownNode, key: string): ReactNode => {
     case "blockquote":
         return (
             <blockquote key={key} className={NODE_CLASSES.quote}>
-                {(node.parts).map((child, index) => block(child, `${key}-${index}`))}
+                {(node.parts).map((child) => block(child, `${key}-${child.id}`))}
             </blockquote>
         )
     case "list": {
-        const items = (node.parts).map((item, index) => (
-            <li key={`${key}-${index}`} className={NODE_CLASSES.item}>
-                {(item.parts).map((child, childIndex) => (
+        const items = (node.parts).map((item) => (
+            <li key={`${key}-${item.id}`} className={NODE_CLASSES.item}>
+                {(item.parts).map((child) => (
                     child.type === "paragraph"
-                        ? <Fragment key={`${key}-${index}-${childIndex}`}>{inline(child.parts)}</Fragment>
-                        : block(child, `${key}-${index}-${childIndex}`)
+                        ? <Fragment key={`${key}-${item.id}-${child.id}`}>{inline(child.parts)}</Fragment>
+                        : block(child, `${key}-${item.id}-${child.id}`)
                 ))}
             </li>
         ))
@@ -207,8 +215,8 @@ export const Article = ({ props, isLoading = false }: ArticleProps) => {
     if (isLoading || props.body === undefined) {
         return (
             <div {...selectable} data-tier="leaf" data-component="Article" data-resting="true" className={NODE_CLASSES.root}>
-                {RESTING_WIDTHS.map((width, index) => (
-                    <span key={`resting-${index + 1}`} className={`${RESTING_LINE} ${width}`} />
+                {RESTING_WIDTHS.map((line) => (
+                    <span key={line.id} className={`${RESTING_LINE} ${line.width}`} />
                 ))}
             </div>
         )
@@ -216,7 +224,7 @@ export const Article = ({ props, isLoading = false }: ArticleProps) => {
     const root = toNode(parser.parse(props.body))
     return (
         <div {...selectable} data-tier="leaf" data-component="Article" className={NODE_CLASSES.root}>
-            {(root?.parts ?? []).map((node, index) => block(node, `${node.type}-${index}`))}
+            {(root?.parts ?? []).map((node) => block(node, node.id))}
         </div>
     )
 }

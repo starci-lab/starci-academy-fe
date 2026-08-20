@@ -8,12 +8,19 @@ import { CourseFoundationResourcePageBase } from "./component"
 /** Route identities required by the connected foundation resource reader. */
 export type CourseFoundationResourcePageProps = { readonly displayId: string; readonly categoryId: string; readonly foundationId: string }
 
+const resourceStateOf = (failed: boolean, pending: boolean, missing: boolean) => {
+    if (failed) return "failed" as const
+    if (pending) return "pending" as const
+    if (missing) return "not-found" as const
+    return "ready" as const
+}
+
 /** Resolve a route resource identity and connect its follow-on playground action. */
 export const CourseFoundationResourcePage = ({ displayId, categoryId, foundationId }: CourseFoundationResourcePageProps) => {
     const t = useTranslations("learn.foundations")
     const router = useRouter()
     const query = useQueryFoundationSwr({ displayId: foundationId })
-    const state = query.error !== undefined ? "failed" : query.data === undefined ? "pending" : query.data === null ? "not-found" : "ready"
+    const state = resourceStateOf(query.error !== undefined, query.data === undefined, query.data === null)
     return (
         <CourseFoundationResourcePageBase
             state={state}

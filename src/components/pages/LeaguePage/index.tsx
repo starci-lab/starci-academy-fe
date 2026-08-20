@@ -93,7 +93,7 @@ export const LeaguePage = () => {
     const globalData = global.data
 
     // The cohort is the denominator, so the percentile means "of the people I am actually racing".
-    const percent = mine && weeklyEntries.length > 0
+    const percent = mine?.rank !== undefined && weeklyEntries.length > 0
         ? Math.max(1, Math.ceil((mine.rank / weeklyEntries.length) * 100))
         : undefined
     const remaining = weekly.data ? Math.max(0, Date.parse(weekly.data.weekEndAt) - Date.now()) : 0
@@ -105,7 +105,7 @@ export const LeaguePage = () => {
     // The person directly above the viewer, and only when the fetched slice actually contains them:
     // a distance to somebody nobody loaded is a number invented to fill a bar.
     const above = globalData?.entries.find((entry) => entry.rank === globalData.myRank - 1)
-    const pointsToNext = above ? Math.max(0, above.points - (globalData?.myPoints ?? 0) + 1) : 0
+    const pointsToNext = above?.points === undefined ? 0 : Math.max(0, above.points - (globalData?.myPoints ?? 0) + 1)
 
     const weeklyRows: ReadonlyArray<RankedUserRowData> = weeklyEntries.slice(PODIUM_SIZE).map((entry) => {
         const isMe = entry.userGlobalId === mine?.userGlobalId
@@ -157,11 +157,11 @@ export const LeaguePage = () => {
         ? {
             standing: {
                 rank: mine?.rank,
-                rankLabel: mine && percent !== undefined ? t("league.rankLine", { rank: mine.rank, percent }) : undefined,
-                title: mine && percent !== undefined ? t("league.rankLine", { rank: mine.rank, percent }) : t("league.unplaced"),
-                subtitle: mine && weekly.data
-                    ? `${t("points", { count: mine.weekPoints })} · ${t("resetIn", countdown)}`
-                    : t("league.empty"),
+                rankLabel: mine?.rank === undefined || percent === undefined ? undefined : t("league.rankLine", { rank: mine.rank, percent }),
+                title: mine?.rank === undefined || percent === undefined ? t("league.unplaced") : t("league.rankLine", { rank: mine.rank, percent }),
+                subtitle: mine?.weekPoints === undefined || weekly.data === undefined
+                    ? t("league.empty")
+                    : `${t("points", { count: mine.weekPoints })} · ${t("resetIn", countdown)}`,
             },
             ctaLabel: t("climbCta"),
             progressAccessibleLabel: t("pageTitle"),
@@ -185,7 +185,7 @@ export const LeaguePage = () => {
                 title: t("top.rankLine", { rank: globalData?.myRank ?? 0 }),
                 subtitle: t("points", { count: globalData?.myPoints ?? 0 }),
             },
-            ...(globalData && above && globalData.myRank > 1
+            ...(globalData?.myRank !== undefined && above !== undefined && globalData.myRank > 1
                 ? {
                     progress: {
                         ratio: globalData.myPoints / Math.max(1, above.points),

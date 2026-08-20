@@ -12,6 +12,11 @@ export type CourseMockInterviewResultPageProps = {
     readonly sessionId: string
 }
 
+const resultStateOf = (failed: boolean, grading: boolean): CourseMockInterviewResultState => {
+    if (failed) return "failed"
+    return grading ? "grading" : "ready"
+}
+
 const COPY = {
     en: {
         title: "Interview debrief",
@@ -52,7 +57,7 @@ export const CourseMockInterviewResultPage = ({ displayId, sessionId }: CourseMo
     const courseId = course.data?.id
     const attempt = useQueryMockInterviewAttemptBySessionSwr(courseId, sessionId, 1500)
     const failed = course.error !== undefined || attempt.error !== undefined || course.data === null
-    const state: CourseMockInterviewResultState = failed ? "failed" : attempt.data === null || attempt.data === undefined ? "grading" : "ready"
+    const state = resultStateOf(failed, attempt.data === null || attempt.data === undefined)
     const result = attempt.data
     const setupPath = `/courses/${displayId}/learn/mock-interview`
 

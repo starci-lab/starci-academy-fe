@@ -12,6 +12,12 @@ import { CourseFlashcardsQuizPageBase } from "./component"
 /** Route identity required by the connected flashcard quiz setup. */
 export type CourseFlashcardsQuizPageProps = { readonly displayId: string }
 
+const quizStateOf = (failed: boolean, pending: boolean, empty: boolean) => {
+    if (failed) return "failed" as const
+    if (pending) return "pending" as const
+    return empty ? "empty" as const : "ready" as const
+}
+
 const labels = (locale: string) => locale === "vi" ? {
     title: "Flashcard",
     subtitle: "Kiểm tra nhanh kiến thức trên toàn khóa học.", // vn-ok: localized Vietnamese interface copy.
@@ -85,7 +91,7 @@ export const CourseFlashcardsQuizPage = ({ displayId }: CourseFlashcardsQuizPage
         .slice(0, cardLimit), [cardLimit, decks.data, level])
     const failed = course.error !== undefined || decks.error !== undefined || start.error !== undefined
     const pending = course.data === undefined || decks.data === undefined
-    const state = failed ? "failed" : pending ? "pending" : course.data === null || decks.data === null || cardIds.length === 0 ? "empty" : "ready"
+    const state = quizStateOf(failed, pending, course.data === null || decks.data === null || cardIds.length === 0)
     const openSession = (sessionId: string) => router.push(`/courses/${displayId}/learn/flashcards/quiz/sessions/${sessionId}`)
     const startQuiz = async () => {
         if (courseId === undefined || cardIds.length === 0) return

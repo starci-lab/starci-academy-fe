@@ -15,6 +15,12 @@ import { CourseFlashcardsReviewPageBase } from "./component"
 /** Route identity required by the connected flashcard review overview. */
 export type CourseFlashcardsReviewPageProps = { readonly displayId: string }
 
+const reviewStateOf = (failed: boolean, pending: boolean, empty: boolean) => {
+    if (failed) return "failed" as const
+    if (pending) return "pending" as const
+    return empty ? "empty" as const : "ready" as const
+}
+
 const labels = (locale: string) => locale === "vi" ? {
     title: "Flashcard",
     subtitle: "Ôn tập theo nhịp nhớ để ghi nhớ lâu hơn.", // vn-ok: localized Vietnamese interface copy.
@@ -82,7 +88,7 @@ export const CourseFlashcardsReviewPage = ({ displayId }: CourseFlashcardsReview
         || stats.error !== undefined
         || start.error !== undefined
     const pending = course.data === undefined || decks.data === undefined || due.data === undefined || stats.data === undefined
-    const state = failed ? "failed" : pending ? "pending" : course.data === null || resolvedDecks.length === 0 ? "empty" : "ready"
+    const state = reviewStateOf(failed, pending, course.data === null || resolvedDecks.length === 0)
 
     const openSession = (sessionId: string) => router.push(`/courses/${displayId}/learn/flashcards/review/sessions/${sessionId}`)
     const startDeck = async (deckId: string) => {

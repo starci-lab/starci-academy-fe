@@ -42,6 +42,13 @@ const openExternal = (href: string) => {
     else window.location.assign(href)
 }
 
+const companyStateOf = (failed: boolean, missing: boolean, pending: boolean) => {
+    if (failed) return "failed" as const
+    if (missing) return "not-found" as const
+    if (pending) return "pending" as const
+    return "ready" as const
+}
+
 /** Connected company detail; contact is proven and no company-level application is exposed. */
 export const CourseHeadhuntingCompanyPage = ({ displayId, companyId }: CourseHeadhuntingCompanyPageProps) => {
     const locale = useLocale() === "vi" ? "vi" : "en"
@@ -58,7 +65,7 @@ export const CourseHeadhuntingCompanyPage = ({ displayId, companyId }: CourseHea
         return contact === undefined ? [] : [[consultant.id, contact] as const]
     }))
     const failed = course.error !== undefined || company.error !== undefined || consultants.error !== undefined || course.data === null
-    const state = failed ? "failed" : company.data === null ? "not-found" : company.data === undefined || consultants.data === undefined ? "pending" : "ready"
+    const state = companyStateOf(failed, company.data === null, company.data === undefined || consultants.data === undefined)
     const actions = Object.fromEntries((consultants.data?.data ?? []).flatMap((consultant) => {
         const contact = contactById.get(consultant.id)
         return contact === undefined ? [] : [[`contact:${consultant.id}`, () => openExternal(contact)] as const]

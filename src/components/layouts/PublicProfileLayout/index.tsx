@@ -22,6 +22,13 @@ const PROFILE_TABS: ReadonlyArray<Omit<ExtendedTab, "label">> = [
     { id: "activity", icon: "notification" },
 ]
 
+const profileLayoutStateOf = (failed: boolean, loading: boolean, missing: boolean, locked: boolean) => {
+    if (failed) return "failed" as const
+    if (loading) return "loading" as const
+    if (missing) return "not-found" as const
+    return locked ? "locked" as const : "ready" as const
+}
+
 /** Connected persistent profile layout: settles canonicalization and whole-screen visibility. */
 export const PublicProfileLayout = ({ content }: PublicProfileLayoutBoundaryProps) => {
     const t = useTranslations("profile")
@@ -33,20 +40,17 @@ export const PublicProfileLayout = ({ content }: PublicProfileLayoutBoundaryProp
     const profile = useQueryUserProfileSwr(username)
     const publicCv = useQueryPublicUserCvSwr(username)
     const viewer = useQueryMeSwr()
-    const isSelf = profile.data !== null && profile.data !== undefined && viewer.data?.id === profile.data.id
+    const isSelf = profile.data?.id !== undefined && viewer.data?.id === profile.data.id
     const visibleTabs = PROFILE_TABS
         .filter((tab) => tab.id !== "cv" || isSelf || Boolean(publicCv.data))
         .map((tab) => ({ ...tab, label: tabsT(tab.id) }))
     const selectedTab = PROFILE_TABS.find((tab) => tab.id !== "overview" && pathname.startsWith(`/profile/${username}/${tab.id}`))?.id ?? "overview"
-    const state = profile.error !== undefined && profile.data === undefined
-        ? "failed"
-        : profile.data === undefined
-            ? "loading"
-            : profile.data === null
-                ? "not-found"
-                : profile.data.profileLocked && !isSelf
-                    ? "locked"
-                    : "ready"
+    const state = profileLayoutStateOf(
+        profile.error !== undefined && profile.data === undefined,
+        profile.data === undefined,
+        profile.data === null,
+        profile.data?.profileLocked === true && !isSelf,
+    )
 
     useEffect(() => {
         if (profile.data?.username && username && profile.data.username !== username) {

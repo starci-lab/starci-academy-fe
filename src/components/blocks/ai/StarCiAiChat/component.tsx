@@ -119,6 +119,7 @@ const HISTORY_STATES = new Set<StarCiAiChatState>([
     "archiving",
     "deleteConfirm",
 ])
+const PENDING_TURN_IDS = ["pending-1", "pending-2", "pending-3", "pending-4"] as const
 
 const stateNeedsRetry = (state: StarCiAiChatState): boolean =>
     state === "sessionsFailed" || state === "historyFailed" || state === "streamFailed" || state === "quotaRejected"
@@ -175,8 +176,8 @@ export const StarCiAiChatBase = (input: StarCiAiChatProps) => {
             )))
         }
         if (renderedTurns.length === 0 && isLoading) {
-            return Array.from({ length: 4 }, (_unused, index) => defineLeafComponent("article", {}, () => (
-                <Article key={`pending-${index}`} props={{}} isLoading />
+            return PENDING_TURN_IDS.map((id) => defineLeafComponent("article", {}, () => (
+                <Article key={id} props={{}} isLoading />
             )))
         }
         return renderedTurns.map((turn) => defineLeafComponent("article", {}, () => (

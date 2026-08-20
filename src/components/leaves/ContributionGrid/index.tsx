@@ -84,8 +84,8 @@ export const ContributionGrid = ({ props, isLoading = false }: ContributionGridP
                 data-part="calendar-grid"
             >
                 <span className="flex w-8 shrink-0 flex-col gap-1 pt-5 pr-1" aria-hidden="true">
-                    {Array.from({ length: 7 }, (_unused, index) => (
-                        <span key={index} className="h-3 text-xs leading-3 text-muted">{props.weekdayLabels[index] ?? ""}</span>
+                    {props.weekdayLabels.map((label) => (
+                        <span key={label} className="h-3 text-xs leading-3 text-muted">{label}</span>
                     ))}
                 </span>
                 {weeks.map((week) => (

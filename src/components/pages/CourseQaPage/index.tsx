@@ -11,6 +11,12 @@ import { CourseQaPageBase, type CourseQaThreadRow } from "./component"
 
 interface CourseQaPageProps { readonly displayId: string }
 
+const qaStateOf = (failed: boolean, pending: boolean, empty: boolean) => {
+    if (failed) return "failed" as const
+    if (pending) return "pending" as const
+    return empty ? "empty" as const : "ready" as const
+}
+
 const COPY = {
     en: {
         title: "Course Q&A", course: "Course", search: "Search questions", clear: "Clear question search",
@@ -58,7 +64,7 @@ export const CourseQaPage = ({ displayId }: CourseQaPageProps) => {
     const failed = course.error !== undefined || questions.error !== undefined || (selectedId !== undefined && replies.error !== undefined)
         || course.data === null || questions.data === null
     const pending = course.data === undefined || questions.data === undefined || (selectedId !== undefined && replies.data === undefined)
-    const state = failed ? "failed" : pending ? "pending" : allQuestions.length === 0 ? "empty" : "ready"
+    const state = qaStateOf(failed, pending, allQuestions.length === 0)
 
     return (
         <CourseQaPageBase

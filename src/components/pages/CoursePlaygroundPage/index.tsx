@@ -9,6 +9,12 @@ import { CoursePlaygroundPageBase, type CoursePlaygroundPageState } from "./comp
 /** Course route identity required by the connected playground catalog. */
 export type CoursePlaygroundPageProps = { readonly displayId: string }
 
+const playgroundStateOf = (failed: boolean, pending: boolean, empty: boolean): CoursePlaygroundPageState => {
+    if (failed) return "failed"
+    if (pending) return "pending"
+    return empty ? "empty" : "ready"
+}
+
 /** Resolve the course primary key, then read its live playground catalog. */
 export const CoursePlaygroundPage = ({ displayId }: CoursePlaygroundPageProps) => {
     const t = useTranslations("learn.playground")
@@ -19,7 +25,7 @@ export const CoursePlaygroundPage = ({ displayId }: CoursePlaygroundPageProps) =
         || (course.data !== null && course.data !== undefined && playgrounds.data === undefined && playgrounds.error === undefined)
     const failed = course.error !== undefined || course.data === null || playgrounds.error !== undefined
     const rows = playgrounds.data ?? []
-    const state: CoursePlaygroundPageState = failed ? "failed" : pending ? "pending" : rows.length === 0 ? "empty" : "ready"
+    const state = playgroundStateOf(failed, pending, rows.length === 0)
 
     return (
         <CoursePlaygroundPageBase

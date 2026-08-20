@@ -9,6 +9,14 @@ import { useQueryUserProfileSwr } from "@/hooks/swr/useQueryUserProfileSwr"
 import { useMutateSetFollowSwr } from "@/hooks/swr/useMutateSetFollowSwr"
 import { ProfileHeroBase } from "./component"
 
+type ProfileTranslator = (key: string) => string
+
+const primaryLabelOf = (isSelf: boolean, canHire: boolean, followed: boolean | undefined, t: ProfileTranslator) => {
+    if (isSelf) return t("actions.edit")
+    if (canHire) return t("actions.hire")
+    return followed ? t("actions.following") : t("actions.follow")
+}
+
 /** Connected identity rail: resolves viewer context, CTA precedence and share/follow behavior. */
 export const ProfileHero = () => {
     const t = useTranslations("profile")
@@ -19,13 +27,9 @@ export const ProfileHero = () => {
     const viewer = useQueryMeSwr()
     const follow = useMutateSetFollowSwr()
     const user = profile.data
-    const isSelf = user !== null && user !== undefined && viewer.data?.id === user.id
+    const isSelf = user?.id !== undefined && viewer.data?.id === user.id
     const canHire = !isSelf && user?.openToWork === true && Boolean(user.githubUsername)
-    const primaryLabel = isSelf
-        ? t("actions.edit")
-        : canHire
-            ? t("actions.hire")
-            : user?.isFollowedByMe ? t("actions.following") : t("actions.follow")
+    const primaryLabel = primaryLabelOf(isSelf, canHire, user?.isFollowedByMe, t)
     const joinedLabel = useMemo(() => {
         if (!user?.createdAt) return ""
         const date = new Date(user.createdAt)
