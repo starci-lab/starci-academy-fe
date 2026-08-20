@@ -6,6 +6,8 @@ import { useRouter } from "@/i18n/navigation"
 import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
 import { useQueryMyInProgressMockInterviewSessionSwr } from "@/hooks/swr/useQueryMyInProgressMockInterviewSessionSwr"
 import { useMutateStartMockInterviewSessionSwr } from "@/hooks/swr/useMutateStartMockInterviewSessionSwr"
+import { useQueryMyMockInterviewAttemptsSwr } from "@/hooks/swr/useQueryMyMockInterviewAttemptsSwr"
+import { useQueryMyMockInterviewStatsSwr } from "@/hooks/swr/useQueryMyMockInterviewStatsSwr"
 import { CourseMockInterviewSetupPageBase } from "./component"
 
 /** Route-owned input for the connected setup page. */
@@ -28,6 +30,8 @@ const COPY = {
         beginTitle: "Interview room",
         historyEmpty: "Completed interview history will appear here.",
         statsEmpty: "Interview statistics will appear after your first completed session.",
+        historyFailed: "Completed interviews could not be loaded.",
+        statsFailed: "Interview statistics could not be loaded.",
         returnToBegin: "Prepare an interview",
         resumeTitle: "Your latest session is still active",
         readiness: { level: "Readiness", mode: "Format", focus: "Focus" },
@@ -50,6 +54,8 @@ const COPY = {
         beginTitle: "Phòng chuẩn bị", // vn-ok: approved Vietnamese runtime copy
         historyEmpty: "Lịch sử phỏng vấn đã hoàn thành sẽ xuất hiện tại đây.", // vn-ok: approved Vietnamese runtime copy
         statsEmpty: "Thống kê sẽ xuất hiện sau buổi phỏng vấn hoàn thành đầu tiên.", // vn-ok: approved Vietnamese runtime copy
+        historyFailed: "Không tải được lịch sử phỏng vấn.", // vn-ok: approved Vietnamese runtime copy
+        statsFailed: "Không tải được thống kê phỏng vấn.", // vn-ok: approved Vietnamese runtime copy
         returnToBegin: "Chuẩn bị phỏng vấn", // vn-ok: approved Vietnamese runtime copy
         resumeTitle: "Buổi gần nhất vẫn còn hiệu lực", // vn-ok: approved Vietnamese runtime copy
         readiness: { level: "Độ sẵn sàng", mode: "Định dạng", focus: "Trọng tâm" }, // vn-ok: approved Vietnamese runtime copy
@@ -67,6 +73,8 @@ export const CourseMockInterviewSetupPage = ({ displayId }: CourseMockInterviewS
     const courseId = course.data?.id
     const inProgress = useQueryMyInProgressMockInterviewSessionSwr(courseId)
     const startSession = useMutateStartMockInterviewSessionSwr(courseId)
+    const attempts = useQueryMyMockInterviewAttemptsSwr(courseId)
+    const stats = useQueryMyMockInterviewStatsSwr(courseId)
     const [level, setLevel] = useState("middle")
     const [mode, setMode] = useState("qna")
     const [selectedTab, setSelectedTab] = useState<"begin" | "history" | "stats">("begin")
@@ -125,6 +133,21 @@ export const CourseMockInterviewSetupPage = ({ displayId }: CourseMockInterviewS
                 beginTitle: copy.beginTitle,
                 historyEmpty: copy.historyEmpty,
                 statsEmpty: copy.statsEmpty,
+                historyFailed: copy.historyFailed,
+                statsFailed: copy.statsFailed,
+                historyState: attempts.error !== undefined ? "failed" : attempts.data === undefined ? "pending" : (attempts.data?.items.length ?? 0) === 0 ? "empty" : "ready",
+                statsState: stats.error !== undefined ? "failed" : stats.data === undefined ? "pending" : stats.data === null || stats.data.insufficientData || stats.data.byPhase.length === 0 ? "empty" : "ready",
+                historyRows: (attempts.data?.items ?? []).map((attempt) => ({
+                    id: attempt.id,
+                    title: attempt.name ?? attempt.promptTitle,
+                    fact: `${attempt.overallScore}/100 · ${attempt.verdict}`,
+                })),
+                statsRows: (stats.data?.byPhase ?? []).map((row) => ({
+                    id: row.key,
+                    title: row.key,
+                    percent: row.avgMax <= 0 ? 0 : Math.round((row.avgScore / row.avgMax) * 100),
+                    percentText: `${Math.round(row.avgScore)}/${Math.round(row.avgMax)}`,
+                })),
                 returnToBegin: copy.returnToBegin,
                 resumeTitle: copy.resumeTitle,
                 readinessLabels: [copy.readiness.level, copy.readiness.mode, copy.readiness.focus],

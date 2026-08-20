@@ -4,6 +4,7 @@ import { ChoiceTabs } from "@/components/leaves/ChoiceTabs"
 import { Heading } from "@/components/leaves/Heading"
 import { Text } from "@/components/leaves/Text"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { LabelledProgressRow } from "@/components/composites/LabelledProgressRow"
 import { defineCompositeComponent, defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
 /** One setup choice presented to the learner. */
@@ -11,6 +12,11 @@ export type MockInterviewSetupChoice = {
     readonly id: string
     readonly label: string
 }
+
+/** One completed interview summary in the history panel. */
+export type MockInterviewHistoryRow = { readonly id: string; readonly title: string; readonly fact: string }
+/** One aggregate interview score in the statistics panel. */
+export type MockInterviewStatsRow = { readonly id: string; readonly title: string; readonly percent: number; readonly percentText: string }
 
 /** The situations the mock-interview green room can present. */
 export type CourseMockInterviewSetupState = "pending" | "ready" | "resumable" | "starting" | "failed"
@@ -35,6 +41,12 @@ export type CourseMockInterviewSetupData = {
     readonly beginTitle: string
     readonly historyEmpty: string
     readonly statsEmpty: string
+    readonly historyFailed: string
+    readonly statsFailed: string
+    readonly historyState: "pending" | "ready" | "empty" | "failed"
+    readonly statsState: "pending" | "ready" | "empty" | "failed"
+    readonly historyRows: ReadonlyArray<MockInterviewHistoryRow>
+    readonly statsRows: ReadonlyArray<MockInterviewStatsRow>
     readonly returnToBegin: string
     readonly resumeTitle: string
     readonly readinessLabels: ReadonlyArray<string>
@@ -82,16 +94,17 @@ export const CourseMockInterviewSetupPageBase = (input: CourseMockInterviewSetup
         )),
     ]
 
-    const historyOrStats = input.props.selectedTab === "history" || input.props.selectedTab === "stats"
-        ? defineCompositeComponent("empty-notice", {}, () => (
-            <EmptyNotice
-                props={{
-                    message: input.props.selectedTab === "history" ? input.props.historyEmpty : input.props.statsEmpty,
-                    actionLabel: input.props.returnToBegin,
-                }}
-                on={{ act: () => input.on?.selectTab?.("begin") }}
-            />
-        ))
+    const historyRows = input.props.historyState === "pending"
+        ? Array.from({ length: 3 }, (_, index) => ({ id: `pending-${index}`, title: "", fact: "" }))
+        : input.props.historyRows
+    const statsRows = input.props.statsState === "pending"
+        ? Array.from({ length: 3 }, (_, index) => ({ id: `pending-${index}`, title: "", percent: 0, percentText: "" }))
+        : input.props.statsRows
+    const historyNotice = input.props.historyState === "empty" || input.props.historyState === "failed"
+        ? defineCompositeComponent("empty-notice", {}, () => <EmptyNotice props={{ message: input.props.historyState === "failed" ? input.props.historyFailed : input.props.historyEmpty, actionLabel: input.props.returnToBegin }} on={{ act: () => input.on?.selectTab?.("begin") }} />)
+        : undefined
+    const statsNotice = input.props.statsState === "empty" || input.props.statsState === "failed"
+        ? defineCompositeComponent("empty-notice", {}, () => <EmptyNotice props={{ message: input.props.statsState === "failed" ? input.props.statsFailed : input.props.statsEmpty, actionLabel: input.props.returnToBegin }} on={{ act: () => input.on?.selectTab?.("begin") }} />)
         : undefined
 
     const readiness = [selectedLevel, selectedMode, input.props.focus].map((value, index) => (
@@ -126,8 +139,17 @@ export const CourseMockInterviewSetupPageBase = (input: CourseMockInterviewSetup
                     notice: input.state !== "failed" ? undefined : defineCompositeComponent("empty-notice", {}, () => (
                         <EmptyNotice props={{ message: input.props.status ?? "", actionLabel: input.props.retryLabel }} on={{ act: input.on?.retry }} />
                     )),
-                    history: input.props.selectedTab === "history" ? defineContractComponent("mock-interview-history-panel", { notice: historyOrStats }) : undefined,
-                    stats: input.props.selectedTab === "stats" ? defineContractComponent("mock-interview-stats-panel", { notice: historyOrStats }) : undefined,
+                    history: input.props.selectedTab === "history" ? defineContractComponent("mock-interview-history-panel", {
+                        attempt: historyRows.length === 0 ? undefined : historyRows.map((row) => defineContractComponent("mock-interview-history-row", {
+                            title: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => <Text props={{ content: row.title, size: "sm", weight: "medium" }} isLoading={input.props.historyState === "pending"} />),
+                            fact: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: row.fact, size: "xs", tone: "muted" }} isLoading={input.props.historyState === "pending"} />),
+                        })),
+                        notice: historyNotice,
+                    }) : undefined,
+                    stats: input.props.selectedTab === "stats" ? defineContractComponent("mock-interview-stats-panel", {
+                        evidence: statsRows.length === 0 ? undefined : statsRows.map((row) => defineCompositeComponent("labelled-progress-row", {}, () => <LabelledProgressRow props={row} isLoading={input.props.statsState === "pending"} />)),
+                        notice: statsNotice,
+                    }) : undefined,
                     resume: input.props.selectedTab !== "begin" || input.state !== "resumable" ? undefined : defineContractComponent("mock-interview-resume-panel", {
                         identity: defineContractComponent("title-with-baseline-fact", {
                             title: defineLeafComponent("heading", {}, () => <Heading props={{ content: input.props.resumeTitle, level: 3 }} />),

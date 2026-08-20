@@ -716,8 +716,19 @@ export const CONTRACTS = buildContracts({
     },
     "mock-interview-history-panel": {
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4"],
-        children: { notice: { composite: "empty-notice", optional: true } },
+        children: {
+            attempt: { contract: "mock-interview-history-row", repeats: true, restingCount: 3, optional: true },
+            notice: { composite: "empty-notice", optional: true },
+        },
         why: "if you need completed interview attempts to settle inside their own selected setup destination without moving the page orientation or tabs.",
+    },
+    "mock-interview-history-row": {
+        classes: ["flex", "min-w-0", "flex-row", "flex-wrap", "items-baseline", "justify-between", "gap-3", "border-b", "border-separator", "py-3"],
+        children: {
+            title: { leaf: "text", props: { size: "sm", weight: "medium" } },
+            fact: { leaf: "text", props: { size: "xs", tone: "muted" } },
+        },
+        why: "if you need one completed interview's identity and score verdict aligned for repeated history scanning.",
     },
     "mock-interview-stats-panel": {
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4"],
