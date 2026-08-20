@@ -21,6 +21,27 @@ import { CourseDetailPageBase, type CourseDetailSection } from "./component"
 import type { CourseDetail, CourseModule } from "@/modules/api/graphql/queries/types/course"
 import type { CoursePricePreview } from "@/modules/api/graphql/queries/types/course-price-preview"
 
+type DetailTranslator = (key: string, values?: Record<string, string | number>) => string
+type OpenPhase = { readonly slotAvailable: number; readonly phase: string }
+
+const scarcityLabelOf = (openPhase: OpenPhase | undefined, t: DetailTranslator) => {
+    if (openPhase === undefined || openPhase.slotAvailable <= 0) return undefined
+    return t("scarcity", { count: openPhase.slotAvailable, phase: t(`phase.${openPhase.phase}`) })
+}
+
+const cartLabelOf = (enrolled: boolean | null | undefined, isPaid: boolean, isInCart: boolean, tCart: DetailTranslator, tCatalog: DetailTranslator) => {
+    if (enrolled === true || !isPaid) return undefined
+    return isInCart ? tCart("remove") : tCatalog("addToCart")
+}
+
+const railStateOf = (pricePending: boolean, checkingOut: boolean, trialing: boolean, changingCart: boolean) => {
+    if (pricePending) return "price-pending" as const
+    if (checkingOut) return "checking-out" as const
+    if (trialing) return "trialing" as const
+    if (changingCart) return "adding" as const
+    return "ready" as const
+}
+
 /**
  * The connected half: resolve one course and hand the presentational half a settled situation.
  *
@@ -256,9 +277,7 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
                         discountLabel: hasDiscount ? `−${discountPercent}%` : undefined,
                         savingsLabel: hasDiscount ? t("savings", { amount: money.format(listPrice - payable) }) : undefined,
                         priceDetailLabel: tCatalog("priceDetail"),
-                        scarcityLabel: openPhase === undefined || openPhase.slotAvailable <= 0
-                            ? undefined
-                            : t("scarcity", { count: openPhase.slotAvailable, phase: t(`phase.${openPhase.phase}`) }),
+                        scarcityLabel: scarcityLabelOf(openPhase, t),
                         phases: phases.map((phase) => ({
                             id: phase.id,
                             name: t(`phase.${phase.phase}`),
@@ -273,21 +292,11 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
                         // action the page can actually offer them.
                         ctaLabel: course.isEnrolled === true ? t("continue") : t("enroll"),
                         trialLabel: course.isEnrolled === true ? undefined : tCourses("trial"),
-                        cartLabel: course.isEnrolled === true || !isPaid
-                            ? undefined
-                            : isInCart ? tCart("remove") : tCatalog("addToCart"),
+                        cartLabel: cartLabelOf(course.isEnrolled, isPaid, isInCart, tCart, tCatalog),
                         isInCart,
                         enrolmentLabel: t("enrolled", { count: course.enrollmentCount }),
                     },
-                    railState: pricePreview.isLoading
-                        ? "price-pending"
-                        : checkout.isMutating
-                            ? "checking-out"
-                            : trial.isMutating
-                                ? "trialing"
-                                : adding.isMutating || removing.isMutating
-                                    ? "adding"
-                                    : "ready",
+                    railState: railStateOf(pricePreview.isLoading, checkout.isMutating, trial.isMutating, adding.isMutating || removing.isMutating),
                 }}
                 on={{
                     act: () => {

@@ -25,6 +25,12 @@ const valueOf = (entry: Pick<CourseLeaderboardEntry, "totalXp" | "totalScore" | 
     return entry.totalXp
 }
 
+const leaderboardStateOf = (failed: boolean, pending: boolean, isEmpty: boolean) => {
+    if (failed) return "failed" as const
+    if (pending) return "pending" as const
+    return isEmpty ? "empty" as const : "ready" as const
+}
+
 const COPY = {
     en: {
         title: "Course leaderboard", course: "Course", category: "Ranking category", total: "Total XP",
@@ -127,11 +133,11 @@ export const CourseLeaderboardPage = ({ displayId }: CourseLeaderboardPageProps)
         errorMessage: copy.failed,
         retryLabel: copy.retry,
     }
-    const state = course.error !== undefined || leaderboard.error !== undefined || course.data === null || leaderboard.data === null
-        ? "failed"
-        : course.data === undefined || leaderboard.data === undefined
-            ? "pending"
-            : entries.length === 0 ? "empty" : "ready"
+    const state = leaderboardStateOf(
+        course.error !== undefined || leaderboard.error !== undefined || course.data === null || leaderboard.data === null,
+        course.data === undefined || leaderboard.data === undefined,
+        entries.length === 0,
+    )
 
     return (
         <CourseLeaderboardPageBase

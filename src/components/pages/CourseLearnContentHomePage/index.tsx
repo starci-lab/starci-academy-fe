@@ -24,6 +24,12 @@ type LessonStatusLabels = {
     readonly unread: string
 }
 
+const homeStateOf = (outlinePending: boolean, outlineFailed: boolean, isEmpty: boolean, hasPartialData: boolean) => {
+    if (outlinePending) return outlineFailed ? "failed" as const : "pending" as const
+    if (isEmpty) return outlineFailed ? "failed" as const : "empty" as const
+    return hasPartialData ? "partial" as const : "ready" as const
+}
+
 const contentCompletionPercent = (outline: CourseOutline): number => {
     const lessons = outline.progress.lessonsTotal === 0
         ? 1
@@ -56,7 +62,11 @@ const currentModule = (outline: CourseOutline): CourseOutlineModule | undefined 
 const lessonStatus = (
     lesson: CourseOutlineLesson,
     labels: LessonStatusLabels,
-): string => lesson.isPremium ? labels.premium : lesson.isRead ? labels.read : labels.unread
+): string => {
+    if (lesson.isPremium) return labels.premium
+    if (lesson.isRead) return labels.read
+    return labels.unread
+}
 
 /** Load course identity and viewer outline, then seat the map beside the legacy overview hierarchy. */
 export const CourseLearnContentHomePage = ({ displayId }: CourseLearnContentHomePageProps) => {
@@ -68,11 +78,12 @@ export const CourseLearnContentHomePage = ({ displayId }: CourseLearnContentHome
     const module = data === undefined ? undefined : currentModule(data)
     const target = data === undefined ? null : resolveCourseOutlineTarget(data, data.nextContentTask)
     const hasFailure = course.error !== undefined || outline.error !== undefined
-    const state = outline.data === undefined
-        ? outline.error === undefined ? "pending" : "failed"
-        : outline.data === null || outline.data.modules.length === 0
-            ? hasFailure ? "failed" : "empty"
-            : hasFailure || course.data == null ? "partial" : "ready"
+    const state = homeStateOf(
+        outline.data === undefined,
+        outline.error !== undefined,
+        outline.data === null || outline.data?.modules.length === 0,
+        hasFailure || course.data == null,
+    )
     const courseTitle = data?.course.title ?? course.data?.title ?? t("title")
     const courseData = course.data ?? undefined
     const totalMinutes = courseData?.modules?.flatMap((item) => item.contents ?? [])

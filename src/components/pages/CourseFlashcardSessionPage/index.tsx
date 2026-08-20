@@ -22,6 +22,21 @@ export type CourseFlashcardSessionPageProps = {
     readonly mode: FlashcardSessionMode
 }
 
+const flashcardStateOf = (
+    failed: boolean,
+    pending: boolean,
+    expired: boolean,
+    completing: boolean,
+    syncing: boolean,
+): CourseFlashcardSessionState => {
+    if (failed) return "failed"
+    if (pending) return "pending"
+    if (expired) return "expired"
+    if (completing) return "completing"
+    if (syncing) return "syncing"
+    return "active"
+}
+
 const COPY = {
     en: {
         reviewTitle: "Study cards",
@@ -198,17 +213,13 @@ export const CourseFlashcardSessionPage = ({ displayId, sessionId, mode }: Cours
         || complete.error !== undefined
         || localFailed
     const expired = !pending && session.data === null && persistedResult.data?.status === "in_progress"
-    const state: CourseFlashcardSessionState = transportFailed || course.data === null || currentCard === undefined && session.data !== undefined && session.data !== null
-        ? "failed"
-        : pending
-            ? "pending"
-            : expired || session.data === null
-                ? "expired"
-                : complete.isMutating
-                    ? "completing"
-                    : sync.isMutating || rate.isMutating
-                        ? "syncing"
-                        : "active"
+    const state = flashcardStateOf(
+        transportFailed || course.data === null || currentCard === undefined && session.data !== undefined && session.data !== null,
+        pending,
+        expired || session.data === null,
+        complete.isMutating,
+        sync.isMutating || rate.isMutating,
+    )
 
     return (
         <CourseFlashcardSessionPageBase

@@ -26,6 +26,18 @@ type ActivityRollup = {
     readonly count: number
 }
 
+const activityActionOf = (item: QueryMyFeedItemData, count: number, t: (key: string, values?: { readonly count: number }) => string) => {
+    if (item.type === ActivityType.MilestonePassed && count > 1) return t("activity.milestonePassedGrouped", { count })
+    const activityKey = item.type === ActivityType.LessonRead ? "contentRead" : item.type
+    return t(`activity.${activityKey}`)
+}
+
+const dayLabelOf = (key: number, today: number, at: Date, locale: string, t: (key: string) => string) => {
+    if (key === today) return t("today")
+    if (key === today - 86_400_000) return t("yesterday")
+    return at.toLocaleDateString(locale, { dateStyle: "long" })
+}
+
 /** Preserve legacy's one-row summary for consecutive milestones by the same actor. */
 const rollUpMilestones = (items: ReadonlyArray<QueryMyFeedItemData>): ReadonlyArray<ActivityRollup> => {
     const rolled: Array<ActivityRollup> = []
@@ -62,9 +74,7 @@ export const ActivityFeed = (input: ActivityFeedConnectedProps) => {
                 id: item.id,
                 actor: item.actorUsername,
                 avatar: item.actorAvatar ?? undefined,
-                action: isGroupedMilestone
-                    ? t("activity.milestonePassedGrouped", { count })
-                    : t(`activity.${item.type === ActivityType.LessonRead ? "contentRead" : item.type}`),
+                action: activityActionOf(item, count, t),
                 target: isGroupedMilestone ? undefined : item.targetLabel ?? undefined,
                 time,
                 reactionLabel: t("react"),
@@ -85,7 +95,7 @@ export const ActivityFeed = (input: ActivityFeedConnectedProps) => {
             if (existing !== undefined) groups.set(key, { ...existing, rows: [...existing.rows, row] })
             else groups.set(key, {
                 id: String(key),
-                label: key === today ? t("today") : key === today - 86_400_000 ? t("yesterday") : at.toLocaleDateString(locale, { dateStyle: "long" }),
+                label: dayLabelOf(key, today, at, locale, t),
                 rows: [row],
             })
         }

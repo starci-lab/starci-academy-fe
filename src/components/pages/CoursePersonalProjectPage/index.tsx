@@ -47,6 +47,18 @@ const COPY = {
         average: (score: string) => `Điểm trung bình ${score}`, // vn-ok: Vietnamese runtime copy while shared message catalogs are frozen.
     },
 } as const
+type ProjectCopy = {
+    readonly completed: string
+    readonly active: string
+    readonly locked: string
+    readonly notStarted: string
+    readonly empty: string
+    readonly failed: string
+    readonly tasksCompleted: (completed: number, total: number) => string
+    readonly submissions: (count: number) => string
+    readonly average: (score: string) => string
+}
+type ProjectProgress = { readonly tasksCompleted: number; readonly tasksTotal: number }
 
 const findCurrentMilestone = (
     milestones: ReadonlyArray<PersonalProjectMilestone>,
@@ -63,6 +75,34 @@ const averageScore = (tasks: ReadonlyArray<PersonalProjectTask>) => {
     return `${score}/${maximum}`
 }
 
+const projectStateOf = (failed: boolean, pending: boolean, hasTasks: boolean) => {
+    if (failed) return "failed" as const
+    if (pending) return "pending" as const
+    return hasTasks ? "ready" as const : "empty" as const
+}
+
+const taskStatusOf = (task: PersonalProjectTask, index: number, currentIndex: number, currentTaskId: string | undefined, copy: ProjectCopy) => {
+    if (task.completed) return copy.completed
+    if (task.id === currentTaskId) return copy.active
+    if (currentIndex >= 0 && index > currentIndex) return copy.locked
+    return copy.notStarted
+}
+
+const completionFactsOf = (progress: ProjectProgress | undefined, copy: ProjectCopy, attempts: number, allTasks: ReadonlyArray<PersonalProjectTask>) => {
+    if (progress === undefined) return ["", "", ""]
+    return [
+        copy.tasksCompleted(progress.tasksCompleted, progress.tasksTotal),
+        copy.submissions(attempts),
+        copy.average(averageScore(allTasks)),
+    ]
+}
+
+const projectNoticeOf = (state: "failed" | "pending" | "ready" | "empty", copy: ProjectCopy) => {
+    if (state === "empty") return copy.empty
+    if (state === "failed") return copy.failed
+    return undefined
+}
+
 /** Resolves live capstone progress into the accepted legacy dashboard hierarchy. */
 export const CoursePersonalProjectPage = ({ displayId }: CoursePersonalProjectPageProps) => {
     const locale = useLocale()
@@ -73,25 +113,13 @@ export const CoursePersonalProjectPage = ({ displayId }: CoursePersonalProjectPa
     const milestones = (data?.milestones ?? []).slice().sort((left, right) => left.orderIndex - right.orderIndex)
     const allTasks = milestones.flatMap((milestone) => milestone.tasks)
     const hasTasks = allTasks.length > 0
-    const state = project.error !== undefined
-        ? "failed"
-        : project.data === undefined
-            ? "pending"
-            : hasTasks
-                ? "ready"
-                : "empty"
+    const state = projectStateOf(project.error !== undefined, project.data === undefined, hasTasks)
     const currentTaskId = data?.currentTask?.kind === "milestoneTask" ? data.currentTask.id : undefined
     const currentMilestone = findCurrentMilestone(milestones, currentTaskId)
     const currentTask = allTasks.find((task) => task.id === currentTaskId)
     const tasks = (currentMilestone?.tasks ?? []).map((task, index, milestoneTasks) => {
         const currentIndex = milestoneTasks.findIndex((candidate) => candidate.id === currentTaskId)
-        const status = task.completed
-            ? copy.completed
-            : task.id === currentTaskId
-                ? copy.active
-                : currentIndex >= 0 && index > currentIndex
-                    ? copy.locked
-                    : copy.notStarted
+        const status = taskStatusOf(task, index, currentIndex, currentTaskId, copy)
         return {
             id: task.id,
             label: `${index + 1}. ${task.title} · ${status}`,
@@ -99,13 +127,7 @@ export const CoursePersonalProjectPage = ({ displayId }: CoursePersonalProjectPa
         }
     })
     const attempts = allTasks.reduce((sum, task) => sum + task.numAttempts, 0)
-    const completionFacts = data === undefined
-        ? ["", "", ""]
-        : [
-            copy.tasksCompleted(data.progress.tasksCompleted, data.progress.tasksTotal),
-            copy.submissions(attempts),
-            copy.average(averageScore(allTasks)),
-        ]
+    const completionFacts = completionFactsOf(data?.progress, copy, attempts, allTasks)
     return (
         <CoursePersonalProjectPageBase
             state={state}
@@ -127,7 +149,7 @@ export const CoursePersonalProjectPage = ({ displayId }: CoursePersonalProjectPa
                 completionFacts,
                 milestoneTitle: currentMilestone?.title,
                 tasks,
-                notice: state === "empty" ? copy.empty : state === "failed" ? copy.failed : undefined,
+                notice: projectNoticeOf(state, copy),
                 retryLabel: copy.retry,
             }}
             on={{

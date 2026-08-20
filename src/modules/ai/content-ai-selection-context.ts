@@ -29,6 +29,18 @@ export const CONTENT_AI_SELECTION_MAX = 600
 const finitePositiveInteger = (value?: number): number | undefined =>
     value !== undefined && Number.isInteger(value) && value > 0 ? value : undefined
 
+const lineSummaryOf = (selection: ContentAiSelectionContext): string | undefined => {
+    if (selection.startLine === undefined) return undefined
+    if (selection.endLine === selection.startLine) return `L${selection.startLine}`
+    return `L${selection.startLine}-${selection.endLine}`
+}
+
+const sourceLocationOf = (selection: ContentAiSelectionContext): string => {
+    if (selection.path === undefined) return ""
+    if (selection.startLine === undefined) return `\nSource: ${selection.path}`
+    return `\nSource: ${selection.path}:${selection.startLine}-${selection.endLine ?? selection.startLine}`
+}
+
 /** Validate and canonicalize one prose/code selection without changing code whitespace. */
 export const normalizeContentAiSelection = (
     input: ContentAiSelectionInput,
@@ -58,11 +70,7 @@ export const formatContentAiContextSummary = (
 ): string => {
     const route = anchor.id === undefined ? anchor.scope : `${anchor.scope}:${anchor.id}`
     if (selection === undefined) return route
-    const lines = selection.startLine === undefined
-        ? undefined
-        : selection.endLine === selection.startLine
-            ? `L${selection.startLine}`
-            : `L${selection.startLine}-${selection.endLine}`
+    const lines = lineSummaryOf(selection)
     return [route, selection.path, lines, selection.hasLocalEdit ? "local" : undefined]
         .filter((part): part is string => part !== undefined)
         .join(" · ")
@@ -72,9 +80,7 @@ export const formatContentAiContextSummary = (
 export const buildContentAiQuestion = (question: string, selection?: ContentAiSelectionContext): string => {
     if (selection === undefined) return question.trim()
     const language = selection.kind === "code" ? selection.path?.split(".").pop() ?? "code" : "text"
-    const location = selection.path === undefined
-        ? ""
-        : `\nSource: ${selection.path}${selection.startLine === undefined ? "" : `:${selection.startLine}-${selection.endLine ?? selection.startLine}`}`
+    const location = sourceLocationOf(selection)
     const runtime = selection.runtimeError === undefined ? "" : `\nRuntime error:\n${selection.runtimeError}`
     return `${question.trim()}${location}\n\nQuoted selection:\n\`\`\`${language}\n${selection.quote}\n\`\`\`${runtime}`
 }
