@@ -5,31 +5,87 @@ import { CourseLearnChallengePageBase, type CourseLearnChallengePageProps } from
 const baseProps: CourseLearnChallengePageProps["props"] = {
     title: "Repository challenge",
     description: "Submit the authored deliverable.",
-    metaLine: "hard · 4/10",
+    difficultyLabel: "Hard",
+    statusLabel: "Not submitted",
     hint: "Keep the public API stable.",
+    earnedScore: 0,
+    maximumScore: 10,
+    expandedRequirementIds: ["submission-1"],
+    isCourseMapOpen: false,
+    courseMap: {
+        state: "ready",
+        props: {
+            labels: {
+                progress: "Course progress",
+                searchPlaceholder: "Search contents",
+                searchLabel: "Search this course",
+                searchClearLabel: "Clear search",
+                failed: "Course outline failed",
+            },
+            completionPercent: 50,
+            progressFact: "1/2",
+            modules: [{
+                id: "module-1",
+                title: "Foundations",
+                countLabel: "1 lesson",
+                lessons: [{
+                    id: "challenge:challenge-1",
+                    title: "Repository challenge",
+                    meta: "10 points",
+                    isComplete: false,
+                    isCurrent: true,
+                }],
+            }],
+        },
+    },
     deliverables: [{
         id: "submission-1",
         title: "API repository",
         description: "Provide the repository URL.",
-        scoreLine: "10",
+        score: 10,
         url: "https://example.test/repository",
     }],
-    submitLabel: "Submit",
-    submittingLabel: "Submitting",
-    retryLabel: "Retry",
-    resultLabel: "Read result",
+    labels: {
+        backToLesson: "Back to lesson",
+        openCourseMap: "Course contents",
+        closeCourseMap: "Close course contents",
+        brief: "Challenge brief",
+        deliverables: "Submit your work",
+        score: "Your score",
+        repositoryPlaceholder: "https://github.com/…",
+        saved: "Saved locally",
+        submit: "Submit",
+        submitting: "Submitting",
+        retry: "Retry",
+        result: "Open graded result",
+        points: (score) => `${score} points`,
+        scoreValue: (score, maximum) => `${score} / ${maximum} points`,
+        passing: (score) => `Pass at ${score}`,
+        scoreCaption: "Reach the passing threshold.",
+    },
 }
 
 describe("CourseLearnChallengePageBase", () => {
-    it("rests the challenge facts and controls while pending", () => {
-        const { container } = render(<CourseLearnChallengePageBase state="pending" props={baseProps} />)
+    it("composes the existing course map with the accepted challenge document and action rail", () => {
+        const { container } = render(<CourseLearnChallengePageBase state="ready" props={baseProps} />)
 
         expect(container.querySelector("[data-node=course-learn-challenge-page]")).toBeTruthy()
-        expect(container.querySelector("h1")).toHaveAttribute("data-loading", "true")
-        expect(screen.getByRole("button", { name: "Submit" })).toBeDisabled()
+        expect(container.querySelector("[data-node=learn-route-context-rail]")).toBeTruthy()
+        expect(container.querySelector("[data-node=challenge-workspace]")).toBeTruthy()
+        expect(container.querySelector("[data-node=challenge-submission-rail]")).toBeTruthy()
+        expect(screen.getByRole("heading", { name: "Repository challenge", level: 1 })).toBeInTheDocument()
+        expect(screen.getAllByText("1/2")).toHaveLength(2)
     })
 
-    it("submits the edited deliverable in the ready state", () => {
+    it("rests the full composition and two deliverable shapes while pending", () => {
+        const { container } = render(<CourseLearnChallengePageBase state="pending" props={baseProps} />)
+
+        expect(container.querySelectorAll("[data-node=challenge-deliverable-row]")).toHaveLength(2)
+        expect(container.querySelector("h1")).toHaveAttribute("data-loading", "true")
+        expect(screen.getAllByRole("button", { name: "Submit" }).every((button) => button.hasAttribute("disabled"))).toBe(true)
+    })
+
+    it("edits and submits one source-authored deliverable", () => {
         const changeUrl = vi.fn()
         const submit = vi.fn()
         render(
@@ -48,40 +104,63 @@ describe("CourseLearnChallengePageBase", () => {
         expect(submit).toHaveBeenCalledWith("submission-1")
     })
 
-    it("locks submission while the approved transport is running", () => {
-        render(<CourseLearnChallengePageBase state="submitting" props={baseProps} />)
+    it("locks every submit control while the active deliverable is in flight", () => {
+        render(
+            <CourseLearnChallengePageBase
+                state="submitting"
+                props={{ ...baseProps, activeSubmissionId: "submission-1" }}
+            />,
+        )
 
         expect(screen.getByLabelText("API repository")).toBeDisabled()
         expect(screen.getByRole("button", { name: "Submitting" })).toBeDisabled()
     })
 
-    it("opens an authored deliverable result after the challenge has passed", () => {
-        const openResult = vi.fn()
-        render(
-            <CourseLearnChallengePageBase
-                state="passed"
-                props={baseProps}
-                on={{ openResult }}
-            />,
-        )
-
-        fireEvent.click(screen.getByRole("button", { name: "Read result: API repository" }))
-        expect(openResult).toHaveBeenCalledWith("submission-1")
-        expect(screen.queryByLabelText("API repository")).not.toBeInTheDocument()
-    })
-
-    it("exposes one recovery action after a load or submit failure", () => {
+    it("keeps the failed field in place and retries that exact deliverable", () => {
         const retry = vi.fn()
         render(
             <CourseLearnChallengePageBase
                 state="failed"
-                props={{ ...baseProps, notice: "Submission refused" }}
+                props={{
+                    ...baseProps,
+                    failedSubmissionId: "submission-1",
+                    notice: "Submission refused",
+                }}
                 on={{ retry }}
             />,
         )
 
-        expect(screen.getByRole("alert")).toHaveTextContent("Submission refused")
+        expect(screen.getByLabelText("API repository")).toHaveAttribute("aria-invalid", "true")
         fireEvent.click(screen.getByRole("button", { name: "Retry" }))
-        expect(retry).toHaveBeenCalledTimes(1)
+        expect(retry).toHaveBeenCalledWith("submission-1")
+    })
+
+    it("opens the graded result after the challenge has passed", () => {
+        const openResult = vi.fn()
+        render(
+            <CourseLearnChallengePageBase
+                state="passed"
+                props={{ ...baseProps, earnedScore: 9, statusLabel: "Passed" }}
+                on={{ openResult }}
+            />,
+        )
+
+        fireEvent.click(screen.getByRole("button", { name: "Open graded result" }))
+        expect(openResult).toHaveBeenCalledWith("submission-1")
+        expect(screen.queryByLabelText("API repository")).not.toBeInTheDocument()
+    })
+
+    it("exposes the same course map through the narrow-screen drawer control", () => {
+        const openCourseMap = vi.fn()
+        render(
+            <CourseLearnChallengePageBase
+                state="ready"
+                props={baseProps}
+                on={{ openCourseMap }}
+            />,
+        )
+
+        fireEvent.click(screen.getByRole("button", { name: "Course contents" }))
+        expect(openCourseMap).toHaveBeenCalledTimes(1)
     })
 })

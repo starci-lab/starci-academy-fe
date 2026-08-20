@@ -1041,12 +1041,163 @@ export const CONTRACTS = buildContracts({
     },
     "course-learn-challenge-page": {
         host: "main",
-        classes: ["mx-auto", "flex", "w-full", "max-w-app-md", "flex-col", "gap-6", "px-6", "py-6"],
+        classes: [
+            "flex", "w-full", "min-w-0", "flex-col", "items-start",
+            "md:flex-row", "md:items-start",
+            "[&>*:first-child]:hidden",
+            "md:[&>*:first-child]:block",
+            "md:[&>[data-node=learn-route-context-rail]]:w-80",
+            "md:[&>[data-node=learn-route-context-rail]]:shrink-0",
+            "md:[&>[data-node=learn-route-context-rail]]:sticky",
+            "md:[&>[data-node=learn-route-context-rail]]:top-rail",
+            "md:[&>[data-node=learn-route-context-rail]]:self-start",
+            "md:[&>[data-node=learn-route-context-rail]]:max-h-rail",
+            "md:[&>[data-node=learn-route-context-rail]]:overflow-y-auto",
+            "md:[&>*:nth-child(2)]:min-w-0",
+            "md:[&>*:nth-child(2)]:grow",
+        ],
         children: {
-            header: { contract: "centred-title-pair" },
-            body: { contract: "stacked-peer-controls" },
+            contents: { contract: "learn-route-context-rail" },
+            page: { contract: "challenge-page-document" },
         },
-        why: "if you need a challenge route ordered from its authored brief through deliverables and submission controls across pending, editing, submitting, passed and failed states.",
+        why: "if you need the complete challenge route with the existing course map beside one flexible challenge document, preserving the accepted full-page composition rather than mounting an isolated form.",
+    },
+    "challenge-page-document": {
+        host: "section",
+        classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "min-w-0", "flex-col", "gap-6", "px-4", "py-6", "pb-6"],
+        children: {
+            mobileMap: { contract: "challenge-mobile-map-row", optional: true },
+            back: { leaf: "button" },
+            header: { contract: "challenge-header" },
+            body: { contract: "challenge-workspace" },
+        },
+        why: "if you need the challenge document to own its header, long brief and submission consequence while the viewport remains the only document-height scroll owner.",
+    },
+    "challenge-mobile-map-row": {
+        classes: ["flex", "w-full", "flex-row", "items-center", "justify-between", "gap-3", "md:hidden"],
+        children: {
+            action: { leaf: "button" },
+            fact: { leaf: "text", props: { size: "xs", tone: "muted" } },
+        },
+        why: "if you need one compact narrow-screen control that opens the same course map hidden from the persistent desktop rail.",
+    },
+    "challenge-header": {
+        host: "header",
+        classes: ["flex", "min-w-0", "flex-col", "gap-3"],
+        children: {
+            title: { leaf: "heading" },
+            description: { leaf: "text" },
+            meta: { contract: "profile-fact-run" },
+        },
+        why: "if a challenge needs authored identity, summary, difficulty, score and attempt status in one opening cluster.",
+    },
+    "challenge-workspace": {
+        classes: [
+            "flex", "w-full", "min-w-0", "flex-col", "items-start", "gap-6",
+            "md:flex-row", "md:items-start", "md:gap-8",
+            "md:[&>*:first-child]:min-w-0", "md:[&>*:first-child]:grow",
+            "md:[&>*:last-child]:w-80", "md:[&>*:last-child]:shrink-0",
+            "md:[&>*:last-child]:sticky", "md:[&>*:last-child]:top-rail", "md:[&>*:last-child]:self-start",
+        ],
+        children: {
+            brief: { contract: "challenge-brief" },
+            rail: { contract: "challenge-submission-rail" },
+        },
+        why: "if you need the accepted flexible technical brief beside a bounded sticky submission rail, reflowing in the same order on narrow screens.",
+    },
+    "challenge-brief": {
+        host: "section",
+        classes: ["flex", "min-w-0", "flex-col", "gap-3", "p-4"],
+        children: {
+            overview: { leaf: "text" },
+            requirement: { contract: "challenge-requirement-disclosure", repeats: true, restingCount: 2, optional: true },
+            hint: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+        },
+        why: "if a learner needs the source-authored challenge overview, scored requirement disclosures and optional hint in one readable brief.",
+    },
+    "challenge-requirement-disclosure": {
+        classes: ["w-full", "min-w-0"],
+        children: {
+            summary: { contract: "challenge-requirement-summary" },
+            body: { contract: "challenge-requirement-body" },
+        },
+        why: "if one source-authored deliverable must also explain its scored requirement through keyboard-operable disclosure mechanics.",
+    },
+    "challenge-requirement-summary": {
+        classes: ["flex", "w-full", "min-w-0", "flex-row", "items-center", "justify-between", "gap-3", "py-3", "text-left"],
+        children: {
+            title: { leaf: "text", props: { size: "sm", weight: "semibold" } },
+            score: { leaf: "badge" },
+        },
+        why: "if a scored challenge requirement needs its name and point value on one disclosure trigger line.",
+    },
+    "challenge-requirement-body": {
+        classes: ["border-t", "border-separator", "py-3"],
+        children: {
+            description: { leaf: "text", props: { size: "sm", tone: "muted" } },
+        },
+        why: "if an expanded challenge requirement needs its authored explanation attached directly below the trigger.",
+    },
+    "challenge-submission-rail": {
+        host: "aside",
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4"],
+        children: {
+            deliverables: { contract: "challenge-deliverable-list" },
+            score: { contract: "challenge-score-card" },
+        },
+        why: "if the challenge needs one bounded action owner that keeps repository evidence and aggregate grading consequence together.",
+    },
+    "challenge-deliverable-list": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "divide-y", "divide-separator", "p-0"],
+        children: {
+            notice: { leaf: "text", optional: true },
+            deliverable: { contract: "challenge-deliverable-row", repeats: true, restingCount: 2, optional: true },
+            recovery: { leaf: "button", optional: true },
+        },
+        why: "if a challenge repeats scored deliverables on one joined surface with no trailing rule after the last member.",
+    },
+    "challenge-deliverable-row": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "p-4"],
+        children: {
+            heading: { contract: "challenge-deliverable-heading" },
+            description: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+            field: { composite: "field", optional: true },
+            status: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
+            actions: { contract: "challenge-deliverable-actions" },
+        },
+        why: "if one authored deliverable needs its score, repository evidence, settled status and exact available action as one list member.",
+    },
+    "challenge-deliverable-heading": {
+        classes: ["flex", "w-full", "min-w-0", "flex-row", "items-start", "justify-between", "gap-3"],
+        children: {
+            title: { leaf: "text", props: { size: "sm", weight: "semibold" } },
+            score: { leaf: "badge" },
+        },
+        why: "if a deliverable title needs the authored point value held at the trailing edge without squeezing the name.",
+    },
+    "challenge-deliverable-actions": {
+        classes: ["flex", "flex-row", "flex-wrap", "items-center", "gap-2"],
+        children: {
+            action: { leaf: "button", repeats: true, restingCount: 1 },
+        },
+        why: "if a deliverable exposes its one current submit, retry or result action without moving the field around it.",
+    },
+    "challenge-score-card": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "p-4"],
+        children: {
+            heading: { contract: "challenge-score-heading" },
+            progress: { leaf: "progress" },
+            caption: { leaf: "text", props: { size: "xs", tone: "muted" } },
+        },
+        why: "if a challenge needs one aggregate earned score read against an explicit passing threshold.",
+    },
+    "challenge-score-heading": {
+        classes: ["flex", "w-full", "min-w-0", "flex-row", "items-end", "justify-between", "gap-3"],
+        children: {
+            value: { leaf: "heading" },
+            threshold: { leaf: "badge" },
+        },
+        why: "if the earned score and pass threshold need to remain one visible grading sentence.",
     },
     "course-learn-challenge-result-page": {
         host: "main",

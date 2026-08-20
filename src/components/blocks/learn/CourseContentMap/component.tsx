@@ -58,13 +58,19 @@ const restingModules = Array.from({ length: 4 }, (_, index) => ({
     lessons: [] as ReadonlyArray<CourseContentMapLesson>,
 }))
 
-/** Draw progress, course search and the source-backed module/lesson map. */
-export const CourseContentMapBase = (input: CourseContentMapBaseProps) => {
+/**
+ * Bind the course-map data to its exact contract without drawing a second frame around it.
+ *
+ * The content reader and the challenge page need the same map in different mechanics: a sticky
+ * desktop rail and, for the challenge, a narrow-screen drawer. Returning the bound contract keeps
+ * both surfaces on one renderer instead of copying the map tree into each page owner.
+ */
+export const courseContentMapPanel = (input: CourseContentMapBaseProps) => {
     const isLoading = input.state === "pending"
     const modules = isLoading ? restingModules : input.props.modules ?? []
     const progressTitle = input.state === "failed" ? input.props.labels.failed : input.props.labels.progress
 
-    const panel = defineContractComponent("content-map-panel", {
+    return defineContractComponent("content-map-panel", {
         progress: defineCompositeComponent("labelled-progress-row", {}, () => (
             <LabelledProgressRow
                 props={{
@@ -106,9 +112,12 @@ export const CourseContentMapBase = (input: CourseContentMapBaseProps) => {
             ))),
         })),
     })
-
-    return <Tree contract="content-map-panel" render={panel} />
 }
+
+/** Draw progress, course search and the source-backed module/lesson map. */
+export const CourseContentMapBase = (input: CourseContentMapBaseProps) => (
+    <Tree contract="content-map-panel" render={courseContentMapPanel(input)} />
+)
 
 /** Source-level ownership marker. */
 export const meta = { world: "pure", domain: "learn" } as const

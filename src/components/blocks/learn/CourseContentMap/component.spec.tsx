@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { CourseContentMapBase, type CourseContentMapLabels } from "./component"
+import { Tree } from "@/components/branches/Tree"
+import { CourseContentMapBase, courseContentMapPanel, type CourseContentMapLabels } from "./component"
 
 const labels: CourseContentMapLabels = {
     progress: "Course progress",
@@ -54,5 +55,16 @@ describe("CourseContentMapBase", () => {
         fireEvent.change(screen.getByRole("searchbox", { name: "Search this course" }), { target: { value: "queues" } })
         fireEvent.submit(screen.getByRole("search"))
         expect(search).toHaveBeenCalledWith("queues")
+    })
+
+    it("exports the same bound panel for sticky rails and narrow drawers", () => {
+        const { container } = render(
+            <Tree
+                contract="content-map-panel"
+                render={courseContentMapPanel({ state: "empty", props: { labels, modules: [] } })}
+            />,
+        )
+        expect(container.querySelectorAll("[data-node=content-map-panel]")).toHaveLength(1)
+        expect(screen.getByRole("searchbox", { name: "Search this course" })).toBeInTheDocument()
     })
 })
