@@ -95,6 +95,18 @@ describe("createApolloClient", () => {
         expect(typeof client.mutate).toBe("function")
     })
 
+    it("forwards a typed mutation through the wrapped Apollo method", async () => {
+        const fetchMock = vi.fn(async () => new Response(JSON.stringify({ data: { ping: true } }), {
+            status: 200,
+            headers: { "content-type": "application/json" },
+        }))
+        vi.stubGlobal("fetch", fetchMock)
+        const client = createApolloClient({ uri: "https://api.example.com/graphql" })
+        const result = await client.mutate<{ ping: boolean }>({ mutation: gql`mutation Ping { ping }` })
+        expect(result.data?.ping).toBe(true)
+        expect(fetchMock).toHaveBeenCalledOnce()
+    })
+
     it("builds a separate client per call", () => {
         expect(createApolloClient()).not.toBe(createApolloClient())
     })
