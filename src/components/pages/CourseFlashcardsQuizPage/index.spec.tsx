@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { CourseFlashcardsQuizPage } from "../../components/pages/CourseFlashcardsQuizPage"
+import { CourseFlashcardsQuizPage } from "./index"
 type StateProps = { state: string }
 
 const useQueryCourseSwr = vi.hoisted(() => vi.fn())
@@ -14,7 +14,7 @@ vi.mock("@/hooks/swr/useQueryMyInProgressFlashcardSessionSwr", () => ({ useQuery
 vi.mock("@/hooks/swr/useMutateStartFlashcardSessionSwr", () => ({ useMutateStartFlashcardSessionSwr }))
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }))
 vi.mock("next-intl", () => ({ useLocale: () => "en" }))
-vi.mock("../../components/pages/CourseFlashcardsQuizPage/component", () => ({
+vi.mock("./component", () => ({
     CourseFlashcardsQuizPageBase: ({ state }: StateProps) => <div data-testid="state">{state}</div>,
 }))
 

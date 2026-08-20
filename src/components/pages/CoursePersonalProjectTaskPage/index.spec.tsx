@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { CoursePersonalProjectTaskPage } from "../../components/pages/CoursePersonalProjectTaskPage"
+import { CoursePersonalProjectTaskPage } from "./index"
 type StateProps = { state: string }
 
 const useQueryCoursePersonalProjectSwr = vi.hoisted(() => vi.fn())
@@ -12,7 +12,7 @@ vi.mock("@/hooks/swr/useQueryPersonalTaskAttemptsSwr", () => ({ useQueryPersonal
 vi.mock("@/hooks/swr/useMutateSubmitPersonalTaskAttemptSwr", () => ({ useMutateSubmitPersonalTaskAttemptSwr }))
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }))
 vi.mock("next-intl", () => ({ useLocale: () => "en" }))
-vi.mock("../../components/pages/CoursePersonalProjectTaskPage/component", () => ({
+vi.mock("./component", () => ({
     CoursePersonalProjectTaskPageBase: ({ state }: StateProps) => <div data-testid="state">{state}</div>,
 }))
 

@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { CourseFoundationResourcePage } from "../../components/pages/CourseFoundationResourcePage"
+import { CourseFoundationResourcePage } from "./index"
 type StateProps = { state: string }
 
 const useQueryFoundationSwr = vi.hoisted(() => vi.fn())
@@ -8,7 +8,7 @@ const useQueryFoundationSwr = vi.hoisted(() => vi.fn())
 vi.mock("@/hooks/swr/useQueryFoundationSwr", () => ({ useQueryFoundationSwr }))
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }))
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
-vi.mock("../../components/pages/CourseFoundationResourcePage/component", () => ({
+vi.mock("./component", () => ({
     CourseFoundationResourcePageBase: ({ state }: StateProps) => <div data-testid="state">{state}</div>,
 }))
 

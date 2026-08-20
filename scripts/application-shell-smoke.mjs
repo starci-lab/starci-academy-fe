@@ -1,5 +1,4 @@
-// The declared E2E command executes this real HTTP assertion after `next build`.
-// Keeping a test-shaped file in the E2E root makes discovery auditable by the Source gate.
+// Operational HTTP smoke assertion. It runs only through `npm run test:e2e` after a production build.
 import {strict as assert} from "node:assert"
 
 const baseUrl = process.env.E2E_BASE_URL ?? "http://127.0.0.1:3101"

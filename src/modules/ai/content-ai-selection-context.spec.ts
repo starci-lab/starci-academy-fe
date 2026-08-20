@@ -256,4 +256,19 @@ describe("parseContentAiQuestion", () => {
             },
         })
     })
+
+    it("covers grounded normalization, summary and parsing together", () => {
+        const selection = normalizeContentAiSelection({
+            kind: "code",
+            quote: "  const value = 1  ",
+            path: "src/a.ts",
+            startLine: 3,
+            endLine: 2,
+            hasLocalEdit: true,
+            runtimeError: "boom",
+        })
+        expect(selection?.endLine).toBe(3)
+        expect(formatContentAiContextSummary({ scope: "content", id: "c", path: "/courses/c/content" }, selection ?? undefined)).toContain("L3")
+        expect(parseContentAiQuestion(buildContentAiQuestion("Why?", selection ?? undefined)).selection?.runtimeError).toBe("boom")
+    })
 })

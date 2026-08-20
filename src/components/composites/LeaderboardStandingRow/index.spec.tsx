@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { LeaderboardStandingRow } from "./index"
+import { RankMarkIconId } from "@/components/leaves/RankMark"
 
 vi.mock("@iconify/react", () => ({
     Icon: (props: Readonly<Record<string, unknown>>) => <span {...props} />,
@@ -20,7 +21,7 @@ describe("LeaderboardStandingRow", () => {
         expect(screen.getByText("4 days left")).toBeInTheDocument()
         expect(container.querySelector("[data-component=\"RankMark\"]")).toHaveAttribute(
             "icon",
-            "fluent-emoji-flat:trophy",
+            RankMarkIconId(4),
         )
     })
 })

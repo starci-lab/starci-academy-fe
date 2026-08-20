@@ -17,7 +17,7 @@ describe("i18n request config", () => {
 
     it("loads messages for the routed root language", async () => {
         lang.mockResolvedValue("vi")
-        const { default: requestConfig } = await import("../../i18n/request")
+        const { default: requestConfig } = await import("./request")
         const config = await requestConfig({ requestLocale: Promise.resolve(undefined) })
         expect(config.locale).toBe("vi")
         expect(config.timeZone).toBe("Asia/Ho_Chi_Minh")
@@ -26,7 +26,7 @@ describe("i18n request config", () => {
 
     it("falls back when the generated root parameter is unsupported", async () => {
         lang.mockResolvedValue("fr")
-        const { default: requestConfig } = await import("../../i18n/request")
+        const { default: requestConfig } = await import("./request")
         const config = await requestConfig({ requestLocale: Promise.resolve(undefined) })
         expect(config.locale).toBe("en")
         expect(config.messages).toHaveProperty("app")

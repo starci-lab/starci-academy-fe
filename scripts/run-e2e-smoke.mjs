@@ -34,7 +34,7 @@ try {
         })
     }
     await waitForServer()
-    const test = spawn(process.execPath, ["tests/e2e/application-shell.test.mjs"], {
+    const test = spawn(process.execPath, ["scripts/application-shell-smoke.mjs"], {
         cwd: process.cwd(),
         stdio: "inherit",
         env: {...process.env, E2E_BASE_URL: baseUrl},

@@ -8,7 +8,7 @@ import {
 
 /**
  * Vitest configuration for the twin-test convention: every source file has a
- * sibling `*.test.ts(x)` beside it, so tests are discovered from `src/` rather
+ * sibling `*.spec.ts(x)` beside it, so tests are discovered from `src/` rather
  * than from a separate test root.
  *
  * `jsdom` gives the component tests a DOM; `vitest.setup.ts` installs the
@@ -26,7 +26,7 @@ export default defineConfig({
             "./vitest.setup.ts",
         ],
         include: [
-            "src/**/*.test.{ts,tsx}",
+            "src/**/*.spec.{ts,tsx}",
         ],
         coverage: {
             provider: "v8",
@@ -52,7 +52,7 @@ export default defineConfig({
                 "src/**/*.{ts,tsx}",
             ],
             exclude: [
-                "src/**/*.test.{ts,tsx}",
+                "src/**/*.spec.{ts,tsx}",
                 "src/**/*.d.ts",
             ],
         },
