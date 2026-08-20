@@ -148,11 +148,9 @@ export const SurfaceCard = <const K extends ContractKey>({
             </Card.Content>
         </Card>
     )
-    const surface = plainSurface
-
     // No name, no section: the column and the label line exist to hold a label, so an object that
     // names itself gets the ground alone rather than an empty row above it.
-    if (props.label === undefined) return surface
+    if (props.label === undefined) return plainSurface
 
     return (
         <Tree
@@ -165,7 +163,7 @@ export const SurfaceCard = <const K extends ContractKey>({
                  * caller's key back as slots would open a second node around a node that is
                  * already drawn, which is the duplicate wrapper this branch was inset twice by.
                  */
-                body: defineContractProjection(contract, () => surface),
+                body: defineContractProjection(contract, () => plainSurface),
             })}
         />
     )

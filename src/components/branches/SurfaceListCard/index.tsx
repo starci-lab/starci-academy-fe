@@ -64,9 +64,7 @@ export const SurfaceListCard = <
     D extends SurfaceListCardData,
     A extends SurfaceListCardActions = SurfaceListCardActions,
 >(input: SurfaceListCardProps<K, D, A>) => {
-    const { props, on, render, isLoading = false } = input
-    const Content = render
-    const surfaceProps: SurfaceListCardData = props
+    const { props: surfaceProps, on, render: Content, isLoading = false } = input
     const label = surfaceProps.fact === undefined ? (
         <Heading props={{ content: surfaceProps.label, level: 3 }} />
     ) : (
@@ -96,7 +94,7 @@ export const SurfaceListCard = <
                     className={surfaceProps.isVerdict === true ? "rounded-none p-0" : "p-0"}
                     data-component="SurfaceListCardBody"
                 >
-                    <Content props={props} on={on} isLoading={isLoading} />
+                    <Content props={surfaceProps} on={on} isLoading={isLoading} />
                 </Card.Content>
             </Card>
             {surfaceProps.actionLabel !== undefined && (isLoading || on?.act !== undefined) ? (

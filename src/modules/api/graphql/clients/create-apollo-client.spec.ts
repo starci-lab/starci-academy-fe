@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest"
 import { ApolloClient, ApolloLink, gql, HttpLink } from "@apollo/client"
 import { RetryLink } from "@apollo/client/link/retry"
-import { createApolloClient, createLinkChain, StarCiApolloClient } from "./create-apollo-client"
+import { createApolloClient, createLinkChain } from "./create-apollo-client"
 
 /**
  * What these tests guard: the shape and ORDER of the link chain, and the fact that the
@@ -84,13 +84,12 @@ describe("createApolloClient", () => {
     it("builds a client with caching left to SWR", () => {
         const client = createApolloClient()
         expect(client).toBeInstanceOf(ApolloClient)
-        expect(client).toBeInstanceOf(StarCiApolloClient)
         expect(client.defaultOptions.query?.fetchPolicy).toBe("no-cache")
     })
 
-    it("forwards Apollo's constructor surface while keeping typed operation methods", () => {
+    it("uses Apollo's operation methods without a subclass field between the caller and vendor", () => {
         const client = createApolloClient({ uri: "https://api.example.com/graphql" })
-        expect(client).toBeInstanceOf(StarCiApolloClient)
+        expect(client.constructor).toBe(ApolloClient)
         expect(typeof client.query).toBe("function")
         expect(typeof client.mutate).toBe("function")
     })
