@@ -8,4 +8,5 @@ export const QUERY_FOUNDATION_CATEGORIES_SWR_KEY = "QUERY_FOUNDATION_CATEGORIES_
 /** Read one localized and server-filtered foundation category page. */
 export const useQueryFoundationCategoriesSwr = ({ search = "", pageNumber = 1, limit = 24 }: UseQueryFoundationCategoriesSwrParams = {}) =>
     useSWR<FoundationCategoriesPage | null>([QUERY_FOUNDATION_CATEGORIES_SWR_KEY, search, pageNumber, limit], async () =>
-        (await queryFoundationCategories({ request: { search: search || undefined, pageNumber, limit } })).data?.foundationCategories.data ?? null)
+        (await queryFoundationCategories({ request: { search: search || undefined, pageNumber, limit } })).data?.foundationCategories.data ?? null,
+    { keepPreviousData: true })

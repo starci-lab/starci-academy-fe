@@ -29,6 +29,13 @@ const copy = {
     retry: "Try again",
     search: "Search categories",
     clearSearch: "Clear search",
+    count: "1 category",
+    open: "Open category",
+    pager: "Category pages",
+    previous: "Previous page",
+    next: "Next page",
+    page: 1,
+    totalPages: 1,
 }
 
 const draw = (
@@ -43,7 +50,7 @@ describe("CourseFoundationsPageBase", () => {
         const search = vi.fn()
         const { container } = draw("ready", [category()], { openCategory, search })
 
-        fireEvent.click(screen.getByRole("link", { name: "Containers · Runtime basics" }))
+        fireEvent.click(screen.getByRole("button", { name: "Open category" }))
         fireEvent.change(screen.getByRole("searchbox", { name: "Search categories" }), { target: { value: "container" } })
         fireEvent.submit(screen.getByRole("search"))
 
@@ -54,21 +61,19 @@ describe("CourseFoundationsPageBase", () => {
 
     it("names a category the backend gave no description for by its title alone", () => {
         draw("ready", [category({ description: null })])
-        expect(screen.getByRole("link", { name: "Containers" })).toBeInTheDocument()
+        expect(screen.getByText("Containers")).toBeInTheDocument()
+        expect(screen.queryByText("Runtime basics")).not.toBeInTheDocument()
     })
 
-    // NOTE: the page stands in four placeholder rows here, but `NavLink` ignores `isLoading`
-    // entirely, so they currently render as live blank links rather than skeletons. That is a
-    // defect in the leaf, reported separately - these tests assert only what is observably true.
-    it("stands in four placeholder category rows before the first answer arrives", () => {
+    it("stands in ten visual category rows before the first answer arrives", () => {
         const { container } = draw("pending", [])
-        expect(container.querySelectorAll("[data-component=NavLink]")).toHaveLength(4)
-        expect(screen.queryByText("Durable concepts")).not.toBeInTheDocument()
+        expect(container.querySelectorAll("[data-node=foundation-category-destination-row]")).toHaveLength(10)
+        expect(container.querySelector("[data-component=Text][data-loading=\"true\"]")).not.toBeNull()
     })
 
     it("keeps the rows it already has rather than replacing them while refreshing", () => {
-        const { container } = draw("pending", [category()])
-        expect(container.querySelectorAll("[data-component=NavLink]")).toHaveLength(1)
+        const { container } = draw("partial", [category()])
+        expect(container.querySelectorAll("[data-node=foundation-category-destination-row]")).toHaveLength(1)
     })
 
     it("says the catalog is empty without offering an action there is none for", () => {
@@ -94,7 +99,7 @@ describe("CourseFoundationsPageBase", () => {
     it("stays inert rather than throwing when the owner registered no handlers", () => {
         draw("failed", [category()])
         expect(() => {
-            fireEvent.click(screen.getByRole("link", { name: "Containers · Runtime basics" }))
+            fireEvent.click(screen.getByRole("button", { name: "Open category" }))
             fireEvent.click(screen.getByRole("button", { name: "Try again" }))
             fireEvent.change(screen.getByRole("searchbox", { name: "Search categories" }), { target: { value: "x" } })
             fireEvent.submit(screen.getByRole("search"))

@@ -517,15 +517,58 @@ export const CONTRACTS = buildContracts({
     },
     "course-foundations-page": {
         host: "main",
-        classes: ["mx-auto", "flex", "w-full", "max-w-app-lg", "flex-col", "gap-6", "px-6", "py-6"],
+        classes: ["mx-auto", "flex", "w-full", "max-w-app-md", "flex-col", "gap-6", "px-6", "py-6"],
         children: {
             header: { contract: "page-header-stack" },
             description: { leaf: "text", props: { size: "sm", tone: "muted" } },
-            search: { leaf: "search-box" },
-            category: { leaf: "nav-link", props: { kind: "section" }, repeats: true, restingCount: 4, optional: true },
-            notice: { composite: "empty-notice", optional: true },
+            trial: { contract: "foundation-trial-enrollment-nudge", optional: true },
+            query: { contract: "catalog-query-with-count" },
+            results: { contract: "foundation-category-result-run" },
         },
         why: "if you need a foundation catalog that introduces the prerequisite library before its query and live category results, with empty and failed outcomes replacing only that result run.",
+    },
+    "foundation-trial-enrollment-nudge": {
+        classes: ["flex", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-3", "p-4", "rounded-2xl"],
+        children: {
+            message: { leaf: "text", props: { size: "sm" } },
+            action: { leaf: "button", optional: true },
+        },
+        why: "if you need a trial learner to keep the free foundation library in view while retaining one route back to full course enrollment.",
+    },
+    "foundation-category-result-run": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4"],
+        children: {
+            list: { contract: "foundation-category-destination-list", optional: true },
+            notice: { composite: "empty-notice", optional: true },
+            pager: { leaf: "pagination", optional: true },
+        },
+        why: "if you need one stable foundation result region whose pending, empty, failed and paged outcomes replace only one another.",
+    },
+    "foundation-category-destination-list": {
+        host: "ul",
+        classes: ["overflow-hidden", "divide-y", "divide-separator", "border", "border-separator", "rounded-2xl"],
+        children: {
+            category: { contract: "foundation-category-destination-row", repeats: true, restingCount: 10 },
+        },
+        why: "if you need the populated foundation destinations held as one ordered visual list inside the stable result region.",
+    },
+    "foundation-category-destination-row": {
+        host: "li",
+        classes: ["flex", "min-w-0", "items-center", "gap-4", "p-4", "[&>*:nth-child(2)]:min-w-0", "[&>*:nth-child(2)]:grow", "[&>*:last-child]:shrink-0"],
+        children: {
+            artwork: { leaf: "cover-image" },
+            identity: { contract: "foundation-category-identity" },
+            action: { leaf: "button", optional: true },
+        },
+        why: "if you need one foundation category's artwork and explanatory identity to remain aligned with its only destination control.",
+    },
+    "foundation-category-identity": {
+        classes: ["flex", "min-w-0", "flex-col", "gap-1"],
+        children: {
+            title: { leaf: "text", props: { size: "sm", weight: "medium" } },
+            description: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+        },
+        why: "if you need a repeated foundation title kept attached to the supporting sentence that distinguishes it from nearby categories.",
     },
     "course-foundation-category-page": {
         host: "main",
@@ -617,19 +660,72 @@ export const CONTRACTS = buildContracts({
         },
         why: "if you need concept-map search and graph scale ahead of a selectable backend-node field whose open action appears only for a node resolving to a course route.",
     },
-    "course-mock-interview-setup-page": {
+    "course-mock-interview-hub-page": {
         host: "main",
-        classes: ["mx-auto", "flex", "w-full", "max-w-md", "flex-col", "gap-6", "px-6", "py-6"],
+        classes: ["mx-auto", "flex", "w-full", "max-w-app-md", "flex-col", "gap-6", "px-6", "py-6"],
         children: {
-            header: { contract: "centred-title-pair" },
+            header: { contract: "page-header-stack" },
+            navigation: { contract: "mock-interview-setup-tabs-over-panel" },
+            panel: { contract: "mock-interview-setup-panel" },
+        },
+        why: "if you need the interview setup route to keep its orientation and three setup destinations stable while one selected panel changes beneath them.",
+    },
+    "mock-interview-setup-tabs-over-panel": {
+        classes: ["flex", "w-full", "flex-col", "gap-3", "border-b", "border-separator"],
+        children: { tabs: { leaf: "choice-tabs" } },
+        why: "if you need begin, history and statistics to remain one navigation layer above the setup panel they replace.",
+    },
+    "mock-interview-setup-panel": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6"],
+        children: {
+            resume: { contract: "mock-interview-resume-panel", optional: true },
+            readiness: { contract: "mock-interview-readiness-snapshot", optional: true },
+            begin: { contract: "mock-interview-begin-panel", optional: true },
+            history: { contract: "mock-interview-history-panel", optional: true },
+            stats: { contract: "mock-interview-stats-panel", optional: true },
+            notice: { composite: "empty-notice", optional: true },
+        },
+        why: "if you need one selected mock-interview destination to own its settled, waiting or recovery content without moving the setup navigation.",
+    },
+    "mock-interview-resume-panel": {
+        classes: ["flex", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-4", "p-4", "rounded-2xl"],
+        children: {
+            identity: { contract: "title-with-baseline-fact" },
+            action: { leaf: "button" },
+        },
+        why: "if you need an unfinished interview's real progress kept beside the one action that returns the learner to it.",
+    },
+    "mock-interview-readiness-snapshot": {
+        classes: ["grid", "grid-cols-1", "gap-4", "sm:grid-cols-4"],
+        children: { fact: { contract: "title-with-baseline-fact", repeats: true, restingCount: 3 } },
+        why: "if you need seniority, interview format and course focus compared as one compact readiness snapshot before entering the room.",
+    },
+    "mock-interview-begin-panel": {
+        classes: ["flex", "w-full", "flex-col", "gap-4", "border", "border-separator", "rounded-2xl", "p-4"],
+        children: {
+            title: { leaf: "heading" },
+            description: { leaf: "text", props: { size: "sm", tone: "muted" } },
             levelLabel: { leaf: "text", props: { size: "sm", tone: "muted" } },
-            level: { leaf: "button", repeats: true, restingCount: 3 },
+            level: { leaf: "choice-tabs" },
             modeLabel: { leaf: "text", props: { size: "sm", tone: "muted" } },
-            mode: { leaf: "button", repeats: true, restingCount: 2 },
+            mode: { leaf: "choice-tabs" },
             status: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
             action: { leaf: "button", repeats: true, restingCount: 2 },
         },
-        why: "if you need an interview green room ordered as seniority, format and persisted session state before one start-or-resume decision in a narrow column.",
+        why: "if you need the interviewer briefing, compact configuration and start-or-resume actions to stay one readable green-room surface.",
+    },
+    "mock-interview-history-panel": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4"],
+        children: { notice: { composite: "empty-notice", optional: true } },
+        why: "if you need completed interview attempts to settle inside their own selected setup destination without moving the page orientation or tabs.",
+    },
+    "mock-interview-stats-panel": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4"],
+        children: {
+            evidence: { composite: "labelled-progress-row", repeats: true, restingCount: 3, optional: true },
+            notice: { composite: "empty-notice", optional: true },
+        },
+        why: "if you need aggregate interview evidence to settle inside its own selected setup destination without replacing the green-room owner.",
     },
     "course-mock-interview-session-page": {
         host: "main",

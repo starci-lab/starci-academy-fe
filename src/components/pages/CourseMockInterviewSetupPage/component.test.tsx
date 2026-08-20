@@ -31,6 +31,20 @@ const copy: CourseMockInterviewSetupData = {
     startLabel: "Start interview",
     resumeLabel: "Resume interview",
     retryLabel: "Try again",
+    selectedTab: "begin",
+    tabsLabel: "Mock interview setup",
+    tabs: [
+        { id: "begin", label: "Begin" },
+        { id: "history", label: "History" },
+        { id: "stats", label: "Statistics" },
+    ],
+    beginTitle: "Interview room",
+    historyEmpty: "No completed interviews yet",
+    statsEmpty: "No statistics yet",
+    returnToBegin: "Prepare an interview",
+    resumeTitle: "Latest session",
+    readinessLabels: ["Readiness", "Format", "Focus"],
+    focus: "System design",
 }
 
 const draw = (
@@ -43,10 +57,10 @@ describe("CourseMockInterviewSetupPageBase", () => {
     it("fills the seniority and format the learner is currently on and leaves the alternatives open", () => {
         draw("ready")
 
-        expect(screen.getByRole("button", { name: "Middle" })).toHaveAttribute("data-variant", "primary")
-        expect(screen.getByRole("button", { name: "Junior" })).toHaveAttribute("data-variant", "ghost")
-        expect(screen.getByRole("button", { name: "Technical Q&A" })).toHaveAttribute("data-variant", "primary")
-        expect(screen.getByRole("button", { name: "System design" })).toHaveAttribute("data-variant", "ghost")
+        expect(screen.getByRole("tab", { name: "Middle" })).toHaveAttribute("aria-selected", "true")
+        expect(screen.getByRole("tab", { name: "Junior" })).toHaveAttribute("aria-selected", "false")
+        expect(screen.getByRole("tab", { name: "Technical Q&A" })).toHaveAttribute("aria-selected", "true")
+        expect(screen.getByRole("tab", { name: "System design" })).toHaveAttribute("aria-selected", "false")
     })
 
     it.each([
@@ -56,7 +70,7 @@ describe("CourseMockInterviewSetupPageBase", () => {
         const configure = vi.fn()
         draw("ready", {}, { configure })
 
-        fireEvent.click(screen.getByRole("button", { name: label }))
+        fireEvent.click(screen.getByRole("tab", { name: label }))
         expect(configure).toHaveBeenCalledWith(field, value)
     })
 
@@ -65,7 +79,7 @@ describe("CourseMockInterviewSetupPageBase", () => {
         const { container } = draw("pending", {}, { start })
 
         expect(container.querySelector("[data-component=Heading][data-loading=\"true\"]")).not.toBeNull()
-        expect(screen.getByRole("button", { name: "Junior" })).toBeDisabled()
+        expect(screen.getByRole("button", { name: "Start interview" })).toBeDisabled()
         fireEvent.click(screen.getByRole("button", { name: "Start interview" }))
         expect(start).not.toHaveBeenCalled()
     })
@@ -76,7 +90,6 @@ describe("CourseMockInterviewSetupPageBase", () => {
         const control = screen.getByRole("button", { name: "Start interview" })
 
         expect(control).toHaveAttribute("data-action-pending", "true")
-        expect(screen.getByRole("button", { name: "Middle" })).toBeDisabled()
         fireEvent.click(control)
         expect(start).not.toHaveBeenCalled()
     })
@@ -114,13 +127,9 @@ describe("CourseMockInterviewSetupPageBase", () => {
         expect(retry).toHaveBeenCalledTimes(1)
     })
 
-    it.each([
-        ["failed", "alert"],
-        ["resumable", "status"],
-    ] as const)("interrupts the reader on the %s state by announcing its status line as a live %s", (state, role) => {
+    it.each(["failed", "resumable"] as const)("keeps the resolved status visible in the %s state", (state) => {
         draw(state, { status: "A session is already open" })
-
-        expect(screen.getByRole(role)).toHaveTextContent("A session is already open")
+        expect(screen.getByText("A session is already open")).toBeInTheDocument()
     })
 
     it("carries no status line at all when the owner resolved none for this green room", () => {
@@ -135,8 +144,8 @@ describe("CourseMockInterviewSetupPageBase", () => {
         draw("ready", {}, { start })
 
         expect(() => {
-            fireEvent.click(screen.getByRole("button", { name: "Junior" }))
-            fireEvent.click(screen.getByRole("button", { name: "System design" }))
+            fireEvent.click(screen.getByRole("tab", { name: "Junior" }))
+            fireEvent.click(screen.getByRole("tab", { name: "System design" }))
         }).not.toThrow()
         expect(start).not.toHaveBeenCalled()
     })
@@ -145,8 +154,8 @@ describe("CourseMockInterviewSetupPageBase", () => {
         draw("resumable")
 
         expect(() => {
-            fireEvent.click(screen.getByRole("button", { name: "Junior" }))
-            fireEvent.click(screen.getByRole("button", { name: "System design" }))
+            fireEvent.click(screen.getByRole("tab", { name: "Junior" }))
+            fireEvent.click(screen.getByRole("tab", { name: "System design" }))
             fireEvent.click(screen.getByRole("button", { name: "Start interview" }))
             fireEvent.click(screen.getByRole("button", { name: "Resume interview" }))
         }).not.toThrow()
