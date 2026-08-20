@@ -73,6 +73,7 @@ icon leaf selects the outline or micro drawing from the role.
 | `practice` | Programming/code practice | `CodeBracketIcon` | Code brackets name programming without reusing verification code |
 | `viewGrid` | Lay a collection out as a card grid | `Squares2X2Icon` | Four equal panes name an arrangement rather than the content being arranged |
 | `viewList` | Lay a collection out as compact rows | `ListBulletIcon` | A bulleted run of lines names row layout without borrowing the review clipboard |
+| `collapseRail` | Collapse or restore the persistent course rail | `Bars3BottomLeftIcon` | A left-aligned sidebar mark names changing the rail width without implying route navigation |
 
 ## Selection procedure
 

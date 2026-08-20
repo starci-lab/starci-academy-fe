@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { Tree } from "@/components/branches/Tree"
-import { learnSpine, type LearnSpineActions, type LearnSpineData } from "./component"
+import { learnSpine, learnSpineCollapsed, type LearnSpineActions, type LearnSpineData } from "./component"
 
 /**
  * What these tests guard: the spine is the only thing a learner navigates a course by, so the
@@ -10,8 +10,10 @@ import { learnSpine, type LearnSpineActions, type LearnSpineData } from "./compo
  */
 
 /** Draw the block the way the learn frame draws it - as the frame's own child. */
-const renderSpine = (props: LearnSpineData, on?: LearnSpineActions, isLoading?: boolean) => render(
-    <Tree contract="learn-course-navigation-rail" render={learnSpine({ props, on, isLoading })} />,
+const renderSpine = (props: LearnSpineData, on?: LearnSpineActions, isLoading?: boolean) => (
+    props.isCollapsed
+        ? render(<Tree contract="learn-course-navigation-rail-collapsed" render={learnSpineCollapsed({ props, on, isLoading })} />)
+        : render(<Tree contract="learn-course-navigation-rail" render={learnSpine({ props, on, isLoading })} />)
 )
 
 const groups: LearnSpineData["groups"] = [{
@@ -25,7 +27,13 @@ const groups: LearnSpineData["groups"] = [{
     ],
 }]
 
-const base: LearnSpineData = { lockedLabel: "Locked", groups }
+const base: LearnSpineData = {
+    lockedLabel: "Locked",
+    collapseLabel: "Collapse",
+    expandLabel: "Expand",
+    isCollapsed: false,
+    groups,
+}
 
 const withResume: LearnSpineData = {
     ...base,
@@ -52,6 +60,23 @@ describe("learnSpine", () => {
         expect(openRow).toHaveBeenCalledWith("flashcards")
     })
 
+    it("uses one icon control to collapse and restore the rail", () => {
+        const toggleCollapse = vi.fn()
+        const { rerender } = renderSpine(base, { toggleCollapse })
+        fireEvent.click(screen.getByRole("button", { name: "Collapse" }))
+        expect(toggleCollapse).toHaveBeenCalledTimes(1)
+
+        rerender(
+            <Tree
+                contract="learn-course-navigation-rail-collapsed"
+                render={learnSpineCollapsed({ props: { ...base, isCollapsed: true }, on: { toggleCollapse } })}
+            />,
+        )
+        expect(screen.getByRole("button", { name: "Expand" })).toBeInTheDocument()
+        expect(screen.queryByText("Your path")).not.toBeInTheDocument()
+        expect(screen.getByRole("link", { name: "Modules" })).toBeInTheDocument()
+    })
+
     it("stays inert rather than throwing when the frame reported no handlers", () => {
         renderSpine(base)
         expect(() => fireEvent.click(screen.getByText("Modules"))).not.toThrow()
@@ -69,6 +94,9 @@ describe("learnSpine", () => {
     it("leaves the trailing slot empty for a row with no supporting fact", () => {
         const { container } = renderSpine({
             lockedLabel: "Locked",
+            collapseLabel: "Collapse",
+            expandLabel: "Expand",
+            isCollapsed: false,
             groups: [{ id: "path", label: "Your path", rows: [{ id: "leaderboard", label: "Leaderboard", icon: "community" }] }],
         })
         expect(container.querySelectorAll("[data-node=learn-nav-row]")).toHaveLength(1)

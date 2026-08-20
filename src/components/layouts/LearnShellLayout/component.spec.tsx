@@ -6,6 +6,9 @@ const Surface = () => <div>Reader surface</div>
 
 const spine: LearnShellLayoutData["spine"] = {
     lockedLabel: "Locked",
+    collapseLabel: "Collapse",
+    expandLabel: "Expand",
+    isCollapsed: false,
     groups: [{
         id: "path",
         label: "Path",
@@ -31,6 +34,16 @@ describe("LearnShellLayoutBase", () => {
 
         expect(screen.getByText("Reader surface")).toBeTruthy()
         expect(container.querySelector("[data-node=learn-course-navigation-rail]")).toBeNull()
+    })
+
+    it("compacts the rail to its icon-only contract", () => {
+        const { container } = render(
+            <LearnShellLayoutBase props={{ spine: { ...spine, isCollapsed: true }, isFullBleed: false }} surface={<Surface />} />,
+        )
+
+        expect(container.querySelector("[data-node=learn-shell-frame-collapsed]")).not.toBeNull()
+        expect(container.querySelector("[data-node=learn-course-navigation-rail-collapsed]")).not.toBeNull()
+        expect(screen.getByRole("button", { name: "Expand" })).toBeInTheDocument()
     })
 
     it("reports mobile view changes through the dedicated action", () => {

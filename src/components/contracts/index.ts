@@ -79,6 +79,14 @@ export type LayoutClassName =
     | "md:[&>[data-node=learn-course-navigation-rail]]:self-start"
     | "md:[&>[data-node=learn-course-navigation-rail]]:max-h-rail"
     | "md:[&>[data-node=learn-course-navigation-rail]]:overflow-y-auto"
+    | "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:w-16"
+    | "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:grow-0"
+    | "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:shrink-0"
+    | "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:sticky"
+    | "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:top-rail"
+    | "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:self-start"
+    | "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:max-h-rail"
+    | "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:overflow-y-auto"
     | "md:[&>*:first-child]:w-80" | "md:[&>*:last-child]:w-64"
     | "md:[&>*:first-child]:sticky" | "md:[&>*:first-child]:top-rail"
     | "md:[&>*:first-child]:self-start" | "md:[&>*:first-child]:max-h-rail"
@@ -490,14 +498,45 @@ export const CONTRACTS = buildContracts({
         },
         why: "if you need a persistent side rail sitting beside a routed main body that swaps surfaces without the frame itself re-rendering.",
     },
+    "learn-shell-frame-collapsed": {
+        classes: [
+            "flex", "min-h-screen", "w-full", "min-w-0", "flex-col", "items-start",
+            "[&>*]:min-w-0", "[&>*]:grow",
+            "md:flex-row", "md:items-start",
+            "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:w-16",
+            "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:grow-0",
+            "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:shrink-0",
+            "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:sticky",
+            "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:top-rail",
+            "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:self-start",
+            "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:max-h-rail",
+            "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:overflow-y-auto",
+        ],
+        children: {
+            spine: { contract: "learn-course-navigation-rail-collapsed", optional: true },
+            body: { contract: "learn-routed-body" },
+            bar: { contract: "learn-mobile-tab-bar", optional: true },
+        },
+        why: "if you need the course rail compacted to icon width while the routed body keeps the same flexible reading position.",
+    },
     "learn-course-navigation-rail": {
         host: "nav",
         classes: ["hidden", "w-full", "min-w-0", "flex-col", "gap-4", "p-4", "md:flex"],
         children: {
+            toggle: { leaf: "icon-button" },
             resume: { contract: "learn-resume-card", optional: true },
             group: { contract: "learn-nav-group", repeats: true, restingCount: 3 },
         },
         why: "if you need the compact course-mode navigation to keep grouped destinations and optional learner evidence in one persistent desktop rail.",
+    },
+    "learn-course-navigation-rail-collapsed": {
+        host: "nav",
+        classes: ["hidden", "w-full", "min-w-0", "flex-col", "gap-4", "p-2", "md:flex"],
+        children: {
+            toggle: { leaf: "icon-button" },
+            group: { contract: "learn-nav-group-collapsed", repeats: true, restingCount: 3 },
+        },
+        why: "if you need every course destination retained as an accessible icon while visible labels and trailing evidence are compacted.",
     },
     "learn-routed-body": {
         classes: ["w-full", "min-w-0", "flex-1"],
@@ -522,6 +561,13 @@ export const CONTRACTS = buildContracts({
         },
         why: "if you need a labelled run of destination rows under one section name, drawing no surface of its own.",
     },
+    "learn-nav-group-collapsed": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-1", "items-center"],
+        children: {
+            row: { contract: "learn-nav-row-collapsed", repeats: true, restingCount: 3 },
+        },
+        why: "if you need one destination group to retain route order while its visible section label is compacted.",
+    },
     "learn-nav-row": {
         classes: ["flex", "w-full", "min-w-0", "flex-row", "items-center", "gap-2", "[&>*:first-child]:min-w-0", "[&>*:first-child]:grow", "[&>*:last-child]:shrink-0"],
         children: {
@@ -529,6 +575,13 @@ export const CONTRACTS = buildContracts({
             fact: { leaf: ["text", "icon"], optional: true },
         },
         why: "if you need a destination link with one optional trailing fact, such as a count or lock, that is never a pressable control of its own.",
+    },
+    "learn-nav-row-collapsed": {
+        classes: ["flex", "w-full", "min-w-0", "items-center", "justify-center"],
+        children: {
+            link: { leaf: "nav-link", props: { kind: "route" } },
+        },
+        why: "if you need one course destination centred as an accessible icon without a trailing fact in compact rail mode.",
     },
     "learn-resume-card": {
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-1", "p-4"],

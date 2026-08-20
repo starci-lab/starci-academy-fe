@@ -878,6 +878,7 @@
                 "track": "Track"
             },
             "rows": {
+                "home": "Home",
                 "content": "Modules",
                 "personalProject": "Capstone",
                 "flashcards": "Review",
@@ -897,6 +898,8 @@
                 "outline": "This page"
             },
             "locked": "Locked",
+            "collapse": "Collapse",
+            "expand": "Expand",
             "resume": "Continue learning",
             "progress": "{percent}% complete"
         }

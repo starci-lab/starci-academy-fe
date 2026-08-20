@@ -22,6 +22,7 @@ const mocks = vi.hoisted(() => ({
     myCourses: undefined as unknown,
     leaderboard: undefined as unknown,
 }))
+const storage = vi.hoisted(() => ({ getItem: vi.fn(), setItem: vi.fn() }))
 
 vi.mock("next-intl", () => ({
     useTranslations: () => (key: string, values?: Readonly<Record<string, unknown>>) => (
@@ -42,6 +43,7 @@ type FrameStub = {
         readonly spine: {
             readonly groups: ReadonlyArray<{ readonly id: string, readonly rows: ReadonlyArray<SpineRow> }>
             readonly resume?: Readonly<Record<string, unknown>>
+            readonly isCollapsed: boolean
         }
         readonly mobileTabs?: ReadonlyArray<{ readonly id: string, readonly isCurrent?: boolean }>
         readonly isFullBleed: boolean
@@ -50,6 +52,7 @@ type FrameStub = {
         readonly openRow?: (id: string) => void
         readonly openMobileTab?: (id: string) => void
         readonly resume?: () => void
+        readonly toggleCollapse?: () => void
     }
     readonly surface: React.ReactNode
 }
@@ -60,11 +63,14 @@ vi.mock("./component", () => ({
             <output data-testid="spine">{JSON.stringify(input.props.spine)}</output>
             <output data-testid="tabs">{JSON.stringify(input.props.mobileTabs ?? null)}</output>
             <output data-testid="full-bleed">{String(input.props.isFullBleed)}</output>
+            <output data-testid="rail-collapsed">{String(input.props.spine.isCollapsed)}</output>
             <button type="button" onClick={() => input.on?.openRow?.("leaderboard")}>row leaderboard</button>
+            <button type="button" onClick={() => input.on?.openRow?.("home")}>row home</button>
             <button type="button" onClick={() => input.on?.openRow?.("nonexistent")}>row nonexistent</button>
             <button type="button" onClick={() => input.on?.openMobileTab?.("progress")}>tab progress</button>
             <button type="button" onClick={() => input.on?.openMobileTab?.("outline")}>tab outline</button>
             <button type="button" onClick={input.on?.resume}>resume</button>
+            <button type="button" onClick={input.on?.toggleCollapse}>toggle collapse</button>
             {input.surface}
         </>
     ),
@@ -93,13 +99,15 @@ describe("LearnShellLayout", () => {
         mocks.course = undefined
         mocks.myCourses = undefined
         mocks.leaderboard = undefined
+        storage.getItem.mockReturnValue(null)
+        Object.defineProperty(window, "localStorage", { configurable: true, value: storage })
         vi.clearAllMocks()
     })
 
     it("draws the reference product's three groups in their published order", () => {
         render(<LearnShellLayout displayId="system-design" surface={<Surface />} />)
         expect(spine().groups.map((group) => group.id)).toEqual(["path", "practice", "track"])
-        expect(spine().groups[0].rows.map((row) => row.id)).toEqual(["content", "personalProject"])
+        expect(spine().groups[0].rows.map((row) => row.id)).toEqual(["home", "content", "personalProject"])
     })
 
     it("marks the row whose route the learner is standing on", () => {
@@ -108,6 +116,26 @@ describe("LearnShellLayout", () => {
 
         expect(rowById("flashcards")?.isCurrent).toBe(true)
         expect(rowById("content")?.isCurrent).toBe(false)
+    })
+
+    it("marks Home only on the bare learn route", () => {
+        const { unmount } = render(<LearnShellLayout displayId="system-design" surface={<Surface />} />)
+        expect(rowById("home")?.isCurrent).toBe(true)
+        unmount()
+
+        mocks.pathname = "/courses/system-design/learn/content"
+        render(<LearnShellLayout displayId="system-design" surface={<Surface />} />)
+        expect(rowById("home")?.isCurrent).toBe(false)
+        expect(rowById("content")?.isCurrent).toBe(true)
+    })
+
+    it("persists the icon rail mode with the legacy storage key", () => {
+        render(<LearnShellLayout displayId="system-design" surface={<Surface />} />)
+        expect(screen.getByTestId("rail-collapsed")).toHaveTextContent("false")
+
+        fireEvent.click(screen.getByRole("button", { name: "toggle collapse" }))
+        expect(screen.getByTestId("rail-collapsed")).toHaveTextContent("true")
+        expect(storage.setItem).toHaveBeenCalledWith("starci.learn.sidebar.collapsed", "true")
     })
 
     it("leaves the gated rows unlocked until enrolment is actually known", () => {
@@ -161,6 +189,9 @@ describe("LearnShellLayout", () => {
 
         fireEvent.click(screen.getByRole("button", { name: "row leaderboard" }))
         expect(mocks.push).toHaveBeenCalledWith("/courses/system-design/learn/leaderboard")
+
+        fireEvent.click(screen.getByRole("button", { name: "row home" }))
+        expect(mocks.push).toHaveBeenCalledWith("/courses/system-design/learn")
 
         mocks.push.mockClear()
         fireEvent.click(screen.getByRole("button", { name: "row nonexistent" }))

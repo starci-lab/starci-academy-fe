@@ -1,6 +1,7 @@
 import { LabelledProgressRow } from "@/components/composites/LabelledProgressRow"
 import { PressableSurface } from "@/components/branches/PressableSurface"
 import { NavLink } from "@/components/leaves/NavLink"
+import { IconButton } from "@/components/leaves/IconButton"
 import type { IconName } from "@/components/leaves/Icon"
 import { Text } from "@/components/leaves/Text"
 import {
@@ -68,6 +69,12 @@ export type LearnSpineGroup = {
 export type LearnSpineData = {
     /** The already-resolved word a locked row ends with. */
     readonly lockedLabel: string
+    /** The accessible name of the control that compacts the rail. */
+    readonly collapseLabel: string
+    /** The accessible name of the control that restores rail labels. */
+    readonly expandLabel: string
+    /** Whether the rail currently shows icons without visible labels. */
+    readonly isCollapsed: boolean
     /** Where the learner left off, when there is somewhere to go back to. */
     readonly resume?: {
         readonly label: string
@@ -82,6 +89,7 @@ export type LearnSpineData = {
 export type LearnSpineActions = {
     readonly openRow?: (id: string) => void
     readonly resume?: () => void
+    readonly toggleCollapse?: () => void
 }
 
 /** Props for {@link learnSpine}. */
@@ -99,11 +107,49 @@ export type LearnSpineProps = {
  *
  * @param input - {@link LearnSpineProps}
  */
+export const learnSpineCollapsed = ({ props, on }: LearnSpineProps) => (
+    defineContractComponent("learn-course-navigation-rail-collapsed", {
+        toggle: defineLeafComponent("icon-button", {}, () => (
+            <IconButton
+                props={{ icon: "collapseRail", label: props.expandLabel, isActive: true }}
+                on={{ press: on?.toggleCollapse }}
+            />
+        )),
+        group: props.groups.map((group) => defineContractComponent("learn-nav-group-collapsed", {
+            row: group.rows.map((row) => defineContractComponent("learn-nav-row-collapsed", {
+                link: defineLeafComponent("nav-link", { kind: "route" }, () => (
+                    <NavLink
+                        props={{
+                            label: row.label,
+                            icon: row.icon,
+                            kind: "route",
+                            isCurrent: row.isCurrent,
+                            showLabel: false,
+                        }}
+                        on={{ press: () => on?.openRow?.(row.id) }}
+                    />
+                )),
+            })),
+        })),
+    })
+)
+
+/**
+ * Build the labelled course spine as the frame's expanded child.
+ *
+ * @param input - {@link LearnSpineProps}
+ */
 export const learnSpine = ({ props, on, isLoading = false }: LearnSpineProps) => {
     const lockedLabel = props.lockedLabel
     const resume = props.resume
     return (
         defineContractComponent("learn-course-navigation-rail", {
+            toggle: defineLeafComponent("icon-button", {}, () => (
+                <IconButton
+                    props={{ icon: "collapseRail", label: props.collapseLabel }}
+                    on={{ press: on?.toggleCollapse }}
+                />
+            )),
             ...(resume === undefined ? {} : {
                 resume: defineContractProjection("learn-resume-card", () => (
                     <PressableSurface
@@ -137,7 +183,12 @@ export const learnSpine = ({ props, on, isLoading = false }: LearnSpineProps) =>
                 row: group.rows.map((row) => defineContractComponent("learn-nav-row", {
                     link: defineLeafComponent("nav-link", { kind: "route" }, () => (
                         <NavLink
-                            props={{ label: row.label, icon: row.icon, kind: "route", isCurrent: row.isCurrent }}
+                            props={{
+                                label: row.label,
+                                icon: row.icon,
+                                kind: "route",
+                                isCurrent: row.isCurrent,
+                            }}
                             on={{ press: () => on?.openRow?.(row.id) }}
                         />
                     )),

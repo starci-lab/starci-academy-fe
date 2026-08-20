@@ -20,6 +20,7 @@ type LearnMobileViewContextValue = {
 }
 
 const LearnMobileViewContext = createContext<LearnMobileViewContextValue | undefined>(undefined)
+const LEARN_RAIL_COLLAPSED_KEY = "starci.learn.sidebar.collapsed"
 
 /** Read the learn layout's current mobile panel from a routed page. */
 export const useLearnMobileView = (): LearnMobileViewContextValue => {
@@ -67,6 +68,7 @@ const GROUPS: ReadonlyArray<{ id: string, rows: ReadonlyArray<SpineRoute> }> = [
     {
         id: "path",
         rows: [
+            { id: "home", icon: "home", at: "/learn" },
             { id: "content", icon: "course", at: "/learn/content" },
             { id: "personalProject", icon: "practice", at: "/learn/personal-project", requiresEnrollment: true },
         ],
@@ -134,6 +136,12 @@ export const LearnShellLayout = (input: LearnShellLayoutProps) => {
                 : [routeDefault]
     ), [isReader, isToday, routeDefault])
     const [mobileView, setMobileView] = useState<LearnMobileView>(routeDefault)
+    const [isSpineCollapsed, setIsSpineCollapsed] = useState(false)
+    useEffect(() => {
+        if (typeof window.localStorage.getItem === "function") {
+            setIsSpineCollapsed(window.localStorage.getItem(LEARN_RAIL_COLLAPSED_KEY) === "true")
+        }
+    }, [])
     useEffect(() => {
         if (!validViews.includes(mobileView)) setMobileView(routeDefault)
     }, [mobileView, routeDefault, validViews])
@@ -146,7 +154,9 @@ export const LearnShellLayout = (input: LearnShellLayoutProps) => {
             id: row.id,
             label: t(`rows.${row.id}`),
             icon: row.icon,
-            isCurrent: pathname.startsWith(`${base}${row.at}`),
+            isCurrent: row.id === "home"
+                ? pathname === `${base}/learn`
+                : pathname.startsWith(`${base}${row.at}`),
             isLocked: row.requiresEnrollment === true && enrollmentKnown && course.data?.isEnrolled !== true,
             fact: row.id === "leaderboard" && viewerRank !== null && viewerRank !== undefined
                 ? `#${viewerRank}`
@@ -162,6 +172,9 @@ export const LearnShellLayout = (input: LearnShellLayoutProps) => {
                 props={{
                     spine: {
                         lockedLabel: t("locked"),
+                        collapseLabel: t("collapse"),
+                        expandLabel: t("expand"),
+                        isCollapsed: isSpineCollapsed,
                         groups,
                         ...(enrolledCourse === undefined ? {} : {
                             resume: {
@@ -193,6 +206,15 @@ export const LearnShellLayout = (input: LearnShellLayoutProps) => {
                         if (next !== undefined) setMobileView(next)
                     },
                     resume: () => router.push(`${base}/learn/content`),
+                    toggleCollapse: () => {
+                        setIsSpineCollapsed((current) => {
+                            const next = !current
+                            if (typeof window.localStorage.setItem === "function") {
+                                window.localStorage.setItem(LEARN_RAIL_COLLAPSED_KEY, String(next))
+                            }
+                            return next
+                        })
+                    },
                 }}
                 surface={input.surface}
             />

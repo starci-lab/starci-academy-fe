@@ -1,6 +1,11 @@
 import { Tree } from "@/components/branches/Tree"
 import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
-import { learnSpine, type LearnSpineActions, type LearnSpineData } from "@/components/blocks/learn/LearnSpine/component"
+import {
+    learnSpine,
+    learnSpineCollapsed,
+    type LearnSpineActions,
+    type LearnSpineData,
+} from "@/components/blocks/learn/LearnSpine/component"
 import { NavLink } from "@/components/leaves/NavLink"
 import type { IconName } from "@/components/leaves/Icon"
 import type { ReactNode } from "react"
@@ -80,6 +85,33 @@ export type LearnShellLayoutProps = {
  */
 export const LearnShellLayoutBase = (input: LearnShellLayoutProps) => {
     const mobileTabs = input.props.mobileTabs ?? []
+    const mobileBar = mobileTabs.length === 0 ? {} : {
+        bar: defineContractComponent("learn-mobile-tab-bar", {
+            tab: mobileTabs.map((tab) => defineLeafComponent("nav-link", { kind: "tab" }, () => (
+                <NavLink
+                    props={{ label: tab.label, icon: tab.icon, kind: "tab", isCurrent: tab.isCurrent }}
+                    on={{ press: () => input.on?.openMobileTab?.(tab.id) }}
+                />
+            ))),
+        }),
+    }
+    const body = defineContractComponent("learn-routed-body", {
+        page: defineLeafComponent("page", {}, () => <>{input.surface}</>),
+    })
+    if (input.props.spine.isCollapsed) {
+        return (
+            <Tree
+                contract="learn-shell-frame-collapsed"
+                render={defineContractComponent("learn-shell-frame-collapsed", {
+                    ...(input.props.isFullBleed ? {} : {
+                        spine: learnSpineCollapsed({ props: input.props.spine, on: input.on, isLoading: input.isLoading ?? false }),
+                    }),
+                    body,
+                    ...mobileBar,
+                })}
+            />
+        )
+    }
     return (
         <Tree
             contract="learn-shell-frame"
@@ -87,19 +119,8 @@ export const LearnShellLayoutBase = (input: LearnShellLayoutProps) => {
                 ...(input.props.isFullBleed ? {} : {
                     spine: learnSpine({ props: input.props.spine, on: input.on, isLoading: input.isLoading ?? false }),
                 }),
-                body: defineContractComponent("learn-routed-body", {
-                    page: defineLeafComponent("page", {}, () => <>{input.surface}</>),
-                }),
-                ...(mobileTabs.length === 0 ? {} : {
-                    bar: defineContractComponent("learn-mobile-tab-bar", {
-                        tab: mobileTabs.map((tab) => defineLeafComponent("nav-link", { kind: "tab" }, () => (
-                            <NavLink
-                                props={{ label: tab.label, icon: tab.icon, kind: "tab", isCurrent: tab.isCurrent }}
-                                on={{ press: () => input.on?.openMobileTab?.(tab.id) }}
-                            />
-                        ))),
-                    }),
-                }),
+                body,
+                ...mobileBar,
             })}
         />
     )

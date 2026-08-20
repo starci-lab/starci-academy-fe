@@ -878,6 +878,7 @@
                 "track": "Theo dõi"
             },
             "rows": {
+                "home": "Home",
                 "content": "Học phần",
                 "personalProject": "Dự án cá nhân",
                 "flashcards": "Ôn tập",
@@ -898,6 +899,8 @@
                 "page": "Trang này"
             },
             "locked": "Khoá",
+            "collapse": "Thu gọn",
+            "expand": "Mở rộng",
             "resume": "Tiếp tục học",
             "progress": "Đã hoàn thành {percent}%"
         }

@@ -5,6 +5,7 @@ import {
     ArrowRightOnRectangleIcon,
     ArrowLeftStartOnRectangleIcon,
     BellIcon,
+    Bars3BottomLeftIcon,
     BoltIcon,
     BookmarkIcon,
     BookOpenIcon,
@@ -50,6 +51,7 @@ import {
     ArrowRightEndOnRectangleIcon as ArrowRightOnRectangleSolidIcon,
     ArrowLeftStartOnRectangleIcon as ArrowLeftStartOnRectangleSolidIcon,
     BellIcon as BellSolidIcon,
+    Bars3BottomLeftIcon as Bars3BottomLeftSolidIcon,
     BoltIcon as BoltSolidIcon,
     BookmarkIcon as BookmarkSolidIcon,
     BookOpenIcon as BookOpenSolidIcon,
@@ -118,7 +120,7 @@ export type IconName =
     | "light" | "dark" | "locale" | "google" | "github"
     | "search" | "cart" | "notification" | "account" | "profile" | "cv" | "settings" | "signOut"
     | "saved" | "blog" | "talents" | "jobs" | "practice"
-    | "viewGrid" | "viewList"
+    | "viewGrid" | "viewList" | "collapseRail"
     | "star" | "ratingStarEmpty" | "ratingStarFilled"
 
 /** The two native Heroicon roles used by the product. */
@@ -252,6 +254,7 @@ const GLYPHS: Record<IconName, GlyphCuts> = {
     practice: cuts(CodeBracketIcon, CodeBracketSolidIcon),
     viewGrid: cuts(Squares2X2Icon, Squares2X2SolidIcon),
     viewList: cuts(ListBulletIcon, ListBulletSolidIcon),
+    collapseRail: cuts(Bars3BottomLeftIcon, Bars3BottomLeftSolidIcon),
     google: cuts(GoogleMark, GoogleMark),
     github: cuts(GithubMark, GithubMark),
 }

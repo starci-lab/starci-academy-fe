@@ -23,6 +23,8 @@ export type NavLinkData = {
     readonly label: string
     /** The meaning drawn before the words, for a tab that carries one. */
     readonly icon?: IconName
+    /** Whether the visible words remain drawn; the accessible name is retained when false. */
+    readonly showLabel?: boolean
     /** Whether this is where the reader already is. */
     readonly isCurrent?: boolean
     /** A page destination, or a section of the page. */
@@ -86,10 +88,11 @@ export const NavLink = ({ props, on }: NavLinkProps) => {
             data-current={isCurrent ? "true" : "false"}
             onPress={on?.press}
             aria-current={isCurrent ? "page" : undefined}
+            aria-label={props.showLabel === false ? props.label : undefined}
             className={`${isCurrent ? kind.current : kind.base}${DEPTH_CLASSES[props.depth ?? 1]}`}
         >
             {props.icon === undefined ? null : <Icon props={{ name: props.icon, role: "leading" }} />}
-            {props.label}
+            {props.showLabel === false ? null : props.label}
         </HeroLink>
     )
 }
