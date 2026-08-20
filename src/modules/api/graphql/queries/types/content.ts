@@ -47,6 +47,30 @@ export interface ContentChallenge {
     readonly submissions: ReadonlyArray<ContentChallengeSubmission>
 }
 
+/** One localized variant of a SCHEMA V2 language body. */
+export interface ContentBodyTranslation {
+    /** Locale carried by this translation row. */
+    readonly locale: string
+    /** Localized markdown, or null when the locale intentionally has no body. */
+    readonly body: string | null
+}
+
+/** One programming-language reading body attached to a SCHEMA V2 lesson. */
+export interface ContentBody {
+    /** Stable body-bucket identity. */
+    readonly id: string
+    /** Programming-language identity such as `typescript`, `java`, `csharp`, or `go`. */
+    readonly lang: string
+    /** Authored display order of the language tabs. */
+    readonly orderIndex: number
+    /** Default-locale markdown body. */
+    readonly body: string | null
+    /** Locale used by {@link body} when no matching translation exists. */
+    readonly defaultLocale: string
+    /** Per-locale markdown variants exposed by the current content snapshot. */
+    readonly translations: ReadonlyArray<ContentBodyTranslation>
+}
+
 /** One content, read. */
 export interface ContentDetail {
     /** Stable identity. */
@@ -66,6 +90,8 @@ export interface ContentDetail {
      * would be a client that could be asked not to.
      */
     body: string
+    /** SCHEMA V2 language bodies. Empty/omitted for legacy scalar-body lessons. */
+    bodies?: ReadonlyArray<ContentBody>
     /** Whether reading this requires enrolment. */
     isPremium: boolean
     /** Whether this lesson owns a synchronized browser sandbox snapshot. */

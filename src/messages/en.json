@@ -758,6 +758,7 @@
             "navCourse": "Course",
             "navModule": "Module",
             "facesLabel": "Views of this content",
+            "languagesLabel": "Lesson language",
             "searchPlaceholder": "Search contents...",
             "searchLabel": "Search this course",
             "searchClearLabel": "Clear search",

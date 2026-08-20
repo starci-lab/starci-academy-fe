@@ -32,6 +32,11 @@ describe("queryContentMap", () => {
     it("leaves the module relation to the dedicated outline query", () => {
         expect(documentText).not.toMatch(/\bmodule\s*\{/)
     })
+
+    it("selects every authored SCHEMA V2 language body and its locale variants", () => {
+        expect(documentText).toMatch(/bodies\s*\{[\s\S]*lang[\s\S]*orderIndex[\s\S]*defaultLocale/)
+        expect(documentText).toMatch(/translations\s*\{[\s\S]*locale[\s\S]*body/)
+    })
 })
 
 describe("queryContent", () => {

@@ -13,10 +13,11 @@ const mocks = vi.hoisted(() => ({
     router: {push: vi.fn()},
     ai: {clearCodeContext: vi.fn(), setCodeContext: vi.fn(), open: vi.fn()},
     view: "lesson" as string,
+    locale: "en" as string,
 }))
 
 vi.mock("next-intl", () => ({
-    useLocale: () => "en",
+    useLocale: () => mocks.locale,
     useTranslations: () => (key: string) => key,
 }))
 vi.mock("@/i18n/navigation", () => ({useRouter: () => mocks.router}))
@@ -40,6 +41,7 @@ type MockPageActions = {
     readonly retryDiscussion: () => void
     readonly searchContent: (query: string) => void
     readonly selectChallenge: () => void
+    readonly selectLanguage: (language: string) => void
     readonly act?: () => void
 }
 
@@ -49,6 +51,10 @@ type MockPageProps = {
         readonly title?: string
         readonly description?: string
         readonly facts?: ReadonlyArray<string>
+        readonly body?: string
+        readonly languages?: ReadonlyArray<{readonly id: string, readonly label: string}>
+        readonly selectedLanguage?: string
+        readonly outline?: ReadonlyArray<{readonly label: string}>
         readonly noticeActionLabel?: string
         readonly courseProgress?: { readonly value: number, readonly total: number }
         readonly modules?: ReadonlyArray<{ readonly id: string, readonly title: string }>
@@ -63,6 +69,10 @@ vi.mock("./component", () => {
             <output data-testid="title">{props.title}</output>
             <output data-testid="description">{props.description}</output>
             <output data-testid="facts">{props.facts?.join(" · ")}</output>
+            <output data-testid="body">{props.body}</output>
+            <output data-testid="languages">{props.languages?.map((language) => language.label).join("|")}</output>
+            <output data-testid="selected-language">{props.selectedLanguage}</output>
+            <output data-testid="page-outline">{props.outline?.map((entry) => entry.label).join("|")}</output>
             <output data-testid="progress">{props.courseProgress === undefined ? "" : `${props.courseProgress.value}/${props.courseProgress.total}`}</output>
             <output data-testid="modules">{props.modules?.map((module) => module.title).join("|")}</output>
             <button onClick={() => on.goCourse()}>course</button>
@@ -73,6 +83,11 @@ vi.mock("./component", () => {
             <button onClick={() => on.retryDiscussion()}>retry</button>
             <button onClick={() => on.searchContent("database")}>search</button>
             <button onClick={() => on.selectChallenge()}>challenge</button>
+            {props.languages?.map((language) => (
+                <button key={language.id} data-testid={`language-${language.id}`} onClick={() => on.selectLanguage(language.id)}>
+                    {language.label}
+                </button>
+            ))}
             {props.noticeActionLabel && <button onClick={() => on.act?.()}>{props.noticeActionLabel}</button>}
         </div>
     )
@@ -97,6 +112,7 @@ describe("CourseLearnContentPage route", () => {
         mocks.source.data = undefined
         mocks.source.error = undefined
         mocks.view = "lesson"
+        mocks.locale = "en"
     })
 
     it("renders pending, failed, and locked states with recovery actions", async () => {
@@ -154,5 +170,49 @@ describe("CourseLearnContentPage route", () => {
         expect(mocks.comments.mutate).toHaveBeenCalled()
         view.unmount()
         await waitFor(() => expect(mocks.ai.clearCodeContext).toHaveBeenCalled())
+    })
+
+    it("reads SCHEMA V2 bodies in authored order, routed locale, and selected language", () => {
+        mocks.locale = "vi"
+        mocks.content.data = {
+            id: "content",
+            title: "Lesson",
+            body: "",
+            isPremium: false,
+            isSandbox: false,
+            githubBaseUrl: null,
+            githubDir: null,
+            challenges: [],
+            bodies: [
+                {
+                    id: "go-body",
+                    lang: "go",
+                    orderIndex: 2,
+                    body: "## Go English",
+                    defaultLocale: "en",
+                    translations: [{locale: "vi", body: "## Go Việt\n### Kiểm thử"}],
+                },
+                {
+                    id: "ts-body",
+                    lang: "typescript",
+                    orderIndex: 1,
+                    body: "## TypeScript English",
+                    defaultLocale: "en",
+                    translations: [{locale: "vi", body: "## TypeScript Việt\n### Thực hành"}],
+                },
+            ],
+        }
+
+        render(<CourseLearnContentPage displayId="course" moduleId="module" contentId="content" />)
+
+        expect(screen.getByTestId("languages")).toHaveTextContent("TypeScript|Go")
+        expect(screen.getByTestId("selected-language")).toHaveTextContent("typescript")
+        expect(screen.getByTestId("body")).toHaveTextContent("TypeScript Việt")
+        expect(screen.getByTestId("page-outline")).toHaveTextContent("TypeScript Việt|Thực hành")
+
+        fireEvent.click(screen.getByTestId("language-go"))
+        expect(screen.getByTestId("selected-language")).toHaveTextContent("go")
+        expect(screen.getByTestId("body")).toHaveTextContent("Go Việt")
+        expect(screen.getByTestId("page-outline")).toHaveTextContent("Go Việt|Kiểm thử")
     })
 })

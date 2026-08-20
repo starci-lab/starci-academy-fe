@@ -12,6 +12,7 @@ import { useQueryContentCommentsSwr } from "@/hooks/swr/useQueryContentCommentsS
 import { useMutateSubmitContentCommentSwr } from "@/hooks/swr/useMutateSubmitContentCommentSwr"
 import { useRepoSandpackFiles } from "@/hooks/swr/useRepoSandpackFiles"
 import { ReactionType } from "@/modules/api/graphql/queries/types/reactions"
+import type { ContentBody } from "@/modules/api/graphql/queries/types/content"
 import { useLearnMobileView } from "@/components/layouts/LearnShellLayout"
 import { useGlobalAiChat } from "@/components/layouts/GlobalAiChatLayout"
 import type { ContentFaceId } from "@/components/blocks/learn/ContentTabRow/component"
@@ -97,6 +98,27 @@ const noticeTextOf = (locked: boolean, failed: boolean, lockedText: string, fail
     return undefined
 }
 
+const LANGUAGE_LABELS: Readonly<Record<string, string>> = {
+    typescript: "TypeScript",
+    javascript: "JavaScript",
+    java: "Java",
+    csharp: "C#",
+    "c-sharp": "C#",
+    go: "Go",
+    golang: "Go",
+    python: "Python",
+    cpp: "C++",
+}
+
+/** Human-facing language name without changing the source identity used by the tab. */
+const languageLabelOf = (language: string): string => LANGUAGE_LABELS[language.toLowerCase()] ?? language
+
+/** Pick the routed locale first, then the authored default body. */
+const localizedBodyOf = (contentBody: ContentBody, locale: string): string =>
+    contentBody.translations.find((translation) => translation.locale === locale)?.body
+    ?? contentBody.body
+    ?? ""
+
 /** Markdown headings, in order, with the depth the outline indents by. */
 const outlineOf = (body: string): Array<ContentOutlineEntry> => {
     const entries: Array<ContentOutlineEntry> = []
@@ -139,6 +161,7 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
     const [discussionError, setDiscussionError] = useState(false)
     const [contentSearch, setContentSearch] = useState("")
     const [selectedFace, setSelectedFace] = useState<ContentFaceId>("reading")
+    const [selectedLanguage, setSelectedLanguage] = useState<string>()
     const [sourceFiles, setSourceFiles] = useState<SandpackFiles>({})
     const [activeSourcePath, setActiveSourcePath] = useState("")
     const [editedSourcePaths, setEditedSourcePaths] = useState<ReadonlyArray<string>>([])
@@ -190,7 +213,17 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
         setSourceRuntimeError(undefined)
     }, [source.data])
 
-    const body = content.data?.body
+    const languageBodies = useMemo(
+        () => [...(content.data?.bodies ?? [])].sort((first, second) => first.orderIndex - second.orderIndex),
+        [content.data?.bodies],
+    )
+    const activeLanguage = languageBodies.some((candidate) => candidate.lang === selectedLanguage)
+        ? selectedLanguage
+        : languageBodies[0]?.lang
+    const activeLanguageBody = languageBodies.find((candidate) => candidate.lang === activeLanguage)
+    const body = activeLanguageBody === undefined
+        ? content.data?.body
+        : localizedBodyOf(activeLanguageBody, locale)
     const pageOutline = useMemo(() => body === undefined ? [] : outlineOf(body), [body])
 
     // The reader's place in the module: the pager counts contents, and the module states how many.
@@ -289,6 +322,12 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                     },
                 ],
                 selectedFace,
+                languagesLabel: t("languagesLabel"),
+                languages: languageBodies.map((languageBody) => ({
+                    id: languageBody.lang,
+                    label: languageLabelOf(languageBody.lang),
+                })),
+                selectedLanguage: activeLanguage,
                 ...(selectedFace !== "source" || !hasSource ? {} : {
                     sourceState: sourceStateOf(source.error !== undefined, source.data === undefined),
                     source: {
@@ -400,6 +439,7 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                 goModule: () => router.push(`/courses/${input.displayId}/learn/content/modules/${input.moduleId}`),
                 act,
                 selectReading: () => setSelectedFace("reading"),
+                selectLanguage: setSelectedLanguage,
                 selectSource: hasSource ? () => setSelectedFace("source") : undefined,
                 selectChallenge: () => {
                     const challenge = challenges[0]

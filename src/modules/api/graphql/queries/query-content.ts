@@ -29,6 +29,17 @@ const query1 = gql`
                 title
                 description
                 body
+                bodies {
+                    id
+                    lang
+                    orderIndex
+                    body
+                    defaultLocale
+                    translations {
+                        locale
+                        body
+                    }
+                }
                 isPremium
                 isSandbox
                 githubBaseUrl
