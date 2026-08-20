@@ -11,6 +11,7 @@ import { CourseQaPage } from "./index"
 beforeEach(() => { vi.clearAllMocks(); m.data = undefined; m.error = undefined })
 describe("CourseQaPage route", () => {
     it("renders loading then failed transport states", () => { const view = render(<CourseQaPage displayId="course" />); expect(screen.getByTestId("state")).toHaveTextContent(/pending|loading|connecting/); m.error = new Error("offline"); view.rerender(<CourseQaPage displayId="course" />); expect(screen.getByTestId("state")).toHaveTextContent(/failed|error/) })
+    it("renders a settled question list", () => { m.data = { id: "course", title: "Course" }; const view = render(<CourseQaPage displayId="course" />); expect(screen.getByTestId("state")).toHaveTextContent(/empty|ready/) ; view.unmount() })
 })
 
 
