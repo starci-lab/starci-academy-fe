@@ -8,10 +8,45 @@ import { useQueryMyInProgressMockInterviewSessionSwr } from "@/hooks/swr/useQuer
 import { useMutateStartMockInterviewSessionSwr } from "@/hooks/swr/useMutateStartMockInterviewSessionSwr"
 import { useQueryMyMockInterviewAttemptsSwr } from "@/hooks/swr/useQueryMyMockInterviewAttemptsSwr"
 import { useQueryMyMockInterviewStatsSwr } from "@/hooks/swr/useQueryMyMockInterviewStatsSwr"
-import { CourseMockInterviewSetupPageBase } from "./component"
+import { CourseMockInterviewSetupPageBase, type CourseMockInterviewSetupState } from "./component"
 
 /** Route-owned input for the connected setup page. */
 export type CourseMockInterviewSetupPageProps = { readonly displayId: string }
+type SetupStatusCopy = { readonly resumable: string; readonly starting: string; readonly failed: string }
+type HistoryData = { readonly items: ReadonlyArray<unknown> }
+type StatsData = { readonly insufficientData: boolean; readonly byPhase: ReadonlyArray<unknown> }
+
+const setupStateOf = (
+    failed: boolean,
+    starting: boolean,
+    pending: boolean,
+    hasResumableSession: boolean,
+): CourseMockInterviewSetupState => {
+    if (failed) return "failed"
+    if (starting) return "starting"
+    if (pending) return "pending"
+    return hasResumableSession ? "resumable" : "ready"
+}
+
+const setupStatusOf = (state: CourseMockInterviewSetupState, copy: SetupStatusCopy) => {
+    if (state === "resumable") return copy.resumable
+    if (state === "starting") return copy.starting
+    if (state === "failed") return copy.failed
+    return undefined
+}
+
+const historyStateOf = (error: unknown, data: HistoryData | null | undefined) => {
+    if (error !== undefined) return "failed" as const
+    if (data === undefined) return "pending" as const
+    if (data === null) return "empty" as const
+    return data.items.length === 0 ? "empty" as const : "ready" as const
+}
+
+const statsStateOf = (error: unknown, data: StatsData | null | undefined) => {
+    if (error !== undefined) return "failed" as const
+    if (data === undefined) return "pending" as const
+    return data === null || data.insufficientData || data.byPhase.length === 0 ? "empty" as const : "ready" as const
+}
 
 const COPY = {
     en: {
@@ -81,15 +116,7 @@ export const CourseMockInterviewSetupPage = ({ displayId }: CourseMockInterviewS
     const [startError, setStartError] = useState(false)
     const failed = course.error !== undefined || inProgress.error !== undefined || startError || course.data === null
     const pending = !failed && (course.data === undefined || inProgress.data === undefined)
-    const state = failed
-        ? "failed"
-        : startSession.isMutating
-            ? "starting"
-            : pending
-                ? "pending"
-                : inProgress.data === null
-                    ? "ready"
-                    : "resumable"
+    const state = setupStateOf(failed, startSession.isMutating, pending, inProgress.data !== null)
 
     const openSession = (sessionId: string) => {
         router.push(`/courses/${displayId}/learn/mock-interview/interview/${sessionId}`)
@@ -117,7 +144,7 @@ export const CourseMockInterviewSetupPage = ({ displayId }: CourseMockInterviewS
             props={{
                 title: copy.title,
                 description: copy.description,
-                status: state === "resumable" ? copy.resumable : state === "starting" ? copy.starting : state === "failed" ? copy.failed : undefined,
+                status: setupStatusOf(state, copy),
                 levelLabel: copy.level,
                 modeLabel: copy.mode,
                 levels: Object.entries(copy.levels).map(([id, label]) => ({ id, label })),
@@ -135,8 +162,8 @@ export const CourseMockInterviewSetupPage = ({ displayId }: CourseMockInterviewS
                 statsEmpty: copy.statsEmpty,
                 historyFailed: copy.historyFailed,
                 statsFailed: copy.statsFailed,
-                historyState: attempts.error !== undefined ? "failed" : attempts.data === undefined ? "pending" : (attempts.data?.items.length ?? 0) === 0 ? "empty" : "ready",
-                statsState: stats.error !== undefined ? "failed" : stats.data === undefined ? "pending" : stats.data === null || stats.data.insufficientData || stats.data.byPhase.length === 0 ? "empty" : "ready",
+                historyState: historyStateOf(attempts.error, attempts.data),
+                statsState: statsStateOf(stats.error, stats.data),
                 historyRows: (attempts.data?.items ?? []).map((attempt) => ({
                     id: attempt.id,
                     title: attempt.name ?? attempt.promptTitle,

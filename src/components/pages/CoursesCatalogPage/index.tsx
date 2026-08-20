@@ -13,6 +13,20 @@ const PAGE_SIZE = 9
 /** Where the reader's layout choice is remembered between visits. */
 const VIEW_STORAGE_KEY = "starci.courses.view"
 
+const catalogStateOf = (failed: boolean, pending: boolean, isEmpty: boolean, isSearching: boolean): CoursesCatalogPageState => {
+    if (failed) return "failed"
+    if (pending) return "pending"
+    if (!isEmpty) return "ready"
+    return isSearching ? "filtered-empty" : "empty"
+}
+
+const catalogNoticeOf = (state: CoursesCatalogPageState, t: (key: string) => string) => {
+    if (state === "failed") return { noticeMessage: t("failed"), noticeActionLabel: t("retry") }
+    if (state === "filtered-empty") return { noticeMessage: t("filteredEmpty"), noticeActionLabel: t("clearFilter") }
+    if (state === "empty") return { noticeMessage: t("empty"), noticeActionLabel: t("emptyAction") }
+    return {}
+}
+
 /** One phase row: what that phase charges, when it overrides the list price. */
 type CoursePhaseRow = {
     readonly phase: string
@@ -181,24 +195,11 @@ export const CoursesCatalogPage = () => {
     const failed = catalog.error !== undefined || catalog.data === null
     const pending = catalog.data === undefined && !failed
 
-    const state: CoursesCatalogPageState = failed
-        ? "failed"
-        : pending
-            ? "pending"
-            // The owned group is a second, independent answer, so it does not vote here. A catalog
-            // with nothing to discover is empty even when the learner owns courses, because the
-            // notice speaks for the list the toolbar narrows and `myCourses` is not that list.
-            : discover.length === 0
-                ? (isSearching ? "filtered-empty" : "empty")
-                : "ready"
-
-    const notice = state === "failed"
-        ? { noticeMessage: t("failed"), noticeActionLabel: t("retry") }
-        : state === "filtered-empty"
-            ? { noticeMessage: t("filteredEmpty"), noticeActionLabel: t("clearFilter") }
-            : state === "empty"
-                ? { noticeMessage: t("empty"), noticeActionLabel: t("emptyAction") }
-                : {}
+    // The owned group is a second, independent answer, so it does not vote here. A catalog
+    // with nothing to discover is empty even when the learner owns courses, because the
+    // notice speaks for the list the toolbar narrows and `myCourses` is not that list.
+    const state = catalogStateOf(failed, pending, discover.length === 0, isSearching)
+    const notice = catalogNoticeOf(state, t)
 
     return (
         <>

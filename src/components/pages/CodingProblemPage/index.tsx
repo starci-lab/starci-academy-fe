@@ -18,6 +18,26 @@ export interface CodingProblemPageProps {
 
 /** The languages the server accepts, in the order a reader scans them. */
 const LANGUAGES = ["python", "javascript", "typescript", "java", "cpp"] as const
+type SocketVerdict = { readonly verdict?: string }
+
+const verdictStateOf = (jobId: string | undefined, isConnected: boolean, verdict: SocketVerdict | null | undefined): JudgeVerdictState => {
+    if (jobId === undefined) return "idle"
+    if (!isConnected) return "socket-lost"
+    if (verdict?.verdict === undefined) return "pending"
+    if (verdict.verdict === "judging") return "judging"
+    return verdict.verdict as JudgeVerdictState
+}
+
+const readingBodyOf = (tab: ProblemReadingTab, statement: string | undefined, hint: string, empty: string) => {
+    if (tab === "statement") return statement
+    if (tab === "hint") return hint
+    return empty
+}
+
+const editorStateOf = (isSubmitting: boolean, jobId: string | undefined) => {
+    if (isSubmitting) return "submitting" as const
+    return jobId === undefined ? "ready" as const : "judged" as const
+}
 
 /**
  * One problem, connected.
@@ -83,21 +103,8 @@ export const CodingProblemPage = ({ slug }: CodingProblemPageProps) => {
      * Order matters: a job that exists with no connection is `socket-lost` BEFORE it is `pending`,
      * because the honest thing to say is that we stopped hearing rather than that we are waiting.
      */
-    const verdictState: JudgeVerdictState = jobId === undefined
-        ? "idle"
-        : !isConnected
-            ? "socket-lost"
-            : verdict?.verdict === undefined
-                ? "pending"
-                : verdict.verdict === "judging"
-                    ? "judging"
-                    : (verdict.verdict as JudgeVerdictState)
-
-    const readingBody = tab === "statement"
-        ? problem.data?.statement
-        : tab === "hint"
-            ? t("hintPending")
-            : t("tabEmpty")
+    const verdictState = verdictStateOf(jobId, isConnected, verdict)
+    const readingBody = readingBodyOf(tab, problem.data?.statement, t("hintPending"), t("tabEmpty"))
 
     return (
         <CodingProblemPageBase
@@ -140,7 +147,7 @@ export const CodingProblemPage = ({ slug }: CodingProblemPageProps) => {
                     },
                 },
                 editor: {
-                    state: isSubmitting ? "submitting" : jobId === undefined ? "ready" : "judged",
+                    state: editorStateOf(isSubmitting, jobId),
                     props: {
                         languages: LANGUAGES.map((id) => ({ id, label: t(`language.${id}`) })),
                         language,

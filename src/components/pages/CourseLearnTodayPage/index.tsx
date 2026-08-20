@@ -14,9 +14,11 @@ import { useQueryCourseLeaderboardSwr } from "@/hooks/swr/useQueryCourseLeaderbo
 import { useQueryMyWeeklyStatsSwr } from "@/hooks/swr/useQueryMyWeeklyStatsSwr"
 import { useQueryResolveRouteSwr } from "@/hooks/swr/useQueryResolveRouteSwr"
 import { useLearnMobileView } from "@/components/layouts/LearnShellLayout"
-import type { CourseLearningSignal } from "@/components/blocks/learn/CourseLearningSignals"
-import type { CourseNextAction } from "@/components/blocks/learn/CourseNextActions"
-import { CourseLearnTodayPageBase, type CourseLearnTodayItem } from "./component"
+import type { CourseLearningSignal, CourseLearningSignalsProps } from "@/components/blocks/learn/CourseLearningSignals"
+import type { CourseNextAction, CourseNextActionsProps } from "@/components/blocks/learn/CourseNextActions"
+import type { CourseProgressOverviewProps } from "@/components/blocks/learn/CourseProgressOverview"
+import type { CourseLearningSignalDetailProps } from "@/components/blocks/learn/CourseLearningSignalDetail"
+import { CourseLearnTodayPageBase, type CourseLearnTodayItem, type CourseLearnTodayState } from "./component"
 
 /** Route identity required by the connected course dashboard. */
 export type CourseLearnTodayPageProps = { readonly displayId: string }
@@ -34,6 +36,56 @@ const pageStateOf = (failed: boolean, pending: boolean, course: unknown) => {
     if (failed) return "failed" as const
     if (pending) return "pending" as const
     return course === null ? "empty" as const : "ready" as const
+}
+
+const progressBlockOf = (
+    state: CourseLearnTodayState | "partial",
+    t: TodayTranslator,
+    completionPercent: number,
+    streak: number,
+    rank: number | null | undefined,
+): CourseProgressOverviewProps => {
+    const frame = { label: t("progressSection"), completionLabel: t("progressLabel") }
+    if (state === "pending") return { state, props: frame }
+    if (state === "failed") return { state, props: { ...frame, message: t("progressFailed"), retryLabel: t("retry") } }
+    if (state === "empty") return { state, props: { ...frame, message: t("empty") } }
+    return {
+        state,
+        props: {
+            ...frame,
+            completionFact: t("progressFact", { percent: completionPercent }),
+            completionValue: completionPercent,
+            continuityLabel: t("signals.continuity"),
+            continuityFact: t("signals.continuityFact", { days: streak }),
+            standingLabel: t("signals.standing"),
+            standingFact: rank === null || rank === undefined ? t("signals.unranked") : t("signals.standingFact", { rank }),
+        },
+    }
+}
+
+const nextActionsBlockOf = (state: CourseLearnTodayState | "partial", t: TodayTranslator, actions: ReadonlyArray<CourseNextAction>): CourseNextActionsProps => {
+    const label = t("nextActionsLabel")
+    if (state === "pending") return { state, props: { label } }
+    if (state === "failed") return { state, props: { label, message: t("actionsFailed"), retryLabel: t("retry") } }
+    if (state === "empty") return { state, props: { label, message: t("empty") } }
+    return { state, props: { label, actions } }
+}
+
+const signalsBlockOf = (state: CourseLearnTodayState | "partial", t: TodayTranslator, signals: ReadonlyArray<CourseLearningSignal>): CourseLearningSignalsProps => {
+    const label = t("signalsLabel")
+    if (state === "pending") return { state, props: { label } }
+    if (state === "failed") return { state, props: { label, message: t("signalsFailed"), retryLabel: t("retry") } }
+    if (state === "empty") return { state, props: { label, message: t("signalsEmpty") } }
+    return { state, props: { label, signals } }
+}
+
+type TodaySignalDetail = Omit<CourseLearningSignal, "isSelected"> & { readonly caption: string; readonly destination: string }
+const signalDetailBlockOf = (state: CourseLearnTodayState | "partial", t: TodayTranslator, selectedSignal: TodaySignalDetail | undefined): CourseLearningSignalDetailProps => {
+    const label = t("signalDetailLabel")
+    if (state === "pending") return { state, props: { label } }
+    if (state === "failed") return { state, props: { label, message: t("signalsFailed"), retryLabel: t("retry") } }
+    if (selectedSignal === undefined) return { state: "empty", props: { label, message: t("signalsEmpty") } }
+    return { state: "ready", props: { label, title: selectedSignal.label, fact: selectedSignal.fact, caption: selectedSignal.caption, actionLabel: t("signals.open") } }
 }
 
 /** Rank live learning facts into the accepted course-dashboard composition. */
@@ -185,21 +237,25 @@ export const CourseLearnTodayPage = ({ displayId }: CourseLearnTodayPageProps) =
         ])
     }
 
-    const progressState = state !== "ready"
-        ? state
-        : weekly.data === undefined || leaderboard.data === undefined || weekly.error !== undefined || leaderboard.error !== undefined
-            ? "partial" as const
-            : "ready" as const
-    const nextState = state !== "ready"
-        ? state
-        : auxiliaryPending ? "pending" as const
-            : auxiliaryFailed ? "partial" as const
-                : "ready" as const
-    const signalsState = state !== "ready"
-        ? state
-        : signalPending ? "pending" as const
-            : signalFailed ? "partial" as const
-                : "ready" as const
+    let progressState: CourseLearnTodayState | "partial" = state
+    if (state === "ready" && (weekly.data === undefined || leaderboard.data === undefined || weekly.error !== undefined || leaderboard.error !== undefined)) {
+        progressState = "partial"
+    }
+    let nextState: CourseLearnTodayState | "partial" = state
+    if (state === "ready") {
+        if (auxiliaryPending) nextState = "pending"
+        else if (auxiliaryFailed) nextState = "partial"
+    }
+    let signalsState: CourseLearnTodayState | "partial" = state
+    if (state === "ready") {
+        if (signalPending) signalsState = "pending"
+        else if (signalFailed) signalsState = "partial"
+    }
+
+    const progress = progressBlockOf(progressState, t, enrolledCourse?.completionPercent ?? 0, streak, rank)
+    const nextActionsBlock = nextActionsBlockOf(nextState, t, nextActions)
+    const signalsBlock = signalsBlockOf(signalsState, t, signals)
+    const signalDetailBlock = signalDetailBlockOf(signalsState, t, selectedSignal)
 
     return (
         <CourseLearnTodayPageBase
@@ -223,55 +279,10 @@ export const CourseLearnTodayPage = ({ displayId }: CourseLearnTodayPageProps) =
                     actionLabel: t("open"),
                 },
                 dashboard: {
-                    progress: progressState === "pending"
-                        ? { state: "pending", props: { label: t("progressSection"), completionLabel: t("progressLabel") } }
-                        : progressState === "failed"
-                            ? { state: "failed", props: { label: t("progressSection"), completionLabel: t("progressLabel"), message: t("progressFailed"), retryLabel: t("retry") } }
-                            : progressState === "empty"
-                                ? { state: "empty", props: { label: t("progressSection"), completionLabel: t("progressLabel"), message: t("empty") } }
-                                : {
-                                    state: progressState,
-                                    props: {
-                                        label: t("progressSection"),
-                                        completionLabel: t("progressLabel"),
-                                        completionFact: t("progressFact", { percent: enrolledCourse?.completionPercent ?? 0 }),
-                                        completionValue: enrolledCourse?.completionPercent ?? 0,
-                                        continuityLabel: t("signals.continuity"),
-                                        continuityFact: t("signals.continuityFact", { days: streak }),
-                                        standingLabel: t("signals.standing"),
-                                        standingFact: rank === null || rank === undefined ? t("signals.unranked") : t("signals.standingFact", { rank }),
-                                    },
-                                },
-                    nextActions: nextState === "pending"
-                        ? { state: "pending", props: { label: t("nextActionsLabel") } }
-                        : nextState === "failed"
-                            ? { state: "failed", props: { label: t("nextActionsLabel"), message: t("actionsFailed"), retryLabel: t("retry") } }
-                            : nextState === "empty"
-                                ? { state: "empty", props: { label: t("nextActionsLabel"), message: t("empty") } }
-                                : { state: nextState, props: { label: t("nextActionsLabel"), actions: nextActions } },
-                    signals: signalsState === "pending"
-                        ? { state: "pending", props: { label: t("signalsLabel") } }
-                        : signalsState === "failed"
-                            ? { state: "failed", props: { label: t("signalsLabel"), message: t("signalsFailed"), retryLabel: t("retry") } }
-                            : signalsState === "empty"
-                                ? { state: "empty", props: { label: t("signalsLabel"), message: t("signalsEmpty") } }
-                                : { state: signalsState, props: { label: t("signalsLabel"), signals } },
-                    signalDetail: signalsState === "pending"
-                        ? { state: "pending", props: { label: t("signalDetailLabel") } }
-                        : signalsState === "failed"
-                            ? { state: "failed", props: { label: t("signalDetailLabel"), message: t("signalsFailed"), retryLabel: t("retry") } }
-                            : selectedSignal === undefined
-                                ? { state: "empty", props: { label: t("signalDetailLabel"), message: t("signalsEmpty") } }
-                                : {
-                                    state: "ready",
-                                    props: {
-                                        label: t("signalDetailLabel"),
-                                        title: selectedSignal.label,
-                                        fact: selectedSignal.fact,
-                                        caption: selectedSignal.caption,
-                                        actionLabel: t("signals.open"),
-                                    },
-                                },
+                    progress,
+                    nextActions: nextActionsBlock,
+                    signals: signalsBlock,
+                    signalDetail: signalDetailBlock,
                 },
                 emptyMessage: t("empty"),
                 failedMessage: t("failed"),

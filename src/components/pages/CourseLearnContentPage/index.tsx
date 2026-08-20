@@ -72,6 +72,29 @@ const discussionStateOf = (failed: boolean, pending: boolean, submitting: boolea
     return commentCount === 0 ? "empty" as const : "ready" as const
 }
 
+const outlineDepthOf = (depth: number) => {
+    if (depth <= 1) return 1 as const
+    if (depth === 2) return 2 as const
+    return 3 as const
+}
+
+const contentStateOf = (pending: boolean, failed: boolean, locked: boolean): CourseLearnContentPageState => {
+    if (pending) return "pending"
+    if (failed) return "failed"
+    return locked ? "locked" : "ready"
+}
+
+const sourceStateOf = (failed: boolean, pending: boolean) => {
+    if (failed) return "failed" as const
+    return pending ? "pending" as const : "ready" as const
+}
+
+const noticeTextOf = (locked: boolean, failed: boolean, lockedText: string, failedText: string) => {
+    if (locked) return lockedText
+    if (failed) return failedText
+    return undefined
+}
+
 /** Markdown headings, in order, with the depth the outline indents by. */
 const outlineOf = (body: string): Array<ContentOutlineEntry> => {
     const entries: Array<ContentOutlineEntry> = []
@@ -82,7 +105,7 @@ const outlineOf = (body: string): Array<ContentOutlineEntry> => {
         entries.push({
             id: `${entries.length + 1}`,
             label: heading[2],
-            depth: depth <= 1 ? 1 : depth === 2 ? 2 : 3,
+            depth: outlineDepthOf(depth),
         })
     }
     return entries
@@ -127,9 +150,7 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
     const isPending = content.data === undefined && content.error === undefined
     const hasFailed = content.error !== undefined || (content.data === null && !isPending)
     const isLocked = content.data?.isPremium === true
-    const state: CourseLearnContentPageState = isPending
-        ? "pending"
-        : hasFailed ? "failed" : isLocked ? "locked" : "ready"
+    const state = contentStateOf(isPending, hasFailed, isLocked)
 
     const hasSource = content.data?.isSandbox === true
         && content.data.githubBaseUrl !== null
@@ -195,6 +216,19 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
         router.push(`/courses/${input.displayId}/learn/content/modules/${input.moduleId}/contents/${id}`)
     }
 
+    let act: (() => void) | undefined
+    if (isLocked) {
+        act = () => router.push(`/courses/${input.displayId}`)
+    } else if (hasFailed) {
+        act = () => {
+            void Promise.all([
+                content.mutate(),
+                module.mutate(),
+                reactions.mutate(),
+            ])
+        }
+    }
+
     return (
         <CourseLearnContentPageBase
             state={state}
@@ -229,9 +263,7 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                 ],
                 selectedFace,
                 ...(selectedFace !== "source" || !hasSource ? {} : {
-                    sourceState: source.error !== undefined
-                        ? "failed" as const
-                        : source.data === undefined ? "pending" as const : "ready" as const,
+                    sourceState: sourceStateOf(source.error !== undefined, source.data === undefined),
                     source: {
                         files: sourceFiles,
                         dependencies: source.dependencies,
@@ -256,8 +288,8 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                 selectionHint: t("selectionHint"),
                 // A premium content and a failed request are told apart by which sentence they get,
                 // in the same place, with the same one way out.
-                noticeMessage: isLocked ? t("lockedMessage") : hasFailed ? t("failedMessage") : undefined,
-                noticeActionLabel: isLocked ? t("lockedAction") : hasFailed ? t("failedAction") : undefined,
+                noticeMessage: noticeTextOf(isLocked, hasFailed, t("lockedMessage"), t("failedMessage")),
+                noticeActionLabel: noticeTextOf(isLocked, hasFailed, t("lockedAction"), t("failedAction")),
                 outline,
                 nextSteps: [
                     ...challenges.map((challenge) => ({ id: challenge.id, label: challenge.title })),
@@ -319,17 +351,7 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                 openContent,
                 goCourse: () => router.push(`/courses/${input.displayId}`),
                 goModule: () => router.push(`/courses/${input.displayId}/learn/content/modules/${input.moduleId}`),
-                act: isLocked
-                    ? () => router.push(`/courses/${input.displayId}`)
-                    : hasFailed
-                        ? () => {
-                            void Promise.all([
-                                content.mutate(),
-                                module.mutate(),
-                                reactions.mutate(),
-                            ])
-                        }
-                        : undefined,
+                act,
                 selectReading: () => setSelectedFace("reading"),
                 selectSource: hasSource ? () => setSelectedFace("source") : undefined,
                 selectChallenge: () => {
