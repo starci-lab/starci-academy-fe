@@ -1,15 +1,19 @@
 import { describe, expect, it, vi } from "vitest"
 import LearnIndexPage from "./page"
 
-const mocks = vi.hoisted(() => ({ redirect: vi.fn(() => { throw new Error("NEXT_REDIRECT") }) }))
+const mocks = vi.hoisted(() => ({ CourseLearnTodayPage: vi.fn(() => null) }))
 
-vi.mock("next/navigation", () => ({ redirect: mocks.redirect }))
+vi.mock("@/components/pages/CourseLearnTodayPage", () => ({
+    CourseLearnTodayPage: mocks.CourseLearnTodayPage,
+}))
 
 describe("LearnIndexPage", () => {
-    it("forwards the bare learn entry to the legacy content home", async () => {
-        await expect(LearnIndexPage({
+    it("mounts the course dashboard at the bare learn entry", async () => {
+        const element = await LearnIndexPage({
             params: Promise.resolve({ lang: "vi", displayId: "fullstack-mastery" }),
-        })).rejects.toThrow("NEXT_REDIRECT")
-        expect(mocks.redirect).toHaveBeenCalledWith("/vi/courses/fullstack-mastery/learn/content")
+        })
+
+        expect(element.type).toBe(mocks.CourseLearnTodayPage)
+        expect(element.props).toEqual({ displayId: "fullstack-mastery" })
     })
 })
