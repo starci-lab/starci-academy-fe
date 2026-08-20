@@ -4,7 +4,9 @@ import {relative, resolve} from "node:path"
 import {fileURLToPath} from "node:url"
 
 const normalize = (file, cwd) => relative(cwd, file).replaceAll("\\", "/")
+// Test support under src/tests is a lane, even when a legacy helper lacked a spec suffix.
 const production = (file) => /^src\/.+\.(?:ts|tsx|js|jsx)$/.test(file)
+    && !file.startsWith("src/tests/")
     && !/\.(?:test|spec|e2e-spec)\.[cm]?[jt]sx?$/.test(file)
 export const resolveBase = (env, args) => env.COVERAGE_BASE_SHA ?? (args.includes("--base") ? args[args.indexOf("--base") + 1] : undefined)
 
