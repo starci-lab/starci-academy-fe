@@ -24,13 +24,18 @@ const card: CourseFlashcardSessionPageData = {
     prompt: "What is CQRS?",
     answer: "Command Query Responsibility Segregation",
     answerVisible: true,
+    solutionVisible: false,
     revealLabel: "Reveal answer",
+    clozeInstructionLabel: "Fill every blank",
+    wordBankLabel: "Word bank",
+    checkAnswerLabel: "Check answer",
+    showSolutionLabel: "Show full answer",
+    resultLabel: "blanks correct",
+    ratingLabel: "How well did you remember it?",
     againLabel: "Again",
     hardLabel: "Hard",
     goodLabel: "Good",
     easyLabel: "Easy",
-    correctLabel: "I got it",
-    incorrectLabel: "Needs review",
     syncingLabel: "Saving your progress",
     completingLabel: "Completing the session",
     expiredText: "This session expired",
@@ -41,8 +46,10 @@ const card: CourseFlashcardSessionPageData = {
 
 const handlers = (): CourseFlashcardSessionPageActions => ({
     reveal: vi.fn(),
+    selectTerm: vi.fn(),
+    checkQuiz: vi.fn(),
+    showSolution: vi.fn(),
     rate: vi.fn(),
-    answerQuiz: vi.fn(),
     retry: vi.fn(),
     leave: vi.fn(),
 })
@@ -98,22 +105,29 @@ describe("CourseFlashcardSessionPageBase", () => {
         expect(screen.getByRole("button", { name: "Easy" })).toHaveAttribute("data-variant", "outline")
     })
 
-    it.each([
-        ["I got it", true],
-        ["Needs review", false],
-    ] as const)("records the %s press as a quiz verdict of %s", (label, correct) => {
-        const { on } = draw("active", { mode: "quiz" })
+    it("runs a cloze quiz through word bank, check, full solution and SM-2 rating", () => {
+        const cloze = { text: "Choose ____ and ____", blanks: ["Consistency", "Availability"], bank: ["Consistency", "Availability", "Durability"], selected: ["Consistency", "Availability"], checked: false, correctCount: 2 }
+        const first = draw("active", { mode: "quiz", answerVisible: false, cloze })
+        expect(screen.getByText("Word bank")).toBeInTheDocument()
+        fireEvent.click(screen.getByRole("button", { name: "Durability" }))
+        expect(first.on.selectTerm).toHaveBeenCalledWith("Durability")
+        fireEvent.click(screen.getByRole("button", { name: "Check answer" }))
+        expect(first.on.checkQuiz).toHaveBeenCalledOnce()
 
-        fireEvent.click(screen.getByRole("button", { name: label }))
-        expect(on.answerQuiz).toHaveBeenCalledWith(correct)
+        first.rerender(<CourseFlashcardSessionPageBase state="active" data={{ ...card, mode: "quiz", answerVisible: false, cloze: { ...cloze, checked: true } }} on={first.on} />)
+        expect(screen.getByText("2 / 2 blanks correct")).toBeInTheDocument()
+        fireEvent.click(screen.getByRole("button", { name: "Show full answer" }))
+        expect(first.on.showSolution).toHaveBeenCalledOnce()
+
+        first.rerender(<CourseFlashcardSessionPageBase state="active" data={{ ...card, mode: "quiz", answerVisible: true, solutionVisible: true, cloze: { ...cloze, checked: true } }} on={first.on} />)
+        fireEvent.click(screen.getByRole("button", { name: "Good" }))
+        expect(first.on.rate).toHaveBeenCalledWith(2)
     })
 
-    it("replaces the four review grades with a two-way verdict once the card is a quiz card", () => {
-        draw("active", { mode: "quiz" })
-
-        expect(screen.queryByRole("button", { name: "Good" })).not.toBeInTheDocument()
-        expect(screen.getByRole("button", { name: "I got it" })).toHaveAttribute("data-variant", "primary")
-        expect(screen.getByRole("button", { name: "Needs review" })).toHaveAttribute("data-variant", "outline")
+    it("falls back to reveal then SM-2 when a quiz card has no cloze markers", () => {
+        const { on } = draw("active", { mode: "quiz", answerVisible: false, cloze: undefined })
+        fireEvent.click(screen.getByRole("button", { name: "Reveal answer" }))
+        expect(on.reveal).toHaveBeenCalledOnce()
     })
 
     it.each([

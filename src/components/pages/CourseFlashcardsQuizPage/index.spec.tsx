@@ -8,11 +8,12 @@ type QuizInput = StateProps & { on?: QuizActions }
 const locale = vi.hoisted(() => ({ value: "en" }))
 const useQueryCourseSwr = vi.hoisted(() => vi.fn())
 const useQueryFlashcardDecksByCourseSwr = vi.hoisted(() => vi.fn())
+const useQueryMyDueFlashcardsSwr = vi.hoisted(() => vi.fn())
 const useQueryMyInProgressFlashcardSessionSwr = vi.hoisted(() => vi.fn())
 const useMutateStartFlashcardSessionSwr = vi.hoisted(() => vi.fn())
 
 vi.mock("@/hooks/swr/useQueryCourseSwr", () => ({ useQueryCourseSwr }))
-vi.mock("@/hooks/swr/useQueryFlashcardDecksByCourseSwr", () => ({ useQueryFlashcardDecksByCourseSwr }))
+vi.mock("@/hooks/swr/useQueryFlashcardDecksByCourseSwr", () => ({ useQueryFlashcardDecksByCourseSwr, useQueryMyDueFlashcardsSwr }))
 vi.mock("@/hooks/swr/useQueryMyInProgressFlashcardSessionSwr", () => ({ useQueryMyInProgressFlashcardSessionSwr }))
 vi.mock("@/hooks/swr/useMutateStartFlashcardSessionSwr", () => ({ useMutateStartFlashcardSessionSwr }))
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }))
@@ -25,6 +26,7 @@ const deck = { id: "deck-1", cards: [{ id: "card-1", level: "junior" }] }
 const ready = () => {
     useQueryCourseSwr.mockReturnValue({ data: { id: "course-1" }, error: undefined, mutate: vi.fn() })
     useQueryFlashcardDecksByCourseSwr.mockReturnValue({ data: [deck], error: undefined, mutate: vi.fn() })
+    useQueryMyDueFlashcardsSwr.mockReturnValue({ data: { dueCount: 1, cards: [{ cardId: "card-1" }] }, error: undefined, mutate: vi.fn() })
     useQueryMyInProgressFlashcardSessionSwr.mockReturnValue({ data: null, error: undefined })
     useMutateStartFlashcardSessionSwr.mockReturnValue({ error: undefined, trigger: vi.fn().mockResolvedValue(null) })
 }

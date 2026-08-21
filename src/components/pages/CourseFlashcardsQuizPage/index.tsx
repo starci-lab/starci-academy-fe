@@ -4,7 +4,7 @@ import { useMemo, useState } from "react"
 import { useLocale } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
-import { useQueryFlashcardDecksByCourseSwr } from "@/hooks/swr/useQueryFlashcardDecksByCourseSwr"
+import { useQueryFlashcardDecksByCourseSwr, useQueryMyDueFlashcardsSwr } from "@/hooks/swr/useQueryFlashcardDecksByCourseSwr"
 import { useQueryMyInProgressFlashcardSessionSwr } from "@/hooks/swr/useQueryMyInProgressFlashcardSessionSwr"
 import { useMutateStartFlashcardSessionSwr } from "@/hooks/swr/useMutateStartFlashcardSessionSwr"
 import { CourseFlashcardsQuizPageBase } from "./component"
@@ -24,6 +24,11 @@ const labels = (locale: string) => locale === "vi" ? {
     review: "Ôn tập", // vn-ok: localized Vietnamese interface copy.
     quiz: "Trắc nghiệm", // vn-ok: localized Vietnamese interface copy.
     configuration: "Thiết lập phiên", // vn-ok: localized Vietnamese interface copy.
+    sessionName: "Tên phiên", // vn-ok: localized Vietnamese interface copy.
+    sessionNamePlaceholder: "Ví dụ: Ôn hệ thống phân tán", // vn-ok: localized Vietnamese interface copy.
+    scope: "Phạm vi", // vn-ok: localized Vietnamese interface copy.
+    allScope: "Tất cả thẻ", // vn-ok: localized Vietnamese interface copy.
+    dueScope: "Chỉ thẻ đến hạn", // vn-ok: localized Vietnamese interface copy.
     mode: "Chế độ", // vn-ok: localized Vietnamese interface copy.
     quick: "Nhanh", // vn-ok: localized Vietnamese interface copy.
     deep: "Chuyên sâu", // vn-ok: localized Vietnamese interface copy.
@@ -45,6 +50,11 @@ const labels = (locale: string) => locale === "vi" ? {
     review: "Review",
     quiz: "Quiz",
     configuration: "Session setup",
+    sessionName: "Session name",
+    sessionNamePlaceholder: "For example: Distributed systems review",
+    scope: "Scope",
+    allScope: "All cards",
+    dueScope: "Due cards only",
     mode: "Mode",
     quick: "Quick",
     deep: "Deep",
@@ -78,24 +88,29 @@ export const CourseFlashcardsQuizPage = ({ displayId }: CourseFlashcardsQuizPage
     const router = useRouter()
     const [practiceMode, setPracticeMode] = useState<"quick" | "deep">("quick")
     const [level, setLevel] = useState<string | null>(null)
+    const [scope, setScope] = useState<"all" | "due">("all")
+    const [sessionName, setSessionName] = useState("")
     const course = useQueryCourseSwr({ displayId })
     const courseId = course.data?.id
     const decks = useQueryFlashcardDecksByCourseSwr(courseId)
+    const due = useQueryMyDueFlashcardsSwr(courseId)
     const inProgress = useQueryMyInProgressFlashcardSessionSwr(courseId === undefined ? undefined : { mode: "quiz", courseId })
     const start = useMutateStartFlashcardSessionSwr()
     const cardLimit = practiceMode === "quick" ? 5 : 10
+    const dueIds = useMemo(() => new Set((due.data?.cards ?? []).map((card) => card.cardId)), [due.data?.cards])
     const cardIds = useMemo(() => shuffle((decks.data ?? [])
         .flatMap((deck) => deck.cards)
         .filter((card) => level === null || card.level === level)
+        .filter((card) => scope === "all" || dueIds.has(card.id))
         .map((card) => card.id))
-        .slice(0, cardLimit), [cardLimit, decks.data, level])
-    const failed = course.error !== undefined || decks.error !== undefined || start.error !== undefined
-    const pending = course.data === undefined || decks.data === undefined
+        .slice(0, cardLimit), [cardLimit, decks.data, dueIds, level, scope])
+    const failed = course.error !== undefined || decks.error !== undefined || due.error !== undefined || start.error !== undefined
+    const pending = course.data === undefined || decks.data === undefined || due.data === undefined
     const state = quizStateOf(failed, pending, course.data === null || decks.data === null || cardIds.length === 0)
     const openSession = (sessionId: string) => router.push(`/courses/${displayId}/learn/flashcards/quiz/sessions/${sessionId}`)
     const startQuiz = async () => {
         if (courseId === undefined || cardIds.length === 0) return
-        const session = await start.trigger({ mode: "quiz", courseId, cardIds, practiceMode, level })
+        const session = await start.trigger({ mode: "quiz", courseId, cardIds, practiceMode, level, name: sessionName.trim() || undefined })
         if (session !== null) openSession(session.sessionId)
     }
 
@@ -108,6 +123,13 @@ export const CourseFlashcardsQuizPage = ({ displayId }: CourseFlashcardsQuizPage
                 reviewLabel: copy.review,
                 quizLabel: copy.quiz,
                 configurationTitle: copy.configuration,
+                sessionNameLabel: copy.sessionName,
+                sessionNamePlaceholder: copy.sessionNamePlaceholder,
+                sessionName,
+                scopeLabel: copy.scope,
+                allScopeLabel: copy.allScope,
+                dueScopeLabel: copy.dueScope,
+                selectedScope: scope,
                 modeLabel: copy.mode,
                 quickLabel: copy.quick,
                 deepLabel: copy.deep,
@@ -130,11 +152,13 @@ export const CourseFlashcardsQuizPage = ({ displayId }: CourseFlashcardsQuizPage
             }}
             on={{
                 openReview: () => router.push(`/courses/${displayId}/learn/flashcards/review`),
+                changeSessionName: setSessionName,
+                selectScope: setScope,
                 selectMode: setPracticeMode,
                 selectLevel: setLevel,
                 start: () => { void startQuiz() },
                 resume: openSession,
-                retry: () => { void Promise.all([course.mutate(), decks.mutate()]) },
+                retry: () => { void Promise.all([course.mutate(), decks.mutate(), due.mutate()]) },
             }}
         />
     )

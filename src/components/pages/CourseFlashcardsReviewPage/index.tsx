@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { useLocale } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
@@ -40,6 +41,10 @@ const labels = (locale: string) => locale === "vi" ? {
     retry: "Thử lại", // vn-ok: localized Vietnamese interface copy.
     empty: "Khóa học này chưa có bộ flashcard.", // vn-ok: localized Vietnamese interface copy.
     failed: "Không thể tải flashcard.", // vn-ok: localized Vietnamese interface copy.
+    modalTitle: "Chọn chế độ ôn", // vn-ok: localized Vietnamese interface copy.
+    reviewAll: "Ôn tất cả", // vn-ok: localized Vietnamese interface copy.
+    reviewDue: "Chỉ thẻ đến hạn", // vn-ok: localized Vietnamese interface copy.
+    cancel: "Hủy", // vn-ok: localized Vietnamese interface copy.
 } : {
     title: "Flashcards",
     subtitle: "Review with spaced repetition to remember longer.",
@@ -59,6 +64,10 @@ const labels = (locale: string) => locale === "vi" ? {
     retry: "Retry",
     empty: "This course has no flashcard decks yet.",
     failed: "Flashcards could not be loaded.",
+    modalTitle: "Choose review mode",
+    reviewAll: "Review all",
+    reviewDue: "Due cards only",
+    cancel: "Cancel",
 }
 
 /** Resolves deck, due queue, stats, and resumable sessions for the review overview. */
@@ -82,6 +91,8 @@ export const CourseFlashcardsReviewPage = ({ displayId }: CourseFlashcardsReview
         reviewKind: "due",
     })
     const start = useMutateStartFlashcardSessionSwr()
+    const [reviewIntent, setReviewIntent] = useState<{ readonly deckId?: string } | null>(null)
+    const [reviewScope, setReviewScope] = useState<"all" | "due">("due")
     const failed = course.error !== undefined
         || decks.error !== undefined
         || due.error !== undefined
@@ -147,11 +158,31 @@ export const CourseFlashcardsReviewPage = ({ displayId }: CourseFlashcardsReview
                     masteredCount: deck.masteredCount ?? 0,
                 })),
                 resumeSessionId: dueInProgress.data?.sessionId ?? deckInProgress.data?.sessionId,
+                modalOpen: reviewIntent !== null,
+                modalTitle: copy.modalTitle,
+                modalDescription: reviewIntent?.deckId === undefined
+                    ? copy.dueDescription
+                    : resolvedDecks.find((deck) => deck.id === reviewIntent.deckId)?.title ?? copy.decks,
+                reviewAllLabel: copy.reviewAll,
+                reviewDueLabel: copy.reviewDue,
+                cancelLabel: copy.cancel,
+                selectedScope: reviewScope,
+                selectedDeckId: reviewIntent?.deckId,
             }}
             on={{
                 openQuiz: () => router.push(`/courses/${displayId}/learn/flashcards/quiz`),
-                startDue: () => { void startDue() },
-                startDeck: (deckId) => { void startDeck(deckId) },
+                openReview: (deckId) => {
+                    setReviewIntent(deckId === undefined ? {} : { deckId })
+                    setReviewScope(deckId === undefined ? "due" : "all")
+                },
+                selectScope: setReviewScope,
+                confirmReview: () => {
+                    const deckId = reviewIntent?.deckId
+                    setReviewIntent(null)
+                    if (deckId !== undefined && reviewScope === "all") void startDeck(deckId)
+                    else void startDue()
+                },
+                dismissModal: () => setReviewIntent(null),
                 resume: openSession,
                 retry: () => { void Promise.all([course.mutate(), decks.mutate(), due.mutate(), stats.mutate()]) },
             }}

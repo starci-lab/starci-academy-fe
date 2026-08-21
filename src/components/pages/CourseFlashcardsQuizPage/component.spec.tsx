@@ -19,6 +19,13 @@ const makeInput = (): CourseFlashcardsQuizPageProps => ({
         reviewLabel: "Review",
         quizLabel: "Quiz",
         configurationTitle: "Session setup",
+        sessionNameLabel: "Session name",
+        sessionNamePlaceholder: "Name this run",
+        sessionName: "Distributed systems",
+        scopeLabel: "Scope",
+        allScopeLabel: "All cards",
+        dueScopeLabel: "Due only",
+        selectedScope: "all",
         modeLabel: "Mode",
         quickLabel: "Quick",
         deepLabel: "Deep",
@@ -38,7 +45,7 @@ const makeInput = (): CourseFlashcardsQuizPageProps => ({
         cardCount: 5,
         cardsLabel: "cards available",
     },
-    on: { openReview: vi.fn(), selectMode: vi.fn(), selectLevel: vi.fn(), start: vi.fn(), resume: vi.fn(), retry: vi.fn() },
+    on: { openReview: vi.fn(), selectMode: vi.fn(), changeSessionName: vi.fn(), selectScope: vi.fn(), selectLevel: vi.fn(), start: vi.fn(), resume: vi.fn(), retry: vi.fn() },
 })
 
 afterEach(cleanup)
@@ -51,9 +58,11 @@ describe("CourseFlashcardsQuizPageBase", () => {
         expect(container.querySelector("[data-node=course-flashcards-quiz-page]")).toBeTruthy()
         expect(container.querySelector("[data-node=flashcard-quiz-configuration]")).toBeTruthy()
         fireEvent.click(screen.getByRole("button", { name: "Deep" }))
+        fireEvent.click(screen.getByRole("button", { name: "Due only" }))
         fireEvent.click(screen.getByRole("button", { name: "Staff" }))
         fireEvent.click(screen.getByRole("button", { name: "Start quiz" }))
         expect(input.on.selectMode).toHaveBeenCalledWith("deep")
+        expect(input.on.selectScope).toHaveBeenCalledWith("due")
         expect(input.on.selectLevel).toHaveBeenCalledWith("staff")
         expect(input.on.start).toHaveBeenCalledOnce()
     })
@@ -63,7 +72,7 @@ describe("CourseFlashcardsQuizPageBase", () => {
         const { container } = render(<CourseFlashcardsQuizPageBase {...input} state="pending" />)
 
         expect(container.querySelector("[data-node=flashcard-quiz-configuration]")).toBeTruthy()
-        expect(container.querySelectorAll("[data-component=Button][data-loading=true]")).toHaveLength(8)
+        expect(container.querySelectorAll("[data-component=Button][data-loading=true]")).toHaveLength(10)
         expect(container.querySelector("[data-component=Heading][data-loading=true]")).toBeTruthy()
         expect(screen.queryByText("Empty")).not.toBeInTheDocument()
     })

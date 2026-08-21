@@ -35,8 +35,15 @@ const makeInput = (): CourseFlashcardsReviewPageProps => ({
         failedText: "Failed",
         dueCount: 3,
         decks: [{ id: "deck-1", title: "Core", description: "Core concepts", difficulty: "easy", cardCount: 5, dueCount: 3, masteredCount: 1 }],
+        modalOpen: false,
+        modalTitle: "Choose review mode",
+        modalDescription: "Core",
+        reviewAllLabel: "Review all",
+        reviewDueLabel: "Due only",
+        cancelLabel: "Cancel",
+        selectedScope: "due",
     },
-    on: { openQuiz: vi.fn(), startDue: vi.fn(), startDeck: vi.fn(), resume: vi.fn(), retry: vi.fn() },
+    on: { openQuiz: vi.fn(), openReview: vi.fn(), selectScope: vi.fn(), confirmReview: vi.fn(), dismissModal: vi.fn(), resume: vi.fn(), retry: vi.fn() },
 })
 
 afterEach(cleanup)
@@ -51,8 +58,8 @@ describe("CourseFlashcardsReviewPageBase", () => {
         const startButtons = screen.getAllByRole("button", { name: "Start" })
         fireEvent.click(startButtons[0])
         fireEvent.click(startButtons[1])
-        expect(input.on.startDue).toHaveBeenCalledOnce()
-        expect(input.on.startDeck).toHaveBeenCalledWith("deck-1")
+        expect(input.on.openReview).toHaveBeenNthCalledWith(1)
+        expect(input.on.openReview).toHaveBeenNthCalledWith(2, "deck-1")
         expect(screen.getByText("2 day streak · 80% retention")).toBeInTheDocument()
         expect(screen.getByText("5 cards · 3 due · 1 mastered")).toBeInTheDocument()
     })

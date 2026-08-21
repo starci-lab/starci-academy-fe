@@ -49,6 +49,12 @@ const COPY = {
         easy: "Easy",
         correct: "I got it",
         incorrect: "Needs review",
+        clozeInstruction: "Fill every blank with a term from the word bank.",
+        wordBank: "Word bank",
+        checkAnswer: "Check answer",
+        showSolution: "Show full answer",
+        result: "blanks correct",
+        rating: "How well did you remember it?",
         syncing: "Saving progress…",
         completing: "Completing session…",
         expired: "This session is no longer resumable.",
@@ -67,6 +73,12 @@ const COPY = {
         easy: "Dễ", // vn-ok: localized Vietnamese interface copy.
         correct: "Tôi trả lời đúng", // vn-ok: localized Vietnamese interface copy.
         incorrect: "Cần ôn lại", // vn-ok: localized Vietnamese interface copy.
+        clozeInstruction: "Điền mỗi chỗ trống bằng một thuật ngữ trong ngân hàng từ.", // vn-ok: localized Vietnamese interface copy.
+        wordBank: "Ngân hàng từ", // vn-ok: localized Vietnamese interface copy.
+        checkAnswer: "Kiểm tra đáp án", // vn-ok: localized Vietnamese interface copy.
+        showSolution: "Xem đáp án đầy đủ", // vn-ok: localized Vietnamese interface copy.
+        result: "blank chính xác", // vn-ok: localized Vietnamese interface copy.
+        rating: "Mức độ ghi nhớ", // vn-ok: localized Vietnamese interface copy.
         syncing: "Đang lưu tiến độ…", // vn-ok: localized Vietnamese interface copy.
         completing: "Đang hoàn tất phiên…", // vn-ok: localized Vietnamese interface copy.
         expired: "Phiên này không còn có thể tiếp tục.", // vn-ok: localized Vietnamese interface copy.
@@ -78,12 +90,19 @@ const COPY = {
 
 const clozePattern = /\{\{c\d+::([^}]+)}}/g
 
-const buildQuizPrompt = (front: string): { readonly prompt: string; readonly blankCount: number } => {
-    const matches = Array.from(front.matchAll(clozePattern))
-    return {
-        prompt: matches.length === 0 ? front : front.replace(clozePattern, "____"),
-        blankCount: Math.max(matches.length, 1),
-    }
+const markerTerms = (value: string): ReadonlyArray<string> => Array.from(value.matchAll(clozePattern))
+    .map((match) => match[1]?.split("::")[0]?.trim() ?? "")
+    .filter(Boolean)
+
+const buildQuizCloze = (
+    answer: string,
+    siblingTerms: ReadonlyArray<string>,
+): { readonly text: string, readonly blanks: ReadonlyArray<string>, readonly bank: ReadonlyArray<string> } | undefined => {
+    const blanks = markerTerms(answer)
+    if (blanks.length === 0) return undefined
+    const text = answer.replace(clozePattern, "____")
+    const bank = [...new Set([...blanks, ...siblingTerms.filter((term) => !blanks.includes(term)).slice(0, 2)])]
+    return { text, blanks, bank }
 }
 
 /** Connects persisted start/resume state to per-card sync and completion transport. */
@@ -108,6 +127,9 @@ export const CourseFlashcardSessionPage = ({ displayId, sessionId, mode }: Cours
     const [answers, setAnswers] = useState<ReadonlyArray<FlashcardQuizAnswer>>([])
     const [xpEarned, setXpEarned] = useState(0)
     const [answerVisible, setAnswerVisible] = useState(false)
+    const [selectedTerms, setSelectedTerms] = useState<ReadonlyArray<string>>([])
+    const [quizChecked, setQuizChecked] = useState(false)
+    const [solutionVisible, setSolutionVisible] = useState(false)
     const [localFailed, setLocalFailed] = useState(false)
 
     useEffect(() => {
@@ -119,6 +141,9 @@ export const CourseFlashcardSessionPage = ({ displayId, sessionId, mode }: Cours
         setAnswers(session.data.results)
         setXpEarned(session.data.xpEarned)
         setAnswerVisible(false)
+        setSelectedTerms([])
+        setQuizChecked(false)
+        setSolutionVisible(false)
         setLocalFailed(false)
     }, [session.data])
 
@@ -130,7 +155,9 @@ export const CourseFlashcardSessionPage = ({ displayId, sessionId, mode }: Cours
     }, [persistedResult.data?.status, resultRoute, router])
 
     const currentCard = session.data?.cards[index]
-    const quizPrompt = useMemo(() => buildQuizPrompt(currentCard?.front ?? ""), [currentCard?.front])
+    const siblingTerms = useMemo(() => (session.data?.cards ?? []).flatMap((card) => markerTerms(card.back ?? "")), [session.data?.cards])
+    const quizCloze = useMemo(() => buildQuizCloze(currentCard?.back ?? "", siblingTerms), [currentCard?.back, siblingTerms])
+    const correctQuizTerms = quizCloze === undefined ? 0 : selectedTerms.filter((term, position) => term.toLowerCase() === quizCloze.blanks[position]?.toLowerCase()).length
     const leave = () => router.push(`/courses/${displayId}/learn/flashcards/${mode}`)
     const finishReview = async (kind: FlashcardReviewKind, count: number, xp: number) => {
         const result = await complete.trigger({ mode: "review", kind, sessionId, reviewedCount: count, xpEarned: xp })
@@ -166,25 +193,29 @@ export const CourseFlashcardSessionPage = ({ displayId, sessionId, mode }: Cours
             setGradedIndexes(nextGradedIndexes)
             setIndex(nextIndex)
             setAnswerVisible(false)
+            setSelectedTerms([])
+            setQuizChecked(false)
+            setSolutionVisible(false)
         } catch {
             setLocalFailed(true)
         }
     }
-    const submitQuizAnswer = async (correct: boolean) => {
+    const submitQuizGrade = async (grade: 0 | 1 | 2 | 3) => {
         if (session.data === null || session.data === undefined || currentCard === undefined || courseId === undefined) return
+        const totalBlanks = quizCloze?.blanks.length ?? 0
         const nextAnswers = [
             ...answers.filter((answer) => answer.cardId !== currentCard.cardId),
             {
                 cardId: currentCard.cardId,
-                correctBlanks: correct ? quizPrompt.blankCount : 0,
-                totalBlanks: quizPrompt.blankCount,
+                correctBlanks: correctQuizTerms,
+                totalBlanks,
             },
         ]
         try {
             const gradeResult = await rate.trigger({
                 cardId: currentCard.cardId,
                 sessionId,
-                grade: correct ? 2 : 0,
+                grade,
             })
             if (gradeResult === null) throw new Error("Flashcard quiz grade returned no result")
             if (index >= session.data.cards.length - 1) {
@@ -199,6 +230,9 @@ export const CourseFlashcardSessionPage = ({ displayId, sessionId, mode }: Cours
             setAnswers(nextAnswers)
             setIndex(nextIndex)
             setAnswerVisible(false)
+            setSelectedTerms([])
+            setQuizChecked(false)
+            setSolutionVisible(false)
         } catch {
             setLocalFailed(true)
         }
@@ -230,16 +264,27 @@ export const CourseFlashcardSessionPage = ({ displayId, sessionId, mode }: Cours
                 progressText: copy.progress(index + 1, session.data?.cards.length ?? 0),
                 deckTitle: currentCard?.deckTitle,
                 level: currentCard?.level,
-                prompt: mode === "quiz" ? quizPrompt.prompt : currentCard?.front,
+                prompt: currentCard?.front,
                 answer: currentCard?.back,
-                answerVisible,
+                answerVisible: answerVisible || solutionVisible,
+                cloze: mode !== "quiz" || quizCloze === undefined ? undefined : {
+                    ...quizCloze,
+                    selected: selectedTerms,
+                    checked: quizChecked,
+                    correctCount: correctQuizTerms,
+                },
+                solutionVisible,
                 revealLabel: copy.reveal,
+                clozeInstructionLabel: copy.clozeInstruction,
+                wordBankLabel: copy.wordBank,
+                checkAnswerLabel: copy.checkAnswer,
+                showSolutionLabel: copy.showSolution,
+                resultLabel: copy.result,
+                ratingLabel: copy.rating,
                 againLabel: copy.again,
                 hardLabel: copy.hard,
                 goodLabel: copy.good,
                 easyLabel: copy.easy,
-                correctLabel: copy.correct,
-                incorrectLabel: copy.incorrect,
                 syncingLabel: copy.syncing,
                 completingLabel: copy.completing,
                 expiredText: copy.expired,
@@ -249,8 +294,13 @@ export const CourseFlashcardSessionPage = ({ displayId, sessionId, mode }: Cours
             }}
             on={{
                 reveal: () => setAnswerVisible(true),
-                rate: (grade) => { void submitReviewGrade(grade) },
-                answerQuiz: (correct) => { void submitQuizAnswer(correct) },
+                selectTerm: (term) => setSelectedTerms((current) => current.length >= (quizCloze?.blanks.length ?? 0) || current.includes(term) ? current : [...current, term]),
+                checkQuiz: () => setQuizChecked(true),
+                showSolution: () => {
+                    setSolutionVisible(true)
+                    setAnswerVisible(true)
+                },
+                rate: (grade) => { void (mode === "quiz" ? submitQuizGrade(grade) : submitReviewGrade(grade)) },
                 retry: () => {
                     setLocalFailed(false)
                     void Promise.all([course.mutate(), session.mutate(), persistedResult.mutate()])

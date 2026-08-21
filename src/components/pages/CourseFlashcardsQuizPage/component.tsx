@@ -2,6 +2,7 @@ import { Tree } from "@/components/branches/Tree"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { Button } from "@/components/leaves/Button"
 import { Heading } from "@/components/leaves/Heading"
+import { Input } from "@/components/leaves/Input"
 import { NavLink } from "@/components/leaves/NavLink"
 import { Text } from "@/components/leaves/Text"
 import {
@@ -19,6 +20,13 @@ export type CourseFlashcardsQuizPageProps = {
         readonly reviewLabel: string
         readonly quizLabel: string
         readonly configurationTitle: string
+        readonly sessionNameLabel: string
+        readonly sessionNamePlaceholder: string
+        readonly sessionName: string
+        readonly scopeLabel: string
+        readonly allScopeLabel: string
+        readonly dueScopeLabel: string
+        readonly selectedScope: "all" | "due"
         readonly modeLabel: string
         readonly quickLabel: string
         readonly deepLabel: string
@@ -42,6 +50,8 @@ export type CourseFlashcardsQuizPageProps = {
     readonly on: {
         readonly openReview: () => void
         readonly selectMode: (mode: "quick" | "deep") => void
+        readonly changeSessionName: (value: string) => void
+        readonly selectScope: (scope: "all" | "due") => void
         readonly selectLevel: (level: string | null) => void
         readonly start: () => void
         readonly resume: (sessionId: string) => void
@@ -94,6 +104,18 @@ export const CourseFlashcardsQuizPageBase = (input: CourseFlashcardsQuizPageProp
                 : defineLeafComponent("button", {}, () => (
                     <Button props={{ label: data.resumeLabel, variant: "outline" }} on={{ press: () => on.resume(resumeSessionId) }} />
                 )),
+            nameLabel: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
+                <Text props={{ content: data.sessionNameLabel, size: "sm", weight: "semibold" }} isLoading={isLoading} />
+            )),
+            name: defineLeafComponent("input", {}, () => (
+                <Input props={{ id: "flashcard-quiz-session-name", name: "sessionName", kind: "text", placeholder: data.sessionNamePlaceholder, defaultValue: data.sessionName }} on={{ change: on.changeSessionName }} isLoading={isLoading} />
+            )),
+            scopeLabel: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
+                <Text props={{ content: data.scopeLabel, size: "sm", weight: "semibold" }} isLoading={isLoading} />
+            )),
+            scope: (["all", "due"] as const).map((scope) => defineLeafComponent("button", {}, () => (
+                <Button props={{ label: scope === "all" ? data.allScopeLabel : data.dueScopeLabel, variant: data.selectedScope === scope ? "primary" : "outline" }} on={{ press: () => on.selectScope(scope) }} isLoading={isLoading} />
+            ))),
             modeLabel: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
                 <Text props={{ content: data.modeLabel, size: "sm", weight: "semibold" }} isLoading={isLoading} />
             )),
