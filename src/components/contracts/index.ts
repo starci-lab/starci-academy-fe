@@ -27,7 +27,7 @@
 export type LayoutClassName =
     | "flex" | "grid" | "flex-col" | "flex-row" | "flex-wrap" | "flex-nowrap" | "overflow-hidden" | "relative"
     | "min-h-0" | "overflow-y-auto" | "overscroll-contain" | "scrollbar"
-    | "items-center" | "items-baseline" | "items-start" | "items-end"
+    | "items-center" | "items-baseline" | "items-start" | "items-end" | "items-stretch"
     | "justify-between" | "justify-center" | "justify-end" | "[&>*]:w-full"
     | "gap-1" | "gap-2" | "gap-3" | "gap-4" | "gap-6" | "gap-8"
     | "grid-cols-1" | "grid-cols-2" | "sm:grid-cols-2" | "sm:grid-cols-4" | "lg:grid-cols-3"
@@ -418,9 +418,9 @@ export const CONTRACTS = buildContracts({
         host: "main",
         classes: ["flex", "w-full", "max-w-app-lg", "flex-col", "gap-6", "p-6"],
         children: {
-            header: { contract: "page-header-stack" },
+            header: { contract: "course-content-header-stack" },
             description: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
-            meta: { contract: "course-content-meta-row", optional: true },
+            meta: { contract: "status-metadata-line", optional: true },
             gates: { contract: "course-content-gate-run", optional: true },
             resume: { contract: "course-content-resume-progress" },
             nudges: { contract: "course-content-nudge-run", optional: true },
@@ -429,12 +429,13 @@ export const CONTRACTS = buildContracts({
         },
         why: "if you need course identity to lead through optional catalogue and learner facts into one continuation decision and only the current authored module path.",
     },
-    "course-content-meta-row": {
+    "status-metadata-line": {
         classes: ["flex", "w-full", "min-w-0", "flex-row", "flex-wrap", "items-center", "gap-2"],
         children: {
-            fact: { leaf: "badge", repeats: true, restingCount: 3 },
+            status: { leaf: "badge", optional: true },
+            facts: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
         },
-        why: "if you need optional module, study-time and learner facts to wrap as peers without competing with course identity.",
+        why: "if metadata may promote at most one semantic status chip while every remaining fact stays one plain-text run separated by middle dots.",
     },
     "course-content-gate-run": {
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3"],
@@ -2154,7 +2155,7 @@ export const CONTRACTS = buildContracts({
         classes: ["flex", "w-full", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-3"],
         children: {
             leading: { leaf: "choice-tabs" },
-            trailing: { leaf: "choice-tabs" },
+            trailing: { leaf: ["choice-tabs", "select"], optional: true },
         },
         why: "if you need two independent primary-tab axes governing one result set, sharing a toolbar row without invented container chrome.",
     },
@@ -2473,7 +2474,7 @@ export const CONTRACTS = buildContracts({
         children: {
             glyph: { leaf: "icon", props: { size: "sm" } },
             title: { leaf: "text", props: { size: "sm", tone: "default" } },
-            fact: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
+            fact: { leaf: ["badge", "text"], optional: true },
         },
         why: "if you need a compact icon-label row for an action or selection with an optional trailing fact subordinate to it.",
     },
@@ -2776,26 +2777,14 @@ export const CONTRACTS = buildContracts({
      */
     "content-reader-frame": {
         classes: [
-            "flex", "w-full", "min-w-0", "flex-col", "items-start",
-            "md:flex-row", "md:items-start",
+            "flex", "h-app-rail", "w-full", "min-w-0", "flex-col", "items-stretch", "overflow-hidden",
+            "md:flex-row",
             "md:[&>[data-node=learn-route-context-rail]]:w-80",
             "md:[&>[data-node=learn-route-context-rail]]:shrink-0",
-            "md:[&>[data-node=learn-route-context-rail]]:sticky",
-            "md:[&>[data-node=learn-route-context-rail]]:top-rail",
-            "md:[&>[data-node=learn-route-context-rail]]:self-start",
-            "md:[&>[data-node=learn-route-context-rail]]:max-h-rail",
-            "md:[&>[data-node=learn-route-context-rail]]:overflow-y-auto",
             "md:[&>[data-node=learn-content-page]]:min-w-0",
             "md:[&>[data-node=learn-content-page]]:grow",
-            "md:[&>[data-node=learn-content-page]]:max-h-rail",
-            "md:[&>[data-node=learn-content-page]]:overflow-y-auto",
             "md:[&>[data-node=content-outline-rail]]:w-64",
             "md:[&>[data-node=content-outline-rail]]:shrink-0",
-            "md:[&>[data-node=content-outline-rail]]:sticky",
-            "md:[&>[data-node=content-outline-rail]]:top-rail",
-            "md:[&>[data-node=content-outline-rail]]:self-start",
-            "md:[&>[data-node=content-outline-rail]]:max-h-rail",
-            "md:[&>[data-node=content-outline-rail]]:overflow-y-auto",
         ],
         children: {
             contents: { contract: "learn-route-context-rail" },
@@ -2803,17 +2792,17 @@ export const CONTRACTS = buildContracts({
             main: { contract: "learn-content-page" },
             outline: { contract: "content-outline-rail", optional: true },
         },
-        why: "if you need the two-rail reading frame — course map on one side, on-page outline on the other, both sticky — around a flexible main content column.",
+        why: "if you need the course map, reading document and on-page outline aligned to one clipped viewport while their dedicated ScrollViewport branches move independently.",
     },
     "content-map-panel": {
         host: "nav",
-        classes: ["flex", "w-full", "min-w-0", "min-h-0", "flex-col", "gap-4", "px-3"],
+        classes: ["flex", "w-full", "min-w-0", "min-h-0", "flex-col", "gap-4", "px-3", "py-6"],
         children: {
             progress: { composite: "labelled-progress-row" },
             search: { leaf: "search-box" },
             modules: { contract: "content-map-module-list" },
         },
-        why: "if you need course progress and search pinned above the independently scrolling module tree with no outer block inset invented by the resizable rail.",
+        why: "if you need course progress and search pinned above the independently scrolling module tree with the rail's required horizontal and vertical page inset.",
     },
     "content-map-module-list": {
         classes: ["flex", "w-full", "min-w-0", "min-h-0", "flex-1", "flex-col", "divide-y", "divide-separator", "overflow-y-auto", "overscroll-contain", "scroll-shadow", "scroll-shadow--vertical", "scroll-shadow--hide-scrollbar"],
@@ -2856,12 +2845,12 @@ export const CONTRACTS = buildContracts({
     },
     "content-outline-rail": {
         host: "nav",
-        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-2", "p-4"],
+        classes: ["flex", "h-full", "w-full", "min-w-0", "min-h-0", "flex-col", "gap-2", "overflow-y-auto", "overscroll-contain", "scrollbar", "p-4"],
         children: {
             label: { leaf: "text", props: { size: "sm", tone: "muted" } },
             heading: { leaf: "nav-link", props: { kind: "section" }, repeats: true, restingCount: 5 },
         },
-        why: "if you need a labelled list of on-page section links for jumping within the current content.",
+        why: "if you need a labelled on-page outline to own its full-height ScrollViewport and move independently from the reading document.",
     },
 
     "learn-content-page": {
@@ -2869,18 +2858,33 @@ export const CONTRACTS = buildContracts({
         // than being posted inside somebody else's - which is what let a review harness draw a
         // second one, and what a rule caught before any of it was seen.
         host: "main",
-        classes: ["flex", "w-full", "min-w-0", "flex-col"],
+        classes: ["flex", "h-full", "w-full", "min-w-0", "min-h-0", "flex-col", "overflow-hidden"],
+        children: {
+            viewport: { contract: "content-reader-main-scroll-viewport" },
+        },
+        why: "if you need the routed page to retain the document's main landmark while its nested ScrollViewport owns vertical movement.",
+    },
+    "course-content-header-stack": {
+        classes: ["flex", "flex-col", "gap-2"],
+        children: {
+            trail: { leaf: "breadcrumbs", optional: true },
+            title: { leaf: "heading" },
+        },
+        why: "if one course-content identity joins its orientation trail and title as a compact ordered header run.",
+    },
+    "content-reader-main-scroll-viewport": {
+        classes: ["h-full", "w-full", "min-w-0", "min-h-0", "overflow-y-auto", "overscroll-contain", "scrollbar"],
         children: {
             inner: { contract: "content-reader-inner" },
         },
-        why: "if you need the flexible, independently scrolling page owner inside the two-rail content reader frame.",
+        why: "if you need the reading document body to move inside the page-owned main landmark without moving either navigation rail.",
     },
     "content-reader-inner": {
         classes: ["flex", "w-full", "max-w-app-md", "flex-col", "gap-6", "p-6"],
         children: {
-            header: { contract: "page-header-stack" },
+            header: { contract: "course-content-header-stack" },
             description: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
-            meta: { contract: "course-content-meta-row", optional: true },
+            meta: { contract: "status-metadata-line", optional: true },
             faces: { contract: "dual-tabs-toolbar", optional: true },
             body: { contract: ["content-reading-column", "centred-empty-notice", "source-workspace-root"] },
         },
@@ -3724,7 +3728,7 @@ export const CONTRACTS = buildContracts({
         classes: ["flex", "min-w-0", "flex-col", "gap-2"],
         children: {
             toolbar: { contract: "source-workspace-toolbar" },
-            workspace: { contract: "source-workspace-grid", optional: true },
+            workspace: { contract: ["source-workspace-grid", "source-code-reader-grid"], optional: true },
         },
         why: "if you need the outer wrapper that keeps a snapshot toolbar attached to its editor/preview workspace through every loading or failure state.",
     },
@@ -3736,6 +3740,14 @@ export const CONTRACTS = buildContracts({
             preview: { leaf: "page" },
         },
         why: "if you need a file explorer, editor and live preview laid out as desktop peers that collapse to one column on narrow screens.",
+    },
+    "source-code-reader-grid": {
+        classes: ["grid", "min-w-0", "grid-cols-1", "sm:grid-cols-2"],
+        children: {
+            files: { contract: "source-file-navigation" },
+            editor: { contract: "source-code-editor-frame" },
+        },
+        why: "if you need a read-only source explorer and code reader to share the available width without fabricating a runnable preview.",
     },
     "source-code-editor-frame": {
         classes: ["min-h-80", "min-w-0", "overflow-auto"],

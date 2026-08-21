@@ -2,14 +2,16 @@ import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { SurfaceAccordionCard } from "@/components/branches/SurfaceAccordionCard"
 import { SurfaceListCard, type SurfaceListCardData } from "@/components/branches/SurfaceListCard"
+import { ScrollViewport } from "@/components/branches/ScrollViewport"
 import { LabelledProgressRow } from "@/components/composites/LabelledProgressRow"
+import { StatusMetadataLine, type StatusMetadataLineStatus } from "@/components/composites/StatusMetadataLine"
 import { Breadcrumbs } from "@/components/leaves/Breadcrumbs"
 import { NavLink } from "@/components/leaves/NavLink"
 import { DisclosureIndicator } from "@/components/leaves/DisclosureIndicator"
 import { Progress } from "@/components/leaves/Progress"
 import { SearchBox } from "@/components/leaves/SearchBox"
 import { SelectionList } from "@/components/leaves/SelectionList"
-import { Article } from "@/components/leaves/Article"
+import { Article } from "@/components/branches/Article"
 import { Icon } from "@/components/leaves/Icon"
 import { Heading } from "@/components/leaves/Heading"
 import { Pagination } from "@/components/leaves/Pagination"
@@ -126,6 +128,8 @@ export type CourseLearnContentPageData = {
     readonly description?: string
     /** Compact source-backed facts such as read state and estimated reading time. */
     readonly facts?: ReadonlyArray<string>
+    /** The optional semantic state promoted to the one status chip ahead of quiet facts. */
+    readonly status?: StatusMetadataLineStatus
     /** The faces this content carries. One face means the bar states the obvious, so it is absent. */
     readonly faces?: ReadonlyArray<ContentFace>
     readonly selectedFace?: ContentFaceId
@@ -280,7 +284,7 @@ export const CourseLearnContentPageBase = (input: CourseLearnContentPageProps) =
         <Article props={{ body: input.props.body, aiSelectable: true }} isLoading={isLoading} />
     ))
 
-    const header = defineContractComponent("page-header-stack", {
+    const header = defineContractComponent("course-content-header-stack", {
         trail: defineLeafComponent("breadcrumbs", {}, () => (
             <Breadcrumbs
                 props={{
@@ -536,47 +540,54 @@ export const CourseLearnContentPageBase = (input: CourseLearnContentPageProps) =
         ? sourceBody
         : readingBody
 
-    const reader = defineContractComponent("learn-content-page", {
-        inner: defineContractComponent("content-reader-inner", {
-            header,
-            ...(input.props.description === undefined ? {} : {
-                description: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                    <Text props={{ content: input.props.description, size: "sm", tone: "muted" }} isLoading={isLoading} />
-                )),
-            }),
-            ...((input.props.facts ?? []).length === 0 ? {} : {
-                meta: defineContractComponent("course-content-meta-row", {
-                    fact: (input.props.facts ?? []).map((fact) => defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                        <Text props={{ content: fact, size: "sm", tone: "muted" }} isLoading={isLoading} />
-                    ))),
-                }),
-            }),
-            /*
+    const readerInner = defineContractComponent("content-reader-inner", {
+        header,
+        ...(input.props.description === undefined ? {} : {
+            description: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                <Text props={{ content: input.props.description, size: "sm", tone: "muted" }} isLoading={isLoading} />
+            )),
+        }),
+        ...((input.props.facts ?? []).length === 0 && input.props.status === undefined ? {} : {
+            meta: defineContractProjection("status-metadata-line", () => (
+                <StatusMetadataLine
+                    props={{ facts: input.props.facts ?? [], status: input.props.status }}
+                    isLoading={isLoading}
+                />
+            )),
+        }),
+        /*
                  * The bar is real at every state, which is the legacy decision this restores: the
                  * faces come from the route rather than from the content body, so they are already
                  * true while the body is still arriving. A single face is still not a choice - a
                  * one-tab bar reads as a control that does not work.
                  */
-            ...(faces.length > 1 || (input.props.languages ?? []).length > 1 ? {
-                faces: contentTabRow(
-                    {
-                        facesLabel: labels.facesLabel,
-                        faces,
-                        selectedFace: input.props.selectedFace,
-                        languagesLabel: input.props.languagesLabel,
-                        languages: input.props.languages,
-                        selectedLanguage: input.props.selectedLanguage,
-                    },
-                    {
-                        selectReading: input.on?.selectReading,
-                        selectSource: input.on?.selectSource,
-                        selectChallenge: input.on?.selectChallenge,
-                        selectLanguage: input.on?.selectLanguage,
-                    },
-                ),
-            } : {}),
-            body: visibleBody,
-        }),
+        ...(faces.length > 1 || (input.props.languages ?? []).length > 1 ? {
+            faces: contentTabRow(
+                {
+                    facesLabel: labels.facesLabel,
+                    faces,
+                    selectedFace: input.props.selectedFace,
+                    languagesLabel: input.props.languagesLabel,
+                    languages: input.props.languages,
+                    selectedLanguage: input.props.selectedLanguage,
+                },
+                {
+                    selectReading: input.on?.selectReading,
+                    selectSource: input.on?.selectSource,
+                    selectChallenge: input.on?.selectChallenge,
+                    selectLanguage: input.on?.selectLanguage,
+                },
+            ),
+        } : {}),
+        body: visibleBody,
+    })
+    const readerViewport = defineContractComponent("content-reader-main-scroll-viewport", {
+        inner: readerInner,
+    })
+    const reader = defineContractComponent("learn-content-page", {
+        viewport: defineContractProjection("content-reader-main-scroll-viewport", () => (
+            <ScrollViewport boundary="content-reader-main" render={readerViewport} />
+        )),
     })
 
     if (input.props.mobileView === "contents") {
@@ -586,7 +597,7 @@ export const CourseLearnContentPageBase = (input: CourseLearnContentPageProps) =
         return <Tree contract="learn-content-page" render={reader} />
     }
     if (input.props.mobileView === "outline") {
-        return <Tree contract="content-outline-rail" render={outline} />
+        return <ScrollViewport boundary="content-outline-rail" render={outline} />
     }
 
     return (
@@ -608,7 +619,11 @@ export const CourseLearnContentPageBase = (input: CourseLearnContentPageProps) =
                     />
                 )),
                 main: reader,
-                ...(outlineEntries.length === 0 ? {} : { outline }),
+                ...(outlineEntries.length === 0 ? {} : {
+                    outline: defineContractProjection("content-outline-rail", () => (
+                        <ScrollViewport boundary="content-outline-rail" render={outline} />
+                    )),
+                }),
             })}
         />
     )

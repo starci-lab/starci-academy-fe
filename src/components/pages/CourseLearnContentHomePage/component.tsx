@@ -1,6 +1,7 @@
 import { Tree } from "@/components/branches/Tree"
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { StatusMetadataLine, type StatusMetadataLineStatus } from "@/components/composites/StatusMetadataLine"
 import { CONTRACTS } from "@/components/contracts"
 import {
     defineCompositeComponent,
@@ -10,7 +11,6 @@ import {
     type BlockProps,
 } from "@/components/contracts/props"
 import { Breadcrumbs, type BreadcrumbStep } from "@/components/leaves/Breadcrumbs"
-import { Badge } from "@/components/leaves/Badge"
 import { Button } from "@/components/leaves/Button"
 import { Heading } from "@/components/leaves/Heading"
 import { NavLink } from "@/components/leaves/NavLink"
@@ -39,6 +39,7 @@ export type CourseLearnContentHomeData = {
     readonly breadcrumbLabel: string
     readonly trail: ReadonlyArray<BreadcrumbStep>
     readonly metaFacts: ReadonlyArray<string>
+    readonly metaStatus?: StatusMetadataLineStatus
     readonly gateMessages: ReadonlyArray<string>
     readonly resumeEyebrow: string
     readonly resumeTarget: string
@@ -90,7 +91,7 @@ export const CourseLearnContentHomePageBase = (input: CourseLearnContentHomeProp
 
     return (
         <Tree contract="course-content-home-overview-page" render={defineContractComponent("course-content-home-overview-page", {
-            header: defineContractComponent("page-header-stack", {
+            header: defineContractComponent("course-content-header-stack", {
                 trail: defineLeafComponent("breadcrumbs", {}, () => (
                     <Breadcrumbs
                         props={{ steps: input.props.trail, label: input.props.breadcrumbLabel }}
@@ -105,11 +106,14 @@ export const CourseLearnContentHomePageBase = (input: CourseLearnContentHomeProp
             description: input.props.description === undefined ? undefined : defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
                 <Text props={{ content: input.props.description, size: "sm", tone: "muted" }} isLoading={isLoading} />
             )),
-            meta: input.props.metaFacts.length === 0 ? undefined : defineContractComponent("course-content-meta-row", {
-                fact: input.props.metaFacts.map((fact) => defineLeafComponent("badge", {}, () => (
-                    <Badge props={{ content: fact }} isLoading={isLoading} />
-                ))),
-            }),
+            meta: input.props.metaFacts.length === 0 && input.props.metaStatus === undefined
+                ? undefined
+                : defineContractProjection("status-metadata-line", () => (
+                    <StatusMetadataLine
+                        props={{ facts: input.props.metaFacts, status: input.props.metaStatus }}
+                        isLoading={isLoading}
+                    />
+                )),
             gates: input.props.gateMessages.length === 0 ? undefined : defineContractComponent("course-content-gate-run", {
                 gate: input.props.gateMessages.map((message) => defineLeafComponent("text", { size: "sm" }, () => (
                     <Text props={{ content: message, size: "sm" }} />

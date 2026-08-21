@@ -2,6 +2,18 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { CourseLearnContentHomePage } from "./index"
 
+Object.defineProperty(window, "localStorage", {
+    configurable: true,
+    value: {
+        getItem: vi.fn(() => null),
+        setItem: vi.fn(),
+        removeItem: vi.fn(),
+        clear: vi.fn(),
+        key: vi.fn(() => null),
+        length: 0,
+    },
+})
+
 type CourseContentMapMockProps = { readonly displayId: string }
 
 const mocks = vi.hoisted(() => ({

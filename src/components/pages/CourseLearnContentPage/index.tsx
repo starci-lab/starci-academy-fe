@@ -181,10 +181,10 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
     const isLocked = content.data?.isPremium === true
     const state = contentStateOf(isPending, hasFailed, isLocked)
 
-    const hasSource = content.data?.isSandbox === true
-        && content.data.githubBaseUrl !== null
-        && content.data.githubDir !== null
+    const hasSource = content.data?.githubBaseUrl != null
+        && content.data.githubDir != null
         && !isLocked
+    const canRunSandbox = content.data?.isSandbox === true
     const source = useRepoSandpackFiles({
         contentId: content.data?.id,
         githubBaseUrl: content.data?.githubBaseUrl,
@@ -327,12 +327,14 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                 mobileView: mobileViewOf(isMobile, view),
                 title: content.data?.title,
                 description: content.data?.description ?? undefined,
-                facts: content.data == null ? [] : [contentHomeT("lessonFact", {
-                    minutes: content.data.minutesRead,
-                    status: activeLesson?.isRead === true
+                facts: content.data == null ? [] : [contentHomeT("minutes", { count: content.data.minutesRead })],
+                status: activeLesson === undefined ? undefined : {
+                    content: activeLesson?.isRead === true
                         ? contentHomeT("lessonRead")
                         : contentHomeT("lessonUnread"),
-                })],
+                    tone: activeLesson?.isRead === true ? "success" : "neutral",
+                    icon: activeLesson?.isRead === true ? "complete" : "incomplete",
+                },
                 faces: [
                     { id: "reading", label: t("readingFace"), icon: "course" },
                     ...(hasSource ? [{ id: "source" as const, label: t("sourceFace"), icon: "practice" as const }] : []),
@@ -354,6 +356,7 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                 ...(selectedFace !== "source" || !hasSource ? {} : {
                     sourceState: sourceStateOf(source.error !== undefined, source.data === undefined),
                     source: {
+                        mode: canRunSandbox ? "sandbox" : "reader",
                         files: sourceFiles,
                         dependencies: source.dependencies,
                         activePath: activeSourcePath,
@@ -503,7 +506,7 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                             path: selection.path,
                             startLine: selection.startLine,
                             endLine: selection.endLine,
-                            hasLocalEdit: editedSourcePaths.includes(selection.path),
+                            hasLocalEdit: canRunSandbox && editedSourcePaths.includes(selection.path),
                         })
                         ai.open()
                     },
@@ -515,7 +518,7 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                             quote: (currentCode || sourceRuntimeError).slice(0, CONTENT_AI_SELECTION_MAX),
                             path: activeSourcePath || undefined,
                             runtimeError: sourceRuntimeError,
-                            hasLocalEdit: editedSourcePaths.includes(activeSourcePath),
+                            hasLocalEdit: canRunSandbox && editedSourcePaths.includes(activeSourcePath),
                         })
                         ai.open()
                     },

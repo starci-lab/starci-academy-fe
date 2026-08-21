@@ -10,6 +10,17 @@ class TestResizeObserver implements ResizeObserver {
 }
 
 globalThis.ResizeObserver = TestResizeObserver
+Object.defineProperty(window, "localStorage", {
+    configurable: true,
+    value: {
+        getItem: vi.fn(() => null),
+        setItem: vi.fn(),
+        removeItem: vi.fn(),
+        clear: vi.fn(),
+        key: vi.fn(() => null),
+        length: 0,
+    },
+})
 
 const labels: CourseLearnContentPageData["labels"] = {
     navCourse: "Course",
@@ -62,9 +73,14 @@ describe("CourseLearnContentPageBase", () => {
 
         expect(container.querySelector("[data-node=content-map-panel]")).not.toBeNull()
         expect(container.querySelector("[data-node=learn-content-page]")).not.toBeNull()
-        expect(container.querySelector("[data-node=learn-content-page] > [data-node=content-reader-inner]")).not.toBeNull()
+        expect(container.querySelector("[data-node=learn-content-page] > [data-node=content-reader-main-scroll-viewport] > [data-node=content-reader-inner]")).not.toBeNull()
         expect(container.querySelector("[data-node=content-outline-rail]")).not.toBeNull()
         expect(container.querySelector("[role=separator]")).not.toBeNull()
+        expect(container.querySelector("[data-node=content-reader-frame]")).toHaveClass("h-app-rail", "overflow-hidden")
+        expect(container.querySelector("[data-node=content-map-panel]")).toHaveClass("py-6")
+        expect(container.querySelector("[data-node=learn-content-page]")).toHaveClass("h-full", "overflow-hidden")
+        expect(container.querySelector("[data-node=content-reader-main-scroll-viewport]")).toHaveClass("h-full", "overflow-y-auto", "scrollbar")
+        expect(container.querySelector("[data-node=content-outline-rail]")).toHaveClass("h-full", "overflow-y-auto", "scrollbar")
 
         const cases = [
             ["contents", "content-map-panel"],
@@ -84,7 +100,7 @@ describe("CourseLearnContentPageBase", () => {
 
     it("opens a module-map content through the page-owned action", () => {
         const openContent = vi.fn()
-        render(
+        const { container } = render(
             <CourseLearnContentPageBase
                 state="ready"
                 props={{
@@ -111,14 +127,15 @@ describe("CourseLearnContentPageBase", () => {
 
     it("renders source-backed lesson context and submits course-map search", () => {
         const searchContent = vi.fn()
-        render(
+        const { container } = render(
             <CourseLearnContentPageBase
                 state="ready"
                 props={{
                     labels,
                     title: "Current lesson",
                     description: "Why dependency inversion matters in production.",
-                    facts: ["20 min · Read"],
+                    status: { content: "Unread", tone: "neutral", icon: "incomplete" },
+                    facts: ["20 min", "2 challenges"],
                     body: "Lesson body",
                 }}
                 on={{ searchContent }}
@@ -126,13 +143,16 @@ describe("CourseLearnContentPageBase", () => {
         )
 
         expect(screen.getByText("Why dependency inversion matters in production.")).toBeInTheDocument()
-        expect(screen.getByText("20 min · Read")).toBeInTheDocument()
+        expect(screen.getByText("Unread")).toBeInTheDocument()
+        expect(screen.getByText("20 min · 2 challenges")).toBeInTheDocument()
+        expect(container.querySelectorAll("[data-component=Badge]")).toHaveLength(1)
+        expect(container.querySelector("[data-node=course-content-header-stack]")).toHaveClass("gap-2")
         fireEvent.change(screen.getByRole("searchbox", { name: "Search contents" }), { target: { value: "database" } })
         fireEvent.submit(screen.getByRole("search"))
         expect(searchContent).toHaveBeenCalledWith("database")
     })
 
-    it("routes both breadcrumb identities through named actions", () => {
+    it("routes the deep trail through its nearest parent action", () => {
         const goCourse = vi.fn()
         const goModule = vi.fn()
         render(
@@ -143,9 +163,8 @@ describe("CourseLearnContentPageBase", () => {
             />,
         )
 
-        fireEvent.click(screen.getByText("Course"))
-        fireEvent.click(screen.getByText("Module"))
-        expect(goCourse).toHaveBeenCalledTimes(1)
+        fireEvent.click(screen.getByText("Back"))
+        expect(goCourse).not.toHaveBeenCalled()
         expect(goModule).toHaveBeenCalledTimes(1)
     })
 
@@ -201,6 +220,7 @@ describe("CourseLearnContentPageBase", () => {
                     ],
                     sourceState: "pending",
                     source: {
+                        mode: "sandbox",
                         files: {},
                         dependencies: {},
                         activePath: "",
@@ -365,7 +385,8 @@ describe("CourseLearnContentPageBase", () => {
         )
 
         expect(container.querySelector("[data-node=dual-tabs-toolbar]")).not.toBeNull()
-        fireEvent.click(screen.getByText("Go"))
+        fireEvent.click(screen.getByRole("button", { name: /Example language/ }))
+        fireEvent.click(screen.getByRole("option", { name: "Go" }))
         expect(selectLanguage).toHaveBeenCalledWith("go")
     })
 })

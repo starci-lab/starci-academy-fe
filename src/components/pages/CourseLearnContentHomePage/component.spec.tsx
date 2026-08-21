@@ -40,8 +40,9 @@ describe("CourseLearnContentHomePageBase", () => {
 
         expect(screen.getByRole("heading", { level: 1, name: "System Design Mastery" })).toBeVisible()
         expect(screen.getByText("Design scalable systems through production trade-offs.")).toBeVisible()
-        expect(screen.getByText("12 study hours")).toBeVisible()
-        expect(container.querySelectorAll("[data-component=Badge]")).toHaveLength(3)
+        expect(screen.getByText("4 modules · 12 study hours · 320 learners")).toBeVisible()
+        expect(container.querySelectorAll("[data-component=Badge]")).toHaveLength(0)
+        expect(container.querySelector("[data-node=course-content-header-stack]")).toHaveClass("gap-2")
         expect(container.querySelector("[data-component=SurfaceCardSurface] [data-node=course-content-lesson-list]")).not.toBeNull()
         expect(screen.getByText("Preview mode")).toBeVisible()
         expect(screen.getByRole("heading", { level: 2, name: "Consistent hashing" })).toBeVisible()
