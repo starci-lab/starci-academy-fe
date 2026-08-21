@@ -492,7 +492,7 @@ export const CONTRACTS = buildContracts({
     },
     "course-learn-module-page": {
         host: "main",
-        classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "flex-col", "gap-4", "px-6", "py-6"],
+        classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "flex-col", "gap-3", "px-6", "py-6"],
         children: {
             title: { leaf: "heading" },
             module: { composite: "curriculum-module-row" },
@@ -884,7 +884,7 @@ export const CONTRACTS = buildContracts({
         why: "if you need whole-project completion to stay paired with task, submission and score facts rather than being inferred from the current milestone.",
     },
     "course-personal-project-current-milestone": {
-        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4"],
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3"],
         children: {
             title: { leaf: "heading" },
             tasks: { contract: "course-personal-project-current-task-grid" },
