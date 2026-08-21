@@ -284,7 +284,7 @@ export const CourseLearnContentPageBase = (input: CourseLearnContentPageProps) =
         <Article props={{ body: input.props.body, aiSelectable: true }} isLoading={isLoading} />
     ))
 
-    const header = defineContractComponent("course-content-header-stack", {
+    const identity = defineContractComponent("course-content-identity-stack", {
         trail: defineLeafComponent("breadcrumbs", {}, () => (
             <Breadcrumbs
                 props={{
@@ -301,6 +301,19 @@ export const CourseLearnContentPageBase = (input: CourseLearnContentPageProps) =
         title: defineLeafComponent("heading", {}, () => (
             <Heading props={{ content: input.props.title, level: 1 }} isLoading={isLoading} />
         )),
+        ...(input.props.description === undefined ? {} : {
+            description: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                <Text props={{ content: input.props.description, size: "sm", tone: "muted" }} isLoading={isLoading} />
+            )),
+        }),
+        ...((input.props.facts ?? []).length === 0 && input.props.status === undefined ? {} : {
+            meta: defineContractProjection("status-metadata-line", () => (
+                <StatusMetadataLine
+                    props={{ facts: input.props.facts ?? [], status: input.props.status }}
+                    isLoading={isLoading}
+                />
+            )),
+        }),
     })
 
     /*
@@ -541,20 +554,7 @@ export const CourseLearnContentPageBase = (input: CourseLearnContentPageProps) =
         : readingBody
 
     const readerInner = defineContractComponent("content-reader-inner", {
-        header,
-        ...(input.props.description === undefined ? {} : {
-            description: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                <Text props={{ content: input.props.description, size: "sm", tone: "muted" }} isLoading={isLoading} />
-            )),
-        }),
-        ...((input.props.facts ?? []).length === 0 && input.props.status === undefined ? {} : {
-            meta: defineContractProjection("status-metadata-line", () => (
-                <StatusMetadataLine
-                    props={{ facts: input.props.facts ?? [], status: input.props.status }}
-                    isLoading={isLoading}
-                />
-            )),
-        }),
+        identity,
         /*
                  * The bar is real at every state, which is the legacy decision this restores: the
                  * faces come from the route rather than from the content body, so they are already

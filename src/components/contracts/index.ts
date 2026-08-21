@@ -418,9 +418,7 @@ export const CONTRACTS = buildContracts({
         host: "main",
         classes: ["flex", "w-full", "max-w-app-lg", "flex-col", "gap-6", "p-6"],
         children: {
-            header: { contract: "course-content-header-stack" },
-            description: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
-            meta: { contract: "status-metadata-line", optional: true },
+            identity: { contract: "course-content-identity-stack" },
             gates: { contract: "course-content-gate-run", optional: true },
             resume: { contract: "course-content-resume-progress" },
             nudges: { contract: "course-content-nudge-run", optional: true },
@@ -2864,13 +2862,15 @@ export const CONTRACTS = buildContracts({
         },
         why: "if you need the routed page to retain the document's main landmark while its nested ScrollViewport owns vertical movement.",
     },
-    "course-content-header-stack": {
+    "course-content-identity-stack": {
         classes: ["flex", "flex-col", "gap-2"],
         children: {
             trail: { leaf: "breadcrumbs", optional: true },
             title: { leaf: "heading" },
+            description: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+            meta: { contract: "status-metadata-line", optional: true },
         },
-        why: "if one course-content identity joins its orientation trail and title as a compact ordered header run.",
+        why: "if one course-content identity reads as a compact ordered run from orientation through title and description to optional metadata.",
     },
     "content-reader-main-scroll-viewport": {
         classes: ["h-full", "w-full", "min-w-0", "min-h-0", "overflow-y-auto", "overscroll-contain", "scrollbar"],
@@ -2882,9 +2882,7 @@ export const CONTRACTS = buildContracts({
     "content-reader-inner": {
         classes: ["flex", "w-full", "max-w-app-md", "flex-col", "gap-6", "p-6"],
         children: {
-            header: { contract: "course-content-header-stack" },
-            description: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
-            meta: { contract: "status-metadata-line", optional: true },
+            identity: { contract: "course-content-identity-stack" },
             faces: { contract: "dual-tabs-toolbar", optional: true },
             body: { contract: ["content-reading-column", "centred-empty-notice", "source-workspace-root"] },
         },

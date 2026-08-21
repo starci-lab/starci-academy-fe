@@ -91,7 +91,7 @@ export const CourseLearnContentHomePageBase = (input: CourseLearnContentHomeProp
 
     return (
         <Tree contract="course-content-home-overview-page" render={defineContractComponent("course-content-home-overview-page", {
-            header: defineContractComponent("course-content-header-stack", {
+            identity: defineContractComponent("course-content-identity-stack", {
                 trail: defineLeafComponent("breadcrumbs", {}, () => (
                     <Breadcrumbs
                         props={{ steps: input.props.trail, label: input.props.breadcrumbLabel }}
@@ -102,18 +102,18 @@ export const CourseLearnContentHomePageBase = (input: CourseLearnContentHomeProp
                 title: defineLeafComponent("heading", {}, () => (
                     <Heading props={{ content: input.props.title, level: 1 }} isLoading={isLoading} />
                 )),
-            }),
-            description: input.props.description === undefined ? undefined : defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                <Text props={{ content: input.props.description, size: "sm", tone: "muted" }} isLoading={isLoading} />
-            )),
-            meta: input.props.metaFacts.length === 0 && input.props.metaStatus === undefined
-                ? undefined
-                : defineContractProjection("status-metadata-line", () => (
-                    <StatusMetadataLine
-                        props={{ facts: input.props.metaFacts, status: input.props.metaStatus }}
-                        isLoading={isLoading}
-                    />
+                description: input.props.description === undefined ? undefined : defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                    <Text props={{ content: input.props.description, size: "sm", tone: "muted" }} isLoading={isLoading} />
                 )),
+                meta: input.props.metaFacts.length === 0 && input.props.metaStatus === undefined
+                    ? undefined
+                    : defineContractProjection("status-metadata-line", () => (
+                        <StatusMetadataLine
+                            props={{ facts: input.props.metaFacts, status: input.props.metaStatus }}
+                            isLoading={isLoading}
+                        />
+                    )),
+            }),
             gates: input.props.gateMessages.length === 0 ? undefined : defineContractComponent("course-content-gate-run", {
                 gate: input.props.gateMessages.map((message) => defineLeafComponent("text", { size: "sm" }, () => (
                     <Text props={{ content: message, size: "sm" }} />
