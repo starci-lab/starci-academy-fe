@@ -1,4 +1,5 @@
 import { Tree } from "@/components/branches/Tree"
+import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { Breadcrumbs } from "@/components/leaves/Breadcrumbs"
 import { Button } from "@/components/leaves/Button"
@@ -8,6 +9,7 @@ import { Text } from "@/components/leaves/Text"
 import {
     defineCompositeComponent,
     defineContractComponent,
+    defineContractProjection,
     defineLeafComponent,
 } from "@/components/contracts/props"
 
@@ -78,34 +80,40 @@ export const CoursePersonalProjectPageBase = (input: CoursePersonalProjectPagePr
     })
     const next = input.state === "empty" || input.state === "failed"
         ? undefined
-        : defineContractComponent("course-personal-project-next-task", {
-            position: input.props.nextTask === undefined
-                ? undefined
-                : defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                    <Text props={{ content: input.props.nextTask?.position, size: "xs", tone: "muted" }} isLoading={loading} />
-                )),
-            title: input.props.nextTask === undefined && !loading
-                ? undefined
-                : defineLeafComponent("heading", {}, () => (
-                    <Heading props={{ content: input.props.nextTask?.title, level: 2 }} isLoading={loading} />
-                )),
-            action: input.props.nextTask === undefined && !loading
-                ? undefined
-                : defineLeafComponent("button", {}, () => (
-                    <Button
-                        props={{ label: input.props.continueLabel }}
-                        on={loading ? undefined : { press: () => input.props.nextTask === undefined
-                            ? undefined
-                            : input.on?.openTask?.(input.props.nextTask.id) }}
-                        isLoading={loading}
-                    />
-                )),
-            completed: input.props.nextTask !== undefined || loading
-                ? undefined
-                : defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                    <Text props={{ content: input.props.allCompleteLabel, size: "sm", tone: "muted" }} />
-                )),
-        })
+        : defineContractProjection("course-personal-project-next-task", () => (
+            <SurfaceCard
+                contract="course-personal-project-next-task"
+                render={defineContractComponent("course-personal-project-next-task", {
+                    position: input.props.nextTask === undefined
+                        ? undefined
+                        : defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                            <Text props={{ content: input.props.nextTask?.position, size: "xs", tone: "muted" }} isLoading={loading} />
+                        )),
+                    title: input.props.nextTask === undefined && !loading
+                        ? undefined
+                        : defineLeafComponent("heading", {}, () => (
+                            <Heading props={{ content: input.props.nextTask?.title, level: 2 }} isLoading={loading} />
+                        )),
+                    action: input.props.nextTask === undefined && !loading
+                        ? undefined
+                        : defineLeafComponent("button", {}, () => (
+                            <Button
+                                props={{ label: input.props.continueLabel, variant: "primary", size: "md", icon: "next", iconPlacement: "trailing" }}
+                                on={loading ? undefined : { press: () => input.props.nextTask === undefined
+                                    ? undefined
+                                    : input.on?.openTask?.(input.props.nextTask.id) }}
+                                isLoading={loading}
+                            />
+                        )),
+                    completed: input.props.nextTask !== undefined || loading
+                        ? undefined
+                        : defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                            <Text props={{ content: input.props.allCompleteLabel, size: "sm", tone: "muted" }} />
+                        )),
+                })}
+                isLoading={loading}
+            />
+        ))
     const completion = defineContractComponent("course-personal-project-completion-summary", {
         label: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
             <Text props={{ content: input.props.completionLabel, size: "sm", weight: "medium" }} isLoading={loading} />
@@ -116,9 +124,9 @@ export const CoursePersonalProjectPageBase = (input: CoursePersonalProjectPagePr
                 isLoading={loading}
             />
         )),
-        fact: input.props.completionFacts.map((fact) => defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-            <Text props={{ content: fact, size: "sm", tone: "muted" }} isLoading={loading} />
-        ))),
+        fact: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+            <Text props={{ content: input.props.completionFacts.join(" · "), size: "sm", tone: "muted" }} isLoading={loading} />
+        )),
     })
     const milestone = input.props.milestoneTitle === undefined && !loading
         ? undefined
@@ -127,21 +135,27 @@ export const CoursePersonalProjectPageBase = (input: CoursePersonalProjectPagePr
                 <Heading props={{ content: input.props.milestoneTitle, level: 2 }} isLoading={loading} />
             )),
             tasks: defineContractComponent("course-personal-project-current-task-grid", {
-                task: tasks.map((task) => defineContractComponent("course-personal-project-task-card", {
-                    title: defineLeafComponent("heading", {}, () => (
-                        <Heading props={{ content: task.title, level: 3 }} isLoading={loading} />
-                    )),
-                    status: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                        <Text props={{ content: task.status, size: "xs", tone: "muted" }} isLoading={loading} />
-                    )),
-                    action: defineLeafComponent("button", {}, () => (
-                        <Button
-                            props={{ label: task.actionLabel, variant: "tertiary", size: "sm", icon: "next", iconPlacement: "trailing" }}
-                            on={loading ? undefined : { press: () => input.on?.openTask?.(task.id) }}
-                            isLoading={loading}
-                        />
-                    )),
-                })),
+                task: tasks.map((task) => defineContractProjection("course-personal-project-task-card", () => (
+                    <SurfaceCard
+                        contract="course-personal-project-task-card"
+                        render={defineContractComponent("course-personal-project-task-card", {
+                            title: defineLeafComponent("heading", {}, () => (
+                                <Heading props={{ content: task.title, level: 3 }} isLoading={loading} />
+                            )),
+                            status: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                                <Text props={{ content: task.status, size: "xs", tone: "muted" }} isLoading={loading} />
+                            )),
+                            action: defineLeafComponent("button", {}, () => (
+                                <Button
+                                    props={{ label: task.actionLabel, variant: "tertiary", size: "sm", icon: "next", iconPlacement: "trailing" }}
+                                    on={loading ? undefined : { press: () => input.on?.openTask?.(task.id) }}
+                                    isLoading={loading}
+                                />
+                            )),
+                        })}
+                        isLoading={loading}
+                    />
+                ))),
             }),
         })
     const notice = input.props.notice === undefined

@@ -81,4 +81,5 @@ describe("course outline helpers", () => {
         expect(resolveCourseOutlineTarget(outline, { kind: "milestoneTask", id: "task-1", milestoneId: "milestone-1" })).toBeNull()
         expect(resolveCourseOutlineTarget(outline, { kind: "lesson", id: "missing", milestoneId: null })).toBeNull()
     })
+
 })

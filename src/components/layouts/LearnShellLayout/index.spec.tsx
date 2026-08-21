@@ -37,7 +37,7 @@ vi.mock("@/hooks/swr/useQueryCourseSwr", () => ({ useQueryCourseSwr: () => ({ da
 vi.mock("@/hooks/swr/useQueryMyCoursesSwr", () => ({ useQueryMyCoursesSwr: () => ({ data: mocks.myCourses }) }))
 vi.mock("@/hooks/swr/useQueryGlobalLeaderboardSwr", () => ({ useQueryGlobalLeaderboardSwr: () => ({ data: mocks.leaderboard }) }))
 
-type SpineRow = { readonly id: string, readonly isCurrent?: boolean, readonly isLocked?: boolean, readonly fact?: string }
+type SpineRow = { readonly id: string, readonly icon?: string, readonly isCurrent?: boolean, readonly isLocked?: boolean, readonly fact?: string }
 type FrameStub = {
     readonly props: {
         readonly spine: {
@@ -110,7 +110,16 @@ describe("LearnShellLayout", () => {
         render(<LearnShellLayout displayId="system-design" surface={<Surface />} />)
         expect(spine().groups.map((group) => group.id)).toEqual(["path", "practice", "track"])
         expect(home().id).toBe("home")
+        expect(home().icon).toBe("viewGrid")
         expect(spine().groups[0].rows.map((row) => row.id)).toEqual(["content", "personalProject"])
+    })
+
+    it("uses product meanings instead of nearest generic glyphs for course destinations", () => {
+        render(<LearnShellLayout displayId="system-design" surface={<Surface />} />)
+        expect(rowById("mindMap")?.icon).toBe("mindMap")
+        expect(rowById("mockInterview")?.icon).toBe("mockInterview")
+        expect(rowById("foundations")?.icon).toBe("foundations")
+        expect(rowById("playground")?.icon).toBe("playground")
     })
 
     it("marks the row whose route the learner is standing on", () => {

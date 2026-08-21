@@ -1,5 +1,6 @@
 import { Tree } from "@/components/branches/Tree"
 import { Icon, type IconName } from "@/components/leaves/Icon"
+import { Badge, type BadgeTone } from "@/components/leaves/Badge"
 import { Text } from "@/components/leaves/Text"
 import type { CompositeProps } from "@/components/contracts/props"
 import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
@@ -12,6 +13,8 @@ export type IconLabelFactRowData = {
     readonly icon: IconName
     readonly label: string
     readonly endText?: string
+    /** A prominent trailing status or rank. Mutually exclusive with quiet endText. */
+    readonly endBadge?: { readonly content: string, readonly tone: BadgeTone }
     readonly recipe: IconLabelFactRowRecipe
 }
 
@@ -54,7 +57,11 @@ export const IconLabelFactRow = ({ props, isLoading = false }: IconLabelFactRowP
             title: defineLeafComponent("text", { size: "sm", tone: "default" }, () => (
                 <Text props={{ content: props.label, size: "sm", parentEmphasis: "accent-soft" }} />
             )),
-            ...(props.endText === undefined ? {} : {
+            ...(props.endBadge !== undefined ? {
+                fact: defineLeafComponent("badge", {}, () => (
+                    <Badge props={props.endBadge} isLoading={isLoading} />
+                )),
+            } : props.endText === undefined ? {} : {
                 fact: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
                     <Text props={{ content: props.endText, size: "xs", tone: "muted", parentEmphasis: "accent-soft" }} />
                 )),

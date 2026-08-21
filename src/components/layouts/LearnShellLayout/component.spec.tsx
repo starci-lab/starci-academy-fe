@@ -24,6 +24,8 @@ describe("LearnShellLayoutBase", () => {
         )
 
         expect(screen.getByText("Reader surface")).toBeTruthy()
+        expect(container.querySelector("[data-node=learn-shell-frame]")).toHaveClass("min-h-app-rail")
+        expect(container.querySelector("[data-node=learn-shell-frame]")).not.toHaveClass("min-h-screen")
         expect(container.querySelector("[data-node=learn-course-navigation-rail]")).not.toBeNull()
         expect(container.querySelector("[data-node=learn-routed-body]")).not.toBeNull()
     })
@@ -43,8 +45,27 @@ describe("LearnShellLayoutBase", () => {
         )
 
         expect(container.querySelector("[data-node=learn-shell-frame-collapsed]")).not.toBeNull()
+        expect(container.querySelector("[data-node=learn-shell-frame-collapsed]")).toHaveClass("min-h-app-rail")
         expect(container.querySelector("[data-node=learn-course-navigation-rail-collapsed]")).not.toBeNull()
         expect(screen.getByRole("button", { name: "Expand" })).toBeInTheDocument()
+    })
+
+    it("keeps one navigation host while the rail width changes", () => {
+        const { container, rerender } = render(
+            <LearnShellLayoutBase props={{ spine, isFullBleed: false }} surface={<Surface />} />,
+        )
+        const expandedRail = container.querySelector("nav[data-node=learn-course-navigation-rail]")
+        expect(expandedRail).not.toBeNull()
+
+        rerender(
+            <LearnShellLayoutBase
+                props={{ spine: { ...spine, isCollapsed: true }, isFullBleed: false }}
+                surface={<Surface />}
+            />,
+        )
+
+        const collapsedRail = container.querySelector("nav[data-node=learn-course-navigation-rail-collapsed]")
+        expect(collapsedRail).toBe(expandedRail)
     })
 
     it("reports mobile view changes through the dedicated action", () => {

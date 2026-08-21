@@ -69,6 +69,12 @@ const KIND_CLASSES = {
     },
 } as const
 
+/** Icon-only route destinations are circles, not text-pill geometry with the words removed. */
+const ICON_ONLY_ROUTE_CLASSES = {
+    base: "inline-flex size-11 shrink-0 items-center justify-center rounded-full p-0 text-muted",
+    current: "inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-accent-soft p-0 text-accent-soft-foreground",
+} as const
+
 /** How far an outline entry is indented for the level it sits at. */
 const DEPTH_CLASSES = { 1: "", 2: " pl-3", 3: " pl-6" } as const
 
@@ -80,6 +86,8 @@ const DEPTH_CLASSES = { 1: "", 2: " pl-3", 3: " pl-6" } as const
 export const NavLink = ({ props, on }: NavLinkProps) => {
     const kind = KIND_CLASSES[props.kind ?? "route"]
     const isCurrent = props.isCurrent === true
+    const isIconOnlyRoute = props.showLabel === false && (props.kind ?? "route") === "route"
+    const classes = isIconOnlyRoute ? ICON_ONLY_ROUTE_CLASSES : kind
     return (
         <HeroLink
             data-tier="leaf"
@@ -89,7 +97,7 @@ export const NavLink = ({ props, on }: NavLinkProps) => {
             onPress={on?.press}
             aria-current={isCurrent ? "page" : undefined}
             aria-label={props.showLabel === false ? props.label : undefined}
-            className={`${isCurrent ? kind.current : kind.base}${DEPTH_CLASSES[props.depth ?? 1]}`}
+            className={`${isCurrent ? classes.current : classes.base}${DEPTH_CLASSES[props.depth ?? 1]}`}
         >
             {props.icon === undefined ? null : <Icon props={{ name: props.icon, role: "leading" }} />}
             {props.showLabel === false ? null : props.label}

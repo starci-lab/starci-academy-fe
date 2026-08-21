@@ -4,6 +4,7 @@ import { CourseLearnContentHomePageBase } from "./component"
 
 const props = {
     title: "System Design Mastery",
+    description: "Design scalable systems through production trade-offs.",
     breadcrumbLabel: "Course content path",
     trail: [
         { id: "course", label: "Course" },
@@ -35,13 +36,16 @@ const props = {
 describe("CourseLearnContentHomePageBase", () => {
     it("draws the complete identity, continuation and current-module hierarchy", () => {
         const lesson = vi.fn()
-        render(<CourseLearnContentHomePageBase state="ready" props={props} on={{ lesson }} />)
+        const { container } = render(<CourseLearnContentHomePageBase state="ready" props={props} on={{ lesson }} />)
 
         expect(screen.getByRole("heading", { level: 1, name: "System Design Mastery" })).toBeVisible()
+        expect(screen.getByText("Design scalable systems through production trade-offs.")).toBeVisible()
         expect(screen.getByText("12 study hours")).toBeVisible()
+        expect(container.querySelectorAll("[data-component=Badge]")).toHaveLength(3)
+        expect(container.querySelector("[data-component=SurfaceCardSurface] [data-node=course-content-lesson-list]")).not.toBeNull()
         expect(screen.getByText("Preview mode")).toBeVisible()
         expect(screen.getByRole("heading", { level: 2, name: "Consistent hashing" })).toBeVisible()
-        expect(screen.getByRole("heading", { level: 2, name: "Current module · Foundations" })).toBeVisible()
+        expect(screen.getByRole("heading", { level: 3, name: "Current module · Foundations" })).toBeVisible()
 
         fireEvent.click(screen.getByRole("link", { name: "Consistent hashing" }))
         expect(lesson).toHaveBeenCalledWith("module-1", "lesson-1")

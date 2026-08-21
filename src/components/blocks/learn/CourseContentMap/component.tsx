@@ -1,12 +1,16 @@
 import { Tree } from "@/components/branches/Tree"
+import { ScrollViewport } from "@/components/branches/ScrollViewport"
+import { SurfaceAccordionCard } from "@/components/branches/SurfaceAccordionCard"
 import { LabelledProgressRow } from "@/components/composites/LabelledProgressRow"
-import { ContentMapRow } from "@/components/leaves/ContentMapRow"
-import { Icon } from "@/components/leaves/Icon"
+import { DisclosureIndicator } from "@/components/leaves/DisclosureIndicator"
+import { Progress } from "@/components/leaves/Progress"
 import { SearchBox } from "@/components/leaves/SearchBox"
+import { SelectionList } from "@/components/leaves/SelectionList"
 import { Text } from "@/components/leaves/Text"
 import {
     defineCompositeComponent,
     defineContractComponent,
+    defineContractProjection,
     defineLeafComponent,
 } from "@/components/contracts/props"
 
@@ -24,6 +28,9 @@ export type CourseContentMapModule = {
     readonly id: string
     readonly title: string
     readonly countLabel: string
+    readonly progressLabel: string
+    readonly completionPercent: number
+    readonly isOpen: boolean
     readonly lessons: ReadonlyArray<CourseContentMapLesson>
 }
 
@@ -47,6 +54,7 @@ export type CourseContentMapBaseProps = {
     }
     readonly on?: {
         readonly search?: (query: string) => void
+        readonly toggleModule?: (id: string, isOpen: boolean) => void
         readonly openLesson?: (id: string) => void
     }
 }
@@ -55,6 +63,9 @@ const restingModules = Array.from({ length: 4 }, (_, index) => ({
     id: `resting-module-${index}`,
     title: undefined,
     countLabel: undefined,
+    progressLabel: "",
+    completionPercent: 0,
+    isOpen: false,
     lessons: [] as ReadonlyArray<CourseContentMapLesson>,
 }))
 
@@ -92,25 +103,67 @@ export const courseContentMapPanel = (input: CourseContentMapBaseProps) => {
                 on={{ search: input.on?.search }}
             />
         )),
-        module: modules.map((module) => defineContractComponent("content-map-module", {
-            title: defineContractComponent("content-map-module-summary", {
-                title: defineLeafComponent("text", { size: "sm" }, () => (
-                    <Text props={{ content: module.title, size: "sm" }} isLoading={isLoading} />
-                )),
-                fact: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                    <Text props={{ content: module.countLabel, size: "xs", tone: "muted" }} isLoading={isLoading} />
-                )),
-                caret: defineLeafComponent("icon", { role: "chip" }, () => (
-                    <Icon props={{ name: "disclosure", role: "chip" }} />
-                )),
-            }),
-            row: module.lessons.map((lesson) => defineLeafComponent("content-map-row", {}, () => (
-                <ContentMapRow
-                    props={lesson}
-                    on={{ press: () => input.on?.openLesson?.(lesson.id) }}
-                />
-            ))),
-        })),
+        modules: defineContractProjection("content-map-module-list", () => (
+            <ScrollViewport
+                boundary="content-map-modules"
+                render={defineContractComponent("content-map-module-list", {
+                    module: modules.map((module) => defineContractProjection("content-map-module", () => (
+                        <SurfaceAccordionCard
+                            isOpen={module.isOpen}
+                            summaryContract="content-map-module-summary"
+                            summaryRender={defineContractComponent("content-map-module-summary", {
+                                copy: defineContractComponent("content-map-module-summary-copy", {
+                                    title: defineLeafComponent("text", { size: "md", weight: "medium" }, () => (
+                                        <Text
+                                            props={{ content: module.title, size: "md", weight: "medium" }}
+                                            isLoading={isLoading}
+                                        />
+                                    )),
+                                    fact: module.isOpen ? undefined : defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                                        <Text
+                                            props={{ content: module.countLabel, size: "xs", tone: "muted" }}
+                                            isLoading={isLoading}
+                                        />
+                                    )),
+                                    progress: module.isOpen ? defineLeafComponent("progress", {}, () => (
+                                        <Progress
+                                            props={{ value: module.completionPercent, label: module.progressLabel }}
+                                            isLoading={isLoading}
+                                        />
+                                    )) : undefined,
+                                }),
+                                caret: defineLeafComponent("disclosure-indicator", {}, () => (
+                                    <DisclosureIndicator props={{ isOpen: module.isOpen }} />
+                                )),
+                            })}
+                            bodyContract="content-map-module-body"
+                            bodyRender={defineContractComponent("content-map-module-body", {
+                                list: defineLeafComponent("selection-list", { variant: "outline" }, () => (
+                                    <SelectionList
+                                        props={{
+                                            id: `course-outline-${module.id}`,
+                                            label: module.title ?? input.props.labels.progress,
+                                            variant: "outline",
+                                            selectedKey: module.lessons.find((lesson) => lesson.isCurrent)?.id,
+                                            items: (module.isOpen ? module.lessons : []).map((lesson) => ({
+                                                id: lesson.id,
+                                                textValue: lesson.title,
+                                                title: lesson.title,
+                                                meta: lesson.meta,
+                                                icon: lesson.isComplete ? "complete" : "pending",
+                                            })),
+                                        }}
+                                        on={{ activate: (id) => input.on?.openLesson?.(id) }}
+                                        isLoading={isLoading}
+                                    />
+                                )),
+                            })}
+                            onOpenChange={(isOpen) => input.on?.toggleModule?.(module.id, isOpen)}
+                        />
+                    ))),
+                })}
+            />
+        )),
     })
 }
 

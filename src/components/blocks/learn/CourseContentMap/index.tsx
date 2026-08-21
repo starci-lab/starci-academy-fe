@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryCourseOutlineSwr } from "@/hooks/swr/useQueryCourseOutlineSwr"
@@ -19,6 +19,7 @@ export const CourseContentMap = ({ displayId, currentLessonId }: CourseContentMa
     const router = useRouter()
     const outline = useQueryCourseOutlineSwr(displayId)
     const [query, setQuery] = useState("")
+    const [expandedModuleIds, setExpandedModuleIds] = useState<ReadonlySet<string>>(new Set())
     const modules = outline.data === undefined || outline.data === null
         ? []
         : filterCourseOutlineModules(outline.data.modules, query)
@@ -34,6 +35,32 @@ export const CourseContentMap = ({ displayId, currentLessonId }: CourseContentMa
         : outline.data === null || modules.length === 0
             ? "empty"
             : hasFailure ? "partial" : "ready"
+    const activeModuleId = outline.data?.modules.find((module) => (
+        module.lessons.some((lesson) => lesson.id === currentLessonId)
+    ))?.id
+
+    useEffect(() => {
+        if (activeModuleId === undefined) return
+        setExpandedModuleIds((current) => new Set([...current, activeModuleId]))
+    }, [activeModuleId])
+
+    const onSearch = (nextQuery: string) => {
+        setQuery(nextQuery)
+        if (outline.data === undefined || outline.data === null) return
+        const matches = filterCourseOutlineModules(outline.data.modules, nextQuery)
+        setExpandedModuleIds(nextQuery.trim() === ""
+            ? new Set(activeModuleId === undefined ? [] : [activeModuleId])
+            : new Set(matches.map((module) => module.id)))
+    }
+
+    const onToggleModule = (moduleId: string, isOpen: boolean) => {
+        setExpandedModuleIds((current) => {
+            const next = new Set(current)
+            if (isOpen) next.add(moduleId)
+            else next.delete(moduleId)
+            return next
+        })
+    }
 
     return (
         <CourseContentMapBase
@@ -50,21 +77,30 @@ export const CourseContentMap = ({ displayId, currentLessonId }: CourseContentMa
                 progressFact: outline.data === undefined || outline.data === null
                     ? undefined
                     : `${outline.data.progress.lessonsRead}/${outline.data.progress.lessonsTotal}`,
-                modules: modules.map((module) => ({
-                    id: module.id,
-                    title: module.title,
-                    countLabel: t("content.moduleCount", { total: module.lessons.length }),
-                    lessons: module.lessons.map((lesson) => ({
-                        id: lesson.id,
-                        title: lesson.title,
-                        meta: t("content.minutes", { minutes: lesson.minutesRead }),
-                        isComplete: lesson.isRead,
-                        isCurrent: lesson.id === currentLessonId,
-                    })),
-                })),
+                modules: modules.map((module) => {
+                    const sourceModule = outline.data?.modules.find((candidate) => candidate.id === module.id) ?? module
+                    const completed = sourceModule.lessons.filter((lesson) => lesson.isRead).length
+                    const total = sourceModule.lessons.length
+                    return {
+                        id: module.id,
+                        title: module.title,
+                        countLabel: t("content.moduleProgress", { completed, total }),
+                        progressLabel: t("content.moduleProgressLabel", { module: module.title }),
+                        completionPercent: total === 0 ? 0 : Math.round(completed / total * 100),
+                        isOpen: expandedModuleIds.has(module.id),
+                        lessons: module.lessons.map((lesson) => ({
+                            id: lesson.id,
+                            title: lesson.title,
+                            meta: t("content.minutes", { minutes: lesson.minutesRead }),
+                            isComplete: lesson.isRead,
+                            isCurrent: lesson.id === currentLessonId,
+                        })),
+                    }
+                }),
             }}
             on={{
-                search: setQuery,
+                search: onSearch,
+                toggleModule: onToggleModule,
                 openLesson: (lessonId) => {
                     const route = lessonRoutes.get(lessonId)
                     if (route === undefined) return

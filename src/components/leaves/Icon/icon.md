@@ -2,11 +2,11 @@
 
 This file answers “which icon represents this feature?” Read it before adding or changing an
 `IconName`. The table maps PRODUCT MEANINGS, not screens: when the same feature appears in
-navigation, a card and an empty state, every placement reuses the same meaning and Heroicon.
+navigation, a card and an empty state, every placement reuses the same meaning and StarCi cut.
 
-The same table is mirrored in `.claude/fe/canon/patterns/icon.md`. A feature-to-glyph decision
-changes both copies together: canon carries the cross-repository law, while this source copy stays
-beside the code so an author or AI cannot miss it while choosing an icon.
+The governing rule lives in `.claude/fe/gates/patterns/icon/INDEX.md`. A feature-to-glyph decision
+changes canon and this source map together: canon carries the cross-repository law, while this copy
+stays beside the code so an author or AI cannot miss it while choosing an icon.
 
 Do not choose a glyph because it resembles the nearest existing one. A new feature either reuses
 an existing product meaning deliberately or receives a unique row here and matching entries in
@@ -16,9 +16,13 @@ an existing product meaning deliberately or receives a unique row here and match
 
 | Placement role | Heroicons family | Rendered size | Use when |
 |---|---|---:|---|
-| `heading` | `@heroicons/react/24/outline` | `size-6` | The glyph introduces a heading or empty region |
-| `leading` | `@heroicons/react/24/outline` | `size-5` | The glyph leads navigation, a row, field, switch or icon control |
-| `chip` | `@heroicons/react/16/solid` | `size-4` | The glyph sits inside a compact chip or text action |
+| `heading` | `@starci/heroicons/24/outline` | `size-6` | The glyph introduces a heading or empty region |
+| `leading` | `@starci/heroicons/24/outline` | `size-5` | The glyph leads navigation, a row, field, switch or icon control |
+| `chip` | `@starci/heroicons/16/solid` | `size-4` | The glyph sits inside a compact chip or text action |
+
+`@starci/heroicons` re-exports the approved upstream Heroicons cuts and owns reviewed product
+extensions when the upstream catalogue has no faithful meaning. Product source imports only this
+package through the `Icon` leaf; it never draws a substitute at the call site.
 
 Role never changes the feature mapping. `course` remains `BookOpenIcon` in every placement; the
 icon leaf selects the outline or micro drawing from the role.
@@ -73,7 +77,11 @@ icon leaf selects the outline or micro drawing from the role.
 | `practice` | Programming/code practice | `CodeBracketIcon` | Code brackets name programming without reusing verification code |
 | `viewGrid` | Lay a collection out as a card grid | `Squares2X2Icon` | Four equal panes name an arrangement rather than the content being arranged |
 | `viewList` | Lay a collection out as compact rows | `ListBulletIcon` | A bulleted run of lines names row layout without borrowing the review clipboard |
-| `collapseRail` | Collapse or restore the persistent course rail | `Bars3BottomLeftIcon` | A left-aligned sidebar mark names changing the rail width without implying route navigation |
+| `collapseRail` | Collapse or restore the persistent course rail | `CourseRailIcon` | The two persistent panes reproduce the course-outline control and name changing the rail width without implying route navigation |
+| `mindMap` | Course mind map | `MindMapIcon` | A central concept joined to independent branches names the spatial knowledge map rather than editorial content |
+| `mockInterview` | Course mock interview | `MockInterviewIcon` | A live microphone names spoken interview practice rather than generic talent discovery |
+| `foundations` | Course foundations | `FoundationsIcon` | Stacked conceptual layers name durable prerequisites rather than catalogue exploration |
+| `playground` | Executable course playground | `PlaygroundIcon` | A bounded terminal prompt names a runnable learning environment rather than credential verification |
 
 ## Selection procedure
 
@@ -86,6 +94,7 @@ named entry points and large empty-region headings may retain their reference-ba
 1. Find the product feature in the mapping table.
 2. Reuse its `IconName`; never import the listed Heroicon at the call site.
 3. Choose `heading`, `leading` or `chip` from placement, not personal size preference.
-4. If no feature matches, add one unique meaning and Heroicon to this table first.
+4. If no feature matches, choose an upstream re-export first; when none is semantically faithful,
+   add reviewed 24px outline and 16px solid cuts to `@starci/heroicons` and document the meaning here.
 5. Update `IconName` and `GLYPHS` in the same change. The parity test rejects drift and duplicate
    Heroicons across different meanings.

@@ -160,6 +160,7 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
     const [discussionDraftKey, setDiscussionDraftKey] = useState(0)
     const [discussionError, setDiscussionError] = useState(false)
     const [contentSearch, setContentSearch] = useState("")
+    const [expandedModuleIds, setExpandedModuleIds] = useState<ReadonlySet<string>>(new Set([input.moduleId]))
     const [selectedFace, setSelectedFace] = useState<ContentFaceId>("reading")
     const [selectedLanguage, setSelectedLanguage] = useState<string>()
     const [sourceFiles, setSourceFiles] = useState<SandpackFiles>({})
@@ -241,6 +242,27 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
         () => filterCourseOutlineModules(courseOutline.data?.modules ?? [], contentSearch),
         [contentSearch, courseOutline.data?.modules],
     )
+
+    useEffect(() => {
+        setExpandedModuleIds((current) => new Set([...current, input.moduleId]))
+    }, [input.moduleId])
+
+    const onSearchContent = (query: string) => {
+        setContentSearch(query)
+        const matches = filterCourseOutlineModules(courseOutline.data?.modules ?? [], query)
+        setExpandedModuleIds(query.trim() === ""
+            ? new Set([input.moduleId])
+            : new Set(matches.map((courseModule) => courseModule.id)))
+    }
+
+    const onToggleModule = (moduleId: string, isOpen: boolean) => {
+        setExpandedModuleIds((current) => {
+            const next = new Set(current)
+            if (isOpen) next.add(moduleId)
+            else next.delete(moduleId)
+            return next
+        })
+    }
     const lessonRoutes = useMemo(() => new Map(
         (courseOutline.data?.modules ?? []).flatMap((courseModule) => courseModule.lessons.map((lesson) => [
             lesson.id,
@@ -293,6 +315,7 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                     searchPlaceholder: t("searchPlaceholder"),
                     searchLabel: t("searchLabel"),
                     searchClearLabel: t("searchClearLabel"),
+                    resizeRail: t("resizeRail"),
                     outlineTitle: t("outlineTitle"),
                     pageLabel: t("pageLabel"),
                     previousLabel: t("previousLabel"),
@@ -404,7 +427,7 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                         id: module.data.id,
                         title: module.data.title,
                         countLabel: t("moduleCount", { total: module.data.numContents }),
-                        isOpen: true,
+                        isOpen: expandedModuleIds.has(module.data.id),
                         contents: ordered.map((sibling) => ({
                             id: sibling.id,
                             title: sibling.title,
@@ -415,7 +438,7 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                         id: courseModule.id,
                         title: courseModule.title,
                         countLabel: t("moduleCount", { total: courseModule.lessons.length }),
-                        isOpen: contentSearch.trim() !== "" || courseModule.id === input.moduleId,
+                        isOpen: expandedModuleIds.has(courseModule.id),
                         contents: courseModule.lessons.map((lesson) => ({
                             id: lesson.id,
                             title: lesson.title,
@@ -433,7 +456,8 @@ export const CourseLearnContentPage = (input: CourseLearnContentPageProps) => {
                     if (target === undefined) return
                     openContent(target.id)
                 },
-                searchContent: setContentSearch,
+                searchContent: onSearchContent,
+                toggleModule: onToggleModule,
                 openContent,
                 goCourse: () => router.push(`/courses/${input.displayId}`),
                 goModule: () => router.push(`/courses/${input.displayId}/learn/content/modules/${input.moduleId}`),

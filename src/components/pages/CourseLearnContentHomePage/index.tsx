@@ -3,7 +3,8 @@
 import { useTranslations } from "next-intl"
 import { Tree } from "@/components/branches/Tree"
 import { CourseContentMap } from "@/components/blocks/learn/CourseContentMap"
-import { defineContractComponent, defineContractProjection } from "@/components/contracts/props"
+import { RailDivider } from "@/components/leaves/RailDivider"
+import { defineContractComponent, defineContractProjection, defineLeafComponent } from "@/components/contracts/props"
 import { useQueryCourseOutlineSwr } from "@/hooks/swr/useQueryCourseOutlineSwr"
 import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
 import { useRouter } from "@/i18n/navigation"
@@ -71,6 +72,7 @@ const lessonStatus = (
 /** Load course identity and viewer outline, then seat the map beside the legacy overview hierarchy. */
 export const CourseLearnContentHomePage = ({ displayId }: CourseLearnContentHomePageProps) => {
     const t = useTranslations("learn.contentHome")
+    const contentText = useTranslations("learn.content")
     const router = useRouter()
     const course = useQueryCourseSwr({ displayId })
     const outline = useQueryCourseOutlineSwr(displayId)
@@ -107,11 +109,23 @@ export const CourseLearnContentHomePage = ({ displayId }: CourseLearnContentHome
             map: defineContractProjection("learn-route-context-rail", () => (
                 <CourseContentMap displayId={displayId} currentLessonId={target?.lessonId} />
             )),
+            divider: defineLeafComponent("rail-divider", {}, () => (
+                <RailDivider
+                    props={{
+                        label: contentText("resizeRail"),
+                        storageKey: "starci.learn.contentMap.width",
+                        defaultWidth: 320,
+                        minWidth: 256,
+                        maxWidth: 560,
+                    }}
+                />
+            )),
             overview: defineContractProjection("course-content-home-overview-page", () => (
                 <CourseLearnContentHomePageBase
                     state={state}
                     props={{
                         title: courseTitle,
+                        description: courseData?.description,
                         breadcrumbLabel: t("breadcrumbLabel"),
                         trail: [
                             { id: "course", label: t("breadcrumbCourse") },

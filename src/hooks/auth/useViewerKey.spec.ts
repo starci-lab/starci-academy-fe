@@ -46,6 +46,15 @@ const answerFor = (streak: number) => ({
     data: { myWeeklyStats: { success: true, message: "ok", data: { streak, longestStreak: streak, days: [] } } },
 })
 
+/** Minimal token payload for proving refresh rotation without storing a real credential. */
+const tokenFor = (subject: string, issuedAt: number): string => {
+    const payload = window.btoa(JSON.stringify({ sub: subject, iat: issuedAt }))
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=+$/g, "")
+    return `header.${payload}.signature-${issuedAt}`
+}
+
 beforeEach(() => {
     setSessionToken(undefined)
     mocks.queryMyWeeklyStats.mockReset()
@@ -72,6 +81,18 @@ describe("useViewerKey", () => {
             setSessionToken("token-b")
         })
         expect(first).toBeDefined()
+        expect(result.current).not.toBe(first)
+    })
+
+    it("keeps the same cache identity when one viewer's access token rotates", () => {
+        const { result } = renderHook(() => useViewerKey())
+        act(() => setSessionToken(tokenFor("viewer-1", 1)))
+        const first = result.current
+
+        act(() => setSessionToken(tokenFor("viewer-1", 2)))
+        expect(result.current).toBe(first)
+
+        act(() => setSessionToken(tokenFor("viewer-2", 3)))
         expect(result.current).not.toBe(first)
     })
 

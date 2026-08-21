@@ -815,6 +815,9 @@
                 "expert": "Chuyên gia"
             },
             "moduleCount": "{total} bài",
+            "moduleProgress": "{completed}/{total} bài",
+            "moduleProgressLabel": "Tiến độ của {module}",
+            "resizeRail": "Điều chỉnh độ rộng mục lục khóa học",
       "minutes": "{minutes} phút",
       "discussionTitle": "Thảo luận",
       "discussionComposerLabel": "Bình luận về bài học này",

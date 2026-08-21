@@ -1,16 +1,20 @@
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
+import { SurfaceAccordionCard } from "@/components/branches/SurfaceAccordionCard"
 import { SurfaceListCard, type SurfaceListCardData } from "@/components/branches/SurfaceListCard"
 import { LabelledProgressRow } from "@/components/composites/LabelledProgressRow"
 import { Breadcrumbs } from "@/components/leaves/Breadcrumbs"
 import { NavLink } from "@/components/leaves/NavLink"
-import { ContentMapRow } from "@/components/leaves/ContentMapRow"
+import { DisclosureIndicator } from "@/components/leaves/DisclosureIndicator"
+import { Progress } from "@/components/leaves/Progress"
 import { SearchBox } from "@/components/leaves/SearchBox"
+import { SelectionList } from "@/components/leaves/SelectionList"
 import { Article } from "@/components/leaves/Article"
 import { Icon } from "@/components/leaves/Icon"
 import { Heading } from "@/components/leaves/Heading"
 import { Pagination } from "@/components/leaves/Pagination"
 import { ReactionPicker, type ReactionLabels } from "@/components/leaves/ReactionPicker"
+import { RailDivider } from "@/components/leaves/RailDivider"
 import { Text } from "@/components/leaves/Text"
 import {
     contentTabRow,
@@ -99,6 +103,7 @@ export type CourseLearnContentPageLabels = {
     readonly searchPlaceholder: string
     readonly searchLabel: string
     readonly searchClearLabel: string
+    readonly resizeRail: string
     /** The name of the outline rail - the docs word for where you are in the page. */
     readonly outlineTitle: string
     readonly pageLabel: string
@@ -208,6 +213,7 @@ export type CourseLearnContentPageActions = {
     readonly submitDiscussion?: () => void
     readonly retryDiscussion?: () => void
     readonly searchContent?: (query: string) => void
+    readonly toggleModule?: (moduleId: string, isOpen: boolean) => void
     readonly openContent?: (contentId: string) => void
     readonly act?: () => void
     readonly goCourse?: () => void
@@ -440,34 +446,64 @@ export const CourseLearnContentPageBase = (input: CourseLearnContentPageProps) =
                 on={{ search: input.on?.searchContent }}
             />
         )),
-        module: (input.props.modules ?? []).map((module) => defineContractComponent("content-map-module", {
-            title: defineContractComponent("content-map-module-summary", {
-                title: defineLeafComponent("text", { size: "sm" }, () => (
-                    <Text props={{ content: module.title, size: "sm" }} isLoading={isLoading} />
-                )),
-                fact: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                    <Text props={{ content: module.countLabel, size: "xs", tone: "muted" }} isLoading={isLoading} />
-                )),
-                caret: defineLeafComponent("icon", { role: "chip" }, () => (
-                    <Icon props={{ name: module.isOpen === true ? "disclosure" : "next", role: "chip" }} />
-                )),
+        modules: defineContractComponent("content-map-module-list", {
+            module: (input.props.modules ?? []).map((module) => {
+                const contents = module.contents ?? []
+                const completed = contents.filter((content) => content.isComplete === true).length
+                const isOpen = module.isOpen === true
+                return defineContractProjection("content-map-module", () => (
+                    <SurfaceAccordionCard
+                        isOpen={isOpen}
+                        summaryContract="content-map-module-summary"
+                        summaryRender={defineContractComponent("content-map-module-summary", {
+                            copy: defineContractComponent("content-map-module-summary-copy", {
+                                title: defineLeafComponent("text", { size: "md", weight: "medium" }, () => (
+                                    <Text props={{ content: module.title, size: "md", weight: "medium" }} isLoading={isLoading} />
+                                )),
+                                fact: isOpen ? undefined : defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                                    <Text props={{ content: module.countLabel, size: "xs", tone: "muted" }} isLoading={isLoading} />
+                                )),
+                                progress: isOpen ? defineLeafComponent("progress", {}, () => (
+                                    <Progress
+                                        props={{
+                                            value: contents.length === 0 ? 0 : Math.round(completed / contents.length * 100),
+                                            label: module.title,
+                                        }}
+                                        isLoading={isLoading}
+                                    />
+                                )) : undefined,
+                            }),
+                            caret: defineLeafComponent("disclosure-indicator", {}, () => (
+                                <DisclosureIndicator props={{ isOpen }} />
+                            )),
+                        })}
+                        bodyContract="content-map-module-body"
+                        bodyRender={defineContractComponent("content-map-module-body", {
+                            list: defineLeafComponent("selection-list", { variant: "outline" }, () => (
+                                <SelectionList
+                                    props={{
+                                        id: `course-reader-outline-${module.id}`,
+                                        label: module.title,
+                                        variant: "outline",
+                                        selectedKey: contents.find((content) => content.isCurrent === true)?.id,
+                                        items: (isOpen ? contents : []).map((content) => ({
+                                            id: content.id,
+                                            textValue: content.title,
+                                            title: content.title,
+                                            meta: content.meta,
+                                            icon: content.isComplete === true ? "complete" : "pending",
+                                        })),
+                                    }}
+                                    on={{ activate: (id) => input.on?.openContent?.(id) }}
+                                    isLoading={isLoading}
+                                />
+                            )),
+                        })}
+                        onOpenChange={(nextOpen) => input.on?.toggleModule?.(module.id, nextOpen)}
+                    />
+                ))
             }),
-            // A module the reader has not opened carries no rows at all: the map is scanned by
-            // module first, and four closed modules each showing five contents is not a map.
-            row: (module.isOpen === true ? module.contents ?? [] : []).map((content) => defineLeafComponent("content-map-row", {}, () => (
-                <ContentMapRow
-                    props={{
-                        id: content.id,
-                        title: content.title,
-                        meta: content.meta,
-                        isComplete: content.isComplete,
-                        isCurrent: content.isCurrent,
-                    }}
-                    on={{ press: () => input.on?.openContent?.(content.id) }}
-                    isLoading={isLoading}
-                />
-            ))),
-        })),
+        }),
     })
 
     /*
@@ -560,6 +596,17 @@ export const CourseLearnContentPageBase = (input: CourseLearnContentPageProps) =
                 contents: defineContractComponent("learn-route-context-rail", {
                     panel: contents,
                 }),
+                divider: defineLeafComponent("rail-divider", {}, () => (
+                    <RailDivider
+                        props={{
+                            label: labels.resizeRail,
+                            storageKey: "starci.learn.contentMap.width",
+                            defaultWidth: 320,
+                            minWidth: 256,
+                            maxWidth: 560,
+                        }}
+                    />
+                )),
                 main: reader,
                 ...(outlineEntries.length === 0 ? {} : { outline }),
             })}

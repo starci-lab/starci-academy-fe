@@ -94,7 +94,7 @@ const TEXT_CLASSES = [
     "data-[size=sm]:text-sm data-[size=sm]:leading-5",
     "data-[tone=muted]:text-muted",
     "data-[tone=accent]:text-accent-soft-foreground",
-    "data-[parent-emphasis=accent-soft]:group-hover:text-accent-soft data-[parent-emphasis=accent-soft]:group-data-[selected=true]:text-accent-soft-foreground data-[parent-emphasis=accent-soft]:group-data-[selected=true]:group-hover:text-accent-soft-foreground",
+    "data-[parent-emphasis=accent-soft]:group-data-[selected=true]:text-accent-soft-foreground",
     "data-[weight=medium]:font-medium data-[weight=semibold]:font-semibold",
     "data-[icon=true]:inline-flex data-[icon=true]:items-center data-[icon=true]:gap-2",
     "data-[superseded=true]:line-through",

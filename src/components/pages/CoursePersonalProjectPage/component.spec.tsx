@@ -39,8 +39,8 @@ describe("CoursePersonalProjectPageBase", () => {
 
         expect(text.indexOf("Build the service")).toBeLessThan(text.indexOf("1/2 tasks completed"))
         expect(text.indexOf("1/2 tasks completed")).toBeLessThan(text.indexOf("1. Plan"))
-        expect(screen.getByText("3 submissions")).toBeInTheDocument()
-        expect(screen.getByText("Average score 18/20")).toBeInTheDocument()
+        expect(screen.getByText("1/2 tasks completed · 3 submissions · Average score 18/20")).toBeInTheDocument()
+        expect(container.querySelectorAll("[data-component=SurfaceCardSurface]")).toHaveLength(3)
     })
 
     it("routes the continue action and task tiles by task identity", () => {

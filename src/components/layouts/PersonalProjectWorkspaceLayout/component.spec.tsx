@@ -15,7 +15,7 @@ const Surface = () => <div>Task workspace</div>
 const frame = {
     progress: { label: "Progress", value: 25, fact: "1/4 tasks" },
     search: { placeholder: "Search tasks...", label: "Search milestones", clearLabel: "Clear search" },
-    toggleLabel: "Collapse project outline",
+    resizeLabel: "Resize project outline",
 } as const
 
 describe("PersonalProjectWorkspaceLayoutBase", () => {
@@ -102,21 +102,31 @@ describe("PersonalProjectWorkspaceLayoutBase", () => {
         expect(screen.getByText("Task workspace")).toBeInTheDocument()
     })
 
-    it("compacts the rail without removing the routed surface", () => {
-        const onToggle = vi.fn()
-        render(
+    it("keeps long milestone labels in a resizable rail with the project inset", () => {
+        const { container } = render(
             <PersonalProjectWorkspaceLayoutBase
                 {...frame}
                 milestones={[]}
                 surface={<Surface />}
-                collapsed
-                toggleLabel="Expand project outline"
-                onToggle={onToggle}
             />,
         )
 
-        fireEvent.click(screen.getByRole("button", { name: "Expand project outline" }))
-        expect(onToggle).toHaveBeenCalledTimes(1)
+        const rail = container.querySelector("[data-node=personal-project-milestone-rail]")
+        expect(container.querySelector("[data-node=personal-project-workspace-frame]")).toHaveClass("min-h-app-rail")
+        expect(container.querySelector("[data-node=personal-project-workspace-frame]")).not.toHaveClass("min-h-screen")
+        expect(rail).toHaveClass(
+            "px-3",
+            "py-6",
+            "overflow-hidden",
+            "md:sticky",
+            "md:h-app-rail",
+        )
+        expect(container.querySelector("[data-node=personal-project-milestone-list-scroll]")).toHaveClass(
+            "overflow-y-auto",
+            "scroll-shadow--hide-scrollbar",
+        )
+        expect(rail).not.toHaveClass("p-4")
+        expect(screen.getByRole("separator", { name: "Resize project outline" })).toBeInTheDocument()
         expect(screen.getByText("Task workspace")).toBeInTheDocument()
     })
 })

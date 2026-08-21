@@ -41,8 +41,9 @@ export type LayoutClassName =
     // column while the two are stacked, and BESIDE it once they are side by side.
     | "md:w-2/5" | "md:shrink-0" | "md:border-b-0" | "md:border-r"
     | "@app-md:flex-row" | "@app-md:items-start" | "@app-md:gap-8" | "@app-md:w-72"
-    | "mx-auto" | "min-h-screen" | "min-h-80" | "w-full" | "min-w-0" | "grow" | "flex-1" | "shrink-0" | "hidden" | "overflow-auto" | "max-w-app-sm" | "max-w-app-md" | "max-w-app-lg" | "max-w-app-xl" | "max-w-6xl" | "max-w-sm" | "max-w-md" | "@container"
-    | "h-16" | "min-h-16" | "sticky" | "top-0" | "top-16" | "z-40" | "z-50"
+    | "mx-auto" | "min-h-screen" | "min-h-app-rail" | "min-h-80" | "w-full" | "min-w-0" | "grow" | "flex-1" | "shrink-0" | "hidden" | "overflow-auto" | "max-w-app-sm" | "max-w-app-md" | "max-w-app-lg" | "max-w-app-xl" | "max-w-6xl" | "max-w-sm" | "max-w-md" | "@container"
+    | "h-16" | "h-full" | "min-h-16" | "h-app-rail" | "sticky" | "top-0" | "top-16" | "z-40" | "z-50"
+    | "md:sticky" | "md:top-16" | "md:self-start" | "md:h-app-rail"
     | "border" | "border-b" | "border-separator" | "divide-y" | "divide-separator" | "bg-background"
     | "px-3" | "px-4" | "px-6" | "py-2" | "py-3" | "py-6" | "p-0" | "p-2" | "p-4" | "p-6" | "-mt-px"
     | "px-2" | "pl-4" | "cursor-pointer" | "text-left" | "text-foreground" | "hover:opacity-80"
@@ -89,40 +90,22 @@ export type LayoutClassName =
     | "md:[&>*:first-child]:overflow-y-auto"
     | "md:[&>*:nth-child(2)]:min-w-0" | "md:[&>*:nth-child(2)]:grow"
     | "[&>*]:min-w-0" | "[&>*]:grow" | "[&>*]:whitespace-nowrap"
-    | "md:[&>[data-node=learn-course-navigation-rail]]:w-64"
-    | "md:[&>[data-node=learn-course-navigation-rail]]:grow-0"
-    | "md:[&>[data-node=learn-course-navigation-rail]]:shrink-0"
-    | "md:[&>[data-node=learn-course-navigation-rail]]:sticky"
-    | "md:[&>[data-node=learn-course-navigation-rail]]:top-rail"
-    | "md:[&>[data-node=learn-course-navigation-rail]]:self-start"
-    | "md:[&>[data-node=learn-course-navigation-rail]]:max-h-rail"
-    | "md:[&>[data-node=learn-course-navigation-rail]]:overflow-y-auto"
-    | "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:w-16"
-    | "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:grow-0"
-    | "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:shrink-0"
-    | "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:sticky"
-    | "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:top-rail"
-    | "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:self-start"
-    | "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:max-h-rail"
-    | "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:overflow-y-auto"
-    | "md:[&>[data-node=personal-project-milestone-rail]]:w-80"
-    | "md:[&>[data-node=personal-project-milestone-rail]]:grow-0"
-    | "md:[&>[data-node=personal-project-milestone-rail]]:shrink-0"
-    | "md:[&>[data-node=personal-project-milestone-rail]]:sticky"
-    | "md:[&>[data-node=personal-project-milestone-rail]]:top-rail"
-    | "md:[&>[data-node=personal-project-milestone-rail]]:self-start"
-    | "md:[&>[data-node=personal-project-milestone-rail]]:max-h-rail"
-    | "md:[&>[data-node=personal-project-milestone-rail]]:overflow-y-auto"
-    | "md:[&>[data-node=personal-project-milestone-rail-collapsed]]:w-16"
-    | "md:[&>[data-node=personal-project-milestone-rail-collapsed]]:grow-0"
-    | "md:[&>[data-node=personal-project-milestone-rail-collapsed]]:shrink-0"
-    | "md:[&>[data-node=personal-project-milestone-rail-collapsed]]:sticky"
-    | "md:[&>[data-node=personal-project-milestone-rail-collapsed]]:top-rail"
-    | "md:[&>[data-node=personal-project-milestone-rail-collapsed]]:self-start"
-    | "md:[&>[data-node=personal-project-milestone-rail-collapsed]]:max-h-rail"
+    | "md:[&>[data-component=CollapsibleRail]]:w-64"
+    | "md:[&>[data-component=CollapsibleRail]]:w-16"
+    | "[&>[data-component=CollapsibleRail]]:hidden"
+    | "[&>[data-component=CollapsibleRail]]:min-w-0"
+    | "md:[&>[data-component=CollapsibleRail]]:block"
+    | "md:[&>[data-component=CollapsibleRail]]:grow-0"
+    | "md:[&>[data-component=CollapsibleRail]]:shrink-0"
+    | "md:[&>[data-component=CollapsibleRail]]:sticky"
+    | "md:[&>[data-component=CollapsibleRail]]:top-16"
+    | "md:[&>[data-component=CollapsibleRail]]:self-start"
+    | "md:[&>[data-component=CollapsibleRail]]:h-app-rail"
+    | "md:[&>[data-component=CollapsibleRail]]:overflow-hidden"
+    | "scroll-shadow" | "scroll-shadow--vertical" | "scroll-shadow--hide-scrollbar"
     | "md:[&>*:first-child]:w-80" | "md:[&>*:last-child]:w-64"
-    | "md:[&>*:first-child]:sticky" | "md:[&>*:first-child]:top-rail"
-    | "md:[&>*:first-child]:self-start" | "md:[&>*:first-child]:max-h-rail"
+    | "md:[&>*:first-child]:sticky" | "md:[&>*:first-child]:top-rail" | "md:[&>*:first-child]:top-16"
+    | "md:[&>*:first-child]:self-start" | "md:[&>*:first-child]:max-h-rail" | "md:[&>*:first-child]:h-app-rail"
     | "md:[&>*:first-child]:overflow-y-auto"
     | "[&>*]:px-4" | "[&>*]:py-3" | "[&>*]:p-2" | "[&>*]:p-3" | "[&>*]:border-separator"
     | "[&>*:nth-child(odd)]:border-r" | "[&>*:nth-child(-n+4)]:border-b"
@@ -418,37 +401,38 @@ export const CONTRACTS = buildContracts({
     "course-content-home-frame": {
         classes: [
             "flex", "w-full", "min-w-0", "flex-col", "items-start",
-            "md:flex-row", "md:items-start", "md:gap-8",
+            "md:flex-row", "md:items-start",
             "md:[&>*:first-child]:w-80", "md:[&>*:first-child]:shrink-0",
-            "md:[&>*:first-child]:sticky", "md:[&>*:first-child]:top-rail",
-            "md:[&>*:first-child]:self-start", "md:[&>*:first-child]:max-h-rail",
-            "md:[&>*:first-child]:overflow-y-auto",
+            "md:[&>*:first-child]:sticky", "md:[&>*:first-child]:top-16",
+            "md:[&>*:first-child]:self-start", "md:[&>*:first-child]:h-app-rail",
             "md:[&>*:last-child]:min-w-0", "md:[&>*:last-child]:grow",
         ],
         children: {
             map: { contract: "learn-route-context-rail" },
+            divider: { leaf: "rail-divider" },
             overview: { contract: "course-content-home-overview-page" },
         },
-        why: "if you need one sticky course map to keep its desktop measure beside a flexible content overview that becomes the next row in narrow viewports.",
+        why: "if you need one sticky adjustable course map separated from a flexible content overview that becomes the next row in narrow viewports.",
     },
     "course-content-home-overview-page": {
         host: "main",
-        classes: ["mx-auto", "flex", "w-full", "max-w-app-lg", "flex-col", "gap-6", "px-6", "py-6"],
+        classes: ["flex", "w-full", "max-w-app-lg", "flex-col", "gap-6", "p-6"],
         children: {
             header: { contract: "page-header-stack" },
+            description: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
             meta: { contract: "course-content-meta-row", optional: true },
             gates: { contract: "course-content-gate-run", optional: true },
             resume: { contract: "course-content-resume-progress" },
             nudges: { contract: "course-content-nudge-run", optional: true },
-            module: { contract: "course-content-current-module-path", optional: true },
+            module: { contract: "course-content-lesson-list", optional: true },
             notice: { composite: "empty-notice", optional: true },
         },
         why: "if you need course identity to lead through optional catalogue and learner facts into one continuation decision and only the current authored module path.",
     },
     "course-content-meta-row": {
-        classes: ["flex", "w-full", "min-w-0", "flex-row", "flex-wrap", "items-center", "gap-3"],
+        classes: ["flex", "w-full", "min-w-0", "flex-row", "flex-wrap", "items-center", "gap-2"],
         children: {
-            fact: { leaf: "text", props: { size: "sm", tone: "muted" }, repeats: true, restingCount: 3 },
+            fact: { leaf: "badge", repeats: true, restingCount: 3 },
         },
         why: "if you need optional module, study-time and learner facts to wrap as peers without competing with course identity.",
     },
@@ -462,13 +446,27 @@ export const CONTRACTS = buildContracts({
     "course-content-resume-progress": {
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3"],
         children: {
-            eyebrow: { leaf: "text", props: { size: "xs", tone: "muted" } },
-            target: { leaf: "heading" },
-            action: { leaf: "button", optional: true },
+            decision: { contract: "course-content-resume-decision-row" },
             progress: { leaf: "progress" },
             fact: { leaf: "text", props: { size: "sm", tone: "muted" } },
         },
-        why: "if you need the next learning target, its action and honest completion evidence to read as one continuation decision.",
+        why: "if you need the next learning decision kept above the honest completion meter and its supporting progress facts.",
+    },
+    "course-content-resume-decision-row": {
+        classes: ["flex", "w-full", "min-w-0", "flex-row", "flex-wrap", "items-end", "justify-between", "gap-3"],
+        children: {
+            copy: { contract: "course-content-resume-copy" },
+            action: { leaf: "button", optional: true },
+        },
+        why: "if you need the next target to keep the available continuation action on the opposite edge without detaching it on narrow widths.",
+    },
+    "course-content-resume-copy": {
+        classes: ["flex", "min-w-0", "grow", "flex-col", "gap-1"],
+        children: {
+            eyebrow: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            target: { leaf: "heading" },
+        },
+        why: "if you need a quiet continuation eyebrow attached directly above the next authored target it qualifies.",
     },
     "course-content-nudge-run": {
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3"],
@@ -477,13 +475,13 @@ export const CONTRACTS = buildContracts({
         },
         why: "if you need learner-specific aids kept between the continuation decision and the current module without becoming primary navigation.",
     },
-    "course-content-current-module-path": {
-        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3"],
+    "course-content-lesson-list": {
+        host: "ul",
+        classes: ["flex", "flex-col", "divide-y", "divide-separator", "overflow-hidden", "p-0", "[&>*]:px-4", "[&>*]:py-3", "[&>*:first-child]:pt-4", "[&>*:last-child]:pb-4"],
         children: {
-            title: { leaf: "heading" },
             lesson: { contract: "course-content-lesson-row", repeats: true, restingCount: 4 },
         },
-        why: "if you need the current module label followed by its lesson destinations while the adjacent course map retains the complete curriculum.",
+        why: "if you need the current module's lesson destinations joined inside one bounded list while the complete curriculum remains in the adjacent rail.",
     },
     "course-content-lesson-row": {
         classes: ["flex", "w-full", "min-w-0", "flex-row", "items-center", "gap-3", "[&>*:first-child]:min-w-0", "[&>*:first-child]:grow", "[&>*:last-child]:shrink-0"],
@@ -512,17 +510,20 @@ export const CONTRACTS = buildContracts({
     },
     "learn-shell-frame": {
         classes: [
-            "flex", "min-h-screen", "w-full", "min-w-0", "flex-col", "items-start",
+            "flex", "min-h-app-rail", "w-full", "min-w-0", "flex-col", "items-start",
             "[&>*]:min-w-0", "[&>*]:grow",
             "md:flex-row", "md:items-start",
-            "md:[&>[data-node=learn-course-navigation-rail]]:w-64",
-            "md:[&>[data-node=learn-course-navigation-rail]]:grow-0",
-            "md:[&>[data-node=learn-course-navigation-rail]]:shrink-0",
-            "md:[&>[data-node=learn-course-navigation-rail]]:sticky",
-            "md:[&>[data-node=learn-course-navigation-rail]]:top-rail",
-            "md:[&>[data-node=learn-course-navigation-rail]]:self-start",
-            "md:[&>[data-node=learn-course-navigation-rail]]:max-h-rail",
-            "md:[&>[data-node=learn-course-navigation-rail]]:overflow-y-auto",
+            "[&>[data-component=CollapsibleRail]]:hidden",
+            "[&>[data-component=CollapsibleRail]]:min-w-0",
+            "md:[&>[data-component=CollapsibleRail]]:block",
+            "md:[&>[data-component=CollapsibleRail]]:w-64",
+            "md:[&>[data-component=CollapsibleRail]]:grow-0",
+            "md:[&>[data-component=CollapsibleRail]]:shrink-0",
+            "md:[&>[data-component=CollapsibleRail]]:sticky",
+            "md:[&>[data-component=CollapsibleRail]]:top-16",
+            "md:[&>[data-component=CollapsibleRail]]:self-start",
+            "md:[&>[data-component=CollapsibleRail]]:h-app-rail",
+            "md:[&>[data-component=CollapsibleRail]]:overflow-hidden",
         ],
         children: {
             spine: { contract: "learn-course-navigation-rail", optional: true },
@@ -533,17 +534,20 @@ export const CONTRACTS = buildContracts({
     },
     "learn-shell-frame-collapsed": {
         classes: [
-            "flex", "min-h-screen", "w-full", "min-w-0", "flex-col", "items-start",
+            "flex", "min-h-app-rail", "w-full", "min-w-0", "flex-col", "items-start",
             "[&>*]:min-w-0", "[&>*]:grow",
             "md:flex-row", "md:items-start",
-            "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:w-16",
-            "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:grow-0",
-            "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:shrink-0",
-            "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:sticky",
-            "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:top-rail",
-            "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:self-start",
-            "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:max-h-rail",
-            "md:[&>[data-node=learn-course-navigation-rail-collapsed]]:overflow-y-auto",
+            "[&>[data-component=CollapsibleRail]]:hidden",
+            "[&>[data-component=CollapsibleRail]]:min-w-0",
+            "md:[&>[data-component=CollapsibleRail]]:block",
+            "md:[&>[data-component=CollapsibleRail]]:w-16",
+            "md:[&>[data-component=CollapsibleRail]]:grow-0",
+            "md:[&>[data-component=CollapsibleRail]]:shrink-0",
+            "md:[&>[data-component=CollapsibleRail]]:sticky",
+            "md:[&>[data-component=CollapsibleRail]]:top-16",
+            "md:[&>[data-component=CollapsibleRail]]:self-start",
+            "md:[&>[data-component=CollapsibleRail]]:h-app-rail",
+            "md:[&>[data-component=CollapsibleRail]]:overflow-hidden",
         ],
         children: {
             spine: { contract: "learn-course-navigation-rail-collapsed", optional: true },
@@ -554,31 +558,31 @@ export const CONTRACTS = buildContracts({
     },
     "learn-course-navigation-rail": {
         host: "nav",
-        classes: ["hidden", "w-full", "min-w-0", "flex-col", "gap-4", "p-4", "md:flex"],
+        classes: ["hidden", "h-full", "w-full", "min-w-0", "flex-col", "gap-4", "overflow-hidden", "border-separator", "px-3", "py-6", "md:flex", "md:border-r"],
         children: {
             toggle: { contract: "learn-course-rail-collapse-toggle" },
             home: { contract: "learn-course-home-navigation-row" },
             resume: { contract: "learn-resume-card", optional: true },
-            group: { contract: "learn-nav-group", repeats: true, restingCount: 3 },
+            groups: { contract: "learn-course-navigation-groups-scroll" },
         },
         why: "if you need the compact course-mode navigation to keep grouped destinations and optional learner evidence in one persistent desktop rail.",
     },
     "learn-course-navigation-rail-collapsed": {
         host: "nav",
-        classes: ["hidden", "w-full", "min-w-0", "flex-col", "gap-4", "p-2", "md:flex"],
+        classes: ["hidden", "h-full", "w-full", "min-w-0", "flex-col", "gap-4", "overflow-hidden", "border-separator", "px-3", "py-6", "md:flex", "md:border-r"],
         children: {
-            toggle: { contract: "learn-course-rail-collapse-toggle" },
+            toggle: { contract: "learn-course-rail-collapse-toggle-collapsed" },
             home: { contract: "learn-course-home-navigation-row" },
-            group: { contract: "learn-nav-group-collapsed", repeats: true, restingCount: 3 },
+            groups: { contract: "learn-course-navigation-groups-scroll" },
         },
         why: "if you need every course destination retained as an accessible icon while visible labels and trailing evidence are compacted.",
     },
     "learn-course-home-navigation-row": {
-        classes: ["flex", "w-full", "min-w-0", "items-center"],
+        classes: ["flex", "w-full", "min-w-0", "items-center", "[&>*]:w-full"],
         children: {
-            link: { leaf: "nav-link", props: { kind: "route" } },
+            list: { leaf: "selection-list" },
         },
-        why: "if the course-local Home destination must exact-match the bare learn route without activating on nested learning routes.",
+        why: "if the course-local Home destination must use the same full-width selection grammar as every other course destination while exact-matching only the bare learn route.",
     },
     "learn-course-rail-collapse-toggle": {
         classes: ["flex", "w-full", "justify-end"],
@@ -586,6 +590,20 @@ export const CONTRACTS = buildContracts({
             control: { leaf: "icon-button" },
         },
         why: "if a persistent course rail changes in place between its labelled and compact icon presentations.",
+    },
+    "learn-course-rail-collapse-toggle-collapsed": {
+        classes: ["flex", "w-full", "justify-center"],
+        children: {
+            control: { leaf: "icon-button" },
+        },
+        why: "if the compact course rail keeps its collapse control on the same centreline as every icon-only destination below it.",
+    },
+    "learn-course-navigation-groups-scroll": {
+        classes: ["scroll-shadow", "scroll-shadow--vertical", "scroll-shadow--hide-scrollbar", "flex", "min-h-0", "w-full", "min-w-0", "flex-1", "flex-col", "gap-4", "overscroll-contain"],
+        children: {
+            group: { contract: ["learn-nav-group", "learn-nav-group-collapsed"], repeats: true, restingCount: 3 },
+        },
+        why: "if navigation groups alone move inside the approved ScrollViewport branch with the vendor scrollbar hidden while collapse, overview and resume controls remain pinned.",
     },
     "learn-routed-body": {
         classes: ["w-full", "min-w-0", "flex-1"],
@@ -596,7 +614,7 @@ export const CONTRACTS = buildContracts({
     },
     "learn-route-context-rail": {
         host: "aside",
-        classes: ["w-full", "min-w-0"],
+        classes: ["flex", "w-full", "min-w-0", "min-h-0", "overflow-hidden", "md:sticky", "md:top-16", "md:self-start", "md:h-app-rail"],
         children: {
             panel: { contract: "content-map-panel" },
         },
@@ -606,31 +624,16 @@ export const CONTRACTS = buildContracts({
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-1"],
         children: {
             label: { leaf: "text", props: { size: "xs", tone: "muted" } },
-            row: { contract: "learn-nav-row", repeats: true, restingCount: 3 },
+            list: { leaf: "selection-list", props: { variant: "navigation" } },
         },
-        why: "if you need a labelled run of destination rows under one section name, drawing no surface of its own.",
+        why: "if you need a labelled ListBox of course destinations under one section name, drawing no second surface of its own.",
     },
     "learn-nav-group-collapsed": {
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-1", "items-center"],
         children: {
-            row: { contract: "learn-nav-row-collapsed", repeats: true, restingCount: 3 },
+            list: { leaf: "selection-list", props: { variant: "navigation-collapsed" } },
         },
-        why: "if you need one destination group to retain route order while its visible section label is compacted.",
-    },
-    "learn-nav-row": {
-        classes: ["flex", "w-full", "min-w-0", "flex-row", "items-center", "gap-2", "[&>*:first-child]:min-w-0", "[&>*:first-child]:grow", "[&>*:last-child]:shrink-0"],
-        children: {
-            link: { leaf: "nav-link", props: { kind: "route" } },
-            fact: { leaf: ["text", "icon"], optional: true },
-        },
-        why: "if you need a destination link with one optional trailing fact, such as a count or lock, that is never a pressable control of its own.",
-    },
-    "learn-nav-row-collapsed": {
-        classes: ["flex", "w-full", "min-w-0", "items-center", "justify-center"],
-        children: {
-            link: { leaf: "nav-link", props: { kind: "route" } },
-        },
-        why: "if you need one course destination centred as an accessible icon without a trailing fact in compact rail mode.",
+        why: "if you need one course destination ListBox to retain keyboard order while labels and trailing facts are compacted.",
     },
     "learn-resume-card": {
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-1", "p-4"],
@@ -642,48 +645,34 @@ export const CONTRACTS = buildContracts({
     },
     "personal-project-workspace-frame": {
         classes: [
-            "flex", "min-h-screen", "w-full", "min-w-0", "flex-col", "items-start",
-            "[&>*]:min-w-0", "[&>*]:grow", "md:flex-row", "md:items-start",
-            "md:[&>[data-node=personal-project-milestone-rail]]:w-80",
-            "md:[&>[data-node=personal-project-milestone-rail]]:grow-0",
-            "md:[&>[data-node=personal-project-milestone-rail]]:shrink-0",
-            "md:[&>[data-node=personal-project-milestone-rail]]:sticky",
-            "md:[&>[data-node=personal-project-milestone-rail]]:top-rail",
-            "md:[&>[data-node=personal-project-milestone-rail]]:self-start",
-            "md:[&>[data-node=personal-project-milestone-rail]]:max-h-rail",
-            "md:[&>[data-node=personal-project-milestone-rail]]:overflow-y-auto",
-            "md:[&>[data-node=personal-project-milestone-rail-collapsed]]:w-16",
-            "md:[&>[data-node=personal-project-milestone-rail-collapsed]]:grow-0",
-            "md:[&>[data-node=personal-project-milestone-rail-collapsed]]:shrink-0",
-            "md:[&>[data-node=personal-project-milestone-rail-collapsed]]:sticky",
-            "md:[&>[data-node=personal-project-milestone-rail-collapsed]]:top-rail",
-            "md:[&>[data-node=personal-project-milestone-rail-collapsed]]:self-start",
-            "md:[&>[data-node=personal-project-milestone-rail-collapsed]]:max-h-rail",
+            "flex", "min-h-app-rail", "w-full", "min-w-0", "flex-col", "items-start",
+            "md:flex-row", "md:items-start", "[&>*:last-child]:min-w-0", "[&>*:last-child]:grow",
         ],
         children: {
-            rail: { contract: ["personal-project-milestone-rail", "personal-project-milestone-rail-collapsed"] },
+            rail: { contract: "personal-project-milestone-rail" },
+            divider: { leaf: "rail-divider" },
             body: { contract: "learn-routed-body" },
         },
-        why: "if you need one bounded milestone rail beside a routed workspace body without flattening its rows into flex siblings.",
+        why: "if you need one adjustable milestone rail and its shared-edge separator beside a routed workspace body without flattening its rows into flex siblings.",
     },
     "personal-project-milestone-rail": {
         host: "nav",
-        classes: ["hidden", "w-full", "min-w-0", "flex-col", "gap-4", "border-separator", "p-4", "md:flex", "md:border-r"],
+        classes: ["hidden", "w-full", "min-w-0", "min-h-0", "shrink-0", "flex-col", "gap-4", "overflow-hidden", "px-3", "py-6", "md:flex", "md:sticky", "md:top-16", "md:self-start", "md:h-app-rail"],
         children: {
-            toggle: { contract: "learn-course-rail-collapse-toggle" },
             title: { leaf: "text", props: { size: "sm", weight: "medium" } },
             progress: { leaf: "progress" },
             fact: { leaf: "text", props: { size: "xs", tone: "muted" } },
             search: { leaf: "search-box" },
-            milestone: { contract: "personal-project-milestone-row", repeats: true, restingCount: 4 },
+            milestones: { contract: "personal-project-milestone-list-scroll" },
         },
         why: "if project completion, search and milestone destinations belong to one independently scrolling desktop rail.",
     },
-    "personal-project-milestone-rail-collapsed": {
-        host: "nav",
-        classes: ["hidden", "w-full", "min-w-0", "flex-col", "items-center", "gap-4", "border-separator", "p-2", "md:flex", "md:border-r"],
-        children: { toggle: { contract: "learn-course-rail-collapse-toggle" } },
-        why: "if the project rail compacts while the routed project body retains its reading width.",
+    "personal-project-milestone-list-scroll": {
+        classes: ["flex", "w-full", "min-w-0", "min-h-0", "flex-1", "flex-col", "overflow-y-auto", "overscroll-contain", "scroll-shadow", "scroll-shadow--vertical", "scroll-shadow--hide-scrollbar"],
+        children: {
+            milestone: { contract: "personal-project-milestone-row", repeats: true, restingCount: 4 },
+        },
+        why: "if milestone destinations alone move while project progress and search remain pinned above them.",
     },
     "personal-project-milestone-row": {
         classes: ["flex", "w-full", "min-w-0", "flex-row", "items-center", "gap-2", "border-b", "border-separator", "py-3", "[&>*:first-child]:min-w-0", "[&>*:first-child]:grow", "[&>*:last-child]:shrink-0"],
@@ -877,7 +866,7 @@ export const CONTRACTS = buildContracts({
         why: "if you need repository identity, optional branch and connection state to remain one compact fact attached to project identity.",
     },
     "course-personal-project-next-task": {
-        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "rounded-3xl", "border", "border-separator", "p-6"],
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "p-6"],
         children: {
             position: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
             title: { leaf: "heading", optional: true },
@@ -891,7 +880,7 @@ export const CONTRACTS = buildContracts({
         children: {
             label: { leaf: "text", props: { size: "sm", weight: "medium" } },
             progress: { leaf: "progress" },
-            fact: { leaf: "text", props: { size: "sm", tone: "muted" }, repeats: true, restingCount: 3 },
+            fact: { leaf: "text", props: { size: "sm", tone: "muted" } },
         },
         why: "if you need whole-project completion to stay paired with task, submission and score facts rather than being inferred from the current milestone.",
     },
@@ -911,7 +900,7 @@ export const CONTRACTS = buildContracts({
         why: "if you need four project task destinations to keep comparable responsive columns without flattening them into workspace navigation.",
     },
     "course-personal-project-task-card": {
-        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "rounded-2xl", "border", "border-separator", "p-4"],
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "p-4"],
         children: {
             title: { leaf: "heading" },
             status: { leaf: "text", props: { size: "xs", tone: "muted" } },
@@ -2721,6 +2710,7 @@ export const CONTRACTS = buildContracts({
         ],
         children: {
             contents: { contract: "learn-route-context-rail" },
+            divider: { leaf: "rail-divider" },
             main: { contract: "learn-content-page" },
             outline: { contract: "content-outline-rail", optional: true },
         },
@@ -2728,30 +2718,52 @@ export const CONTRACTS = buildContracts({
     },
     "content-map-panel": {
         host: "nav",
-        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4", "p-4"],
+        classes: ["flex", "w-full", "min-w-0", "min-h-0", "flex-col", "gap-4", "px-3"],
         children: {
             progress: { composite: "labelled-progress-row" },
             search: { leaf: "search-box" },
+            modules: { contract: "content-map-module-list" },
+        },
+        why: "if you need course progress and search pinned above the independently scrolling module tree with no outer block inset invented by the resizable rail.",
+    },
+    "content-map-module-list": {
+        classes: ["flex", "w-full", "min-w-0", "min-h-0", "flex-1", "flex-col", "divide-y", "divide-separator", "overflow-y-auto", "overscroll-contain", "scroll-shadow", "scroll-shadow--vertical", "scroll-shadow--hide-scrollbar"],
+        children: {
             module: { contract: "content-map-module", repeats: true, restingCount: 4 },
         },
-        why: "if you need the course map: progress first, then search filtering the whole tree, then the module list.",
+        why: "if you need a long module tree to scroll without moving the controls above it while full-width separators keep peer modules visually distinct.",
     },
     "content-map-module-summary": {
-        classes: ["flex", "w-full", "min-w-0", "flex-row", "items-center", "gap-3", "px-3", "py-2", "[&>*:first-child]:min-w-0", "[&>*:first-child]:grow", "[&>*:nth-child(2)]:shrink-0", "[&>*:last-child]:shrink-0"],
+        classes: ["flex", "w-full", "min-w-0", "flex-row", "items-center", "gap-3", "px-3", "py-2", "[&>*:first-child]:min-w-0", "[&>*:first-child]:grow", "[&>*:last-child]:shrink-0"],
         children: {
-            title: { leaf: "text", props: { size: "sm" } },
-            fact: { leaf: "text", props: { size: "xs", tone: "muted" } },
-            caret: { leaf: "icon", props: { role: "chip" } },
+            copy: { contract: "content-map-module-summary-copy" },
+            caret: { leaf: "disclosure-indicator" },
         },
-        why: "if you need one module's name, completion fact, and open/closed caret on a single scannable line.",
+        why: "if you need one module's title and state summary to yield before its fixed disclosure indicator.",
+    },
+    "content-map-module-summary-copy": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "items-start", "gap-2", "text-left"],
+        children: {
+            title: { leaf: "text", props: { size: "md", weight: "medium" } },
+            fact: { leaf: ["text", "badge"], optional: true },
+            progress: { leaf: "progress", optional: true },
+        },
+        why: "if you need an expanded module to replace its compact completion fact with a full-width progress bar under the same title.",
     },
     "content-map-module": {
-        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-1"],
+        classes: ["w-full", "min-w-0"],
         children: {
-            title: { contract: "content-map-module-summary" },
-            row: { leaf: "content-map-row", repeats: true, restingCount: 0 },
+            summary: { contract: "content-map-module-summary" },
+            body: { contract: "content-map-module-body" },
         },
-        why: "if you need a module's summary row paired with its content rows underneath, with no rows at all when the module is unopened.",
+        why: "if you need one module disclosure to keep its typed summary and selectable lesson body under one vendor-owned interaction.",
+    },
+    "content-map-module-body": {
+        classes: ["w-full", "min-w-0"],
+        children: {
+            list: { leaf: "selection-list", props: { variant: "outline" } },
+        },
+        why: "if you need one module's lesson destinations exposed as a single HeroUI selection list inside its disclosure panel.",
     },
     "content-outline-rail": {
         host: "nav",
@@ -2775,7 +2787,7 @@ export const CONTRACTS = buildContracts({
         why: "if you need the flexible, independently scrolling page owner inside the two-rail content reader frame.",
     },
     "content-reader-inner": {
-        classes: ["mx-auto", "flex", "w-full", "max-w-app-md", "flex-col", "gap-6", "px-6", "py-6"],
+        classes: ["flex", "w-full", "max-w-app-md", "flex-col", "gap-6", "p-6"],
         children: {
             header: { contract: "page-header-stack" },
             description: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },

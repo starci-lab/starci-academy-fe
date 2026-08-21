@@ -76,15 +76,15 @@ const GROUPS: ReadonlyArray<{ id: string, rows: ReadonlyArray<SpineRoute> }> = [
         id: "practice",
         rows: [
             { id: "flashcards", icon: "review", at: "/learn/flashcards" },
-            { id: "mockInterview", icon: "talents", at: "/learn/mock-interview", requiresEnrollment: true },
-            { id: "foundations", icon: "explore", at: "/learn/foundations" },
-            { id: "playground", icon: "code", at: "/learn/playground" },
+            { id: "mockInterview", icon: "mockInterview", at: "/learn/mock-interview", requiresEnrollment: true },
+            { id: "foundations", icon: "foundations", at: "/learn/foundations" },
+            { id: "playground", icon: "playground", at: "/learn/playground" },
         ],
     },
     {
         id: "track",
         rows: [
-            { id: "mindMap", icon: "blog", at: "/learn/mind-map" },
+            { id: "mindMap", icon: "mindMap", at: "/learn/mind-map" },
             { id: "leaderboard", icon: "league", at: "/learn/leaderboard" },
             { id: "qa", icon: "community", at: "/learn/qa" },
         ],
@@ -175,7 +175,7 @@ export const LearnShellLayout = (input: LearnShellLayoutProps) => {
                         home: {
                             id: "home",
                             label: t("rows.home"),
-                            icon: "home",
+                            icon: "viewGrid",
                             isCurrent: pathname === `${base}/learn`,
                         },
                         groups,

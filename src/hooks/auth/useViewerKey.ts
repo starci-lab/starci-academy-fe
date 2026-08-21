@@ -21,9 +21,11 @@ import { useSessionToken } from "./useSessionToken"
  * same mistake as one in web storage. The fingerprint is not a security boundary and is not
  * claimed to be one; it is only a stable, non-reversible way to say "a different viewer".
  *
- * A TOKEN REFRESH ALSO CHANGES IT, and that is left alone deliberately. Refetching once when a
- * token is renewed costs one request; the alternative is decoding the token here to find a subject
- * claim, which puts this file in the business of parsing credentials to save a round trip.
+ * A TOKEN REFRESH MUST NOT CHANGE IT. Access tokens rotate while the viewer stays the same; hashing
+ * the whole token made every viewer-scoped SWR hook abandon its populated key, briefly return
+ * `data=undefined`, and repaint the reader as a skeleton. The public `sub` claim is identity data,
+ * not authorization: the server still verifies the token on every request. Opaque tokens fall back
+ * to the whole-token fingerprint because they expose no stable viewer identity.
  */
 
 /** What a viewer-scoped hook puts in its key. `undefined` means nobody is signed in. */
@@ -45,6 +47,20 @@ const fingerprint = (token: string): string => {
     return (hash >>> 0).toString(36)
 }
 
+/** Read the public stable subject from a JWT without treating the unverified payload as authority. */
+const subjectOf = (token: string): string | undefined => {
+    try {
+        const encoded = token.split(".")[1]
+        if (encoded === undefined) return undefined
+        const normalized = encoded.replace(/-/g, "+").replace(/_/g, "/")
+        const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=")
+        const payload = JSON.parse(window.atob(padded)) as { readonly sub?: unknown }
+        return typeof payload.sub === "string" && payload.sub !== "" ? payload.sub : undefined
+    } catch {
+        return undefined
+    }
+}
+
 /**
  * Read who is asking, as a cache key fragment.
  *
@@ -56,5 +72,7 @@ const fingerprint = (token: string): string => {
  */
 export const useViewerKey = (): ViewerKey => {
     const token = useSessionToken()
-    return token === undefined ? undefined : fingerprint(token)
+    if (token === undefined) return undefined
+    const subject = subjectOf(token)
+    return fingerprint(subject ?? token)
 }

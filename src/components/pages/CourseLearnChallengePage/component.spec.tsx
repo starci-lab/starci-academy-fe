@@ -27,7 +27,10 @@ const baseProps: CourseLearnChallengePageProps["props"] = {
             modules: [{
                 id: "module-1",
                 title: "Foundations",
-                countLabel: "1 lesson",
+                countLabel: "0/1 lesson",
+                progressLabel: "Progress for Foundations",
+                completionPercent: 0,
+                isOpen: true,
                 lessons: [{
                     id: "challenge:challenge-1",
                     title: "Repository challenge",

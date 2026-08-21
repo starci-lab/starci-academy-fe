@@ -1,5 +1,6 @@
 import { Tree } from "@/components/branches/Tree"
-import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
+import { CollapsibleRail } from "@/components/branches/CollapsibleRail"
+import { defineContractComponent, defineContractProjection, defineLeafComponent } from "@/components/contracts/props"
 import {
     learnSpine,
     learnSpineCollapsed,
@@ -98,13 +99,22 @@ export const LearnShellLayoutBase = (input: LearnShellLayoutProps) => {
     const body = defineContractComponent("learn-routed-body", {
         page: defineLeafComponent("page", {}, () => <>{input.surface}</>),
     })
+    const expandedSpine = learnSpine({ props: input.props.spine, on: input.on, isLoading: input.isLoading ?? false })
+    const collapsedSpine = learnSpineCollapsed({ props: input.props.spine, on: input.on, isLoading: input.isLoading ?? false })
+    const projectedRail = () => (
+        <CollapsibleRail
+            isCollapsed={input.props.spine.isCollapsed}
+            expanded={expandedSpine}
+            collapsed={collapsedSpine}
+        />
+    )
     if (input.props.spine.isCollapsed) {
         return (
             <Tree
                 contract="learn-shell-frame-collapsed"
                 render={defineContractComponent("learn-shell-frame-collapsed", {
                     ...(input.props.isFullBleed ? {} : {
-                        spine: learnSpineCollapsed({ props: input.props.spine, on: input.on, isLoading: input.isLoading ?? false }),
+                        spine: defineContractProjection("learn-course-navigation-rail-collapsed", projectedRail),
                     }),
                     body,
                     ...mobileBar,
@@ -117,7 +127,7 @@ export const LearnShellLayoutBase = (input: LearnShellLayoutProps) => {
             contract="learn-shell-frame"
             render={defineContractComponent("learn-shell-frame", {
                 ...(input.props.isFullBleed ? {} : {
-                    spine: learnSpine({ props: input.props.spine, on: input.on, isLoading: input.isLoading ?? false }),
+                    spine: defineContractProjection("learn-course-navigation-rail", projectedRail),
                 }),
                 body,
                 ...mobileBar,

@@ -1,11 +1,11 @@
 import {
     AcademicCapIcon,
+    ArrowLeftIcon,
     ArrowPathIcon,
     ArrowRightIcon,
     ArrowRightOnRectangleIcon,
     ArrowLeftStartOnRectangleIcon,
     BellIcon,
-    Bars3BottomLeftIcon,
     BoltIcon,
     BookmarkIcon,
     BookOpenIcon,
@@ -43,15 +43,20 @@ import {
     UserPlusIcon,
     XMarkIcon,
     StarIcon,
-} from "@heroicons/react/24/outline"
+    CourseRailIcon,
+    FoundationsIcon,
+    MindMapIcon,
+    MockInterviewIcon,
+    PlaygroundIcon,
+} from "@starci/heroicons/24/outline"
 import {
     AcademicCapIcon as AcademicCapSolidIcon,
+    ArrowLeftIcon as ArrowLeftSolidIcon,
     ArrowPathIcon as ArrowPathSolidIcon,
     ArrowRightIcon as ArrowRightSolidIcon,
     ArrowRightEndOnRectangleIcon as ArrowRightOnRectangleSolidIcon,
     ArrowLeftStartOnRectangleIcon as ArrowLeftStartOnRectangleSolidIcon,
     BellIcon as BellSolidIcon,
-    Bars3BottomLeftIcon as Bars3BottomLeftSolidIcon,
     BoltIcon as BoltSolidIcon,
     BookmarkIcon as BookmarkSolidIcon,
     BookOpenIcon as BookOpenSolidIcon,
@@ -89,7 +94,12 @@ import {
     UserPlusIcon as UserPlusSolidIcon,
     XMarkIcon as XMarkSolidIcon,
     StarIcon as StarSolidIcon,
-} from "@heroicons/react/16/solid"
+    CourseRailIcon as CourseRailSolidIcon,
+    FoundationsIcon as FoundationsSolidIcon,
+    MindMapIcon as MindMapSolidIcon,
+    MockInterviewIcon as MockInterviewSolidIcon,
+    PlaygroundIcon as PlaygroundSolidIcon,
+} from "@starci/heroicons/16/solid"
 import type { ComponentType, SVGProps } from "react"
 import { GithubMark, GoogleMark } from "./brands"
 import type { LeafProps } from "@/components/contracts/props"
@@ -115,12 +125,12 @@ import type { LeafProps } from "@/components/contracts/props"
 export type IconName =
     | "brand" | "aiChatbot" | "streak" | "credit" | "reward" | "course"
     | "email" | "password" | "revealPassword" | "hidePassword" | "code"
-    | "complete" | "pending" | "signIn" | "signUp" | "close" | "next" | "disclosure" | "retry" | "send"
+    | "complete" | "pending" | "signIn" | "signUp" | "close" | "back" | "next" | "disclosure" | "retry" | "send"
     | "home" | "explore" | "community" | "league" | "review" | "livestream"
     | "light" | "dark" | "locale" | "google" | "github"
     | "search" | "cart" | "notification" | "account" | "profile" | "cv" | "settings" | "signOut"
     | "saved" | "blog" | "talents" | "jobs" | "practice"
-    | "viewGrid" | "viewList" | "collapseRail"
+    | "viewGrid" | "viewList" | "collapseRail" | "mindMap" | "mockInterview" | "foundations" | "playground"
     | "star" | "ratingStarEmpty" | "ratingStarFilled"
 
 /** The two native Heroicon roles used by the product. */
@@ -223,6 +233,7 @@ const GLYPHS: Record<IconName, GlyphCuts> = {
     signIn: cuts(ArrowRightOnRectangleIcon, ArrowRightOnRectangleSolidIcon),
     signUp: cuts(UserPlusIcon, UserPlusSolidIcon),
     close: cuts(XMarkIcon, XMarkSolidIcon),
+    back: cuts(ArrowLeftIcon, ArrowLeftSolidIcon),
     next: cuts(ArrowRightIcon, ArrowRightSolidIcon),
     disclosure: cuts(ChevronRightIcon, ChevronRightSolidIcon),
     retry: cuts(ArrowPathIcon, ArrowPathSolidIcon),
@@ -254,7 +265,11 @@ const GLYPHS: Record<IconName, GlyphCuts> = {
     practice: cuts(CodeBracketIcon, CodeBracketSolidIcon),
     viewGrid: cuts(Squares2X2Icon, Squares2X2SolidIcon),
     viewList: cuts(ListBulletIcon, ListBulletSolidIcon),
-    collapseRail: cuts(Bars3BottomLeftIcon, Bars3BottomLeftSolidIcon),
+    collapseRail: cuts(CourseRailIcon, CourseRailSolidIcon),
+    mindMap: cuts(MindMapIcon, MindMapSolidIcon),
+    mockInterview: cuts(MockInterviewIcon, MockInterviewSolidIcon),
+    foundations: cuts(FoundationsIcon, FoundationsSolidIcon),
+    playground: cuts(PlaygroundIcon, PlaygroundSolidIcon),
     google: cuts(GoogleMark, GoogleMark),
     github: cuts(GithubMark, GithubMark),
 }

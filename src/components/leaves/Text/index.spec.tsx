@@ -30,12 +30,11 @@ describe("Text", () => {
         expect(line).toHaveClass("w-10", "text-xs", "leading-4")
     })
 
-    it("offers one closed parent-emphasis response without a style escape hatch", () => {
+    it("responds to parent selection without overriding the vendor hover colour", () => {
         const { container } = render(<Text props={{ content: "Count", size: "xs", parentEmphasis: "accent-soft" }} />)
         const line = container.querySelector("[data-component=Text]")
         expect(line).toHaveAttribute("data-parent-emphasis", "accent-soft")
-        expect(line).toHaveClass("data-[parent-emphasis=accent-soft]:group-hover:text-accent-soft")
         expect(line).toHaveClass("data-[parent-emphasis=accent-soft]:group-data-[selected=true]:text-accent-soft-foreground")
-        expect(line).toHaveClass("data-[parent-emphasis=accent-soft]:group-data-[selected=true]:group-hover:text-accent-soft-foreground")
+        expect(line?.className).not.toContain("group-hover:text-accent-soft")
     })
 })

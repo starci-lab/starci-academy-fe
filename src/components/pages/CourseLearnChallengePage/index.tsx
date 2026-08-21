@@ -34,6 +34,7 @@ export const CourseLearnChallengePage = (input: CourseLearnChallengePageProps) =
     const submission = useMutateSubmitContentChallengeSwr()
     const [urls, setUrls] = useState<Readonly<Record<string, string>>>({})
     const [contentSearch, setContentSearch] = useState("")
+    const [expandedModuleIds, setExpandedModuleIds] = useState<ReadonlySet<string>>(new Set([input.moduleId]))
     const [isCourseMapOpen, setIsCourseMapOpen] = useState(false)
     const [expandedRequirementIds, setExpandedRequirementIds] = useState<ReadonlyArray<string>>([])
     const [activeSubmissionId, setActiveSubmissionId] = useState<string>()
@@ -102,6 +103,27 @@ export const CourseLearnChallengePage = (input: CourseLearnChallengePageProps) =
         () => filterCourseOutlineModules(courseOutline.data?.modules ?? [], contentSearch),
         [contentSearch, courseOutline.data?.modules],
     )
+
+    useEffect(() => {
+        setExpandedModuleIds((current) => new Set([...current, input.moduleId]))
+    }, [input.moduleId])
+
+    const onSearchCourseMap = (query: string) => {
+        setContentSearch(query)
+        const matches = filterCourseOutlineModules(courseOutline.data?.modules ?? [], query)
+        setExpandedModuleIds(query.trim() === ""
+            ? new Set([input.moduleId])
+            : new Set(matches.map((courseModule) => courseModule.id)))
+    }
+
+    const onToggleCourseMapModule = (moduleId: string, isOpen: boolean) => {
+        setExpandedModuleIds((current) => {
+            const next = new Set(current)
+            if (isOpen) next.add(moduleId)
+            else next.delete(moduleId)
+            return next
+        })
+    }
     const courseMapRoutes = useMemo(() => {
         const entries = (courseOutline.data?.modules ?? []).flatMap((courseModule) => (
             courseModule.lessons.flatMap((lesson): ReadonlyArray<readonly [string, string]> => [
@@ -160,11 +182,8 @@ export const CourseLearnChallengePage = (input: CourseLearnChallengePageProps) =
                         progressFact: courseOutline.data === null || courseOutline.data === undefined
                             ? undefined
                             : `${courseOutline.data.progress.lessonsRead}/${courseOutline.data.progress.lessonsTotal}`,
-                        modules: filteredModules.map((courseModule) => ({
-                            id: courseModule.id,
-                            title: courseModule.title,
-                            countLabel: contentText("moduleCount", { total: courseModule.lessons.length }),
-                            lessons: courseModule.lessons.flatMap((lesson) => [
+                        modules: filteredModules.map((courseModule) => {
+                            const lessons = courseModule.lessons.flatMap((lesson) => [
                                 {
                                     id: `lesson:${lesson.id}`,
                                     title: lesson.title,
@@ -179,8 +198,18 @@ export const CourseLearnChallengePage = (input: CourseLearnChallengePageProps) =
                                     isComplete: candidate.completed,
                                     isCurrent: candidate.id === challenge?.id,
                                 })),
-                            ]),
-                        })),
+                            ])
+                            const completed = lessons.filter((lesson) => lesson.isComplete).length
+                            return {
+                                id: courseModule.id,
+                                title: courseModule.title,
+                                countLabel: contentText("moduleProgress", { completed, total: lessons.length }),
+                                progressLabel: contentText("moduleProgressLabel", { module: courseModule.title }),
+                                completionPercent: lessons.length === 0 ? 0 : Math.round(completed / lessons.length * 100),
+                                isOpen: expandedModuleIds.has(courseModule.id),
+                                lessons,
+                            }
+                        }),
                     },
                 },
                 deliverables: [...challengeSubmissions]
@@ -215,7 +244,8 @@ export const CourseLearnChallengePage = (input: CourseLearnChallengePageProps) =
                 back: () => router.push(lessonPath),
                 openCourseMap: () => setIsCourseMapOpen(true),
                 closeCourseMap: () => setIsCourseMapOpen(false),
-                searchCourseMap: setContentSearch,
+                searchCourseMap: onSearchCourseMap,
+                toggleCourseMapModule: onToggleCourseMapModule,
                 openCourseMapItem: (id) => {
                     const path = courseMapRoutes.get(id)
                     if (path !== undefined) router.push(path)

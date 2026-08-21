@@ -17,6 +17,15 @@ import { defineContractProjection } from "@/components/contracts/props"
 const rail = defineContractProjection("course-pricing-rail", () => (
     <p data-testid="rail-body">1.750.000 ₫</p>
 ))
+const navigationGroups = defineContractProjection("learn-course-navigation-groups-scroll", () => (
+    <div data-testid="navigation-groups" />
+))
+const contentMapModules = defineContractProjection("content-map-module-list", () => (
+    <div data-testid="content-map-modules" />
+))
+const projectMilestones = defineContractProjection("personal-project-milestone-list-scroll", () => (
+    <div data-testid="personal-project-milestones" />
+))
 
 describe("ScrollViewport", () => {
     it("bounds the pricing rail in the approved scrolling entry inside one marked card", () => {
@@ -35,5 +44,38 @@ describe("ScrollViewport", () => {
         expect(container.querySelector("[data-node=\"course-pricing-rail\"]")).not.toBeNull()
         expect(container.querySelector("[data-node=\"label-row-over-card\"]")).toBeNull()
         expect(screen.getByTestId("rail-body")).toBeInTheDocument()
+    })
+
+    it("uses the vendor scroll branch for long navigation groups", () => {
+        const { container } = render(
+            <ScrollViewport boundary="learn-navigation-groups" render={navigationGroups} />,
+        )
+
+        const viewport = container.querySelector("[data-node=learn-course-navigation-groups-scroll]")
+        expect(viewport).not.toBeNull()
+        expect(viewport).toHaveClass("scroll-shadow--vertical", "scroll-shadow--hide-scrollbar")
+        expect(screen.getByTestId("navigation-groups")).toBeInTheDocument()
+    })
+
+    it("keeps the resize separator visually separate from the content-map scrollbar", () => {
+        const { container } = render(
+            <ScrollViewport boundary="content-map-modules" render={contentMapModules} />,
+        )
+
+        const viewport = container.querySelector("[data-node=content-map-module-list]")
+        expect(viewport).toHaveClass("scroll-shadow--vertical", "scroll-shadow--hide-scrollbar")
+        expect(viewport).not.toHaveClass("scrollbar")
+        expect(screen.getByTestId("content-map-modules")).toBeInTheDocument()
+    })
+
+    it("keeps personal-project progress pinned while its milestone list scrolls", () => {
+        const { container } = render(
+            <ScrollViewport boundary="personal-project-milestones" render={projectMilestones} />,
+        )
+
+        const viewport = container.querySelector("[data-node=personal-project-milestone-list-scroll]")
+        expect(viewport).toHaveClass("scroll-shadow--vertical", "scroll-shadow--hide-scrollbar")
+        expect(viewport).not.toHaveClass("scrollbar")
+        expect(screen.getByTestId("personal-project-milestones")).toBeInTheDocument()
     })
 })

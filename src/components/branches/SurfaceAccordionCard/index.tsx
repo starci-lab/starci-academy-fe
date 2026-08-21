@@ -32,7 +32,7 @@ export const SurfaceAccordionCard = <const SK extends ContractKey, const BK exte
             data-component="SurfaceAccordionCard"
         >
             <Accordion.Heading>
-                <Accordion.Trigger>
+                <Accordion.Trigger className="w-full justify-start text-left">
                     <Tree contract={input.summaryContract} render={input.summaryRender} />
                 </Accordion.Trigger>
             </Accordion.Heading>

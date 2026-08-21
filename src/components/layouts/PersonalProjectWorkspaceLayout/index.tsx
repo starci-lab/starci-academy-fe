@@ -17,7 +17,6 @@ export const PersonalProjectWorkspaceLayout = (input: PersonalProjectWorkspaceLa
     const locale = useLocale()
     const pathname = usePathname()
     const router = useRouter()
-    const [collapsed, setCollapsed] = useState(false)
     const [query, setQuery] = useState("")
     const project = useQueryCoursePersonalProjectSwr(input.displayId)
     const routeTaskId = pathname.match(/\/personal-project\/tasks\/([^/]+)/)?.[1]
@@ -48,11 +47,10 @@ export const PersonalProjectWorkspaceLayout = (input: PersonalProjectWorkspaceLa
             search: "Tìm task...", // vn-ok: Vietnamese runtime copy while shared message catalogs are frozen.
             searchLabel: "Tìm milestone", // vn-ok: Vietnamese runtime copy while shared message catalogs are frozen.
             clear: "Xóa tìm kiếm", // vn-ok: Vietnamese runtime copy while shared message catalogs are frozen.
-            collapse: "Thu gọn mục lục dự án", // vn-ok: Vietnamese runtime copy while shared message catalogs are frozen.
-            expand: "Mở mục lục dự án", // vn-ok: Vietnamese runtime copy while shared message catalogs are frozen.
+            resize: "Thay đổi độ rộng mục lục dự án", // vn-ok: Vietnamese runtime copy while shared message catalogs are frozen.
             fact: "nhiệm vụ", // vn-ok: Vietnamese runtime copy while shared message catalogs are frozen.
         }
-        : { title: "Progress", search: "Search tasks...", searchLabel: "Search milestones", clear: "Clear search", collapse: "Collapse project outline", expand: "Expand project outline", fact: "tasks" }
+        : { title: "Progress", search: "Search tasks...", searchLabel: "Search milestones", clear: "Clear search", resize: "Resize project outline", fact: "tasks" }
     return (
         <PersonalProjectWorkspaceLayoutBase
             milestones={visibleMilestones}
@@ -63,11 +61,9 @@ export const PersonalProjectWorkspaceLayout = (input: PersonalProjectWorkspaceLa
                 fact: `${project.data?.progress?.tasksCompleted ?? 0}/${project.data?.progress?.tasksTotal ?? 0} ${copy.fact}`,
             }}
             search={{ placeholder: copy.search, label: copy.searchLabel, clearLabel: copy.clear }}
-            collapsed={collapsed}
-            toggleLabel={collapsed ? copy.expand : copy.collapse}
+            resizeLabel={copy.resize}
             onTask={(taskId) => router.push(`/courses/${input.displayId}/learn/personal-project/tasks/${taskId}`)}
             onSearch={setQuery}
-            onToggle={() => setCollapsed((value) => !value)}
             isLoading={project.data === undefined && project.error === undefined}
         />
     )

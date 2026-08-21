@@ -18,6 +18,7 @@ const labels: CourseLearnContentPageData["labels"] = {
     searchPlaceholder: "Search contents",
     searchLabel: "Search contents",
     searchClearLabel: "Clear search",
+    resizeRail: "Resize course outline",
     outlineTitle: "On this page",
     pageLabel: "Page",
     previousLabel: "Previous",
@@ -63,6 +64,7 @@ describe("CourseLearnContentPageBase", () => {
         expect(container.querySelector("[data-node=learn-content-page]")).not.toBeNull()
         expect(container.querySelector("[data-node=learn-content-page] > [data-node=content-reader-inner]")).not.toBeNull()
         expect(container.querySelector("[data-node=content-outline-rail]")).not.toBeNull()
+        expect(container.querySelector("[role=separator]")).not.toBeNull()
 
         const cases = [
             ["contents", "content-map-panel"],
@@ -329,7 +331,7 @@ describe("CourseLearnContentPageBase", () => {
         expect(screen.getByText("Course progress")).toBeInTheDocument()
         expect(screen.getByText("3/12")).toBeInTheDocument()
         expect(screen.queryByText("Hidden lesson")).not.toBeInTheDocument()
-        expect(container.querySelectorAll("[data-node=content-map-module]")).toHaveLength(2)
+        expect(container.querySelectorAll("[data-component=SurfaceAccordionCard]")).toHaveLength(2)
         expect(container.querySelector("[data-component=ContentMapRow]")).toBeNull()
     })
 

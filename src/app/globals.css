@@ -54,6 +54,10 @@
      */
     --spacing-rail: 5.5rem;
     --max-height-rail: calc(100dvh - 7rem);
+    /* The sticky app band is 4rem content plus its 1px bottom separator. Rails subtract both so
+       browser rounding cannot leave a one-pixel document scroll range on an otherwise fixed page. */
+    --height-app-rail: calc(100dvh - 4rem - 1px);
+    --min-height-app-rail: calc(100dvh - 4rem - 1px);
 
     /*
      * Course detail has TWO sticky navbar rows. Measured on the live route, the primary row occupies

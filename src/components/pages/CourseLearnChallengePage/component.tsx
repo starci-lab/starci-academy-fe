@@ -76,6 +76,7 @@ export type CourseLearnChallengePageProps = {
         readonly openCourseMap?: () => void
         readonly closeCourseMap?: () => void
         readonly searchCourseMap?: (query: string) => void
+        readonly toggleCourseMapModule?: (id: string, isOpen: boolean) => void
         readonly openCourseMapItem?: (id: string) => void
         readonly toggleRequirement?: (id: string, isOpen: boolean) => void
         readonly changeUrl?: (id: string, value: string) => void
@@ -103,6 +104,7 @@ export const CourseLearnChallengePageBase = (input: CourseLearnChallengePageProp
         ...input.props.courseMap,
         on: {
             search: input.on?.searchCourseMap,
+            toggleModule: input.on?.toggleCourseMapModule,
             openLesson: input.on?.openCourseMapItem,
         },
     })

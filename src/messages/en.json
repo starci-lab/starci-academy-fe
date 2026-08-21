@@ -815,6 +815,9 @@
                 "expert": "Expert"
             },
             "moduleCount": "{total} contents",
+            "moduleProgress": "{completed}/{total} contents",
+            "moduleProgressLabel": "Progress for {module}",
+            "resizeRail": "Resize course outline",
       "minutes": "{minutes} min",
       "discussionTitle": "Discussion",
       "discussionComposerLabel": "Comment on this lesson",

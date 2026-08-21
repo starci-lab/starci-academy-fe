@@ -1,4 +1,5 @@
-import { Breadcrumbs as HeroBreadcrumbs, skeletonVariants } from "@heroui/react"
+import { Breadcrumbs as HeroBreadcrumbs, Link as HeroLink, skeletonVariants } from "@heroui/react"
+import { Icon } from "@/components/leaves/Icon"
 import type { LeafProps } from "@/components/contracts/props"
 
 /**
@@ -41,6 +42,12 @@ export type BreadcrumbsProps = LeafProps<BreadcrumbsData, BreadcrumbsActions>
 
 /** The resting shape - one short bar where the trail will be. */
 const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({ className: "h-4 w-40 rounded-sm" })
+/** Three path steps no longer aid orientation; the nearest ancestor is the useful way out. */
+const BACK_LINK_MIN_DEPTH = 3
+/** Back-link anatomy owned by this leaf so every deep trail resolves to the same quiet control. */
+const BACK_LINK_CLASSES = "inline-flex w-fit items-center gap-1 text-sm text-muted"
+/** Deep trails use the short legacy wording; the surrounding accessible label still names the path. */
+const BACK_LABEL = "Back"
 
 /**
  * Draw the path to the current page.
@@ -60,6 +67,21 @@ export const Breadcrumbs = ({ props, on, isLoading = false }: BreadcrumbsProps) 
         )
     }
     const last = props.steps.length - 1
+    const parent = [...props.steps.slice(0, last)].reverse().find((step) => on?.[step.id] !== undefined)
+    if (props.steps.length >= BACK_LINK_MIN_DEPTH && parent !== undefined) {
+        return (
+            <HeroLink
+                data-tier="leaf"
+                data-component="Breadcrumbs"
+                data-variant="back"
+                onPress={on?.[parent.id]}
+                className={BACK_LINK_CLASSES}
+            >
+                <Icon props={{ name: "back", role: "chip" }} />
+                {BACK_LABEL}
+            </HeroLink>
+        )
+    }
     return (
         <HeroBreadcrumbs
             data-tier="leaf"

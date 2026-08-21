@@ -1,8 +1,9 @@
 import { LabelledProgressRow } from "@/components/composites/LabelledProgressRow"
 import { PressableSurface } from "@/components/branches/PressableSurface"
-import { NavLink } from "@/components/leaves/NavLink"
+import { ScrollViewport } from "@/components/branches/ScrollViewport"
 import { IconButton } from "@/components/leaves/IconButton"
 import type { IconName } from "@/components/leaves/Icon"
+import { SelectionList, type SelectionListItem } from "@/components/leaves/SelectionList"
 import { Text } from "@/components/leaves/Text"
 import {
     defineCompositeComponent,
@@ -101,6 +102,19 @@ export type LearnSpineProps = {
     readonly isLoading?: boolean
 }
 
+const selectionItemsOf = (
+    rows: ReadonlyArray<LearnSpineRow>,
+    lockedLabel: string,
+): ReadonlyArray<SelectionListItem> => rows.map((row) => ({
+    id: row.id,
+    textValue: row.label,
+    title: row.label,
+    icon: row.icon,
+    badge: row.isLocked === true ? lockedLabel : row.fact,
+    badgeTone: row.isLocked === true ? "warning" : row.fact === undefined ? undefined : "accent",
+    isCurrent: row.isCurrent,
+}))
+
 /**
  * Build the spine as the frame's own child.
  *
@@ -111,7 +125,7 @@ export type LearnSpineProps = {
  */
 export const learnSpineCollapsed = ({ props, on }: LearnSpineProps) => (
     defineContractComponent("learn-course-navigation-rail-collapsed", {
-        toggle: defineContractComponent("learn-course-rail-collapse-toggle", {
+        toggle: defineContractComponent("learn-course-rail-collapse-toggle-collapsed", {
             control: defineLeafComponent("icon-button", {}, () => (
                 <IconButton
                     props={{ icon: "collapseRail", label: props.expandLabel, isActive: true }}
@@ -120,23 +134,38 @@ export const learnSpineCollapsed = ({ props, on }: LearnSpineProps) => (
             )),
         }),
         home: defineContractComponent("learn-course-home-navigation-row", {
-            link: defineLeafComponent("nav-link", { kind: "route" }, () => (
-                <NavLink
-                    props={{ label: props.home.label, icon: props.home.icon, kind: "route", isCurrent: props.home.isCurrent, showLabel: false }}
-                    on={{ press: () => on?.openRow?.(props.home.id) }}
+            list: defineLeafComponent("selection-list", { variant: "navigation-collapsed" }, () => (
+                <SelectionList
+                    props={{
+                        label: props.home.label,
+                        items: selectionItemsOf([props.home], props.lockedLabel),
+                        selectedKey: props.home.isCurrent === true ? props.home.id : undefined,
+                        variant: "navigation-collapsed",
+                    }}
+                    on={{ activate: on?.openRow }}
                 />
             )),
         }),
-        group: props.groups.map((group) => defineContractComponent("learn-nav-group-collapsed", {
-            row: group.rows.map((row) => defineContractComponent("learn-nav-row-collapsed", {
-                link: defineLeafComponent("nav-link", { kind: "route" }, () => (
-                    <NavLink
-                        props={{ label: row.label, icon: row.icon, kind: "route", isCurrent: row.isCurrent, showLabel: false }}
-                        on={{ press: () => on?.openRow?.(row.id) }}
-                    />
-                )),
-            })),
-        })),
+        groups: defineContractProjection("learn-course-navigation-groups-scroll", () => (
+            <ScrollViewport
+                boundary="learn-navigation-groups"
+                render={defineContractComponent("learn-course-navigation-groups-scroll", {
+                    group: props.groups.map((group) => defineContractComponent("learn-nav-group-collapsed", {
+                        list: defineLeafComponent("selection-list", { variant: "navigation-collapsed" }, () => (
+                            <SelectionList
+                                props={{
+                                    label: group.label,
+                                    items: selectionItemsOf(group.rows, props.lockedLabel),
+                                    selectedKey: group.rows.find((row) => row.isCurrent === true)?.id,
+                                    variant: "navigation-collapsed",
+                                }}
+                                on={{ activate: on?.openRow }}
+                            />
+                        )),
+                    })),
+                })}
+            />
+        )),
     })
 )
 
@@ -185,35 +214,41 @@ export const learnSpine = ({ props, on, isLoading = false }: LearnSpineProps) =>
                 )),
             }),
             home: defineContractComponent("learn-course-home-navigation-row", {
-                link: defineLeafComponent("nav-link", { kind: "route" }, () => (
-                    <NavLink
-                        props={{ label: props.home.label, icon: props.home.icon, kind: "route", isCurrent: props.home.isCurrent }}
-                        on={{ press: () => on?.openRow?.(props.home.id) }}
+                list: defineLeafComponent("selection-list", { variant: "navigation" }, () => (
+                    <SelectionList
+                        props={{
+                            label: props.home.label,
+                            items: selectionItemsOf([props.home], lockedLabel),
+                            selectedKey: props.home.isCurrent === true ? props.home.id : undefined,
+                            variant: "navigation",
+                        }}
+                        on={{ activate: on?.openRow }}
                     />
                 )),
             }),
-            group: props.groups.map((group) => defineContractComponent("learn-nav-group", {
-                label: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                    <Text props={{ content: group.label, size: "xs" }} />
-                )),
-                row: group.rows.map((row) => defineContractComponent("learn-nav-row", {
-                    link: defineLeafComponent("nav-link", { kind: "route" }, () => (
-                        <NavLink
-                            props={{ label: row.label, icon: row.icon, kind: "route", isCurrent: row.isCurrent }}
-                            on={{ press: () => on?.openRow?.(row.id) }}
-                        />
-                    )),
-                    ...(row.isLocked === true ? {
-                        fact: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                            <Text props={{ content: lockedLabel, size: "xs" }} />
-                        )),
-                    } : row.fact === undefined ? {} : {
-                        fact: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                            <Text props={{ content: row.fact, size: "xs" }} />
-                        )),
-                    }),
-                })),
-            })),
+            groups: defineContractProjection("learn-course-navigation-groups-scroll", () => (
+                <ScrollViewport
+                    boundary="learn-navigation-groups"
+                    render={defineContractComponent("learn-course-navigation-groups-scroll", {
+                        group: props.groups.map((group) => defineContractComponent("learn-nav-group", {
+                            label: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                                <Text props={{ content: group.label, size: "xs" }} />
+                            )),
+                            list: defineLeafComponent("selection-list", { variant: "navigation" }, () => (
+                                <SelectionList
+                                    props={{
+                                        label: group.label,
+                                        items: selectionItemsOf(group.rows, lockedLabel),
+                                        selectedKey: group.rows.find((row) => row.isCurrent === true)?.id,
+                                        variant: "navigation",
+                                    }}
+                                    on={{ activate: on?.openRow }}
+                                />
+                            )),
+                        })),
+                    })}
+                />
+            )),
         })
     )
 }

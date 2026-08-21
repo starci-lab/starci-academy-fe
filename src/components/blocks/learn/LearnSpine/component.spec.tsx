@@ -48,11 +48,24 @@ const withResume: LearnSpineData = {
 
 describe("learnSpine", () => {
     it("names every group and every destination it offers", () => {
-        renderSpine(base)
+        const { container } = renderSpine(base)
         expect(screen.getByText("Your path")).toBeInTheDocument()
         expect(screen.getByText("Home")).toBeInTheDocument()
+        expect(screen.getByRole("option", { name: "Home" })).toBeInTheDocument()
         expect(screen.getByText("Modules")).toBeInTheDocument()
         expect(screen.getByText("Leaderboard")).toBeInTheDocument()
+        expect(container.querySelector("[data-component=SelectionList][data-variant=navigation]")).toBeTruthy()
+        expect(container.querySelector("[data-node=learn-course-navigation-rail]")).toHaveClass(
+            "border-separator",
+            "px-3",
+            "py-6",
+            "md:border-r",
+        )
+        expect(container.querySelector("[data-node=learn-course-navigation-rail]")).not.toHaveClass("p-4")
+        expect(container.querySelector("[data-node=learn-course-navigation-groups-scroll]")).toHaveClass(
+            "scroll-shadow--vertical",
+            "scroll-shadow--hide-scrollbar",
+        )
     })
 
     it("reports the pressed destination by its own id", () => {
@@ -64,7 +77,7 @@ describe("learnSpine", () => {
 
     it("uses one icon control to collapse and restore the rail", () => {
         const toggleCollapse = vi.fn()
-        const { rerender } = renderSpine(base, { toggleCollapse })
+        const { container, rerender } = renderSpine(base, { toggleCollapse })
         fireEvent.click(screen.getByRole("button", { name: "Collapse" }))
         expect(toggleCollapse).toHaveBeenCalledTimes(1)
 
@@ -76,7 +89,15 @@ describe("learnSpine", () => {
         )
         expect(screen.getByRole("button", { name: "Expand" })).toBeInTheDocument()
         expect(screen.queryByText("Your path")).not.toBeInTheDocument()
-        expect(screen.getByRole("link", { name: "Modules" })).toBeInTheDocument()
+        expect(screen.getByRole("option", { name: "Home" })).toBeInTheDocument()
+        expect(screen.getByRole("option", { name: "Modules" })).toBeInTheDocument()
+        expect(container.querySelector("[data-node=learn-course-navigation-rail-collapsed]")).toHaveClass(
+            "border-separator",
+            "px-3",
+            "py-6",
+            "md:border-r",
+        )
+        expect(container.querySelector("[data-node=learn-course-navigation-rail-collapsed]")).not.toHaveClass("p-2", "px-2")
     })
 
     it("stays inert rather than throwing when the frame reported no handlers", () => {
@@ -102,8 +123,34 @@ describe("learnSpine", () => {
             home: { id: "home", label: "Home", icon: "home" },
             groups: [{ id: "path", label: "Your path", rows: [{ id: "leaderboard", label: "Leaderboard", icon: "community" }] }],
         })
-        expect(container.querySelectorAll("[data-node=learn-nav-row]")).toHaveLength(1)
+        expect(container.querySelectorAll("[data-component=SelectionList][data-variant=navigation] [role=option]")).toHaveLength(2)
         expect(screen.queryByText("Locked")).not.toBeInTheDocument()
+    })
+
+    it("keeps locked destinations operable so they can open the explanatory gate", () => {
+        const openRow = vi.fn()
+        renderSpine(base, { openRow })
+        const capstone = screen.getByRole("option", { name: /Capstone/ })
+        expect(capstone).not.toHaveAttribute("aria-disabled")
+        fireEvent.click(capstone)
+        expect(openRow).toHaveBeenCalledWith("capstone")
+    })
+
+    it("renders locked and rank facts as prominent semantic chips", () => {
+        renderSpine({
+            ...base,
+            groups: [{
+                id: "track",
+                label: "Track",
+                rows: [
+                    { id: "capstone", label: "Capstone", icon: "jobs", isLocked: true },
+                    { id: "leaderboard", label: "Leaderboard", icon: "league", fact: "#7" },
+                ],
+            }],
+        })
+
+        expect(screen.getByText("Locked").closest("[data-component=Badge]")).toHaveAttribute("data-tone", "warning")
+        expect(screen.getByText("#7").closest("[data-component=Badge]")).toHaveAttribute("data-tone", "accent")
     })
 
     it("omits the resume card entirely when there is nowhere to go back to", () => {

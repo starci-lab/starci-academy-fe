@@ -24,7 +24,10 @@ describe("CourseContentMapBase", () => {
                     modules: [{
                         id: "module-1",
                         title: "Distributed foundations",
-                        countLabel: "2 contents",
+                        countLabel: "0/2 contents",
+                        progressLabel: "Progress for Distributed foundations",
+                        completionPercent: 0,
+                        isOpen: true,
                         lessons: [{
                             id: "lesson-1",
                             title: "Latency budgets",
@@ -38,15 +41,25 @@ describe("CourseContentMapBase", () => {
             />,
         )
 
-        expect(container.querySelector("[data-node=content-map-panel]")).toBeTruthy()
+        expect(container.querySelector("[data-node=content-map-panel]")).toHaveClass("px-3")
+        expect(container.querySelector("[data-node=content-map-panel]")).not.toHaveClass("py-6")
+        expect(container.querySelector("[data-node=content-map-panel]")).not.toHaveClass("p-4")
+        expect(container.querySelector("[data-node=content-map-module-list]")).toHaveClass(
+            "divide-y",
+            "divide-separator",
+            "scroll-shadow--vertical",
+            "scroll-shadow--hide-scrollbar",
+        )
+        expect(container.querySelector("[data-node=content-map-module-list]")).not.toHaveClass("scrollbar")
         expect(screen.getByRole("progressbar", { name: "Course progress" })).toHaveAttribute("aria-valuenow", "50")
         fireEvent.click(screen.getByText("Latency budgets"))
         expect(openLesson).toHaveBeenCalledWith("lesson-1")
     })
 
+
     it("rests exactly four authored module shapes while the outline is pending", () => {
         const { container } = render(<CourseContentMapBase state="pending" props={{ labels }} />)
-        expect(container.querySelectorAll("[data-node=content-map-module]")).toHaveLength(4)
+        expect(container.querySelectorAll("[data-component=SurfaceAccordionCard]")).toHaveLength(4)
     })
 
     it("keeps the panel and search available for an empty filtered result", () => {
