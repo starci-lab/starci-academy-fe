@@ -19,12 +19,14 @@ const makeInput = (): CourseFlashcardsReviewPageProps => ({
         subtitle: "Review",
         reviewLabel: "Review",
         quizLabel: "Quiz",
+        overviewLabel: "Overview",
+        historyLabel: "History",
+        statsLabel: "Statistics",
+        activeView: "overview",
         dueTitle: "Due today",
         dueDescription: "Review due cards",
-        statsTitle: "Review progress",
-        streakText: "2 day streak",
-        retentionText: "80% retention",
         decksTitle: "Decks",
+        evidenceTitle: "Recent sessions",
         cardsLabel: "cards",
         dueLabel: "due",
         masteredLabel: "mastered",
@@ -34,7 +36,12 @@ const makeInput = (): CourseFlashcardsReviewPageProps => ({
         emptyText: "Empty",
         failedText: "Failed",
         dueCount: 3,
+        statRows: [{ label: "Cards", value: "5" }, { label: "Mastered", value: "1" }, { label: "Retention", value: "80%" }, { label: "Streak", value: "2" }],
         decks: [{ id: "deck-1", title: "Core", description: "Core concepts", difficulty: "easy", cardCount: 5, dueCount: 3, masteredCount: 1 }],
+        evidenceRows: [{ id: "one", title: "Core", description: "4/5 reviewed", fact: "+20 XP" }],
+        searchLabel: "Search decks",
+        searchValue: "",
+        foundText: "1 deck found",
         modalOpen: false,
         modalTitle: "Choose review mode",
         modalDescription: "Core",
@@ -43,12 +50,20 @@ const makeInput = (): CourseFlashcardsReviewPageProps => ({
         cancelLabel: "Cancel",
         selectedScope: "due",
     },
-    on: { openQuiz: vi.fn(), openReview: vi.fn(), selectScope: vi.fn(), confirmReview: vi.fn(), dismissModal: vi.fn(), resume: vi.fn(), retry: vi.fn() },
+    on: { openQuiz: vi.fn(), selectView: vi.fn(), changeSearch: vi.fn(), openReview: vi.fn(), selectScope: vi.fn(), confirmReview: vi.fn(), dismissModal: vi.fn(), resume: vi.fn(), retry: vi.fn() },
 })
 
 afterEach(cleanup)
 
 describe("CourseFlashcardsReviewPageBase", () => {
+    it("keeps review mode and evidence view as independent tab axes", () => {
+        const input = makeInput()
+        render(<CourseFlashcardsReviewPageBase {...input} />)
+        fireEvent.click(screen.getByText("History"))
+        expect(input.on.selectView).toHaveBeenCalledWith("history")
+        expect(input.on.openQuiz).not.toHaveBeenCalled()
+    })
+
     it("starts the cross-deck due session and a selected deck", () => {
         const input = makeInput()
         const { container } = render(<CourseFlashcardsReviewPageBase {...input} />)
@@ -60,7 +75,7 @@ describe("CourseFlashcardsReviewPageBase", () => {
         fireEvent.click(startButtons[1])
         expect(input.on.openReview).toHaveBeenNthCalledWith(1)
         expect(input.on.openReview).toHaveBeenNthCalledWith(2, "deck-1")
-        expect(screen.getByText("2 day streak · 80% retention")).toBeInTheDocument()
+        expect(screen.getByText("80%")).toBeInTheDocument()
         expect(screen.getByText("5 cards · 3 due · 1 mastered")).toBeInTheDocument()
     })
 
@@ -70,7 +85,7 @@ describe("CourseFlashcardsReviewPageBase", () => {
 
         expect(container.querySelectorAll("[data-node=flashcard-review-deck-card]")).toHaveLength(4)
         expect(container.querySelector("[data-node=flashcard-review-due-card]")).toBeNull()
-        expect(screen.queryByText("Review progress")).not.toBeInTheDocument()
+        expect(screen.queryByText("Recent sessions")).not.toBeInTheDocument()
         expect(container.querySelectorAll("[data-component=Button][data-loading=true]")).toHaveLength(4)
     })
 

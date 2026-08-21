@@ -7,7 +7,9 @@ import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
 import { useQueryFlashcardDecksByCourseSwr, useQueryMyDueFlashcardsSwr } from "@/hooks/swr/useQueryFlashcardDecksByCourseSwr"
 import { useQueryMyInProgressFlashcardSessionSwr } from "@/hooks/swr/useQueryMyInProgressFlashcardSessionSwr"
 import { useMutateStartFlashcardSessionSwr } from "@/hooks/swr/useMutateStartFlashcardSessionSwr"
-import { CourseFlashcardsQuizPageBase } from "./component"
+import { useQueryMyFlashcardQuizHistorySwr } from "@/hooks/swr/useQueryMyFlashcardQuizHistorySwr"
+import { useQueryMyFlashcardQuizStatsSwr } from "@/hooks/swr/useQueryMyFlashcardQuizStatsSwr"
+import { CourseFlashcardsQuizPageBase, type FlashcardQuizView } from "./component"
 
 /** Route identity required by the connected flashcard quiz setup. */
 export type CourseFlashcardsQuizPageProps = { readonly displayId: string }
@@ -23,6 +25,14 @@ const labels = (locale: string) => locale === "vi" ? {
     subtitle: "Kiểm tra nhanh kiến thức trên toàn khóa học.", // vn-ok: localized Vietnamese interface copy.
     review: "Ôn tập", // vn-ok: localized Vietnamese interface copy.
     quiz: "Trắc nghiệm", // vn-ok: localized Vietnamese interface copy.
+    setup: "Bắt đầu", // vn-ok: localized Vietnamese interface copy.
+    history: "Lịch sử", // vn-ok: localized Vietnamese interface copy.
+    statistics: "Thống kê", // vn-ok: localized Vietnamese interface copy.
+    historyTitle: "Phiên trắc nghiệm gần đây", // vn-ok: localized Vietnamese interface copy.
+    statsTitle: "Độ phủ kiến thức", // vn-ok: localized Vietnamese interface copy.
+    correct: "đúng", // vn-ok: localized Vietnamese interface copy.
+    coverage: "độ phủ", // vn-ok: localized Vietnamese interface copy.
+    concepts: "khái niệm", // vn-ok: localized Vietnamese interface copy.
     configuration: "Thiết lập phiên", // vn-ok: localized Vietnamese interface copy.
     sessionName: "Tên phiên", // vn-ok: localized Vietnamese interface copy.
     sessionNamePlaceholder: "Ví dụ: Ôn hệ thống phân tán", // vn-ok: localized Vietnamese interface copy.
@@ -49,6 +59,14 @@ const labels = (locale: string) => locale === "vi" ? {
     subtitle: "Run a focused knowledge check across the course.",
     review: "Review",
     quiz: "Quiz",
+    setup: "Start",
+    history: "History",
+    statistics: "Statistics",
+    historyTitle: "Recent quiz sessions",
+    statsTitle: "Knowledge coverage",
+    correct: "correct",
+    coverage: "coverage",
+    concepts: "concepts",
     configuration: "Session setup",
     sessionName: "Session name",
     sessionNamePlaceholder: "For example: Distributed systems review",
@@ -90,12 +108,15 @@ export const CourseFlashcardsQuizPage = ({ displayId }: CourseFlashcardsQuizPage
     const [level, setLevel] = useState<string | null>(null)
     const [scope, setScope] = useState<"all" | "due">("all")
     const [sessionName, setSessionName] = useState("")
+    const [activeView, setActiveView] = useState<FlashcardQuizView>("setup")
     const course = useQueryCourseSwr({ displayId })
     const courseId = course.data?.id
     const decks = useQueryFlashcardDecksByCourseSwr(courseId)
     const due = useQueryMyDueFlashcardsSwr(courseId)
     const inProgress = useQueryMyInProgressFlashcardSessionSwr(courseId === undefined ? undefined : { mode: "quiz", courseId })
     const start = useMutateStartFlashcardSessionSwr()
+    const history = useQueryMyFlashcardQuizHistorySwr(courseId, activeView === "history")
+    const stats = useQueryMyFlashcardQuizStatsSwr(courseId, activeView === "stats")
     const cardLimit = practiceMode === "quick" ? 5 : 10
     const dueIds = useMemo(() => new Set((due.data?.cards ?? []).map((card) => card.cardId)), [due.data?.cards])
     const cardIds = useMemo(() => shuffle((decks.data ?? [])
@@ -104,8 +125,10 @@ export const CourseFlashcardsQuizPage = ({ displayId }: CourseFlashcardsQuizPage
         .filter((card) => scope === "all" || dueIds.has(card.id))
         .map((card) => card.id))
         .slice(0, cardLimit), [cardLimit, decks.data, dueIds, level, scope])
-    const failed = course.error !== undefined || decks.error !== undefined || due.error !== undefined || start.error !== undefined
+    const failed = course.error !== undefined || decks.error !== undefined || due.error !== undefined || start.error !== undefined || history.error !== undefined || stats.error !== undefined
     const pending = course.data === undefined || decks.data === undefined || due.data === undefined
+        || (activeView === "history" && history.data === undefined)
+        || (activeView === "stats" && stats.data === undefined)
     const state = quizStateOf(failed, pending, course.data === null || decks.data === null || cardIds.length === 0)
     const openSession = (sessionId: string) => router.push(`/courses/${displayId}/learn/flashcards/quiz/sessions/${sessionId}`)
     const startQuiz = async () => {
@@ -113,6 +136,22 @@ export const CourseFlashcardsQuizPage = ({ displayId }: CourseFlashcardsQuizPage
         const session = await start.trigger({ mode: "quiz", courseId, cardIds, practiceMode, level, name: sessionName.trim() || undefined })
         if (session !== null) openSession(session.sessionId)
     }
+    const evidenceRows = activeView === "history"
+        ? (history.data?.items ?? []).map((item) => ({
+            id: item.id,
+            title: item.name ?? new Date(item.updatedAt).toLocaleString(),
+            description: `${item.correctCount}/${item.cardCount} ${copy.correct} · ${item.level ?? copy.all}`,
+            fact: `${Math.round((item.coverage ?? 0) * 100)}% ${copy.coverage} · +${item.xpEarned} XP`,
+        }))
+        : [
+            ...(stats.data?.conceptCoverage == null ? [] : [{
+                id: "concept-coverage",
+                title: copy.statsTitle,
+                description: `${stats.data.conceptCoverage.covered}/${stats.data.conceptCoverage.total} ${copy.concepts}`,
+                fact: `${stats.data.conceptCoverage.total === 0 ? 0 : Math.round(stats.data.conceptCoverage.covered / stats.data.conceptCoverage.total * 100)}%`,
+            }]),
+            ...(stats.data?.byTag ?? []).map((item) => ({ id: `tag-${item.tag}`, title: item.tag, description: copy.coverage, fact: `${Math.round(item.coverage * 100)}%` })),
+        ]
 
     return (
         <CourseFlashcardsQuizPageBase
@@ -122,6 +161,12 @@ export const CourseFlashcardsQuizPage = ({ displayId }: CourseFlashcardsQuizPage
                 subtitle: copy.subtitle,
                 reviewLabel: copy.review,
                 quizLabel: copy.quiz,
+                setupLabel: copy.setup,
+                historyLabel: copy.history,
+                statsLabel: copy.statistics,
+                activeView,
+                evidenceTitle: activeView === "history" ? copy.historyTitle : copy.statsTitle,
+                evidenceRows,
                 configurationTitle: copy.configuration,
                 sessionNameLabel: copy.sessionName,
                 sessionNamePlaceholder: copy.sessionNamePlaceholder,
@@ -152,13 +197,14 @@ export const CourseFlashcardsQuizPage = ({ displayId }: CourseFlashcardsQuizPage
             }}
             on={{
                 openReview: () => router.push(`/courses/${displayId}/learn/flashcards/review`),
+                selectView: setActiveView,
                 changeSessionName: setSessionName,
                 selectScope: setScope,
                 selectMode: setPracticeMode,
                 selectLevel: setLevel,
                 start: () => { void startQuiz() },
                 resume: openSession,
-                retry: () => { void Promise.all([course.mutate(), decks.mutate(), due.mutate()]) },
+                retry: () => { void Promise.all([course.mutate(), decks.mutate(), due.mutate(), history.mutate(), stats.mutate()]) },
             }}
         />
     )

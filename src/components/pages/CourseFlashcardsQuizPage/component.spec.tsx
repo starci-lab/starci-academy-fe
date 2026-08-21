@@ -18,6 +18,12 @@ const makeInput = (): CourseFlashcardsQuizPageProps => ({
         subtitle: "Quiz",
         reviewLabel: "Review",
         quizLabel: "Quiz",
+        setupLabel: "Start",
+        historyLabel: "History",
+        statsLabel: "Statistics",
+        activeView: "setup",
+        evidenceTitle: "Recent sessions",
+        evidenceRows: [{ id: "one", title: "Run one", description: "4/5 correct", fact: "80%" }],
         configurationTitle: "Session setup",
         sessionNameLabel: "Session name",
         sessionNamePlaceholder: "Name this run",
@@ -45,12 +51,20 @@ const makeInput = (): CourseFlashcardsQuizPageProps => ({
         cardCount: 5,
         cardsLabel: "cards available",
     },
-    on: { openReview: vi.fn(), selectMode: vi.fn(), changeSessionName: vi.fn(), selectScope: vi.fn(), selectLevel: vi.fn(), start: vi.fn(), resume: vi.fn(), retry: vi.fn() },
+    on: { openReview: vi.fn(), selectView: vi.fn(), selectMode: vi.fn(), changeSessionName: vi.fn(), selectScope: vi.fn(), selectLevel: vi.fn(), start: vi.fn(), resume: vi.fn(), retry: vi.fn() },
 })
 
 afterEach(cleanup)
 
 describe("CourseFlashcardsQuizPageBase", () => {
+    it("keeps quiz mode and evidence view as independent tab axes", () => {
+        const input = makeInput()
+        render(<CourseFlashcardsQuizPageBase {...input} />)
+        fireEvent.click(screen.getByText("Statistics"))
+        expect(input.on.selectView).toHaveBeenCalledWith("stats")
+        expect(input.on.openReview).not.toHaveBeenCalled()
+    })
+
     it("selects the deep/staff configuration and starts the quiz", () => {
         const input = makeInput()
         const { container } = render(<CourseFlashcardsQuizPageBase {...input} />)

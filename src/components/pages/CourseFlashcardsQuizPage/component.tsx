@@ -1,4 +1,5 @@
 import { Tree } from "@/components/branches/Tree"
+import { SurfaceListCard, type SurfaceListCardData } from "@/components/branches/SurfaceListCard"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { Button } from "@/components/leaves/Button"
 import { Heading } from "@/components/leaves/Heading"
@@ -8,8 +9,15 @@ import { Text } from "@/components/leaves/Text"
 import {
     defineCompositeComponent,
     defineContractComponent,
+    defineContractProjection,
     defineLeafComponent,
+    type LeafProps,
 } from "@/components/contracts/props"
+
+/** Local evidence panel selected independently from the review/quiz route mode. */
+export type FlashcardQuizView = "setup" | "history" | "stats"
+/** One comparable quiz history or coverage row. */
+export type FlashcardQuizEvidenceRow = { readonly id: string, readonly title: string, readonly description: string, readonly fact: string }
 
 /** Pure quiz-setup contract after configuration facts and actions resolve. */
 export type CourseFlashcardsQuizPageProps = {
@@ -19,6 +27,12 @@ export type CourseFlashcardsQuizPageProps = {
         readonly subtitle: string
         readonly reviewLabel: string
         readonly quizLabel: string
+        readonly setupLabel: string
+        readonly historyLabel: string
+        readonly statsLabel: string
+        readonly activeView: FlashcardQuizView
+        readonly evidenceTitle: string
+        readonly evidenceRows: ReadonlyArray<FlashcardQuizEvidenceRow>
         readonly configurationTitle: string
         readonly sessionNameLabel: string
         readonly sessionNamePlaceholder: string
@@ -49,6 +63,7 @@ export type CourseFlashcardsQuizPageProps = {
     }
     readonly on: {
         readonly openReview: () => void
+        readonly selectView: (view: FlashcardQuizView) => void
         readonly selectMode: (mode: "quick" | "deep") => void
         readonly changeSessionName: (value: string) => void
         readonly selectScope: (scope: "all" | "due") => void
@@ -58,6 +73,18 @@ export type CourseFlashcardsQuizPageProps = {
         readonly retry: () => void
     }
 }
+
+type EvidenceListData = SurfaceListCardData & { readonly rows: ReadonlyArray<FlashcardQuizEvidenceRow> }
+const EvidenceListView = ({ props, isLoading }: LeafProps<EvidenceListData>) => (
+    <Tree contract="flashcard-evidence-list" render={defineContractComponent("flashcard-evidence-list", {
+        row: props.rows.map((row) => defineContractComponent("flashcard-evidence-row", {
+            title: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => <Text props={{ content: row.title, size: "sm", weight: "medium" }} isLoading={isLoading} />),
+            description: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: row.description, size: "sm", tone: "muted" }} isLoading={isLoading} />),
+            fact: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: row.fact, size: "xs", tone: "muted" }} isLoading={isLoading} />),
+        })),
+    })} />
+)
+const EvidenceList = defineContractComponent("flashcard-evidence-list", EvidenceListView)
 
 /** Renders the legacy quiz setup hierarchy without fetching or routing internally. */
 export const CourseFlashcardsQuizPageBase = (input: CourseFlashcardsQuizPageProps) => {
@@ -91,7 +118,13 @@ export const CourseFlashcardsQuizPageBase = (input: CourseFlashcardsQuizPageProp
             )),
         ],
     })
-    const configuration = state === "ready" || state === "pending"
+    const views = defineContractComponent("flashcard-view-tabs", {
+        tab: (["setup", "history", "stats"] as const).map((view) => defineLeafComponent("nav-link", { kind: "tab" }, () => (
+            <NavLink props={{ label: view === "setup" ? data.setupLabel : view === "history" ? data.historyLabel : data.statsLabel, kind: "tab", isCurrent: data.activeView === view }} on={{ press: () => on.selectView(view) }} />
+        ))),
+    })
+    const toolbar = defineContractComponent("flashcard-dual-tab-toolbar", { mode: modes, view: views })
+    const configuration = (state === "ready" || state === "pending") && data.activeView === "setup"
         ? defineContractComponent("flashcard-quiz-configuration", {
             title: defineLeafComponent("heading", {}, () => (
                 <Heading props={{ content: data.configurationTitle, level: 2 }} isLoading={isLoading} />
@@ -147,6 +180,9 @@ export const CourseFlashcardsQuizPageBase = (input: CourseFlashcardsQuizPageProp
             )),
         })
         : undefined
+    const evidence = state === "ready" && data.activeView !== "setup" ? defineContractProjection("flashcard-evidence-list", () => (
+        <SurfaceListCard contract="flashcard-evidence-list" render={EvidenceList} props={{ label: data.evidenceTitle, rows: data.evidenceRows }} />
+    )) : undefined
     const notice = state === "failed" || state === "empty"
         ? defineCompositeComponent("empty-notice", {}, () => (
             <EmptyNotice
@@ -162,8 +198,10 @@ export const CourseFlashcardsQuizPageBase = (input: CourseFlashcardsQuizPageProp
     return (
         <Tree contract="course-flashcards-quiz-page" render={defineContractComponent("course-flashcards-quiz-page", {
             header,
-            modes,
+            toolbar,
             configuration,
+            evidenceTitle: state === "ready" && data.activeView !== "setup" ? defineLeafComponent("heading", {}, () => <Heading props={{ content: data.evidenceTitle, level: 2 }} />) : undefined,
+            evidence,
             notice,
         })} />
     )

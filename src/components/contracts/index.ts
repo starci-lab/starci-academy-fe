@@ -1349,6 +1349,22 @@ export const CONTRACTS = buildContracts({
         },
         why: "if you need the review/quiz mode switch shared across the flashcard routes.",
     },
+    "flashcard-view-tabs": {
+        host: "nav",
+        classes: ["flex", "min-w-0", "flex-row", "gap-2", "border-b", "border-separator", "overflow-auto", "[&>*]:whitespace-nowrap"],
+        children: {
+            tab: { leaf: "nav-link", props: { kind: "tab" }, repeats: true, restingCount: 3 },
+        },
+        why: "if you need overview, history and statistics to remain one bounded keyboard-operable view axis without wrapping its labels.",
+    },
+    "flashcard-dual-tab-toolbar": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "sm:flex-row", "sm:items-start", "sm:justify-between"],
+        children: {
+            mode: { contract: "flashcard-mode-tabs" },
+            view: { contract: "flashcard-view-tabs" },
+        },
+        why: "if you need route mode and local evidence view to keep independent selected keys while sharing one row only when both axes fit.",
+    },
     "flashcard-review-due-card": {
         classes: ["flex", "flex-col", "gap-3", "rounded-xl", "border", "border-separator", "p-4"],
         children: {
@@ -1394,16 +1410,50 @@ export const CONTRACTS = buildContracts({
         },
         why: "if you need one selectable review scope joining its name with card count and estimated duration.",
     },
+    "flashcard-deck-toolbar": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "sm:flex-row", "sm:items-start", "sm:justify-between"],
+        children: {
+            search: { leaf: "input" },
+            fact: { leaf: "text", props: { size: "sm", tone: "muted" } },
+        },
+        why: "if you need a deck search field and its settled result count to share a row only while both remain usable.",
+    },
+    "flashcard-evidence-list": {
+        classes: ["overflow-hidden", "divide-y", "divide-separator", "p-0"],
+        children: {
+            row: { contract: "flashcard-evidence-row", repeats: true, restingCount: 4 },
+        },
+        why: "if you need comparable history or retention evidence to share one bounded list with edge-to-edge separators.",
+    },
+    "flashcard-evidence-row": {
+        classes: ["flex", "flex-row", "flex-wrap", "items-baseline", "justify-between", "gap-3", "px-4", "py-3"],
+        children: {
+            title: { leaf: "text", props: { size: "sm", weight: "medium" } },
+            description: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            fact: { leaf: "text", props: { size: "xs", tone: "muted" } },
+        },
+        why: "if you need one historical session or learning signal to keep its identity readable before supporting evidence and one trailing fact.",
+    },
+    "flashcard-stat-grid": {
+        classes: ["grid", "grid-cols-1", "sm:grid-cols-4", "border", "border-separator", "rounded-xl", "overflow-hidden"],
+        children: {
+            stat: { contract: "flashcard-result-stat", repeats: true, restingCount: 4 },
+        },
+        why: "if you need four comparable flashcard figures to collapse to one track while retaining one shared boundary.",
+    },
     "course-flashcards-review-page": {
         host: "main",
-        classes: ["mx-auto", "flex", "w-full", "max-w-app-md", "flex-col", "gap-6", "px-6", "py-6"],
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6", "p-6"],
         children: {
             header: { contract: "centred-title-pair" },
-            modes: { contract: "flashcard-mode-tabs" },
+            toolbar: { contract: "flashcard-dual-tab-toolbar" },
             due: { contract: "flashcard-review-due-card", optional: true },
-            stats: { contract: "centred-title-pair", optional: true },
+            stats: { contract: "flashcard-stat-grid", optional: true },
+            deckToolbar: { contract: "flashcard-deck-toolbar", optional: true },
             decksTitle: { leaf: "heading", optional: true },
             decks: { contract: "flashcard-review-deck-list", optional: true },
+            evidenceTitle: { leaf: "heading", optional: true },
+            evidence: { contract: "flashcard-evidence-list", optional: true },
             modal: { contract: "flashcard-review-mode-modal", optional: true },
             notice: { composite: "empty-notice", optional: true },
         },
@@ -1429,11 +1479,13 @@ export const CONTRACTS = buildContracts({
     },
     "course-flashcards-quiz-page": {
         host: "main",
-        classes: ["mx-auto", "flex", "w-full", "max-w-app-md", "flex-col", "gap-6", "px-6", "py-6"],
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6", "p-6"],
         children: {
             header: { contract: "centred-title-pair" },
-            modes: { contract: "flashcard-mode-tabs" },
+            toolbar: { contract: "flashcard-dual-tab-toolbar" },
             configuration: { contract: "flashcard-quiz-configuration", optional: true },
+            evidenceTitle: { leaf: "heading", optional: true },
+            evidence: { contract: "flashcard-evidence-list", optional: true },
             notice: { composite: "empty-notice", optional: true },
         },
         why: "if you need a flashcard quiz route with shared identity and mode switch above one finite setup surface that empty or failed transport can replace in place.",
@@ -1464,7 +1516,7 @@ export const CONTRACTS = buildContracts({
     },
     "course-flashcard-session-page": {
         host: "main",
-        classes: ["mx-auto", "flex", "min-h-screen", "w-full", "max-w-app-md", "flex-col", "gap-6", "px-6", "py-6"],
+        classes: ["flex", "min-h-screen", "w-full", "min-w-0", "flex-col", "gap-6", "p-6"],
         children: {
             header: { contract: "flashcard-session-header" },
             progress: { contract: "label-with-muted-fact-row", optional: true },
@@ -1493,7 +1545,7 @@ export const CONTRACTS = buildContracts({
     },
     "course-flashcard-result-page": {
         host: "main",
-        classes: ["mx-auto", "flex", "w-full", "max-w-app-md", "flex-col", "gap-6", "px-6", "py-6"],
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6", "p-6"],
         children: {
             mode: { leaf: "text", props: { size: "sm", tone: "muted" } },
             header: { contract: "centred-title-pair" },
