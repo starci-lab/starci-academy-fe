@@ -89,7 +89,7 @@ export const CourseFlashcardsReviewPageBase = (input: CourseFlashcardsReviewPage
         fact: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => <Text props={{ content: `${data.dueCount} ${data.dueLabel}`, size: "sm", weight: "medium" }} />),
         action: data.resumeSessionId !== undefined ? defineLeafComponent("button", {}, () => <Button props={{ label: data.resumeLabel, variant: "primary" }} on={{ press: () => on.resume(data.resumeSessionId as string) }} />) : data.dueCount === 0 ? undefined : defineLeafComponent("button", {}, () => <Button props={{ label: data.startLabel, variant: "primary" }} on={{ press: () => on.openReview() }} />),
     }) : undefined
-    const stats = state !== "failed" && data.activeView === "overview" ? defineContractComponent("flashcard-stat-grid", {
+    const stats = (state === "ready" || state === "pending") && data.activeView === "overview" ? defineContractComponent("flashcard-stat-grid", {
         stat: data.statRows.map((stat) => defineContractComponent("flashcard-result-stat", {
             label: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: stat.label, size: "xs", tone: "muted" }} isLoading={isLoading} />),
             value: defineLeafComponent("heading", {}, () => <Heading props={{ content: stat.value, level: 2 }} isLoading={isLoading} />),
@@ -101,7 +101,8 @@ export const CourseFlashcardsReviewPageBase = (input: CourseFlashcardsReviewPage
         fact: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: data.foundText, size: "sm", tone: "muted" }} isLoading={isLoading} />),
     }) : undefined
     const decks = (state === "pending" || state === "ready") && data.activeView === "overview" ? defineContractProjection("flashcard-review-deck-list", () => <SurfaceListCard contract="flashcard-review-deck-list" render={DeckList} props={{ label: data.decksTitle, decks: visibleDecks, labels: data }} on={{ open: on.openReview }} isLoading={isLoading} />) : undefined
-    const evidence = state === "ready" && data.activeView !== "overview" ? defineContractProjection("flashcard-evidence-list", () => <SurfaceListCard contract="flashcard-evidence-list" render={EvidenceList} props={{ label: data.evidenceTitle, rows: data.evidenceRows }} />) : undefined
+    const visibleEvidenceRows = state === "pending" ? Array.from({ length: 4 }, (_, index) => ({ id: `pending-${index}`, title: data.evidenceTitle, description: "", fact: "" })) : data.evidenceRows
+    const evidence = (state === "ready" || state === "pending") && data.activeView !== "overview" ? defineContractProjection("flashcard-evidence-list", () => <SurfaceListCard contract="flashcard-evidence-list" render={EvidenceList} props={{ label: data.evidenceTitle, rows: visibleEvidenceRows }} isLoading={isLoading} />) : undefined
     const modal = defineContractComponent("flashcard-review-mode-modal", {
         title: defineLeafComponent("heading", {}, () => <Heading props={{ content: data.modalTitle, level: 2 }} />),
         description: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: data.modalDescription, size: "sm", tone: "muted" }} />),
@@ -119,7 +120,7 @@ export const CourseFlashcardsReviewPageBase = (input: CourseFlashcardsReviewPage
             header, toolbar, due, stats, deckToolbar,
             decksTitle: (state === "ready" || state === "pending") && data.activeView === "overview" ? defineLeafComponent("heading", {}, () => <Heading props={{ content: data.decksTitle, level: 2 }} isLoading={isLoading} />) : undefined,
             decks,
-            evidenceTitle: state === "ready" && data.activeView !== "overview" ? defineLeafComponent("heading", {}, () => <Heading props={{ content: data.evidenceTitle, level: 2 }} />) : undefined,
+            evidenceTitle: (state === "ready" || state === "pending") && data.activeView !== "overview" ? defineLeafComponent("heading", {}, () => <Heading props={{ content: data.evidenceTitle, level: 2 }} isLoading={isLoading} />) : undefined,
             evidence, notice,
         })} />
         <ModalBranch isOpen={data.modalOpen} size="md" contract="flashcard-review-mode-modal" render={modal} onDismiss={on.dismissModal} />

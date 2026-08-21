@@ -180,8 +180,9 @@ export const CourseFlashcardsQuizPageBase = (input: CourseFlashcardsQuizPageProp
             )),
         })
         : undefined
-    const evidence = state === "ready" && data.activeView !== "setup" ? defineContractProjection("flashcard-evidence-list", () => (
-        <SurfaceListCard contract="flashcard-evidence-list" render={EvidenceList} props={{ label: data.evidenceTitle, rows: data.evidenceRows }} />
+    const visibleEvidenceRows = state === "pending" ? Array.from({ length: 4 }, (_, index) => ({ id: `pending-${index}`, title: data.evidenceTitle, description: "", fact: "" })) : data.evidenceRows
+    const evidence = (state === "ready" || state === "pending") && data.activeView !== "setup" ? defineContractProjection("flashcard-evidence-list", () => (
+        <SurfaceListCard contract="flashcard-evidence-list" render={EvidenceList} props={{ label: data.evidenceTitle, rows: visibleEvidenceRows }} isLoading={isLoading} />
     )) : undefined
     const notice = state === "failed" || state === "empty"
         ? defineCompositeComponent("empty-notice", {}, () => (
@@ -200,7 +201,7 @@ export const CourseFlashcardsQuizPageBase = (input: CourseFlashcardsQuizPageProp
             header,
             toolbar,
             configuration,
-            evidenceTitle: state === "ready" && data.activeView !== "setup" ? defineLeafComponent("heading", {}, () => <Heading props={{ content: data.evidenceTitle, level: 2 }} />) : undefined,
+            evidenceTitle: (state === "ready" || state === "pending") && data.activeView !== "setup" ? defineLeafComponent("heading", {}, () => <Heading props={{ content: data.evidenceTitle, level: 2 }} isLoading={isLoading} />) : undefined,
             evidence,
             notice,
         })} />
