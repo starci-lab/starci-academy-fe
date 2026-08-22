@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import type { FoundationCategory } from "@/modules/api/graphql/queries/query-foundation-categories"
-import { CourseFoundationsPageBase, type CourseFoundationsPageProps } from "./component"
+import { CourseFoundationsBlockBase as CourseFoundationsPageContentBase, type CourseFoundationsBlockProps as CourseFoundationsPageProps } from "@/components/blocks/learn/CourseFoundationsBlock/component"
 
 /**
  * What these tests guard: the four query states this hub can be in. Three of them look alike
@@ -42,9 +42,9 @@ const draw = (
     state: CourseFoundationsPageProps["state"],
     categories: ReadonlyArray<FoundationCategory>,
     on?: CourseFoundationsPageProps["on"],
-) => render(<CourseFoundationsPageBase state={state} props={{ ...copy, categories }} on={on} />)
+) => render(<CourseFoundationsPageContentBase state={state} props={{ ...copy, categories }} on={on} />)
 
-describe("CourseFoundationsPageBase", () => {
+describe("CourseFoundationsPageContentBase", () => {
     it("renders the canonical catalog and forwards live category actions", () => {
         const openCategory = vi.fn()
         const search = vi.fn()
