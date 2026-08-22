@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { CourseFlashcardsReviewPageBase, type CourseFlashcardsReviewPageProps } from "./component"
+import { CourseFlashcardsReviewBlockBase, type CourseFlashcardsReviewPageProps } from "@/components/blocks/learn/CourseFlashcardsReviewBlock/component"
 
 /**
  * What these tests guard.
@@ -13,7 +13,8 @@ import { CourseFlashcardsReviewPageBase, type CourseFlashcardsReviewPageProps } 
  */
 
 const makeInput = (): CourseFlashcardsReviewPageProps => ({
-    state: "ready",
+    pageState: "overview",
+    blockState: "ready",
     props: {
         title: "Flashcards",
         subtitle: "Review",
@@ -34,6 +35,8 @@ const makeInput = (): CourseFlashcardsReviewPageProps => ({
         resumeLabel: "Resume session",
         retryLabel: "Retry",
         emptyText: "Empty",
+        evidenceEmptyText: "No evidence",
+        noResultsText: "No decks match",
         failedText: "Failed",
         dueCount: 3,
         statRows: [{ label: "Cards", value: "5" }, { label: "Mastered", value: "1" }, { label: "Retention", value: "80%" }, { label: "Streak", value: "2" }],
@@ -49,16 +52,17 @@ const makeInput = (): CourseFlashcardsReviewPageProps => ({
         reviewDueLabel: "Due only",
         cancelLabel: "Cancel",
         selectedScope: "due",
+        startPending: false,
     },
-    on: { openQuiz: vi.fn(), selectView: vi.fn(), changeSearch: vi.fn(), openReview: vi.fn(), selectScope: vi.fn(), confirmReview: vi.fn(), dismissModal: vi.fn(), resume: vi.fn(), retry: vi.fn() },
+    on: { openQuiz: vi.fn(), selectView: vi.fn(), changeSearch: vi.fn(), openReview: vi.fn(), startDue: vi.fn(), selectScope: vi.fn(), confirmReview: vi.fn(), dismissModal: vi.fn(), resume: vi.fn(), retry: vi.fn() },
 })
 
 afterEach(cleanup)
 
-describe("CourseFlashcardsReviewPageBase", () => {
+describe("CourseFlashcardsReviewBlockBase", () => {
     it("keeps review mode and evidence view as independent tab axes", () => {
         const input = makeInput()
-        render(<CourseFlashcardsReviewPageBase {...input} />)
+        render(<CourseFlashcardsReviewBlockBase {...input} />)
         fireEvent.click(screen.getByText("History"))
         expect(input.on.selectView).toHaveBeenCalledWith("history")
         expect(input.on.openQuiz).not.toHaveBeenCalled()
@@ -66,22 +70,22 @@ describe("CourseFlashcardsReviewPageBase", () => {
 
     it("starts the cross-deck due session and a selected deck", () => {
         const input = makeInput()
-        const { container } = render(<CourseFlashcardsReviewPageBase {...input} />)
+        const { container } = render(<CourseFlashcardsReviewBlockBase {...input} />)
 
         expect(container.querySelector("[data-node=course-flashcards-review-page]")).toBeTruthy()
         expect(container.querySelectorAll("[data-node=flashcard-review-deck-card]")).toHaveLength(1)
         const startButtons = screen.getAllByRole("button", { name: "Start" })
         fireEvent.click(startButtons[0])
         fireEvent.click(startButtons[1])
-        expect(input.on.openReview).toHaveBeenNthCalledWith(1)
-        expect(input.on.openReview).toHaveBeenNthCalledWith(2, "deck-1")
+        expect(input.on.startDue).toHaveBeenCalledOnce()
+        expect(input.on.openReview).toHaveBeenCalledWith("deck-1")
         expect(screen.getByText("80%")).toBeInTheDocument()
-        expect(screen.getByText("5 cards · 3 due · 1 mastered")).toBeInTheDocument()
+        expect(screen.getByText("easy · 5 cards · 3 due · 1 mastered")).toBeInTheDocument()
     })
 
     it("rests four deck cards and withholds the due card until the queue is known", () => {
         const input = makeInput()
-        const { container } = render(<CourseFlashcardsReviewPageBase {...input} state="pending" />)
+        const { container } = render(<CourseFlashcardsReviewBlockBase {...input} blockState="pending" />)
 
         expect(container.querySelectorAll("[data-node=flashcard-review-deck-card]")).toHaveLength(4)
         expect(container.querySelector("[data-node=flashcard-review-due-card]")).toBeNull()
@@ -91,7 +95,7 @@ describe("CourseFlashcardsReviewPageBase", () => {
 
     it("replaces the whole overview when nothing is due and nothing is published", () => {
         const input = makeInput()
-        const { container } = render(<CourseFlashcardsReviewPageBase {...input} state="empty" />)
+        const { container } = render(<CourseFlashcardsReviewBlockBase {...input} blockState="empty" />)
 
         expect(screen.getByText("Empty")).toBeInTheDocument()
         expect(container.querySelector("[data-node=flashcard-review-deck-card]")).toBeNull()
@@ -101,17 +105,53 @@ describe("CourseFlashcardsReviewPageBase", () => {
 
     it("offers the way back from a failed deck load", () => {
         const input = makeInput()
-        render(<CourseFlashcardsReviewPageBase {...input} state="failed" />)
+        render(<CourseFlashcardsReviewBlockBase {...input} blockState="failed" />)
 
         expect(screen.getByText("Failed")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Retry" }))
         expect(input.on.retry).toHaveBeenCalledOnce()
     })
 
+    it("keeps due work and progress while a deck search settles with no matches", () => {
+        const input = makeInput()
+        render(<CourseFlashcardsReviewBlockBase {...input} props={{ ...input.props, decks: [], foundText: "0 decks found" }} />)
+
+        expect(screen.getByText("Due today")).toBeInTheDocument()
+        expect(screen.getByText("80%")).toBeInTheDocument()
+        expect(screen.getByText("No decks match")).toBeInTheDocument()
+        expect(screen.getByText("0 decks found")).toBeInTheDocument()
+    })
+
+    it("uses a panel-specific empty state without removing the page identity or view tabs", () => {
+        const input = makeInput()
+        render(<CourseFlashcardsReviewBlockBase {...input} pageState="history" blockState="empty" props={{ ...input.props, activeView: "history" }} />)
+
+        expect(screen.getByRole("heading", { name: "Flashcards", level: 1 })).toBeInTheDocument()
+        expect(screen.getByText("No evidence")).toBeInTheDocument()
+        expect(screen.getByText("Statistics")).toBeInTheDocument()
+    })
+
+    it("retains deck scope and reports a failed or pending start inside the modal", () => {
+        const input = makeInput()
+        render(<CourseFlashcardsReviewBlockBase {...input} props={{ ...input.props, modalOpen: true, selectedDeckId: "deck-1", startPending: true, startErrorText: "Start failed" }} />)
+
+        expect(screen.getAllByText("3 due")).toHaveLength(2)
+        expect(screen.getByText("Start failed")).toBeInTheDocument()
+        expect(screen.getAllByRole("button", { name: "Start" }).some((button) => button.hasAttribute("disabled"))).toBe(true)
+        fireEvent.click(screen.getByText(/Due only/))
+        expect(input.on.selectScope).toHaveBeenCalledWith("due")
+    })
+
+    it("keeps the page identity on the left content axis", () => {
+        const { container } = render(<CourseFlashcardsReviewBlockBase {...makeInput()} />)
+        expect(container.querySelector("[data-node=learn-page-title-pair]")).toHaveClass("items-start", "text-left")
+        expect(container.querySelector("[data-node=flashcard-dual-tab-toolbar]")).not.toHaveClass("sm:flex-row")
+    })
+
     it("resumes an unfinished session instead of starting a new one", () => {
         const input = makeInput()
         const { container } = render(
-            <CourseFlashcardsReviewPageBase
+            <CourseFlashcardsReviewBlockBase
                 {...input}
                 props={{ ...input.props, resumeSessionId: "session-4" }}
             />,
@@ -126,7 +166,7 @@ describe("CourseFlashcardsReviewPageBase", () => {
     it("leaves the due card actionless when the queue is empty and still routes to the quiz face", () => {
         const input = makeInput()
         const { container } = render(
-            <CourseFlashcardsReviewPageBase {...input} props={{ ...input.props, dueCount: 0, decks: [] }} />,
+            <CourseFlashcardsReviewBlockBase {...input} props={{ ...input.props, dueCount: 0, decks: [] }} />,
         )
 
         const dueCard = container.querySelector("[data-node=flashcard-review-due-card]")
