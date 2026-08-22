@@ -1420,8 +1420,16 @@ export const CONTRACTS = buildContracts({
         },
         why: "if route mode is the contained primary switch and local evidence is a separate secondary line-tab row, both beginning on the page's content axis.",
     },
+    "flashcard-review-tab-toolbar": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "items-start", "gap-4"],
+        children: {
+            mode: { leaf: "choice-tabs" },
+            view: { leaf: "choice-tabs" },
+        },
+        why: "if the review route needs one contained mode choice above one secondary evidence choice without centring either axis.",
+    },
     "flashcard-review-due-card": {
-        classes: ["flex", "flex-col", "gap-3", "rounded-xl", "border", "border-separator", "p-4"],
+        classes: ["flex", "flex-col", "gap-3", "p-4"],
         children: {
             title: { leaf: "heading" },
             description: { leaf: "text", props: { size: "sm", tone: "muted" } },
@@ -1448,6 +1456,23 @@ export const CONTRACTS = buildContracts({
         },
         why: "if you need comparable flashcard decks to share one bounded list with full-width separators instead of becoming a card grid.",
     },
+    "flashcard-review-deck-grid": {
+        classes: ["grid", "grid-cols-1", "sm:grid-cols-2", "lg:grid-cols-3", "gap-4"],
+        children: {
+            deck: { contract: "flashcard-review-deck-grid-card", repeats: true, restingCount: 4 },
+        },
+        why: "if each flashcard deck is an independent object compared beside peer deck cards across responsive tracks.",
+    },
+    "flashcard-review-deck-grid-card": {
+        classes: ["flex", "min-w-0", "flex-col", "gap-3", "p-4"],
+        children: {
+            title: { leaf: "heading" },
+            description: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            facts: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            action: { leaf: "button" },
+        },
+        why: "if one deck card must keep its identity, explanation, study facts and review action together when compared in a grid.",
+    },
     "flashcard-review-mode-modal": {
         classes: ["flex", "flex-col", "gap-4", "p-4"],
         children: {
@@ -1467,13 +1492,15 @@ export const CONTRACTS = buildContracts({
         },
         why: "if you need one selectable review scope joining its name with card count and estimated duration.",
     },
-    "flashcard-deck-toolbar": {
-        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "sm:flex-row", "sm:items-start", "sm:justify-between"],
+    "flashcard-deck-section": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3"],
         children: {
-            search: { leaf: "input" },
-            fact: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            title: { leaf: "heading" },
+            toolbar: { contract: "catalog-search-count-view-row" },
+            decks: { contract: ["flashcard-review-deck-grid", "flashcard-review-deck-list"], optional: true },
+            notice: { composite: "empty-notice", optional: true },
         },
-        why: "if you need a deck search field and its settled result count to share a row only while both remain usable.",
+        why: "if the deck heading must own its adjacent search, result count, layout choice and the collection those controls change.",
     },
     "flashcard-evidence-list": {
         classes: ["overflow-hidden", "divide-y", "divide-separator", "p-0"],
@@ -1492,24 +1519,29 @@ export const CONTRACTS = buildContracts({
         why: "if you need one historical session or learning signal to keep its identity readable before supporting evidence and one trailing fact.",
     },
     "flashcard-stat-grid": {
-        classes: ["grid", "grid-cols-1", "sm:grid-cols-4", "border", "border-separator", "rounded-xl", "overflow-hidden"],
+        classes: ["grid", "grid-cols-1", "sm:grid-cols-4", "gap-4"],
         children: {
-            stat: { contract: "flashcard-result-stat", repeats: true, restingCount: 4 },
+            stat: { contract: "flashcard-review-stat-card", repeats: true, restingCount: 4 },
         },
-        why: "if you need four comparable flashcard figures to collapse to one track while retaining one shared boundary.",
+        why: "if four independent review figures need responsive peer tracks while each figure retains its own card boundary.",
+    },
+    "flashcard-review-stat-card": {
+        classes: ["flex", "flex-col", "gap-2", "p-4"],
+        children: {
+            label: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            value: { leaf: "heading" },
+        },
+        why: "if one review figure is an independent page object whose label and value must stay together inside one card.",
     },
     "course-flashcards-review-page": {
         host: "main",
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6", "p-6"],
         children: {
             header: { contract: "learn-page-title-pair" },
-            toolbar: { contract: "flashcard-dual-tab-toolbar" },
+            toolbar: { contract: "flashcard-review-tab-toolbar" },
             due: { contract: "flashcard-review-due-card", optional: true },
             stats: { contract: "flashcard-stat-grid", optional: true },
-            deckToolbar: { contract: "flashcard-deck-toolbar", optional: true },
-            decksTitle: { leaf: "heading", optional: true },
-            decks: { contract: "flashcard-review-deck-list", optional: true },
-            deckNotice: { composite: "empty-notice", optional: true },
+            decksSection: { contract: "flashcard-deck-section", optional: true },
             evidenceTitle: { leaf: "heading", optional: true },
             evidence: { contract: "flashcard-evidence-list", optional: true },
             modal: { contract: "flashcard-review-mode-modal", optional: true },

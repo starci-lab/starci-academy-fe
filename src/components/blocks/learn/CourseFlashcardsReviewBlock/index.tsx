@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useLocale } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
@@ -13,10 +13,13 @@ import { useQueryMyFlashcardReviewHistorySwr } from "@/hooks/swr/useQueryMyFlash
 import { useQueryMyFlashcardReviewStatsSwr } from "@/hooks/swr/useQueryMyFlashcardReviewStatsSwr"
 import { useQueryMyInProgressFlashcardSessionSwr } from "@/hooks/swr/useQueryMyInProgressFlashcardSessionSwr"
 import { useMutateStartFlashcardSessionSwr } from "@/hooks/swr/useMutateStartFlashcardSessionSwr"
-import { CourseFlashcardsReviewBlockBase, type FlashcardReviewView } from "./component"
+import { CourseFlashcardsReviewBlockBase, type FlashcardReviewLayout, type FlashcardReviewView } from "./component"
 
 /** Route identity required by the connected flashcard review overview. */
 export type CourseFlashcardsReviewBlockProps = { readonly displayId: string }
+
+/** The deck collection keeps the reader's preferred scan mode between visits. */
+const VIEW_STORAGE_KEY = "starci.flashcards.review.view"
 
 const reviewStateOf = (failed: boolean, pending: boolean, empty: boolean) => {
     if (failed) return "failed" as const
@@ -29,6 +32,8 @@ const labels = (locale: string) => locale === "vi" ? {
     subtitle: "Ôn tập theo nhịp nhớ để ghi nhớ lâu hơn.", // vn-ok: localized Vietnamese interface copy.
     review: "Ôn tập", // vn-ok: localized Vietnamese interface copy.
     quiz: "Trắc nghiệm", // vn-ok: localized Vietnamese interface copy.
+    modeTabsLabel: "Chế độ flashcard", // vn-ok: localized Vietnamese interface copy.
+    viewTabsLabel: "Khu vực ôn tập", // vn-ok: localized Vietnamese interface copy.
     overview: "Tổng quan", // vn-ok: localized Vietnamese interface copy.
     history: "Lịch sử", // vn-ok: localized Vietnamese interface copy.
     statistics: "Thống kê", // vn-ok: localized Vietnamese interface copy.
@@ -39,7 +44,11 @@ const labels = (locale: string) => locale === "vi" ? {
     retention: "tỷ lệ nhớ đúng", // vn-ok: localized Vietnamese interface copy.
     decks: "Bộ thẻ", // vn-ok: localized Vietnamese interface copy.
     search: "Tìm trong bộ thẻ", // vn-ok: localized Vietnamese interface copy.
+    searchClear: "Xóa tìm kiếm bộ thẻ", // vn-ok: localized Vietnamese interface copy.
     found: "bộ được tìm thấy", // vn-ok: localized Vietnamese interface copy.
+    layout: "Cách hiển thị bộ thẻ", // vn-ok: localized Vietnamese interface copy.
+    grid: "Lưới", // vn-ok: localized Vietnamese interface copy.
+    line: "Danh sách", // vn-ok: localized Vietnamese interface copy.
     totalCards: "Tổng số thẻ", // vn-ok: localized Vietnamese interface copy.
     totalMastered: "Đã ghi nhớ", // vn-ok: localized Vietnamese interface copy.
     historyTitle: "Phiên ôn gần đây", // vn-ok: localized Vietnamese interface copy.
@@ -71,6 +80,8 @@ const labels = (locale: string) => locale === "vi" ? {
     subtitle: "Review with spaced repetition to remember longer.",
     review: "Review",
     quiz: "Quiz",
+    modeTabsLabel: "Flashcard mode",
+    viewTabsLabel: "Review area",
     overview: "Overview",
     history: "History",
     statistics: "Statistics",
@@ -81,7 +92,11 @@ const labels = (locale: string) => locale === "vi" ? {
     retention: "retention",
     decks: "Decks",
     search: "Search decks",
+    searchClear: "Clear deck search",
     found: "decks found",
+    layout: "Deck layout",
+    grid: "Grid",
+    line: "List",
     totalCards: "Total cards",
     totalMastered: "Mastered",
     historyTitle: "Recent review sessions",
@@ -122,6 +137,11 @@ export const CourseFlashcardsReviewBlock = ({ displayId }: CourseFlashcardsRevie
     const stats = useQueryMyFlashcardStatsSwr(courseId !== undefined)
     const [activeView, setActiveView] = useState<FlashcardReviewView>("overview")
     const [search, setSearch] = useState("")
+    const [layout, setLayout] = useState<FlashcardReviewLayout>("grid")
+    useEffect(() => {
+        const saved = window.localStorage.getItem(VIEW_STORAGE_KEY)
+        if (saved === "grid" || saved === "line") setLayout(saved)
+    }, [])
     const history = useQueryMyFlashcardReviewHistorySwr(courseId, activeView === "history")
     const reviewStats = useQueryMyFlashcardReviewStatsSwr(courseId, activeView === "stats")
     const resolvedDecks = decks.data ?? []
@@ -208,6 +228,7 @@ export const CourseFlashcardsReviewBlock = ({ displayId }: CourseFlashcardsRevie
         blockState={blockState}
         props={{
             title: copy.title, subtitle: copy.subtitle, reviewLabel: copy.review, quizLabel: copy.quiz,
+            modeTabsLabel: copy.modeTabsLabel, viewTabsLabel: copy.viewTabsLabel,
             overviewLabel: copy.overview, historyLabel: copy.history, statsLabel: copy.statistics, activeView,
             dueTitle: copy.dueTitle, dueDescription: copy.dueDescription, decksTitle: copy.decks,
             evidenceTitle: activeView === "history" ? copy.historyTitle : copy.statsTitle,
@@ -224,7 +245,8 @@ export const CourseFlashcardsReviewBlock = ({ displayId }: CourseFlashcardsRevie
                 { label: copy.streak, value: (stats.data?.longestStreak ?? 0).toString() },
             ],
             decks: visibleDecks.map((deck) => ({ id: deck.id, title: deck.title, description: deck.description, difficulty: difficultyOf(deck.difficulty), cardCount: deck.cards.length, dueCount: deck.dueCount ?? 0, masteredCount: deck.masteredCount ?? 0 })),
-            evidenceRows, searchLabel: copy.search, searchValue: search, foundText: `${visibleDecks.length} ${copy.found}`,
+            evidenceRows, searchLabel: copy.search, searchClearLabel: copy.searchClear, searchValue: search, foundText: `${visibleDecks.length} ${copy.found}`,
+            layoutLabel: copy.layout, gridLabel: copy.grid, lineLabel: copy.line, layout,
             resumeSessionId: dueInProgress.data?.sessionId ?? deckInProgress.data?.sessionId,
             modalOpen: reviewIntent !== null, modalTitle: copy.modalTitle,
             modalDescription: resolvedDecks.find((deck) => deck.id === reviewIntent?.deckId)?.title ?? copy.decks,
@@ -234,6 +256,14 @@ export const CourseFlashcardsReviewBlock = ({ displayId }: CourseFlashcardsRevie
         }}
         on={{
             openQuiz: () => router.push(`/courses/${displayId}/learn/flashcards/quiz`), selectView: setActiveView, changeSearch: setSearch,
+            changeLayout: (next) => {
+                setLayout(next)
+                try {
+                    window.localStorage.setItem(VIEW_STORAGE_KEY, next)
+                } catch {
+                    // The visible choice still applies for this visit when storage is unavailable.
+                }
+            },
             openReview: (deckId) => { start.reset(); setReviewIntent({ deckId }); setReviewScope("all") },
             startDue: () => { void startDue() },
             selectScope: (scope) => { start.reset(); setReviewScope(scope) },

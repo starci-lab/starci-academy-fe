@@ -10,6 +10,19 @@ const mocks = vi.hoisted(() => ({
     reset: vi.fn(),
     mutateCourse: vi.fn(), mutateDecks: vi.fn(), mutateDue: vi.fn(), mutateStats: vi.fn(), mutateHistory: vi.fn(), mutateReviewStats: vi.fn(),
 }))
+const storage = new Map<string, string>()
+
+Object.defineProperty(window, "localStorage", {
+    configurable: true,
+    value: {
+        getItem: (key: string) => storage.get(key) ?? null,
+        setItem: (key: string, value: string) => storage.set(key, value),
+        removeItem: (key: string) => storage.delete(key),
+        clear: () => storage.clear(),
+        key: (index: number) => [...storage.keys()][index] ?? null,
+        get length() { return storage.size },
+    },
+})
 
 vi.mock("next-intl", () => ({ useLocale: () => "en" }))
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
@@ -28,6 +41,7 @@ vi.mock("./component", () => ({ CourseFlashcardsReviewBlockBase: (input: ReviewB
 import { CourseFlashcardsReviewBlock } from "./index"
 
 beforeEach(() => {
+    window.localStorage.clear()
     mocks.input = undefined
     mocks.trigger.mockReset()
     mocks.trigger.mockResolvedValue(null)
@@ -54,5 +68,19 @@ describe("CourseFlashcardsReviewBlock", () => {
 
         await waitFor(() => expect(mocks.trigger).toHaveBeenCalledWith({ mode: "review", kind: "deck", deckId: "deck-1", cardIds: ["card-2"], reviewMode: "due" }))
         expect(mocks.input?.props.modalOpen).toBe(true)
+    })
+
+    it("defaults to grid, persists list, and restores the reader's deck layout", async () => {
+        const { unmount } = render(<CourseFlashcardsReviewBlock displayId="fullstack-mastery" />)
+        expect(mocks.input?.props.layout).toBe("grid")
+
+        act(() => { mocks.input?.on.changeLayout("line") })
+        await waitFor(() => expect(mocks.input?.props.layout).toBe("line"))
+        expect(window.localStorage.getItem("starci.flashcards.review.view")).toBe("line")
+
+        unmount()
+        mocks.input = undefined
+        render(<CourseFlashcardsReviewBlock displayId="fullstack-mastery" />)
+        await waitFor(() => expect(mocks.input?.props.layout).toBe("line"))
     })
 })

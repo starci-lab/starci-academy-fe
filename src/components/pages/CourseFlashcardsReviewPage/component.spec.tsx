@@ -20,6 +20,8 @@ const makeInput = (): CourseFlashcardsReviewPageProps => ({
         subtitle: "Review",
         reviewLabel: "Review",
         quizLabel: "Quiz",
+        modeTabsLabel: "Flashcard mode",
+        viewTabsLabel: "Review area",
         overviewLabel: "Overview",
         historyLabel: "History",
         statsLabel: "Statistics",
@@ -43,8 +45,13 @@ const makeInput = (): CourseFlashcardsReviewPageProps => ({
         decks: [{ id: "deck-1", title: "Core", description: "Core concepts", difficulty: "easy", cardCount: 5, dueCount: 3, masteredCount: 1 }],
         evidenceRows: [{ id: "one", title: "Core", description: "4/5 reviewed", fact: "+20 XP" }],
         searchLabel: "Search decks",
+        searchClearLabel: "Clear deck search",
         searchValue: "",
         foundText: "1 deck found",
+        layoutLabel: "Deck layout",
+        gridLabel: "Grid",
+        lineLabel: "List",
+        layout: "grid",
         modalOpen: false,
         modalTitle: "Choose review mode",
         modalDescription: "Core",
@@ -54,7 +61,7 @@ const makeInput = (): CourseFlashcardsReviewPageProps => ({
         selectedScope: "due",
         startPending: false,
     },
-    on: { openQuiz: vi.fn(), selectView: vi.fn(), changeSearch: vi.fn(), openReview: vi.fn(), startDue: vi.fn(), selectScope: vi.fn(), confirmReview: vi.fn(), dismissModal: vi.fn(), resume: vi.fn(), retry: vi.fn() },
+    on: { openQuiz: vi.fn(), selectView: vi.fn(), changeSearch: vi.fn(), changeLayout: vi.fn(), openReview: vi.fn(), startDue: vi.fn(), selectScope: vi.fn(), confirmReview: vi.fn(), dismissModal: vi.fn(), resume: vi.fn(), retry: vi.fn() },
 })
 
 afterEach(cleanup)
@@ -73,7 +80,7 @@ describe("CourseFlashcardsReviewBlockBase", () => {
         const { container } = render(<CourseFlashcardsReviewBlockBase {...input} />)
 
         expect(container.querySelector("[data-node=course-flashcards-review-page]")).toBeTruthy()
-        expect(container.querySelectorAll("[data-node=flashcard-review-deck-card]")).toHaveLength(1)
+        expect(container.querySelectorAll("[data-node=flashcard-review-deck-grid-card]")).toHaveLength(1)
         const startButtons = screen.getAllByRole("button", { name: "Start" })
         fireEvent.click(startButtons[0])
         fireEvent.click(startButtons[1])
@@ -83,11 +90,55 @@ describe("CourseFlashcardsReviewBlockBase", () => {
         expect(screen.getByText("easy · 5 cards · 3 due · 1 mastered")).toBeInTheDocument()
     })
 
+    it("renders due work and every review figure as independent page cards", () => {
+        const { container } = render(<CourseFlashcardsReviewBlockBase {...makeInput()} />)
+
+        const due = container.querySelector("[data-node=flashcard-review-due-card]")
+        expect(due?.closest("[data-component=SurfaceCardSurface]")).toBeTruthy()
+        const stats = [...container.querySelectorAll("[data-node=flashcard-review-stat-card]")]
+        expect(stats).toHaveLength(4)
+        expect(stats.every((stat) => stat.closest("[data-component=SurfaceCardSurface]") !== null)).toBe(true)
+        expect(container.querySelector("[data-node=flashcard-stat-grid]")).toHaveClass("gap-4")
+    })
+
+    it("orders the deck title before one adjacent search-count toolbar", () => {
+        const input = makeInput()
+        const { container } = render(<CourseFlashcardsReviewBlockBase {...input} />)
+
+        const section = container.querySelector("[data-node=flashcard-deck-section]")
+        const title = section?.querySelector("h2")
+        const query = section?.querySelector("[data-node=catalog-query-with-count]")
+        expect(screen.getAllByRole("heading", { name: "Decks", level: 2 })).toHaveLength(1)
+        expect(query).toContainElement(screen.getByRole("searchbox", { name: "Search decks" }))
+        expect(query).toContainElement(screen.getByText("1 deck found"))
+        expect(title).toBeTruthy()
+        expect(query).toBeTruthy()
+        expect((title as Element).compareDocumentPosition(query as Node) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+
+        fireEvent.change(screen.getByRole("searchbox", { name: "Search decks" }), { target: { value: "core" } })
+        fireEvent.submit(screen.getByRole("search"))
+        expect(input.on.changeSearch).toHaveBeenCalledWith("core")
+    })
+
+    it("switches the same deck collection between grid cards and one joined list", () => {
+        const input = makeInput()
+        const { container, rerender } = render(<CourseFlashcardsReviewBlockBase {...input} />)
+
+        expect(container.querySelector("[data-node=flashcard-review-deck-grid]")).toBeTruthy()
+        fireEvent.click(screen.getByText("List"))
+        expect(input.on.changeLayout).toHaveBeenCalledWith("line")
+
+        rerender(<CourseFlashcardsReviewBlockBase {...input} props={{ ...input.props, layout: "line" }} />)
+        expect(container.querySelector("[data-node=flashcard-review-deck-grid]")).toBeNull()
+        expect(container.querySelector("[data-node=flashcard-review-deck-list]")).toBeTruthy()
+        expect(screen.getAllByRole("heading", { name: "Decks" })).toHaveLength(1)
+    })
+
     it("rests four deck cards and withholds the due card until the queue is known", () => {
         const input = makeInput()
         const { container } = render(<CourseFlashcardsReviewBlockBase {...input} blockState="pending" />)
 
-        expect(container.querySelectorAll("[data-node=flashcard-review-deck-card]")).toHaveLength(4)
+        expect(container.querySelectorAll("[data-node=flashcard-review-deck-grid-card]")).toHaveLength(4)
         expect(container.querySelector("[data-node=flashcard-review-due-card]")).toBeNull()
         expect(screen.queryByText("Recent sessions")).not.toBeInTheDocument()
         expect(container.querySelectorAll("[data-component=Button][data-loading=true]")).toHaveLength(4)
@@ -98,7 +149,7 @@ describe("CourseFlashcardsReviewBlockBase", () => {
         const { container } = render(<CourseFlashcardsReviewBlockBase {...input} blockState="empty" />)
 
         expect(screen.getByText("Empty")).toBeInTheDocument()
-        expect(container.querySelector("[data-node=flashcard-review-deck-card]")).toBeNull()
+        expect(container.querySelector("[data-node=flashcard-review-deck-grid-card]")).toBeNull()
         expect(screen.queryByText("Decks")).not.toBeInTheDocument()
         expect(screen.queryByRole("button", { name: "Retry" })).not.toBeInTheDocument()
     })
@@ -145,7 +196,7 @@ describe("CourseFlashcardsReviewBlockBase", () => {
     it("keeps the page identity on the left content axis", () => {
         const { container } = render(<CourseFlashcardsReviewBlockBase {...makeInput()} />)
         expect(container.querySelector("[data-node=learn-page-title-pair]")).toHaveClass("items-start", "text-left")
-        expect(container.querySelector("[data-node=flashcard-dual-tab-toolbar]")).not.toHaveClass("sm:flex-row")
+        expect(container.querySelector("[data-node=flashcard-review-tab-toolbar]")).not.toHaveClass("sm:flex-row")
     })
 
     it("resumes an unfinished session instead of starting a new one", () => {
@@ -173,7 +224,7 @@ describe("CourseFlashcardsReviewBlockBase", () => {
         expect(dueCard).toBeTruthy()
         expect(screen.getByText("0 due")).toBeInTheDocument()
         expect(dueCard?.querySelector("[data-component=Button]")).toBeNull()
-        expect(container.querySelectorAll("[data-node=flashcard-review-deck-card]")).toHaveLength(0)
+        expect(container.querySelectorAll("[data-node=flashcard-review-deck-grid-card]")).toHaveLength(0)
         fireEvent.click(screen.getByText("Quiz"))
         expect(input.on.openQuiz).toHaveBeenCalledOnce()
     })
