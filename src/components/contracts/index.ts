@@ -968,16 +968,22 @@ export const CONTRACTS = buildContracts({
         why: "if each current-milestone task keeps its title, state and destination as one bounded comparable card.",
     },
     "course-foundations-page": {
-        host: "main",
-        classes: ["mx-auto", "flex", "w-full", "max-w-app-md", "flex-col", "gap-6", "px-6", "py-6"],
+        classes: ["flex", "w-full", "max-w-app-md", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            workspace: { contract: "course-foundations-workspace" },
+        },
+        why: "if the routed foundation region must keep one left content axis inside the Learn shell's existing main landmark while its connected workspace owns every live catalog state.",
+    },
+    "course-foundations-workspace": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6"],
         children: {
             header: { contract: "page-header-stack" },
             description: { leaf: "text", props: { size: "sm", tone: "muted" } },
             trial: { contract: "foundation-trial-enrollment-nudge", optional: true },
-            query: { contract: "catalog-query-with-count" },
+            toolbar: { contract: "catalog-search-count-view-row" },
             results: { contract: "foundation-category-result-run" },
         },
-        why: "if you need a foundation catalog that introduces the prerequisite library before its query and live category results, with empty and failed outcomes replacing only that result run.",
+        why: "if you need a foundation catalog workspace that introduces the prerequisite library before its query and live category results, with empty and failed outcomes replacing only that result run.",
     },
     "foundation-trial-enrollment-nudge": {
         classes: ["flex", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-3", "p-4", "rounded-2xl"],
@@ -990,23 +996,63 @@ export const CONTRACTS = buildContracts({
     "foundation-category-result-run": {
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4"],
         children: {
-            list: { contract: "foundation-category-destination-list", optional: true },
+            header: { contract: "foundation-category-results-header" },
+            collection: { contract: ["foundation-category-card-grid", "foundation-category-destination-list"], optional: true },
             notice: { composite: "empty-notice", optional: true },
             pager: { leaf: "pagination", optional: true },
         },
         why: "if you need one stable foundation result region whose pending, empty, failed and paged outcomes replace only one another.",
     },
+    "foundation-category-results-header": {
+        classes: ["flex", "flex-row", "flex-wrap", "items-start", "justify-between", "gap-3"],
+        children: {
+            identity: { contract: "foundation-category-results-identity" },
+            status: { leaf: "text", props: { size: "xs", tone: "muted" } },
+        },
+        why: "if you need the category run named and explained while the selected presentation remains visible at the opposite edge.",
+    },
+    "foundation-category-results-identity": {
+        classes: ["flex", "min-w-0", "flex-col", "items-start", "gap-1"],
+        children: {
+            title: { leaf: "heading" },
+            description: { leaf: "text", props: { size: "sm", tone: "muted" } },
+        },
+        why: "if you need the foundation result heading kept with the instruction that explains what opening a category does.",
+    },
+    "foundation-category-card-grid": {
+        classes: ["grid", "w-full", "min-w-0", "grid-cols-1", "sm:grid-cols-2", "gap-4"],
+        children: {
+            category: { contract: "foundation-category-grid-card", repeats: true, restingCount: 10 },
+        },
+        why: "if you need foundation categories rendered as independent responsive SurfaceCard destinations for visual comparison.",
+    },
+    "foundation-category-grid-card": {
+        classes: ["flex", "h-full", "min-w-0", "flex-col", "overflow-hidden"],
+        children: {
+            artwork: { leaf: "cover-image" },
+            body: { contract: "foundation-category-grid-card-body" },
+        },
+        why: "if one grid destination needs its own artwork above the identity and action held by the same independent card.",
+    },
+    "foundation-category-grid-card-body": {
+        classes: ["flex", "min-w-0", "grow", "flex-col", "gap-3", "p-4"],
+        children: {
+            identity: { contract: "foundation-category-identity" },
+            action: { leaf: "button", optional: true },
+        },
+        why: "if a grid card needs its category explanation to grow above the one destination action without a nested surface.",
+    },
     "foundation-category-destination-list": {
         host: "ul",
-        classes: ["overflow-hidden", "divide-y", "divide-separator", "border", "border-separator", "rounded-2xl"],
+        classes: ["overflow-hidden", "divide-y", "divide-separator"],
         children: {
             category: { contract: "foundation-category-destination-row", repeats: true, restingCount: 10 },
         },
-        why: "if you need the populated foundation destinations held as one ordered visual list inside the stable result region.",
+        why: "if you need surface-free category rows joined inside the one list-card ground owned by SurfaceListCard.",
     },
     "foundation-category-destination-row": {
         host: "li",
-        classes: ["flex", "min-w-0", "items-center", "gap-4", "p-4", "[&>*:nth-child(2)]:min-w-0", "[&>*:nth-child(2)]:grow", "[&>*:last-child]:shrink-0"],
+        classes: ["flex", "min-w-0", "flex-col", "gap-4", "p-4", "sm:flex-row", "sm:items-start", "[&>*:nth-child(2)]:min-w-0", "[&>*:nth-child(2)]:grow", "[&>*:last-child]:shrink-0"],
         children: {
             artwork: { leaf: "cover-image" },
             identity: { contract: "foundation-category-identity" },

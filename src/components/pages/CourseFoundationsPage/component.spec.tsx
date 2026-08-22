@@ -31,6 +31,14 @@ const copy = {
     clearSearch: "Clear search",
     count: "1 category",
     open: "Open category",
+    resultsTitle: "Categories",
+    resultsDescription: "Choose a topic",
+    layoutLabel: "Category layout",
+    gridLabel: "Grid",
+    lineLabel: "List",
+    activeGrid: "Viewing as a grid",
+    activeLine: "Viewing as a list",
+    layout: "grid" as const,
     pager: "Category pages",
     previous: "Previous page",
     next: "Next page",
@@ -54,9 +62,26 @@ describe("CourseFoundationsPageContentBase", () => {
         fireEvent.change(screen.getByRole("searchbox", { name: "Search categories" }), { target: { value: "container" } })
         fireEvent.submit(screen.getByRole("search"))
 
-        expect(container.querySelector("[data-node=\"course-foundations-page\"]")).not.toBeNull()
+        expect(container.querySelector("[data-node=\"course-foundations-workspace\"]")).not.toBeNull()
+        expect(container.querySelectorAll("[data-component=SurfaceCardSurface]")).toHaveLength(1)
         expect(openCategory).toHaveBeenCalledWith("category-1")
         expect(search).toHaveBeenCalledWith("container")
+    })
+
+    it("draws list mode as one joined list-card surface and reports layout changes", () => {
+        const changeLayout = vi.fn()
+        const { container } = render(
+            <CourseFoundationsPageContentBase
+                state="ready"
+                props={{ ...copy, layout: "line", categories: [category()] }}
+                on={{ changeLayout }}
+            />,
+        )
+
+        expect(container.querySelectorAll("[data-component=SurfaceListCardSurface]")).toHaveLength(1)
+        expect(container.querySelector("[data-node=foundation-category-card-grid]")).toBeNull()
+        fireEvent.click(screen.getByRole("tab", { name: "Grid" }))
+        expect(changeLayout).toHaveBeenCalledWith("grid")
     })
 
     it("names a category the backend gave no description for by its title alone", () => {
@@ -65,15 +90,15 @@ describe("CourseFoundationsPageContentBase", () => {
         expect(screen.queryByText("Runtime basics")).not.toBeInTheDocument()
     })
 
-    it("stands in ten visual category rows before the first answer arrives", () => {
+    it("stands in ten independent category cards before the first answer arrives", () => {
         const { container } = draw("pending", [])
-        expect(container.querySelectorAll("[data-node=foundation-category-destination-row]")).toHaveLength(10)
+        expect(container.querySelectorAll("[data-component=SurfaceCardSurface]")).toHaveLength(10)
         expect(container.querySelector("[data-component=Text][data-loading=\"true\"]")).not.toBeNull()
     })
 
     it("keeps the rows it already has rather than replacing them while refreshing", () => {
         const { container } = draw("partial", [category()])
-        expect(container.querySelectorAll("[data-node=foundation-category-destination-row]")).toHaveLength(1)
+        expect(container.querySelectorAll("[data-component=SurfaceCardSurface]")).toHaveLength(1)
     })
 
     it("says the catalog is empty without offering an action there is none for", () => {
