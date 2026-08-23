@@ -4,6 +4,7 @@ type LayoutSurface = LayoutChildren & { surface: unknown }
 const seo = vi.hoisted(() => ({ googleSiteVerification: undefined as string | undefined }))
 
 vi.mock("next/navigation", () => ({ notFound: vi.fn() }))
+vi.mock("next/font/google", () => ({ Be_Vietnam_Pro: () => ({ variable: "--starci-font-sans" }) }))
 vi.mock("next-intl", () => ({ hasLocale: (_locales: ReadonlyArray<string>, locale: string) => locale === "en" || locale === "vi" }))
 vi.mock("next-intl/server", () => ({ getTranslations: async () => (key: string) => key, getMessages: async () => ({ app: {} }) }))
 vi.mock("@/config/seo", () => ({ openGraphLocale: (locale: string) => locale, readSeoConfig: () => ({ siteUrl: "https://academy.starci.org", siteName: "StarCi", googleSiteVerification: seo.googleSiteVerification, imagePath: "/og.png" }) }))

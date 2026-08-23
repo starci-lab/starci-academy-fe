@@ -12,6 +12,32 @@ afterEach(() => {
     cleanup()
 })
 
+// Node 25 exposes an incomplete experimental `localStorage` unless it receives a backing-file
+// flag. Vitest can surface that object inside jsdom, where component code reasonably expects the
+// complete browser Storage contract. Install a deterministic in-memory implementation only when
+// the environment did not provide that contract itself.
+if (typeof window !== "undefined" && typeof window.localStorage?.clear !== "function") {
+    const values = new Map<string, string>()
+    const localStorage: Storage = {
+        get length() {
+            return values.size
+        },
+        clear: () => values.clear(),
+        getItem: (key) => values.get(key) ?? null,
+        key: (index) => Array.from(values.keys())[index] ?? null,
+        removeItem: (key) => {
+            values.delete(key)
+        },
+        setItem: (key, value) => {
+            values.set(key, value)
+        },
+    }
+    Object.defineProperty(window, "localStorage", {
+        configurable: true,
+        value: localStorage,
+    })
+}
+
 // jsdom ships no `matchMedia`, and `next-themes` asks for it the moment it mounts to learn what
 // the operating system prefers. Answering "no preference, and nothing is listening" is the honest
 // stand-in: a test asserting on a theme sets the theme rather than pretending to be an OS.
