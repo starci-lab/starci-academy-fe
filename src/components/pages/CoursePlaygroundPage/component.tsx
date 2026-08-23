@@ -1,71 +1,9 @@
+import { CoursePlaygroundCatalog } from "@/components/blocks/learn/CoursePlaygroundCatalog"
 import { Tree } from "@/components/branches/Tree"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
-import { Heading } from "@/components/leaves/Heading"
-import { NavLink } from "@/components/leaves/NavLink"
-import { Text } from "@/components/leaves/Text"
-import { defineCompositeComponent, defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
-import type { PlaygroundSummary } from "@/modules/api/graphql/queries/query-playgrounds"
-
-/** Catalog states exposed by the pure playground hub. */
-export type CoursePlaygroundPageState = "pending" | "ready" | "empty" | "failed"
-
-/** Resolved catalog data and navigation actions for the playground hub. */
-export type CoursePlaygroundPageProps = {
-    readonly state: CoursePlaygroundPageState
-    readonly props: {
-        readonly title: string
-        readonly description: string
-        readonly stepLabel: string
-        readonly emptyText: string
-        readonly failedText: string
-        readonly retryLabel: string
-        readonly playgrounds: ReadonlyArray<PlaygroundSummary>
-    }
-    readonly on: {
-        readonly openSetup: (slug: string) => void
-        readonly retry: () => void
-    }
-}
-
-/** Draw the backend-owned playground catalog without a parallel local catalog. */
-export const CoursePlaygroundPageBase = (input: CoursePlaygroundPageProps) => {
-    const loading = input.state === "pending"
-    const rows: ReadonlyArray<PlaygroundSummary> = loading && input.props.playgrounds.length === 0
-        ? Array.from({ length: 4 }, (_, index) => ({ id: `pending-${index}`, slug: `pending-${index}`, title: "", icon: null, stepCount: 0 }))
-        : input.props.playgrounds
-    const notice = input.state === "empty" || input.state === "failed"
-        ? defineCompositeComponent("empty-notice", {}, () => (
-            <EmptyNotice
-                props={{
-                    message: input.state === "failed" ? input.props.failedText : input.props.emptyText,
-                    actionLabel: input.state === "failed" ? input.props.retryLabel : undefined,
-                }}
-                on={{ act: input.on.retry }}
-            />
-        ))
-        : undefined
-
-    return (
-        <Tree contract="course-playground-page" render={defineContractComponent("course-playground-page", {
-            header: defineContractComponent("page-header-stack", {
-                title: defineLeafComponent("heading", {}, () => (
-                    <Heading props={{ content: input.props.title, level: 1 }} isLoading={loading} />
-                )),
-            }),
-            description: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                <Text props={{ content: input.props.description, size: "sm", tone: "muted" }} isLoading={loading} />
-            )),
-            playground: rows.map((playground) => defineLeafComponent("nav-link", { kind: "section" }, () => (
-                <NavLink
-                    props={{ label: `${playground.title} · ${playground.stepCount} ${input.props.stepLabel}`, kind: "section" }}
-                    on={{ press: () => input.on.openSetup(playground.slug) }}
-                    isLoading={loading}
-                />
-            ))),
-            notice,
-        })} />
-    )
-}
-
+import { defineContractComponent, defineContractProjection } from "@/components/contracts/props"
+/** Route identity passed to the connected catalog block. */
+export type CoursePlaygroundPageProps = { readonly displayId: string }
+/** Playground route shell; catalog query and navigation belong to the connected block. */
+export const CoursePlaygroundPageBase = ({ displayId }: CoursePlaygroundPageProps) => <Tree contract="course-playground-page" render={defineContractComponent("course-playground-page", { catalog: defineContractProjection("course-playground-catalog", () => <CoursePlaygroundCatalog displayId={displayId} />) })} />
 /** Source-level ownership marker. */
 export const meta = { world: "pure", domain: "learn" } as const

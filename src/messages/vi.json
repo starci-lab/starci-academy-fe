@@ -243,6 +243,7 @@
             "contentSignalLabel": "Kho kiến thức",
             "challengeSignalLabel": "Learning-by-doing",
             "previewCount": "{count} bài xem trước",
+            "moduleSummary": "{count} nội dung · {minutes} phút",
             "phaseOpen": "Đang mở",
             "savings": "Tiết kiệm {amount}",
             "scarcity": "Còn {count} suất ở phase {phase}",
@@ -749,7 +750,8 @@
             "lessonPremium": "Tr\u1ea3 ph\u00ed",
             "empty": "Kh\u00f3a h\u1ecdc n\u00e0y ch\u01b0a c\u00f3 b\u00e0i h\u1ecdc.",
             "failed": "Kh\u00f4ng t\u1ea3i \u0111\u01b0\u1ee3c n\u1ed9i dung kh\u00f3a h\u1ecdc.",
-            "retry": "Th\u1eed l\u1ea1i"
+            "retry": "Th\u1eed l\u1ea1i",
+            "minutes": "{count} phút"
         },
         "module": {
             "contents": "B\u00e0i h\u1ecdc"
@@ -828,6 +830,18 @@
       "discussionFailed": "Không tải được phần thảo luận.",
       "discussionRetry": "Thử lại",
       "discussionMeta": "{date} · {replies, plural, =0 {Chưa có phản hồi} other {# phản hồi}}"
+        },
+        "project": {
+            "progressLabel": "Tiến độ dự án",
+            "searchPlaceholder": "Tìm nhiệm vụ...",
+            "searchLabel": "Tìm trong dự án cá nhân",
+            "searchClearLabel": "Xoá ô tìm kiếm",
+            "failedMessage": "Không tải được lộ trình dự án.",
+            "milestoneProgress": "{completed}/{total} nhiệm vụ",
+            "milestoneProgressLabel": "Tiến độ của {milestone}",
+            "taskScore": "{score}/{maximum} điểm",
+            "taskWorth": "{maximum} điểm",
+            "resizeRail": "Điều chỉnh độ rộng lộ trình dự án"
         },
         "foundations": {
             "title": "Nền tảng",
@@ -937,6 +951,7 @@
                 "contents": "Mục lục",
                 "page": "Trang này"
             },
+            "mobileCourseNavigation": "Điều hướng khóa học",
             "locked": "Khoá",
             "collapse": "Thu gọn",
             "expand": "Mở rộng",

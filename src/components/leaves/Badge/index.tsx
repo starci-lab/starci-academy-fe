@@ -1,4 +1,5 @@
 import { Chip, skeletonVariants } from "@heroui/react"
+import { Icon, type IconName } from "@/components/leaves/Icon"
 import type { LeafProps } from "@/components/contracts/props"
 
 /**
@@ -18,6 +19,8 @@ export type BadgeData = {
     readonly content?: string
     /** What it is saying. */
     readonly tone?: BadgeTone
+    /** Optional status glyph carried inside the same compact chip. */
+    readonly icon?: IconName
 }
 
 /** Props for {@link Badge}. Three fixed slots, no fourth - see {@link LeafProps}. */
@@ -56,6 +59,7 @@ export const Badge = ({ props, isLoading = false }: BadgeProps) => {
             size="sm"
             className={isLoading ? RESTING_CLASSES : undefined}
         >
+            {props.icon === undefined ? null : <Icon props={{ name: props.icon, role: "chip" }} />}
             {props.content ?? ""}
         </Chip>
     )

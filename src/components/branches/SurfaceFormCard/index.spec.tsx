@@ -47,4 +47,13 @@ describe("SurfaceFormCard", () => {
         expect(container.querySelector("[data-component=\"SurfaceFormCard\"]")?.className).toContain("p-0")
         expect(container.querySelector("[data-component=\"SurfaceFormCardBody\"]")?.className).toContain("p-0")
     })
+
+    it("keeps an optional section label outside the form surface", () => {
+        const { container } = render(<SurfaceFormCard props={{ label: "Project GitHub" }} contract="stacked-peer-controls" render={controls} />)
+
+        const heading = screen.getByRole("heading", { name: "Project GitHub", level: 3 })
+        const surface = container.querySelector("[data-component=\"SurfaceFormCard\"]")
+        expect(heading.compareDocumentPosition(surface as Node) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
+        expect(surface).not.toContainElement(heading)
+    })
 })

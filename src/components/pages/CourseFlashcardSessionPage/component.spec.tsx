@@ -1,11 +1,11 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import {
-    CourseFlashcardSessionPageBase,
+    CourseFlashcardSessionBlockBase,
     type CourseFlashcardSessionPageActions,
     type CourseFlashcardSessionPageData,
     type CourseFlashcardSessionPageProps,
-} from "./component"
+} from "@/components/blocks/learn/CourseFlashcardSessionBlock/component"
 
 /**
  * What these tests guard: a live session that only ever offers the controls its own state admits.
@@ -55,14 +55,14 @@ const handlers = (): CourseFlashcardSessionPageActions => ({
 })
 
 const draw = (
-    state: CourseFlashcardSessionPageProps["state"],
+    blockState: CourseFlashcardSessionPageProps["blockState"],
     data: Partial<CourseFlashcardSessionPageData> = {},
 ) => {
     const on = handlers()
-    return { on, ...render(<CourseFlashcardSessionPageBase state={state} data={{ ...card, ...data }} on={on} />) }
+    return { on, ...render(<CourseFlashcardSessionBlockBase blockState={blockState} data={{ ...card, ...data }} on={on} />) }
 }
 
-describe("CourseFlashcardSessionPageBase", () => {
+describe("CourseFlashcardSessionBlockBase", () => {
     it("shows the prompt, the deck it came from and how far through the session the reader is", () => {
         const { container } = draw("active")
 
@@ -114,12 +114,12 @@ describe("CourseFlashcardSessionPageBase", () => {
         fireEvent.click(screen.getByRole("button", { name: "Check answer" }))
         expect(first.on.checkQuiz).toHaveBeenCalledOnce()
 
-        first.rerender(<CourseFlashcardSessionPageBase state="active" data={{ ...card, mode: "quiz", answerVisible: false, cloze: { ...cloze, checked: true } }} on={first.on} />)
+        first.rerender(<CourseFlashcardSessionBlockBase blockState="active" data={{ ...card, mode: "quiz", answerVisible: false, cloze: { ...cloze, checked: true } }} on={first.on} />)
         expect(screen.getByText("2 / 2 blanks correct")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Show full answer" }))
         expect(first.on.showSolution).toHaveBeenCalledOnce()
 
-        first.rerender(<CourseFlashcardSessionPageBase state="active" data={{ ...card, mode: "quiz", answerVisible: true, solutionVisible: true, cloze: { ...cloze, checked: true } }} on={first.on} />)
+        first.rerender(<CourseFlashcardSessionBlockBase blockState="active" data={{ ...card, mode: "quiz", answerVisible: true, solutionVisible: true, cloze: { ...cloze, checked: true } }} on={first.on} />)
         fireEvent.click(screen.getByRole("button", { name: "Good" }))
         expect(first.on.rate).toHaveBeenCalledWith(2)
     })

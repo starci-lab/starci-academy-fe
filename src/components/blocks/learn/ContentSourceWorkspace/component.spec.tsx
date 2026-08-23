@@ -13,7 +13,12 @@ vi.mock("@/components/branches/SandpackWorkspace", () => ({
     ),
 }))
 
+vi.mock("@/components/branches/CodeReaderWorkspace", () => ({
+    CodeReaderWorkspace: () => <div data-testid="code-reader">Readonly source</div>,
+}))
+
 const props: ContentSourceWorkspaceData = {
+    mode: "sandbox",
     identity: "GitHub snapshot · Async patterns",
     loadingLabel: "Loading source",
     failedLabel: "Source could not be loaded",
@@ -78,5 +83,12 @@ describe("ContentSourceWorkspace", () => {
         fireEvent.click(screen.getByRole("button", { name: "Ask StarCi about this error" }))
         expect(askError).toHaveBeenCalledTimes(1)
         expect(screen.getByLabelText("Preview failed")).toBeInTheDocument()
+    })
+
+    it("renders backend source as readonly code without sandbox actions", () => {
+        render(<ContentSourceWorkspace state="ready" props={{ ...props, mode: "reader" }} />)
+
+        expect(screen.getByTestId("code-reader")).toBeInTheDocument()
+        expect(screen.queryByRole("button", { name: "Reset sandbox" })).toBeNull()
     })
 })

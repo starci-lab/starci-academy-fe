@@ -1,10 +1,10 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import {
-    CourseMockInterviewSetupPageBase,
+    CourseMockInterviewSetupBlockBase as CourseMockInterviewSetupPageBase,
     type CourseMockInterviewSetupData,
     type CourseMockInterviewSetupPageProps,
-} from "./component"
+} from "@/components/blocks/learn/CourseMockInterviewSetupBlock/component"
 
 /**
  * What these tests guard: the green room is the last place a learner can still change their mind,
@@ -39,6 +39,20 @@ const copy: CourseMockInterviewSetupData = {
         { id: "stats", label: "Statistics" },
     ],
     beginTitle: "Interview room",
+    briefingEyebrow: "Course-grounded interview",
+    briefingTitle: "Get ready for a focused interview",
+    setupTitle: "Session setup",
+    setupDescription: "Choose two settings",
+    sequenceTitle: "After you begin",
+    sequenceSteps: [
+        { id: "create", title: "Create session", description: "Draw questions" },
+        { id: "answer", title: "Answer questions", description: "Persist progress" },
+        { id: "feedback", title: "Receive feedback", description: "Review results" },
+    ],
+    serverNote: "Questions are generated after you begin.",
+    savedNote: "The session is saved.",
+    historyTitle: "Interview history",
+    statsTitle: "Interview statistics",
     historyEmpty: "No completed interviews yet",
     statsEmpty: "No statistics yet",
     historyFailed: "History failed",
@@ -60,6 +74,22 @@ const draw = (
 ) => render(<CourseMockInterviewSetupPageBase state={state} props={{ ...copy, ...props }} on={on} />)
 
 describe("CourseMockInterviewSetupPageBase", () => {
+    it("assigns every destination to its approved surface owner", () => {
+        const begin = draw("ready")
+        expect(begin.container.querySelector("[data-component=SurfaceFormCard]")).toBeTruthy()
+        expect(begin.container.querySelector("[data-component=SurfaceListCard]")).toBeNull()
+        begin.unmount()
+
+        const history = draw("history", { historyState: "ready", historyRows: [{ id: "one", title: "Attempt", fact: "82/100" }] })
+        expect(history.container.querySelector("[data-component=SurfaceListCard]")).toBeTruthy()
+        expect(screen.getByText("Interview history")).toBeInTheDocument()
+        history.unmount()
+
+        const statistics = draw("stats", { statsState: "ready", statsRows: [{ id: "qna", title: "Q&A", percent: 82, percentText: "82/100" }] })
+        expect(statistics.container.querySelector("[data-component=SurfaceListCard]")).toBeTruthy()
+        expect(screen.getByText("Interview statistics")).toBeInTheDocument()
+    })
+
     it("fills the seniority and format the learner is currently on and leaves the alternatives open", () => {
         draw("ready")
 
@@ -110,8 +140,9 @@ describe("CourseMockInterviewSetupPageBase", () => {
 
     it("offers the persisted session beside a fresh start and resumes it on request", () => {
         const resume = vi.fn()
-        draw("resumable", { status: "A session is already open" }, { resume })
+        const { container } = draw("resumable", { status: "A session is already open" }, { resume })
 
+        expect(container.querySelector("[data-node=mock-interview-resume-panel]")).toBeTruthy()
         expect(screen.getByText("A session is already open")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Resume interview" }))
         expect(resume).toHaveBeenCalledTimes(1)

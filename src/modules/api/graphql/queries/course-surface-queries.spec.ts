@@ -70,9 +70,17 @@ describe("queryCourse", () => {
         expect(mocks.query.mock.calls[0][0].variables).toEqual({ request: { displayId: "he-thong-phan-tan" } })
     })
 
-    it("selects the per-content counts the hero chips are summed from", async () => {
+    it("selects the complete curriculum summary and panel anatomy", async () => {
         await queryCourse()
-        for (const field of ["minutesRead", "numChallenges", "previewContents", "pricingPhases", "isEnrolled"]) {
+        for (const field of [
+            "minutesRead",
+            "numChallenges",
+            "description",
+            "contentTier",
+            "previewContents",
+            "pricingPhases",
+            "isEnrolled",
+        ]) {
             expect(sentDocumentText(), field).toContain(field)
         }
     })

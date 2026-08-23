@@ -9,6 +9,8 @@ import { CoverImage } from "@/components/leaves/CoverImage"
 import { PricingPhaseDisclosure } from "@/components/composites/PricingPhaseDisclosure"
 import { Text } from "@/components/leaves/Text"
 import { TextLink } from "@/components/leaves/TextLink"
+import { CoursePriceOverlay } from "@/components/overlays/courses/CoursePriceOverlay"
+import { CourseMobileEnrollBarBase } from "../CourseMobileEnrollBar/component"
 import {
     defineCompositeComponent,
     defineContractComponent,
@@ -127,6 +129,10 @@ export type CoursePricingRailProps = {
     readonly props: CoursePricingRailData
     /** What the rail reports. */
     readonly on?: CoursePricingRailActions
+    /** Optional connected price explanation projected beside the rail. */
+    readonly priceOverlay?: { readonly courseId: string; readonly title: string; readonly isOpen: boolean; readonly onDismiss: () => void }
+    /** Which responsive projection should be drawn by this commerce owner. */
+    readonly surface?: "rail" | "mobile"
 }
 
 /**
@@ -145,6 +151,7 @@ export const CoursePricingRailBase = (input: CoursePricingRailProps) => {
     const isTrialing = input.state === "trialing"
     const isCheckingOut = input.state === "checking-out"
     const phases = input.props.phases ?? []
+    if (input.surface === "mobile") return <CourseMobileEnrollBarBase state={isPricePending ? "price-pending" : "ready"} props={{ price: input.props.price, originalPrice: input.props.originalPrice, ctaLabel: input.props.ctaLabel }} on={{ act: input.on?.act }} />
     const activePhase = phases.find((phase) => phase.isActive === true)
     const hasIntentSwitch = trialLabel !== undefined && intent !== undefined
     const visibleIntent = hasIntentSwitch ? selectedIntent : "purchase"
@@ -194,121 +201,124 @@ export const CoursePricingRailBase = (input: CoursePricingRailProps) => {
     })
 
     return (
-        <ScrollViewport
-            boundary="pricing-rail"
-            render={defineContractComponent("course-pricing-rail", {
-                cover: defineLeafComponent("cover-image", {}, () => (
-                    <CoverImage props={{ src: input.props.coverUrl ?? null, alt: input.props.title, ratio: "wide" }} />
-                )),
-                phase: activePhase === undefined
-                    ? undefined
-                    : defineLeafComponent("badge", {}, () => (
-                        <Badge props={{ content: activePhase.name, tone: "accent" }} />
+        <>
+            <ScrollViewport
+                boundary="pricing-rail"
+                render={defineContractComponent("course-pricing-rail", {
+                    cover: defineLeafComponent("cover-image", {}, () => (
+                        <CoverImage props={{ src: input.props.coverUrl ?? null, alt: input.props.title, ratio: "wide" }} />
                     )),
-                price: priceBlock,
-                selector: hasIntentSwitch
-                    ? defineLeafComponent("choice-tabs", {}, () => (
-                        <ChoiceTabs
-                            props={{
-                                label: intent.intentTabsLabel,
-                                selectedKey: visibleIntent,
-                                variant: "primary",
-                                tabs: [
-                                    { id: "purchase", label: intent.purchaseModeLabel },
-                                    { id: "trial", label: intent.trialModeLabel },
-                                ],
-                            }}
-                            on={{
-                                select: (key) => {
-                                    if (key === "purchase" || key === "trial") setSelectedIntent(key)
-                                },
-                            }}
-                        />
-                    ))
-                    : undefined,
-                purchase: visibleIntent === "purchase"
-                    ? defineContractComponent("course-pricing-purchase-intent", {
-                        copy: input.props.intent === undefined
-                            ? undefined
-                            : defineContractComponent("course-pricing-purchase-copy", {
-                                heading: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
-                                    <Text props={{ content: input.props.intent?.purchaseTitle, size: "sm", weight: "medium" }} />
-                                )),
-                                description: defineLeafComponent("text", { size: "sm" }, () => (
-                                    <Text props={{ content: input.props.intent?.purchaseDescription, size: "sm" }} />
-                                )),
-                            }),
-                        actions: defineContractComponent("course-pricing-purchase-actions", {
-                            primary: defineLeafComponent("button", {}, () => (
-                                <Button
-                                    props={{
-                                        label: input.props.ctaLabel,
-                                        variant: "primary",
-                                        size: "md",
-                                        icon: "next",
-                                        iconPlacement: "trailing",
-                                        isPending: isCheckingOut,
-                                    }}
-                                    on={{ press: input.on?.act }}
-                                />
-                            )),
-                            cart: cartLabel === undefined
+                    phase: activePhase === undefined
+                        ? undefined
+                        : defineLeafComponent("badge", {}, () => (
+                            <Badge props={{ content: activePhase.name, tone: "accent" }} />
+                        )),
+                    price: priceBlock,
+                    selector: hasIntentSwitch
+                        ? defineLeafComponent("choice-tabs", {}, () => (
+                            <ChoiceTabs
+                                props={{
+                                    label: intent.intentTabsLabel,
+                                    selectedKey: visibleIntent,
+                                    variant: "primary",
+                                    tabs: [
+                                        { id: "purchase", label: intent.purchaseModeLabel },
+                                        { id: "trial", label: intent.trialModeLabel },
+                                    ],
+                                }}
+                                on={{
+                                    select: (key) => {
+                                        if (key === "purchase" || key === "trial") setSelectedIntent(key)
+                                    },
+                                }}
+                            />
+                        ))
+                        : undefined,
+                    purchase: visibleIntent === "purchase"
+                        ? defineContractComponent("course-pricing-purchase-intent", {
+                            copy: input.props.intent === undefined
                                 ? undefined
-                                : defineLeafComponent("button", {}, () => (
+                                : defineContractComponent("course-pricing-purchase-copy", {
+                                    heading: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
+                                        <Text props={{ content: input.props.intent?.purchaseTitle, size: "sm", weight: "medium" }} />
+                                    )),
+                                    description: defineLeafComponent("text", { size: "sm" }, () => (
+                                        <Text props={{ content: input.props.intent?.purchaseDescription, size: "sm" }} />
+                                    )),
+                                }),
+                            actions: defineContractComponent("course-pricing-purchase-actions", {
+                                primary: defineLeafComponent("button", {}, () => (
                                     <Button
                                         props={{
-                                            label: cartLabel,
-                                            variant: "secondary",
+                                            label: input.props.ctaLabel,
+                                            variant: "primary",
                                             size: "md",
-                                            isPending: isAdding,
+                                            icon: "next",
+                                            iconPlacement: "trailing",
+                                            isPending: isCheckingOut,
                                         }}
-                                        on={{ press: input.on?.addToCart }}
+                                        on={{ press: input.on?.act }}
                                     />
                                 )),
+                                cart: cartLabel === undefined
+                                    ? undefined
+                                    : defineLeafComponent("button", {}, () => (
+                                        <Button
+                                            props={{
+                                                label: cartLabel,
+                                                variant: "secondary",
+                                                size: "md",
+                                                isPending: isAdding,
+                                            }}
+                                            on={{ press: input.on?.addToCart }}
+                                        />
+                                    )),
+                            }),
+                        })
+                        : undefined,
+                    exploration: visibleIntent !== "trial" || trialLabel === undefined
+                        ? undefined
+                        : defineContractComponent("course-pricing-exploration-intent", {
+                            heading: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
+                                <Text
+                                    props={{
+                                        content: input.props.intent?.trialTitle ?? trialLabel,
+                                        size: "sm",
+                                        weight: "medium",
+                                    }}
+                                />
+                            )),
+                            description: input.props.intent === undefined
+                                ? undefined
+                                : defineLeafComponent("text", { size: "sm" }, () => (
+                                    <Text props={{ content: input.props.intent?.trialDescription, size: "sm" }} />
+                                )),
+                            action: defineLeafComponent("button", {}, () => (
+                                <Button
+                                    props={{ label: trialLabel, variant: "tertiary", size: "md", isPending: isTrialing }}
+                                    on={{ press: input.on?.trial }}
+                                />
+                            )),
                         }),
-                    })
-                    : undefined,
-                exploration: visibleIntent !== "trial" || trialLabel === undefined
-                    ? undefined
-                    : defineContractComponent("course-pricing-exploration-intent", {
-                        heading: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
-                            <Text
+                    ladder: phases.length === 0
+                        ? undefined
+                        : defineCompositeComponent("pricing-phase-disclosure", {}, () => (
+                            <PricingPhaseDisclosure
                                 props={{
-                                    content: input.props.intent?.trialTitle ?? trialLabel,
-                                    size: "sm",
-                                    weight: "medium",
+                                    label: input.props.intent?.phaseDisclosureLabel ?? input.props.title,
+                                    phases,
                                 }}
                             />
                         )),
-                        description: input.props.intent === undefined
-                            ? undefined
-                            : defineLeafComponent("text", { size: "sm" }, () => (
-                                <Text props={{ content: input.props.intent?.trialDescription, size: "sm" }} />
-                            )),
-                        action: defineLeafComponent("button", {}, () => (
-                            <Button
-                                props={{ label: trialLabel, variant: "tertiary", size: "md", isPending: isTrialing }}
-                                on={{ press: input.on?.trial }}
-                            />
+                    proof: input.props.enrolmentLabel === undefined
+                        ? undefined
+                        : defineLeafComponent("text", { size: "xs" }, () => (
+                            <Text props={{ content: input.props.enrolmentLabel, size: "xs" }} />
                         )),
-                    }),
-                ladder: phases.length === 0
-                    ? undefined
-                    : defineCompositeComponent("pricing-phase-disclosure", {}, () => (
-                        <PricingPhaseDisclosure
-                            props={{
-                                label: input.props.intent?.phaseDisclosureLabel ?? input.props.title,
-                                phases,
-                            }}
-                        />
-                    )),
-                proof: input.props.enrolmentLabel === undefined
-                    ? undefined
-                    : defineLeafComponent("text", { size: "xs" }, () => (
-                        <Text props={{ content: input.props.enrolmentLabel, size: "xs" }} />
-                    )),
-            })}
-        />
+                })}
+            />
+            {input.priceOverlay === undefined ? null : <CoursePriceOverlay {...input.priceOverlay} />}
+        </>
     )
 }
 

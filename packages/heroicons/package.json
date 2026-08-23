@@ -1,7 +1,7 @@
 {
   "name": "@starci/heroicons",
-  "version": "0.1.0",
-  "description": "StarCi's Heroicons-compatible extension cuts.",
+  "version": "0.2.0",
+  "description": "Custom-only Heroicons-compatible cuts missing from upstream.",
   "type": "module",
   "sideEffects": false,
   "files": [

@@ -11,6 +11,7 @@ import {
     BookOpenIcon,
     BriefcaseIcon,
     CheckCircleIcon,
+    XCircleIcon,
     ChevronRightIcon,
     ClipboardDocumentCheckIcon,
     CodeBracketIcon,
@@ -43,12 +44,7 @@ import {
     UserPlusIcon,
     XMarkIcon,
     StarIcon,
-    CourseRailIcon,
-    FoundationsIcon,
-    MindMapIcon,
-    MockInterviewIcon,
-    PlaygroundIcon,
-} from "@starci/heroicons/24/outline"
+} from "@heroicons/react/24/outline"
 import {
     AcademicCapIcon as AcademicCapSolidIcon,
     ArrowLeftIcon as ArrowLeftSolidIcon,
@@ -62,6 +58,7 @@ import {
     BookOpenIcon as BookOpenSolidIcon,
     BriefcaseIcon as BriefcaseSolidIcon,
     CheckCircleIcon as CheckCircleSolidIcon,
+    XCircleIcon as XCircleSolidIcon,
     ChevronRightIcon as ChevronRightSolidIcon,
     ClipboardDocumentCheckIcon as ClipboardDocumentCheckSolidIcon,
     CodeBracketIcon as CodeBracketSolidIcon,
@@ -94,6 +91,20 @@ import {
     UserPlusIcon as UserPlusSolidIcon,
     XMarkIcon as XMarkSolidIcon,
     StarIcon as StarSolidIcon,
+} from "@heroicons/react/16/solid"
+import {
+    CircleIcon,
+    CourseRailIcon,
+    FirstPlaceMedalIcon,
+    FoundationsIcon,
+    MindMapIcon,
+    MockInterviewIcon,
+    PlaygroundIcon,
+    SecondPlaceMedalIcon,
+    ThirdPlaceMedalIcon,
+} from "@starci/heroicons/24/outline"
+import {
+    CircleIcon as CircleSolidIcon,
     CourseRailIcon as CourseRailSolidIcon,
     FoundationsIcon as FoundationsSolidIcon,
     MindMapIcon as MindMapSolidIcon,
@@ -125,13 +136,14 @@ import type { LeafProps } from "@/components/contracts/props"
 export type IconName =
     | "brand" | "aiChatbot" | "streak" | "credit" | "reward" | "course"
     | "email" | "password" | "revealPassword" | "hidePassword" | "code"
-    | "complete" | "pending" | "signIn" | "signUp" | "close" | "back" | "next" | "disclosure" | "retry" | "send"
+    | "complete" | "incomplete" | "pending" | "signIn" | "signUp" | "close" | "back" | "next" | "disclosure" | "retry" | "send"
     | "home" | "explore" | "community" | "league" | "review" | "livestream"
     | "light" | "dark" | "locale" | "google" | "github"
     | "search" | "cart" | "notification" | "account" | "profile" | "cv" | "settings" | "signOut"
     | "saved" | "blog" | "talents" | "jobs" | "practice"
     | "viewGrid" | "viewList" | "collapseRail" | "mindMap" | "mockInterview" | "foundations" | "playground"
     | "star" | "ratingStarEmpty" | "ratingStarFilled"
+    | "rankFirst" | "rankSecond" | "rankThird" | "rankOther"
 
 /** The two native Heroicon roles used by the product. */
 export type IconRole = "heading" | "leading" | "chip"
@@ -154,29 +166,6 @@ export type IconProps = LeafProps<IconData>
  * because that is what a reader recognises before they read anything.
  */
 type GlyphComponent = ComponentType<SVGProps<SVGSVGElement>>
-
-/**
- * The unfinished twin of Heroicons' 24px outline CheckCircleIcon. Heroicons does not export an
- * empty circle, so this keeps that glyph's outer path verbatim and removes only its inner check.
- */
-const CircleIcon = (props: SVGProps<SVGSVGElement>) => (
-    <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth={1.5}
-        stroke="currentColor"
-        aria-hidden="true"
-        data-slot="icon"
-        {...props}
-    >
-        <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-        />
-    </svg>
-)
 
 /**
  * StarCi AI's own mark: one chat silhouette around code chevrons and a small assistant spark.
@@ -229,7 +218,8 @@ const GLYPHS: Record<IconName, GlyphCuts> = {
     hidePassword: cuts(EyeSlashIcon, EyeSlashSolidIcon),
     code: cuts(ShieldCheckIcon, ShieldCheckSolidIcon),
     complete: cuts(CheckCircleIcon, CheckCircleSolidIcon),
-    pending: cuts(CircleIcon, CircleIcon),
+    incomplete: cuts(XCircleIcon, XCircleSolidIcon),
+    pending: cuts(CircleIcon, CircleSolidIcon),
     signIn: cuts(ArrowRightOnRectangleIcon, ArrowRightOnRectangleSolidIcon),
     signUp: cuts(UserPlusIcon, UserPlusSolidIcon),
     close: cuts(XMarkIcon, XMarkSolidIcon),
@@ -270,6 +260,10 @@ const GLYPHS: Record<IconName, GlyphCuts> = {
     mockInterview: cuts(MockInterviewIcon, MockInterviewSolidIcon),
     foundations: cuts(FoundationsIcon, FoundationsSolidIcon),
     playground: cuts(PlaygroundIcon, PlaygroundSolidIcon),
+    rankFirst: cuts(FirstPlaceMedalIcon, FirstPlaceMedalIcon),
+    rankSecond: cuts(SecondPlaceMedalIcon, SecondPlaceMedalIcon),
+    rankThird: cuts(ThirdPlaceMedalIcon, ThirdPlaceMedalIcon),
+    rankOther: cuts(TrophyIcon, TrophySolidIcon),
     google: cuts(GoogleMark, GoogleMark),
     github: cuts(GithubMark, GithubMark),
 }

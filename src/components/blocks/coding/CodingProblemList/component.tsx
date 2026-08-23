@@ -34,7 +34,7 @@ import {
  */
 
 /** The situations this list can be in. */
-export type CodingProblemListState = "pending" | "ready" | "empty" | "all-solved"
+export type CodingProblemListState = "pending" | "ready" | "empty" | "all-solved" | "failed"
 
 /** One problem, as the list draws it. */
 export type CodingProblemRow = {
@@ -86,13 +86,13 @@ const RESTING_COUNT = 5
  */
 export const CodingProblemListBase = (input: CodingProblemListProps) => {
     const isLoading = input.state === "pending"
-    const showsNotice = input.state === "empty" || input.state === "all-solved"
+    const showsNotice = input.state === "empty" || input.state === "all-solved" || input.state === "failed"
 
     if (showsNotice) {
         return (
             <EmptyNotice
                 props={{
-                    icon: input.state === "all-solved" ? "complete" : "practice",
+                    icon: input.state === "all-solved" ? "complete" : input.state === "failed" ? "retry" : "practice",
                     message: input.props.noticeMessage ?? "",
                     description: input.props.noticeDescription,
                     actionLabel: input.props.noticeActionLabel,

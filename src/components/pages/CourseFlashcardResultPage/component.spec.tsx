@@ -1,10 +1,10 @@
 /** @vitest-environment jsdom */
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { CourseFlashcardResultPageBase, type CourseFlashcardResultPageProps } from "./component"
+import { FlashcardResultBase, type FlashcardResultBlockProps } from "@/components/blocks/learn/FlashcardResult/component"
 
-const makeInput = (): CourseFlashcardResultPageProps => ({
-    state: "ready",
+const makeInput = (): FlashcardResultBlockProps => ({
+    blockState: "ready",
     data: {
         mode: "review",
         title: "Review complete",
@@ -33,12 +33,12 @@ const makeInput = (): CourseFlashcardResultPageProps => ({
 
 afterEach(cleanup)
 
-describe("CourseFlashcardResultPageBase", () => {
+describe("FlashcardResultBase", () => {
     it("renders the persisted score, breakdown, weak topics, and retry path", () => {
         const input = makeInput()
-        const { container } = render(<CourseFlashcardResultPageBase {...input} />)
+        const { container } = render(<FlashcardResultBase {...input} />)
 
-        expect(container.querySelector("[data-node=course-flashcard-result-page]")).toBeTruthy()
+        expect(container.querySelector("[data-node=flashcard-result-workspace]")).toBeTruthy()
         expect(container.querySelectorAll("[data-node=flashcard-result-stat]")).toHaveLength(4)
         expect(screen.getByText("75%")).toBeTruthy()
         expect(screen.getByText("Redis")).toBeTruthy()
@@ -48,8 +48,8 @@ describe("CourseFlashcardResultPageBase", () => {
     })
 
     it("uses the load retry action for a failed projection", () => {
-        const input = { ...makeInput(), state: "failed" as const }
-        render(<CourseFlashcardResultPageBase {...input} />)
+        const input = { ...makeInput(), blockState: "failed" as const }
+        render(<FlashcardResultBase {...input} />)
 
         fireEvent.click(screen.getByRole("button", { name: "Try again" }))
         expect(input.on.retryLoad).toHaveBeenCalledOnce()

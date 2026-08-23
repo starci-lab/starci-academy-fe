@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import type { PlaygroundStep } from "@/modules/api/graphql/queries/query-playground"
-import { CoursePlaygroundSessionPageBase, type CoursePlaygroundSessionPageProps } from "./component"
+import { PlaygroundSessionBase as CoursePlaygroundSessionPageBase, type PlaygroundSessionBaseProps as CoursePlaygroundSessionPageProps } from "@/components/blocks/learn/PlaygroundSession/component"
 
 /**
  * What these tests guard: progress in this workspace belongs to the server. The verify action is
@@ -56,7 +56,7 @@ describe("CoursePlaygroundSessionPageBase", () => {
     it("titles the workspace by the selected step and shows the command and hint it needs", () => {
         const { container } = draw("live")
 
-        expect(container.querySelector("[data-node=\"course-playground-session-page\"]")).not.toBeNull()
+        expect(container.querySelector("[data-node=\"course-playground-session-workspace\"]")).not.toBeNull()
         expect(screen.getByRole("heading", { name: "Run a container" })).toBeInTheDocument()
         expect(screen.getByText("docker run -it alpine")).toBeInTheDocument()
         expect(screen.getByText("Open a terminal on the paired machine.")).toBeInTheDocument()

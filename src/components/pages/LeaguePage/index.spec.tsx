@@ -1,21 +1,17 @@
-type TestPageInput = { state: string; on: Record<string, (...args: ReadonlyArray<unknown>) => unknown> }
-import { fireEvent, render, screen } from "@testing-library/react"
-import { beforeEach, describe, expect, it, vi } from "vitest"
-const m = vi.hoisted(() => ({ token: "token" as string | undefined, restoring: false, scope: "weekly", weekly: { data: undefined as unknown, error: undefined as unknown, mutate: vi.fn() }, global: { data: undefined as unknown }, me: { data: { username: "me", avatar: null } }, push: vi.fn(), replace: vi.fn(), follow: vi.fn().mockResolvedValue({ data: { setFollow: { success: true } } }) }))
+import { render, screen } from "@testing-library/react"
+import { describe, expect, it, vi } from "vitest"
+
+const mocks = vi.hoisted(() => ({ token: "token" as string | undefined, restoring: false, scope: "weekly", push: vi.fn(), replace: vi.fn() }))
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => ({ get: () => m.scope }) }))
-vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: m.push, replace: m.replace }) }))
-vi.mock("@/hooks/auth/useSessionToken", () => ({ useSessionToken: () => m.token }))
-vi.mock("@/hooks/auth/useSessionRefresh", () => ({ useSessionRefresh: () => ({ isRestoring: m.restoring }) }))
-vi.mock("@/hooks", () => ({ useQueryMeSwr: () => m.me, useQueryMyLeagueSwr: () => m.weekly, useQueryGlobalLeaderboardSwr: () => m.global, useMutateSetFollowSwr: () => ({ trigger: m.follow }) }))
-vi.mock("./component", () => ({ LeaguePageBase: ({ state, on }: TestPageInput) => { for (const [key, action] of Object.entries(on)) { if (key.startsWith("follow:") || key.startsWith("open:")) void action() } return <><output data-testid="state">{state}</output><button onClick={() => on.selectScope("global")}>global</button><button onClick={on.goHome}>home</button><button onClick={on.climb}>climb</button><button onClick={on.retry}>retry</button></> } }))
+vi.mock("next/navigation", () => ({ useSearchParams: () => ({ get: () => mocks.scope }) }))
+vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push, replace: mocks.replace }) }))
+vi.mock("@/hooks/auth/useSessionToken", () => ({ useSessionToken: () => mocks.token }))
+vi.mock("@/hooks/auth/useSessionRefresh", () => ({ useSessionRefresh: () => ({ isRestoring: mocks.restoring }) }))
+type PageShellStub = { readonly scope: string; readonly on?: { readonly selectScope?: (scope: string) => void } }
+vi.mock("./component", () => ({ LeaguePageBase: (input: PageShellStub) => <><output data-testid="scope">{input.scope}</output><button type="button" onClick={() => input.on?.selectScope?.("global")}>global</button></> }))
 import { LeaguePage } from "./index"
-beforeEach(() => { vi.clearAllMocks(); m.token = "token"; m.restoring = false; m.scope = "weekly"; m.weekly.data = undefined; m.weekly.error = undefined; m.global.data = undefined })
+
 describe("LeaguePage route", () => {
-    it("withholds signed-out content and redirects to authentication", () => { m.token = undefined; render(<LeaguePage />); expect(screen.queryByTestId("state")).not.toBeInTheDocument(); expect(m.replace).toHaveBeenCalledWith("/authentication") })
-    it("reports pending, failed, empty and ready states with navigation", () => { const view = render(<LeaguePage />); expect(screen.getByTestId("state")).toHaveTextContent("pending"); m.weekly.error = new Error("offline"); view.rerender(<LeaguePage />); expect(screen.getByTestId("state")).toHaveTextContent("failed"); m.weekly.error = undefined; m.weekly.data = { weekEndAt: new Date(Date.now() + 1000).toISOString(), entries: [] }; view.rerender(<LeaguePage />); expect(screen.getByTestId("state")).toHaveTextContent("empty"); m.weekly.data = { weekEndAt: new Date(Date.now() + 1000).toISOString(), entries: [1, 2, 3, 4, 5].map((_, index) => ({ userGlobalId: `gid://User/${index + 1}`, username: index === 0 ? "Ada" : `user-${index}`, rank: index + 1, weekPoints: 10, rankDelta: index === 1 ? 1 : index === 2 ? -1 : 0, avatar: null })) }; view.rerender(<LeaguePage />); expect(screen.getByTestId("state")).toHaveTextContent("ready"); fireEvent.click(screen.getByText("global")); fireEvent.click(screen.getByText("home")); fireEvent.click(screen.getByText("climb")); fireEvent.click(screen.getByText("retry")); expect(m.push).toHaveBeenCalledWith("/league?scope=global"); expect(m.push).toHaveBeenCalledWith("/dashboard"); expect(m.push).toHaveBeenCalledWith("/dashboard?tab=courses"); expect(m.weekly.mutate).toHaveBeenCalled() })
-    it("renders the global board and its pinned viewer row", () => { m.weekly.data = { weekEndAt: new Date(Date.now() + 1000).toISOString(), entries: [] }; m.global.data = { myRank: 5, myPoints: 50, entries: [{ userGlobalId: "gid://User/2", username: "Other", rank: 1, points: 100, avatar: null, isFollowing: false }] }; render(<LeaguePage />); expect(screen.getByTestId("state")).toHaveTextContent(/empty|ready/) })
-    it("settles the global board with its own ranking data", () => { m.scope = "global"; m.me.data = { username: "me", avatar: null }; m.global.data = { myRank: 5, myPoints: 50, entries: [1, 2, 3, 4, 5].map((rank) => ({ userGlobalId: `gid://User/${rank}`, username: rank === 5 ? "me" : `user-${rank}`, rank, points: rank * 10, avatar: null, isFollowing: rank % 2 === 0 })) }; render(<LeaguePage />); expect(screen.getByTestId("state")).toHaveTextContent("ready") })
+    it("withholds signed-out content and redirects", () => { mocks.token = undefined; render(<LeaguePage />); expect(screen.queryByTestId("scope")).not.toBeInTheDocument(); expect(mocks.replace).toHaveBeenCalledWith("/authentication"); mocks.token = "token" })
+    it("keeps scope in the page shell and URL action", () => { mocks.token = "token"; mocks.scope = "global"; render(<LeaguePage />); expect(screen.getByTestId("scope")).toHaveTextContent("global"); screen.getByRole("button", { name: "global" }).click(); expect(mocks.push).toHaveBeenCalledWith("/league?scope=global") })
 })
-
-

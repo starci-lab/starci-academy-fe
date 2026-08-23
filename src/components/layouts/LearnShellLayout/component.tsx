@@ -1,13 +1,10 @@
+import { DrawerBranch } from "@/components/branches/DrawerBranch"
 import { Tree } from "@/components/branches/Tree"
-import { CollapsibleRail } from "@/components/branches/CollapsibleRail"
 import { defineContractComponent, defineContractProjection, defineLeafComponent } from "@/components/contracts/props"
-import {
-    learnSpine,
-    learnSpineCollapsed,
-    type LearnSpineActions,
-    type LearnSpineData,
-} from "@/components/blocks/learn/LearnSpine/component"
+import { LearnSpine } from "@/components/blocks/learn/LearnSpine"
+import { Button } from "@/components/leaves/Button"
 import { NavLink } from "@/components/leaves/NavLink"
+import { Text } from "@/components/leaves/Text"
 import type { IconName } from "@/components/leaves/Icon"
 import type { ReactNode } from "react"
 
@@ -50,8 +47,6 @@ export type LearnMobileView =
 
 /** What the frame draws. */
 export type LearnShellLayoutData = {
-    /** Everything the learner can do in this course. */
-    readonly spine: LearnSpineData
     /**
      * What the bottom bar offers below the rail's breakpoint.
      *
@@ -61,20 +56,26 @@ export type LearnShellLayoutData = {
      * which is what the reference product settled on and why its reader has a tab bar of its own.
      */
     readonly mobileTabs?: ReadonlyArray<LearnMobileTab>
+    /** The compact course location that opens the persistent spine as a left drawer. */
+    readonly mobileCourseNavigation?: { readonly label: string; readonly currentLabel: string; readonly isOpen: boolean }
     /** Focused work sessions remove course furniture and give the routed surface the full frame. */
     readonly isFullBleed: boolean
 }
 
 /** What the frame reports. */
-export type LearnShellLayoutActions = LearnSpineActions & {
+export type LearnShellLayoutActions = {
     readonly openMobileTab?: (id: string) => void
+    readonly openCourseNavigation?: () => void
+    readonly closeCourseNavigation?: () => void
 }
 
 /** Props for {@link LearnShellLayoutBase}. */
 export type LearnShellLayoutProps = {
-    readonly props: LearnShellLayoutData
+    readonly displayId: string
+    readonly mobileTabs?: ReadonlyArray<LearnMobileTab>
+    readonly mobileCourseNavigation?: LearnShellLayoutData["mobileCourseNavigation"]
+    readonly isFullBleed: boolean
     readonly on?: LearnShellLayoutActions
-    readonly isLoading?: boolean
     /** The routed surface - the one thing the frame does not decide. */
     readonly surface: ReactNode
 }
@@ -85,7 +86,7 @@ export type LearnShellLayoutProps = {
  * @param input - {@link LearnShellLayoutProps}
  */
 export const LearnShellLayoutBase = (input: LearnShellLayoutProps) => {
-    const mobileTabs = input.props.mobileTabs ?? []
+    const mobileTabs = input.mobileTabs ?? []
     const mobileBar = mobileTabs.length === 0 ? {} : {
         bar: defineContractComponent("learn-mobile-tab-bar", {
             tab: mobileTabs.map((tab) => defineLeafComponent("nav-link", { kind: "tab" }, () => (
@@ -99,40 +100,38 @@ export const LearnShellLayoutBase = (input: LearnShellLayoutProps) => {
     const body = defineContractComponent("learn-routed-body", {
         page: defineLeafComponent("page", {}, () => <>{input.surface}</>),
     })
-    const expandedSpine = learnSpine({ props: input.props.spine, on: input.on, isLoading: input.isLoading ?? false })
-    const collapsedSpine = learnSpineCollapsed({ props: input.props.spine, on: input.on, isLoading: input.isLoading ?? false })
-    const projectedRail = () => (
-        <CollapsibleRail
-            isCollapsed={input.props.spine.isCollapsed}
-            expanded={expandedSpine}
-            collapsed={collapsedSpine}
-        />
-    )
-    if (input.props.spine.isCollapsed) {
-        return (
+    const mobileCourseNavigation = input.mobileCourseNavigation === undefined ? undefined : defineContractComponent("learn-mobile-course-map-row", {
+        action: defineLeafComponent("button", {}, () => (
+            <Button props={{ label: input.mobileCourseNavigation?.label ?? "", variant: "outline", size: "sm", icon: "course" }} on={{ press: input.on?.openCourseNavigation }} />
+        )),
+        fact: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+            <Text props={{ content: input.mobileCourseNavigation?.currentLabel ?? "", size: "xs", tone: "muted" }} />
+        )),
+    })
+    return (
+        <>
             <Tree
-                contract="learn-shell-frame-collapsed"
-                render={defineContractComponent("learn-shell-frame-collapsed", {
-                    ...(input.props.isFullBleed ? {} : {
-                        spine: defineContractProjection("learn-course-navigation-rail-collapsed", projectedRail),
-                    }),
+                contract="learn-shell-frame"
+                render={defineContractComponent("learn-shell-frame", {
+                    ...(input.isFullBleed ? {} : { spine: defineContractProjection("learn-course-navigation-rail", () => <LearnSpine displayId={input.displayId} />) }),
+                    mobileCourseNavigation,
                     body,
                     ...mobileBar,
                 })}
             />
-        )
-    }
-    return (
-        <Tree
-            contract="learn-shell-frame"
-            render={defineContractComponent("learn-shell-frame", {
-                ...(input.props.isFullBleed ? {} : {
-                    spine: defineContractProjection("learn-course-navigation-rail", projectedRail),
-                }),
-                body,
-                ...mobileBar,
-            })}
-        />
+            {input.mobileCourseNavigation === undefined ? null : (
+                <DrawerBranch
+                    isOpen={input.mobileCourseNavigation.isOpen}
+                    placement="left"
+                    title={input.mobileCourseNavigation.label}
+                    onDismiss={() => input.on?.closeCourseNavigation?.()}
+                    contract="learn-course-navigation-drawer-host"
+                    render={defineContractComponent("learn-course-navigation-drawer-host", {
+                        navigation: defineLeafComponent("page", {}, () => <LearnSpine displayId={input.displayId} presentation="drawer" onNavigate={input.on?.closeCourseNavigation} />),
+                    })}
+                />
+            )}
+        </>
     )
 }
 

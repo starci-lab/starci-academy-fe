@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { Tree } from "@/components/branches/Tree"
-import { learnSpine, learnSpineCollapsed, type LearnSpineActions, type LearnSpineData } from "./component"
+import { LearnSpineBase, learnSpine, learnSpineCollapsed, type LearnSpineActions, type LearnSpineData } from "./component"
 
 /**
  * What these tests guard: the spine is the only thing a learner navigates a course by, so the
@@ -173,5 +173,17 @@ describe("learnSpine", () => {
         expect(screen.getByText("Your path")).toBeInTheDocument()
         expect(screen.getByText("Pick up where you left off")).toBeInTheDocument()
         expect(screen.queryByText("62%")).not.toBeInTheDocument()
+    })
+
+    it("moves the same grouped destinations into the narrow drawer without rail controls", () => {
+        const openRow = vi.fn()
+        const { container } = render(<LearnSpineBase isCollapsed={false} presentation="drawer" props={base} on={{ openRow }} />)
+
+        expect(container.querySelector("[data-node=learn-course-navigation-drawer]")).toBeTruthy()
+        expect(screen.getByText("Your path")).toBeInTheDocument()
+        expect(screen.getByRole("option", { name: "Home" })).toBeInTheDocument()
+        fireEvent.click(screen.getByText("Flashcards"))
+        expect(openRow).toHaveBeenCalledWith("flashcards")
+        expect(screen.queryByRole("button", { name: "Collapse" })).not.toBeInTheDocument()
     })
 })

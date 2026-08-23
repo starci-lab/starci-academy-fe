@@ -16,13 +16,13 @@ an existing product meaning deliberately or receives a unique row here and match
 
 | Placement role | Heroicons family | Rendered size | Use when |
 |---|---|---:|---|
-| `heading` | `@starci/heroicons/24/outline` | `size-6` | The glyph introduces a heading or empty region |
-| `leading` | `@starci/heroicons/24/outline` | `size-5` | The glyph leads navigation, a row, field, switch or icon control |
-| `chip` | `@starci/heroicons/16/solid` | `size-4` | The glyph sits inside a compact chip or text action |
+| `heading` | `@heroicons/react/24/outline` or a missing cut from `@starci/heroicons/24/outline` | `size-6` | The glyph introduces a heading or empty region |
+| `leading` | `@heroicons/react/24/outline` or a missing cut from `@starci/heroicons/24/outline` | `size-5` | The glyph leads navigation, a row, field, switch or icon control |
+| `chip` | `@heroicons/react/16/solid` or a missing cut from `@starci/heroicons/16/solid` | `size-4` | The glyph sits inside a compact chip or text action |
 
-`@starci/heroicons` re-exports the approved upstream Heroicons cuts and owns reviewed product
-extensions when the upstream catalogue has no faithful meaning. Product source imports only this
-package through the `Icon` leaf; it never draws a substitute at the call site.
+Use upstream Heroicons directly when the drawing exists. `@starci/heroicons` contains reviewed
+custom cuts only and never re-exports upstream. Product callers still go through the `Icon` leaf;
+they never choose either package or draw a substitute at the call site.
 
 Role never changes the feature mapping. `course` remains `BookOpenIcon` in every placement; the
 icon leaf selects the outline or micro drawing from the role.
@@ -43,6 +43,7 @@ icon leaf selects the outline or micro drawing from the role.
 | `hidePassword` | Hide a visible password | `EyeSlashIcon` | A crossed eye names returning a visible secret to its masked state |
 | `code` | Verification/security code | `ShieldCheckIcon` | The checked shield distinguishes verification from programming |
 | `complete` | Completed/successful state | `CheckCircleIcon` | A checked circle names completion across authentication, quests and progress without tying the glyph to one feature |
+| `incomplete` | Explicit unread/incomplete state | `XCircleIcon` | The crossed circle states that the item is not complete, distinct from the neutral pending ring |
 | `pending` | Incomplete/pending progress | `CircleIcon` | The unfinished state is the exact empty twin of completion: keep Heroicons' outer `CheckCircleIcon` path and remove only its inner check |
 | `signIn` | Enter account/session | `ArrowRightOnRectangleIcon` | The arrow entering a boundary names session entry |
 | `signUp` | Create an account | `UserPlusIcon` | A person with a plus names account creation |
@@ -82,6 +83,10 @@ icon leaf selects the outline or micro drawing from the role.
 | `mockInterview` | Course mock interview | `MockInterviewIcon` | A live microphone names spoken interview practice rather than generic talent discovery |
 | `foundations` | Course foundations | `FoundationsIcon` | Stacked conceptual layers name durable prerequisites rather than catalogue exploration |
 | `playground` | Executable course playground | `PlaygroundIcon` | A bounded terminal prompt names a runnable learning environment rather than credential verification |
+| `rankFirst` | First leaderboard place | `FirstPlaceMedalIcon` | The authored numeral keeps first place distinct without another artwork vendor |
+| `rankSecond` | Second leaderboard place | `SecondPlaceMedalIcon` | The authored numeral keeps second place distinct without another artwork vendor |
+| `rankThird` | Third leaderboard place | `ThirdPlaceMedalIcon` | The authored numeral keeps third place distinct without another artwork vendor |
+| `rankOther` | Leaderboard place below third | `TrophyIcon` | Upstream already has a faithful generic competition trophy |
 
 ## Selection procedure
 
@@ -94,7 +99,7 @@ named entry points and large empty-region headings may retain their reference-ba
 1. Find the product feature in the mapping table.
 2. Reuse its `IconName`; never import the listed Heroicon at the call site.
 3. Choose `heading`, `leading` or `chip` from placement, not personal size preference.
-4. If no feature matches, choose an upstream re-export first; when none is semantically faithful,
+4. If no feature matches, choose an upstream Heroicon first; when none is semantically faithful,
    add reviewed 24px outline and 16px solid cuts to `@starci/heroicons` and document the meaning here.
 5. Update `IconName` and `GLYPHS` in the same change. The parity test rejects drift and duplicate
    Heroicons across different meanings.

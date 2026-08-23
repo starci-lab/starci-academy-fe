@@ -1,4 +1,4 @@
-import { Article } from "@/components/leaves/Article"
+import { Article } from "@/components/branches/Article"
 import { Badge } from "@/components/leaves/Badge"
 import { ExtendedTabs } from "@/components/leaves/ExtendedTabs"
 import { Heading } from "@/components/leaves/Heading"

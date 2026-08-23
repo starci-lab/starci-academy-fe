@@ -1,10 +1,18 @@
 import { Card } from "@heroui/react"
 import { Tree } from "@/components/branches/Tree"
+import { Heading } from "@/components/leaves/Heading"
 import type { ContractKey } from "@/components/contracts"
-import type { ContractBranchProps } from "@/components/contracts/props"
+import {
+    defineContractComponent,
+    defineContractProjection,
+    defineLeafComponent,
+    type ContractBranchProps,
+} from "@/components/contracts/props"
 
 /** Props for a card whose complete content is one typed form-oriented contract. */
-export type SurfaceFormCardProps<K extends ContractKey> = ContractBranchProps<K>
+export type SurfaceFormCardProps<K extends ContractKey> = ContractBranchProps<K> & {
+    readonly props?: { readonly label?: string }
+}
 
 /**
  * Draw one bounded form surface without adding a title or another layout node around its content.
@@ -19,15 +27,29 @@ export type SurfaceFormCardProps<K extends ContractKey> = ContractBranchProps<K>
  * @param input - {@link SurfaceFormCardProps}
  */
 export const SurfaceFormCard = <const K extends ContractKey>({
+    props = {},
     contract,
     render,
-}: SurfaceFormCardProps<K>) => (
+}: SurfaceFormCardProps<K>) => {
+    const surface = (
         <Card className="p-0" data-component="SurfaceFormCard">
             <Card.Content className="p-0" data-component="SurfaceFormCardBody">
                 <Tree contract={contract} render={render} />
             </Card.Content>
         </Card>
     )
+    if (props.label === undefined) return surface
+    return (
+        <Tree contract="label-row-over-card" render={defineContractComponent("label-row-over-card", {
+            label: defineContractComponent("title-with-end-action", {
+                title: defineLeafComponent("heading", {}, () => (
+                    <Heading props={{ content: props.label, level: 3 }} />
+                )),
+            }),
+            body: defineContractProjection(contract, () => surface),
+        })} />
+    )
+}
 
 /** Source-level tier marker for the form surface branch. */
 export const meta = { shape: "branch", world: "pure" } as const

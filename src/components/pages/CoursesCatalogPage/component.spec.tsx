@@ -1,6 +1,10 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { CoursesCatalogPageBase, type CoursesCatalogPageLabels } from "./component"
+import { CoursesCatalogBlockBase as RawCoursesCatalogBlockBase, type CoursesCatalogPageLabels } from "@/components/blocks/courses/CoursesCatalogBlock/component"
+type TestCatalogProps = { readonly state: string; readonly props: Record<string, unknown>; readonly on?: Record<string, (...args: Array<never>) => void> }
+const CoursesCatalogBlockBase = ({ state, props, on }: TestCatalogProps) => (
+    <RawCoursesCatalogBlockBase blockState={state as never} props={props as never} on={on} />
+)
 
 /**
  * What these tests guard.
@@ -67,11 +71,11 @@ const discover = [
     { id: "course-2", title: "TypeScript Deep Dive", price: "1.200.000 ₫", viewLabel: "Xem khóa học" },
 ]
 
-describe("CoursesCatalogPageBase", () => {
+describe("CoursesCatalogBlockBase", () => {
     it("keeps the catalog shell visible and renders EmptyNotice when there are no courses", () => {
         const recover = vi.fn()
         const { container } = render(
-            <CoursesCatalogPageBase
+            <CoursesCatalogBlockBase
                 state="empty"
                 props={{
                     labels,
@@ -102,7 +106,7 @@ describe("CoursesCatalogPageBase", () => {
         const changeView = vi.fn()
         const goHome = vi.fn()
         const { container } = render(
-            <CoursesCatalogPageBase
+            <CoursesCatalogBlockBase
                 state="ready"
                 props={{ labels, countLabel: "2 khóa học", hasOwned: true, discover, page: 1, totalPages: 3 }}
                 on={{ changePage, changeView, goHome }}
@@ -129,7 +133,7 @@ describe("CoursesCatalogPageBase", () => {
         const view = vi.fn()
         const priceDetail = vi.fn()
         const { container } = render(
-            <CoursesCatalogPageBase
+            <CoursesCatalogBlockBase
                 state="ready"
                 props={{ labels, view: "line", discover, page: 2, totalPages: 2 }}
                 on={{ "view:course-1": view, "priceDetail:course-1": priceDetail }}
@@ -150,7 +154,7 @@ describe("CoursesCatalogPageBase", () => {
 
     it("rests three discover cards and withholds the pager until there are results to bound", () => {
         const { container } = render(
-            <CoursesCatalogPageBase state="pending" props={{ labels, hasOwned: true, page: 1, totalPages: 4 }} />,
+            <CoursesCatalogBlockBase state="pending" props={{ labels, hasOwned: true, page: 1, totalPages: 4 }} />,
         )
 
         expect(screen.getAllByTestId("catalog-card")).toHaveLength(3)
@@ -163,7 +167,7 @@ describe("CoursesCatalogPageBase", () => {
 
     it("rests three joined rows when the line layout is chosen before the first page lands", () => {
         const { container } = render(
-            <CoursesCatalogPageBase state="pending" props={{ labels, view: "line" }} />,
+            <CoursesCatalogBlockBase state="pending" props={{ labels, view: "line" }} />,
         )
 
         expect(container.querySelector("[data-node=\"catalog-card-list\"]")).not.toBeNull()
@@ -174,7 +178,7 @@ describe("CoursesCatalogPageBase", () => {
 
     it("keeps a filtered-empty notice wordless rather than inventing a sentence", () => {
         const { container } = render(
-            <CoursesCatalogPageBase state="filtered-empty" props={{ labels, query: "khong-co", discover: [] }} />,
+            <CoursesCatalogBlockBase state="filtered-empty" props={{ labels, query: "khong-co", discover: [] }} />,
         )
 
         expect(container.querySelector("[data-node=\"empty-notice-stack\"]")).not.toBeNull()
@@ -185,7 +189,7 @@ describe("CoursesCatalogPageBase", () => {
     it("reports a search from the toolbar that governs both groups", () => {
         const search = vi.fn()
         const { container } = render(
-            <CoursesCatalogPageBase state="ready" props={{ labels, discover, totalPages: 1 }} on={{ search }} />,
+            <CoursesCatalogBlockBase state="ready" props={{ labels, discover, totalPages: 1 }} on={{ search }} />,
         )
 
         fireEvent.change(screen.getByRole("searchbox", { name: "Tìm khóa học" }), { target: { value: "system" } })

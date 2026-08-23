@@ -1,46 +1,14 @@
 "use client"
 import { useState } from "react"
-import { useLocale, useTranslations } from "next-intl"
-import { useSWRConfig } from "swr"
+import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import {
-    useMutateAddToCartSwr,
-    useMutateCoursesCheckoutSwr,
-    useMutateRemoveFromCartSwr,
-    useMutateStartTrialSwr,
     useQueryCourseReviewsSwr,
-    useQueryCoursePricePreviewSwr,
     useQueryCourseSwr,
-    useQueryMyCartSwr,
 } from "@/hooks"
-import { CoursePriceOverlay } from "@/components/overlays/courses/CoursePriceOverlay"
-import { isPersonalPrice } from "@/modules/utils/course-price"
-import { useSessionToken } from "@/hooks/auth/useSessionToken"
-import { QUERY_MY_CART_SWR_KEY } from "@/hooks/swr/useQueryMyCartSwr"
 import { CourseDetailPageBase, type CourseDetailSection } from "./component"
 import type { CourseDetail, CourseModule } from "@/modules/api/graphql/queries/types/course"
-import type { CoursePricePreview } from "@/modules/api/graphql/queries/types/course-price-preview"
 
-type DetailTranslator = (key: string, values?: Record<string, string | number>) => string
-type OpenPhase = { readonly slotAvailable: number; readonly phase: string }
-
-const scarcityLabelOf = (openPhase: OpenPhase | undefined, t: DetailTranslator) => {
-    if (openPhase === undefined || openPhase.slotAvailable <= 0) return undefined
-    return t("scarcity", { count: openPhase.slotAvailable, phase: t(`phase.${openPhase.phase}`) })
-}
-
-const cartLabelOf = (enrolled: boolean | null | undefined, isPaid: boolean, isInCart: boolean, tCart: DetailTranslator, tCatalog: DetailTranslator) => {
-    if (enrolled === true || !isPaid) return undefined
-    return isInCart ? tCart("remove") : tCatalog("addToCart")
-}
-
-const railStateOf = (pricePending: boolean, checkingOut: boolean, trialing: boolean, changingCart: boolean) => {
-    if (pricePending) return "price-pending" as const
-    if (checkingOut) return "checking-out" as const
-    if (trialing) return "trialing" as const
-    if (changingCart) return "adding" as const
-    return "ready" as const
-}
 
 /**
  * The connected half: resolve one course and hand the presentational half a settled situation.
@@ -66,13 +34,6 @@ export interface CourseDetailPageProps {
     displayId: string
 }
 
-const payablePriceOf = (personalPrice: CoursePricePreview | undefined, openPrice: number | undefined, originalPrice: number) => personalPrice?.discountedPriceVnd ?? openPrice ?? originalPrice
-const listPriceOf = (personalPrice: CoursePricePreview | undefined, originalPrice: number) => personalPrice?.originalPriceVnd ?? originalPrice
-const discountPercentOf = (personalPrice: CoursePricePreview | undefined, payable: number, listPrice: number) => {
-    if (personalPrice !== undefined) return personalPrice.discountPercent ?? 0
-    if (payable >= listPrice) return 0
-    return Math.round((1 - payable / listPrice) * 100)
-}
 const sectionTargetOf = (section: CourseDetailSection, sections: NodeListOf<HTMLElement>) => {
     if (section === "overview") return document.querySelector<HTMLElement>("[data-node=\"course-hero-heading\"]")
     if (section === "curriculum") return sections.item(2)
@@ -95,27 +56,13 @@ const byOrder = <T extends { orderIndex: number }>(rows: ReadonlyArray<T>) =>
  */
 export const CourseDetailPage = (input: CourseDetailPageProps) => {
     const t = useTranslations("courses.detail")
-    const tCourses = useTranslations("courses")
-    const tCatalog = useTranslations("courses.catalog")
-    const tCart = useTranslations("cart")
-    const locale = useLocale()
     const router = useRouter()
     const [selectedSection, setSelectedSection] = useState<CourseDetailSection>("overview")
-    const [isPriceDetailOpen, setIsPriceDetailOpen] = useState(false)
-    const { mutate } = useSWRConfig()
-    const sessionToken = useSessionToken()
     const query = useQueryCourseSwr({ displayId: input.displayId })
-    const cartQuery = useQueryMyCartSwr()
-    const adding = useMutateAddToCartSwr(query.data?.id)
-    const removing = useMutateRemoveFromCartSwr(query.data?.id)
-    const checkout = useMutateCoursesCheckoutSwr()
-    const trial = useMutateStartTrialSwr(query.data?.id)
     // The rating is a second request on purpose: it is public, shared by every reader and
     // invalidated by a different event than the course itself, so folding it into the course
     // query would make one cache entry answer two questions that change at different times.
     const reviewQuery = useQueryCourseReviewsSwr(query.data?.id)
-    const pricePreview = useQueryCoursePricePreviewSwr(query.data?.id)
-    const money = new Intl.NumberFormat(locale, { style: "currency", currency: "VND", maximumFractionDigits: 0 })
 
     const labels = {
         breadcrumbLabel: t("breadcrumbLabel"),
@@ -139,35 +86,17 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
     if (query.error !== undefined && query.data === undefined) {
         return (
             <CourseDetailPageBase
-                state="failed"
-                props={{ labels, noticeMessage: t("failed"), noticeActionLabel: t("retry") }}
+                pageState="failed" props={{ labels, noticeMessage: t("failed"), noticeActionLabel: t("retry") }}
                 on={{ retry: () => { void query.mutate() } }}
+                displayId={input.displayId}
             />
         )
     }
-    if (query.data === undefined) return <CourseDetailPageBase state="pending" props={{ labels }} />
-    if (query.data === null) return <CourseDetailPageBase state="not-found" props={{ labels, noticeMessage: t("notFound") }} />
+    if (query.data === undefined) return <CourseDetailPageBase displayId={input.displayId} pageState="pending" props={{ labels }} />
+    if (query.data === null) return <CourseDetailPageBase displayId={input.displayId} pageState="not-found" props={{ labels, noticeMessage: t("notFound") }} />
 
     const course: CourseDetail = query.data
     const modules = byOrder(course.modules ?? [])
-    const phases = byOrder(course.pricingPhases ?? [])
-    const openPhase = phases.find((phase) => phase.phase === course.currentPhase)
-
-    // The payable price IS the open phase's price. Falling back to the list price when no phase is
-    // open is not a guess: a course with no phase ladder sells at its list price, which is the same
-    // number the ladder would have shown.
-    const preview = pricePreview.data ?? undefined
-    const personalPrice = isPersonalPrice(preview)
-    // `discountedPriceVnd` is the one field the personal-price rule itself dereferenced, so a
-    // preview that reached here carries it. The OTHER two are not guaranteed: the server answers
-    // some previews with only the two fields the rule reads, so their fallbacks still fire.
-    const payable = payablePriceOf(personalPrice ? preview : undefined, openPhase?.price, course.originalPrice)
-    const listPrice = personalPrice ? listPriceOf(preview, course.originalPrice) : course.originalPrice
-    const isPaid = payable > 0
-    const isInCart = (cartQuery.data ?? []).some((row) => row.courseId === course.id)
-    const hasDiscount = payable < listPrice
-    const discountPercent = discountPercentOf(personalPrice ? preview : undefined, payable, listPrice)
-
     const selectSection = (section: CourseDetailSection) => {
         setSelectedSection(section)
         const sections = document.querySelectorAll<HTMLElement>("[data-node=\"course-section\"]")
@@ -178,8 +107,8 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
     return (
         <>
             <CourseDetailPageBase
-                state="ready"
-                props={{
+                displayId={input.displayId}
+                pageState="ready" props={{
                     labels,
                     selectedSection,
                     title: course.title,
@@ -224,8 +153,8 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
                     valueProps: byOrder(course.valuePropositions ?? []).map((proposition) => proposition.text),
                     faqs: byOrder(course.qnas ?? []).map((faq) => ({
                         id: faq.id,
-                        question: faq.question,
-                        answer: faq.answer,
+                        title: faq.question,
+                        description: faq.answer,
                     })),
                     // Ordered by the backend and read that way here: a learner who lacks the first
                     // requirement cannot judge the second, so arrival order is not good enough.
@@ -246,113 +175,30 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
                         id: `prerequisite-${index + 1}`,
                         requirement: row.text,
                     })),
-                    modules: modules.map((module) => {
-                        const previews = byOrder(module.previewContents ?? [])
-                        return {
-                            id: module.id,
-                            title: module.title,
-                            level: module.contentTier,
-                            levelLabel: t(`tier.${module.contentTier}`),
-                            previewLabel: previews.length === 0 ? undefined : t("previewCount", { count: previews.length }),
-                            // A preview bullet IS the thing the disclosure reveals, and every one of
-                            // them is previewable by definition - that is what makes it a preview.
-                            lessons: previews.map((preview) => ({ id: preview.id, title: preview.text, isPreview: true })),
-                        }
-                    }),
-                    rail: {
-                        intent: {
-                            intentTabsLabel: t("intentTabsLabel"),
-                            purchaseModeLabel: t("purchaseModeLabel"),
-                            trialModeLabel: t("trialModeLabel"),
-                            purchaseTitle: t("purchaseTitle"),
-                            purchaseDescription: t("purchaseDescription"),
-                            trialTitle: t("trialTitle"),
-                            trialDescription: t("trialDescription"),
-                            phaseDisclosureLabel: t("phaseDisclosureLabel"),
-                        },
-                        coverUrl: course.coverImageUrl ?? null,
-                        title: course.title,
-                        price: money.format(payable),
-                        originalPrice: hasDiscount ? money.format(listPrice) : undefined,
-                        discountLabel: hasDiscount ? `−${discountPercent}%` : undefined,
-                        savingsLabel: hasDiscount ? t("savings", { amount: money.format(listPrice - payable) }) : undefined,
-                        priceDetailLabel: tCatalog("priceDetail"),
-                        scarcityLabel: scarcityLabelOf(openPhase, t),
-                        phases: phases.map((phase) => ({
-                            id: phase.id,
-                            name: t(`phase.${phase.phase}`),
-                            // The OPEN phase shows that it is open rather than repeating its price -
-                            // the price is already the headline above, and a ladder that restates it
-                            // reads as two prices.
-                            value: phase.phase === course.currentPhase ? t("phaseOpen") : money.format(phase.price),
-                            isActive: phase.phase === course.currentPhase,
+                    modules: modules.map((module) => ({
+                        id: module.id,
+                        title: module.title,
+                        level: module.contentTier,
+                        levelLabel: t(`tier.${module.contentTier}`),
+                        previewLabel: (module.previewContents ?? []).length === 0
+                            ? undefined
+                            : t("previewCount", { count: (module.previewContents ?? []).length }),
+                        summary: t("moduleSummary", {
+                            count: (module.contents ?? []).length,
+                            minutes: (module.contents ?? []).reduce((total, content) => total + content.minutesRead, 0),
+                        }),
+                        description: module.description,
+                        previews: byOrder(module.previewContents ?? []).map((preview) => ({
+                            id: preview.id,
+                            title: preview.text,
                         })),
-                        // An enrolled viewer continues; everyone else enrols. `isEnrolled` is null for a
-                        // guest, which is neither - and a guest is asked to enrol, because that is the
-                        // action the page can actually offer them.
-                        ctaLabel: course.isEnrolled === true ? t("continue") : t("enroll"),
-                        trialLabel: course.isEnrolled === true ? undefined : tCourses("trial"),
-                        cartLabel: cartLabelOf(course.isEnrolled, isPaid, isInCart, tCart, tCatalog),
-                        isInCart,
-                        enrolmentLabel: t("enrolled", { count: course.enrollmentCount }),
-                    },
-                    railState: railStateOf(pricePreview.isLoading, checkout.isMutating, trial.isMutating, adding.isMutating || removing.isMutating),
+                    })),
                 }}
                 on={{
-                    act: () => {
-                        if (course.isEnrolled === true) {
-                            router.push(`/courses/${course.displayId}/learn/content`)
-                            return
-                        }
-                        if (sessionToken === undefined) {
-                            router.push("/authentication")
-                            return
-                        }
-                        const here = window.location.href
-                        void checkout.trigger({
-                            courseIds: [course.id],
-                            paymentType: "payos",
-                            returnUrl: here,
-                            cancelUrl: here,
-                        }).then((result) => {
-                            const url = result?.data?.coursesCheckout?.data?.checkoutUrl
-                            if (typeof url === "string" && url !== "") window.location.assign(url)
-                        })
-                    },
-                    trial: () => {
-                        if (sessionToken === undefined) {
-                            router.push("/authentication")
-                            return
-                        }
-                        void trial.trigger({ courseId: course.id }).then((result) => {
-                            if (result?.data?.startTrial?.success !== true) return
-                            router.push(`/courses/${course.displayId}/learn/content`)
-                        }).catch(() => undefined)
-                    },
-                    addToCart: () => {
-                        if (sessionToken === undefined) {
-                            router.push("/authentication")
-                            return
-                        }
-                        const operation = isInCart
-                            ? removing.trigger({ courseId: course.id }).then((result) => result?.data?.removeFromCart?.success)
-                            : adding.trigger({ courseId: course.id }).then((result) => result?.data?.addToCart?.success)
-                        void operation.then((success) => {
-                            if (success !== true) return
-                            void mutate((key) => Array.isArray(key) && key[0] === QUERY_MY_CART_SWR_KEY[0])
-                        })
-                    },
-                    openPriceDetail: () => { setIsPriceDetailOpen(true) },
                     navigateHome: () => { router.push("/") },
                     navigateCourses: () => { router.push("/courses") },
                     selectSection,
                 }}
-            />
-            <CoursePriceOverlay
-                courseId={course.id}
-                title={course.title}
-                isOpen={isPriceDetailOpen}
-                onDismiss={() => { setIsPriceDetailOpen(false) }}
             />
         </>
     )

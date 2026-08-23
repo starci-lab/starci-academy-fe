@@ -32,6 +32,8 @@
  * every breakpoint. Pinned here to the same pixel values as the viewport scale.
  */
 @theme {
+    --font-sans: var(--starci-font-sans);
+
     --container-app-sm: 40rem;
     --container-app-md: 48rem;
     --container-app-lg: 64rem;
@@ -79,6 +81,10 @@
      */
     --height-document: 80dvh;
     --min-height-document: 32.5rem;
+}
+
+body {
+    font-family: var(--starci-font-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
 /* Original StarCi secondary-tab skin: the navbar owns the only baseline. */

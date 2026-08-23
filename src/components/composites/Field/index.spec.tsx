@@ -6,6 +6,28 @@ import { Field } from "."
 afterEach(cleanup)
 
 describe("Field", () => {
+    it("places stable guidance before the input and exposes all descriptive copy", () => {
+        const { container } = render(
+            <Field
+                props={{
+                    id: "repository",
+                    name: "repository",
+                    label: "Repository",
+                    description: "Paste the repository that contains your implementation.",
+                    hint: "Use an HTTPS GitHub URL.",
+                }}
+            />,
+        )
+
+        const input = screen.getByLabelText("Repository")
+        const description = screen.getByText("Paste the repository that contains your implementation.")
+        const hint = screen.getByText("Use an HTTPS GitHub URL.")
+        expect(description.compareDocumentPosition(input) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+        expect(input).toHaveAttribute("aria-describedby", "repository-description repository-hint")
+        expect(container.querySelector("[data-node=\"field-label-copy\"]")).toContainElement(description)
+        expect(container.querySelector("[data-node=\"field-control-hint\"]")).toContainElement(hint)
+    })
+
     it("uses the legacy eye control to reveal and hide a password", () => {
         render(
             <Field

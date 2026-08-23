@@ -2,10 +2,6 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { TopLearnersBase } from "./component"
 
-vi.mock("@iconify/react", () => ({
-    Icon: (props: Readonly<Record<string, unknown>>) => <span {...props} />,
-}))
-
 const frame = {
     label: "Top learners",
     seeMoreLabel: "View leaderboard",
@@ -26,7 +22,7 @@ describe("TopLearnersBase", () => {
             ],
         }} on={{ "follow:one": follow }} />)
         expect(container.querySelectorAll("[data-component=\"Avatar\"]")).toHaveLength(2)
-        expect(container.querySelector("[data-component=\"RankMark\"][icon=\"fluent-emoji-flat:trophy\"]")).toBeInTheDocument()
+        expect(container.querySelector("[data-component=\"RankMark\"][data-icon=\"rankOther\"]")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Follow" }))
         expect(follow).toHaveBeenCalledOnce()
         expect(screen.getAllByRole("button", { name: "Follow" })).toHaveLength(1)

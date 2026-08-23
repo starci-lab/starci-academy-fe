@@ -243,6 +243,7 @@
             "contentSignalLabel": "Knowledge library",
             "challengeSignalLabel": "Learning by doing",
             "previewCount": "{count} previews",
+            "moduleSummary": "{count, plural, one {# content} other {# contents}} · {minutes} min",
             "phaseOpen": "Open now",
             "savings": "Save {amount}",
             "scarcity": "{count} seats left in the {phase} phase",
@@ -749,7 +750,8 @@
             "lessonPremium": "Premium",
             "empty": "This course does not have authored lessons yet.",
             "failed": "Course content could not be loaded.",
-            "retry": "Try again"
+            "retry": "Try again",
+            "minutes": "{count} min"
         },
         "module": {
             "contents": "Lessons"
@@ -828,6 +830,18 @@
       "discussionFailed": "The discussion could not be loaded.",
       "discussionRetry": "Try again",
       "discussionMeta": "{date} · {replies, plural, =0 {No replies} one {# reply} other {# replies}}"
+        },
+        "project": {
+            "progressLabel": "Project progress",
+            "searchPlaceholder": "Search tasks...",
+            "searchLabel": "Search the personal project",
+            "searchClearLabel": "Clear search",
+            "failedMessage": "Could not load the project roadmap.",
+            "milestoneProgress": "{completed}/{total} tasks",
+            "milestoneProgressLabel": "Progress of {milestone}",
+            "taskScore": "{score}/{maximum} points",
+            "taskWorth": "{maximum} points",
+            "resizeRail": "Resize the project roadmap"
         },
         "foundations": {
             "title": "Foundations",
@@ -936,6 +950,7 @@
                 "lesson": "Lesson",
                 "outline": "This page"
             },
+            "mobileCourseNavigation": "Course navigation",
             "locked": "Locked",
             "collapse": "Collapse",
             "expand": "Expand",

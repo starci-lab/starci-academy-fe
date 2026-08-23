@@ -1,33 +1,30 @@
 import { CONTRACTS } from "@/components/contracts"
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { Tree } from "@/components/branches/Tree"
 import { SurfaceListCard, type SurfaceListCardData } from "@/components/branches/SurfaceListCard"
+import { Tree } from "@/components/branches/Tree"
 import { CoursePrerequisiteListBase, type CoursePrerequisite } from "@/components/blocks/courses/CoursePrerequisiteList/component"
 import { CourseReviewBlockBase, type CourseReview } from "@/components/blocks/courses/CourseReviewBlock/component"
 import { CourseValuePropositionList } from "@/components/blocks/courses/CourseValuePropositionList/component"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import {
+    CourseCurriculumAccordion,
+    type CourseCurriculumModule,
+} from "@/components/composites/CourseCurriculumAccordion"
+import {
+    TitleDescriptionAccordion,
+    type TitleDescriptionAccordionItem,
+} from "@/components/composites/TitleDescriptionAccordion"
 import { ChoiceTabs } from "@/components/leaves/ChoiceTabs"
 import { Breadcrumbs } from "@/components/leaves/Breadcrumbs"
 import { Heading } from "@/components/leaves/Heading"
 import { Text } from "@/components/leaves/Text"
 import {
-    CurriculumModuleRow,
-    type CurriculumLesson,
-    type CurriculumLevel,
-} from "@/components/composites/CurriculumModuleRow"
-import {
-    defineCompositeComponent,
     defineContractComponent,
     defineContractProjection,
     defineLeafComponent,
     type LeafProps,
 } from "@/components/contracts/props"
-import {
-    CoursePricingRail,
-    type CoursePricingRailData,
-    type CoursePricingRailState,
-} from "@/components/blocks/courses/CoursePricingRail/component"
-import { CourseMobileEnrollBar } from "@/components/blocks/courses/CourseMobileEnrollBar/component"
+import { CoursePricingRail, CoursePricingRailMobile } from "@/components/blocks/courses/CoursePricingRail"
 
 /**
  * PAGE - `CourseDetailPage`: what the course is, what it promises, what it contains, and one place
@@ -71,31 +68,11 @@ export type CourseStat = {
 /** The real sections the course-page tabs can reach. */
 export type CourseDetailSection = "overview" | "curriculum" | "reviews" | "faq"
 
-/** One authored question and answer on the course landing page. */
-export type CourseFaq = {
-    /** Stable backend identity. */
-    readonly id: string
-    /** The learner-facing question. */
-    readonly question: string
-    /** The course owner's answer. */
-    readonly answer: string
-}
+/** One authored question/answer pair, normalized to the shared disclosure grammar. */
+export type CourseFaq = TitleDescriptionAccordionItem
 
-/** One curriculum module. */
-export type CourseModule = {
-    /** Stable identity. */
-    readonly id: string
-    /** The already-resolved module title. */
-    readonly title: string
-    /** Stable difficulty identity used to select the level's semantic tone. */
-    readonly level?: CurriculumLevel
-    /** The already-resolved level word. */
-    readonly levelLabel?: string
-    /** The already-resolved preview count sentence. */
-    readonly previewLabel?: string
-    /** The lessons revealed on open. */
-    readonly lessons?: ReadonlyArray<CurriculumLesson>
-}
+/** One curriculum module with the complete structured disclosure anatomy. */
+export type CourseModule = CourseCurriculumModule
 
 /** Every already-resolved string the page renders. */
 export type CourseDetailLabels = {
@@ -159,10 +136,6 @@ export type CourseDetailPageData = {
     readonly reviewTotal?: number
     /** The curriculum. */
     readonly modules?: ReadonlyArray<CourseModule>
-    /** Everything the rail needs. */
-    readonly rail?: CoursePricingRailData
-    /** The rail's own situation, which settles independently of the course. */
-    readonly railState?: CoursePricingRailState
     /** Message for the not-found and failed situations. */
     readonly noticeMessage?: string
     /** Recovery action label for those situations. */
@@ -175,14 +148,6 @@ export type CourseDetailPageActions = {
     readonly navigateHome?: () => void
     /** Return through the breadcrumb to the course catalogue. */
     readonly navigateCourses?: () => void
-    /** The single buy action, shared by the rail and the pinned bar. */
-    readonly act?: () => void
-    /** Open the previewable learning path without buying the course. */
-    readonly trial?: () => void
-    /** Put the course in the viewer's cart without leaving this page. */
-    readonly addToCart?: () => void
-    /** Open the canonical backend price breakdown. */
-    readonly openPriceDetail?: () => void
     /** Move the reader to one real section on this page. */
     readonly selectSection?: (section: CourseDetailSection) => void
     /** Recovery from the failed situation. */
@@ -194,8 +159,9 @@ export type CourseDetailPageState = "pending" | "ready" | "not-found" | "failed"
 
 /** Props for {@link CourseDetailPageBase}. */
 export type CourseDetailPageProps = {
-    /** The business situation, which picks the tree. */
-    readonly state: CourseDetailPageState
+    /** Route identity used by the connected commerce projection. */
+    readonly displayId: string
+    readonly pageState: CourseDetailPageState
     /** What that tree says. */
     readonly props: CourseDetailPageData
     /** What the page reports. */
@@ -203,7 +169,6 @@ export type CourseDetailPageProps = {
 }
 
 const reviewStateOf = (total: number | undefined): "unrated" | "rated" => (total ?? 0) === 0 ? "unrated" : "rated"
-const mobileEnrollStateOf = (railState: CourseDetailPageProps["props"]["railState"]): "price-pending" | "ready" => railState === "price-pending" ? "price-pending" : "ready"
 
 /**
  * How many resting rows each run shows while its values are unknown.
@@ -215,9 +180,9 @@ const mobileEnrollStateOf = (railState: CourseDetailPageProps["props"]["railStat
 const RESTING = {
     stats: CONTRACTS["course-signal-board"].children.signal.restingCount,
     promises: CONTRACTS["marked-row-list"].children.row.restingCount,
-    modules: CONTRACTS["course-module-list"].children.module.restingCount,
+    modules: CONTRACTS["course-curriculum-disclosure"].children.summary.restingCount,
     prerequisites: CONTRACTS["course-prerequisite-list"].children.prerequisite.restingCount,
-    faqs: CONTRACTS["course-faq-list"].children.faq.restingCount,
+    faqs: CONTRACTS["title-description-disclosure"].children.summary.restingCount,
 }
 
 /** Draw one cell inside the shared signal surface. */
@@ -244,17 +209,6 @@ const courseSignalCard = (stat: CourseStat, isLoading: boolean) => {
  * is not drawn twice.
  */
 
-/** What the curriculum run draws: the modules, in teaching order. */
-type CourseModuleListData = SurfaceListCardData & {
-    readonly modules: ReadonlyArray<CourseModule>
-}
-
-/** What the FAQ run draws: authored question/answer pairs or one honest empty row. */
-type CourseFaqListData = SurfaceListCardData & {
-    readonly faqs: ReadonlyArray<CourseFaq>
-    readonly emptyLabel: string
-}
-
 /** What the prerequisite list draws inside the surface branch body. */
 type CoursePrerequisiteListData = SurfaceListCardData & {
     /** The requirements, in the order the course stores them. */
@@ -269,64 +223,13 @@ const CoursePrerequisiteListView = ({ props }: LeafProps<CoursePrerequisiteListD
 /** Stable component type branded for the exact prerequisite contract it implements. */
 const CoursePrerequisiteList = defineContractComponent("course-prerequisite-list", CoursePrerequisiteListView)
 
-/** The ordered run of modules, drawn inside the surface branch's body. */
-const CourseModuleListView = ({ props, isLoading = false }: LeafProps<CourseModuleListData>) => (
-    <Tree
-        contract="course-module-list"
-        render={defineContractComponent("course-module-list", {
-            module: props.modules.map((module) => defineContractComponent("course-module-row", {
-                module: defineCompositeComponent("curriculum-module-row", {}, () => (
-                    <CurriculumModuleRow
-                        props={{
-                            title: module.title,
-                            level: module.level,
-                            levelLabel: module.levelLabel,
-                            previewLabel: module.previewLabel,
-                            lessons: module.lessons,
-                        }}
-                        isLoading={isLoading}
-                    />
-                )),
-            })),
-        })}
-    />
-)
-
-/** Stable component type branded for the exact curriculum contract it implements. */
-const CourseModuleList = defineContractComponent("course-module-list", CourseModuleListView)
-
-/** The unordered FAQ run, drawn inside the existing joined-list surface. */
-const CourseFaqListView = ({ props, isLoading = false }: LeafProps<CourseFaqListData>) => {
-    const rows = props.faqs.length === 0 && !isLoading
-        ? [{ id: "empty", question: props.emptyLabel, answer: "" }]
-        : props.faqs
-    return (
-        <Tree
-            contract="course-faq-list"
-            render={defineContractComponent("course-faq-list", {
-                faq: rows.map((faq) => defineContractComponent("course-faq-row", {
-                    question: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
-                        <Text props={{ content: faq.question, size: "sm", weight: "semibold" }} isLoading={isLoading} />
-                    )),
-                    answer: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                        <Text props={{ content: faq.answer, size: "sm", tone: "muted" }} isLoading={isLoading} />
-                    )),
-                })),
-            })}
-        />
-    )
-}
-
-/** Stable component type branded for the exact FAQ contract it implements. */
-const CourseFaqList = defineContractComponent("course-faq-list", CourseFaqListView)
-
 /**
  * Draw the course landing.
  *
  * @param input - {@link CourseDetailPageProps}
  */
 export const CourseDetailPageBase = (input: CourseDetailPageProps) => {
-    if (input.state === "not-found" || input.state === "failed") {
+    if (input.pageState === "not-found" || input.pageState === "failed") {
         return (
             <EmptyNotice
                 props={{
@@ -335,18 +238,17 @@ export const CourseDetailPageBase = (input: CourseDetailPageProps) => {
                     // Not-found is final: there is no retry that could change the answer, and an
                     // action that cannot help is worse than none. Failed is a request that may yet
                     // succeed, so only that one offers a way out.
-                    actionLabel: input.state === "failed" ? input.props.noticeActionLabel : undefined,
+                    actionLabel: input.pageState === "failed" ? input.props.noticeActionLabel : undefined,
                 }}
                 on={{ act: input.on?.retry }}
             />
         )
     }
 
-    const isLoading = input.state === "pending"
+    const isLoading = input.pageState === "pending"
     // A resting row carries no values - those are exactly what is still unknown - but it keeps an
-    // identity, so React can key the run without reordering it on settle. A resting module also
-    // carries no lessons, so it renders flat: a disclosure that opens onto nothing while loading is
-    // a control offering to reveal something it does not have.
+    // identity, so React can key the run without reordering it on settle. A resting disclosure is
+    // disabled until its source-backed description arrives.
     const stats: ReadonlyArray<CourseStat> = isLoading
         ? Array.from({ length: RESTING.stats }, (_unused, index) => ({
             id: `resting-${index + 1}`,
@@ -358,7 +260,15 @@ export const CourseDetailPageBase = (input: CourseDetailPageProps) => {
         ? Array.from({ length: RESTING.promises }, () => "")
         : input.props.valueProps ?? []
     const modules: ReadonlyArray<CourseModule> = isLoading
-        ? Array.from({ length: RESTING.modules }, (_unused, index) => ({ id: `resting-${index + 1}`, title: "" }))
+        ? Array.from({ length: RESTING.modules }, (_unused, index) => ({
+            id: `resting-module-${index + 1}`,
+            title: "",
+            level: "foundation",
+            levelLabel: "",
+            summary: "",
+            description: "",
+            previews: [],
+        }))
         : input.props.modules ?? []
     // A resting prerequisite list rests at the same count the entry declares, so nothing moves
     // when the real requirements land.
@@ -367,7 +277,7 @@ export const CourseDetailPageBase = (input: CourseDetailPageProps) => {
         : input.props.prerequisites ?? []
     const reviews: ReadonlyArray<CourseReview> = isLoading ? [] : input.props.reviews ?? []
     const faqs: ReadonlyArray<CourseFaq> = isLoading
-        ? Array.from({ length: RESTING.faqs }, (_unused, index) => ({ id: `resting-${index + 1}`, question: "", answer: "" }))
+        ? Array.from({ length: RESTING.faqs }, (_unused, index) => ({ id: `resting-faq-${index + 1}`, title: "", description: "" }))
         : input.props.faqs ?? []
 
     const hero = defineContractComponent("course-hero", {
@@ -420,10 +330,8 @@ export const CourseDetailPageBase = (input: CourseDetailPageProps) => {
                     isLoading={isLoading}
                 />
             )),
-            defineContractProjection("course-module-list", () => (
-                <SurfaceListCard
-                    contract="course-module-list"
-                    render={CourseModuleList}
+            defineContractProjection("course-curriculum-accordion", () => (
+                <CourseCurriculumAccordion
                     props={{ label: input.props.labels.curriculumTitle, modules }}
                     isLoading={isLoading}
                 />
@@ -445,11 +353,9 @@ export const CourseDetailPageBase = (input: CourseDetailPageProps) => {
                     />
                 )),
             }),
-            defineContractProjection("course-faq-list", () => (
-                <SurfaceListCard
-                    contract="course-faq-list"
-                    render={CourseFaqList}
-                    props={{ label: input.props.labels.faqTitle, faqs, emptyLabel: input.props.labels.faqEmpty }}
+            defineContractProjection("title-description-accordion", () => (
+                <TitleDescriptionAccordion
+                    props={{ label: input.props.labels.faqTitle, items: faqs, emptyLabel: input.props.labels.faqEmpty }}
                     isLoading={isLoading}
                 />
             )),
@@ -479,26 +385,9 @@ export const CourseDetailPageBase = (input: CourseDetailPageProps) => {
                 }),
                 body: defineContractComponent("main-then-rail", {
                     main: hero,
-                    rail: CoursePricingRail({
-                        state: input.props.railState ?? "ready",
-                        props: input.props.rail ?? { title: input.props.title ?? "", ctaLabel: "" },
-                        on: {
-                            act: input.on?.act,
-                            trial: input.on?.trial,
-                            addToCart: input.on?.addToCart,
-                            openPriceDetail: input.on?.openPriceDetail,
-                        },
-                    }),
+                    rail: defineContractProjection("course-pricing-rail", () => <CoursePricingRail displayId={input.displayId} />),
                 }),
-                action: input.props.rail === undefined ? undefined : CourseMobileEnrollBar({
-                    state: mobileEnrollStateOf(input.props.railState),
-                    props: {
-                        price: input.props.rail.price,
-                        originalPrice: input.props.rail.originalPrice,
-                        ctaLabel: input.props.rail.ctaLabel,
-                    },
-                    on: { act: input.on?.act },
-                }),
+                action: defineContractProjection("course-mobile-action-bar", () => <CoursePricingRailMobile displayId={input.displayId} />),
             })}
         />
     )

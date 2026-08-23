@@ -1,78 +1,21 @@
 import { Tree } from "@/components/branches/Tree"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
-import { Article } from "@/components/leaves/Article"
-import { Button } from "@/components/leaves/Button"
-import { Heading } from "@/components/leaves/Heading"
-import { Text } from "@/components/leaves/Text"
 import { defineCompositeComponent, defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
-import type { Foundation } from "@/modules/api/graphql/queries/query-foundations"
+import { CourseFoundationResourceBlock, CourseFoundationResourceBlockBack, CourseFoundationResourceBlockBody, CourseFoundationResourceBlockDescription, CourseFoundationResourceBlockHeader, CourseFoundationResourceBlockNotice, CourseFoundationResourceBlockPractice } from "@/components/blocks/learn/CourseFoundationResourceBlock"
 
-/** Resolved states, content and actions for one foundation resource reader. */
-export type CourseFoundationResourcePageProps = {
-    readonly state: "pending" | "ready" | "not-found" | "failed"
-    readonly props: {
-        readonly resource?: Foundation | null
-        readonly titleFallback: string
-        readonly notFound: string
-        readonly failed: string
-        readonly retry: string
-        readonly back: string
-        readonly openPlayground: string
-    }
-    readonly on?: { readonly back?: () => void; readonly retry?: () => void; readonly openPlayground?: () => void }
-}
+/** Route identities for the resource page composition. */
+export type CourseFoundationResourcePageCompositionProps = { readonly displayId: string; readonly categoryId: string; readonly foundationId: string }
 
-/** Draw one live foundation resource, including not-found and retryable failure states. */
-export const CourseFoundationResourcePageBase = (input: CourseFoundationResourcePageProps) => {
-    const loading = input.state === "pending"
-    const unavailable = input.state === "not-found" || input.state === "failed"
-    const notice = unavailable
-        ? defineCompositeComponent("empty-notice", {}, () => (
-            <EmptyNotice
-                props={{
-                    message: input.state === "failed" ? input.props.failed : input.props.notFound,
-                    actionLabel: input.state === "failed" ? input.props.retry : undefined,
-                }}
-                on={{ act: input.on?.retry }}
-            />
-        ))
-        : undefined
+/** Render the page-owned main shell while the connected block owns resource state and slots. */
+export const CourseFoundationResourcePageBase = ({ displayId, categoryId, foundationId }: CourseFoundationResourcePageCompositionProps) => <CourseFoundationResourceBlock displayId={displayId} categoryId={categoryId} foundationId={foundationId} render={() => (
+    <Tree contract="course-foundation-resource-page" render={defineContractComponent("course-foundation-resource-page", {
+        back: defineLeafComponent("button", {}, () => <CourseFoundationResourceBlockBack />),
+        header: defineContractComponent("page-header-stack", { title: defineLeafComponent("heading", {}, () => <CourseFoundationResourceBlockHeader />) }),
+        description: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <CourseFoundationResourceBlockDescription />),
+        body: defineLeafComponent("article", {}, () => <CourseFoundationResourceBlockBody />),
+        practice: defineLeafComponent("button", {}, () => <CourseFoundationResourceBlockPractice />),
+        notice: defineCompositeComponent("empty-notice", {}, () => <CourseFoundationResourceBlockNotice />),
+    })} />
+)} />
 
-    return (
-        <Tree contract="course-foundation-resource-page" render={defineContractComponent("course-foundation-resource-page", {
-            back: defineLeafComponent("button", {}, () => (
-                <Button props={{ label: input.props.back, variant: "ghost" }} on={{ press: input.on?.back }} />
-            )),
-            ...(!unavailable ? {
-                header: defineContractComponent("page-header-stack", {
-                    title: defineLeafComponent("heading", {}, () => (
-                        <Heading
-                            props={{ content: input.props.resource?.title ?? input.props.titleFallback, level: 1 }}
-                            isLoading={loading}
-                        />
-                    )),
-                }),
-                description: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                    <Text
-                        props={{ content: input.props.resource?.description ?? "", size: "sm", tone: "muted" }}
-                        isLoading={loading}
-                    />
-                )),
-                body: defineLeafComponent("article", {}, () => (
-                    <Article props={{ body: input.props.resource?.value ?? undefined }} isLoading={loading} />
-                )),
-                practice: defineLeafComponent("button", {}, () => (
-                    <Button
-                        props={{ label: input.props.openPlayground, variant: "primary" }}
-                        on={{ press: input.on?.openPlayground }}
-                        isLoading={loading}
-                    />
-                )),
-            } : {}),
-            notice,
-        })} />
-    )
-}
-
-/** Source-level ownership marker. */
-export const meta = { world: "pure", domain: "learn" } as const
+/** Source-level ownership marker for the page composition. */
+export const meta = { world: "connected", domain: "learn" } as const

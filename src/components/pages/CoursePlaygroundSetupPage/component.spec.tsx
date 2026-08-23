@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import type { Playground } from "@/modules/api/graphql/queries/query-playground"
-import { CoursePlaygroundSetupPageBase, type CoursePlaygroundSetupPageProps } from "./component"
+import { PlaygroundSetupBase as CoursePlaygroundSetupPageBase, type PlaygroundSetupBaseProps as CoursePlaygroundSetupPageProps } from "@/components/blocks/learn/PlaygroundSetup/component"
 
 /**
  * What these tests guard: one server-created session read through six states. The reader may only
@@ -57,7 +57,7 @@ describe("CoursePlaygroundSetupPageBase", () => {
     it("names the playground the server returned and numbers the preparation it asks for", () => {
         const { container } = draw("unpaired")
 
-        expect(container.querySelector("[data-node=\"course-playground-setup-page\"]")).not.toBeNull()
+        expect(container.querySelector("[data-node=\"course-playground-setup-workspace\"]")).not.toBeNull()
         expect(screen.getByRole("heading", { name: "Docker basics" })).toBeInTheDocument()
         expect(screen.getByText("Run your first container.")).toBeInTheDocument()
         expect(screen.getByText("1. Install the CLI")).toBeInTheDocument()

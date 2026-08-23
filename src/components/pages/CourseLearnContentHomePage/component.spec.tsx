@@ -1,6 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { CourseLearnContentHomePageBase } from "./component"
+vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
+vi.mock("@/components/blocks/learn/CourseContentMap", () => ({ CourseContentMap: () => null }))
+import { CourseLearnContentHomeBlockBase } from "@/components/blocks/learn/CourseLearnContentHomeBlock/component"
 
 const props = {
     title: "System Design Mastery",
@@ -33,10 +35,10 @@ const props = {
     retryLabel: "Try again",
 } as const
 
-describe("CourseLearnContentHomePageBase", () => {
+describe("CourseLearnContentHomeBlockBase", () => {
     it("draws the complete identity, continuation and current-module hierarchy", () => {
         const lesson = vi.fn()
-        const { container } = render(<CourseLearnContentHomePageBase state="ready" props={props} on={{ lesson }} />)
+        const { container } = render(<CourseLearnContentHomeBlockBase blockState="ready" props={props} on={{ lesson }} />)
 
         expect(screen.getByRole("heading", { level: 1, name: "System Design Mastery" })).toBeVisible()
         expect(screen.getByText("Design scalable systems through production trade-offs.")).toBeVisible()
@@ -56,7 +58,7 @@ describe("CourseLearnContentHomePageBase", () => {
 
     it("retains course identity and offers recovery when the outline fails", () => {
         const retry = vi.fn()
-        render(<CourseLearnContentHomePageBase state="failed" props={props} on={{ retry }} />)
+        render(<CourseLearnContentHomeBlockBase blockState="failed" props={props} on={{ retry }} />)
 
         expect(screen.getByRole("heading", { level: 1, name: "System Design Mastery" })).toBeVisible()
         expect(screen.getByText("Could not load")).toBeVisible()

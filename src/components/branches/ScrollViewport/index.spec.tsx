@@ -23,8 +23,11 @@ const navigationGroups = defineContractProjection("learn-course-navigation-group
 const contentMapModules = defineContractProjection("content-map-module-list", () => (
     <div data-testid="content-map-modules" />
 ))
-const projectMilestones = defineContractProjection("personal-project-milestone-list-scroll", () => (
-    <div data-testid="personal-project-milestones" />
+const readerMain = defineContractProjection("content-reader-main-scroll-viewport", () => (
+    <div data-testid="reader-main" />
+))
+const outlineRail = defineContractProjection("content-outline-rail", () => (
+    <div data-testid="outline-rail" />
 ))
 
 describe("ScrollViewport", () => {
@@ -68,14 +71,17 @@ describe("ScrollViewport", () => {
         expect(screen.getByTestId("content-map-modules")).toBeInTheDocument()
     })
 
-    it("keeps personal-project progress pinned while its milestone list scrolls", () => {
-        const { container } = render(
-            <ScrollViewport boundary="personal-project-milestones" render={projectMilestones} />,
-        )
+    it("gives the reading document one full-height scroll owner", () => {
+        const { container } = render(<ScrollViewport boundary="content-reader-main" render={readerMain} />)
+        const viewport = container.querySelector("[data-node=content-reader-main-scroll-viewport]")
+        expect(viewport).toHaveClass("h-full", "min-h-0", "overflow-y-auto", "scrollbar")
+        expect(screen.getByTestId("reader-main")).toBeInTheDocument()
+    })
 
-        const viewport = container.querySelector("[data-node=personal-project-milestone-list-scroll]")
-        expect(viewport).toHaveClass("scroll-shadow--vertical", "scroll-shadow--hide-scrollbar")
-        expect(viewport).not.toHaveClass("scrollbar")
-        expect(screen.getByTestId("personal-project-milestones")).toBeInTheDocument()
+    it("gives the on-page outline one full-height scroll owner", () => {
+        const { container } = render(<ScrollViewport boundary="content-outline-rail" render={outlineRail} />)
+        const viewport = container.querySelector("[data-node=content-outline-rail]")
+        expect(viewport).toHaveClass("h-full", "min-h-0", "overflow-y-auto", "scrollbar")
+        expect(screen.getByTestId("outline-rail")).toBeInTheDocument()
     })
 })

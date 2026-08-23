@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { CoursePersonalProjectPage } from "."
+import { CoursePersonalProject } from "@/components/blocks/learn/CoursePersonalProject"
+import type { CoursePersonalProjectBlockProps } from "@/components/blocks/learn/CoursePersonalProject/component"
 
 const mocks = vi.hoisted(() => ({
     locale: "en",
@@ -16,27 +17,13 @@ vi.mock("@/hooks/swr/useQueryCoursePersonalProjectSwr", () => ({
     useQueryCoursePersonalProjectSwr: () => ({ data: mocks.data, error: mocks.error, mutate: mocks.mutate }),
 }))
 
-type PageStubProps = {
-    readonly state: string
-    readonly props: {
-        readonly nextTask?: { readonly id: string; readonly position: string; readonly title: string }
-        readonly completionFacts: ReadonlyArray<string>
-        readonly milestoneTitle?: string
-        readonly tasks: ReadonlyArray<{ readonly id: string; readonly title: string; readonly status: string; readonly actionLabel: string; readonly isCurrent?: boolean }>
-        readonly notice?: string
-    }
-    readonly on?: {
-        readonly openCourse?: () => void
-        readonly openTask?: (id: string) => void
-        readonly retry?: () => void
-    }
-}
+type PageStubProps = CoursePersonalProjectBlockProps
 
-vi.mock("./component", () => ({
-    CoursePersonalProjectPageBase: (input: PageStubProps) => (
+vi.mock("@/components/blocks/learn/CoursePersonalProject/component", () => ({
+    CoursePersonalProjectBase: (input: PageStubProps) => (
         <>
             <output data-testid="state">{input.state}</output>
-            <output data-testid="props">{JSON.stringify(input.props)}</output>
+            <output data-testid="props">{JSON.stringify(input.data)}</output>
             <button type="button" onClick={input.on?.openCourse}>Open course</button>
             <button type="button" onClick={() => input.on?.openTask?.("task-9")}>Open task</button>
             <button type="button" onClick={input.on?.retry}>Retry</button>
@@ -69,7 +56,7 @@ const data = {
     currentTask: { kind: "milestoneTask", id: "task-2", milestoneId: "milestone-1" },
 }
 
-const props = () => JSON.parse(screen.getByTestId("props").textContent ?? "{}") as PageStubProps["props"]
+const props = () => JSON.parse(screen.getByTestId("props").textContent ?? "{}") as CoursePersonalProjectBlockProps["data"]
 
 describe("CoursePersonalProjectPage", () => {
     beforeEach(() => {
@@ -80,7 +67,7 @@ describe("CoursePersonalProjectPage", () => {
     })
 
     it("derives next action, aggregate evidence and only the current milestone task grid", () => {
-        render(<CoursePersonalProjectPage displayId="system-design" />)
+        render(<CoursePersonalProject displayId="system-design" />)
 
         expect(screen.getByTestId("state")).toHaveTextContent("ready")
         expect(props().nextTask).toEqual({ id: "task-2", position: "Next task · Build", title: "Code" })
@@ -96,7 +83,7 @@ describe("CoursePersonalProjectPage", () => {
 
     it("uses the first incomplete milestone when no resume pointer exists", () => {
         mocks.data = { ...data, currentTask: null }
-        render(<CoursePersonalProjectPage displayId="system-design" />)
+        render(<CoursePersonalProject displayId="system-design" />)
 
         expect(props().milestoneTitle).toBe("Build")
         expect(props().nextTask).toBeUndefined()
@@ -104,25 +91,25 @@ describe("CoursePersonalProjectPage", () => {
 
     it("keeps pending, empty and failed outcomes distinct", () => {
         mocks.data = undefined
-        const { unmount } = render(<CoursePersonalProjectPage displayId="system-design" />)
+        const { unmount } = render(<CoursePersonalProject displayId="system-design" />)
         expect(screen.getByTestId("state")).toHaveTextContent("pending")
         unmount()
 
         mocks.data = { ...data, milestones: [], progress: { tasksCompleted: 0, tasksTotal: 0, completionPercent: 0 }, currentTask: null }
-        const empty = render(<CoursePersonalProjectPage displayId="system-design" />)
+        const empty = render(<CoursePersonalProject displayId="system-design" />)
         expect(screen.getByTestId("state")).toHaveTextContent("empty")
         expect(props().notice).toContain("does not have")
         empty.unmount()
 
         mocks.data = undefined
         mocks.error = new Error("network")
-        render(<CoursePersonalProjectPage displayId="system-design" />)
+        render(<CoursePersonalProject displayId="system-design" />)
         expect(screen.getByTestId("state")).toHaveTextContent("failed")
         expect(props().notice).toContain("could not be loaded")
     })
 
     it("routes course and task actions and retries the owned query", () => {
-        render(<CoursePersonalProjectPage displayId="system-design" />)
+        render(<CoursePersonalProject displayId="system-design" />)
 
         fireEvent.click(screen.getByRole("button", { name: "Open course" }))
         fireEvent.click(screen.getByRole("button", { name: "Open task" }))

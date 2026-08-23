@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { CourseFlashcardsQuizPageBase, type CourseFlashcardsQuizPageProps } from "./component"
+import { CourseFlashcardsQuizBlockBase, type CourseFlashcardsQuizPageProps } from "@/components/blocks/learn/CourseFlashcardsQuizBlock/component"
 
 /**
  * What these tests guard.
@@ -12,7 +12,8 @@ import { CourseFlashcardsQuizPageBase, type CourseFlashcardsQuizPageProps } from
  */
 
 const makeInput = (): CourseFlashcardsQuizPageProps => ({
-    state: "ready",
+    pageState: "setup",
+    blockState: "ready",
     props: {
         title: "Flashcards",
         subtitle: "Quiz",
@@ -56,18 +57,24 @@ const makeInput = (): CourseFlashcardsQuizPageProps => ({
 
 afterEach(cleanup)
 
-describe("CourseFlashcardsQuizPageBase", () => {
+describe("CourseFlashcardsQuizBlockBase", () => {
     it("keeps quiz mode and evidence view as independent tab axes", () => {
         const input = makeInput()
-        render(<CourseFlashcardsQuizPageBase {...input} />)
+        render(<CourseFlashcardsQuizBlockBase {...input} />)
         fireEvent.click(screen.getByText("Statistics"))
         expect(input.on.selectView).toHaveBeenCalledWith("stats")
         expect(input.on.openReview).not.toHaveBeenCalled()
     })
 
+    it("shares the left-aligned page identity and vertical tab hierarchy with review", () => {
+        const { container } = render(<CourseFlashcardsQuizBlockBase {...makeInput()} />)
+        expect(container.querySelector("[data-node=learn-page-title-pair]")).toHaveClass("items-start", "text-left")
+        expect(container.querySelector("[data-node=flashcard-dual-tab-toolbar]")).not.toHaveClass("sm:flex-row")
+    })
+
     it("selects the deep/staff configuration and starts the quiz", () => {
         const input = makeInput()
-        const { container } = render(<CourseFlashcardsQuizPageBase {...input} />)
+        const { container } = render(<CourseFlashcardsQuizBlockBase {...input} />)
 
         expect(container.querySelector("[data-node=course-flashcards-quiz-page]")).toBeTruthy()
         expect(container.querySelector("[data-node=flashcard-quiz-configuration]")).toBeTruthy()
@@ -83,7 +90,7 @@ describe("CourseFlashcardsQuizPageBase", () => {
 
     it("keeps the whole configuration standing while the deck count is still arriving", () => {
         const input = makeInput()
-        const { container } = render(<CourseFlashcardsQuizPageBase {...input} state="pending" />)
+        const { container } = render(<CourseFlashcardsQuizBlockBase {...input} blockState="pending" />)
 
         expect(container.querySelector("[data-node=flashcard-quiz-configuration]")).toBeTruthy()
         expect(container.querySelectorAll("[data-component=Button][data-loading=true]")).toHaveLength(10)
@@ -93,7 +100,7 @@ describe("CourseFlashcardsQuizPageBase", () => {
 
     it("replaces the configuration with an empty notice that offers no dead start button", () => {
         const input = makeInput()
-        const { container } = render(<CourseFlashcardsQuizPageBase {...input} state="empty" />)
+        const { container } = render(<CourseFlashcardsQuizBlockBase {...input} blockState="empty" />)
 
         expect(container.querySelector("[data-node=flashcard-quiz-configuration]")).toBeNull()
         expect(screen.getByText("Empty")).toBeInTheDocument()
@@ -103,7 +110,7 @@ describe("CourseFlashcardsQuizPageBase", () => {
 
     it("offers the way back from a failed deck load", () => {
         const input = makeInput()
-        render(<CourseFlashcardsQuizPageBase {...input} state="failed" />)
+        render(<CourseFlashcardsQuizBlockBase {...input} blockState="failed" />)
 
         expect(screen.getByText("Failed")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Retry" }))
@@ -113,7 +120,7 @@ describe("CourseFlashcardsQuizPageBase", () => {
     it("resumes an unfinished session and can still leave for the review face", () => {
         const input = makeInput()
         render(
-            <CourseFlashcardsQuizPageBase
+            <CourseFlashcardsQuizBlockBase
                 {...input}
                 props={{ ...input.props, resumeSessionId: "session-9", selectedMode: "deep", selectedLevel: "senior" }}
             />,

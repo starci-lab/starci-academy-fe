@@ -1167,14 +1167,26 @@ export const CONTRACTS = buildContracts({
         why: "if you need the concept-map body to remain a legal non-landmark subtree under its route-owned main shell.",
     },
     "course-mock-interview-hub-page": {
-        host: "main",
-        classes: ["mx-auto", "flex", "w-full", "max-w-app-md", "flex-col", "gap-6", "px-6", "py-6"],
+        classes: ["mx-auto", "w-full", "max-w-app-lg", "px-6", "py-6"],
+        children: { content: { contract: "mock-interview-hub-content" } },
+        why: "if the mock-interview route needs one measured page plane inside the learn shell's existing main landmark while its connected block owns the changing green-room content.",
+    },
+    "mock-interview-hub-content": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6"],
         children: {
-            header: { contract: "page-header-stack" },
+            header: { contract: "mock-interview-page-header" },
             navigation: { contract: "mock-interview-setup-tabs-over-panel" },
             panel: { contract: "mock-interview-setup-panel" },
         },
         why: "if you need the interview setup route to keep its orientation and three setup destinations stable while one selected panel changes beneath them.",
+    },
+    "mock-interview-page-header": {
+        classes: ["flex", "flex-col", "gap-4", "sm:flex-row", "sm:items-start", "sm:justify-between"],
+        children: {
+            identity: { contract: "learn-page-title-pair" },
+            focus: { leaf: "badge" },
+        },
+        why: "if the interview route needs its purpose on the reading axis while preserving the course that grounds every generated session as a compact fact.",
     },
     "mock-interview-setup-tabs-over-panel": {
         classes: ["flex", "w-full", "flex-col", "gap-3", "border-b", "border-separator"],
@@ -1194,7 +1206,7 @@ export const CONTRACTS = buildContracts({
         why: "if you need one selected mock-interview destination to own its settled, waiting or recovery content without moving the setup navigation.",
     },
     "mock-interview-resume-panel": {
-        classes: ["flex", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-4", "p-4", "rounded-2xl"],
+        classes: ["flex", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-4", "rounded-2xl", "bg-accent-soft", "p-4"],
         children: {
             identity: { contract: "title-with-baseline-fact" },
             action: { leaf: "button" },
@@ -1202,12 +1214,48 @@ export const CONTRACTS = buildContracts({
         why: "if you need an unfinished interview's real progress kept beside the one action that returns the learner to it.",
     },
     "mock-interview-readiness-snapshot": {
-        classes: ["grid", "grid-cols-1", "gap-4", "sm:grid-cols-4"],
+        classes: ["flex", "flex-col", "divide-y", "divide-separator"],
         children: { fact: { contract: "title-with-baseline-fact", repeats: true, restingCount: 3 } },
         why: "if you need seniority, interview format and course focus compared as one compact readiness snapshot before entering the room.",
     },
     "mock-interview-begin-panel": {
-        classes: ["flex", "w-full", "flex-col", "gap-4", "border", "border-separator", "rounded-2xl", "p-4"],
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "md:flex-row"],
+        children: {
+            briefing: { contract: "mock-interview-briefing-track" },
+            configuration: { contract: "mock-interview-configuration-track" },
+        },
+        why: "if the green room needs one shared form surface whose course briefing precedes the bounded setup controls and stacks in the same order when narrow.",
+    },
+    "mock-interview-briefing-track": {
+        classes: ["flex", "min-w-0", "grow", "flex-col", "gap-4", "border-b", "border-separator", "p-6", "md:border-b-0", "md:border-r"],
+        children: {
+            eyebrow: { leaf: "text", props: { size: "sm", tone: "accent" } },
+            title: { leaf: "heading" },
+            description: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            readiness: { contract: "mock-interview-readiness-snapshot" },
+            sequenceTitle: { leaf: "heading" },
+            step: { contract: "mock-interview-sequence-step", repeats: true, restingCount: 3 },
+        },
+        why: "if the learner needs the course-grounded purpose, current choices and the server-owned sequence together before configuring a new interview.",
+    },
+    "mock-interview-sequence-step": {
+        classes: ["flex", "flex-row", "items-start", "gap-3"],
+        children: {
+            index: { leaf: "badge" },
+            copy: { contract: "mock-interview-sequence-copy" },
+        },
+        why: "if one server-owned interview consequence needs a stable order marker beside its concise title and explanation.",
+    },
+    "mock-interview-sequence-copy": {
+        classes: ["flex", "min-w-0", "grow", "flex-col", "gap-1"],
+        children: {
+            title: { leaf: "text", props: { size: "sm", weight: "semibold" } },
+            description: { leaf: "text", props: { size: "xs", tone: "muted" } },
+        },
+        why: "if an ordered interview step needs its action named before the muted consequence it explains.",
+    },
+    "mock-interview-configuration-track": {
+        classes: ["flex", "w-full", "flex-col", "gap-4", "p-6", "md:w-2/5", "md:shrink-0"],
         children: {
             title: { leaf: "heading" },
             description: { leaf: "text", props: { size: "sm", tone: "muted" } },
@@ -1215,21 +1263,22 @@ export const CONTRACTS = buildContracts({
             level: { leaf: "choice-tabs" },
             modeLabel: { leaf: "text", props: { size: "sm", tone: "muted" } },
             mode: { leaf: "choice-tabs" },
-            status: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
-            action: { leaf: "button", repeats: true, restingCount: 2 },
+            note: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            status: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
+            action: { leaf: "button" },
+            fine: { leaf: "text", props: { size: "xs", tone: "muted" } },
         },
-        why: "if you need the interviewer briefing, compact configuration and start-or-resume actions to stay one readable green-room surface.",
+        why: "if two independent interview choices and their one server mutation need a bounded configuration track beside the course briefing.",
     },
     "mock-interview-history-panel": {
-        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4"],
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "divide-y", "divide-separator"],
         children: {
-            attempt: { contract: "mock-interview-history-row", repeats: true, restingCount: 3, optional: true },
-            notice: { composite: "empty-notice", optional: true },
+            item: { contract: ["mock-interview-history-row", "mock-interview-notice-row"], repeats: true, restingCount: 3 },
         },
         why: "if you need completed interview attempts to settle inside their own selected setup destination without moving the page orientation or tabs.",
     },
     "mock-interview-history-row": {
-        classes: ["flex", "min-w-0", "flex-row", "flex-wrap", "items-baseline", "justify-between", "gap-3", "border-b", "border-separator", "py-3"],
+        classes: ["flex", "min-w-0", "flex-row", "flex-wrap", "items-baseline", "justify-between", "gap-3", "px-6", "py-3"],
         children: {
             title: { leaf: "text", props: { size: "sm", weight: "medium" } },
             fact: { leaf: "text", props: { size: "xs", tone: "muted" } },
@@ -1237,30 +1286,155 @@ export const CONTRACTS = buildContracts({
         why: "if you need one completed interview's identity and score verdict aligned for repeated history scanning.",
     },
     "mock-interview-stats-panel": {
-        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4"],
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "divide-y", "divide-separator"],
         children: {
-            evidence: { composite: "labelled-progress-row", repeats: true, restingCount: 3, optional: true },
-            notice: { composite: "empty-notice", optional: true },
+            item: { contract: ["mock-interview-stats-row", "mock-interview-notice-row"], repeats: true, restingCount: 3 },
         },
         why: "if you need aggregate interview evidence to settle inside its own selected setup destination without replacing the green-room owner.",
     },
+    "mock-interview-stats-row": {
+        classes: ["w-full", "min-w-0", "px-6", "py-3"],
+        children: { evidence: { composite: "labelled-progress-row" } },
+        why: "if one aggregate interview phase needs its labelled score and progress kept as one peer row inside a shared statistics surface.",
+    },
+    "mock-interview-notice-row": {
+        classes: ["w-full", "min-w-0", "p-6"],
+        children: { notice: { composite: "empty-notice" } },
+        why: "if an empty or failed interview collection must replace its peer rows without escaping the selected destination's one shared surface.",
+    },
     "course-mock-interview-session-page": {
-        host: "main",
-        classes: ["flex", "min-h-screen", "w-full", "min-w-0", "flex-col", "gap-6", "bg-background", "px-6", "py-6"],
+        host: "div",
+        classes: ["mx-auto", "flex", "min-h-screen", "w-full", "max-w-6xl", "min-w-0", "flex-col", "gap-6", "bg-background", "px-4", "py-6"],
+        children: { content: { contract: "mock-interview-session-content" } },
+        why: "if one live interview route must own the main landmark and measured Focus Desk plane around its connected session content.",
+    },
+    "mock-interview-session-content": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6"],
         children: {
-            header: { contract: "centred-title-pair" },
+            header: { contract: "mock-interview-session-header-owner" },
+            workspace: { contract: "mock-interview-session-workspace" },
+        },
+        why: "if one live interview session must keep its progress orientation above a focused prompt-and-answer desk with a supporting workspace rail.",
+    },
+    "mock-interview-session-header-owner": {
+        host: "header",
+        classes: ["sticky", "top-16", "z-40", "w-full", "min-w-0"],
+        children: { surface: { contract: "mock-interview-session-header" } },
+        why: "if the compact session identity, progress, clock and leave consequence must remain reachable while the interview document scrolls.",
+    },
+    "mock-interview-session-header": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "items-start", "gap-4", "p-4", "md:flex", "md:flex-row", "md:items-start", "md:gap-8", "md:[&>*:nth-child(2)]:min-w-0", "md:[&>*:nth-child(2)]:grow"],
+        children: {
+            identity: { contract: "mock-interview-session-identity" },
             progress: { composite: "labelled-progress-row" },
             remaining: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
-            notice: { leaf: "text", props: { size: "sm" } },
-            turn: { contract: "centred-title-pair", repeats: true, restingCount: 3 },
-            streaming: { contract: "centred-title-pair", optional: true },
-            answerLabel: { leaf: "text", props: { size: "sm", weight: "medium" } },
-            answer: { leaf: "textarea" },
-            action: { leaf: "button", repeats: true, restingCount: 3 },
-            workspaceTitle: { leaf: "heading" },
-            workspace: { leaf: ["code-block", "text"] },
+            leave: { leaf: "button" },
         },
-        why: "if you need a live interview room ordered from prompt and server clock through conversation and one answer decision to a supporting question workspace.",
+        why: "if one compact session surface must keep interview identity, progress, remaining time and the quiet exit consequence in one scan line before stacking narrow.",
+    },
+    "mock-interview-session-identity": {
+        classes: ["flex", "min-w-0", "flex-col", "gap-1"],
+        children: {
+            title: { leaf: "heading" },
+            description: { leaf: "text", props: { size: "xs", tone: "muted" } },
+        },
+        why: "if the live room title must remain anchored to its course-owned interview prompt without centring either line.",
+    },
+    "mock-interview-session-workspace": {
+        classes: [
+            "flex", "w-full", "min-w-0", "flex-col", "items-start", "gap-6",
+            "md:flex-row", "md:items-start", "md:gap-8",
+            "md:[&>*:first-child]:min-w-0", "md:[&>*:first-child]:grow",
+            "md:[&>*:last-child]:w-80", "md:[&>*:last-child]:shrink-0",
+            "md:[&>*:last-child]:sticky", "md:[&>*:last-child]:top-rail", "md:[&>*:last-child]:self-start",
+        ],
+        children: {
+            primary: { contract: "mock-interview-session-main-column" },
+            rail: { contract: "mock-interview-session-rail" },
+        },
+        why: "if the prompt, answer and saved turns must own the flexible reading column beside one continuously reachable supporting question rail.",
+    },
+    "mock-interview-session-main-column": {
+        host: "section",
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6"],
+        children: {
+            notice: { contract: "mock-interview-session-notice", optional: true },
+            prompt: { contract: "mock-interview-active-prompt" },
+            answer: { contract: "mock-interview-answer-operation" },
+            history: { contract: "mock-interview-turn-list" },
+        },
+        why: "if the active interviewer prompt must precede the learner operation and completed-turn evidence in one stable reading order.",
+    },
+    "mock-interview-session-notice": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-1", "p-4"],
+        children: {
+            title: { leaf: "text", props: { size: "sm", weight: "semibold" } },
+            description: { leaf: "text", props: { size: "sm" } },
+        },
+        why: "if one transport or grading condition needs a named consequence before the interview operation without becoming a second page header.",
+    },
+    "mock-interview-active-prompt": {
+        host: "section",
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "p-4"],
+        children: {
+            title: { leaf: "heading" },
+            body: { leaf: "text" },
+            streaming: { leaf: "text", props: { size: "sm" }, optional: true },
+        },
+        why: "if one active interviewer question needs its source-owned title, complete prompt and optional streamed continuation inside one readable SurfaceCard body.",
+    },
+    "mock-interview-answer-operation": {
+        host: "form",
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4", "p-4"],
+        children: {
+            answer: { leaf: "textarea" },
+            actions: { contract: "challenge-deliverable-actions" },
+        },
+        why: "if one bounded learner answer operation owns the multiline response, continue consequence, finish consequence and stream recovery without accepting duplicate work.",
+    },
+    "mock-interview-turn-list": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "divide-y", "divide-separator", "overflow-hidden", "p-0"],
+        children: {
+            item: { contract: ["mock-interview-turn-row", "mock-interview-turn-empty-row"], repeats: true, restingCount: 2 },
+        },
+        why: "if completed interview turns are comparable saved peers that share one SurfaceListCard boundary and full-bleed separators.",
+    },
+    "mock-interview-turn-row": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-2", "px-6", "py-3"],
+        children: {
+            title: { leaf: "text", props: { size: "sm", weight: "semibold" } },
+            description: { leaf: "text", props: { size: "sm", tone: "muted" } },
+        },
+        why: "if one completed turn needs the interviewer question named before the learner answer that was durably saved for it.",
+    },
+    "mock-interview-turn-empty-row": {
+        classes: ["w-full", "min-w-0", "p-6"],
+        children: { notice: { leaf: "text", props: { size: "sm", tone: "muted" } } },
+        why: "if a new interview honestly states that no completed turn exists yet while preserving the one joined history surface owner.",
+    },
+    "mock-interview-session-rail": {
+        host: "aside",
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6"],
+        children: {
+            workspace: { contract: "mock-interview-question-workspace" },
+            outcomes: { contract: "mock-interview-session-outcomes" },
+        },
+        why: "if source context and session consequences support the interview without competing with the active prompt and answer column.",
+    },
+    "mock-interview-question-workspace": {
+        host: "section",
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "p-4"],
+        children: { content: { leaf: ["code-block", "text"] } },
+        why: "if one question has either verbatim supporting code or one honest absence statement inside a single SurfaceCard body without inventing an editor.",
+    },
+    "mock-interview-session-outcomes": {
+        host: "section",
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "p-4"],
+        children: {
+            status: { leaf: "text", props: { size: "sm" } },
+            action: { leaf: "button", repeats: true, restingCount: 2 },
+        },
+        why: "if one quiet supporting surface must state the current connection or operation outcome beside finish and leave recovery without duplicating the primary answer action.",
     },
     "course-mock-interview-result-page": {
         host: "main",

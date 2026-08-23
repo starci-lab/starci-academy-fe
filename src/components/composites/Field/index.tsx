@@ -34,6 +34,8 @@ export type FieldData = {
     readonly name: string
     /** The already-resolved name of the box. Copy, so it never rests. */
     readonly label: string
+    /** Stable guidance read after the label and before the box. */
+    readonly description?: string
     /** What is being typed. */
     readonly kind?: FieldKind
     /** The already-resolved example shown in an empty box. */
@@ -56,7 +58,7 @@ export type FieldActions = {
     readonly change?: (value: string) => void
 }
 
-/** Props for {@link Field}. Three fixed slots, no fourth - see {@link LeafProps}. */
+/** Props for {@link Field}. Fixed semantic slots, no caller-owned layout - see {@link LeafProps}. */
 export type FieldProps = CompositeProps<FieldData, FieldActions>
 
 /**
@@ -65,28 +67,39 @@ export type FieldProps = CompositeProps<FieldData, FieldActions>
  * @param input - {@link FieldProps}
  */
 export const Field = ({ props, on, isLoading = false }: FieldProps) => {
+    const describedBy = [
+        props.description === undefined ? undefined : `${props.id}-description`,
+        props.hint === undefined ? undefined : `${props.id}-hint`,
+    ].filter((value): value is string => value !== undefined).join(" ")
     const content = defineContractComponent("label-field-hint", {
-        label: defineLeafComponent("label", {}, () => <Label props={{ htmlFor: props.id, content: props.label }} />),
-        field: defineLeafComponent("input", {}, () => (
-            <Input
-                props={{
-                    id: props.id,
-                    name: props.name,
-                    kind: props.kind,
-                    placeholder: props.placeholder,
-                    disabled: props.disabled,
-                    isInvalid: props.isInvalid,
-                    describedBy: props.hint === undefined ? undefined : `${props.id}-hint`,
-                    revealLabel: props.revealLabel,
-                    hideLabel: props.hideLabel,
-                }}
-                on={{ change: on?.change }}
-                isLoading={isLoading}
-            />
-        )),
-        hint: props.hint === undefined ? undefined : defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-            <Text props={{ id: `${props.id}-hint`, content: props.hint, size: "xs", live: props.isInvalid === true ? "assertive" : "off" }} />
-        )),
+        copy: defineContractComponent("field-label-copy", {
+            label: defineLeafComponent("label", {}, () => <Label props={{ htmlFor: props.id, content: props.label }} />),
+            description: props.description === undefined ? undefined : defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                <Text props={{ id: `${props.id}-description`, content: props.description, size: "xs", tone: "muted" }} />
+            )),
+        }),
+        control: defineContractComponent("field-control-hint", {
+            field: defineLeafComponent("input", {}, () => (
+                <Input
+                    props={{
+                        id: props.id,
+                        name: props.name,
+                        kind: props.kind,
+                        placeholder: props.placeholder,
+                        disabled: props.disabled,
+                        isInvalid: props.isInvalid,
+                        describedBy: describedBy === "" ? undefined : describedBy,
+                        revealLabel: props.revealLabel,
+                        hideLabel: props.hideLabel,
+                    }}
+                    on={{ change: on?.change }}
+                    isLoading={isLoading}
+                />
+            )),
+            hint: props.hint === undefined ? undefined : defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                <Text props={{ id: `${props.id}-hint`, content: props.hint, size: "xs", live: props.isInvalid === true ? "assertive" : "off" }} />
+            )),
+        }),
     })
     return <Tree contract="label-field-hint" render={content} />
 }

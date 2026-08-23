@@ -1,7 +1,8 @@
 import { render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
-import { ProfileChallengesPageBase, type ProfileChallengesPageProps } from "./component"
+vi.mock("@/components/blocks/profile/ProfileChallenges", () => ({ ProfileChallenges: () => null }))
+import { ProfileChallengesBase, type ProfileChallengesBlockProps } from "@/components/blocks/profile/ProfileChallenges/component"
 
 /**
  * What these tests guard.
@@ -25,9 +26,9 @@ const rowTitles = (container: HTMLElement) => Array.from(
     container.querySelectorAll("[data-node='evidence-title-subtitle-fact-row']"),
 )
 
-describe("ProfileChallengesPageBase", () => {
+describe("ProfileChallengesBase", () => {
     it("renders headline strength before passed submission proof", () => {
-        const html = renderToStaticMarkup(<ProfileChallengesPageBase strength={{ state: "ready", data: { percentile: 12, rank: 214, xp: 1840 } }} submissions={{ state: "ready", data: [submission] }} on={{ openCourse: vi.fn() }} />)
+        const html = renderToStaticMarkup(<ProfileChallengesBase strength={{ state: "ready", data: { percentile: 12, rank: 214, xp: 1840 } }} submissions={{ state: "ready", data: [submission] }} on={{ openCourse: vi.fn() }} />)
         expect(html.indexOf("Challenge strength")).toBeLessThan(html.indexOf("Passed submissions"))
         expect(html).toContain("Top 12%")
         expect(html).toContain("Resilient checkout")
@@ -35,7 +36,7 @@ describe("ProfileChallengesPageBase", () => {
 
     it("rests three proof rows and every metric while both families are in flight", () => {
         const { container } = render(
-            <ProfileChallengesPageBase
+            <ProfileChallengesBase
                 strength={{ state: "pending" }}
                 submissions={{ state: "pending", data: [] }}
                 on={{ openCourse: vi.fn() }}
@@ -50,7 +51,7 @@ describe("ProfileChallengesPageBase", () => {
 
     it("says standing is unavailable without borrowing the list's failure", () => {
         const { container } = render(
-            <ProfileChallengesPageBase
+            <ProfileChallengesBase
                 strength={{ state: "error" }}
                 submissions={{ state: "error", data: [] }}
                 on={{ openCourse: vi.fn() }}
@@ -65,7 +66,7 @@ describe("ProfileChallengesPageBase", () => {
 
     it("counts settled proof and drops absent standing figures rather than showing a dash", () => {
         render(
-            <ProfileChallengesPageBase
+            <ProfileChallengesBase
                 strength={{ state: "ready", data: { percentile: null, rank: null, xp: null } }}
                 submissions={{ state: "ready", data: [] }}
                 on={{ openCourse: vi.fn() }}
@@ -83,7 +84,7 @@ describe("ProfileChallengesPageBase", () => {
     it("opens the owning course from a proof row that carries only a slug", () => {
         const openCourse = vi.fn()
         render(
-            <ProfileChallengesPageBase
+            <ProfileChallengesBase
                 strength={{ state: "ready", data: { rank: 214 } }}
                 submissions={{
                     state: "ready",
@@ -101,7 +102,7 @@ describe("ProfileChallengesPageBase", () => {
     it("leaves a course-less proof row unpressable and prints an unparseable date verbatim", () => {
         const openCourse = vi.fn()
         render(
-            <ProfileChallengesPageBase
+            <ProfileChallengesBase
                 strength={{ state: "ready", data: { xp: 1840 } }}
                 submissions={{
                     state: "ready",
@@ -118,12 +119,12 @@ describe("ProfileChallengesPageBase", () => {
     })
 
     it("formats a parseable pass date and shows the score as the trailing fact", () => {
-        const props: ProfileChallengesPageProps = {
+        const props: ProfileChallengesBlockProps = {
             strength: { state: "ready", data: { percentile: 12 } },
             submissions: { state: "ready", data: [submission] },
             on: { openCourse: vi.fn() },
         }
-        render(<ProfileChallengesPageBase {...props} />)
+        render(<ProfileChallengesBase {...props} />)
 
         expect(screen.getByText(/Jul 28/)).toBeInTheDocument()
         expect(screen.getByText("94")).toBeInTheDocument()

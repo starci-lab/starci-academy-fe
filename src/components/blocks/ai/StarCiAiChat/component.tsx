@@ -1,5 +1,5 @@
 import { Tree } from "@/components/branches/Tree"
-import { Article } from "@/components/leaves/Article"
+import { Article } from "@/components/branches/Article"
 import { Button } from "@/components/leaves/Button"
 import { CodeBlock } from "@/components/leaves/CodeBlock"
 import { Text } from "@/components/leaves/Text"

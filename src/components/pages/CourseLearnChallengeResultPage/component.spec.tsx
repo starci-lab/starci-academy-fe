@@ -1,8 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { CourseLearnChallengeResultPageBase, type CourseLearnChallengeResultPageProps } from "./component"
+import { ChallengeResultBase, type ChallengeResultBlockProps } from "@/components/blocks/learn/ChallengeResult/component"
 
-const baseProps: CourseLearnChallengeResultPageProps["props"] = {
+const baseProps: ChallengeResultBlockProps["props"] = {
     title: "API repository",
     description: "Provide the repository URL.",
     scoreLine: "8/10",
@@ -20,11 +20,11 @@ const baseProps: CourseLearnChallengeResultPageProps["props"] = {
     nextLabel: "Next content",
 }
 
-describe("CourseLearnChallengeResultPageBase", () => {
+describe("ChallengeResultBase", () => {
     it("rests the result surface while grading is pending", () => {
-        const { container } = render(<CourseLearnChallengeResultPageBase state="pending" props={baseProps} />)
+        const { container } = render(<ChallengeResultBase blockState="pending" props={baseProps} />)
 
-        expect(container.querySelector("[data-node=course-learn-challenge-result-page]")).toBeTruthy()
+        expect(container.querySelector("[data-node=challenge-result-workspace]")).toBeTruthy()
         expect(container.querySelector("h1")).toHaveAttribute("data-loading", "true")
         expect(screen.getByRole("button", { name: "Retry challenge" })).toBeDisabled()
         expect(screen.getByRole("button", { name: "Next content" })).toBeDisabled()
@@ -34,8 +34,8 @@ describe("CourseLearnChallengeResultPageBase", () => {
         const retry = vi.fn()
         const next = vi.fn()
         render(
-            <CourseLearnChallengeResultPageBase
-                state="ready"
+            <ChallengeResultBase
+                blockState="ready"
                 props={baseProps}
                 on={{ retry, next }}
             />,
@@ -55,8 +55,8 @@ describe("CourseLearnChallengeResultPageBase", () => {
     it("replaces result actions with reload after a query failure", () => {
         const reload = vi.fn()
         render(
-            <CourseLearnChallengeResultPageBase
-                state="failed"
+            <ChallengeResultBase
+                blockState="failed"
                 props={{ ...baseProps, notice: "Result unavailable" }}
                 on={{ reload }}
             />,

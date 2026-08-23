@@ -1,6 +1,10 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { CourseHeadhuntingsPageBase } from "./component"
+import { CourseHeadhuntingsBlockBase as CourseHeadhuntingsPageBase } from "@/components/blocks/learn/CourseHeadhuntingsBlock/component"
+type TestBlockProps = { readonly blockState: string; readonly on?: Record<string, (...args: Array<never>) => void>; readonly [key: string]: unknown }
+const TestBlock = ({ blockState, on, ...props }: TestBlockProps) => (
+    <CourseHeadhuntingsPageBase blockState={blockState as "pending" | "ready" | "empty" | "failed"} props={props as never} on={on} />
+)
 
 /**
  * What these tests guard.
@@ -25,16 +29,17 @@ const props = {
     errorMessage: "Could not load companies.",
     retryLabel: "Try again",
 }
+const withState = (blockState: "pending" | "ready" | "empty" | "failed", overrides: Record<string, unknown> = {}) => ({ ...props, ...overrides, blockState })
 
 describe("CourseHeadhuntingsPage", () => {
     it("renders proven company and consultant directory rows", () => {
-        render(<CourseHeadhuntingsPageBase state="ready" props={props} />)
+        render(<TestBlock {...withState("ready")} />)
         expect(screen.getByText(/Acme Talent/)).toBeInTheDocument()
         expect(screen.getByText(/Alex/)).toBeInTheDocument()
     })
 
     it("rests both directories rather than hiding the consultant list while loading", () => {
-        const { container } = render(<CourseHeadhuntingsPageBase state="pending" props={props} />)
+        const { container } = render(<TestBlock {...withState("pending")} />)
 
         expect(container.querySelectorAll("[data-node=\"next-action-list\"]")).toHaveLength(2)
         expect(container.querySelectorAll("[data-node=\"next-action-list\"] > [data-component=\"Text\"][data-loading=\"true\"]")).toHaveLength(8)
@@ -42,7 +47,7 @@ describe("CourseHeadhuntingsPage", () => {
     })
 
     it("replaces both directories with a talents notice when nothing is published", () => {
-        const { container } = render(<CourseHeadhuntingsPageBase state="empty" props={props} />)
+        const { container } = render(<TestBlock {...withState("empty")} />)
 
         expect(screen.getByText("No companies.")).toBeInTheDocument()
         expect(container.querySelector("[data-node=\"next-action-list\"]")).toBeNull()
@@ -51,7 +56,7 @@ describe("CourseHeadhuntingsPage", () => {
 
     it("offers the way back from a failed directory", () => {
         const retry = vi.fn()
-        render(<CourseHeadhuntingsPageBase state="failed" props={props} on={{ retry }} />)
+        render(<TestBlock {...withState("failed")} on={{ retry }} />)
 
         expect(screen.getByText("Could not load companies.")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Try again" }))
@@ -64,15 +69,13 @@ describe("CourseHeadhuntingsPage", () => {
         const search = vi.fn()
         const course = vi.fn()
         const { container } = render(
-            <CourseHeadhuntingsPageBase
-                state="ready"
-                props={{
-                    ...props,
+            <TestBlock
+                {...withState("ready", {
                     consultants: [
                         ...props.consultants,
                         { id: "consultant-2", label: "Blair", actionLabel: "Contact", isActionAvailable: false },
                     ],
-                }}
+                })}
                 on={{ "open:company-1": open, "contact:consultant-1": contact, search, course }}
             />,
         )
@@ -93,7 +96,7 @@ describe("CourseHeadhuntingsPage", () => {
 
     it("drops the consultant surface entirely when the course has no consultants", () => {
         const { container } = render(
-            <CourseHeadhuntingsPageBase state="ready" props={{ ...props, consultants: [] }} />,
+            <TestBlock {...withState("ready", { consultants: [] })} />,
         )
 
         expect(container.querySelectorAll("[data-node=\"next-action-list\"]")).toHaveLength(1)

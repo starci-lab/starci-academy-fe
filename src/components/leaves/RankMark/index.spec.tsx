@@ -1,10 +1,6 @@
 import { render } from "@testing-library/react"
-import { describe, expect, it, vi } from "vitest"
+import { describe, expect, it } from "vitest"
 import { RankMark, RankMarkIconId } from "./index"
-
-vi.mock("@iconify/react", () => ({
-    Icon: (props: Readonly<Record<string, unknown>>) => <span {...props} />,
-}))
 
 describe("RankMark", () => {
     it("keeps distinct place medals and uses one stable mark for lower ranks", () => {

@@ -1,6 +1,6 @@
 import { render } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { Article } from "./index"
+import { Article, segmentArticleSurfaces } from "./index"
 
 /**
  * The tree the article is handed, when a test needs one the markdown parser would never produce.
@@ -17,6 +17,8 @@ const forceTree = (tree: unknown) => {
     parserSeam.isForced = true
     parserSeam.tree = tree
 }
+
+type MermaidDiagramFixtureProps = { readonly props: { readonly source: string } }
 
 vi.mock("unified", async (importOriginal) => {
     const actual = await importOriginal<typeof import("unified")>()
@@ -36,6 +38,12 @@ vi.mock("unified", async (importOriginal) => {
     }
 })
 
+vi.mock("@/components/branches/MermaidDiagram", () => ({
+    MermaidDiagram: (input: MermaidDiagramFixtureProps) => (
+        <div data-component="MermaidDiagram">{input.props.source}</div>
+    ),
+}))
+
 afterEach(() => {
     parserSeam.isForced = false
     parserSeam.tree = undefined
@@ -49,6 +57,27 @@ const headings = (root: HTMLElement) =>
     ])
 
 describe("Article", () => {
+    it("classifies labelled bodies, peer lists and accordion panels without flattening Markdown", () => {
+        const sections = segmentArticleSurfaces(":::muted\nGoal\n:::\n\nProtect `GET /me`.\n\n## Common errors\n\n- **Trusting userId:** never trust input.\n- Keep `exp`.\n\n## Steps\n\n::::accordion\n:::panel{title=\"Step 1\"}\nVerify **the token**.\n:::\n::::")
+
+        expect(sections).toEqual([
+            expect.objectContaining({ label: "Goal", kind: "body", body: "Protect `GET /me`." }),
+            expect.objectContaining({
+                label: "Common errors",
+                kind: "peer-list",
+                items: [
+                    expect.objectContaining({ body: "**Trusting userId:** never trust input." }),
+                    expect.objectContaining({ body: "Keep `exp`." }),
+                ],
+            }),
+            expect.objectContaining({
+                label: "Steps",
+                kind: "accordion",
+                items: [expect.objectContaining({ title: "Step 1", body: "Verify **the token**." })],
+            }),
+        ])
+    })
+
     it("opts a grounded article into the shared AI selection boundary", () => {
         const { container } = render(<Article props={{ body: "Lesson body", aiSelectable: true }} />)
         expect(container.firstElementChild).toHaveAttribute("data-ai-selectable", "true")
@@ -126,14 +155,14 @@ describe("Article", () => {
         expect(container.querySelector("p")?.textContent).toBe("a withdrawn claim")
     })
 
-    it("draws a fenced block through the code leaf, with and without a declared language", () => {
+    it("draws a fenced block through the document code branch, with and without a declared language", () => {
         const { container } = render(<Article props={{
             body: "```ts\nconst a = 1\n```\n\n```\nplain text\n```\n",
         }} />)
-        const blocks = container.querySelectorAll("[data-component=\"CodeBlock\"]")
+        const blocks = container.querySelectorAll("[data-component=\"MarkdownCodeBlock\"]")
         expect(blocks).toHaveLength(2)
-        expect(blocks[0]?.textContent).toBe("tsconst a = 1")
-        expect(blocks[1]?.textContent).toBe("plain text")
+        expect(blocks[0]?.textContent).toBe("TypeScriptCopyconst a = 1")
+        expect(blocks[1]?.textContent).toBe("textCopyplain text")
     })
 
     it("draws an unordered list of items and an ordered list as different elements", () => {
@@ -165,19 +194,52 @@ describe("Article", () => {
         expect(quote?.querySelector("p")?.textContent).toBe("quoted words")
     })
 
-    it("keeps the words of a block it has no shape for instead of dropping it", () => {
+    it("renders a GFM table through the vendor table branch, named by its own header", () => {
         const { container } = render(<Article props={{
             body: "| left | right |\n| --- | --- |\n| one | two |\n",
         }} />)
-        expect(container.textContent).toContain("left")
-        expect(container.textContent).toContain("two")
-        expect(container.querySelector("table")).toBeNull()
+        // VENDOR-15: the vendor draws the anatomy, so this reads the vendor's own contract - the
+        // accessible name it owns and the column headers it builds - rather than the tag names a
+        // hand-built table would have shared with it.
+        const grid = container.querySelector("[aria-label]")
+        expect(grid).not.toBeNull()
+        // The accessible name comes from the table's own header, never from invented copy.
+        expect(grid?.getAttribute("aria-label")).toBe("left, right")
+        expect(container.querySelectorAll("[role=\"columnheader\"]")).toHaveLength(2)
+        expect(container.textContent).toContain("one")
     })
 
-    it("swallows a directive fence's markers instead of spilling them into the prose", () => {
-        const { container } = render(<Article props={{ body: ":::accordion\nhidden away\n:::\n" }} />)
+    it("frames a wide table as a recessed well that scrolls inside itself", () => {
+        const { container } = render(<Article props={{
+            body: "| left | right |\n| --- | --- |\n| one | two |\n",
+        }} />)
+        // SURFACE-IN-SURFACE-7 recessed form and its OVERFLOW-5 scroll sit on the same node,
+        // because the frame and the scroll are one decision.
+        const well = container.querySelector("[role=\"grid\"], [role=\"table\"]")?.closest("div.overflow-x-auto")
+        expect(well).not.toBeNull()
+        expect(well).toHaveClass("rounded-xl", "border", "border-border", "bg-background", "shadow-none", "min-w-0")
+    })
+
+    it("renders authored accordion panels instead of flattening directive markers", () => {
+        const { container } = render(<Article props={{ body: "::::accordion\n:::panel{title=\"DI flow\"}\nhidden away\n:::\n::::\n" }} />)
         expect(container.textContent).not.toContain(":::")
+        expect(container.querySelector("details summary")?.textContent).toBe("DI flow")
         expect(container.textContent).toContain("hidden away")
+    })
+
+    it("renders the legacy muted, chip and preview/code directives", () => {
+        const { container, getByRole } = render(<Article props={{ body: ":::muted\nquiet context\n:::\n\n:::chip\nready · reviewed\n:::\n\n::::tab\n:::preview\nvisible preview\n:::\n:::code\n```ts\nconst ready = true\n```\n:::\n::::\n" }} />)
+        expect(container.textContent).toContain("quiet context")
+        expect(container.textContent).toContain("ready")
+        expect(container.textContent).toContain("reviewed")
+        expect(getByRole("tab", { name: "Preview" })).toHaveAttribute("aria-selected", "true")
+        expect(getByRole("tab", { name: "Code" })).toHaveAttribute("aria-selected", "false")
+    })
+
+    it("routes a mermaid fence through the diagram leaf", () => {
+        const { container } = render(<Article props={{ body: "```mermaid\nflowchart LR\nA-->B\n```\n" }} />)
+        expect(container.querySelector("[data-component=MermaidDiagram]")).not.toBeNull()
+        expect(container.querySelector("[data-component=MarkdownCodeBlock]")).toBeNull()
     })
 
     it("draws an empty article when the parser answers with something that is not a document", () => {
@@ -212,6 +274,6 @@ describe("Article", () => {
         })
         const { container } = render(<Article props={{ body: "ignored" }} />)
         expect(headings(container)).toEqual([["H2", "2", "Untitled"]])
-        expect(container.querySelector("[data-component=\"CodeBlock\"]")?.textContent).toBe("")
+        expect(container.querySelector("[data-component=\"MarkdownCodeBlock\"]")?.textContent).toBe("textCopy")
     })
 })

@@ -1,7 +1,5 @@
 import { forwardRef, type ReactNode, type SVGProps } from "react"
 
-export * from "@heroicons/react/16/solid"
-
 /** Props shared by StarCi micro cuts that follow Heroicons' accessible SVG surface. */
 export type StarCiSolidIconProps = SVGProps<SVGSVGElement> & {
     readonly title?: string
@@ -31,6 +29,11 @@ const solidIcon = (name: string, body: ReactNode) => {
     Component.displayName = name
     return Component
 }
+
+/** Empty completion ring missing from upstream Heroicons' 16px solid family. */
+export const CircleIcon = solidIcon("CircleIcon", (
+    <path fillRule="evenodd" clipRule="evenodd" d="M8 1.25a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.75 8a5.25 5.25 0 1 1 10.5 0 5.25 5.25 0 0 1-10.5 0Z" />
+))
 
 /** Solid micro cut for the persistent two-pane course rail. */
 export const CourseRailIcon = solidIcon("CourseRailIcon", (

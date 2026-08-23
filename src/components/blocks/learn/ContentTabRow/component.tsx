@@ -1,4 +1,5 @@
 import { ChoiceTabs } from "@/components/leaves/ChoiceTabs"
+import { Select } from "@/components/leaves/Select"
 import type { IconName } from "@/components/leaves/Icon"
 import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
@@ -100,19 +101,18 @@ export const contentTabRow = (props: ContentTabRowData, on?: ContentTabRowAction
                 on={{ select: (faceId) => selectFace(props.faces, on, faceId) }}
             />
         )),
-        trailing: defineLeafComponent("choice-tabs", {}, () => (
-            <ChoiceTabs
+        ...((props.languages ?? []).length === 0 ? {} : { trailing: defineLeafComponent("select", {}, () => (
+            <Select
                 props={{
+                    id: "content-language",
+                    name: "content-language",
                     label: props.languagesLabel ?? "",
+                    options: props.languages ?? [],
                     selectedKey: props.selectedLanguage ?? props.languages?.[0]?.id ?? "",
-                    // Neutral, as legacy draws it: the language qualifies the examples inside the
-                    // face rather than choosing a face, so it must not compete with the pill.
-                    variant: "secondary",
-                    tabs: (props.languages ?? []).map((language) => ({ id: language.id, label: language.label })),
                 }}
                 on={{ select: on?.selectLanguage }}
             />
-        )),
+        )) }),
     })
 
 /** Source-level ownership marker. */

@@ -1,10 +1,10 @@
 import { fireEvent, render, screen, within } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import {
-    CourseMockInterviewResultPageBase,
+    CourseMockInterviewResultBlockBase as CourseMockInterviewResultPageBase,
     type CourseMockInterviewResultData,
     type CourseMockInterviewResultPageProps,
-} from "./component"
+} from "@/components/blocks/learn/CourseMockInterviewResultBlock/component"
 
 /**
  * What these tests guard: a debrief the reader can trust the arithmetic of. Every rubric row is

@@ -7,7 +7,7 @@ import {
 } from "@/components/contracts/props"
 
 /** The bounded viewport whose content may scroll. */
-export type ScrollViewportBoundary = "pricing-rail" | "learn-navigation-groups" | "content-map-modules" | "personal-project-milestones"
+export type ScrollViewportBoundary = "pricing-rail" | "learn-navigation-groups" | "content-map-modules" | "content-reader-main" | "content-outline-rail"
 
 /** Props for {@link ScrollViewport}. */
 type PricingRailScrollViewportProps = {
@@ -29,14 +29,20 @@ type ContentMapScrollViewportProps = {
     readonly render: ContractComponent<"content-map-module-list">
 }
 
-/** The project milestones that move without carrying project progress and search with them. */
-type PersonalProjectScrollViewportProps = {
-    readonly boundary: "personal-project-milestones"
-    readonly render: ContractComponent<"personal-project-milestone-list-scroll">
+/** The reading document that moves independently from both navigation rails. */
+type ContentReaderMainScrollViewportProps = {
+    readonly boundary: "content-reader-main"
+    readonly render: ContractComponent<"content-reader-main-scroll-viewport">
+}
+
+/** The on-page outline that moves independently from the reading document. */
+type ContentOutlineScrollViewportProps = {
+    readonly boundary: "content-outline-rail"
+    readonly render: ContractComponent<"content-outline-rail">
 }
 
 /** One approved bounded region whose content, rather than its pinned siblings, owns scrolling. */
-export type ScrollViewportProps = PricingRailScrollViewportProps | LearnNavigationScrollViewportProps | ContentMapScrollViewportProps | PersonalProjectScrollViewportProps
+export type ScrollViewportProps = PricingRailScrollViewportProps | LearnNavigationScrollViewportProps | ContentMapScrollViewportProps | ContentReaderMainScrollViewportProps | ContentOutlineScrollViewportProps
 
 /**
  * BRANCH - `ScrollViewport`: one bounded, internally scrolling contract projection.
@@ -53,8 +59,11 @@ export const ScrollViewport = (input: ScrollViewportProps) => {
     if (input.boundary === "content-map-modules") {
         return <Tree contract="content-map-module-list" render={input.render} />
     }
-    if (input.boundary === "personal-project-milestones") {
-        return <Tree contract="personal-project-milestone-list-scroll" render={input.render} />
+    if (input.boundary === "content-reader-main") {
+        return <Tree contract="content-reader-main-scroll-viewport" render={input.render} />
+    }
+    if (input.boundary === "content-outline-rail") {
+        return <Tree contract="content-outline-rail" render={input.render} />
     }
 
     // One boundary is approved, so the viewport contract is that boundary's, named once here rather

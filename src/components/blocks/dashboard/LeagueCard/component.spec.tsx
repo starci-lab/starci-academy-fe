@@ -2,10 +2,6 @@ import { cleanup, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { LeagueCardBase } from "./component"
 
-vi.mock("@iconify/react", () => ({
-    Icon: (props: Readonly<Record<string, unknown>>) => <span {...props} />,
-}))
-
 const frame = {
     label: "Weekly league",
     seeMoreLabel: "View leaderboard",

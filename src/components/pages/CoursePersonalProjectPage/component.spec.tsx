@@ -1,17 +1,17 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import {
-    CoursePersonalProjectPageBase,
-    type CoursePersonalProjectPageProps,
+    CoursePersonalProjectBase,
+    type CoursePersonalProjectBlockProps,
     type CoursePersonalProjectTaskRow,
-} from "./component"
+} from "@/components/blocks/learn/CoursePersonalProject/component"
 
 const tasks: ReadonlyArray<CoursePersonalProjectTaskRow> = [
     { id: "task-1", title: "1. Plan", status: "Completed", actionLabel: "Continue" },
     { id: "task-2", title: "2. Build", status: "Next task", actionLabel: "Continue", isCurrent: true },
 ]
 
-const baseProps: CoursePersonalProjectPageProps["props"] = {
+const baseProps: CoursePersonalProjectBlockProps["data"] = {
     breadcrumbLabel: "Course path",
     courseTitle: "System Design",
     title: "Personal Project",
@@ -27,10 +27,10 @@ const baseProps: CoursePersonalProjectPageProps["props"] = {
 }
 
 const draw = (
-    state: CoursePersonalProjectPageProps["state"],
-    props: Partial<CoursePersonalProjectPageProps["props"]> = {},
-    on?: CoursePersonalProjectPageProps["on"],
-) => render(<CoursePersonalProjectPageBase state={state} props={{ ...baseProps, ...props }} on={on} />)
+    state: CoursePersonalProjectBlockProps["state"],
+    data: Partial<CoursePersonalProjectBlockProps["data"]> = {},
+    on?: CoursePersonalProjectBlockProps["on"],
+) => render(<CoursePersonalProjectBase state={state} data={{ ...baseProps, ...data }} on={on} />)
 
 describe("CoursePersonalProjectPageBase", () => {
     it("orders next action before completion evidence and current milestone tasks", () => {

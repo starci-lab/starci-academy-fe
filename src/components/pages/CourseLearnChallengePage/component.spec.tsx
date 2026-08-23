@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { CourseLearnChallengePageBase, type CourseLearnChallengePageProps } from "./component"
+import { CourseLearnChallengeBlockBase, type CourseLearnChallengePageProps } from "@/components/blocks/learn/CourseLearnChallengeBlock/component"
 
 const baseProps: CourseLearnChallengePageProps["props"] = {
     title: "Repository challenge",
@@ -68,20 +68,19 @@ const baseProps: CourseLearnChallengePageProps["props"] = {
     },
 }
 
-describe("CourseLearnChallengePageBase", () => {
+describe("CourseLearnChallengeBlockBase", () => {
     it("composes the existing course map with the accepted challenge document and action rail", () => {
-        const { container } = render(<CourseLearnChallengePageBase state="ready" props={baseProps} />)
+        const { container } = render(<CourseLearnChallengeBlockBase blockState="ready" props={baseProps} />)
 
-        expect(container.querySelector("[data-node=course-learn-challenge-page]")).toBeTruthy()
-        expect(container.querySelector("[data-node=learn-route-context-rail]")).toBeTruthy()
+        expect(container.querySelector("[data-node=challenge-page-document]")).toBeTruthy()
         expect(container.querySelector("[data-node=challenge-workspace]")).toBeTruthy()
         expect(container.querySelector("[data-node=challenge-submission-rail]")).toBeTruthy()
         expect(screen.getByRole("heading", { name: "Repository challenge", level: 1 })).toBeInTheDocument()
-        expect(screen.getAllByText("1/2")).toHaveLength(2)
+        expect(screen.getAllByText("1/2")).toHaveLength(1)
     })
 
     it("rests the full composition and two deliverable shapes while pending", () => {
-        const { container } = render(<CourseLearnChallengePageBase state="pending" props={baseProps} />)
+        const { container } = render(<CourseLearnChallengeBlockBase blockState="pending" props={baseProps} />)
 
         expect(container.querySelectorAll("[data-node=challenge-deliverable-row]")).toHaveLength(2)
         expect(container.querySelector("h1")).toHaveAttribute("data-loading", "true")
@@ -92,8 +91,8 @@ describe("CourseLearnChallengePageBase", () => {
         const changeUrl = vi.fn()
         const submit = vi.fn()
         render(
-            <CourseLearnChallengePageBase
-                state="ready"
+            <CourseLearnChallengeBlockBase
+                blockState="ready"
                 props={baseProps}
                 on={{ changeUrl, submit }}
             />,
@@ -109,8 +108,8 @@ describe("CourseLearnChallengePageBase", () => {
 
     it("locks every submit control while the active deliverable is in flight", () => {
         render(
-            <CourseLearnChallengePageBase
-                state="submitting"
+            <CourseLearnChallengeBlockBase
+                blockState="submitting"
                 props={{ ...baseProps, activeSubmissionId: "submission-1" }}
             />,
         )
@@ -122,8 +121,8 @@ describe("CourseLearnChallengePageBase", () => {
     it("keeps the failed field in place and retries that exact deliverable", () => {
         const retry = vi.fn()
         render(
-            <CourseLearnChallengePageBase
-                state="failed"
+            <CourseLearnChallengeBlockBase
+                blockState="failed"
                 props={{
                     ...baseProps,
                     failedSubmissionId: "submission-1",
@@ -141,8 +140,8 @@ describe("CourseLearnChallengePageBase", () => {
     it("opens the graded result after the challenge has passed", () => {
         const openResult = vi.fn()
         render(
-            <CourseLearnChallengePageBase
-                state="passed"
+            <CourseLearnChallengeBlockBase
+                blockState="passed"
                 props={{ ...baseProps, earnedScore: 9, statusLabel: "Passed" }}
                 on={{ openResult }}
             />,
@@ -155,9 +154,9 @@ describe("CourseLearnChallengePageBase", () => {
 
     it("exposes the same course map through the narrow-screen drawer control", () => {
         const openCourseMap = vi.fn()
-        render(
-            <CourseLearnChallengePageBase
-                state="ready"
+        const { container } = render(
+            <CourseLearnChallengeBlockBase
+                blockState="ready"
                 props={baseProps}
                 on={{ openCourseMap }}
             />,
@@ -165,5 +164,7 @@ describe("CourseLearnChallengePageBase", () => {
 
         fireEvent.click(screen.getByRole("button", { name: "Course contents" }))
         expect(openCourseMap).toHaveBeenCalledTimes(1)
+        expect(container.querySelector("[data-node=learn-mobile-course-map-row]")).toBeTruthy()
+        expect(container.querySelector("[data-node=challenge-mobile-map-row]")).toBeNull()
     })
 })

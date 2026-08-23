@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { CourseMockInterviewSessionPageBase, type CourseMockInterviewSessionData } from "./component"
+import { CourseMockInterviewSessionBlockBase as CourseMockInterviewSessionPageBase, type CourseMockInterviewSessionData } from "@/components/blocks/learn/CourseMockInterviewSessionBlock/component"
 
 /**
  * What these tests guard.
@@ -30,6 +30,9 @@ const props: CourseMockInterviewSessionData = {
     finishLabel: "Finish and grade",
     retryLabel: "Try again",
     workspaceLabel: "Question workspace",
+    workspaceEmptyLabel: "No code is attached.",
+    turnsLabel: "Completed turns",
+    turnsEmptyLabel: "Completed answers will collect here.",
 }
 
 describe("CourseMockInterviewSessionPageBase", () => {
@@ -44,9 +47,9 @@ describe("CourseMockInterviewSessionPageBase", () => {
         expect(answer).toHaveBeenCalledWith("New answer")
         expect(finish).toHaveBeenCalledOnce()
         expect(screen.getByText("How would you invalidate stale entries?")).toBeTruthy()
-        expect(container.querySelector("[data-node=\"course-mock-interview-session-page\"]")).toBeTruthy()
+        expect(container.querySelector("[data-node=\"mock-interview-session-content\"]")).toBeTruthy()
         expect(screen.getByText("24:30 remaining")).toBeInTheDocument()
-        expect(screen.getByText("Waiting for interviewer")).toBeInTheDocument()
+        expect(screen.getByRole("heading", { name: "Interviewer" })).toBeInTheDocument()
     })
 
     it("refuses the answer box and the finish action while the room is still connecting", () => {
@@ -65,6 +68,27 @@ describe("CourseMockInterviewSessionPageBase", () => {
         expect(screen.getByText("Connected")).toHaveAttribute("aria-live", "polite")
         expect(screen.getByRole("heading", { name: "Distributed cache" })).toBeInTheDocument()
         expect(screen.getByRole("button", { name: /Finish and grade/ })).toBeEnabled()
+    })
+
+    it("clears the uncontrolled answer well when one completed turn is committed", () => {
+        const view = render(<CourseMockInterviewSessionPageBase state="live" props={props} />)
+
+        expect(screen.getByPlaceholderText("Answer here")).toHaveValue("Use versioned keys")
+        view.rerender(
+            <CourseMockInterviewSessionPageBase
+                state="live"
+                props={{
+                    ...props,
+                    answer: "",
+                    turns: [
+                        ...props.turns,
+                        { id: "turn-2", role: "candidate", label: "Your answer", content: "Use versioned keys" },
+                    ],
+                }}
+            />,
+        )
+
+        expect(screen.getByPlaceholderText("Answer here")).toHaveValue("")
     })
 
     it("swaps answering for retrying once the transport failed, and says so assertively", () => {
@@ -101,6 +125,7 @@ describe("CourseMockInterviewSessionPageBase", () => {
                 state="syncing"
                 props={{
                     ...props,
+                    operation: "streaming",
                     remainingLabel: undefined,
                     streamingText: "Consider a write-through cache",
                     workspaceCode: "const cache = new Map()",
@@ -115,7 +140,37 @@ describe("CourseMockInterviewSessionPageBase", () => {
         expect(leave).toHaveBeenCalledOnce()
         expect(screen.getByText("Consider a write-through cache")).toHaveAttribute("aria-live", "polite")
         expect(screen.queryByText("24:30 remaining")).not.toBeInTheDocument()
-        expect(container.querySelectorAll("[data-node=\"centred-title-pair\"]")).toHaveLength(3)
+        expect(container.querySelector("[data-component=\"SurfaceFormCard\"]")).not.toBeNull()
+        expect(container.querySelector("[data-component=\"SurfaceListCard\"]")).not.toBeNull()
         expect(screen.getByText(/const cache = new Map\(\)/)).toBeInTheDocument()
+    })
+
+    it("renders an honest empty workspace and completed-turn history without inventing code", () => {
+        render(
+            <CourseMockInterviewSessionPageBase
+                state="live"
+                props={{ ...props, turns: [], workspaceCode: undefined }}
+            />,
+        )
+
+        expect(screen.getByText("No code is attached.")).toBeInTheDocument()
+        expect(screen.getByText("Completed answers will collect here.")).toBeInTheDocument()
+        expect(screen.queryByText(/const /)).not.toBeInTheDocument()
+    })
+
+    it.each([
+        ["syncing", "Saving the transcript"],
+        ["grading", "Grading the interview"],
+    ] as const)("keeps submission disabled while %s", (operation, stateLabel) => {
+        render(
+            <CourseMockInterviewSessionPageBase
+                state="syncing"
+                props={{ ...props, operation, stateLabel }}
+            />,
+        )
+
+        expect(screen.getByPlaceholderText("Answer here")).toBeDisabled()
+        expect(screen.getByRole("button", { name: /Answer and continue/ })).toBeDisabled()
+        expect(screen.getByText(stateLabel)).toHaveAttribute("aria-live", "polite")
     })
 })

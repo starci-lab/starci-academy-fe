@@ -11,16 +11,17 @@ import { type QueryCourseRequest, type QueryCourseResponse } from "./types/cours
  * state. The client is therefore built WITH the auth link - it attaches nothing when no token
  * exists - so one document and one code path serve both readers.
  *
- * WHY THE COUNTS ARE SELECTED AND NOT ASKED FOR. The hero's trust chips are contents, hours and
+ * WHY THE CONTENT FACTS ARE SELECTED AND NOT ASKED FOR. The hero's trust chips are contents, hours and
  * challenges across the whole course, and the server exposes them per content rather than as course
  * totals. The legacy page sums them client-side, so this selects `minutesRead` and `numChallenges`
  * per content and sums them the same way. That keeps the chips FACTS about this course rather than
  * numbers a second source could disagree with - at the cost of a wider selection, which is the
- * honest trade and is why the contents carry no title: nothing lists them.
+ * honest trade. The same rows derive each module's content-count and duration fact.
  *
- * WHAT THE DISCLOSURE REVEALS. `previewContents` are the module's published bullets, not its
- * lessons - the server has no lesson type. They are what the named render shows when a module is
- * opened, and their count is the "N previews" the closed row reports.
+ * WHAT THE DISCLOSURE REVEALS. Curriculum is not a generic title/description pair. Its summary keeps
+ * the authored level and preview count, while its panel keeps the derived content facts, module
+ * description and ordered preview rows. Selecting those fields here prevents the connected page
+ * from flattening a richer product contract before the surface can render it.
  */
 const query1 = gql`
     query Course($request: CourseRequest!) {
@@ -62,9 +63,9 @@ const query1 = gql`
                 modules {
                     id
                     title
+                    description
                     orderIndex
                     contentTier
-                    numContents
                     contents {
                         id
                         minutesRead

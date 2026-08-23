@@ -1,8 +1,12 @@
 /** @vitest-environment jsdom */
 import { renderHook } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { CombinedGraphQLErrors, ServerError } from "@apollo/client/errors"
 import { setSessionToken } from "../auth/useSessionToken"
-import { useQueryPersonalProjectTaskWorkspaceSwr } from "./useQueryPersonalProjectTaskWorkspaceSwr"
+import {
+    isPersonalProjectEnrollmentDenied,
+    useQueryPersonalProjectTaskWorkspaceSwr,
+} from "./useQueryPersonalProjectTaskWorkspaceSwr"
 
 const mocks = vi.hoisted(() => ({
     useSWR: vi.fn(),
@@ -47,7 +51,56 @@ describe("useQueryPersonalProjectTaskWorkspaceSwr", () => {
             task: { id: "task-1" },
             repository: { branch: "main", tokenLast4: "1234" },
             models: [{ model: "review-pro" }],
+            ancillaryUnavailable: false,
         })
+    })
+
+    it("preserves the authored task when repository or grading-model discovery fails", async () => {
+        mocks.repository.mockRejectedValue(new Error("repository unavailable"))
+        mocks.models.mockRejectedValue(new Error("models unavailable"))
+        renderHook(() => useQueryPersonalProjectTaskWorkspaceSwr("course-1", "task-1"))
+
+        await expect(fetcher()()).resolves.toMatchObject({
+            task: { id: "task-1" },
+            repository: {},
+            models: [],
+            ancillaryUnavailable: true,
+        })
+    })
+
+    it("still fails when the authored task request itself fails", async () => {
+        mocks.task.mockRejectedValue(new Error("task unavailable"))
+        renderHook(() => useQueryPersonalProjectTaskWorkspaceSwr("course-1", "task-1"))
+        await expect(fetcher()()).rejects.toThrow("task unavailable")
+    })
+
+    it("turns a settled unenrolled contract into a stable permission denial", async () => {
+        mocks.task.mockRejectedValue(new Error("transport hid the guard body"))
+        mocks.repository.mockResolvedValue({ data: { courseEnrollmentStatus: { data: {
+            isEnrolled: false,
+            enrollment: null,
+        } } } })
+        renderHook(() => useQueryPersonalProjectTaskWorkspaceSwr("course-1", "task-1"))
+
+        await expect(fetcher()()).rejects.toSatisfy(isPersonalProjectEnrollmentDenied)
+    })
+
+    it("recognizes the backend enrollment guard code without treating other failures as permission denial", () => {
+        const denied = new CombinedGraphQLErrors({
+            errors: [{ message: "Enrollment not found", extensions: { code: "ENROLLMENT_NOT_FOUND_EXCEPTION" } }],
+        })
+
+        expect(isPersonalProjectEnrollmentDenied(denied)).toBe(true)
+        expect(isPersonalProjectEnrollmentDenied(new ServerError("Response not successful", {
+            response: new Response(null, { status: 500 }),
+            bodyText: JSON.stringify({
+                errors: [{ message: "Enrollment not found", extensions: { code: "ENROLLMENT_NOT_FOUND_EXCEPTION" } }],
+            }),
+        }))).toBe(true)
+        expect(isPersonalProjectEnrollmentDenied({
+            bodyText: JSON.stringify({ errors: [{ extensions: { code: "ENROLLMENT_NOT_FOUND_EXCEPTION" } }] }),
+        })).toBe(true)
+        expect(isPersonalProjectEnrollmentDenied(new Error("task unavailable"))).toBe(false)
     })
 
     it("refuses a settled response without an authored task", async () => {

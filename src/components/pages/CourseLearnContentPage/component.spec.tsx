@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { ReactionType } from "@/modules/api/graphql/queries/types/reactions"
-import { CourseLearnContentPageBase, type CourseLearnContentPageData } from "./component"
+import { CourseLearnContentBlockBase, type CourseLearnContentBlockData as CourseLearnContentPageData } from "@/components/blocks/learn/CourseLearnContentBlock/component"
 
 class TestResizeObserver implements ResizeObserver {
     observe = () => undefined
@@ -58,7 +58,7 @@ const discussion = {
     },
 }
 
-describe("CourseLearnContentPageBase", () => {
+describe("CourseLearnContentBlockBase", () => {
     it("shows one selected mobile panel and keeps all three panels on desktop", () => {
         const props: CourseLearnContentPageData = {
             labels,
@@ -68,7 +68,7 @@ describe("CourseLearnContentPageBase", () => {
             outline: [{ id: "heading-1", label: "Heading" }],
         }
         const { container, rerender } = render(
-            <CourseLearnContentPageBase state="ready" props={props} />,
+            <CourseLearnContentBlockBase blockState="ready" props={props} />,
         )
 
         expect(container.querySelector("[data-node=content-map-panel]")).not.toBeNull()
@@ -89,7 +89,7 @@ describe("CourseLearnContentPageBase", () => {
         ] as const
         for (const [mobileView, node] of cases) {
             rerender(
-                <CourseLearnContentPageBase state="ready" props={{ ...props, mobileView }} />,
+                <CourseLearnContentBlockBase blockState="ready" props={{ ...props, mobileView }} />,
             )
             expect(container.firstElementChild?.getAttribute("data-node")).toBe(node)
             expect(container.querySelectorAll("[data-node=content-map-panel]")).toHaveLength(mobileView === "contents" ? 1 : 0)
@@ -100,9 +100,9 @@ describe("CourseLearnContentPageBase", () => {
 
     it("opens a module-map content through the page-owned action", () => {
         const openContent = vi.fn()
-        const { container } = render(
-            <CourseLearnContentPageBase
-                state="ready"
+        render(
+            <CourseLearnContentBlockBase
+                blockState="ready"
                 props={{
                     labels,
                     title: "Current lesson",
@@ -128,8 +128,8 @@ describe("CourseLearnContentPageBase", () => {
     it("renders source-backed lesson context and submits course-map search", () => {
         const searchContent = vi.fn()
         const { container } = render(
-            <CourseLearnContentPageBase
-                state="ready"
+            <CourseLearnContentBlockBase
+                blockState="ready"
                 props={{
                     labels,
                     title: "Current lesson",
@@ -158,8 +158,8 @@ describe("CourseLearnContentPageBase", () => {
         const goCourse = vi.fn()
         const goModule = vi.fn()
         render(
-            <CourseLearnContentPageBase
-                state="ready"
+            <CourseLearnContentBlockBase
+                blockState="ready"
                 props={{ labels, title: "Current lesson", body: "Lesson body" }}
                 on={{ goCourse, goModule }}
             />,
@@ -173,8 +173,8 @@ describe("CourseLearnContentPageBase", () => {
     it("offers the failed reader recovery action", () => {
         const act = vi.fn()
         render(
-            <CourseLearnContentPageBase
-                state="failed"
+            <CourseLearnContentBlockBase
+                blockState="failed"
                 props={{
                     labels,
                     noticeMessage: "Could not load lesson",
@@ -191,8 +191,8 @@ describe("CourseLearnContentPageBase", () => {
     it("keeps the visible discussion inside the unlocked lesson footer", () => {
         const submitDiscussion = vi.fn()
         const { container } = render(
-            <CourseLearnContentPageBase
-                state="ready"
+            <CourseLearnContentBlockBase
+                blockState="ready"
                 props={{ labels, title: "Current lesson", body: "Lesson body", discussion }}
                 on={{ submitDiscussion }}
             />,
@@ -208,8 +208,8 @@ describe("CourseLearnContentPageBase", () => {
     it("switches the lesson body to the approved Source face", () => {
         const selectSource = vi.fn()
         const { container } = render(
-            <CourseLearnContentPageBase
-                state="ready"
+            <CourseLearnContentBlockBase
+                blockState="ready"
                 props={{
                     labels,
                     title: "Current lesson",
@@ -253,8 +253,8 @@ describe("CourseLearnContentPageBase", () => {
     it("joins the paywall to the preview inside the same paper and drops the whole footer", () => {
         const act = vi.fn()
         const { container } = render(
-            <CourseLearnContentPageBase
-                state="locked"
+            <CourseLearnContentBlockBase
+                blockState="locked"
                 props={{
                     labels,
                     title: "Paid lesson",
@@ -281,8 +281,8 @@ describe("CourseLearnContentPageBase", () => {
     it("keeps the paywall's way in even when no lock sentence was resolved", () => {
         const act = vi.fn()
         const { container } = render(
-            <CourseLearnContentPageBase
-                state="locked"
+            <CourseLearnContentBlockBase
+                blockState="locked"
                 props={{ labels, title: "Paid lesson", body: "The opening paragraph", noticeActionLabel: "Enrol" }}
                 on={{ act }}
             />,
@@ -297,8 +297,8 @@ describe("CourseLearnContentPageBase", () => {
         const selectReaction = vi.fn()
         const changePage = vi.fn()
         const { container } = render(
-            <CourseLearnContentPageBase
-                state="ready"
+            <CourseLearnContentBlockBase
+                blockState="ready"
                 props={{
                     labels,
                     title: "Current lesson",
@@ -335,8 +335,8 @@ describe("CourseLearnContentPageBase", () => {
 
     it("measures course progress in the map panel and closes the modules the reader has not opened", () => {
         const { container } = render(
-            <CourseLearnContentPageBase
-                state="ready"
+            <CourseLearnContentBlockBase
+                blockState="ready"
                 props={{
                     labels,
                     title: "Current lesson",
@@ -354,12 +354,13 @@ describe("CourseLearnContentPageBase", () => {
         expect(screen.getByText("3/12")).toBeInTheDocument()
         expect(screen.queryByText("Hidden lesson")).not.toBeInTheDocument()
         expect(container.querySelectorAll("[data-component=SurfaceAccordionCard]")).toHaveLength(2)
+        expect(container.querySelectorAll("[data-component=SurfaceAccordionCardItem]")).toHaveLength(2)
         expect(container.querySelector("[data-component=ContentMapRow]")).toBeNull()
     })
 
     it("falls back to a wordless failure notice when the reader was given no sentence", () => {
         const { container } = render(
-            <CourseLearnContentPageBase state="failed" props={{ labels, outline: [{ id: "heading-1", label: "Heading" }] }} />,
+            <CourseLearnContentBlockBase blockState="failed" props={{ labels, outline: [{ id: "heading-1", label: "Heading" }] }} />,
         )
 
         expect(container.querySelector("[data-node=centred-empty-notice]")).not.toBeNull()
@@ -370,8 +371,8 @@ describe("CourseLearnContentPageBase", () => {
     it("opens the bar for a single face that carries more than one example language", () => {
         const selectLanguage = vi.fn()
         const { container } = render(
-            <CourseLearnContentPageBase
-                state="ready"
+            <CourseLearnContentBlockBase
+                blockState="ready"
                 props={{
                     labels,
                     title: "Current lesson",

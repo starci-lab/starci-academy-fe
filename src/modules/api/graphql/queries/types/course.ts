@@ -13,9 +13,6 @@ import { type GraphQLResponse } from "../../types"
 /** Which pricing phase a course is currently selling in. Mirrors the server's `PricingPhase` enum. */
 export type CoursePricingPhase = "pioneer" | "earlyBird" | "regular"
 
-/** How demanding a module is. Mirrors the server's `CourseContentTier` enum. */
-export type CourseContentTier = "foundation" | "intermediate" | "advanced"
-
 /** One phase of the price ladder. */
 export interface CoursePricingPhaseRow {
     /** Stable key for the ladder row. */
@@ -68,7 +65,10 @@ export interface CourseFaqRow {
     orderIndex: number
 }
 
-/** One content inside a module. Selected for its COUNTS, not to be listed. */
+/** Stable curriculum difficulty identity exposed by the course API. */
+export type CourseContentTier = "foundation" | "intermediate" | "advanced"
+
+/** One content inside a module. Selected for the module and course facts derived from it. */
 export interface CourseModuleContent {
     /** Stable key. */
     id: string
@@ -83,11 +83,11 @@ export interface CourseModuleContent {
     numChallenges: number
 }
 
-/** One preview bullet a module publishes before enrolment. */
+/** One ordered preview row a module publishes before enrolment. */
 export interface CourseModulePreview {
     /** Stable key. */
     id: string
-    /** The claim itself - this is what the disclosure reveals when a module is opened. */
+    /** The authored preview statement shown inside the expanded module. */
     text: string
     /** Declaration order. */
     orderIndex: number
@@ -99,15 +99,15 @@ export interface CourseModule {
     id: string
     /** Module title, shown on the closed row. */
     title: string
+    /** Authored module explanation revealed when the row opens. */
+    description: string
     /** Declaration order - modules are ORDERED, and the curriculum renders them as an `ol`. */
     orderIndex: number
-    /** Difficulty word shown as the row's badge. */
+    /** Difficulty shown beside the closed-row title. */
     contentTier: CourseContentTier
-    /** How many contents this module holds; summed into the "contents" chip. */
-    numContents: number
-    /** The contents, selected for their counts only. */
+    /** The contents used to derive the module and course facts. */
     contents?: ReadonlyArray<CourseModuleContent>
-    /** The preview bullets revealed on open, and whose count the closed row reports. */
+    /** Ordered preview rows revealed inside the module. */
     previewContents?: ReadonlyArray<CourseModulePreview>
 }
 

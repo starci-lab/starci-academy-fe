@@ -2,10 +2,6 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { RankedUserRow } from "./index"
 
-vi.mock("@iconify/react", () => ({
-    Icon: (props: Readonly<Record<string, unknown>>) => <span {...props} />,
-}))
-
 describe("RankedUserRow", () => {
     it("maps success and danger verdicts to inset bands without adding a border", () => {
         const success = render(<RankedUserRow props={{

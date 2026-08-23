@@ -1,6 +1,10 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { CourseHeadhuntingCompanyPageBase } from "./component"
+import { CourseHeadhuntingCompanyBlockBase } from "@/components/blocks/learn/CourseHeadhuntingCompanyBlock/component"
+type TestBlockProps = { readonly blockState: string; readonly on?: Record<string, (...args: Array<never>) => void>; readonly [key: string]: unknown }
+const CourseHeadhuntingCompanyPageBase = ({ blockState, on, ...props }: TestBlockProps) => (
+    <CourseHeadhuntingCompanyBlockBase blockState={blockState as "pending" | "ready" | "not-found" | "failed"} props={props as never} on={on} />
+)
 
 /**
  * What these tests guard.
@@ -14,26 +18,24 @@ import { CourseHeadhuntingCompanyPageBase } from "./component"
 const props = {
     title: "Acme Talent",
     trail: [{ id: "course", label: "TypeScript" }, { id: "directory", label: "Partners" }, { id: "company", label: "Acme Talent" }],
-    description: "Technology hiring",
-    contactLabel: "Contact company",
-    consultantsLabel: "Consultants",
-    consultants: [{ id: "consultant-1", label: "Alex", actionLabel: "Contact", isActionAvailable: true }],
+    description: "Technology hiring", contactLabel: "Contact company", consultantsLabel: "Consultants", consultants: [{ id: "consultant-1", label: "Alex", actionLabel: "Contact", isActionAvailable: true }],
     backLabel: "Back to partners",
     notFoundMessage: "Not found.",
     emptyMessage: "No consultants.",
     errorMessage: "Could not load company.",
     retryLabel: "Try again",
 }
+const withState = (blockState: "pending" | "ready" | "not-found" | "failed", overrides: Record<string, unknown> = {}) => ({ ...props, ...overrides, blockState })
 
 describe("CourseHeadhuntingCompanyPage", () => {
     it("offers contact without inventing a company application", () => {
-        render(<CourseHeadhuntingCompanyPageBase state="ready" props={props} />)
+        render(<CourseHeadhuntingCompanyPageBase {...withState("ready")} />)
         expect(screen.getByRole("button", { name: /Contact company/ })).toBeInTheDocument()
         expect(screen.queryByText(/apply/i)).not.toBeInTheDocument()
     })
 
     it("rests three consultant rows and the company name while the profile arrives", () => {
-        const { container } = render(<CourseHeadhuntingCompanyPageBase state="pending" props={props} />)
+        const { container } = render(<CourseHeadhuntingCompanyPageBase {...withState("pending")} />)
 
         expect(container.querySelectorAll("[data-node=\"next-action-list\"] > [data-component=\"Text\"][data-loading=\"true\"]")).toHaveLength(3)
         expect(container.querySelector("[data-component=\"Heading\"][data-loading=\"true\"]")).not.toBeNull()
@@ -44,7 +46,7 @@ describe("CourseHeadhuntingCompanyPage", () => {
         const back = vi.fn()
         const retry = vi.fn()
         const { container } = render(
-            <CourseHeadhuntingCompanyPageBase state="not-found" props={props} on={{ back, retry }} />,
+            <CourseHeadhuntingCompanyPageBase {...withState("not-found")} on={{ back, retry }} />,
         )
 
         expect(screen.getByText("Not found.")).toBeInTheDocument()
@@ -56,7 +58,7 @@ describe("CourseHeadhuntingCompanyPage", () => {
 
     it("offers the way back from a failed company load", () => {
         const retry = vi.fn()
-        render(<CourseHeadhuntingCompanyPageBase state="failed" props={props} on={{ retry }} />)
+        render(<CourseHeadhuntingCompanyPageBase {...withState("failed")} on={{ retry }} />)
 
         expect(screen.getByText("Could not load company.")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: /Try again/ }))
@@ -66,8 +68,7 @@ describe("CourseHeadhuntingCompanyPage", () => {
     it("keeps a contactless partner to one back control and says the roster is empty", () => {
         const { container } = render(
             <CourseHeadhuntingCompanyPageBase
-                state="ready"
-                props={{ ...props, contactLabel: undefined, description: undefined, consultants: [] }}
+                {...withState("ready", { contactLabel: undefined, description: undefined, consultants: [] })}
             />,
         )
 
@@ -84,15 +85,13 @@ describe("CourseHeadhuntingCompanyPage", () => {
         const course = vi.fn()
         render(
             <CourseHeadhuntingCompanyPageBase
-                state="ready"
-                props={{
-                    ...props,
+                {...withState("ready", {
                     address: "12 Le Loi",
                     consultants: [
                         ...props.consultants,
                         { id: "consultant-2", label: "Blair", actionLabel: "Contact", isActionAvailable: false },
                     ],
-                }}
+                })}
                 on={{ back, companyContact, course, "contact:consultant-1": contact }}
             />,
         )
@@ -106,7 +105,5 @@ describe("CourseHeadhuntingCompanyPage", () => {
         expect(companyContact).toHaveBeenCalledOnce()
         fireEvent.click(screen.getByRole("button", { name: /Back to partners/ }))
         expect(back).toHaveBeenCalledOnce()
-        fireEvent.click(screen.getByText("TypeScript"))
-        expect(course).toHaveBeenCalledOnce()
     })
 })

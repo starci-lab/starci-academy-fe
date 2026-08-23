@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
-import { ProfileProjectsPageBase } from "./component"
+import { ProfileProjectsBase } from "@/components/blocks/profile/ProfileProjects/component"
 
 /**
  * What these tests guard.
@@ -21,9 +21,9 @@ const capstone = {
     milestones: [],
 }
 
-describe("ProfileProjectsPageBase", () => {
+describe("ProfileProjectsBase", () => {
     it("keeps pinned project tiles before the verified capstone list", () => {
-        const html = renderToStaticMarkup(<ProfileProjectsPageBase pinned={{ state: "ready", data: [{ id: "pin", type: "external", title: "Design tokens", description: "Shared tokens", techStack: ["TypeScript"], orderIndex: 0, isVerified: false }] }} capstones={{ state: "ready", data: [capstone] }} on={{ openPinned: vi.fn(), openCapstone: vi.fn() }} />)
+        const html = renderToStaticMarkup(<ProfileProjectsBase pinned={{ state: "ready", data: [{ id: "pin", type: "external", title: "Design tokens", description: "Shared tokens", techStack: ["TypeScript"], orderIndex: 0, isVerified: false }] }} capstones={{ state: "ready", data: [capstone] }} on={{ openPinned: vi.fn(), openCapstone: vi.fn() }} />)
         expect(html.indexOf("Pinned projects")).toBeLessThan(html.indexOf("Verified capstone work"))
         expect(html).toContain("profile-project-card-grid")
         expect(html).toContain("82%")
@@ -31,7 +31,7 @@ describe("ProfileProjectsPageBase", () => {
 
     it("rests two tiles and three capstone rows while both families are in flight", () => {
         const { container } = render(
-            <ProfileProjectsPageBase
+            <ProfileProjectsBase
                 pinned={{ state: "pending", data: [] }}
                 capstones={{ state: "pending", data: [] }}
                 on={{ openPinned: vi.fn(), openCapstone: vi.fn() }}
@@ -46,7 +46,7 @@ describe("ProfileProjectsPageBase", () => {
 
     it("gives each family its own failure sentence", () => {
         render(
-            <ProfileProjectsPageBase
+            <ProfileProjectsBase
                 pinned={{ state: "error", data: [] }}
                 capstones={{ state: "error", data: [] }}
                 on={{ openPinned: vi.fn(), openCapstone: vi.fn() }}
@@ -59,7 +59,7 @@ describe("ProfileProjectsPageBase", () => {
 
     it("says nothing is pinned and nothing is verified when both settle empty", () => {
         render(
-            <ProfileProjectsPageBase
+            <ProfileProjectsBase
                 pinned={{ state: "ready", data: [] }}
                 capstones={{ state: "ready", data: [] }}
                 on={{ openPinned: vi.fn(), openCapstone: vi.fn() }}
@@ -75,7 +75,7 @@ describe("ProfileProjectsPageBase", () => {
         const openPinned = vi.fn()
         const openCapstone = vi.fn()
         render(
-            <ProfileProjectsPageBase
+            <ProfileProjectsBase
                 pinned={{
                     state: "ready",
                     data: [{ id: "pin", type: "external", title: "Design tokens", url: "https://example.com/tokens", techStack: ["TypeScript"], orderIndex: 0, isVerified: true }],
@@ -95,7 +95,7 @@ describe("ProfileProjectsPageBase", () => {
     it("leaves an unlinked tile unpressable and keeps its own kind badge", () => {
         const openPinned = vi.fn()
         render(
-            <ProfileProjectsPageBase
+            <ProfileProjectsBase
                 pinned={{
                     state: "ready",
                     data: [{ id: "pin", type: "case study", title: "Offline sync", description: null, techStack: [], orderIndex: 0, isVerified: false }],

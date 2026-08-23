@@ -42,7 +42,7 @@ describe("CourseContentMapBase", () => {
         )
 
         expect(container.querySelector("[data-node=content-map-panel]")).toHaveClass("px-3")
-        expect(container.querySelector("[data-node=content-map-panel]")).not.toHaveClass("py-6")
+        expect(container.querySelector("[data-node=content-map-panel]")).toHaveClass("py-6")
         expect(container.querySelector("[data-node=content-map-panel]")).not.toHaveClass("p-4")
         expect(container.querySelector("[data-node=content-map-module-list]")).toHaveClass(
             "divide-y",
@@ -60,6 +60,7 @@ describe("CourseContentMapBase", () => {
     it("rests exactly four authored module shapes while the outline is pending", () => {
         const { container } = render(<CourseContentMapBase state="pending" props={{ labels }} />)
         expect(container.querySelectorAll("[data-component=SurfaceAccordionCard]")).toHaveLength(4)
+        expect(container.querySelectorAll("[data-component=SurfaceAccordionCardItem]")).toHaveLength(4)
     })
 
     it("keeps the panel and search available for an empty filtered result", () => {

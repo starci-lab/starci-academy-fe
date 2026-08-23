@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { Be_Vietnam_Pro } from "next/font/google"
 import { notFound } from "next/navigation"
 import { getMessages, getTranslations } from "next-intl/server"
 import { hasLocale } from "next-intl"
@@ -33,6 +34,13 @@ import "../globals.css"
  * Both are fixable. Neither is worth fixing to pre-build a blank screen.
  */
 export const dynamic = "force-dynamic"
+
+const starCiSans = Be_Vietnam_Pro({
+    display: "swap",
+    subsets: ["latin", "vietnamese"],
+    variable: "--starci-font-sans",
+    weight: ["400", "500", "600"],
+})
 
 /**
  * Browser-level metadata for every route in this language.
@@ -91,7 +99,7 @@ const LocaleLayout = async ({ children, params }: LayoutProps<"/[lang]">) => {
         // provider writes the resolved theme onto this element before React hydrates, so the
         // server's markup and the browser's first paint differ on purpose. Suppressing it here
         // is narrow - it covers this element's own attributes, not the tree below it.
-        <html lang={lang} suppressHydrationWarning>
+        <html className={starCiSans.variable} lang={lang} suppressHydrationWarning>
             <body>
                 <AppProviders locale={lang} messages={messages}>
                     <GlobalAiChatLayout surface={children} />

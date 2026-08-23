@@ -1,7 +1,5 @@
 import { forwardRef, type ReactNode, type SVGProps } from "react"
 
-export * from "@heroicons/react/24/outline"
-
 /** Props shared by StarCi cuts that follow Heroicons' accessible SVG surface. */
 export type StarCiOutlineIconProps = SVGProps<SVGSVGElement> & {
     readonly title?: string
@@ -33,6 +31,35 @@ const outlineIcon = (name: string, body: ReactNode) => {
     Component.displayName = name
     return Component
 }
+
+/** Empty completion ring missing from upstream Heroicons. */
+export const CircleIcon = outlineIcon("CircleIcon", (
+    <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+))
+
+/** Shared medal silhouette with an authored place numeral. */
+const placeMedal = (name: string, numeral: ReactNode) => outlineIcon(name, (
+    <>
+        <path strokeLinecap="round" strokeLinejoin="round" d="m8 3 4 6 4-6m-8 0H5.5l4 7.2m6.5-7.2h2.5l-4 7.2" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M18.75 15.75a6.75 6.75 0 1 1-13.5 0 6.75 6.75 0 0 1 13.5 0Z" />
+        {numeral}
+    </>
+))
+
+/** First-place medal custom cut. */
+export const FirstPlaceMedalIcon = placeMedal("FirstPlaceMedalIcon", (
+    <path strokeLinecap="round" strokeLinejoin="round" d="M11 13.25h1.25v5m-1.25 0h2.5" />
+))
+
+/** Second-place medal custom cut. */
+export const SecondPlaceMedalIcon = placeMedal("SecondPlaceMedalIcon", (
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 14.25c.25-1 1.1-1.5 2.25-1.5 1.25 0 2.25.7 2.25 1.75 0 1.75-2.25 2.25-4.5 3.75h4.75" />
+))
+
+/** Third-place medal custom cut. */
+export const ThirdPlaceMedalIcon = placeMedal("ThirdPlaceMedalIcon", (
+    <path strokeLinecap="round" strokeLinejoin="round" d="M10 13h2.25c1.15 0 2 .6 2 1.5s-.85 1.5-2 1.5H11.5h.75c1.3 0 2.25.65 2.25 1.6 0 1.05-.95 1.65-2.35 1.65H10" />
+))
 
 /** Two persistent panes separated by the boundary controlled by the course-rail toggle. */
 export const CourseRailIcon = outlineIcon("CourseRailIcon", (

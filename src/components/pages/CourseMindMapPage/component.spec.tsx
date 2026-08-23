@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { CourseMindMapPageBase, type CourseMindMapNodeView, type CourseMindMapPageProps } from "./component"
+import { CourseMindMapBase, type CourseMindMapNodeView, type CourseMindMapBlockProps } from "@/components/blocks/learn/CourseMindMap/component"
 
 /**
  * What these tests guard: three different absences that all draw an empty canvas. A graph the course
@@ -33,7 +33,7 @@ const copy = {
     graphFact: "18 concepts · 24 connections",
 }
 
-const handlers = (): CourseMindMapPageProps["on"] => ({
+const handlers = (): CourseMindMapBlockProps["on"] => ({
     search: vi.fn(),
     select: vi.fn(),
     openContent: vi.fn(),
@@ -41,22 +41,22 @@ const handlers = (): CourseMindMapPageProps["on"] => ({
 })
 
 const draw = (
-    state: CourseMindMapPageProps["state"],
-    props: Partial<CourseMindMapPageProps["props"]> = {},
-    on: CourseMindMapPageProps["on"] = handlers(),
+    blockState: CourseMindMapBlockProps["blockState"],
+    props: Partial<CourseMindMapBlockProps["props"]> = {},
+    on: CourseMindMapBlockProps["on"] = handlers(),
 ) => render(
-    <CourseMindMapPageBase
-        state={state}
+    <CourseMindMapBase
+        blockState={blockState}
         props={{ ...copy, nodes: [node()], selectedId: "node-1", ...props }}
         on={on}
     />,
 )
 
-describe("CourseMindMapPageBase", () => {
+describe("CourseMindMapBase", () => {
     it("draws the graph scale, the selected node's detail and its route into real content", () => {
         const { container } = draw("ready")
 
-        expect(container.querySelector("[data-node=\"course-mind-map-page\"]")).not.toBeNull()
+        expect(container.querySelector("[data-node=\"course-mind-map-workspace\"]")).not.toBeNull()
         expect(screen.getByText("18 concepts · 24 connections")).toBeInTheDocument()
         expect(screen.getByRole("link", { name: "Containers · 12 lessons" })).toHaveAttribute("aria-current", "page")
         expect(screen.getByText("12 lessons")).toBeInTheDocument()

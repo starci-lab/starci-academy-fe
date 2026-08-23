@@ -1,4 +1,5 @@
 import { SandpackWorkspace, type SandpackWorkspaceData } from "@/components/branches/SandpackWorkspace"
+import { CodeReaderWorkspace } from "@/components/branches/CodeReaderWorkspace"
 import { Tree } from "@/components/branches/Tree"
 import { Button } from "@/components/leaves/Button"
 import { StatusDot } from "@/components/leaves/StatusDot"
@@ -11,6 +12,7 @@ export type ContentSourceWorkspaceState = "pending" | "ready" | "failed"
 
 /** Product copy and runtime data for the selected Source face. */
 export type ContentSourceWorkspaceData = SandpackWorkspaceData & {
+    readonly mode: "reader" | "sandbox"
     readonly identity: string
     readonly loadingLabel: string
     readonly failedLabel: string
@@ -55,7 +57,7 @@ const toolbar = (
             ? [defineLeafComponent("button", {}, () => (
                 <Button props={{ label: props.resetLabel, size: "sm" }} isLoading />
             ))]
-            : [
+            : props.mode === "reader" ? [] : [
                 defineLeafComponent("button", {}, () => (
                     <Button props={{ label: props.resetLabel, size: "sm", disabled: !hasEdits }} on={{ press: on?.reset }} />
                 )),
@@ -81,25 +83,35 @@ const toolbar = (
 }
 
 /** Render source loading/failure or the editable Sandpack workspace. */
-export const ContentSourceWorkspace = ({ state, props, on }: ContentSourceWorkspaceProps) => (
+export const ContentSourceWorkspace = (input: ContentSourceWorkspaceProps) => (
     <Tree
         contract="source-workspace-root"
         render={defineContractComponent("source-workspace-root", {
-            toolbar: toolbar(state, props, on),
-            ...(state === "ready" ? {
-                workspace: defineContractProjection("source-workspace-grid", () => (
-                    <SandpackWorkspace
-                        props={props}
+            toolbar: toolbar(input.state, input.props, input.on),
+            ...(input.state !== "ready" ? {} : input.props.mode === "reader" ? {
+                workspace: defineContractProjection("source-code-reader-grid", () => (
+                    <CodeReaderWorkspace
+                        props={input.props}
                         on={{
-                            activateFile: on?.activateFile,
-                            updateFile: on?.updateFile,
-                            selectionChange: on?.selectCode,
-                            runtimeError: on?.runtimeError,
-                            reset: on?.reset,
+                            activateFile: input.on?.activateFile,
+                            selectionChange: input.on?.selectCode,
                         }}
                     />
                 )),
-            } : {}),
+            } : {
+                workspace: defineContractProjection("source-workspace-grid", () => (
+                    <SandpackWorkspace
+                        props={input.props}
+                        on={{
+                            activateFile: input.on?.activateFile,
+                            updateFile: input.on?.updateFile,
+                            selectionChange: input.on?.selectCode,
+                            runtimeError: input.on?.runtimeError,
+                            reset: input.on?.reset,
+                        }}
+                    />
+                )),
+            }),
         })}
     />
 )

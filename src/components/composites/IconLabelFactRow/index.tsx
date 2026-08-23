@@ -23,6 +23,7 @@ export type IconLabelFactRowProps = CompositeProps<IconLabelFactRowData>
 
 /** Draw one shared visual row without owning its surrounding interaction. */
 export const IconLabelFactRow = ({ props, isLoading = false }: IconLabelFactRowProps) => {
+    const endBadge = props.endBadge
     const glyph = defineLeafComponent("icon", { size: "sm" }, () => (
         <Icon props={{ name: props.icon, role: "leading" }} />
     ))
@@ -57,9 +58,9 @@ export const IconLabelFactRow = ({ props, isLoading = false }: IconLabelFactRowP
             title: defineLeafComponent("text", { size: "sm", tone: "default" }, () => (
                 <Text props={{ content: props.label, size: "sm", parentEmphasis: "accent-soft" }} />
             )),
-            ...(props.endBadge !== undefined ? {
+            ...(endBadge !== undefined ? {
                 fact: defineLeafComponent("badge", {}, () => (
-                    <Badge props={props.endBadge} isLoading={isLoading} />
+                    <Badge props={endBadge} isLoading={isLoading} />
                 )),
             } : props.endText === undefined ? {} : {
                 fact: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (

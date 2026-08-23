@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { ProfileSkillsPageBase, type ProfileSkillsPageProps } from "./component"
+import { ProfileSkillsBase, type ProfileSkillsBlockProps } from "@/components/blocks/profile/ProfileSkills/component"
 
 /**
  * What these tests guard.
@@ -10,7 +10,7 @@ import { ProfileSkillsPageBase, type ProfileSkillsPageProps } from "./component"
  * chip run - and a resting tab keeps all three rather than collapsing to a spinner.
  */
 
-const ready: ProfileSkillsPageProps["props"] = {
+const ready: ProfileSkillsBlockProps["props"] = {
     metrics: [
         { id: "solved", value: "42", label: "solved" },
         { id: "xp", value: "3280", label: "coding XP" },
@@ -24,10 +24,10 @@ const ready: ProfileSkillsPageProps["props"] = {
     filterLabel: "Filters",
 }
 
-describe("ProfileSkillsPageBase", () => {
+describe("ProfileSkillsBase", () => {
     it("keeps legacy metric, breakdown and solve-history order without generic evidence owner", () => {
         const select = vi.fn()
-        const { container } = render(<ProfileSkillsPageBase state="ready" props={ready} on={{ select }} />)
+        const { container } = render(<ProfileSkillsBase state="ready" props={ready} on={{ select }} />)
         const text = container.textContent ?? ""
         expect(text.indexOf("Coding metrics")).toBeLessThan(text.indexOf("Stats"))
         expect(text.indexOf("Stats")).toBeLessThan(text.indexOf("Solve history"))
@@ -37,7 +37,7 @@ describe("ProfileSkillsPageBase", () => {
     })
 
     it("rests four metrics and all three breakdown runs rather than collapsing the tab", () => {
-        const { container } = render(<ProfileSkillsPageBase state="pending" props={ready} on={{}} />)
+        const { container } = render(<ProfileSkillsBase state="pending" props={ready} on={{}} />)
 
         expect(container.querySelectorAll("[data-node='profile-proof-metric']")).toHaveLength(4)
         expect(container.querySelectorAll("[data-node='profile-topic-chip-run'] [data-component='Badge']")).toHaveLength(4)
@@ -49,7 +49,7 @@ describe("ProfileSkillsPageBase", () => {
     })
 
     it("keeps a failed tab readable and its controls inert when no outcomes are wired", () => {
-        render(<ProfileSkillsPageBase state="error" props={{ ...ready, history: [] }} />)
+        render(<ProfileSkillsBase state="error" props={{ ...ready, history: [] }} />)
 
         expect(screen.getByText("Solve history")).toBeInTheDocument()
         expect(screen.getByRole("searchbox", { name: "Search solve history" })).toBeInTheDocument()
@@ -62,7 +62,7 @@ describe("ProfileSkillsPageBase", () => {
         const select = vi.fn()
         const search = vi.fn()
         const filter = vi.fn()
-        render(<ProfileSkillsPageBase state="ready" props={ready} on={{ select, search, filter }} />)
+        render(<ProfileSkillsBase state="ready" props={ready} on={{ select, search, filter }} />)
 
         expect(screen.getByText("1 results")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Shortest path" }))
@@ -74,7 +74,7 @@ describe("ProfileSkillsPageBase", () => {
 
     it("tones a medium problem apart from an unclassified one and leaves the latter factless", () => {
         const { container } = render(
-            <ProfileSkillsPageBase
+            <ProfileSkillsBase
                 state="ready"
                 props={{
                     ...ready,
