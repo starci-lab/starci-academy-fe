@@ -21,10 +21,16 @@ describe("Icon", () => {
     })
 
     it.each([
+        ["learnHome", 3],
+        ["courseContent", 2],
+        ["personalProject", 3],
+        ["flashcards", 3],
         ["mindMap", 2],
         ["mockInterview", 2],
         ["foundations", 2],
         ["playground", 2],
+        ["courseLeaderboard", 2],
+        ["courseQa", 3],
     ] as const)("owns a reviewed product cut for %s", (name, pathCount) => {
         const { container } = render(<Icon props={{ name, role: "leading" }} />)
         expect(container.querySelector("svg")).toHaveAttribute("viewBox", "0 0 24 24")

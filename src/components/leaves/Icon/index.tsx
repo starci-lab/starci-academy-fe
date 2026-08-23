@@ -94,21 +94,33 @@ import {
 } from "@heroicons/react/16/solid"
 import {
     CircleIcon,
+    CourseContentIcon,
+    CourseLeaderboardIcon,
+    CourseOverviewIcon,
+    CourseQaIcon,
     CourseRailIcon,
+    FlashcardsIcon,
     FirstPlaceMedalIcon,
     FoundationsIcon,
     MindMapIcon,
     MockInterviewIcon,
+    PersonalProjectIcon,
     PlaygroundIcon,
     SecondPlaceMedalIcon,
     ThirdPlaceMedalIcon,
 } from "@starci/heroicons/24/outline"
 import {
     CircleIcon as CircleSolidIcon,
+    CourseContentIcon as CourseContentSolidIcon,
+    CourseLeaderboardIcon as CourseLeaderboardSolidIcon,
+    CourseOverviewIcon as CourseOverviewSolidIcon,
+    CourseQaIcon as CourseQaSolidIcon,
     CourseRailIcon as CourseRailSolidIcon,
+    FlashcardsIcon as FlashcardsSolidIcon,
     FoundationsIcon as FoundationsSolidIcon,
     MindMapIcon as MindMapSolidIcon,
     MockInterviewIcon as MockInterviewSolidIcon,
+    PersonalProjectIcon as PersonalProjectSolidIcon,
     PlaygroundIcon as PlaygroundSolidIcon,
 } from "@starci/heroicons/16/solid"
 import type { ComponentType, SVGProps } from "react"
@@ -141,7 +153,8 @@ export type IconName =
     | "light" | "dark" | "locale" | "google" | "github"
     | "search" | "cart" | "notification" | "account" | "profile" | "cv" | "settings" | "signOut"
     | "saved" | "blog" | "talents" | "jobs" | "practice"
-    | "viewGrid" | "viewList" | "collapseRail" | "mindMap" | "mockInterview" | "foundations" | "playground"
+    | "viewGrid" | "viewList" | "collapseRail" | "learnHome" | "courseContent" | "personalProject" | "flashcards"
+    | "mindMap" | "mockInterview" | "foundations" | "playground" | "courseLeaderboard" | "courseQa"
     | "star" | "ratingStarEmpty" | "ratingStarFilled"
     | "rankFirst" | "rankSecond" | "rankThird" | "rankOther"
 
@@ -256,10 +269,16 @@ const GLYPHS: Record<IconName, GlyphCuts> = {
     viewGrid: cuts(Squares2X2Icon, Squares2X2SolidIcon),
     viewList: cuts(ListBulletIcon, ListBulletSolidIcon),
     collapseRail: cuts(CourseRailIcon, CourseRailSolidIcon),
+    learnHome: cuts(CourseOverviewIcon, CourseOverviewSolidIcon),
+    courseContent: cuts(CourseContentIcon, CourseContentSolidIcon),
+    personalProject: cuts(PersonalProjectIcon, PersonalProjectSolidIcon),
+    flashcards: cuts(FlashcardsIcon, FlashcardsSolidIcon),
     mindMap: cuts(MindMapIcon, MindMapSolidIcon),
     mockInterview: cuts(MockInterviewIcon, MockInterviewSolidIcon),
     foundations: cuts(FoundationsIcon, FoundationsSolidIcon),
     playground: cuts(PlaygroundIcon, PlaygroundSolidIcon),
+    courseLeaderboard: cuts(CourseLeaderboardIcon, CourseLeaderboardSolidIcon),
+    courseQa: cuts(CourseQaIcon, CourseQaSolidIcon),
     rankFirst: cuts(FirstPlaceMedalIcon, FirstPlaceMedalIcon),
     rankSecond: cuts(SecondPlaceMedalIcon, SecondPlaceMedalIcon),
     rankThird: cuts(ThirdPlaceMedalIcon, ThirdPlaceMedalIcon),

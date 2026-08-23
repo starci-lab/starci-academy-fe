@@ -14,9 +14,9 @@ export type LearnSpineProps = { readonly displayId: string; readonly presentatio
 
 type SpineRoute = { readonly id: string; readonly icon: IconName; readonly at: string; readonly requiresEnrollment?: boolean }
 const GROUPS: ReadonlyArray<{ id: string; rows: ReadonlyArray<SpineRoute> }> = [
-    { id: "path", rows: [{ id: "content", icon: "course", at: "/learn/content" }, { id: "personalProject", icon: "practice", at: "/learn/personal-project", requiresEnrollment: true }] },
-    { id: "practice", rows: [{ id: "flashcards", icon: "review", at: "/learn/flashcards" }, { id: "mockInterview", icon: "mockInterview", at: "/learn/mock-interview", requiresEnrollment: true }, { id: "foundations", icon: "foundations", at: "/learn/foundations" }, { id: "playground", icon: "playground", at: "/learn/playground" }] },
-    { id: "track", rows: [{ id: "mindMap", icon: "mindMap", at: "/learn/mind-map" }, { id: "leaderboard", icon: "league", at: "/learn/leaderboard" }, { id: "qa", icon: "community", at: "/learn/qa" }] },
+    { id: "path", rows: [{ id: "content", icon: "courseContent", at: "/learn/content" }, { id: "personalProject", icon: "personalProject", at: "/learn/personal-project", requiresEnrollment: true }] },
+    { id: "practice", rows: [{ id: "flashcards", icon: "flashcards", at: "/learn/flashcards" }, { id: "mockInterview", icon: "mockInterview", at: "/learn/mock-interview", requiresEnrollment: true }, { id: "foundations", icon: "foundations", at: "/learn/foundations" }, { id: "playground", icon: "playground", at: "/learn/playground" }] },
+    { id: "track", rows: [{ id: "mindMap", icon: "mindMap", at: "/learn/mind-map" }, { id: "leaderboard", icon: "courseLeaderboard", at: "/learn/leaderboard" }, { id: "qa", icon: "courseQa", at: "/learn/qa" }] },
 ]
 const LEARN_RAIL_COLLAPSED_KEY = "starci.learn.sidebar.collapsed"
 
@@ -50,7 +50,7 @@ export const LearnSpine = ({ displayId, presentation = "rail", onNavigate }: Lea
     })), [t, pathname, base, enrollmentKnown, course.data?.isEnrolled, viewerRank])
     const props = {
         lockedLabel: t("locked"), collapseLabel: t("collapse"), expandLabel: t("expand"), isCollapsed,
-        home: { id: "home", label: t("rows.home"), icon: "viewGrid" as const, isCurrent: pathname === `${base}/learn` },
+        home: { id: "home", label: t("rows.home"), icon: "learnHome" as const, isCurrent: pathname === `${base}/learn` },
         groups,
         ...(enrolledCourse === undefined ? {} : { resume: { label: t("resume"), title: enrolledCourse.label, percent: enrolledCourse.completionPercent, percentText: t("progress", { percent: enrolledCourse.completionPercent }) } }),
     }

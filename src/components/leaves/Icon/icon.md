@@ -79,10 +79,16 @@ icon leaf selects the outline or micro drawing from the role.
 | `viewGrid` | Lay a collection out as a card grid | `Squares2X2Icon` | Four equal panes name an arrangement rather than the content being arranged |
 | `viewList` | Lay a collection out as compact rows | `ListBulletIcon` | A bulleted run of lines names row layout without borrowing the review clipboard |
 | `collapseRail` | Collapse or restore the persistent course rail | `CourseRailIcon` | The two persistent panes reproduce the course-outline control and name changing the rail width without implying route navigation |
+| `learnHome` | Course learning overview | `CourseOverviewIcon` | A home held inside the learning surface distinguishes the course overview from both the global dashboard and a generic grid layout |
+| `courseContent` | Course lesson content | `CourseContentIcon` | An open text with lesson lines names the curriculum the learner reads rather than the wider course catalogue |
+| `personalProject` | Personal course project | `PersonalProjectIcon` | A bounded authored code artifact names the learner's deliverable rather than generic code practice |
+| `flashcards` | Course flashcard review | `FlashcardsIcon` | Overlapping study cards with a forward cue name moving through a review deck rather than checking assigned work |
 | `mindMap` | Course mind map | `MindMapIcon` | A central concept joined to independent branches names the spatial knowledge map rather than editorial content |
 | `mockInterview` | Course mock interview | `MockInterviewIcon` | A live microphone names spoken interview practice rather than generic talent discovery |
-| `foundations` | Course foundations | `FoundationsIcon` | Stacked conceptual layers name durable prerequisites rather than catalogue exploration |
+| `foundations` | Course foundations | `FoundationsIcon` | One block supported by two lower prerequisite blocks names a foundation rather than generic layers |
 | `playground` | Executable course playground | `PlaygroundIcon` | A bounded terminal prompt names a runnable learning environment rather than credential verification |
+| `courseLeaderboard` | Course leaderboard | `CourseLeaderboardIcon` | A three-place podium names ordered course standing directly instead of generic competitive achievement |
+| `courseQa` | Course questions and answers | `CourseQaIcon` | A question bubble paired with its response names learner Q&A rather than the whole learner community |
 | `rankFirst` | First leaderboard place | `FirstPlaceMedalIcon` | The authored numeral keeps first place distinct without another artwork vendor |
 | `rankSecond` | Second leaderboard place | `SecondPlaceMedalIcon` | The authored numeral keeps second place distinct without another artwork vendor |
 | `rankThird` | Third leaderboard place | `ThirdPlaceMedalIcon` | The authored numeral keeps third place distinct without another artwork vendor |
