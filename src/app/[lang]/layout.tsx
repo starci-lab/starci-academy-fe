@@ -99,7 +99,7 @@ const LocaleLayout = async ({ children, params }: LayoutProps<"/[lang]">) => {
         // provider writes the resolved theme onto this element before React hydrates, so the
         // server's markup and the browser's first paint differ on purpose. Suppressing it here
         // is narrow - it covers this element's own attributes, not the tree below it.
-        <html className={starCiSans.variable} lang={lang} suppressHydrationWarning>
+        <html className={starCiSans.variable} data-grammar="core" lang={lang} suppressHydrationWarning>
             <body>
                 <AppProviders locale={lang} messages={messages}>
                     <GlobalAiChatLayout surface={children} />

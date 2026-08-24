@@ -4,6 +4,7 @@ import { Heading } from "@/components/leaves/Heading"
 import { Text } from "@/components/leaves/Text"
 import { SeeMoreLink } from "@/components/leaves/SeeMoreLink"
 import type { ContractKey } from "@/components/contracts"
+import { STARCI_ACADEMY_GRAMMAR_CONTRACTS } from "@/components/contracts/grammar"
 import {
     defineContractComponent,
     defineContractProjection,
@@ -141,6 +142,7 @@ export const SurfaceCard = <const K extends ContractKey>({
         <Card
             className="p-0"
             data-component="SurfaceCardSurface"
+            data-grammar-contract={STARCI_ACADEMY_GRAMMAR_CONTRACTS.surfaceCard.key}
             data-scroll-inside={props.scrollInside}
         >
             <Card.Content className="p-0" data-component="SurfaceCardBody">

@@ -4,6 +4,7 @@ import { Heading } from "@/components/leaves/Heading"
 import { Text } from "@/components/leaves/Text"
 import { Button } from "@/components/leaves/Button"
 import type { JoinedListContractKey } from "@/components/contracts"
+import { STARCI_ACADEMY_GRAMMAR_CONTRACTS } from "@/components/contracts/grammar"
 import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 import type {
     ContractRenderComponent,
@@ -82,7 +83,11 @@ export const SurfaceListCard = <
     )
 
     return (
-        <div data-component="SurfaceListCard" className="flex flex-col gap-3">
+        <div
+            className="flex flex-col gap-3"
+            data-component="SurfaceListCard"
+            data-grammar-contract={STARCI_ACADEMY_GRAMMAR_CONTRACTS.surfaceListCard.key}
+        >
             {surfaceProps.isLabelHidden === true ? null : label}
             <Card
                 className="p-0"

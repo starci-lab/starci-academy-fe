@@ -42,8 +42,8 @@ describe("offset-pop layered CSS", () => {
         expect(css).toContain("--offset-pop-shadow-y: 7px")
         expect(css).toContain("--offset-pop-shadow-blur: 0")
 
-        const topRule = css.match(/\[data-grammar-surface-depth="top"\][^{]*\{(?<body>[\s\S]*?)\n\s*\}/)?.groups?.body
-        const nestedRule = css.match(/\[data-grammar-surface-depth="nested"\][^{]*\{(?<body>[\s\S]*?)\n\s*\}/)?.groups?.body
+        const topRule = css.match(/\[data-grammar-surface-depth="top"\][^{]*\{([\s\S]*?)\n\s*\}/)?.[1]
+        const nestedRule = css.match(/\[data-grammar-surface-depth="nested"\][^{]*\{([\s\S]*?)\n\s*\}/)?.[1]
 
         expect(topRule).toContain("box-shadow")
         expect(topRule).toContain("var(--offset-pop-shadow-blur)")
