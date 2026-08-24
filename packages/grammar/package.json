@@ -1,0 +1,72 @@
+{
+  "name": "@starci/grammar",
+  "version": "0.1.0",
+  "description": "Business-neutral StarCi UI contracts and versioned Grammar bundles.",
+  "keywords": [
+    "starci",
+    "design-system",
+    "ui-contracts",
+    "grammar"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/starci-lab/starci-academy-fe.git",
+    "directory": "packages/grammar"
+  },
+  "bugs": {
+    "url": "https://github.com/starci-lab/starci-academy-fe/issues"
+  },
+  "homepage": "https://github.com/starci-lab/starci-academy-fe/tree/main/packages/grammar#readme",
+  "type": "module",
+  "sideEffects": [
+    "./dist/**/*.css"
+  ],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    "./common": {
+      "types": "./dist/common/index.d.ts",
+      "import": "./dist/common/index.js"
+    },
+    "./common.css": "./dist/common/styles.css",
+    "./common/styles.css": "./dist/common/styles.css",
+    "./core": {
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.js"
+    },
+    "./core.css": "./dist/core/styles.css",
+    "./core/styles.css": "./dist/core/styles.css",
+    "./offset-pop": {
+      "types": "./dist/offset-pop/index.d.ts",
+      "import": "./dist/offset-pop/index.js"
+    },
+    "./offset-pop.css": "./dist/offset-pop/styles.css",
+    "./offset-pop/styles.css": "./dist/offset-pop/styles.css",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "node scripts/clean.mjs && tsc -p tsconfig.build.json && node scripts/copy-css.mjs",
+    "typecheck": "tsc -p tsconfig.build.json --noEmit",
+    "test": "npm run build && node --test src/common/index.test.mjs src/core/index.test.mjs src/offset-pop/index.test.mjs && vitest run --config vitest.config.ts src/offset-pop/styles.spec.ts",
+    "prepack": "npm run typecheck && npm test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "react": "^19.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^4.1.11"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}
