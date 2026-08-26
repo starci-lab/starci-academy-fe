@@ -4,6 +4,9 @@ import { CourseLearnChallengeBlockBase, type CourseLearnChallengePageProps } fro
 
 const baseProps: CourseLearnChallengePageProps["props"] = {
     title: "Repository challenge",
+    courseTitle: "Fullstack Mastery",
+    moduleTitle: "Foundations",
+    contentTitle: "Dependency injection",
     description: "Submit the authored deliverable.",
     difficultyLabel: "Hard",
     statusLabel: "Not submitted",
@@ -12,6 +15,9 @@ const baseProps: CourseLearnChallengePageProps["props"] = {
     maximumScore: 10,
     expandedRequirementIds: ["submission-1"],
     isCourseMapOpen: false,
+    isConfirmOpen: false,
+    allDraftsComplete: true,
+    draftStatus: "Draft saved",
     courseMap: {
         state: "ready",
         props: {
@@ -57,6 +63,17 @@ const baseProps: CourseLearnChallengePageProps["props"] = {
         score: "Your score",
         repositoryPlaceholder: "https://github.com/…",
         saved: "Saved locally",
+        saving: "Saving",
+        saveFailed: "Save failed",
+        conflict: "Draft conflict",
+        saveDraft: "Save draft",
+        retrySave: "Retry save",
+        submitAttempt: "Submit complete attempt",
+        confirmTitle: "Submit this attempt?",
+        confirmDescription: "The submitted revision cannot be edited.",
+        confirmSubmit: "Submit and evaluate",
+        cancel: "Keep editing",
+        breadcrumb: "Course challenge path",
         submit: "Submit",
         submitting: "Submitting",
         retry: "Retry",
@@ -74,7 +91,7 @@ describe("CourseLearnChallengeBlockBase", () => {
 
         expect(container.querySelector("[data-node=challenge-page-document]")).toBeTruthy()
         expect(container.querySelector("[data-node=challenge-workspace]")).toBeTruthy()
-        expect(container.querySelector("[data-node=challenge-submission-rail]")).toBeTruthy()
+        expect(container.querySelector("[data-node=challenge-attempt-workbench]")).toBeTruthy()
         expect(screen.getByRole("heading", { name: "Repository challenge", level: 1 })).toBeInTheDocument()
         expect(screen.getAllByText("1/2")).toHaveLength(1)
     })
@@ -84,26 +101,26 @@ describe("CourseLearnChallengeBlockBase", () => {
 
         expect(container.querySelectorAll("[data-node=challenge-deliverable-row]")).toHaveLength(2)
         expect(container.querySelector("h1")).toHaveAttribute("data-loading", "true")
-        expect(screen.getAllByRole("button", { name: "Submit" }).every((button) => button.hasAttribute("disabled"))).toBe(true)
+        expect(screen.getByRole("button", { name: "Submit complete attempt" })).toBeDisabled()
     })
 
-    it("edits and submits one source-authored deliverable", () => {
+    it("edits one deliverable and submits the complete attempt", () => {
         const changeUrl = vi.fn()
-        const submit = vi.fn()
+        const submitAttempt = vi.fn()
         render(
             <CourseLearnChallengeBlockBase
                 blockState="ready"
                 props={baseProps}
-                on={{ changeUrl, submit }}
+                on={{ changeUrl, submitAttempt }}
             />,
         )
 
         fireEvent.change(screen.getByLabelText("API repository"), {
             target: { value: "https://example.test/next" },
         })
-        fireEvent.click(screen.getByRole("button", { name: "Submit" }))
+        fireEvent.click(screen.getByRole("button", { name: "Submit complete attempt" }))
         expect(changeUrl).toHaveBeenCalledWith("submission-1", "https://example.test/next")
-        expect(submit).toHaveBeenCalledWith("submission-1")
+        expect(submitAttempt).toHaveBeenCalledTimes(1)
     })
 
     it("locks every submit control while the active deliverable is in flight", () => {
@@ -115,11 +132,11 @@ describe("CourseLearnChallengeBlockBase", () => {
         )
 
         expect(screen.getByLabelText("API repository")).toBeDisabled()
-        expect(screen.getByRole("button", { name: "Submitting" })).toBeDisabled()
+        expect(screen.getByRole("button", { name: "Submit complete attempt" })).toBeDisabled()
     })
 
-    it("keeps the failed field in place and retries that exact deliverable", () => {
-        const retry = vi.fn()
+    it("keeps the failed field in place and retries the recoverable draft save", () => {
+        const saveDraft = vi.fn()
         render(
             <CourseLearnChallengeBlockBase
                 blockState="failed"
@@ -128,13 +145,13 @@ describe("CourseLearnChallengeBlockBase", () => {
                     failedSubmissionId: "submission-1",
                     notice: "Submission refused",
                 }}
-                on={{ retry }}
+                on={{ saveDraft }}
             />,
         )
 
         expect(screen.getByLabelText("API repository")).toHaveAttribute("aria-invalid", "true")
-        fireEvent.click(screen.getByRole("button", { name: "Retry" }))
-        expect(retry).toHaveBeenCalledWith("submission-1")
+        fireEvent.click(screen.getByRole("button", { name: "Save draft" }))
+        expect(saveDraft).toHaveBeenCalledTimes(1)
     })
 
     it("opens the graded result after the challenge has passed", () => {

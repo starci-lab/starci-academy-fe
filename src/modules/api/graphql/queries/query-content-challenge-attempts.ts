@@ -5,6 +5,7 @@ import type { GraphQLResponse, LookupQueryParams, PaginationFilters } from "../t
 /** One persisted grading attempt for a challenge deliverable. */
 export interface ContentChallengeAttempt {
     readonly id: string
+    readonly attemptGroupId: string | null
     readonly attemptNumber: number
     readonly score: number | null
     readonly shortFeedback: string | null
@@ -12,6 +13,16 @@ export interface ContentChallengeAttempt {
     readonly submissionUrl: string
     readonly servedModel: string | null
     readonly servedProvider: string | null
+    readonly evaluationJobId: string | null
+    readonly status: "evaluating" | "passed" | "needs_revision" | "evaluation_unavailable" | "completed"
+    readonly draftRevision: number
+    readonly submittedAt: string
+    readonly updatedAt: string
+    readonly platformDecision: "passed" | "needs_revision" | null
+    readonly confidence: number | null
+    readonly uncertainty: string | null
+    readonly nextAction: string | null
+    readonly finalizationRevision: number
 }
 
 /** Sort keys accepted by the challenge-attempt list. */
@@ -41,6 +52,7 @@ const query1 = gql`
                 count
                 data {
                     id
+                    attemptGroupId
                     attemptNumber
                     score
                     shortFeedback
@@ -48,6 +60,16 @@ const query1 = gql`
                     submissionUrl
                     servedModel
                     servedProvider
+                    evaluationJobId
+                    status
+                    draftRevision
+                    submittedAt
+                    updatedAt
+                    platformDecision
+                    confidence
+                    uncertainty
+                    nextAction
+                    finalizationRevision
                 }
             }
         }

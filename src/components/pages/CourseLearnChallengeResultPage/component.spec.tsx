@@ -18,16 +18,18 @@ const baseProps: ChallengeResultBlockProps["props"] = {
     reloadLabel: "Reload",
     retryLabel: "Retry challenge",
     nextLabel: "Next content",
+    evaluationTitle: "Evaluating your attempt",
+    evaluationDetail: "You may leave and resume later.",
 }
 
 describe("ChallengeResultBase", () => {
     it("rests the result surface while grading is pending", () => {
         const { container } = render(<ChallengeResultBase blockState="pending" props={baseProps} />)
 
-        expect(container.querySelector("[data-node=challenge-result-workspace]")).toBeTruthy()
-        expect(container.querySelector("h1")).toHaveAttribute("data-loading", "true")
-        expect(screen.getByRole("button", { name: "Retry challenge" })).toBeDisabled()
-        expect(screen.getByRole("button", { name: "Next content" })).toBeDisabled()
+        expect(container.querySelector("[data-node=challenge-evaluation-status]")).toBeTruthy()
+        expect(screen.getByText("Evaluating your attempt")).toBeInTheDocument()
+        expect(screen.getByText("You may leave and resume later.")).toBeInTheDocument()
+        expect(screen.getByRole("button", { name: "Reload" })).toBeDisabled()
     })
 
     it("renders backend score and every visible feedback body in the ready state", () => {

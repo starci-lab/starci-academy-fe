@@ -6,15 +6,28 @@ import type { GraphQLResponse } from "../types"
 /** Backend-proven grading request for one authored challenge-submission row. */
 export interface SubmitContentChallengeRequest {
     readonly challengeSubmissionId: string
+    readonly deliverables?: ReadonlyArray<{
+        readonly challengeSubmissionId: string
+        readonly idempotencyKey: string
+    }>
     readonly githubUrl?: string
     readonly selectedModel?: string
     readonly selectedModelProvider?: string
     readonly lang?: string
+    readonly idempotencyKey?: string
+    readonly attemptGroupId?: string
 }
 
 /** Async grading job identity returned after a challenge submission is accepted. */
 export interface SubmitContentChallengeResult {
     readonly jobId: string
+    readonly attemptId: string
+    readonly attemptGroupId?: string
+    readonly items?: ReadonlyArray<{
+        readonly challengeSubmissionId: string
+        readonly jobId: string
+        readonly attemptId: string
+    }>
 }
 
 /** GraphQL envelope returned by the challenge-submission mutation. */
@@ -28,7 +41,10 @@ const mutation1 = gql`
             success
             message
             error
-            data { jobId }
+            data {
+                jobId attemptId attemptGroupId
+                items { challengeSubmissionId jobId attemptId }
+            }
         }
     }
 `

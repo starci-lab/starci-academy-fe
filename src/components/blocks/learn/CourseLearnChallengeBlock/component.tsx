@@ -1,4 +1,5 @@
 import { DrawerBranch } from "@/components/branches/DrawerBranch"
+import { ModalBranch } from "@/components/branches/ModalBranch"
 import { SurfaceAccordionCard } from "@/components/branches/SurfaceAccordionCard"
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { Tree } from "@/components/branches/Tree"
@@ -14,6 +15,7 @@ import {
     defineLeafComponent,
 } from "@/components/contracts/props"
 import { Badge } from "@/components/leaves/Badge"
+import { Breadcrumbs } from "@/components/leaves/Breadcrumbs"
 import { Button } from "@/components/leaves/Button"
 import { Heading } from "@/components/leaves/Heading"
 import { Progress } from "@/components/leaves/Progress"
@@ -29,7 +31,7 @@ export type CourseLearnChallengeDeliverable = {
 }
 
 /** The finite challenge states approved for the content-reader route. */
-export type CourseLearnChallengeBlockState = "pending" | "ready" | "submitting" | "passed" | "failed"
+export type CourseLearnChallengeBlockState = "pending" | "ready" | "saving" | "saveFailed" | "conflict" | "submitting" | "evaluating" | "evaluationUnavailable" | "passed" | "needsRevision" | "failed"
 
 /** All reader-facing challenge words, resolved by the connected locale owner. */
 export type CourseLearnChallengeLabels = {
@@ -41,6 +43,17 @@ export type CourseLearnChallengeLabels = {
     readonly score: string
     readonly repositoryPlaceholder: string
     readonly saved: string
+    readonly saving: string
+    readonly saveFailed: string
+    readonly conflict: string
+    readonly saveDraft: string
+    readonly retrySave: string
+    readonly submitAttempt: string
+    readonly confirmTitle: string
+    readonly confirmDescription: string
+    readonly confirmSubmit: string
+    readonly cancel: string
+    readonly breadcrumb: string
     readonly submit: string
     readonly submitting: string
     readonly retry: string
@@ -56,6 +69,9 @@ export type CourseLearnChallengeBlockProps = {
     readonly blockState: CourseLearnChallengeBlockState
     readonly props: {
         readonly title: string
+        readonly courseTitle: string
+        readonly moduleTitle: string
+        readonly contentTitle: string
         readonly description: string
         readonly difficultyLabel: string
         readonly statusLabel: string
@@ -67,6 +83,9 @@ export type CourseLearnChallengeBlockProps = {
         readonly activeSubmissionId?: string
         readonly failedSubmissionId?: string
         readonly notice?: string
+        readonly draftStatus?: string
+        readonly isConfirmOpen: boolean
+        readonly allDraftsComplete: boolean
         readonly isCourseMapOpen: boolean
         readonly courseMap: CourseContentMapBaseProps
         readonly labels: CourseLearnChallengeLabels
@@ -83,6 +102,13 @@ export type CourseLearnChallengeBlockProps = {
         readonly submit?: (id: string) => void
         readonly retry?: (id?: string) => void
         readonly openResult?: (id: string) => void
+        readonly saveDraft?: () => void
+        readonly submitAttempt?: () => void
+        readonly confirmSubmit?: () => void
+        readonly cancelSubmit?: () => void
+        readonly openCourse?: () => void
+        readonly openModule?: () => void
+        readonly openContent?: () => void
     }
 }
 
@@ -98,6 +124,8 @@ const restingDeliverables: ReadonlyArray<CourseLearnChallengeDeliverable> = [0, 
 /** Draws the challenge brief, deliverables and every approved submission state without fetching. */
 export const CourseLearnChallengeBlockBase = (input: CourseLearnChallengeBlockProps) => {
     const isLoading = input.blockState === "pending"
+    const isBusy = input.blockState === "saving" || input.blockState === "submitting" || input.blockState === "evaluating"
+    const isPassed = input.blockState === "passed"
     const deliverables = isLoading ? restingDeliverables : input.props.deliverables
     const threshold = Math.ceil(input.props.maximumScore * 0.8)
     const scorePercent = input.props.maximumScore === 0
@@ -161,37 +189,7 @@ export const CourseLearnChallengeBlockBase = (input: CourseLearnChallengeBlockPr
     })
 
     const deliverableRows = deliverables.map((deliverable) => {
-        const isActive = input.props.activeSubmissionId === deliverable.id
         const hasFailed = input.props.failedSubmissionId === deliverable.id
-        const isPassed = input.blockState === "passed"
-        const action = isPassed
-            ? defineLeafComponent("button", {}, () => (
-                <Button
-                    props={{ label: input.props.labels.result, variant: "secondary", size: "sm" }}
-                    on={{ press: () => input.on?.openResult?.(deliverable.id) }}
-                    isLoading={isLoading}
-                />
-            ))
-            : hasFailed
-                ? defineLeafComponent("button", {}, () => (
-                    <Button
-                        props={{ label: input.props.labels.retry, variant: "primary", size: "sm", icon: "retry" }}
-                        on={{ press: () => input.on?.retry?.(deliverable.id) }}
-                    />
-                ))
-                : defineLeafComponent("button", {}, () => (
-                    <Button
-                        props={{
-                            label: isActive ? input.props.labels.submitting : input.props.labels.submit,
-                            variant: "primary",
-                            size: "sm",
-                            disabled: input.blockState === "submitting" || deliverable.url?.trim().length === 0,
-                            isPending: input.blockState === "submitting" && isActive,
-                        }}
-                        on={{ press: () => input.on?.submit?.(deliverable.id) }}
-                        isLoading={isLoading}
-                    />
-                ))
 
         const status = hasFailed
             ? input.props.notice
@@ -234,7 +232,7 @@ export const CourseLearnChallengeBlockBase = (input: CourseLearnChallengeBlockPr
                             label: deliverable.title,
                             placeholder: input.props.labels.repositoryPlaceholder,
                             kind: "text",
-                            disabled: input.blockState === "submitting",
+                            disabled: isBusy || isPassed,
                             hint: hasFailed ? input.props.notice : undefined,
                             isInvalid: hasFailed,
                         }}
@@ -250,7 +248,6 @@ export const CourseLearnChallengeBlockBase = (input: CourseLearnChallengeBlockPr
                     />
                 )),
             }),
-            actions: defineContractComponent("challenge-deliverable-actions", { action: [action] }),
         })
     })
 
@@ -269,6 +266,68 @@ export const CourseLearnChallengeBlockBase = (input: CourseLearnChallengeBlockPr
                 />
             )),
         } : {}),
+    })
+
+    const draftStatusIsError = input.blockState === "saveFailed" || input.blockState === "conflict"
+    const draftStatus = defineContractComponent("challenge-draft-status", {
+        status: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+            <Text
+                props={{
+                    content: input.props.draftStatus,
+                    size: "sm",
+                    tone: "muted",
+                    live: draftStatusIsError ? "assertive" : "polite",
+                }}
+            />
+        )),
+    })
+    const saveLabel = input.blockState === "saveFailed" || input.blockState === "conflict"
+        ? input.props.labels.retrySave
+        : input.props.labels.saveDraft
+    const submissionActionLeaves = isPassed
+        ? [defineLeafComponent("button", {}, () => (
+            <Button
+                props={{ label: input.props.labels.result, variant: "primary" }}
+                on={{ press: () => input.on?.openResult?.(deliverables[0]?.id ?? "") }}
+            />
+        ))]
+        : [
+            defineLeafComponent("button", {}, () => (
+                <Button
+                    props={{
+                        label: saveLabel,
+                        variant: "outline",
+                        disabled: isLoading || isBusy || isPassed,
+                        isPending: input.blockState === "saving",
+                    }}
+                    on={{ press: input.on?.saveDraft }}
+                />
+            )),
+            defineLeafComponent("button", {}, () => (
+                <Button
+                    props={{
+                        label: input.props.labels.submitAttempt,
+                        variant: "primary",
+                        disabled: isLoading || isBusy || isPassed || !input.props.allDraftsComplete,
+                        isPending: input.blockState === "submitting",
+                    }}
+                    on={{ press: input.on?.submitAttempt }}
+                />
+            )),
+        ]
+    const submissionActions = defineContractComponent("challenge-submission-actions", {
+        action: submissionActionLeaves,
+    })
+    const workbench = defineContractComponent("challenge-attempt-workbench", {
+        deliverables: defineContractProjection("challenge-deliverable-list", () => (
+            <SurfaceCard
+                props={{ label: input.props.labels.deliverables }}
+                contract="challenge-deliverable-list"
+                render={deliverableList}
+            />
+        )),
+        draftStatus,
+        actions: submissionActions,
     })
 
     const score = defineContractComponent("challenge-score-card", {
@@ -304,6 +363,24 @@ export const CourseLearnChallengeBlockBase = (input: CourseLearnChallengeBlockPr
     })
 
     const page = defineContractComponent("challenge-page-document", {
+        breadcrumb: defineLeafComponent("breadcrumbs", {}, () => (
+            <Breadcrumbs
+                props={{
+                    label: input.props.labels.breadcrumb,
+                    steps: [
+                        { id: "course", label: input.props.courseTitle },
+                        { id: "module", label: input.props.moduleTitle },
+                        { id: "content", label: input.props.contentTitle },
+                        { id: "challenge", label: input.props.title },
+                    ],
+                }}
+                on={{
+                    course: input.on?.openCourse,
+                    module: input.on?.openModule,
+                    content: input.on?.openContent,
+                }}
+            />
+        )),
         mobileMap: defineContractComponent("learn-mobile-course-map-row", {
             action: defineLeafComponent("button", {}, () => (
                 <Button
@@ -355,18 +432,31 @@ export const CourseLearnChallengeBlockBase = (input: CourseLearnChallengeBlockPr
             brief: defineContractProjection("challenge-brief", () => (
                 <SurfaceCard props={{ label: input.props.labels.brief }} contract="challenge-brief" render={brief} />
             )),
-            rail: defineContractComponent("challenge-submission-rail", {
-                deliverables: defineContractProjection("challenge-deliverable-list", () => (
-                    <SurfaceCard
-                        props={{ label: input.props.labels.deliverables }}
-                        contract="challenge-deliverable-list"
-                        render={deliverableList}
-                    />
-                )),
-                score: defineContractProjection("challenge-score-card", () => (
+            workbench: defineContractProjection("challenge-attempt-workbench", () => (
+                <>
+                    <Tree contract="challenge-attempt-workbench" render={workbench} />
                     <SurfaceCard props={{ label: input.props.labels.score }} contract="challenge-score-card" render={score} />
+                </>
+            )),
+        }),
+    })
+
+    const confirmation = defineContractComponent("challenge-submit-confirmation", {
+        title: defineLeafComponent("heading", {}, () => (
+            <Heading props={{ content: input.props.labels.confirmTitle, level: 2 }} />
+        )),
+        description: defineLeafComponent("text", { tone: "muted" }, () => (
+            <Text props={{ content: input.props.labels.confirmDescription, tone: "muted" }} />
+        )),
+        actions: defineContractComponent("challenge-submission-actions", {
+            action: [
+                defineLeafComponent("button", {}, () => (
+                    <Button props={{ label: input.props.labels.cancel, variant: "outline" }} on={{ press: input.on?.cancelSubmit }} />
                 )),
-            }),
+                defineLeafComponent("button", {}, () => (
+                    <Button props={{ label: input.props.labels.confirmSubmit, variant: "primary" }} on={{ press: input.on?.confirmSubmit }} />
+                )),
+            ],
         }),
     })
 
@@ -383,6 +473,13 @@ export const CourseLearnChallengeBlockBase = (input: CourseLearnChallengeBlockPr
                     render={courseMap}
                 />
             ) : null}
+            <ModalBranch
+                isOpen={input.props.isConfirmOpen}
+                size="sm"
+                contract="challenge-submit-confirmation"
+                render={confirmation}
+                onDismiss={() => input.on?.cancelSubmit?.()}
+            />
         </>
     )
 }

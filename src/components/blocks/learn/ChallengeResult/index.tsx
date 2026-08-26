@@ -5,6 +5,8 @@ import { useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryContentChallengeAttemptsSwr } from "@/hooks/swr/useQueryContentChallengeAttemptsSwr"
+import { useQueryContentChallengeSubmissionsSwr } from "@/hooks/swr/useQueryContentChallengeSubmissionsSwr"
+import { useMutateSubmitContentChallengeSwr } from "@/hooks/swr/useMutateSubmitContentChallengeSwr"
 import { useQueryContentChallengeFeedbacksSwr } from "@/hooks/swr/useQueryContentChallengeFeedbacksSwr"
 import { useQueryContentSwr } from "@/hooks/swr/useQueryContentSwr"
 import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
@@ -19,6 +21,12 @@ export type ChallengeResultRouteProps = {
     readonly challengeId: string
 }
 
+/** Minimal lifecycle fields needed to classify an interrupted evaluation. */
+type StaleEvaluationCandidate = {
+    readonly status: string
+    readonly updatedAt: string
+}
+
 /** Resolves the selected attempt and ordered feedback, polling until grading has settled. */
 export const ChallengeResultBlock = (input: ChallengeResultRouteProps) => {
     const practice = useTranslations("practice")
@@ -27,29 +35,48 @@ export const ChallengeResultBlock = (input: ChallengeResultRouteProps) => {
     const searchParams = useSearchParams()
     const submissionId = searchParams.get("submission") ?? undefined
     const attemptId = searchParams.get("attempt") ?? undefined
+    const attemptGroupId = searchParams.get("attemptGroup") ?? undefined
+    const routeJobId = searchParams.get("jobs")?.split(",")[0] || undefined
     const content = useQueryContentSwr({ id: input.contentId })
     const course = useQueryCourseSwr({ displayId: input.displayId })
     const module = useQueryModuleSwr({ id: input.moduleId })
-    const attempts = useQueryContentChallengeAttemptsSwr(course.data?.id, submissionId)
-    const selectedAttempt = attemptId === undefined
-        ? attempts.data?.[0]
-        : attempts.data?.find((candidate) => candidate.id === attemptId)
-    const feedbacks = useQueryContentChallengeFeedbacksSwr(course.data?.id, selectedAttempt?.id)
+    const submit = useMutateSubmitContentChallengeSwr()
     const challenge = content.data?.challenges?.find((candidate) => (
         candidate.id === input.challengeId || candidate.displayId === input.challengeId
     ))
-    const deliverable = challenge?.submissions.find((candidate) => candidate.id === submissionId)
+    const attempts = useQueryContentChallengeAttemptsSwr(course.data?.id, submissionId)
+    const submissions = useQueryContentChallengeSubmissionsSwr(course.data?.id, challenge?.id)
+    const selectedAttempt = attemptId === undefined
+        ? attempts.data?.[0]
+        : attempts.data?.find((candidate) => candidate.id === attemptId)
+    const groupedAttempts = attemptGroupId === undefined
+        ? selectedAttempt === undefined ? [] : [selectedAttempt]
+        : (submissions.data ?? []).flatMap((item) => {
+            const candidate = item.userSubmission?.lastAttempt
+            return candidate?.attemptGroupId === attemptGroupId ? [candidate] : []
+        })
+    const feedbacks = useQueryContentChallengeFeedbacksSwr(course.data?.id, selectedAttempt?.id)
+    const deliverable = challenge?.submissions?.find((candidate) => candidate.id === submissionId)
+        ?? submissions.data?.find((candidate) => candidate.id === submissionId)
     const orderedContents = useMemo(
         () => [...(module.data?.contents ?? [])].sort((first, second) => first.orderIndex - second.orderIndex),
         [module.data?.contents],
     )
     const contentPosition = orderedContents.findIndex((candidate) => candidate.id === input.contentId)
     const nextContent = contentPosition === -1 ? undefined : orderedContents[contentPosition + 1]
+    const loadError = [content.error,
+        course.error,
+        module.error,
+        attempts.error,
+        submissions.error,
+        feedbacks.error]
+        .find((error): error is Error => error instanceof Error)
     const failed = submissionId === undefined
         || content.error !== undefined
         || course.error !== undefined
         || module.error !== undefined
         || attempts.error !== undefined
+        || submissions.error !== undefined
         || feedbacks.error !== undefined
         || (content.data !== undefined && (content.data === null || challenge === undefined || deliverable === undefined))
         || (course.data !== undefined && course.data === null)
@@ -57,13 +84,25 @@ export const ChallengeResultBlock = (input: ChallengeResultRouteProps) => {
         || (attemptId !== undefined && attempts.data !== undefined && selectedAttempt === undefined)
         || attempts.data === null
         || feedbacks.data === null
+    const isStaleEvaluation = (attempt: StaleEvaluationCandidate) => (
+        attempt.status === "evaluating"
+        && Date.now() - new Date(attempt.updatedAt).getTime() >= 5 * 60 * 1000
+    )
+    const staleAttemptIds = new Set(
+        (attempts.data ?? []).filter(isStaleEvaluation).map((attempt) => attempt.id),
+    )
+    const unavailable = !failed && groupedAttempts.some((attempt) => (
+        attempt.status === "evaluation_unavailable" || staleAttemptIds.has(attempt.id)
+    ))
     const pending = !failed && (
         content.data === undefined
         || course.data === undefined
         || module.data === undefined
         || attempts.data === undefined
         || selectedAttempt === undefined
-        || selectedAttempt.processedAt === null
+        || submissions.data === undefined
+        || groupedAttempts.length === 0
+        || groupedAttempts.some((attempt) => attempt.status === "evaluating" && !staleAttemptIds.has(attempt.id))
         || feedbacks.data === undefined
     )
     const readerPath = nextContent === undefined
@@ -73,17 +112,87 @@ export const ChallengeResultBlock = (input: ChallengeResultRouteProps) => {
         `/courses/${input.displayId}/learn/content/modules/${input.moduleId}/contents/${input.contentId}`
         + `/challenges/${input.challengeId}`
     )
+    const totalScore = groupedAttempts.reduce((sum, attempt) => sum + (attempt.score ?? 0), 0)
+    const maxScore = submissions.data?.reduce((sum, item) => sum + item.score, 0) ?? challenge?.score
+    const decidedAttempts = groupedAttempts.filter((attempt) => attempt.platformDecision !== null)
+    const aggregateDecision = decidedAttempts.length === groupedAttempts.length
+        && groupedAttempts.length > 0
+        && decidedAttempts.every((attempt) => attempt.platformDecision === "passed")
+        ? "passed"
+        : decidedAttempts.some((attempt) => attempt.platformDecision === "needs_revision")
+            ? "needs_revision"
+            : undefined
+    const confidences = groupedAttempts.flatMap((attempt) => attempt.confidence === null ? [] : [attempt.confidence])
+    const aggregateConfidence = confidences.length === 0
+        ? undefined
+        : confidences.reduce((sum, confidence) => sum + confidence, 0) / confidences.length
+    const retryEvaluation = async () => {
+        const courseId = course.data?.id
+        if (courseId === undefined) return
+        const retryable = (submissions.data ?? []).filter((item) => {
+            const lastAttempt = item.userSubmission?.lastAttempt
+            return (lastAttempt?.status === "evaluation_unavailable"
+                || (lastAttempt !== undefined && lastAttempt !== null && staleAttemptIds.has(lastAttempt.id)))
+                && (attemptGroupId === undefined || lastAttempt.attemptGroupId === attemptGroupId)
+                && lastAttempt.evaluationJobId !== null
+        })
+        const retryTargets = retryable.map((item) => ({
+            challengeSubmissionId: item.id,
+            submissionUrl: item.userSubmission?.submissionUrl,
+            evaluationJobId: item.userSubmission?.lastAttempt?.evaluationJobId ?? undefined,
+            targetAttemptGroupId: item.userSubmission?.lastAttempt?.attemptGroupId ?? undefined,
+        }))
+        const selectedEvaluationJobId = selectedAttempt?.evaluationJobId ?? routeJobId
+        const selectedAttemptRetryable = selectedAttempt !== undefined
+            && (
+                selectedAttempt.status === "evaluation_unavailable"
+                || staleAttemptIds.has(selectedAttempt.id)
+            )
+            && selectedEvaluationJobId !== undefined
+        if (retryTargets.length === 0 && deliverable !== undefined && selectedAttemptRetryable) {
+            retryTargets.push({
+                challengeSubmissionId: deliverable.id,
+                submissionUrl: selectedAttempt.submissionUrl,
+                evaluationJobId: selectedEvaluationJobId,
+                targetAttemptGroupId: selectedAttempt.attemptGroupId ?? undefined,
+            })
+        }
+        await Promise.all(retryTargets.map((target) => submit.trigger({
+            courseId,
+            request: {
+                challengeSubmissionId: target.challengeSubmissionId,
+                githubUrl: target.submissionUrl,
+                idempotencyKey: target.evaluationJobId,
+                attemptGroupId: target.targetAttemptGroupId,
+            },
+        })))
+        await Promise.all([attempts.mutate(), submissions.mutate(), feedbacks.mutate()])
+    }
 
     return (
         <ChallengeResultBase
-            blockState={failed ? "failed" : pending ? "pending" : "ready"}
+            blockState={failed ? "failed" : unavailable ? "unavailable" : pending ? "pending" : "ready"}
             props={{
-                title: deliverable?.title ?? challenge?.title ?? contentText("failedMessage"),
-                description: deliverable?.description ?? challenge?.description ?? "",
-                scoreLine: selectedAttempt?.score === null || selectedAttempt?.score === undefined
+                title: challenge?.title ?? deliverable?.title ?? contentText("failedMessage"),
+                description: challenge?.description ?? deliverable?.description ?? "",
+                scoreLine: groupedAttempts.some((attempt) => attempt.score === null)
                     ? undefined
-                    : `${selectedAttempt.score}/${deliverable?.score ?? challenge?.score ?? selectedAttempt.score}`,
-                shortFeedback: selectedAttempt?.shortFeedback ?? undefined,
+                    : `${totalScore}/${maxScore ?? totalScore}`,
+                shortFeedback: groupedAttempts.map((attempt) => attempt.shortFeedback).filter(Boolean).join(" ") || undefined,
+                evaluationTitle: contentText("challengeEvaluationTitle"),
+                evaluationDetail: contentText("challengeEvaluationDetail"),
+                unavailableTitle: contentText("challengeEvaluationUnavailableTitle"),
+                unavailableDetail: contentText("challengeEvaluationUnavailableDetail"),
+                outcomeLabel: aggregateDecision === "passed"
+                    ? contentText("challengePassed")
+                    : aggregateDecision === "needs_revision"
+                        ? contentText("challengeNeedsRevision")
+                        : undefined,
+                confidenceLine: aggregateConfidence === undefined
+                    ? undefined
+                    : contentText("challengeConfidence", { confidence: Math.round(aggregateConfidence * 100) }),
+                uncertainty: groupedAttempts.find((attempt) => attempt.uncertainty)?.uncertainty ?? undefined,
+                nextAction: groupedAttempts.find((attempt) => attempt.nextAction)?.nextAction ?? undefined,
                 feedbacks: [...(feedbacks.data ?? [])]
                     .sort((first, second) => first.sortIndex - second.sortIndex)
                     .map((feedback) => ({
@@ -94,18 +203,23 @@ export const ChallengeResultBlock = (input: ChallengeResultRouteProps) => {
                         location: feedback.location ?? undefined,
                         suggestion: feedback.suggestion ?? undefined,
                     })),
-                notice: contentText("failedMessage"),
+                notice: loadError?.message ?? contentText("failedMessage"),
                 reloadLabel: practice("retry"),
                 retryLabel: practice("retry"),
                 nextLabel: contentText("nextLabel"),
             }}
             on={{
                 reload: () => {
+                    if (unavailable) {
+                        void retryEvaluation()
+                        return
+                    }
                     void Promise.all([
                         content.mutate(),
                         course.mutate(),
                         module.mutate(),
                         attempts.mutate(),
+                        submissions.mutate(),
                         feedbacks.mutate(),
                     ])
                 },

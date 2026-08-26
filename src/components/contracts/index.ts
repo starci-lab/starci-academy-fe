@@ -1597,6 +1597,7 @@ export const CONTRACTS = buildContracts({
         host: "section",
         classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "min-w-0", "flex-col", "gap-6", "px-4", "py-6", "pb-6"],
         children: {
+            breadcrumb: { leaf: "breadcrumbs", optional: true },
             mobileMap: { contract: "learn-mobile-course-map-row", optional: true },
             back: { leaf: "button" },
             header: { contract: "challenge-header" },
@@ -1624,7 +1625,7 @@ export const CONTRACTS = buildContracts({
         ],
         children: {
             brief: { contract: "challenge-brief" },
-            rail: { contract: "challenge-submission-rail" },
+            workbench: { contract: "challenge-attempt-workbench" },
         },
         why: "if you need the accepted flexible technical brief beside a bounded sticky submission rail, reflowing in the same order on narrow screens.",
     },
@@ -1661,15 +1662,6 @@ export const CONTRACTS = buildContracts({
         },
         why: "if an expanded challenge requirement needs its authored explanation attached directly below the trigger.",
     },
-    "challenge-submission-rail": {
-        host: "aside",
-        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4"],
-        children: {
-            deliverables: { contract: "challenge-deliverable-list" },
-            score: { contract: "challenge-score-card" },
-        },
-        why: "if the challenge needs one bounded action owner that keeps repository evidence and aggregate grading consequence together.",
-    },
     "challenge-deliverable-list": {
         classes: ["flex", "w-full", "min-w-0", "flex-col", "divide-y", "divide-separator", "p-0"],
         children: {
@@ -1686,7 +1678,7 @@ export const CONTRACTS = buildContracts({
             description: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
             field: { composite: "field", optional: true },
             status: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
-            actions: { contract: "challenge-deliverable-actions" },
+            actions: { contract: "challenge-deliverable-actions", optional: true },
         },
         why: "if one authored deliverable needs its score, repository evidence, settled status and exact available action as one list member.",
     },
@@ -1704,6 +1696,63 @@ export const CONTRACTS = buildContracts({
             action: { leaf: "button", repeats: true, restingCount: 1 },
         },
         why: "if a deliverable exposes its one current submit, retry or result action without moving the field around it.",
+    },
+    "challenge-attempt-workbench": {
+        host: "aside",
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4"],
+        children: {
+            deliverables: { contract: "challenge-deliverable-list" },
+            draftStatus: { contract: "challenge-draft-status" },
+            actions: { contract: "challenge-submission-actions" },
+        },
+        why: "if one recoverable attempt must keep its complete deliverable collection, saved revision and consequential action together.",
+    },
+    "challenge-draft-status": {
+        classes: ["flex", "min-h-16", "w-full", "min-w-0", "items-center"],
+        children: { status: { leaf: "text", props: { size: "sm", tone: "muted" } } },
+        why: "if save, conflict and recovery state must remain explicit without moving the submission controls.",
+    },
+    "challenge-submission-actions": {
+        classes: ["flex", "w-full", "flex-col", "gap-2", "sm:flex-row", "justify-end"],
+        children: { action: { leaf: "button", repeats: true, restingCount: 2 } },
+        why: "if draft save and whole-attempt submit need one stable, keyboard-operable action row.",
+    },
+    "challenge-submit-confirmation": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4", "p-6"],
+        children: {
+            title: { leaf: "heading" },
+            description: { leaf: "text", props: { tone: "muted" } },
+            actions: { contract: "challenge-submission-actions" },
+        },
+        why: "if an immutable attempt requires an explicit confirmation so an accidental press cannot consume a retry or begin evaluation.",
+    },
+    "challenge-evaluation-status": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "rounded-xl", "border", "border-separator", "p-4"],
+        children: {
+            title: { leaf: "text", props: { weight: "semibold" } },
+            detail: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            actions: { contract: "challenge-submission-actions", optional: true },
+        },
+        why: "if evaluating and evaluation-unavailable must preserve one attempt identity and expose safe recovery.",
+    },
+    "challenge-criterion-feedback-list": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "divide-y", "divide-separator"],
+        children: { feedback: { contract: "stacked-peer-controls", repeats: true, restingCount: 3, optional: true } },
+        why: "if platform feedback repeats by criterion as evidence, gap, uncertainty and next action without card-per-row decoration.",
+    },
+    "challenge-result-actions": {
+        classes: ["flex", "w-full", "flex-col", "gap-2", "sm:flex-row", "flex-wrap"],
+        children: { action: { leaf: "button", repeats: true, restingCount: 2 } },
+        why: "if a settled result needs retry, continue and history actions without changing the result evidence order.",
+    },
+    "challenge-result-summary": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3"],
+        children: {
+            header: { contract: "centred-title-pair" },
+            score: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+            status: { contract: "stacked-peer-controls", optional: true },
+        },
+        why: "if the immutable attempt outcome needs its title, aggregate score and platform-owned decision before criterion evidence.",
     },
     "challenge-score-card": {
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "p-4"],
@@ -2121,7 +2170,9 @@ export const CONTRACTS = buildContracts({
     "challenge-result-workspace": {
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6"],
         children: {
-            header: { contract: "centred-title-pair" }, score: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true }, body: { contract: "stacked-peer-controls" },
+            summary: { contract: "challenge-result-summary" },
+            feedback: { contract: "challenge-criterion-feedback-list", optional: true },
+            actions: { contract: "challenge-result-actions" },
         }, why: "if challenge result evidence remains a legal non-landmark workspace beneath its route-owned main shell.",
     },
     "flashcard-result-workspace": {

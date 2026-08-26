@@ -37,7 +37,7 @@ export const useQueryContentChallengeAttemptsSwr = (courseId?: string, submissio
             refreshInterval: (attempts) => attempts === null
                 || attempts === undefined
                 || attempts.length === 0
-                || attempts.some((attempt) => attempt.processedAt === null)
+                || attempts.some((attempt) => attempt.status === "evaluating" || attempt.processedAt === null)
                 ? 2_000
                 : 0,
         },
