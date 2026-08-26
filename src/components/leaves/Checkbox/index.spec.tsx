@@ -12,7 +12,12 @@ describe("Checkbox", () => {
             <Checkbox props={{ label: "Remember me", isSelected: false }} on={{ change }} />,
         )
 
-        expect(container.querySelector("[data-slot='checkbox-control']")).toBeTruthy()
+        const root = container.querySelector<HTMLElement>("[data-component='Checkbox']")
+        expect(root?.className).toContain("checkbox--secondary")
+        const control = container.querySelector<HTMLElement>("[data-slot='checkbox-control']")
+        expect(control).toBeTruthy()
+        expect(control?.className).not.toContain("bg-default")
+        expect(control?.className).not.toContain("bg-white")
         expect(container.querySelector("[data-slot^='checkbox-default-indicator']")).toBeTruthy()
         const content = container.querySelector<HTMLElement>("[data-slot='checkbox-content']")
         if (content === null) throw new Error("checkbox content is missing")

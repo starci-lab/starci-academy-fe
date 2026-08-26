@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { usePlaygroundSession } from "@/components/layouts/PlaygroundSessionLayout"
@@ -19,10 +19,16 @@ export const PlaygroundSession = ({ displayId, slug }: PlaygroundSessionProps) =
     const currentStepIndex = Math.min(session.passedStepIndexes.length, Math.max(0, steps.length - 1))
     const selectedStepIndex = selectedOverride ?? currentStepIndex
     const completed = steps.length > 0 && session.passedStepIndexes.includes(steps.length - 1)
+
+    useEffect(() => {
+        if (session.isRestoring || session.hasPaired) return
+        router.replace(`/courses/${displayId}/learn/playground/${slug}`)
+    }, [displayId, router, session.hasPaired, session.isRestoring, slug])
+
     let state: CoursePlaygroundSessionState = "live"
-    if (session.failed || session.startFailed || session.session === null || session.socketState === "failed") state = "failed"
+    if (session.failed || session.startFailed) state = "failed"
     else if (completed) state = "completed"
-    else if (session.socketState === "reconnecting") state = "reconnecting"
+    else if (session.hasPaired && (session.socketState === "reconnecting" || session.socketState === "failed")) state = "reconnecting"
     else if (session.socketState !== "connected" || !session.agentConnected) state = "connecting"
     const connectionTextByState: Record<CoursePlaygroundSessionState, string> = {
         connecting: t("session.waiting"), live: t("session.agentConnected"), reconnecting: t("session.reconnecting"),

@@ -20,3 +20,5 @@ export const StateMark = ({ state }: StateMarkProps) => {
         </svg>
     )
 }
+
+export const meta = { shape: "leaf", grammar: "core" } as const

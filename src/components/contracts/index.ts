@@ -17,6 +17,8 @@
  * whoever inserts one is looking at this file beside it.
  */
 
+import type { CoreLayoutClassName } from "@starci/grammar/core"
+
 /**
  * The closed set of classes a node may lay its children out with.
  *
@@ -24,12 +26,9 @@
  * property is what makes a whole family of patrol rules unnecessary: there is nothing to police
  * when the bad value cannot be typed.
  */
-export type LayoutClassName =
-    | "flex" | "grid" | "flex-col" | "flex-row" | "flex-wrap" | "flex-nowrap" | "overflow-hidden" | "relative" | "contents"
-    | "min-h-0" | "overflow-y-auto" | "overscroll-contain" | "scrollbar" | "grow-0"
-    | "items-center" | "items-baseline" | "items-start" | "items-end" | "items-stretch"
-    | "justify-between" | "justify-center" | "justify-end" | "[&>*]:w-full"
-    | "gap-1" | "gap-2" | "gap-3" | "gap-4" | "gap-6" | "gap-8"
+export type LayoutClassName = CoreLayoutClassName
+    | "scrollbar"
+    | "items-baseline"
     | "grid-cols-1" | "grid-cols-2" | "sm:grid-cols-2" | "sm:grid-cols-4" | "lg:grid-cols-3"
     | "sm:flex-row" | "sm:items-start" | "sm:justify-between"
     | "md:flex" | "md:flex-row" | "md:items-start" | "md:gap-8"
@@ -41,8 +40,8 @@ export type LayoutClassName =
     // column while the two are stacked, and BESIDE it once they are side by side.
     | "md:w-2/5" | "md:shrink-0" | "md:border-b-0" | "md:border-r"
     | "@app-md:flex-row" | "@app-md:items-start" | "@app-md:gap-8" | "@app-md:w-72"
-    | "mx-auto" | "min-h-screen" | "min-h-app-rail" | "min-h-80" | "w-full" | "min-w-0" | "grow" | "flex-1" | "shrink-0" | "hidden" | "overflow-auto" | "max-w-app-sm" | "max-w-app-md" | "max-w-app-lg" | "max-w-app-xl" | "max-w-6xl" | "max-w-sm" | "max-w-md" | "@container"
-    | "h-16" | "h-full" | "min-h-16" | "h-app-rail" | "sticky" | "top-0" | "top-16" | "z-40" | "z-50"
+    | "mx-auto" | "min-h-screen" | "min-h-app-rail" | "min-h-80" | "max-w-app-sm" | "max-w-app-md" | "max-w-app-lg" | "max-w-app-xl" | "max-w-6xl" | "max-w-sm" | "max-w-md" | "@container"
+    | "h-16" | "h-full" | "min-h-16" | "h-app-rail" | "top-0" | "top-16" | "z-40" | "z-50"
     | "md:sticky" | "md:top-16" | "md:self-start" | "md:h-app-rail"
     | "border" | "border-b" | "border-separator" | "divide-y" | "divide-separator" | "bg-background"
     | "px-3" | "px-4" | "px-6" | "py-2" | "py-3" | "py-6" | "p-0" | "p-2" | "p-4" | "p-6" | "-mt-px"
@@ -1102,43 +1101,85 @@ export const CONTRACTS = buildContracts({
     },
     "course-playground-page": {
         host: "main",
-        classes: ["mx-auto", "flex", "w-full", "max-w-app-lg", "flex-col", "gap-6", "px-6", "py-6"],
-        children: { catalog: { contract: "$content" } },
-        why: "if you need a live-lab catalog explaining server verification once before a peer run of backend playground destinations across pending, empty and failed states.",
+        classes: ["mx-auto", "flex", "w-full", "max-w-app-xl", "flex-col", "gap-6", "px-6", "py-6"],
+        children: { journey: { leaf: "progress" }, catalog: { contract: "$content" } },
+        why: "if you need the discovery checkpoint and its live-lab catalog to share one measured journey plane before setup begins.",
     },
     "course-playground-setup-page": {
         host: "main",
-        classes: ["mx-auto", "flex", "w-full", "max-w-app-md", "flex-col", "gap-6", "px-6", "py-6"],
-        children: { content: { contract: "$content" } },
-        why: "if you need playground preparation before session creation, followed by server pairing identity and agent readiness before entry becomes available.",
+        classes: ["mx-auto", "flex", "w-full", "max-w-app-xl", "flex-col", "gap-6", "px-6", "py-6"],
+        children: { journey: { leaf: "progress" }, content: { contract: "$content" } },
+        why: "if you need the setup checkpoint above a wide guided preparation plane whose readiness remains distinct from the live workspace.",
     },
     "course-playground-setup-workspace": {
         classes: ["flex", "w-full", "flex-col", "gap-6"],
         children: {
-            header: { leaf: "heading" }, description: { leaf: "text", props: { size: "sm", tone: "muted" } }, preparationTitle: { leaf: "heading", optional: true }, preparationStep: { leaf: "text", props: { size: "sm" }, repeats: true, restingCount: 3, optional: true }, pairingLabel: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true }, pairingCode: { leaf: "text", props: { size: "sm", weight: "semibold" }, optional: true }, status: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true }, action: { leaf: "button", repeats: true, restingCount: 1, optional: true }, notice: { composite: "empty-notice", optional: true },
+            identity: { contract: "playground-setup-identity" },
+            workspace: { contract: "playground-setup-guided-split", optional: true },
+            notice: { composite: "empty-notice", optional: true },
         },
-        why: "if playground setup content remains a legal non-landmark workspace beneath the route-owned main shell.",
+        why: "if playground identity must remain above one preparation-and-readiness split while failures replace only the actionable workspace.",
+    },
+    "playground-setup-identity": {
+        host: "header",
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-2"],
+        children: { title: { leaf: "heading" }, description: { leaf: "text", props: { size: "sm", tone: "muted" } } },
+        why: "if the selected playground must be named and explained before machine preparation or pairing controls compete for attention.",
+    },
+    "playground-setup-guided-split": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "items-start", "gap-6", "md:flex-row", "md:items-start", "md:gap-8", "md:[&>*:first-child]:min-w-0", "md:[&>*:first-child]:grow", "md:[&>*:last-child]:w-80", "md:[&>*:last-child]:shrink-0", "md:[&>*:last-child]:sticky", "md:[&>*:last-child]:top-rail", "md:[&>*:last-child]:self-start"],
+        children: { preparation: { contract: "playground-setup-preparation" }, readiness: { contract: "playground-setup-readiness" } },
+        why: "if the instructional path must own the flexible reading column while one compact readiness rail stays reachable and stacks below it on narrow screens.",
+    },
+    "playground-setup-preparation": {
+        host: "section",
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4", "p-6"],
+        children: { title: { leaf: "heading" }, step: { leaf: "text", props: { size: "sm" }, repeats: true, restingCount: 3 } },
+        why: "if machine preparation is one ordered instructional surface whose steps remain readable without mixing in pairing state.",
+    },
+    "playground-setup-readiness": {
+        host: "aside",
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4", "p-6"],
+        children: { pairingLabel: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true }, pairingCode: { leaf: "text", props: { size: "sm", weight: "semibold" }, optional: true }, status: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true }, action: { leaf: "button", repeats: true, restingCount: 1 } },
+        why: "if session creation, pairing identity, agent readiness and explicit entry must occupy one compact decision rail without entering automatically.",
     },
     "course-playground-session-page": {
         host: "main",
-        classes: ["flex", "min-h-screen", "w-full", "min-w-0", "flex-col", "gap-6", "bg-background", "px-6", "py-6"],
-        children: { content: { contract: "$content" } },
-        why: "if you need a persistent playground workspace ordered as connection state, server-owned steps and selected instruction, with one verification action and server-settled completion or failure.",
+        classes: ["mx-auto", "flex", "min-h-screen", "w-full", "max-w-6xl", "min-w-0", "flex-col", "gap-6", "bg-background", "px-6", "py-6"],
+        children: { journey: { leaf: "progress" }, content: { contract: "$content" } },
+        why: "if the live checkpoint must keep journey orientation above one persistent guided workspace without widening past a readable desktop plane.",
     },
     "course-playground-session-workspace": {
-        classes: ["flex", "min-h-screen", "w-full", "min-w-0", "flex-col", "gap-6", "bg-background", "px-6", "py-6"],
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6"],
         children: {
-            leave: { leaf: "button" },
-            connection: { leaf: "text", props: { size: "xs", tone: "muted" } },
-            title: { leaf: "heading" },
-            step: { leaf: "nav-link", props: { kind: "section" }, repeats: true, restingCount: 4 },
-            body: { leaf: "article", optional: true },
-            command: { leaf: "code-block", optional: true },
-            hint: { leaf: "text", props: { size: "sm" }, optional: true },
-            submit: { leaf: "button", optional: true },
+            identity: { contract: "playground-session-identity" },
+            workspace: { contract: "playground-session-guided-split", optional: true },
             notice: { composite: "empty-notice", optional: true },
         },
-        why: "if session content remains a legal non-landmark workspace beneath the route-owned main shell.",
+        why: "if live-session identity must stay above a step rail and selected task plane while completion or hard failure can settle the workspace.",
+    },
+    "playground-session-identity": {
+        host: "header",
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "p-4", "md:flex", "md:flex-row", "md:items-start", "md:gap-8", "md:[&>*:nth-child(2)]:min-w-0", "md:[&>*:nth-child(2)]:grow"],
+        children: { leave: { leaf: "button" }, title: { leaf: "heading" }, progress: { leaf: "progress" }, connection: { leaf: "text", props: { size: "xs", tone: "muted" } } },
+        why: "if exit, selected-step identity, server-verified progress and relay state must remain in one compact scan region before the workspace.",
+    },
+    "playground-session-guided-split": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "items-start", "gap-6", "md:flex-row", "md:items-start", "md:gap-8", "md:[&>*:first-child]:w-72", "md:[&>*:first-child]:shrink-0", "md:[&>*:first-child]:sticky", "md:[&>*:first-child]:top-rail", "md:[&>*:first-child]:self-start", "md:[&>*:last-child]:min-w-0", "md:[&>*:last-child]:grow"],
+        children: { steps: { contract: "playground-session-step-rail" }, task: { contract: "playground-session-task" } },
+        why: "if a stable guided step rail must precede the flexible selected instruction and collapse above it on narrow screens.",
+    },
+    "playground-session-step-rail": {
+        host: "aside",
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-2", "p-4"],
+        children: { step: { leaf: "nav-link", props: { kind: "section" }, repeats: true, restingCount: 4 } },
+        why: "if server-owned steps need one continuously reachable navigation surface without taking ownership of verification.",
+    },
+    "playground-session-task": {
+        host: "section",
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6", "p-6"],
+        children: { body: { leaf: "article", optional: true }, command: { leaf: "code-block", optional: true }, hint: { leaf: "text", props: { size: "sm" }, optional: true }, submit: { leaf: "button", optional: true } },
+        why: "if the selected instruction, kind-specific workspace hint and one server-verified consequence must share a focused task surface.",
     },
     "course-mind-map-page": {
         host: "main",
@@ -1149,8 +1190,19 @@ export const CONTRACTS = buildContracts({
     "course-playground-catalog": {
         host: "section",
         classes: ["flex", "w-full", "flex-col", "gap-6"],
-        children: { header: { leaf: "heading" }, description: { leaf: "text", props: { size: "sm", tone: "muted" } }, playground: { leaf: "nav-link", props: { kind: "section" }, repeats: true, restingCount: 4, optional: true }, notice: { composite: "empty-notice", optional: true } },
-        why: "if the playground catalog remains a legal workspace beneath its route-owned main shell.",
+        children: { header: { leaf: "heading" }, description: { leaf: "text", props: { size: "sm", tone: "muted" } }, grid: { contract: "playground-catalog-grid", optional: true }, notice: { composite: "empty-notice", optional: true } },
+        why: "if the playground catalog needs one identity before a responsive run of equally weighted guided destinations or its settled notice.",
+    },
+    "playground-catalog-grid": {
+        classes: ["grid", "w-full", "min-w-0", "grid-cols-1", "gap-6", "sm:grid-cols-2", "lg:grid-cols-3"],
+        children: { playground: { contract: "playground-catalog-card", repeats: true, restingCount: 4 } },
+        why: "if peer playground destinations need comparable card widths and collapse to one readable column on compact screens.",
+    },
+    "playground-catalog-card": {
+        host: "section",
+        classes: ["flex", "h-full", "w-full", "min-w-0", "flex-col", "gap-3", "p-6"],
+        children: { open: { leaf: "nav-link", props: { kind: "section" } }, fact: { leaf: "text", props: { size: "sm", tone: "muted" } } },
+        why: "if one playground destination must name itself once as the explicit setup link before exposing its guided-step measure inside a coherent peer card.",
     },
     "course-mind-map-workspace": {
         classes: ["flex", "w-full", "flex-col", "gap-6"],
@@ -1175,10 +1227,16 @@ export const CONTRACTS = buildContracts({
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6"],
         children: {
             header: { contract: "mock-interview-page-header" },
+            journey: { contract: "mock-interview-journey-progress" },
             navigation: { contract: "mock-interview-setup-tabs-over-panel" },
             panel: { contract: "mock-interview-setup-panel" },
         },
         why: "if you need the interview setup route to keep its orientation and three setup destinations stable while one selected panel changes beneath them.",
+    },
+    "mock-interview-journey-progress": {
+        classes: ["w-full", "min-w-0", "p-4"],
+        children: { progress: { composite: "labelled-progress-row" } },
+        why: "if setup, interview and result need one consistent journey checkpoint without replacing each page's local task progress.",
     },
     "mock-interview-page-header": {
         classes: ["flex", "flex-col", "gap-4", "sm:flex-row", "sm:items-start", "sm:justify-between"],
@@ -1311,6 +1369,7 @@ export const CONTRACTS = buildContracts({
     "mock-interview-session-content": {
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6"],
         children: {
+            journey: { contract: "mock-interview-journey-progress" },
             header: { contract: "mock-interview-session-header-owner" },
             workspace: { contract: "mock-interview-session-workspace" },
         },
@@ -1361,9 +1420,8 @@ export const CONTRACTS = buildContracts({
             notice: { contract: "mock-interview-session-notice", optional: true },
             prompt: { contract: "mock-interview-active-prompt" },
             answer: { contract: "mock-interview-answer-operation" },
-            history: { contract: "mock-interview-turn-list" },
         },
-        why: "if the active interviewer prompt must precede the learner operation and completed-turn evidence in one stable reading order.",
+        why: "if the active interviewer prompt must precede the learner operation in one stable, distraction-free reading column.",
     },
     "mock-interview-session-notice": {
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-1", "p-4"],
@@ -1418,8 +1476,9 @@ export const CONTRACTS = buildContracts({
         children: {
             workspace: { contract: "mock-interview-question-workspace" },
             outcomes: { contract: "mock-interview-session-outcomes" },
+            history: { contract: "mock-interview-turn-list" },
         },
-        why: "if source context and session consequences support the interview without competing with the active prompt and answer column.",
+        why: "if source context, session consequences and completed turns must stay available without competing with the active prompt and answer column.",
     },
     "mock-interview-question-workspace": {
         host: "section",
@@ -1440,23 +1499,94 @@ export const CONTRACTS = buildContracts({
         host: "main",
         classes: ["mx-auto", "flex", "w-full", "max-w-app-lg", "flex-col", "gap-6", "px-6", "py-6"],
         children: {
-            header: { contract: "centred-title-pair" },
+            journey: { contract: "mock-interview-journey-progress" },
+            header: { contract: "learn-page-title-pair" },
             notice: { composite: "empty-notice", optional: true },
             grading: { leaf: "progress", optional: true },
-            scoreLabel: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
-            score: { leaf: "heading", optional: true },
-            verdict: { contract: "centred-title-pair", optional: true },
-            phaseTitle: { leaf: "heading", optional: true },
-            phase: { composite: "labelled-progress-row", repeats: true, restingCount: 3, optional: true },
-            strengthsTitle: { leaf: "heading", optional: true },
-            strength: { leaf: "text", props: { size: "sm" }, repeats: true, restingCount: 3, optional: true },
-            gapsTitle: { leaf: "heading", optional: true },
-            gap: { leaf: "text", props: { size: "sm" }, repeats: true, restingCount: 3, optional: true },
-            reviewsTitle: { leaf: "heading", optional: true },
-            review: { composite: "evidence-row", repeats: true, restingCount: 3, optional: true },
+            workspace: { contract: "mock-interview-result-workspace", optional: true },
+            actions: { contract: "mock-interview-result-actions", optional: true },
+        },
+        why: "if you need a persisted interview debrief ordered from outcome and rubric through evidence beside one continuously reachable next-action rail.",
+    },
+    "mock-interview-result-workspace": {
+        classes: [
+            "flex", "w-full", "min-w-0", "flex-col", "items-start", "gap-6",
+            "md:flex-row", "md:items-start", "md:gap-8",
+            "md:[&>*:first-child]:min-w-0", "md:[&>*:first-child]:grow",
+            "md:[&>*:last-child]:w-72", "md:[&>*:last-child]:shrink-0",
+            "md:[&>*:last-child]:sticky", "md:[&>*:last-child]:top-rail", "md:[&>*:last-child]:self-start",
+        ],
+        children: {
+            primary: { contract: "mock-interview-result-primary" },
+            rail: { contract: "mock-interview-result-rail" },
+        },
+        why: "if the assessed outcome and evidence need one flexible reading column beside a bounded next-action rail.",
+    },
+    "mock-interview-result-primary": {
+        host: "section",
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6"],
+        children: {
+            summary: { contract: "mock-interview-result-summary" },
+            rubric: { contract: "mock-interview-result-rubric" },
+            insights: { contract: "mock-interview-result-insights" },
+            reviews: { contract: "mock-interview-result-reviews", optional: true },
+        },
+        why: "if the learner must understand the outcome before inspecting rubric, improvement signals and per-question evidence.",
+    },
+    "mock-interview-result-summary": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "p-6"],
+        children: {
+            scoreLabel: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            score: { leaf: "heading" },
+            verdict: { contract: "learn-page-title-pair" },
+        },
+        why: "if the assessed score and verdict must lead the debrief as one bounded outcome summary.",
+    },
+    "mock-interview-result-rubric": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4", "p-6"],
+        children: {
+            title: { leaf: "heading" },
+            phase: { composite: "labelled-progress-row", repeats: true, restingCount: 3 },
+        },
+        why: "if rubric phases must remain comparable peers inside one assessment surface instead of separating labels from their scored progress evidence.",
+    },
+    "mock-interview-result-insights": {
+        classes: ["grid", "w-full", "min-w-0", "grid-cols-1", "gap-6", "sm:grid-cols-2"],
+        children: {
+            strengths: { contract: "mock-interview-result-insight" },
+            gaps: { contract: "mock-interview-result-insight" },
+        },
+        why: "if strengths and improvement signals need equal peer surfaces that stack without changing reading order.",
+    },
+    "mock-interview-result-insight": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "p-6"],
+        children: {
+            title: { leaf: "heading" },
+            item: { leaf: "text", props: { size: "sm" }, repeats: true, restingCount: 3 },
+        },
+        why: "if one assessment insight category needs a title before its concise evidence list.",
+    },
+    "mock-interview-result-reviews": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4", "p-6"],
+        children: {
+            title: { leaf: "heading" },
+            review: { composite: "evidence-row", repeats: true, restingCount: 3 },
+        },
+        why: "if question-level evidence must remain available after the summary and coaching signals.",
+    },
+    "mock-interview-result-rail": {
+        host: "aside",
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6"],
+        children: { actions: { contract: "mock-interview-result-actions" } },
+        why: "if the next interview consequence must remain reachable without competing with assessment evidence.",
+    },
+    "mock-interview-result-actions": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "p-4"],
+        children: {
+            title: { leaf: "heading" },
             action: { leaf: "button", repeats: true, restingCount: 2 },
         },
-        why: "if you need a persisted interview debrief ordered from outcome and rubric through strengths, gaps and question evidence to one next action, with grading and recovery retaining the page owner.",
+        why: "if the learner needs one clear next-step surface beside the completed assessment.",
     },
     "course-learn-challenge-page": {
         host: "main",
@@ -1890,7 +2020,7 @@ export const CONTRACTS = buildContracts({
         why: "if you need the document's one main landmark, sized to the height the navbar leaves rather than a measure of its own.",
     },
     "centred-authentication-page": {
-        classes: ["flex", "min-h-screen", "w-full", "items-center", "justify-center", "p-6"],
+        classes: ["flex", "min-h-screen", "w-full", "items-center", "justify-center", "p-6", "[&>*]:w-full", "[&>*]:max-w-md"],
         children: {
             surface: { contract: "authentication-panel-card" },
         },

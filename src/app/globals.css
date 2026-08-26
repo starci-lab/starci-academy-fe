@@ -89,6 +89,11 @@ body {
     font-family: var(--starci-font-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
+/* Sticky app bars must not fully cover the control that receives keyboard focus. */
+html {
+    scroll-padding-block: 5rem;
+}
+
 /* Original StarCi secondary-tab skin: the navbar owns the only baseline. */
 .extended-tabs .tabs__list {
     border-bottom-width: 0 !important;
@@ -370,7 +375,7 @@ body {
  * generic Card inset above is intentionally important, therefore this semantic exception must
  * win at the same cascade strength; a p-0 utility on the element cannot do that by itself.
  */
-.card[data-component="SurfaceListCardSurface"] {
+.starci-core-surface-list > .card[data-grammar-surface] {
     padding: 0 !important;
 }
 
@@ -380,23 +385,22 @@ body {
  * important 16px above and the node adds its own inside it, and every card on the screen grows by
  * one whole inset the day the branch stops wearing the node.
  */
-.card[data-component="SurfaceCardSurface"],
-.card[data-component="SurfaceFormCard"] {
+.starci-core-surface-card .card[data-grammar-surface][data-grammar-frame="bounded"] {
     padding: 0 !important;
 }
 
 /* Pricing rail: the card owns the viewport and only its content scrolls. */
-.card[data-component="SurfaceCardSurface"][data-scroll-inside="pricing-rail"] {
+.card[data-grammar-surface][data-grammar-scroll="contained"][data-scroll-inside="pricing-rail"] {
     max-height: var(--max-height-pricing-rail);
     overflow: hidden;
 }
 
-.card[data-component="SurfaceCardSurface"][data-scroll-inside="pricing-rail"]
-    [data-component="SurfaceCardBody"] {
+.card[data-grammar-surface][data-grammar-scroll="contained"][data-scroll-inside="pricing-rail"]
+    [data-grammar-surface-content] {
     min-height: 0;
 }
 
-.card[data-component="SurfaceCardSurface"][data-scroll-inside="pricing-rail"]
+.card[data-grammar-surface][data-grammar-scroll="contained"][data-scroll-inside="pricing-rail"]
     [data-node="pricing-rail-scroll-viewport"] {
     max-height: var(--max-height-pricing-rail);
 }
@@ -424,14 +428,14 @@ body {
 }
 
 /* A joined list nested in a larger story keeps its boundary but cannot claim a second elevation. */
-.card[data-component="SurfaceListCardSurface"][data-surface-context="nested"] {
+.starci-core-surface-list > .card[data-grammar-surface-depth="nested"] {
     border: 1px solid var(--border) !important;
     box-shadow: none !important;
 }
 
 /* The accepted dashboard direction layers its coordinated surfaces without changing their anatomy. */
-[data-node="course-learn-today-page"] .card[data-component="SurfaceCardSurface"],
-[data-node="course-learn-today-page"] .card[data-component="SurfaceListCardSurface"] {
+[data-node="course-learn-today-page"] .starci-core-surface-card .card[data-grammar-surface][data-grammar-frame="bounded"],
+[data-node="course-learn-today-page"] .starci-core-surface-list > .card[data-grammar-surface] {
     box-shadow: var(--dashboard-calm-elevation);
     transition: box-shadow var(--dashboard-calm-duration) var(--dashboard-calm-easing);
 }

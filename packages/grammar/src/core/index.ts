@@ -18,6 +18,17 @@ export {
     type NeutralTreatment,
     type PresentationState,
 } from "./state.js"
+export {
+    CORE_LAYOUT_CLASS_NAMES,
+    type CoreLayoutClassName,
+} from "./layout.js"
+export { StateMark, meta as stateMarkMeta, type StateMarkProps } from "./StateMark.js"
+export {
+    StaticStateRow,
+    meta as staticStateRowMeta,
+    type StaticStateRowData,
+    type StaticStateRowProps,
+} from "./composite/StaticStateRow/index.js"
 export { SurfaceCard, meta as surfaceCardMeta, type SurfaceCardProps, type WholeCardAction } from "./branch/SurfaceCard/index.js"
 export { SurfaceListCard, meta as surfaceListCardMeta, type SurfaceListCardProps, type SurfaceListItem } from "./branch/SurfaceListCard/index.js"
 export { Rail, meta as railMeta, type RailProps } from "./branch/Rail/index.js"

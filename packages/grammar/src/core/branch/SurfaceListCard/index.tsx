@@ -1,13 +1,8 @@
-import { useId } from "react"
-import { StateMark } from "../../StateMark.js"
-import { assertPresentationState, treatmentFor, type PresentationState } from "../../state.js"
+import { useId, type ReactNode } from "react"
+import { StaticStateRow, type StaticStateRowData } from "../../composite/StaticStateRow/index.js"
+import { assertPresentationState } from "../../state.js"
 
-export type SurfaceListItem = {
-    readonly id: string
-    readonly label: string
-    readonly description?: string
-    readonly state?: PresentationState
-}
+export type SurfaceListItem = StaticStateRowData
 
 type LabelledSurfaceList = {
     readonly label: string
@@ -19,65 +14,84 @@ type SelfNamedSurfaceList = {
     readonly ariaLabel: string
 }
 
-export type SurfaceListCardProps = (LabelledSurfaceList | SelfNamedSurfaceList) & {
-    readonly items: ReadonlyArray<SurfaceListItem>
+type SurfaceListFrameProps = (LabelledSurfaceList | SelfNamedSurfaceList) & {
     readonly fact?: string
+    readonly labelEnd?: ReactNode
+    readonly labelHidden?: boolean
+    readonly footer?: ReactNode
     readonly depth?: "top" | "nested"
-    readonly emptyLabel?: string
 }
+
+type StaticSurfaceListProps = {
+    readonly items: ReadonlyArray<SurfaceListItem>
+    readonly emptyLabel?: string
+    readonly children?: never
+    readonly rowMode?: "static"
+}
+
+type ContentOwnedSurfaceListProps = {
+    readonly children: ReactNode
+    readonly rowMode: "interactive"
+    readonly items?: never
+    readonly emptyLabel?: never
+}
+
+export type SurfaceListCardProps = SurfaceListFrameProps & (StaticSurfaceListProps | ContentOwnedSurfaceListProps)
 
 export const SurfaceListCard = ({
     label,
     ariaLabel,
     items,
+    children,
     fact,
+    labelEnd,
+    labelHidden = false,
+    footer,
     depth = "top",
     emptyLabel = "No items",
+    rowMode = "static",
 }: SurfaceListCardProps) => {
     const headingId = useId()
-    for (const item of items) assertPresentationState(item.state ?? "neutral")
+    for (const item of items ?? []) assertPresentationState(item.state ?? "neutral")
+    const accessibleName = ariaLabel ?? label
+    const collection = rowMode === "interactive" ? (
+        <div className="starci-core-owned-collection" data-grammar-list="true" data-grammar-list-mode="interactive">
+            {children}
+        </div>
+    ) : items?.length === 0 ? (
+        <p className="starci-core-empty-row" data-grammar-state="neutral">{emptyLabel}</p>
+    ) : (
+        <ul className="starci-core-static-list" data-grammar-list="true" data-grammar-list-mode="static">
+            {(items ?? []).map((item) => <StaticStateRow key={item.id} item={item} />)}
+        </ul>
+    )
 
     return (
-        <section className="starci-core-surface-list" data-grammar-surface-list="true">
-            {label === undefined ? null : (
+        <section
+            className="starci-core-surface-list"
+            data-grammar-contract="core.surface-list-card"
+            data-grammar-label-visibility={labelHidden ? "hidden" : "visible"}
+            data-grammar-list-mode={rowMode}
+            data-grammar-surface-list="true"
+        >
+            {label === undefined || labelHidden ? null : (
                 <div className="starci-core-surface-label" data-grammar-surface-label="true">
                     <h3 id={headingId}>{label}</h3>
-                    {fact === undefined ? null : <span>{fact}</span>}
+                    {labelEnd ?? (fact === undefined ? null : <span>{fact}</span>)}
                 </div>
             )}
             <div
-                aria-label={label === undefined ? ariaLabel : undefined}
-                aria-labelledby={label === undefined ? undefined : headingId}
+                aria-label={labelHidden || label === undefined ? accessibleName : undefined}
+                aria-labelledby={!labelHidden && label !== undefined ? headingId : undefined}
                 className="starci-core-surface starci-core-list-shell"
                 data-grammar-surface="true"
                 data-grammar-surface-depth={depth}
             >
-                {items.length === 0 ? (
-                    <p className="starci-core-empty-row" data-grammar-state="neutral">{emptyLabel}</p>
-                ) : (
-                    <ul className="starci-core-static-list" data-grammar-list="true">
-                        {items.map((item) => {
-                            const state = item.state ?? "neutral"
-                            const treatment = treatmentFor(state)
-                            return (
-                                <li
-                                    className="starci-core-static-row"
-                                    data-grammar-row="true"
-                                    data-grammar-state={state}
-                                    data-grammar-treatment={treatment.tone}
-                                    key={item.id}
-                                >
-                                    <StateMark state={state} />
-                                    <span className="starci-core-static-row-copy">
-                                        <span>{item.label}</span>
-                                        {item.description === undefined ? null : <span>{item.description}</span>}
-                                    </span>
-                                </li>
-                            )
-                        })}
-                    </ul>
-                )}
+                {collection}
             </div>
+            {footer === undefined ? null : (
+                <div className="starci-core-surface-footer" data-grammar-surface-footer="true">{footer}</div>
+            )}
         </section>
     )
 }

@@ -15,6 +15,7 @@ import { CodeBlock } from "@/components/leaves/CodeBlock"
 import { Heading } from "@/components/leaves/Heading"
 import { Text } from "@/components/leaves/Text"
 import { Textarea } from "@/components/leaves/Textarea"
+import { SurfaceCard as GrammarSurfaceCard } from "@starci/grammar/core"
 
 /** Finite runtime situations shown by the interview room. */
 export type CourseMockInterviewSessionState = "connecting" | "live" | "syncing" | "expired" | "failed"
@@ -36,6 +37,8 @@ export type CourseMockInterviewSessionData = {
     readonly sessionState?: CourseMockInterviewSessionState
     readonly operation?: CourseMockInterviewSessionOperation
     readonly title: string
+    readonly journeyLabel?: string
+    readonly journeyStageLabel?: string
     readonly promptTitle: string
     readonly stateLabel: string
     readonly counterLabel: string
@@ -151,6 +154,30 @@ export const CourseMockInterviewSessionBlockBase = (input: CourseMockInterviewSe
         )
     })
     const workspaceCode = input.props.workspaceCode
+
+    const journeySurface = (
+        <GrammarSurfaceCard
+            ariaLabel={input.props.journeyLabel ?? input.props.title}
+            state={isPending ? "pending" : "neutral"}
+        >
+            <Tree
+                contract="mock-interview-journey-progress"
+                render={defineContractComponent("mock-interview-journey-progress", {
+                    progress: defineCompositeComponent("labelled-progress-row", {}, () => (
+                        <LabelledProgressRow
+                            props={{
+                                id: "mock-interview-journey-session",
+                                title: input.props.journeyLabel ?? input.props.title,
+                                percent: (100 / 3) * 2,
+                                percentText: input.props.journeyStageLabel ?? "2 / 3",
+                            }}
+                            isLoading={isPending}
+                        />
+                    )),
+                })}
+            />
+        </GrammarSurfaceCard>
+    )
 
     const headerSurface = (
         <SurfaceCard
@@ -294,6 +321,7 @@ export const CourseMockInterviewSessionBlockBase = (input: CourseMockInterviewSe
         <Tree
             contract="mock-interview-session-content"
             render={defineContractComponent("mock-interview-session-content", {
+                journey: defineContractProjection("mock-interview-journey-progress", () => journeySurface),
                 header: defineContractComponent("mock-interview-session-header-owner", {
                     surface: defineContractProjection("mock-interview-session-header", () => headerSurface),
                 }),
@@ -304,11 +332,11 @@ export const CourseMockInterviewSessionBlockBase = (input: CourseMockInterviewSe
                         }),
                         prompt: defineContractProjection("mock-interview-active-prompt", () => promptSurface),
                         answer: defineContractProjection("mock-interview-answer-operation", () => answerSurface),
-                        history: defineContractProjection("mock-interview-turn-list", () => historySurface),
                     }),
                     rail: defineContractComponent("mock-interview-session-rail", {
                         workspace: defineContractProjection("mock-interview-question-workspace", () => workspaceSurface),
                         outcomes: defineContractProjection("mock-interview-session-outcomes", () => outcomesSurface),
+                        history: defineContractProjection("mock-interview-turn-list", () => historySurface),
                     }),
                 }),
             })}

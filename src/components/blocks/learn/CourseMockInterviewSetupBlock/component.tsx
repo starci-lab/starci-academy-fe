@@ -16,6 +16,7 @@ import {
     defineLeafComponent,
     type LeafProps,
 } from "@/components/contracts/props"
+import { SurfaceCard } from "@starci/grammar/core"
 
 /** One selectable setup value presented to the learner. */
 export type MockInterviewSetupChoice = { readonly id: string; readonly label: string }
@@ -34,6 +35,8 @@ export type CourseMockInterviewSetupData = {
     readonly setupState?: CourseMockInterviewSetupState
     readonly title: string
     readonly description: string
+    readonly journeyLabel?: string
+    readonly journeyStageLabel?: string
     readonly status?: string
     readonly levelLabel: string
     readonly modeLabel: string
@@ -139,6 +142,29 @@ export const CourseMockInterviewSetupBlockBase = (input: CourseMockInterviewSetu
         title: defineLeafComponent("heading", {}, () => <Heading props={{ content: input.props.readinessLabels[index] ?? "", level: 3 }} isLoading={loading} />),
         fact: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: value, size: "sm", tone: "muted" }} isLoading={loading} />),
     }))
+    const journeySurface = (
+        <SurfaceCard
+            ariaLabel={input.props.journeyLabel ?? input.props.title}
+            state={loading ? "pending" : "neutral"}
+        >
+            <Tree
+                contract="mock-interview-journey-progress"
+                render={defineContractComponent("mock-interview-journey-progress", {
+                    progress: defineCompositeComponent("labelled-progress-row", {}, () => (
+                        <LabelledProgressRow
+                            props={{
+                                id: "mock-interview-journey-setup",
+                                title: input.props.journeyLabel ?? input.props.title,
+                                percent: 100 / 3,
+                                percentText: input.props.journeyStageLabel ?? "1 / 3",
+                            }}
+                            isLoading={loading}
+                        />
+                    )),
+                })}
+            />
+        </SurfaceCard>
+    )
 
     const begin = defineContractProjection("mock-interview-begin-panel", () => (
         <SurfaceFormCard
@@ -187,6 +213,7 @@ export const CourseMockInterviewSetupBlockBase = (input: CourseMockInterviewSetu
                 }),
                 focus: defineLeafComponent("badge", {}, () => <Badge props={{ content: input.props.focus, icon: "course" }} isLoading={loading} />),
             }),
+            journey: defineContractProjection("mock-interview-journey-progress", () => journeySurface),
             navigation: defineContractComponent("mock-interview-setup-tabs-over-panel", {
                 tabs: defineLeafComponent("choice-tabs", {}, () => <ChoiceTabs props={{ label: input.props.tabsLabel, selectedKey: selectedTab, tabs: input.props.tabs, variant: "secondary" }} on={{ select: (key) => input.on?.selectTab?.(key as "begin" | "history" | "stats") }} />),
             }),

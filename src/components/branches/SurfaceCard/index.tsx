@@ -5,6 +5,7 @@ import { Text } from "@/components/leaves/Text"
 import { SeeMoreLink } from "@/components/leaves/SeeMoreLink"
 import type { ContractKey } from "@/components/contracts"
 import { STARCI_ACADEMY_GRAMMAR_CONTRACTS } from "@/components/contracts/grammar"
+import { treatmentFor, type PresentationState } from "@starci/grammar/core"
 import {
     defineContractComponent,
     defineContractProjection,
@@ -102,6 +103,8 @@ export const SurfaceCard = <const K extends ContractKey>({
     render,
     isLoading = false,
 }: SurfaceCardProps<K>) => {
+    const grammarState: PresentationState = isLoading ? "pending" : "neutral"
+    const treatment = treatmentFor(grammarState)
     // One place at the end of the line: the way out wins it, the fact takes it only if free.
     const hasSeeMore = props.seeMoreLabel !== undefined && on?.seeMore !== undefined
     const end = hasSeeMore
@@ -127,8 +130,25 @@ export const SurfaceCard = <const K extends ContractKey>({
                 end: defineLeafComponent("see-more-link", {}, () => end),
             } : {}),
         })
+    const canonicalLabelRow = defineContractProjection(labelContract, () => (
+        <div className="starci-core-surface-label" data-grammar-surface-label="true">
+            <Tree contract={labelContract} render={labelRow} />
+        </div>
+    ))
     const plainSurface = props.isFrameless === true ? (
-        <Tree contract={contract} render={render} />
+        <div
+            className="starci-core-surface starci-core-frameless-surface"
+            data-grammar-frame="frameless"
+            data-grammar-scroll={props.scrollInside === undefined ? "page" : "contained"}
+            data-grammar-state={grammarState}
+            data-grammar-surface="true"
+            data-grammar-surface-depth="top"
+            data-grammar-treatment={treatment.tone}
+        >
+            <div className="starci-core-surface-content" data-grammar-surface-content="true">
+                <Tree contract={contract} render={render} />
+            </div>
+        </div>
     ) : (
         /*
          * THE MARKER IS WHAT ZEROES THE VENDOR INSET, not the class beside it.
@@ -140,34 +160,55 @@ export const SurfaceCard = <const K extends ContractKey>({
          * same rather than inventing a second escape.
          */
         <Card
-            className="p-0"
+            className="starci-core-surface p-0"
             data-component="SurfaceCardSurface"
-            data-grammar-contract={STARCI_ACADEMY_GRAMMAR_CONTRACTS.surfaceCard.key}
+            data-grammar-frame="bounded"
+            data-grammar-scroll={props.scrollInside === undefined ? "page" : "contained"}
+            data-grammar-state={grammarState}
+            data-grammar-surface="true"
+            data-grammar-surface-depth="top"
+            data-grammar-treatment={treatment.tone}
             data-scroll-inside={props.scrollInside}
         >
-            <Card.Content className="p-0" data-component="SurfaceCardBody">
+            <Card.Content className="starci-core-surface-content p-0" data-component="SurfaceCardBody" data-grammar-surface-content="true">
                 <Tree contract={contract} render={render} />
             </Card.Content>
         </Card>
     )
     // No name, no section: the column and the label line exist to hold a label, so an object that
     // names itself gets the ground alone rather than an empty row above it.
-    if (props.label === undefined) return plainSurface
+    if (props.label === undefined) return (
+        <div
+            className="starci-core-surface-card"
+            data-grammar-contract={STARCI_ACADEMY_GRAMMAR_CONTRACTS.surfaceCard.key}
+            data-grammar-frame={props.isFrameless === true ? "frameless" : "bounded"}
+            data-grammar-surface-card="true"
+        >
+            {plainSurface}
+        </div>
+    )
 
     return (
-        <Tree
-            contract="label-row-over-card"
-            render={defineContractComponent("label-row-over-card", {
-                label: labelRow,
-                /*
-                 * The surface is ALREADY a whole node - vendor card, body and the caller's own
-                 * contract inside it - so it enters the section as a projection. Handing the
-                 * caller's key back as slots would open a second node around a node that is
-                 * already drawn, which is the duplicate wrapper this branch was inset twice by.
-                 */
-                body: defineContractProjection(contract, () => plainSurface),
-            })}
-        />
+        <div
+            className="starci-core-surface-card"
+            data-grammar-contract={STARCI_ACADEMY_GRAMMAR_CONTRACTS.surfaceCard.key}
+            data-grammar-frame={props.isFrameless === true ? "frameless" : "bounded"}
+            data-grammar-surface-card="true"
+        >
+            <Tree
+                contract="label-row-over-card"
+                render={defineContractComponent("label-row-over-card", {
+                    label: canonicalLabelRow,
+                    /*
+                     * The surface is ALREADY a whole node - vendor card, body and the caller's own
+                     * contract inside it - so it enters the section as a projection. Handing the
+                     * caller's key back as slots would open a second node around a node that is
+                     * already drawn, which is the duplicate wrapper this branch was inset twice by.
+                     */
+                    body: defineContractProjection(contract, () => plainSurface),
+                })}
+            />
+        </div>
     )
 }
 

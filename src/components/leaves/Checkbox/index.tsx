@@ -58,6 +58,7 @@ export const Checkbox = ({ props, on }: CheckboxProps) => (
         name={props.name}
         isSelected={props.isSelected}
         onChange={(isSelected: boolean) => on?.change?.(isSelected)}
+        variant="secondary"
         className={ROOT_CLASSES}
     >
         <HeroCheckbox.Content>

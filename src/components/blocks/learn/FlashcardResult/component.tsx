@@ -1,3 +1,4 @@
+import { SurfaceCard as GrammarSurfaceCard } from "@starci/grammar/core"
 import { Tree } from "@/components/branches/Tree"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { Button } from "@/components/leaves/Button"
@@ -112,10 +113,10 @@ export const FlashcardResultBase = (input: FlashcardResultBlockProps) => {
     const actions = blockState === "ready"
         ? [
             defineLeafComponent("button", {}, () => (
-                <Button props={{ label: data.backLabel, variant: "outline" }} on={{ press: on.back }} />
+                <Button props={{ label: data.retrySessionLabel, variant: "primary" }} on={{ press: on.retrySession }} />
             )),
             defineLeafComponent("button", {}, () => (
-                <Button props={{ label: data.retrySessionLabel, variant: "primary" }} on={{ press: on.retrySession }} />
+                <Button props={{ label: data.backLabel, variant: "outline" }} on={{ press: on.back }} />
             )),
         ]
         : undefined
@@ -127,30 +128,33 @@ export const FlashcardResultBase = (input: FlashcardResultBlockProps) => {
             />
         ))
         : undefined
+    const grammarState = blockState === "pending" ? "pending" : blockState === "failed" ? "negative" : "affirmative"
 
     return (
-        <Tree contract="flashcard-result-workspace" render={defineContractComponent("flashcard-result-workspace", {
-            mode: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                <Text props={{ content: data.mode === "review" ? "Review" : "Quiz", size: "sm", tone: "muted" }} />
-            )),
-            header,
-            stat: stats,
-            nextDue,
-            breakdownTitle: blockState === "ready" && data.gradeRows.length > 0
-                ? defineLeafComponent("heading", {}, () => (
-                    <Heading props={{ content: data.breakdownTitle, level: 2 }} />
-                ))
-                : undefined,
-            grade: grades,
-            weakTopicsTitle: blockState === "ready" && data.weakTopics.length > 0
-                ? defineLeafComponent("heading", {}, () => (
-                    <Heading props={{ content: data.weakTopicsTitle, level: 2 }} />
-                ))
-                : undefined,
-            weakTopic: weakTopics,
-            action: actions,
-            notice,
-        })} />
+        <GrammarSurfaceCard ariaLabel={data.title} frame="frameless" state={grammarState}>
+            <Tree contract="flashcard-result-workspace" render={defineContractComponent("flashcard-result-workspace", {
+                mode: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                    <Text props={{ content: data.mode === "review" ? "Review" : "Quiz", size: "sm", tone: "muted" }} />
+                )),
+                header,
+                stat: stats,
+                nextDue,
+                breakdownTitle: blockState === "ready" && data.gradeRows.length > 0
+                    ? defineLeafComponent("heading", {}, () => (
+                        <Heading props={{ content: data.breakdownTitle, level: 2 }} />
+                    ))
+                    : undefined,
+                grade: grades,
+                weakTopicsTitle: blockState === "ready" && data.weakTopics.length > 0
+                    ? defineLeafComponent("heading", {}, () => (
+                        <Heading props={{ content: data.weakTopicsTitle, level: 2 }} />
+                    ))
+                    : undefined,
+                weakTopic: weakTopics,
+                action: actions,
+                notice,
+            })} />
+        </GrammarSurfaceCard>
     )
 }
 

@@ -9,8 +9,10 @@ import { Text } from "@/components/leaves/Text"
 import {
     defineCompositeComponent,
     defineContractComponent,
+    defineContractProjection,
     defineLeafComponent,
 } from "@/components/contracts/props"
+import { SurfaceCard } from "@starci/grammar/core"
 
 /** Finite situations shown by the result route. */
 export type CourseMockInterviewResultState = "grading" | "ready" | "failed"
@@ -38,6 +40,8 @@ export type CourseMockInterviewResultData = {
     readonly resultState?: CourseMockInterviewResultState
     readonly title: string
     readonly description: string
+    readonly journeyLabel?: string
+    readonly journeyStageLabel?: string
     readonly gradingLabel: string
     readonly failedLabel: string
     readonly scoreLabel: string
@@ -54,6 +58,7 @@ export type CourseMockInterviewResultData = {
     readonly reviews: ReadonlyArray<CourseMockInterviewQuestionReview>
     readonly retryLabel: string
     readonly newSessionLabel: string
+    readonly actionsTitle?: string
 }
 
 /** User intents emitted by the pure result page. */
@@ -84,12 +89,148 @@ export const CourseMockInterviewResultBlockBase = (input: CourseMockInterviewRes
             )),
         ]),
     ]
+    const journeySurface = (
+        <SurfaceCard
+            ariaLabel={input.props.journeyLabel ?? input.props.title}
+            state={loading ? "pending" : "neutral"}
+        >
+            <Tree
+                contract="mock-interview-journey-progress"
+                render={defineContractComponent("mock-interview-journey-progress", {
+                    progress: defineCompositeComponent("labelled-progress-row", {}, () => (
+                        <LabelledProgressRow
+                            props={{
+                                id: "mock-interview-journey-result",
+                                title: input.props.journeyLabel ?? input.props.title,
+                                percent: 100,
+                                percentText: input.props.journeyStageLabel ?? "3 / 3",
+                            }}
+                            isLoading={loading}
+                        />
+                    )),
+                })}
+            />
+        </SurfaceCard>
+    )
+    const summarySurface = (
+        <SurfaceCard ariaLabel={input.props.scoreLabel}>
+            <Tree
+                contract="mock-interview-result-summary"
+                render={defineContractComponent("mock-interview-result-summary", {
+                    scoreLabel: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                        <Text props={{ content: input.props.scoreLabel, size: "xs", tone: "muted" }} />
+                    )),
+                    score: defineLeafComponent("heading", {}, () => (
+                        <Heading props={{ content: `${input.props.score ?? 0}/100`, level: 1 }} />
+                    )),
+                    verdict: defineContractComponent("learn-page-title-pair", {
+                        title: defineLeafComponent("heading", {}, () => (
+                            <Heading props={{ content: input.props.verdict, level: 2 }} />
+                        )),
+                        description: defineLeafComponent("text", { size: "sm" }, () => (
+                            <Text props={{ content: input.props.promptTitle, size: "sm", tone: "muted" }} />
+                        )),
+                    }),
+                })}
+            />
+        </SurfaceCard>
+    )
+    const rubricSurface = (
+        <SurfaceCard ariaLabel={input.props.phaseTitle}>
+            <Tree
+                contract="mock-interview-result-rubric"
+                render={defineContractComponent("mock-interview-result-rubric", {
+                    title: defineLeafComponent("heading", {}, () => (
+                        <Heading props={{ content: input.props.phaseTitle, level: 2 }} />
+                    )),
+                    phase: input.props.phases.map((item) => defineCompositeComponent("labelled-progress-row", {}, () => (
+                        <LabelledProgressRow
+                            props={{
+                                id: item.id,
+                                title: item.label,
+                                percent: item.max === 0 ? 0 : (item.score / item.max) * 100,
+                                percentText: `${item.score}/${item.max}`,
+                            }}
+                        />
+                    ))),
+                })}
+            />
+        </SurfaceCard>
+    )
+    const strengthsSurface = (
+        <SurfaceCard ariaLabel={input.props.strengthsTitle}>
+            <Tree
+                contract="mock-interview-result-insight"
+                render={defineContractComponent("mock-interview-result-insight", {
+                    title: defineLeafComponent("heading", {}, () => (
+                        <Heading props={{ content: input.props.strengthsTitle, level: 2 }} />
+                    )),
+                    item: input.props.strengths.map((item) => defineLeafComponent("text", { size: "sm" }, () => (
+                        <Text props={{ content: item, size: "sm" }} />
+                    ))),
+                })}
+            />
+        </SurfaceCard>
+    )
+    const gapsSurface = (
+        <SurfaceCard ariaLabel={input.props.gapsTitle}>
+            <Tree
+                contract="mock-interview-result-insight"
+                render={defineContractComponent("mock-interview-result-insight", {
+                    title: defineLeafComponent("heading", {}, () => (
+                        <Heading props={{ content: input.props.gapsTitle, level: 2 }} />
+                    )),
+                    item: input.props.gaps.map((item) => defineLeafComponent("text", { size: "sm" }, () => (
+                        <Text props={{ content: item, size: "sm" }} />
+                    ))),
+                })}
+            />
+        </SurfaceCard>
+    )
+    const reviewsSurface = (
+        <SurfaceCard ariaLabel={input.props.reviewsTitle}>
+            <Tree
+                contract="mock-interview-result-reviews"
+                render={defineContractComponent("mock-interview-result-reviews", {
+                    title: defineLeafComponent("heading", {}, () => (
+                        <Heading props={{ content: input.props.reviewsTitle, level: 2 }} />
+                    )),
+                    review: input.props.reviews.map((item) => defineCompositeComponent("evidence-row", {}, () => (
+                        <EvidenceRow
+                            props={{
+                                title: `${item.title}: ${item.answer}`,
+                                subtitle: item.feedback,
+                                fact: item.scoreLabel,
+                            }}
+                        />
+                    ))),
+                })}
+            />
+        </SurfaceCard>
+    )
+    const actionsSurface = (
+        <SurfaceCard
+            ariaLabel={input.props.actionsTitle ?? input.props.newSessionLabel}
+            state={loading ? "pending" : "neutral"}
+        >
+            <Tree
+                contract="mock-interview-result-actions"
+                render={defineContractComponent("mock-interview-result-actions", {
+                    title: defineLeafComponent("heading", {}, () => (
+                        <Heading props={{ content: input.props.actionsTitle ?? input.props.newSessionLabel, level: 2 }} />
+                    )),
+                    action,
+                })}
+            />
+        </SurfaceCard>
+    )
 
     return (
         <Tree
             contract={"course-mock-interview-result-page"}
             render={defineContractComponent("course-mock-interview-result-page", {
-                header: defineContractComponent("centred-title-pair", {
+                journey: defineContractProjection("mock-interview-journey-progress", () => journeySurface),
+                header: defineContractComponent("learn-page-title-pair", {
                     title: defineLeafComponent("heading", {}, () => (
                         <Heading props={{ content: input.props.title, level: 1 }} isLoading={loading} />
                     )),
@@ -114,61 +255,26 @@ export const CourseMockInterviewResultBlockBase = (input: CourseMockInterviewRes
                     )),
                 } : {}),
                 ...(ready ? {
-                    scoreLabel: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                        <Text props={{ content: input.props.scoreLabel, size: "xs", tone: "muted" }} />
-                    )),
-                    score: defineLeafComponent("heading", {}, () => (
-                        <Heading props={{ content: `${input.props.score ?? 0}/100`, level: 1 }} />
-                    )),
-                    verdict: defineContractComponent("centred-title-pair", {
-                        title: defineLeafComponent("heading", {}, () => (
-                            <Heading props={{ content: input.props.verdict, level: 2 }} />
-                        )),
-                        description: defineLeafComponent("text", { size: "sm" }, () => (
-                            <Text props={{ content: input.props.promptTitle, size: "sm", tone: "muted" }} />
-                        )),
-                    }),
-                    phaseTitle: defineLeafComponent("heading", {}, () => (
-                        <Heading props={{ content: input.props.phaseTitle, level: 2 }} />
-                    )),
-                    phase: input.props.phases.map((item) => defineCompositeComponent("labelled-progress-row", {}, () => (
-                        <LabelledProgressRow
-                            props={{
-                                id: item.id,
-                                title: item.label,
-                                percent: item.max === 0 ? 0 : (item.score / item.max) * 100,
-                                percentText: `${item.score}/${item.max}`,
-                            }}
-                        />
-                    ))),
-                    strengthsTitle: defineLeafComponent("heading", {}, () => (
-                        <Heading props={{ content: input.props.strengthsTitle, level: 2 }} />
-                    )),
-                    strength: input.props.strengths.map((item) => defineLeafComponent("text", { size: "sm" }, () => (
-                        <Text props={{ content: item, size: "sm" }} />
-                    ))),
-                    gapsTitle: defineLeafComponent("heading", {}, () => (
-                        <Heading props={{ content: input.props.gapsTitle, level: 2 }} />
-                    )),
-                    gap: input.props.gaps.map((item) => defineLeafComponent("text", { size: "sm" }, () => (
-                        <Text props={{ content: item, size: "sm" }} />
-                    ))),
-                    ...(input.props.reviews.length === 0 ? {} : {
-                        reviewsTitle: defineLeafComponent("heading", {}, () => (
-                            <Heading props={{ content: input.props.reviewsTitle, level: 2 }} />
-                        )),
-                        review: input.props.reviews.map((item) => defineCompositeComponent("evidence-row", {}, () => (
-                            <EvidenceRow
-                                props={{
-                                    title: `${item.title}: ${item.answer}`,
-                                    subtitle: item.feedback,
-                                    fact: item.scoreLabel,
-                                }}
-                            />
-                        ))),
+                    workspace: defineContractComponent("mock-interview-result-workspace", {
+                        primary: defineContractComponent("mock-interview-result-primary", {
+                            summary: defineContractProjection("mock-interview-result-summary", () => summarySurface),
+                            rubric: defineContractProjection("mock-interview-result-rubric", () => rubricSurface),
+                            insights: defineContractComponent("mock-interview-result-insights", {
+                                strengths: defineContractProjection("mock-interview-result-insight", () => strengthsSurface),
+                                gaps: defineContractProjection("mock-interview-result-insight", () => gapsSurface),
+                            }),
+                            ...(input.props.reviews.length === 0 ? {} : {
+                                reviews: defineContractProjection("mock-interview-result-reviews", () => reviewsSurface),
+                            }),
+                        }),
+                        rail: defineContractComponent("mock-interview-result-rail", {
+                            actions: defineContractProjection("mock-interview-result-actions", () => actionsSurface),
+                        }),
                     }),
                 } : {}),
-                action,
+                ...(ready ? {} : {
+                    actions: defineContractProjection("mock-interview-result-actions", () => actionsSurface),
+                }),
             })}
         />
     )
@@ -176,6 +282,3 @@ export const CourseMockInterviewResultBlockBase = (input: CourseMockInterviewRes
 
 /** Source-level ownership marker for the pure result twin. */
 export const meta = { world: "pure", domain: "learn" } as const
-
-
-

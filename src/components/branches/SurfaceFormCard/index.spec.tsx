@@ -39,6 +39,8 @@ describe("SurfaceFormCard", () => {
         expect(node).toHaveAttribute("data-tier", "branch")
         expect(node?.getAttribute("data-why")).not.toBe("")
         expect(screen.getByRole("button", { name: "Post comment" })).toBeInTheDocument()
+        expect(container.querySelector("[data-grammar-surface-card=\"true\"]")).toHaveAttribute("data-grammar-contract", "core.surface-card")
+        expect(container.querySelector("[data-grammar-surface=\"true\"]")).toHaveAttribute("data-grammar-state", "neutral")
     })
 
     it("empties the vendor inset on both halves because the entry owns the inset", () => {

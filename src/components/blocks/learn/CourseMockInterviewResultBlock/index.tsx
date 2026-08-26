@@ -21,6 +21,8 @@ const COPY = {
     en: {
         title: "Interview debrief",
         description: "Your persisted result, rubric breakdown and question-by-question feedback.",
+        journey: "Practice journey",
+        journeyStage: "Step 3 of 3 · Result",
         grading: "Your interview is still being graded",
         failed: "The interview result could not be loaded.",
         score: "Overall score",
@@ -30,11 +32,14 @@ const COPY = {
         reviews: "Question review",
         retry: "Check again",
         newSession: "Interview again",
+        actions: "Next steps",
         question: (index: number) => `Question ${index}`,
     },
     vi: {
         title: "Nhận xét buổi phỏng vấn", // vn-ok: approved Vietnamese runtime copy
         description: "Kết quả đã lưu, điểm theo tiêu chí và nhận xét cho từng câu hỏi.", // vn-ok: approved Vietnamese runtime copy
+        journey: "Hành trình luyện tập", // vn-ok: approved Vietnamese runtime copy
+        journeyStage: "Bước 3/3 · Kết quả", // vn-ok: approved Vietnamese runtime copy
         grading: "Buổi phỏng vấn vẫn đang được chấm", // vn-ok: approved Vietnamese runtime copy
         failed: "Không thể tải kết quả phỏng vấn.", // vn-ok: approved Vietnamese runtime copy
         score: "Tổng điểm", // vn-ok: approved Vietnamese runtime copy
@@ -44,6 +49,7 @@ const COPY = {
         reviews: "Nhận xét từng câu", // vn-ok: approved Vietnamese runtime copy
         retry: "Kiểm tra lại", // vn-ok: approved Vietnamese runtime copy
         newSession: "Phỏng vấn lại", // vn-ok: approved Vietnamese runtime copy
+        actions: "Bước tiếp theo", // vn-ok: approved Vietnamese runtime copy
         question: (index: number) => `Câu ${index}`, // vn-ok: approved Vietnamese runtime copy
     },
 } as const
@@ -67,6 +73,8 @@ export const CourseMockInterviewResultBlock = ({ displayId, sessionId }: CourseM
             props={{
                 title: copy.title,
                 description: copy.description,
+                journeyLabel: copy.journey,
+                journeyStageLabel: copy.journeyStage,
                 gradingLabel: copy.grading,
                 failedLabel: copy.failed,
                 scoreLabel: copy.score,
@@ -94,6 +102,7 @@ export const CourseMockInterviewResultBlock = ({ displayId, sessionId }: CourseM
                 })),
                 retryLabel: copy.retry,
                 newSessionLabel: copy.newSession,
+                actionsTitle: copy.actions,
             }}
             on={{
                 retry: () => { void Promise.all([course.mutate(), attempt.mutate()]) },

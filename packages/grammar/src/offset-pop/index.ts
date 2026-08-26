@@ -64,8 +64,8 @@ export const OFFSET_POP_COMPLEX_CASES = Object.freeze([
 /** One installable Grammar bundle: Core owns anatomy; Offset Pop owns only visual treatment. */
 export const offsetPopGrammar = Object.freeze({
     id: "offset-pop",
-    version: "1.0.0",
-    extends: Object.freeze([{ id: "core", version: "1.0.0" }]),
+    version: "1.1.0",
+    extends: Object.freeze([{ id: "core", version: "1.1.0" }]),
     contracts: Object.freeze({
         ...CORE_COMPONENT_CONTRACTS,
         [offsetPopVisualTreatmentContract.key]: offsetPopVisualTreatmentContract,

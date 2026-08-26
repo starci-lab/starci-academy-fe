@@ -52,6 +52,8 @@ const COPY = {
     en: {
         title: "Mock interview",
         description: "Practise a technical interview grounded in this course, then receive detailed feedback.",
+        journey: "Practice journey",
+        journeyStage: "Step 1 of 3 · Setup",
         level: "Seniority",
         mode: "Interview format",
         start: "Start interview",
@@ -90,6 +92,8 @@ const COPY = {
     vi: {
         title: "Phỏng vấn thử", // vn-ok: approved Vietnamese runtime copy
         description: "Luyện phỏng vấn kỹ thuật theo nội dung khóa học và nhận phản hồi chi tiết.", // vn-ok: approved Vietnamese runtime copy
+        journey: "Hành trình luyện tập", // vn-ok: approved Vietnamese runtime copy
+        journeyStage: "Bước 1/3 · Thiết lập", // vn-ok: approved Vietnamese runtime copy
         level: "Cấp độ", // vn-ok: approved Vietnamese runtime copy
         mode: "Hình thức phỏng vấn", // vn-ok: approved Vietnamese runtime copy
         start: "Bắt đầu phỏng vấn", // vn-ok: approved Vietnamese runtime copy
@@ -172,6 +176,8 @@ export const CourseMockInterviewSetupBlock = ({ displayId }: CourseMockInterview
             props={{
                 title: copy.title,
                 description: copy.description,
+                journeyLabel: copy.journey,
+                journeyStageLabel: copy.journeyStage,
                 status: setupStatusOf(state, copy),
                 levelLabel: copy.level,
                 modeLabel: copy.mode,

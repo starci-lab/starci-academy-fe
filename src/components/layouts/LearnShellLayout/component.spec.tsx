@@ -38,4 +38,17 @@ describe("LearnShellLayoutBase", () => {
         fireEvent.click(screen.getByRole("button", { name: "dismiss drawer" }))
         expect(closeCourseNavigation).toHaveBeenCalledOnce()
     })
+
+    it("keeps one semantic mobile navigation below the desktop rail breakpoint", () => {
+        const { container } = render(<LearnShellLayoutBase
+            displayId="course"
+            isFullBleed={false}
+            mobileTabs={[{ id: "today", label: "Today", icon: "course", isCurrent: true }]}
+            surface={<div>Today surface</div>}
+        />)
+
+        const mobileNavigation = container.querySelector("nav[data-node=learn-mobile-tab-bar]")
+        expect(mobileNavigation).not.toBeNull()
+        expect(mobileNavigation?.className).toContain("md:hidden")
+    })
 })

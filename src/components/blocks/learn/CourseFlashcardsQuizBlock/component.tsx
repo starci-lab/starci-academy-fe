@@ -1,3 +1,4 @@
+import { SurfaceCard as GrammarSurfaceCard } from "@starci/grammar/core"
 import { Tree } from "@/components/branches/Tree"
 import { SurfaceListCard, type SurfaceListCardData } from "@/components/branches/SurfaceListCard"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
@@ -93,7 +94,7 @@ const EvidenceListView = ({ props, isLoading }: LeafProps<EvidenceListData>) => 
 )
 const EvidenceList = defineContractComponent("flashcard-evidence-list", EvidenceListView)
 
-/** Renders the legacy quiz setup hierarchy without fetching or routing internally. */
+/** Draw the guided quick-quiz setup, evidence views, and resume path without fetching. */
 export const CourseFlashcardsQuizBlockBase = (input: CourseFlashcardsQuizBlockProps) => {
     const pageState = input.pageState
     const blockState = input.blockState
@@ -155,7 +156,7 @@ export const CourseFlashcardsQuizBlockBase = (input: CourseFlashcardsQuizBlockPr
                 <Text props={{ content: data.scopeLabel, size: "sm", weight: "semibold" }} isLoading={isLoading} />
             )),
             scope: (["all", "due"] as const).map((scope) => defineLeafComponent("button", {}, () => (
-                <Button props={{ label: scope === "all" ? data.allScopeLabel : data.dueScopeLabel, variant: data.selectedScope === scope ? "primary" : "outline" }} on={{ press: () => on.selectScope(scope) }} isLoading={isLoading} />
+                <Button props={{ label: scope === "all" ? data.allScopeLabel : data.dueScopeLabel, size: "sm", variant: data.selectedScope === scope ? "primary" : "outline" }} on={{ press: () => on.selectScope(scope) }} isLoading={isLoading} />
             ))),
             modeLabel: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
                 <Text props={{ content: data.modeLabel, size: "sm", weight: "semibold" }} isLoading={isLoading} />
@@ -164,6 +165,7 @@ export const CourseFlashcardsQuizBlockBase = (input: CourseFlashcardsQuizBlockPr
                 <Button
                     props={{
                         label: mode === "quick" ? data.quickLabel : data.deepLabel,
+                        size: "sm",
                         variant: data.selectedMode === mode ? "primary" : "outline",
                     }}
                     on={{ press: () => on.selectMode(mode) }}
@@ -177,6 +179,7 @@ export const CourseFlashcardsQuizBlockBase = (input: CourseFlashcardsQuizBlockPr
                 <Button
                     props={{
                         label: level.label,
+                        size: "sm",
                         variant: data.selectedLevel === level.id ? "primary" : "outline",
                     }}
                     on={{ press: () => on.selectLevel(level.id) }}
@@ -203,19 +206,21 @@ export const CourseFlashcardsQuizBlockBase = (input: CourseFlashcardsQuizBlockPr
             />
         ))
         : undefined
+    const grammarState = blockState === "pending" ? "pending" : blockState === "failed" ? "negative" : blockState === "empty" ? "unavailable" : "neutral"
 
     return (
-        <Tree contract={"course-flashcards-quiz-page"} render={defineContractComponent("course-flashcards-quiz-page", {
-            header,
-            toolbar,
-            configuration,
-            evidenceTitle: (blockState === "ready" || blockState === "pending") && pageState !== "setup" ? defineLeafComponent("heading", {}, () => <Heading props={{ content: data.evidenceTitle, level: 2 }} isLoading={isLoading} />) : undefined,
-            evidence,
-            notice,
-        })} />
+        <GrammarSurfaceCard ariaLabel={data.title} frame="frameless" state={grammarState}>
+            <Tree contract={"course-flashcards-quiz-page"} render={defineContractComponent("course-flashcards-quiz-page", {
+                header,
+                toolbar,
+                configuration,
+                evidenceTitle: (blockState === "ready" || blockState === "pending") && pageState !== "setup" ? defineLeafComponent("heading", {}, () => <Heading props={{ content: data.evidenceTitle, level: 2 }} isLoading={isLoading} />) : undefined,
+                evidence,
+                notice,
+            })} />
+        </GrammarSurfaceCard>
     )
 }
 
 /** Canon metadata for the pure page half. */
 export const meta = { world: "pure", domain: "learn" } as const
-

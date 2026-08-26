@@ -1,9 +1,10 @@
 import { Tree } from "@/components/branches/Tree"
+import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { Heading } from "@/components/leaves/Heading"
 import { NavLink } from "@/components/leaves/NavLink"
 import { Text } from "@/components/leaves/Text"
-import { defineCompositeComponent, defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
+import { defineCompositeComponent, defineContractComponent, defineContractProjection, defineLeafComponent } from "@/components/contracts/props"
 import type { PlaygroundSummary } from "@/modules/api/graphql/queries/query-playgrounds"
 
 /** Catalog states exposed by the pure playground hub. */
@@ -16,7 +17,21 @@ export const CoursePlaygroundCatalogBase = (input: CoursePlaygroundCatalogBlockP
     const loading = input.state === "pending"
     const rows = loading && input.props.playgrounds.length === 0 ? Array.from({ length: 4 }, (_, index) => ({ id: `pending-${index}`, slug: `pending-${index}`, title: "", icon: null, stepCount: 0 })) : input.props.playgrounds
     const notice = input.state === "empty" || input.state === "failed" ? defineCompositeComponent("empty-notice", {}, () => <EmptyNotice props={{ message: input.state === "failed" ? input.props.failedText : input.props.emptyText, actionLabel: input.state === "failed" ? input.props.retryLabel : undefined }} on={{ act: input.on.retry }} />) : undefined
-    return <Tree contract="course-playground-catalog" render={defineContractComponent("course-playground-catalog", { header: defineLeafComponent("heading", {}, () => <Heading props={{ content: input.props.title, level: 1 }} isLoading={loading} />), description: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: input.props.description, size: "sm", tone: "muted" }} isLoading={loading} />), playground: rows.map((playground) => defineLeafComponent("nav-link", { kind: "section" }, () => <NavLink props={{ label: `${playground.title} · ${playground.stepCount} ${input.props.stepLabel}`, kind: "section" }} on={{ press: () => input.on.openSetup(playground.slug) }} isLoading={loading} />)), notice })} />
+    const grid = rows.length === 0 ? undefined : defineContractProjection("playground-catalog-grid", () => (
+        <Tree contract="playground-catalog-grid" render={defineContractComponent("playground-catalog-grid", {
+            playground: rows.map((playground) => defineContractProjection("playground-catalog-card", () => (
+                <SurfaceCard
+                    contract="playground-catalog-card"
+                    render={defineContractComponent("playground-catalog-card", {
+                        open: defineLeafComponent("nav-link", { kind: "section" }, () => <NavLink props={{ label: playground.title, kind: "section" }} on={{ press: () => input.on.openSetup(playground.slug) }} isLoading={loading} />),
+                        fact: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: `${playground.stepCount} ${input.props.stepLabel}`, size: "sm", tone: "muted" }} isLoading={loading} />),
+                    })}
+                    isLoading={loading}
+                />
+            ))),
+        })} />
+    ))
+    return <Tree contract="course-playground-catalog" render={defineContractComponent("course-playground-catalog", { header: defineLeafComponent("heading", {}, () => <Heading props={{ content: input.props.title, level: 1 }} isLoading={loading} />), description: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: input.props.description, size: "sm", tone: "muted" }} isLoading={loading} />), grid, notice })} />
 }
 
 /** Source-level ownership marker. */

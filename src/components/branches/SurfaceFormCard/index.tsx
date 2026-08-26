@@ -2,6 +2,8 @@ import { Card } from "@heroui/react"
 import { Tree } from "@/components/branches/Tree"
 import { Heading } from "@/components/leaves/Heading"
 import type { ContractKey } from "@/components/contracts"
+import { STARCI_ACADEMY_GRAMMAR_CONTRACTS } from "@/components/contracts/grammar"
+import { treatmentFor } from "@starci/grammar/core"
 import {
     defineContractComponent,
     defineContractProjection,
@@ -31,23 +33,42 @@ export const SurfaceFormCard = <const K extends ContractKey>({
     contract,
     render,
 }: SurfaceFormCardProps<K>) => {
+    const treatment = treatmentFor("neutral")
     const surface = (
-        <Card className="p-0" data-component="SurfaceFormCard">
-            <Card.Content className="p-0" data-component="SurfaceFormCardBody">
+        <Card
+            className="starci-core-surface p-0"
+            data-component="SurfaceFormCard"
+            data-grammar-frame="bounded"
+            data-grammar-state="neutral"
+            data-grammar-surface="true"
+            data-grammar-surface-depth="top"
+            data-grammar-treatment={treatment.tone}
+        >
+            <Card.Content className="starci-core-surface-content p-0" data-component="SurfaceFormCardBody" data-grammar-surface-content="true">
                 <Tree contract={contract} render={render} />
             </Card.Content>
         </Card>
     )
-    if (props.label === undefined) return surface
+    if (props.label === undefined) return (
+        <div className="starci-core-surface-card" data-grammar-contract={STARCI_ACADEMY_GRAMMAR_CONTRACTS.surfaceCard.key} data-grammar-frame="bounded" data-grammar-surface-card="true">
+            {surface}
+        </div>
+    )
     return (
-        <Tree contract="label-row-over-card" render={defineContractComponent("label-row-over-card", {
-            label: defineContractComponent("title-with-end-action", {
-                title: defineLeafComponent("heading", {}, () => (
-                    <Heading props={{ content: props.label, level: 3 }} />
+        <div className="starci-core-surface-card" data-grammar-contract={STARCI_ACADEMY_GRAMMAR_CONTRACTS.surfaceCard.key} data-grammar-frame="bounded" data-grammar-surface-card="true">
+            <Tree contract="label-row-over-card" render={defineContractComponent("label-row-over-card", {
+                label: defineContractProjection("title-with-end-action", () => (
+                    <div className="starci-core-surface-label" data-grammar-surface-label="true">
+                        <Tree contract="title-with-end-action" render={defineContractComponent("title-with-end-action", {
+                            title: defineLeafComponent("heading", {}, () => (
+                                <Heading props={{ content: props.label, level: 3 }} />
+                            )),
+                        })} />
+                    </div>
                 )),
-            }),
-            body: defineContractProjection(contract, () => surface),
-        })} />
+                body: defineContractProjection(contract, () => surface),
+            })} />
+        </div>
     )
 }
 

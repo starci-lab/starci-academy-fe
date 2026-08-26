@@ -3,7 +3,7 @@
 import { motion, useReducedMotion } from "framer-motion"
 import { Tree } from "@/components/branches/Tree"
 import type { ContractComponent } from "@/components/contracts/props"
-import { STARCI_ACADEMY_GRAMMAR_CONTRACTS } from "@/components/contracts/grammar"
+import { Rail } from "@starci/grammar/core"
 
 /** Expanded learn-navigation width, kept equal to the frame contract's `w-64`. */
 const EXPANDED_WIDTH = 256
@@ -36,14 +36,20 @@ export const CollapsibleRail = ({ isCollapsed, expanded, collapsed }: Collapsibl
         <motion.div
             data-tier="branch"
             data-component="CollapsibleRail"
-            data-grammar-contract={STARCI_ACADEMY_GRAMMAR_CONTRACTS.rail.key}
             initial={false}
             animate={{ width: isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH }}
             transition={reduceMotion ? INSTANT_TRANSITION : SPRING_TRANSITION}
         >
-            {isCollapsed
-                ? <Tree contract="learn-course-navigation-rail-collapsed" render={collapsed} />
-                : <Tree contract="learn-course-navigation-rail" render={expanded} />}
+            <Rail
+                collapse={isCollapsed ? "collapsed" : "expanded"}
+                landmark="content-navigation"
+                motion={reduceMotion ? "reduced" : "animated"}
+                width={isCollapsed ? "compact" : "standard"}
+            >
+                {isCollapsed
+                    ? <Tree contract="learn-course-navigation-rail-collapsed" render={collapsed} />
+                    : <Tree contract="learn-course-navigation-rail" render={expanded} />}
+            </Rail>
         </motion.div>
     )
 }

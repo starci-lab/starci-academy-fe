@@ -1,3 +1,4 @@
+import { SurfaceCard as GrammarSurfaceCard } from "@starci/grammar/core"
 import { Tree } from "@/components/branches/Tree"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { Button } from "@/components/leaves/Button"
@@ -84,7 +85,7 @@ export const CourseFlashcardSessionBlockBase = ({ blockState, data, on }: Course
     const header = defineContractComponent("flashcard-session-header", {
         deck: data.deckTitle === undefined ? undefined : defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: data.deckTitle, size: "sm", tone: "muted" }} isLoading={isLoading} />),
         title: defineLeafComponent("heading", {}, () => <Heading props={{ content: data.title, level: 1 }} isLoading={isLoading} />),
-        leave: defineLeafComponent("button", {}, () => <Button props={{ label: data.leaveLabel, variant: "outline" }} on={{ press: on.leave }} />),
+        leave: defineLeafComponent("button", {}, () => <Button props={{ label: data.leaveLabel, variant: "outline", disabled: blockState === "syncing" || blockState === "completing" }} on={{ press: on.leave }} />),
     })
     const progress = settledFailure ? undefined : defineContractComponent("label-with-muted-fact-row", {
         label: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => <Text props={{ content: data.progressText, size: "sm", weight: "semibold" }} isLoading={isLoading} />),
@@ -107,11 +108,12 @@ export const CourseFlashcardSessionBlockBase = ({ blockState, data, on }: Course
             : !data.answerVisible ? [defineLeafComponent("button", {}, () => <Button props={{ label: data.revealLabel, variant: "primary" }} on={{ press: on.reveal }} />)]
                 : ([data.againLabel, data.hardLabel, data.goodLabel, data.easyLabel] as const).map((label, grade) => defineLeafComponent("button", {}, () => <Button props={{ label, variant: grade === 2 ? "primary" : "outline" }} on={{ press: () => on.rate(grade as 0 | 1 | 2 | 3) }} />))
     const notice = settledFailure ? defineCompositeComponent("empty-notice", {}, () => <EmptyNotice props={{ message: blockState === "expired" ? data.expiredText : data.failedText, actionLabel: data.retryLabel }} on={{ act: on.retry }} />) : undefined
+    const grammarState = blockState === "failed" ? "negative" : blockState === "expired" ? "unavailable" : blockState === "active" ? "neutral" : "pending"
 
-    return <Tree contract={"course-flashcard-session-page"} render={defineContractComponent("course-flashcard-session-page", { header, progress, card, status, action: actions, notice })} />
+    return <GrammarSurfaceCard ariaLabel={data.title} frame="frameless" state={grammarState}>
+        <Tree contract={"course-flashcard-session-page"} render={defineContractComponent("course-flashcard-session-page", { header, progress, card, status, action: actions, notice })} />
+    </GrammarSurfaceCard>
 }
 
 /** Canon ownership marker for the pure live-session page. */
 export const meta = { world: "pure", domain: "learn" } as const
-
-

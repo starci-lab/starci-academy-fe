@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { PlaygroundSessionLayout, usePlaygroundSession } from "."
+import { PlaygroundSession } from "@/components/blocks/learn/PlaygroundSession"
 
 /**
  * What these tests guard.
@@ -24,9 +25,12 @@ const mocks = vi.hoisted(() => ({
     agentConnected: false,
     verifiedStepIndex: null as number | null,
     passedStepIndexes: [] as ReadonlyArray<number>,
+    replace: vi.fn(),
+    push: vi.fn(),
 }))
 
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
+vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ replace: mocks.replace, push: mocks.push }) }))
 vi.mock("@/hooks/swr/useQueryPlaygroundSwr", () => ({
     useQueryPlaygroundSwr: () => ({ data: mocks.data, error: mocks.error, mutate: mocks.mutate }),
 }))
@@ -72,6 +76,8 @@ const Surface = () => {
             <output data-testid="socket">{`${session.socketState}/${String(session.agentConnected)}/${String(session.verifiedStepIndex)}/${session.passedStepIndexes.join(",")}`}</output>
             <output data-testid="identity">{`${session.displayId}/${session.slug}`}</output>
             <output data-testid="starting">{String(session.isStarting)}</output>
+            <output data-testid="restoring">{String(session.isRestoring)}</output>
+            <output data-testid="paired">{String(session.hasPaired)}</output>
             <button type="button" onClick={() => void session.start()}>Start session</button>
             <button type="button" onClick={session.verify}>Verify step</button>
         </div>
@@ -91,6 +97,7 @@ describe("PlaygroundSessionLayout", () => {
         mocks.agentConnected = false
         mocks.verifiedStepIndex = null
         mocks.passedStepIndexes = []
+        window.sessionStorage.clear()
         vi.clearAllMocks()
         mocks.trigger.mockResolvedValue({})
     })
@@ -123,6 +130,59 @@ describe("PlaygroundSessionLayout", () => {
         expect(mocks.trigger).toHaveBeenCalledWith({ playgroundId: "playground-1", mode: "guided" })
         expect(mocks.subscribe).toHaveBeenCalledWith("session-7")
         expect(screen.getByTestId("start-failed")).toHaveTextContent("false")
+    })
+
+    it("restores an open session before allowing a replacement start", async () => {
+        window.sessionStorage.setItem(
+            "starci:playground-session:v1:system-design/k8s-basics",
+            JSON.stringify({ id: "session-restored", pairingCode: "ABC123", steps: [] }),
+        )
+        mount()
+
+        await waitFor(() => expect(screen.getByTestId("session")).toHaveTextContent("session-restored"))
+        expect(mocks.subscribe).toHaveBeenCalledWith("session-restored")
+
+        fireEvent.click(screen.getByRole("button", { name: "Start session" }))
+        expect(mocks.trigger).not.toHaveBeenCalled()
+    })
+
+    it("remembers a successful machine pair for guarded session entry", async () => {
+        mocks.agentConnected = true
+        mount()
+
+        await waitFor(() => expect(screen.getByTestId("paired")).toHaveTextContent("true"))
+        expect(window.sessionStorage.getItem("starci:playground-paired:v1:system-design/k8s-basics")).toBe("true")
+    })
+
+    it("returns an unpaired live-session deep link to setup", async () => {
+        render(
+            <PlaygroundSessionLayout
+                displayId="system-design"
+                slug="k8s-basics"
+                surface={<PlaygroundSession displayId="system-design" slug="k8s-basics" />}
+            />,
+        )
+
+        await waitFor(() => expect(mocks.replace).toHaveBeenCalledWith("/courses/system-design/learn/playground/k8s-basics"))
+    })
+
+    it("keeps a previously paired learner in the live session while the relay reconnects", async () => {
+        window.sessionStorage.setItem(
+            "starci:playground-session:v1:system-design/k8s-basics",
+            JSON.stringify({ id: "session-restored", pairingCode: "ABC123", steps: [] }),
+        )
+        window.sessionStorage.setItem("starci:playground-paired:v1:system-design/k8s-basics", "true")
+        mocks.socketState = "failed"
+        render(
+            <PlaygroundSessionLayout
+                displayId="system-design"
+                slug="k8s-basics"
+                surface={<PlaygroundSession displayId="system-design" slug="k8s-basics" />}
+            />,
+        )
+
+        await waitFor(() => expect(screen.getByText("session.reconnecting")).toBeInTheDocument())
+        expect(mocks.replace).not.toHaveBeenCalled()
     })
 
     it("reports a server answer that carried no session as a failed start", async () => {

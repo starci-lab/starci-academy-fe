@@ -5,6 +5,7 @@ import { Text } from "@/components/leaves/Text"
 import { Button } from "@/components/leaves/Button"
 import type { JoinedListContractKey } from "@/components/contracts"
 import { STARCI_ACADEMY_GRAMMAR_CONTRACTS } from "@/components/contracts/grammar"
+import { treatmentFor, type PresentationState } from "@starci/grammar/core"
 import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 import type {
     ContractRenderComponent,
@@ -66,6 +67,8 @@ export const SurfaceListCard = <
     A extends SurfaceListCardActions = SurfaceListCardActions,
 >(input: SurfaceListCardProps<K, D, A>) => {
     const { props: surfaceProps, on, render: Content, isLoading = false } = input
+    const grammarState: PresentationState = isLoading ? "pending" : "neutral"
+    const treatment = treatmentFor(grammarState)
     const label = surfaceProps.fact === undefined ? (
         <Heading props={{ content: surfaceProps.label, level: 3 }} />
     ) : (
@@ -84,28 +87,44 @@ export const SurfaceListCard = <
 
     return (
         <div
-            className="flex flex-col gap-3"
+            className="starci-core-surface-list flex flex-col gap-3"
             data-component="SurfaceListCard"
             data-grammar-contract={STARCI_ACADEMY_GRAMMAR_CONTRACTS.surfaceListCard.key}
+            data-grammar-label-visibility={surfaceProps.isLabelHidden === true ? "hidden" : "visible"}
+            data-grammar-list-mode="interactive"
+            data-grammar-surface-list="true"
         >
-            {surfaceProps.isLabelHidden === true ? null : label}
+            {surfaceProps.isLabelHidden === true ? null : (
+                <div className="starci-core-surface-label" data-grammar-surface-label="true">{label}</div>
+            )}
             <Card
-                className="p-0"
+                aria-label={surfaceProps.isLabelHidden === true ? surfaceProps.label : undefined}
+                className="starci-core-list-shell starci-core-surface p-0"
                 data-component="SurfaceListCardSurface"
+                data-grammar-state={grammarState}
+                data-grammar-surface="true"
+                data-grammar-surface-depth={surfaceProps.isNested === true ? "nested" : "top"}
+                data-grammar-treatment={treatment.tone}
                 data-surface-context={surfaceProps.isNested === true ? "nested" : "page"}
                 data-verdict={surfaceProps.isVerdict === true ? "true" : "false"}
             >
                 <Card.Content
-                    className={surfaceProps.isVerdict === true ? "rounded-none p-0" : "p-0"}
+                    className={surfaceProps.isVerdict === true ? "starci-core-owned-collection rounded-none p-0" : "starci-core-owned-collection p-0"}
                     data-component="SurfaceListCardBody"
+                    data-grammar-list="true"
+                    data-grammar-list-mode="interactive"
                 >
                     <Content props={surfaceProps} on={on} isLoading={isLoading} />
                 </Card.Content>
             </Card>
             {surfaceProps.actionLabel !== undefined && (isLoading || on?.act !== undefined) ? (
-                <Button props={{ label: surfaceProps.actionLabel, size: "sm", variant: "primary" }} on={{ press: on?.act }} isLoading={isLoading} />
+                <div className="starci-core-surface-footer" data-grammar-surface-footer="true">
+                    <Button props={{ label: surfaceProps.actionLabel, size: "sm", variant: "primary" }} on={{ press: on?.act }} isLoading={isLoading} />
+                </div>
             ) : surfaceProps.description === undefined ? null : (
-                <Text props={{ content: surfaceProps.description, size: "xs", tone: "muted" }} isLoading={isLoading} />
+                <div className="starci-core-surface-footer" data-grammar-surface-footer="true">
+                    <Text props={{ content: surfaceProps.description, size: "xs", tone: "muted" }} isLoading={isLoading} />
+                </div>
             )}
         </div>
     )

@@ -8,6 +8,7 @@ import {
 
 test("offset-pop is a declared, version-pinned extension of core visual treatment", () => {
     assert.equal(offsetPopGrammar.extends[0]?.id, "core")
+    assert.equal(offsetPopGrammar.extends[0]?.version, "1.1.0")
     assert.equal(offsetPopVisualTreatmentContract.base?.key, "core.visual-treatment")
     assert.equal(offsetPopVisualTreatmentContract.base?.version, "1.0.0")
     assert.deepEqual(Object.keys(offsetPopVisualTreatmentContract.resolvedAxes).sort(), [

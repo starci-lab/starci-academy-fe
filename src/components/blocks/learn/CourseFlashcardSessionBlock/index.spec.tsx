@@ -97,4 +97,37 @@ describe("CourseFlashcardSessionBlock", () => {
         fireEvent.click(screen.getByText("select"))
         fireEvent.click(screen.getByText("check"))
     })
+
+    it("keeps the live session on screen while a persisted mutation is pending", async () => {
+        const { CourseFlashcardSessionBlockBase } = await vi.importActual<typeof import("./component")>("./component")
+        const sharedData = {
+            mode: "review" as const, title: "Core concepts", progressText: "Card 2 of 10", prompt: "What is a closure?", answer: "A function with lexical scope",
+            answerVisible: false, solutionVisible: false, revealLabel: "Reveal answer", clozeInstructionLabel: "Complete the sentence", wordBankLabel: "Word bank",
+            checkAnswerLabel: "Check answer", showSolutionLabel: "Show solution", resultLabel: "correct", ratingLabel: "Rate this card",
+            againLabel: "Again", hardLabel: "Hard", goodLabel: "Good", easyLabel: "Easy", syncingLabel: "Saving progress", completingLabel: "Completing session",
+            expiredText: "Session expired", failedText: "Could not load", retryLabel: "Retry", leaveLabel: "Leave session",
+        }
+        const actions = { reveal: vi.fn(), selectTerm: vi.fn(), checkQuiz: vi.fn(), showSolution: vi.fn(), rate: vi.fn(), retry: vi.fn(), leave: vi.fn() }
+        const view = render(<CourseFlashcardSessionBlockBase blockState="syncing" data={sharedData} on={actions} />)
+        expect(screen.getByRole("button", { name: "Leave session" })).toBeDisabled()
+
+        view.rerender(<CourseFlashcardSessionBlockBase blockState="active" data={sharedData} on={actions} />)
+        expect(screen.getByRole("button", { name: "Leave session" })).toBeEnabled()
+    })
+
+    it("orders the result continuation before the secondary return action", async () => {
+        const { FlashcardResultBase } = await vi.importActual<typeof import("../FlashcardResult/component")>("../FlashcardResult/component")
+        render(<FlashcardResultBase
+            blockState="ready"
+            data={{
+                mode: "review", title: "Session complete", subtitle: "Keep your momentum", scoreLabel: "Score", scoreText: "82%", reviewedLabel: "Reviewed", reviewedText: "10",
+                xpLabel: "XP", xpText: "+20", durationLabel: "Duration", durationText: "4 min", nextDueLabel: "Next due", nextDueText: "Tomorrow",
+                breakdownTitle: "Recall breakdown", gradeRows: [{ label: "Good", value: 7 }], weakTopicsTitle: "Weak topics", weakTopics: [{ tag: "Closures", value: "Review next" }],
+                failedText: "Could not load", retryLabel: "Retry", retrySessionLabel: "Study again", backLabel: "Back to library",
+            }}
+            on={{ retryLoad: vi.fn(), retrySession: vi.fn(), back: vi.fn() }}
+        />)
+
+        expect(screen.getAllByRole("button").map((button) => button.textContent)).toEqual(["Study again", "Back to library"])
+    })
 })

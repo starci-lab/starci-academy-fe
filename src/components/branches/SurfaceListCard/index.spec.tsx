@@ -49,6 +49,17 @@ describe("SurfaceListCard", () => {
 
         expect(screen.getByRole("heading", { name: "Course standings" })).toBeInTheDocument()
         expect(container.querySelectorAll("[data-node=\"next-action-row\"]")).toHaveLength(2)
+        const owner = container.querySelector("[data-grammar-surface-list=\"true\"]")
+        const surface = container.querySelector("[data-grammar-surface=\"true\"]")
+        const collection = container.querySelector("[data-grammar-list=\"true\"]")
+        expect(owner).toHaveAttribute("data-grammar-contract", "core.surface-list-card")
+        expect(collection).toHaveAttribute("data-grammar-list-mode", "interactive")
+        expect(owner).not.toBe(surface)
+        expect(surface).not.toBe(collection)
+        expect(owner?.contains(surface)).toBe(true)
+        expect(surface?.contains(collection)).toBe(true)
+        expect(container.querySelectorAll("[data-grammar-contract=\"core.surface-list-card\"]")).toHaveLength(1)
+        expect(container.querySelectorAll("[data-grammar-list=\"true\"]")).toHaveLength(1)
         expect(container.querySelector("[data-node=\"label-with-muted-fact-row\"]")).toBeNull()
         fireEvent.click(screen.getByRole("button", { name: "Ada" }))
         expect(open).toHaveBeenCalledOnce()
@@ -94,6 +105,7 @@ describe("SurfaceListCard", () => {
 
         const surface = container.querySelector("[data-component=\"SurfaceListCardSurface\"]")
         expect(surface).toHaveAttribute("data-surface-context", "nested")
+        expect(surface).toHaveAttribute("data-grammar-surface-depth", "nested")
         expect(surface).toHaveAttribute("data-verdict", "true")
         expect(container.querySelector("[data-component=\"SurfaceListCardBody\"]")?.className).toContain("rounded-none")
     })
@@ -121,6 +133,7 @@ describe("SurfaceListCard", () => {
         expect(screen.queryByText("Refreshed hourly")).not.toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: /See all standings/ }))
         expect(act).toHaveBeenCalledOnce()
+        expect(document.querySelector("[data-grammar-surface-footer=\"true\"]")).not.toBeNull()
     })
 
     it("reserves the action's place while the list rests, before any outcome is wired", () => {

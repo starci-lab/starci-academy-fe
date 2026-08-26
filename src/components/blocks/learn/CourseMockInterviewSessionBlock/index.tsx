@@ -54,6 +54,8 @@ const resolveInterviewStateLabel = (state: CourseMockInterviewSessionState, copy
 const COPY = {
     en: {
         title: "Mock interview",
+        journey: "Practice journey",
+        journeyStage: "Step 2 of 3 · Interview",
         connecting: "Connecting to your interview…",
         reconnecting: "Connection lost. Reconnecting without discarding your transcript…",
         syncing: "Saving your transcript…",
@@ -80,6 +82,8 @@ const COPY = {
     },
     vi: {
         title: "Phỏng vấn thử", // vn-ok: approved Vietnamese runtime copy
+        journey: "Hành trình luyện tập", // vn-ok: approved Vietnamese runtime copy
+        journeyStage: "Bước 2/3 · Phỏng vấn", // vn-ok: approved Vietnamese runtime copy
         connecting: "Đang kết nối tới buổi phỏng vấn…", // vn-ok: approved Vietnamese runtime copy
         reconnecting: "Mất kết nối. Đang kết nối lại mà không làm mất bản ghi…", // vn-ok: approved Vietnamese runtime copy
         syncing: "Đang lưu bản ghi phỏng vấn…", // vn-ok: approved Vietnamese runtime copy
@@ -312,6 +316,8 @@ export const CourseMockInterviewSessionBlock = ({ displayId, sessionId }: Course
             props={{
                 operation: grade.isMutating ? "grading" : sync.isMutating ? "syncing" : socket.isStreaming ? "streaming" : undefined,
                 title: copy.title,
+                journeyLabel: copy.journey,
+                journeyStageLabel: copy.journeyStage,
                 promptTitle: session?.promptTitle ?? copy.title,
                 stateLabel,
                 counterLabel: copy.counter(Math.min(current + 1, total), total),

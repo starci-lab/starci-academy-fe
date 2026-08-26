@@ -29,6 +29,20 @@ export const CORE_RULES = [
         refuse: ["one shell per row", "interactive row behavior", "more than one state mark per row"],
     },
     {
+        id: "core.anatomy.interactive-collection",
+        concern: "anatomy",
+        when: ["peer rows share one boundary and one or more rows own an action"],
+        decide: ["render one collection shell", "keep every row action inside its row owner", "place a collection outcome after the shell"],
+        refuse: ["claiming the static-row capability", "one surface per row", "moving row actions into the surface owner"],
+    },
+    {
+        id: "core.anatomy.frameless-surface",
+        concern: "anatomy",
+        when: ["the content already owns its visible surface boundaries"],
+        decide: ["retain the external label", "remove the redundant surface shell"],
+        refuse: ["dropping the accessible name", "drawing a transparent decorative shell"],
+    },
+    {
         id: "core.interaction.whole-surface-action",
         concern: "interaction",
         when: ["the entire surface has exactly one destination or action"],
@@ -48,5 +62,12 @@ export const CORE_RULES = [
         when: ["a surface or rail loses useful inline space"],
         decide: ["reflow owned rows within the component container", "disable sticky positioning on a narrow viewport"],
         refuse: ["content clipping", "hiding the primary body", "caller-authored breakpoint classes"],
+    },
+    {
+        id: "core.layout.collapsible-navigation-rail",
+        concern: "layout",
+        when: ["one persistent navigation rail changes between expanded and compact modes"],
+        decide: ["keep one mounted rail owner", "retain accessible destination names", "remove interpolation for reduced motion"],
+        refuse: ["nesting navigation landmarks", "hiding destinations in compact mode", "removing the state change with the animation"],
     },
 ] as const satisfies ReadonlyArray<CoreRule>

@@ -12,13 +12,28 @@ const CLOSED_EXTENSION_BOUNDARIES = [
 ] as const
 
 const surfaceCardSpec = {
-    version: "1.0.0",
+    version: "1.1.0",
     layer: "branch",
     slots: ["external-label", "content", "whole-action"],
     stateInputs: PRESENTATION_STATES,
-    variableAxes: ["surface-depth", "state-treatment", "action-mode", "container-response"],
+    variableAxes: [
+        "surface-depth",
+        "state-treatment",
+        "action-mode",
+        "label-end",
+        "frame-mode",
+        "scroll-mode",
+        "container-response",
+    ],
     extensionPolicy: {
-        allowedAxes: ["surface-depth", "state-treatment", "container-response"],
+        allowedAxes: [
+            "surface-depth",
+            "state-treatment",
+            "label-end",
+            "frame-mode",
+            "scroll-mode",
+            "container-response",
+        ],
         forbiddenChanges: CLOSED_EXTENSION_BOUNDARIES,
     },
     closedInvariants: [
@@ -26,38 +41,74 @@ const surfaceCardSpec = {
         "nested-border-xor-shadow",
         "one-content-owner",
         "whole-action-is-overlay",
+        "frameless-has-no-surface-shell",
+        "contained-scroll-has-one-scroll-owner",
         "neutral-state-only",
     ],
 } as const satisfies GrammarContractSpec
 
 const surfaceListCardSpec = {
-    version: "1.0.0",
+    version: "1.1.0",
     layer: "branch",
-    slots: ["external-label", "single-list-shell", "static-row"],
+    slots: ["external-label", "single-list-shell", "single-collection-shell", "static-row", "interactive-row", "footer"],
     stateInputs: PRESENTATION_STATES,
-    variableAxes: ["surface-depth", "state-treatment", "row-count", "container-response"],
+    variableAxes: [
+        "surface-depth",
+        "state-treatment",
+        "row-count",
+        "row-mode",
+        "label-visibility",
+        "footer-mode",
+        "container-response",
+    ],
     extensionPolicy: {
-        allowedAxes: ["surface-depth", "state-treatment", "container-response"],
+        allowedAxes: [
+            "surface-depth",
+            "state-treatment",
+            "row-mode",
+            "label-visibility",
+            "footer-mode",
+            "container-response",
+        ],
         forbiddenChanges: CLOSED_EXTENSION_BOUNDARIES,
     },
     closedInvariants: [
         "one-list-one-shell",
+        "one-collection-one-shell",
         "rows-separated-by-dividers",
         "affirmative-row-uses-one-check",
         "nested-border-xor-shadow",
         "static-rows-have-no-action",
+        "interactive-rows-own-their-actions",
+        "hidden-label-retains-accessible-name",
+        "footer-follows-collection",
         "neutral-state-only",
     ],
 } as const satisfies GrammarContractSpec
 
 const railSpec = {
-    version: "1.0.0",
+    version: "1.1.0",
     layer: "branch",
-    slots: ["heading", "body", "footer"],
+    slots: ["heading", "body", "footer", "content-landmark"],
     stateInputs: PRESENTATION_STATES,
-    variableAxes: ["rail-mode", "rail-width", "state-treatment", "container-response"],
+    variableAxes: [
+        "landmark-mode",
+        "rail-mode",
+        "rail-width",
+        "collapse-mode",
+        "motion-mode",
+        "state-treatment",
+        "container-response",
+    ],
     extensionPolicy: {
-        allowedAxes: ["rail-width", "state-treatment", "container-response"],
+        allowedAxes: [
+            "landmark-mode",
+            "rail-width",
+            "collapse-mode",
+            "motion-mode",
+            "state-treatment",
+            "container-response",
+        ],
         forbiddenChanges: CLOSED_EXTENSION_BOUNDARIES,
     },
     closedInvariants: [
@@ -65,6 +116,9 @@ const railSpec = {
         "sticky-disabled-on-narrow-viewport",
         "body-remains-reachable",
         "footer-follows-body",
+        "content-landmark-is-not-wrapped-by-a-second-landmark",
+        "collapsed-navigation-retains-accessible-names",
+        "reduced-motion-removes-interpolation-not-state-change",
         "neutral-state-only",
     ],
 } as const satisfies GrammarContractSpec
