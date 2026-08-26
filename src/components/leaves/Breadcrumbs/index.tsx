@@ -30,6 +30,8 @@ export type BreadcrumbsData = {
     readonly steps: ReadonlyArray<BreadcrumbStep>
     /** What the trail is, for assistive technology. Never drawn. */
     readonly label: string
+    /** Keep every ancestor visible when each step communicates meaningful journey state. */
+    readonly showFullTrail?: boolean
 }
 
 /** One handler per step id, so the caller decides what "go back there" means. */
@@ -68,7 +70,7 @@ export const Breadcrumbs = ({ props, on, isLoading = false }: BreadcrumbsProps) 
     }
     const last = props.steps.length - 1
     const parent = [...props.steps.slice(0, last)].reverse().find((step) => on?.[step.id] !== undefined)
-    if (props.steps.length >= BACK_LINK_MIN_DEPTH && parent !== undefined) {
+    if (props.showFullTrail !== true && props.steps.length >= BACK_LINK_MIN_DEPTH && parent !== undefined) {
         return (
             <HeroLink
                 data-tier="leaf"

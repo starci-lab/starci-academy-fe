@@ -31,6 +31,8 @@ const copy: CourseMockInterviewSetupData = {
     startLabel: "Start interview",
     resumeLabel: "Resume interview",
     retryLabel: "Try again",
+    accessMessage: "Course access is required",
+    accessLabel: "View course access",
     selectedTab: "begin",
     tabsLabel: "Mock interview setup",
     tabs: [
@@ -43,12 +45,6 @@ const copy: CourseMockInterviewSetupData = {
     briefingTitle: "Get ready for a focused interview",
     setupTitle: "Session setup",
     setupDescription: "Choose two settings",
-    sequenceTitle: "After you begin",
-    sequenceSteps: [
-        { id: "create", title: "Create session", description: "Draw questions" },
-        { id: "answer", title: "Answer questions", description: "Persist progress" },
-        { id: "feedback", title: "Receive feedback", description: "Review results" },
-    ],
     serverNote: "Questions are generated after you begin.",
     savedNote: "The session is saved.",
     historyTitle: "Interview history",
@@ -162,6 +158,17 @@ describe("CourseMockInterviewSetupPageBase", () => {
         expect(screen.queryByRole("button", { name: "Start interview" })).not.toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Try again" }))
         expect(retry).toHaveBeenCalledTimes(1)
+    })
+
+    it("replaces protected setup controls with a course-access explanation when locked", () => {
+        const access = vi.fn()
+        draw("locked", {}, { access })
+
+        expect(screen.queryByRole("button", { name: "Start interview" })).not.toBeInTheDocument()
+        expect(screen.queryByRole("tab", { name: "History" })).not.toBeInTheDocument()
+        expect(screen.getByText("Course access is required")).toBeInTheDocument()
+        fireEvent.click(screen.getByRole("button", { name: "View course access" }))
+        expect(access).toHaveBeenCalledTimes(1)
     })
 
     it.each(["failed", "resumable"] as const)("keeps the resolved status visible in the %s state", (state) => {

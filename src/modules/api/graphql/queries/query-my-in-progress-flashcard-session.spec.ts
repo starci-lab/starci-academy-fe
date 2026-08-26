@@ -40,6 +40,7 @@ const card = {
     deckTitle: "Docker",
     front: "What is a layer?",
     back: "A filesystem diff",
+    answerAvailable: true,
     level: "easy",
     tags: ["images"],
     nextIntervals: { again: 1, hard: 2, good: 3, easy: 4 },
@@ -88,6 +89,7 @@ describe("queryMyInProgressFlashcardSession resolving a review session by id", (
         expect(mocks.query.mock.calls[1][0].variables).toEqual({ courseId: "course-1", cardIds: ["c-1", "c-2"] })
         expect(printedCalls()[0]).toContain("myFlashcardReviewSessionBySessionId")
         expect(printedCalls()[1]).toContain("nextIntervals")
+        expect(printedCalls()[1]).toContain("answerAvailable")
     })
 
     it("falls back to the deck family and to empty counters when the stored row omits them", async () => {

@@ -18,14 +18,49 @@ import {
 const card: CourseFlashcardSessionPageData = {
     mode: "review",
     title: "Study cards",
+    currentCard: 1,
+    progressCard: 1,
+    totalCards: 12,
     progressText: "Card 1 of 12",
+    readOnly: false,
+    questions: Array.from({ length: 12 }, (_, index) => ({
+        position: index + 1,
+        state: index === 0 ? "current" as const : "future" as const,
+        selected: index === 0,
+        disabled: index > 0,
+    })),
+    breadcrumbLabel: "Course path",
+    modeBreadcrumbLabel: "Review",
+    taskBreadcrumbLabel: "Study",
+    courseTitle: "Fullstack Mastery",
     deckTitle: "Core deck",
     level: "B1",
     prompt: "What is CQRS?",
     answer: "Command Query Responsibility Segregation",
+    answerAvailable: true,
     answerVisible: true,
     solutionVisible: false,
     revealLabel: "Reveal answer",
+    promptLabel: "Question",
+    answerLabel: "Answer",
+    answerUnavailableLabel: "Answer unavailable",
+    answerUnavailableText: "This answer is locked for the current course access.",
+    sessionSummaryLabel: "Session details",
+    modeLabel: "Mode",
+    deckLabel: "Deck",
+    levelLabel: "Level",
+    navigatorTitle: "Questions",
+    navigatorDescription: "Open an answered card to review it. Saved grades cannot be changed.",
+    navigatorStateLabel: "Question states",
+    answeredLabel: "Answered",
+    selectedLabel: "Reviewing",
+    currentLabel: "Current",
+    futureLabel: "Not reached",
+    readOnlyLabel: "Reviewing a saved answer",
+    readOnlyText: "This card is read-only because its grade is already saved.",
+    previousLabel: "Previous",
+    nextLabel: "Next",
+    continueHint: "Choose a recall grade to continue.",
     clozeInstructionLabel: "Fill every blank",
     wordBankLabel: "Word bank",
     checkAnswerLabel: "Check answer",
@@ -50,6 +85,11 @@ const handlers = (): CourseFlashcardSessionPageActions => ({
     checkQuiz: vi.fn(),
     showSolution: vi.fn(),
     rate: vi.fn(),
+    selectQuestion: vi.fn(),
+    previous: vi.fn(),
+    next: vi.fn(),
+    openCourse: vi.fn(),
+    openMode: vi.fn(),
     retry: vi.fn(),
     leave: vi.fn(),
 })
@@ -62,9 +102,19 @@ const draw = (
     return { on, ...render(<CourseFlashcardSessionBlockBase blockState={blockState} data={{ ...card, ...data }} on={on} />) }
 }
 
+const progressedQuestions = (selectedPosition = 7) => Array.from({ length: 12 }, (_, index) => {
+    const position = index + 1
+    return {
+        position,
+        state: position < 7 ? "answered" as const : position === 7 ? "current" as const : "future" as const,
+        selected: position === selectedPosition,
+        disabled: position > 7,
+    }
+})
+
 describe("CourseFlashcardSessionBlockBase", () => {
     it("shows the prompt, the deck it came from and how far through the session the reader is", () => {
-        const { container } = draw("active")
+        const { container, on } = draw("active")
 
         expect(container.querySelector("[data-node=\"course-flashcard-session-page\"]")).not.toBeNull()
         expect(screen.getByRole("heading", { name: "Study cards" })).toBeInTheDocument()
@@ -73,6 +123,85 @@ describe("CourseFlashcardSessionBlockBase", () => {
         expect(screen.getByText("B1")).toBeInTheDocument()
         expect(screen.getByText("What is CQRS?")).toBeInTheDocument()
         expect(screen.getByText("Command Query Responsibility Segregation")).toBeInTheDocument()
+        expect(screen.getByLabelText("Course path")).toBeInTheDocument()
+        expect(screen.getByLabelText("Course path")).toHaveTextContent("Fullstack MasteryReviewStudy")
+        expect(screen.queryByText("Back")).not.toBeInTheDocument()
+        fireEvent.click(screen.getByText("Review"))
+        expect(on.openMode).toHaveBeenCalledOnce()
+        expect(screen.getByRole("progressbar", { name: "Card 1 of 12" })).toHaveAttribute("aria-valuenow", "8")
+        expect(container.querySelector("[data-node=flashcard-session-workspace]")).not.toBeNull()
+        expect(container.querySelector("[data-node=flashcard-session-feedback-neutral]")).not.toBeNull()
+        expect(container.querySelector("[data-node=flashcard-session-navigation-panel]")).not.toBeNull()
+        const rail = container.querySelector("[data-node=flashcard-session-rail]")
+        expect(rail).not.toBeNull()
+        expect(rail?.querySelectorAll("[data-grammar-surface-card=true]")).toHaveLength(2)
+        expect(rail?.querySelectorAll("[data-component=SurfaceListCard]")).toHaveLength(1)
+        expect(container.querySelector("[data-node=flashcard-session-feedback-neutral] [data-component=Icon]")).toBeNull()
+        expect(container.querySelector("[data-node=flashcard-session-navigation-legend] [data-component=Icon]")).toBeNull()
+        expect(container.querySelector("[data-node=flashcard-session-navigation-legend]")).toHaveClass("grid-cols-2")
+        expect(container.querySelector("[data-node=flashcard-session-navigation-legend]")?.children).toHaveLength(4)
+        expect(Array.from(container.querySelectorAll("[data-node=flashcard-session-navigation-legend] [data-component=ButtonStateSample]"), (sample) => ({
+            variant: sample.getAttribute("data-variant"),
+            disabled: sample.getAttribute("data-disabled"),
+        }))).toEqual([
+            { variant: "outline", disabled: "false" },
+            { variant: "secondary", disabled: "false" },
+            { variant: "primary", disabled: "false" },
+            { variant: "tertiary", disabled: "true" },
+        ])
+        const facts = screen.getByRole("heading", { name: "Session details" }).closest("[data-component=SurfaceListCard]")
+        expect(facts).not.toBeNull()
+        expect(facts?.querySelector("[data-node=flashcard-session-context-list]")).toHaveClass("divide-y")
+        expect(facts?.querySelectorAll("[data-node=flashcard-session-context-row]")).toHaveLength(3)
+    })
+
+    it("maps answered, current and future questions without unlocking unreached work", () => {
+        const { on } = draw("active", {
+            currentCard: 7,
+            progressCard: 7,
+            progressText: "Card 7 of 12",
+            questions: progressedQuestions(),
+        })
+
+        expect(screen.getByRole("button", { name: "7" })).toHaveAttribute("data-variant", "primary")
+        expect(screen.getByRole("button", { name: "1" })).toHaveAttribute("data-variant", "outline")
+        expect(screen.getByRole("button", { name: "8" })).toBeDisabled()
+        fireEvent.click(screen.getByRole("button", { name: "4" }))
+        expect(on.selectQuestion).toHaveBeenCalledWith(4)
+        expect(on.selectQuestion).not.toHaveBeenCalledWith(8)
+    })
+
+    it("reopens an answered question read-only while keeping persisted progress at the frontier", () => {
+        const { container } = draw("active", {
+            currentCard: 3,
+            progressCard: 7,
+            progressText: "Card 7 of 12",
+            readOnly: true,
+            questions: progressedQuestions(3),
+        })
+
+        expect(screen.getByRole("progressbar", { name: "Card 7 of 12" })).toHaveAttribute("aria-valuenow", "58")
+        expect(screen.getByText("This card is read-only because its grade is already saved.")).toBeInTheDocument()
+        expect(screen.getByRole("button", { name: "3" })).toHaveAttribute("data-variant", "secondary")
+        expect(screen.queryByRole("button", { name: "Good" })).not.toBeInTheDocument()
+        expect(screen.queryByRole("button", { name: "Reveal answer" })).not.toBeInTheDocument()
+        expect(screen.queryByText("Reviewing a saved answer")).not.toBeInTheDocument()
+        expect(container.querySelectorAll("[data-node=flashcard-session-feedback-neutral]")).toHaveLength(1)
+    })
+
+    it("traverses saved questions with previous and next without grading them", () => {
+        const { on } = draw("active", {
+            currentCard: 3,
+            progressCard: 7,
+            readOnly: true,
+            questions: progressedQuestions(3),
+        })
+
+        fireEvent.click(screen.getByRole("button", { name: "Previous" }))
+        fireEvent.click(screen.getByRole("button", { name: "Next" }))
+        expect(on.previous).toHaveBeenCalledOnce()
+        expect(on.next).toHaveBeenCalledOnce()
+        expect(on.rate).not.toHaveBeenCalled()
     })
 
     it("keeps the answer hidden and offers only the reveal until the reader asks for it", () => {
@@ -116,6 +245,7 @@ describe("CourseFlashcardSessionBlockBase", () => {
 
         first.rerender(<CourseFlashcardSessionBlockBase blockState="active" data={{ ...card, mode: "quiz", answerVisible: false, cloze: { ...cloze, checked: true } }} on={first.on} />)
         expect(screen.getByText("2 / 2 blanks correct")).toBeInTheDocument()
+        expect(first.container.querySelector("[data-node=flashcard-session-feedback-success]")).not.toBeNull()
         fireEvent.click(screen.getByRole("button", { name: "Show full answer" }))
         expect(first.on.showSolution).toHaveBeenCalledOnce()
 
@@ -170,13 +300,30 @@ describe("CourseFlashcardSessionBlockBase", () => {
         expect(container.querySelectorAll("[data-node=\"flashcard-session-header\"] > [data-component=Text]")).toHaveLength(0)
     })
 
-    it("leaves the level fact blank rather than inventing one when the backend reported no level", () => {
-        const { container } = draw("active", { level: null })
-        const fact = container.querySelector("[data-node=\"label-with-muted-fact-row\"] [data-size=\"xs\"]")
+    it("omits the level context row rather than inventing one when the backend reported no level", () => {
+        draw("active", { level: null })
 
-        expect(fact).not.toBeNull()
-        expect(fact?.textContent).toBe("")
+        expect(screen.queryByText("Level")).not.toBeInTheDocument()
         expect(screen.queryByText("B1")).not.toBeInTheDocument()
+        expect(screen.getByRole("progressbar", { name: "Card 1 of 12" })).toHaveAttribute("aria-valuenow", "8")
+    })
+
+    it("draws a partial quiz verdict as a warning surface instead of a success state", () => {
+        const { container } = draw("active", {
+            mode: "quiz",
+            answerVisible: false,
+            cloze: {
+                text: "Choose ____ and ____",
+                blanks: ["Consistency", "Availability"],
+                bank: ["Consistency", "Availability"],
+                selected: ["Consistency", "Durability"],
+                checked: true,
+                correctCount: 1,
+            },
+        })
+
+        expect(container.querySelector("[data-node=flashcard-session-feedback-warning]")).not.toBeNull()
+        expect(container.querySelector("[data-node=flashcard-session-feedback-success]")).toBeNull()
     })
 
     it("keeps the way out of the session reachable even after the session has died", () => {

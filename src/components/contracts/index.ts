@@ -29,7 +29,7 @@ import type { CoreLayoutClassName } from "@starci/grammar/core"
 export type LayoutClassName = CoreLayoutClassName
     | "scrollbar"
     | "items-baseline"
-    | "grid-cols-1" | "grid-cols-2" | "sm:grid-cols-2" | "sm:grid-cols-4" | "lg:grid-cols-3"
+    | "grid-cols-1" | "grid-cols-2" | "grid-cols-5" | "sm:grid-cols-2" | "sm:grid-cols-3" | "sm:grid-cols-4" | "lg:grid-cols-3"
     | "sm:flex-row" | "sm:items-start" | "sm:justify-between"
     | "md:flex" | "md:flex-row" | "md:items-start" | "md:gap-8"
     // A PROPORTIONAL split, which the union could not previously express. Every existing two-column
@@ -108,7 +108,7 @@ export type LayoutClassName = CoreLayoutClassName
     | "md:[&>*:first-child]:self-start" | "md:[&>*:first-child]:max-h-rail" | "md:[&>*:first-child]:h-app-rail"
     | "md:[&>*:first-child]:overflow-y-auto"
     | "[&>*]:px-4" | "[&>*]:py-3" | "[&>*]:p-2" | "[&>*]:p-3" | "[&>*]:border-separator"
-    | "[&>*:nth-child(odd)]:border-r" | "[&>*:nth-child(-n+4)]:border-b"
+    | "[&>*:nth-child(odd)]:border-r" | "[&>*:nth-child(-n+2)]:border-b" | "[&>*:nth-child(-n+4)]:border-b"
     | "[&>*:first-child]:w-5" | "[&>*:first-child]:shrink-0"
     // A catalog row reads left to right: what it looks like, what it is, what to do. The artwork
     // is FIXED rather than proportional, because a thumbnail that grew with the viewport would
@@ -1219,7 +1219,7 @@ export const CONTRACTS = buildContracts({
         why: "if you need the concept-map body to remain a legal non-landmark subtree under its route-owned main shell.",
     },
     "course-mock-interview-hub-page": {
-        classes: ["mx-auto", "w-full", "max-w-app-lg", "px-6", "py-6"],
+        classes: ["mx-auto", "w-full", "max-w-app-md", "px-6", "py-6"],
         children: { content: { contract: "mock-interview-hub-content" } },
         why: "if the mock-interview route needs one measured page plane inside the learn shell's existing main landmark while its connected block owns the changing green-room content.",
     },
@@ -1228,7 +1228,7 @@ export const CONTRACTS = buildContracts({
         children: {
             header: { contract: "mock-interview-page-header" },
             journey: { contract: "mock-interview-journey-progress" },
-            navigation: { contract: "mock-interview-setup-tabs-over-panel" },
+            navigation: { contract: "mock-interview-setup-tabs-over-panel", optional: true },
             panel: { contract: "mock-interview-setup-panel" },
         },
         why: "if you need the interview setup route to keep its orientation and three setup destinations stable while one selected panel changes beneath them.",
@@ -1247,7 +1247,7 @@ export const CONTRACTS = buildContracts({
         why: "if the interview route needs its purpose on the reading axis while preserving the course that grounds every generated session as a compact fact.",
     },
     "mock-interview-setup-tabs-over-panel": {
-        classes: ["flex", "w-full", "flex-col", "gap-3", "border-b", "border-separator"],
+        classes: ["flex", "w-full", "flex-col", "gap-3"],
         children: { tabs: { leaf: "choice-tabs" } },
         why: "if you need begin, history and statistics to remain one navigation layer above the setup panel they replace.",
     },
@@ -1272,48 +1272,33 @@ export const CONTRACTS = buildContracts({
         why: "if you need an unfinished interview's real progress kept beside the one action that returns the learner to it.",
     },
     "mock-interview-readiness-snapshot": {
-        classes: ["flex", "flex-col", "divide-y", "divide-separator"],
+        classes: ["grid", "grid-cols-1", "gap-3", "sm:grid-cols-3"],
         children: { fact: { contract: "title-with-baseline-fact", repeats: true, restingCount: 3 } },
         why: "if you need seniority, interview format and course focus compared as one compact readiness snapshot before entering the room.",
     },
     "mock-interview-begin-panel": {
-        classes: ["flex", "w-full", "min-w-0", "flex-col", "md:flex-row"],
+        classes: ["flex", "w-full", "min-w-0", "flex-col"],
         children: {
             briefing: { contract: "mock-interview-briefing-track" },
             configuration: { contract: "mock-interview-configuration-track" },
         },
-        why: "if the green room needs one shared form surface whose course briefing precedes the bounded setup controls and stacks in the same order when narrow.",
+        why: "if the green room needs the legacy reading order: a ready-to-enter room first, followed by quieter optional configuration on the same bounded surface.",
     },
     "mock-interview-briefing-track": {
-        classes: ["flex", "min-w-0", "grow", "flex-col", "gap-4", "border-b", "border-separator", "p-6", "md:border-b-0", "md:border-r"],
+        classes: ["flex", "min-w-0", "flex-col", "gap-4", "border-b", "border-separator", "p-6"],
         children: {
             eyebrow: { leaf: "text", props: { size: "sm", tone: "accent" } },
             title: { leaf: "heading" },
             description: { leaf: "text", props: { size: "sm", tone: "muted" } },
             readiness: { contract: "mock-interview-readiness-snapshot" },
-            sequenceTitle: { leaf: "heading" },
-            step: { contract: "mock-interview-sequence-step", repeats: true, restingCount: 3 },
+            status: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
+            action: { leaf: "button" },
+            fine: { leaf: "text", props: { size: "xs", tone: "muted" } },
         },
-        why: "if the learner needs the course-grounded purpose, current choices and the server-owned sequence together before configuring a new interview.",
-    },
-    "mock-interview-sequence-step": {
-        classes: ["flex", "flex-row", "items-start", "gap-3"],
-        children: {
-            index: { leaf: "badge" },
-            copy: { contract: "mock-interview-sequence-copy" },
-        },
-        why: "if one server-owned interview consequence needs a stable order marker beside its concise title and explanation.",
-    },
-    "mock-interview-sequence-copy": {
-        classes: ["flex", "min-w-0", "grow", "flex-col", "gap-1"],
-        children: {
-            title: { leaf: "text", props: { size: "sm", weight: "semibold" } },
-            description: { leaf: "text", props: { size: "xs", tone: "muted" } },
-        },
-        why: "if an ordered interview step needs its action named before the muted consequence it explains.",
+        why: "if the learner needs the course-grounded purpose, resolved defaults and primary room-entry action together before optional configuration, matching the legacy green room.",
     },
     "mock-interview-configuration-track": {
-        classes: ["flex", "w-full", "flex-col", "gap-4", "p-6", "md:w-2/5", "md:shrink-0"],
+        classes: ["flex", "w-full", "flex-col", "gap-4", "bg-background", "p-6"],
         children: {
             title: { leaf: "heading" },
             description: { leaf: "text", props: { size: "sm", tone: "muted" } },
@@ -1322,11 +1307,8 @@ export const CONTRACTS = buildContracts({
             modeLabel: { leaf: "text", props: { size: "sm", tone: "muted" } },
             mode: { leaf: "choice-tabs" },
             note: { leaf: "text", props: { size: "xs", tone: "muted" } },
-            status: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
-            action: { leaf: "button" },
-            fine: { leaf: "text", props: { size: "xs", tone: "muted" } },
         },
-        why: "if two independent interview choices and their one server mutation need a bounded configuration track beside the course briefing.",
+        why: "if two independent interview choices should remain available as a quieter customization area after the default interview is already ready to enter.",
     },
     "mock-interview-history-panel": {
         classes: ["flex", "w-full", "min-w-0", "flex-col", "divide-y", "divide-separator"],
@@ -1795,9 +1777,9 @@ export const CONTRACTS = buildContracts({
             title: { leaf: "heading" },
             description: { leaf: "text", props: { size: "sm", tone: "muted" } },
             facts: { leaf: "text", props: { size: "xs", tone: "muted" } },
-            action: { leaf: "button" },
+            action: { leaf: "button", repeats: true, restingCount: 2 },
         },
-        why: "if you need one comparable deck row: identity and explanation yield before card, due and mastery facts plus one review action.",
+        why: "if you need one comparable deck row: identity and explanation yield before card, due and mastery facts plus review and conditionally available quiz actions.",
     },
     "flashcard-review-deck-list": {
         classes: ["overflow-hidden", "divide-y", "divide-separator", "p-0"],
@@ -1819,9 +1801,9 @@ export const CONTRACTS = buildContracts({
             title: { leaf: "heading" },
             description: { leaf: "text", props: { size: "sm", tone: "muted" } },
             facts: { leaf: "text", props: { size: "xs", tone: "muted" } },
-            action: { leaf: "button" },
+            action: { leaf: "button", repeats: true, restingCount: 2 },
         },
-        why: "if one deck card must keep its identity, explanation, study facts and review action together when compared in a grid.",
+        why: "if one deck card must keep its identity, explanation, study facts and its explicit review plus eligible quiz actions together when compared in a grid.",
     },
     "flashcard-review-mode-modal": {
         classes: ["flex", "flex-col", "gap-4", "p-4"],
@@ -1931,41 +1913,188 @@ export const CONTRACTS = buildContracts({
         why: "if you need a flashcard quiz route with shared identity and mode switch above one finite setup surface that empty or failed transport can replace in place.",
     },
     "flashcard-session-header": {
-        classes: ["flex", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-4", "border-b", "border-separator", "py-3"],
+        host: "header",
+        classes: ["flex", "w-full", "min-w-0", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-4", "border-b", "border-separator", "py-3"],
         children: {
-            deck: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
-            title: { leaf: "heading" },
+            identity: { contract: "page-header-stack" },
             leave: { leaf: "button" },
         },
-        why: "if you need a session header where the deck name qualifies the title and one leave action sits at the far edge.",
+        why: "if one live study session needs a real route trail and title on the primary axis while its only exit stays separate and is disabled during writes.",
     },
     "flashcard-session-card": {
-        classes: ["flex", "flex-1", "flex-col", "justify-center", "gap-6", "rounded-2xl", "border", "border-separator", "p-6"],
+        classes: ["flex", "min-h-80", "w-full", "min-w-0", "flex-col", "justify-center", "gap-6", "p-6"],
         children: {
+            label: { leaf: "text", props: { size: "xs", tone: "muted" } },
             prompt: { leaf: "text", props: { size: "md", weight: "medium" } },
             instruction: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
             cloze: { leaf: "text", props: { size: "md" }, optional: true },
             bankLabel: { leaf: "text", props: { size: "sm", weight: "semibold" }, optional: true },
             term: { leaf: "button", repeats: true, restingCount: 3, optional: true },
-            result: { leaf: "text", props: { size: "sm", weight: "medium" }, optional: true },
-            answer: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+            feedback: { contract: ["flashcard-session-feedback-neutral", "flashcard-session-feedback-unavailable", "flashcard-session-feedback-success", "flashcard-session-feedback-warning"], optional: true },
             check: { leaf: "button", optional: true },
             solution: { leaf: "button", optional: true },
         },
-        why: "if you need one focused flashcard work surface that either flips a plain answer or runs cloze fill, check, full solution and SM-2 rating in order.",
+        why: "if one bounded study surface must keep the prompt central and reveal its answer or checked quiz verdict as a nested state surface rather than as an unrelated line below it.",
+    },
+    "flashcard-session-feedback-neutral": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-2", "rounded-xl", "bg-accent-soft", "p-4"],
+        children: {
+            copy: { contract: "flashcard-session-feedback-copy" },
+        },
+        why: "if a revealed answer must read as new supporting information inside the question surface without decorative glyphs or a false correctness claim.",
+    },
+    "flashcard-session-feedback-unavailable": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-2", "rounded-xl", "border", "border-separator", "p-4"],
+        children: {
+            copy: { contract: "flashcard-session-feedback-copy" },
+        },
+        why: "if answer evidence is unavailable and must be stated without competing with the active session accent or implying a successful reveal.",
+    },
+    "flashcard-session-feedback-success": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-2", "rounded-xl", "bg-success-soft", "p-4"],
+        children: {
+            copy: { contract: "flashcard-session-feedback-copy" },
+        },
+        why: "if a checked quiz answer is fully correct and needs a durable positive state surface around its verdict and resolved answer.",
+    },
+    "flashcard-session-feedback-warning": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-2", "rounded-xl", "bg-warning-soft", "p-4"],
+        children: {
+            copy: { contract: "flashcard-session-feedback-copy" },
+        },
+        why: "if a checked quiz answer still needs work and must expose the partial verdict without presenting it as either transport failure or full success.",
+    },
+    "flashcard-session-feedback-copy": {
+        classes: ["flex", "min-w-0", "grow", "flex-col", "gap-2"],
+        children: {
+            label: { leaf: "text", props: { size: "sm", weight: "semibold" } },
+            answer: { leaf: "text", props: { size: "sm" }, optional: true },
+            context: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
+        },
+        why: "if one session verdict needs its short state label kept above answer evidence and at most one subordinate context line.",
+    },
+    "flashcard-session-workspace": {
+        classes: [
+            "flex", "w-full", "min-w-0", "flex-col", "items-stretch", "gap-6",
+            "md:flex-row", "md:items-start", "md:gap-8",
+            "md:[&>*:first-child]:min-w-0", "md:[&>*:first-child]:grow",
+            "md:[&>*:last-child]:w-80", "md:[&>*:last-child]:shrink-0",
+            "md:[&>*:last-child]:sticky", "md:[&>*:last-child]:top-rail", "md:[&>*:last-child]:self-start",
+        ],
+        children: {
+            primary: { contract: "flashcard-session-primary-column" },
+            rail: { contract: "flashcard-session-rail" },
+        },
+        why: "if the active prompt needs the flexible reading width while distinct navigation, state and session-fact surfaces stay visible in one sticky rail.",
+    },
+    "flashcard-session-primary-column": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4"],
+        children: {
+            card: { contract: "flashcard-session-card" },
+            reveal: { contract: "flashcard-session-reveal-action", optional: true },
+            rating: { contract: "flashcard-session-rating-panel", optional: true },
+            status: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+            navigation: { contract: "flashcard-session-navigation-actions" },
+        },
+        why: "if one study prompt must be followed by its legal response and within-session previous/next controls, while answer and read-only state converge inside the card's single feedback owner.",
+    },
+    "flashcard-session-reveal-action": {
+        classes: ["flex", "w-full", "min-w-0", "[&>*]:w-full"],
+        children: {
+            action: { leaf: "button" },
+        },
+        why: "if the unrevealed card admits one next move and that move should occupy the full response axis rather than look like a small optional tool.",
+    },
+    "flashcard-session-rating-panel": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "p-4"],
+        children: {
+            actions: { contract: "flashcard-session-rating-actions" },
+        },
+        why: "if a revealed card needs four scheduler grades inside the separately labelled rating surface owned by SurfaceCard.",
+    },
+    "flashcard-session-rating-actions": {
+        classes: ["grid", "w-full", "min-w-0", "grid-cols-2", "gap-3", "sm:grid-cols-4", "[&>*]:w-full"],
+        children: {
+            action: { leaf: "button", repeats: true, restingCount: 4 },
+        },
+        why: "if the four mutually exclusive recall grades need equal press areas that become one row only when all labels retain useful width.",
+    },
+    "flashcard-session-navigation-actions": {
+        classes: ["grid", "w-full", "min-w-0", "grid-cols-1", "items-center", "gap-3", "sm:grid-cols-3", "[&>*]:w-full"],
+        children: {
+            previous: { leaf: "button" },
+            hint: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            next: { leaf: "button" },
+        },
+        why: "if answered cards can be traversed without advancing the persisted frontier and the learner must see why forward movement is currently unavailable.",
+    },
+    "flashcard-session-navigation-panel": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4", "p-4"],
+        children: {
+            description: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            questions: { contract: "flashcard-session-question-grid" },
+        },
+        why: "if one session needs a compact question map where answered positions reopen read-only and unreached positions remain visibly locked, separate from legend and session facts.",
+    },
+    "flashcard-session-rail": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4"],
+        children: {
+            map: { contract: "flashcard-session-navigation-panel" },
+            state: { contract: "flashcard-session-navigation-legend" },
+            facts: { contract: "flashcard-session-context-list" },
+        },
+        why: "if question navigation, state explanation and session identity are three different reading jobs that each need a distinct SurfaceCard boundary in the sticky rail.",
+    },
+    "flashcard-session-question-grid": {
+        classes: ["grid", "w-full", "min-w-0", "grid-cols-5", "gap-2", "[&>*]:w-full"],
+        children: {
+            question: { leaf: "button", repeats: true, restingCount: 20 },
+        },
+        why: "if up to twenty session positions need equal compact targets whose variants and disabled state communicate answered, current, selected-history and future states.",
+    },
+    "flashcard-session-navigation-legend": {
+        classes: ["grid", "w-full", "min-w-0", "grid-cols-2", "overflow-hidden", "p-0", "[&>*]:px-4", "[&>*]:py-3", "[&>*:nth-child(odd)]:border-r", "[&>*:nth-child(-n+2)]:border-b", "[&>*]:border-separator"],
+        children: {
+            answered: { contract: "button-treatment-with-label" },
+            selected: { contract: "button-treatment-with-label" },
+            current: { contract: "button-treatment-with-label" },
+            future: { contract: "button-treatment-with-label" },
+        },
+        why: "if four equal question states need exact non-interactive samples arranged as an explicit two-by-two joined surface, matching the question map without becoming one loose wrapping legend.",
+    },
+    "button-treatment-with-label": {
+        classes: ["flex", "min-w-0", "flex-row", "items-center", "gap-2"],
+        children: {
+            mark: { leaf: "button-state-sample" },
+            label: { leaf: "text", props: { size: "xs", tone: "muted" } },
+        },
+        why: "if a compact state key must pair an exact control-treatment sample with a textual meaning without introducing a fake interactive control.",
+    },
+    "flashcard-session-context-list": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "divide-y", "divide-separator", "overflow-hidden", "p-0"],
+        children: {
+            fact: { contract: "flashcard-session-context-row", repeats: true, restingCount: 4 },
+        },
+        why: "if mode, deck and level are comparable supporting facts that belong to one labelled joined-list surface.",
+    },
+    "flashcard-session-context-row": {
+        classes: ["flex", "w-full", "min-w-0", "flex-row", "flex-wrap", "items-baseline", "justify-between", "gap-2", "px-4", "py-3"],
+        children: {
+            label: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            value: { leaf: "text", props: { size: "sm", weight: "medium" } },
+        },
+        why: "if one session context name and its resolved value must share a compact baseline inside the supporting rail.",
     },
     "course-flashcard-session-page": {
         host: "main",
-        classes: ["flex", "min-h-screen", "w-full", "min-w-0", "flex-col", "gap-6", "p-6"],
+        classes: ["mx-auto", "flex", "min-h-app-rail", "w-full", "max-w-6xl", "min-w-0", "flex-col", "gap-6", "px-6", "py-6"],
         children: {
             header: { contract: "flashcard-session-header" },
-            progress: { contract: "label-with-muted-fact-row", optional: true },
-            card: { contract: "flashcard-session-card", optional: true },
-            status: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
-            action: { leaf: "button", repeats: true, restingCount: 4, optional: true },
+            progress: { contract: "label-fact-over-progress", optional: true },
+            workspace: { contract: "flashcard-session-workspace", optional: true },
             notice: { composite: "empty-notice", optional: true },
         },
-        why: "if you need a live flashcard session ordered as orientation, progress, one focused card and only the actions admitted by its reveal and transport state.",
+        why: "if a live review or quiz route needs one bounded learning workspace ordered as identity, measurable progress, primary prompt, sticky context and only phase-legal controls.",
     },
     "flashcard-result-stat": {
         classes: ["flex", "flex-col", "gap-2", "rounded-xl", "border", "border-separator", "p-4"],
@@ -1985,7 +2114,7 @@ export const CONTRACTS = buildContracts({
     },
     "course-flashcard-result-page": {
         host: "main",
-        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6", "p-6"],
+        classes: ["flex", "w-full", "min-w-0", "flex-col"],
         children: { workspace: { contract: "flashcard-result-workspace" } },
         why: "if you need a persisted flashcard result ordered from mode and outcome through summary figures and optional due or diagnostic evidence to back and repeat actions across loading and failure.",
     },
@@ -1996,10 +2125,65 @@ export const CONTRACTS = buildContracts({
         }, why: "if challenge result evidence remains a legal non-landmark workspace beneath its route-owned main shell.",
     },
     "flashcard-result-workspace": {
+        classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "min-w-0", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            summary: { contract: "flashcard-result-summary-card", optional: true },
+            body: { contract: "flashcard-result-body", optional: true },
+            notice: { composite: "empty-notice", optional: true },
+        }, why: "if a persisted review or quiz result needs one outcome summary followed by diagnostic evidence and a continuously reachable next move, without flattening every fact into the same page rank.",
+    },
+    "flashcard-result-summary-card": {
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6", "p-6"],
         children: {
-            mode: { leaf: "text", props: { size: "sm", tone: "muted" } }, header: { contract: "centred-title-pair" }, stat: { contract: "flashcard-result-stat", repeats: true, restingCount: 4, optional: true }, nextDue: { contract: "centred-title-pair", optional: true }, breakdownTitle: { leaf: "heading", optional: true }, grade: { contract: "flashcard-result-fact-row", repeats: true, restingCount: 4, optional: true }, weakTopicsTitle: { leaf: "heading", optional: true }, weakTopic: { contract: "flashcard-result-fact-row", repeats: true, restingCount: 3, optional: true }, action: { leaf: "button", repeats: true, restingCount: 2, optional: true }, notice: { composite: "empty-notice", optional: true },
-        }, why: "if flashcard result content remains a legal non-landmark workspace beneath its route-owned main shell.",
+            mode: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            header: { contract: "centred-title-pair" },
+            stats: { contract: "flashcard-result-stat-grid", optional: true },
+        },
+        why: "if the saved outcome identity and its four comparable measures should land as one bounded summary before any diagnostic detail.",
+    },
+    "flashcard-result-stat-grid": {
+        classes: ["grid", "w-full", "min-w-0", "grid-cols-2", "gap-3", "sm:grid-cols-4"],
+        children: {
+            stat: { contract: "flashcard-result-stat", repeats: true, restingCount: 4 },
+        },
+        why: "if four persisted result figures need two compact tracks on narrow screens and one comparable row when space permits.",
+    },
+    "flashcard-result-body": {
+        classes: [
+            "flex", "w-full", "min-w-0", "flex-col", "items-stretch", "gap-6",
+            "md:flex-row", "md:items-start", "md:gap-8",
+            "md:[&>*:first-child]:min-w-0", "md:[&>*:first-child]:grow",
+            "md:[&>*:last-child]:w-80", "md:[&>*:last-child]:shrink-0",
+            "md:[&>*:last-child]:sticky", "md:[&>*:last-child]:top-rail", "md:[&>*:last-child]:self-start",
+        ],
+        children: {
+            evidence: { contract: "flashcard-result-evidence-column" },
+            next: { contract: "flashcard-result-next-action-panel" },
+        },
+        why: "if diagnostic evidence needs the flexible column while the next review fact and onward actions remain continuously reachable in a compact sticky rail.",
+    },
+    "flashcard-result-evidence-column": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6"],
+        children: {
+            breakdown: { contract: "flashcard-result-fact-list", optional: true },
+            weakTopics: { contract: "flashcard-result-fact-list", optional: true },
+        },
+        why: "if grade distribution and weak-topic evidence are separate questions that each deserve their own named surface on one reading axis.",
+    },
+    "flashcard-result-fact-list": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "divide-y", "divide-separator", "overflow-hidden", "p-0"],
+        children: {
+            fact: { contract: "flashcard-result-fact-row", repeats: true, restingCount: 4 },
+        },
+        why: "if one named result dimension needs several comparable fact rows joined by separators inside a single surface.",
+    },
+    "flashcard-result-next-action-panel": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4", "p-4", "[&>*]:w-full"],
+        children: {
+            nextDue: { contract: "centred-title-pair", optional: true },
+            action: { leaf: "button", repeats: true, restingCount: 2 },
+        },
+        why: "if the next scheduled review and the two onward choices belong in one small decision surface that stays reachable beside the evidence.",
     },
     "nav-over-body-page": {
         classes: ["flex", "min-h-screen", "w-full", "flex-col"],

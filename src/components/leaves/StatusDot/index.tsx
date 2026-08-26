@@ -2,13 +2,14 @@ import { skeletonVariants } from "@heroui/react"
 import type { LeafProps } from "@/components/contracts/props"
 
 /** Semantic states represented by a compact legend mark. */
-export type StatusDotTone = "accent" | "success" | "warning" | "danger"
+export type StatusDotTone = "neutral" | "accent" | "success" | "warning" | "danger"
 /** Meaning and accessible name for one status mark. */
 export type StatusDotData = { readonly tone: StatusDotTone; readonly label: string }
 /** Closed leaf props for a status mark. */
 export type StatusDotProps = LeafProps<StatusDotData>
 
 const TONES = {
+    neutral: "bg-default",
     accent: "bg-accent",
     success: "bg-success",
     warning: "bg-warning",

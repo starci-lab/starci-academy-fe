@@ -12,7 +12,7 @@ import { Text } from "@/components/leaves/Text"
 import { defineCompositeComponent, defineContractComponent, defineContractProjection, defineLeafComponent, type LeafProps } from "@/components/contracts/props"
 
 /** One settled deck row owned by the review library's joined list. */
-export type FlashcardReviewDeckRow = { readonly id: string, readonly title: string, readonly description: string, readonly difficulty: string, readonly cardCount: number, readonly dueCount: number, readonly masteredCount: number }
+export type FlashcardReviewDeckRow = { readonly id: string, readonly title: string, readonly description: string, readonly difficulty: string, readonly cardCount: number, readonly dueCount: number, readonly masteredCount: number, readonly quizEligible: boolean }
 /** One comparable history or review-health row. */
 export type FlashcardReviewEvidenceRow = { readonly id: string, readonly title: string, readonly description: string, readonly fact: string }
 /** Local evidence panel selected independently from the review/quiz route mode. */
@@ -34,7 +34,7 @@ export type CourseFlashcardsReviewBlockProps = {
         readonly modeTabsLabel: string, readonly viewTabsLabel: string
         readonly overviewLabel: string, readonly historyLabel: string, readonly statsLabel: string, readonly activeView: FlashcardReviewView
         readonly dueTitle: string, readonly dueDescription: string, readonly decksTitle: string, readonly evidenceTitle: string
-        readonly cardsLabel: string, readonly dueLabel: string, readonly masteredLabel: string, readonly startLabel: string, readonly resumeLabel: string
+        readonly cardsLabel: string, readonly dueLabel: string, readonly masteredLabel: string, readonly startLabel: string, readonly quizDeckLabel: string, readonly resumeLabel: string
         readonly retryLabel: string, readonly emptyText: string, readonly evidenceEmptyText: string, readonly noResultsText: string, readonly failedText: string, readonly dueCount: number
         readonly statRows: ReadonlyArray<{ readonly label: string, readonly value: string }>
         readonly decks: ReadonlyArray<FlashcardReviewDeckRow>, readonly evidenceRows: ReadonlyArray<FlashcardReviewEvidenceRow>
@@ -46,7 +46,7 @@ export type CourseFlashcardsReviewBlockProps = {
         readonly startPending: boolean, readonly startErrorText?: string
     }
     readonly on: {
-        readonly openQuiz: () => void, readonly selectView: (view: FlashcardReviewView) => void, readonly changeSearch: (value: string) => void
+        readonly openQuiz: (deckId?: string) => void, readonly selectView: (view: FlashcardReviewView) => void, readonly changeSearch: (value: string) => void
         readonly changeLayout: (layout: FlashcardReviewLayout) => void
         readonly openReview: (deckId: string) => void, readonly startDue: () => void, readonly selectScope: (scope: ReviewScope) => void
         readonly confirmReview: () => void, readonly dismissModal: () => void, readonly resume: (sessionId: string) => void, readonly retry: () => void
@@ -55,14 +55,17 @@ export type CourseFlashcardsReviewBlockProps = {
 /** Compatibility name for the review presentation contract. */
 export type CourseFlashcardsReviewPageProps = CourseFlashcardsReviewBlockProps
 
-type DeckListData = SurfaceListCardData & { readonly decks: ReadonlyArray<FlashcardReviewDeckRow>, readonly labels: Pick<CourseFlashcardsReviewBlockProps["props"], "cardsLabel" | "dueLabel" | "masteredLabel" | "startLabel"> }
-const DeckListView = ({ props, on, isLoading }: LeafProps<DeckListData, { readonly open?: (id: string) => void }>) => (
+type DeckListData = SurfaceListCardData & { readonly decks: ReadonlyArray<FlashcardReviewDeckRow>, readonly labels: Pick<CourseFlashcardsReviewBlockProps["props"], "cardsLabel" | "dueLabel" | "masteredLabel" | "startLabel" | "quizDeckLabel"> }
+const DeckListView = ({ props, on, isLoading }: LeafProps<DeckListData, { readonly open?: (id: string) => void, readonly quiz?: (id: string) => void }>) => (
     <Tree contract="flashcard-review-deck-list" render={defineContractComponent("flashcard-review-deck-list", {
         deck: props.decks.map((deck) => defineContractComponent("flashcard-review-deck-card", {
             title: defineLeafComponent("heading", {}, () => <Heading props={{ content: deck.title, level: 3 }} isLoading={isLoading} />),
             description: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: deck.description, size: "sm", tone: "muted" }} isLoading={isLoading} />),
             facts: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: [deck.difficulty, `${deck.cardCount} ${props.labels.cardsLabel}`, `${deck.dueCount} ${props.labels.dueLabel}`, `${deck.masteredCount} ${props.labels.masteredLabel}`].filter(Boolean).join(" · "), size: "xs", tone: "muted" }} isLoading={isLoading} />),
-            action: defineLeafComponent("button", {}, () => <Button props={{ label: props.labels.startLabel, size: "sm", variant: "outline" }} on={{ press: () => on?.open?.(deck.id) }} isLoading={isLoading} />),
+            action: [
+                defineLeafComponent("button", {}, () => <Button props={{ label: props.labels.startLabel, size: "sm", variant: "outline" }} on={{ press: () => on?.open?.(deck.id) }} isLoading={isLoading} />),
+                ...(deck.quizEligible ? [defineLeafComponent("button", {}, () => <Button props={{ label: props.labels.quizDeckLabel, size: "sm", variant: "outline" }} on={{ press: () => on?.quiz?.(deck.id) }} isLoading={isLoading} />)] : []),
+            ],
         })),
     })} />
 )
@@ -138,7 +141,7 @@ export const CourseFlashcardsReviewBlockBase = (input: CourseFlashcardsReviewBlo
             />
         ))),
     }) : undefined
-    const visibleDecks = blockState === "pending" ? Array.from({ length: 4 }, (_, index) => ({ id: `pending-${index}`, title: data.decksTitle, description: "", difficulty: "", cardCount: 0, dueCount: 0, masteredCount: 0 })) : data.decks
+    const visibleDecks = blockState === "pending" ? Array.from({ length: 4 }, (_, index) => ({ id: `pending-${index}`, title: data.decksTitle, description: "", difficulty: "", cardCount: 0, dueCount: 0, masteredCount: 0, quizEligible: false })) : data.decks
     const deckQuery = defineContractComponent("catalog-query-with-count", {
         query: defineLeafComponent("search-box", {}, () => <SearchBox
             props={{ placeholder: data.searchLabel, label: data.searchLabel, clearLabel: data.searchClearLabel }}
@@ -168,7 +171,10 @@ export const CourseFlashcardsReviewBlockBase = (input: CourseFlashcardsReviewBlo
                     title: defineLeafComponent("heading", {}, () => <Heading props={{ content: deck.title, level: 3 }} isLoading={isLoading} />),
                     description: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: deck.description, size: "sm", tone: "muted" }} isLoading={isLoading} />),
                     facts: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: [deck.difficulty, `${deck.cardCount} ${data.cardsLabel}`, `${deck.dueCount} ${data.dueLabel}`, `${deck.masteredCount} ${data.masteredLabel}`].filter(Boolean).join(" · "), size: "xs", tone: "muted" }} isLoading={isLoading} />),
-                    action: defineLeafComponent("button", {}, () => <Button props={{ label: data.startLabel, size: "sm", variant: "outline" }} on={{ press: () => on.openReview(deck.id) }} isLoading={isLoading} />),
+                    action: [
+                        defineLeafComponent("button", {}, () => <Button props={{ label: data.startLabel, size: "sm", variant: "outline" }} on={{ press: () => on.openReview(deck.id) }} isLoading={isLoading} />),
+                        ...(deck.quizEligible ? [defineLeafComponent("button", {}, () => <Button props={{ label: data.quizDeckLabel, size: "sm", variant: "outline" }} on={{ press: () => on.openQuiz(deck.id) }} isLoading={isLoading} />)] : []),
+                    ],
                 })}
             />
         ))),
@@ -177,7 +183,7 @@ export const CourseFlashcardsReviewBlockBase = (input: CourseFlashcardsReviewBlo
         contract="flashcard-review-deck-list"
         render={DeckList}
         props={{ label: data.decksTitle, isLabelHidden: true, decks: visibleDecks, labels: data }}
-        on={{ open: on.openReview }}
+        on={{ open: on.openReview, quiz: on.openQuiz }}
         isLoading={isLoading}
     />) : undefined
     const decks = data.layout === "line" ? deckList : deckGrid

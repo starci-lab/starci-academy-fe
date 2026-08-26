@@ -32,6 +32,7 @@ export type DueFlashcard = {
     readonly deckTitle: string
     readonly front: string
     readonly back: string
+    readonly answerAvailable: boolean
     readonly level?: string | null
     readonly tags: ReadonlyArray<string>
 }
@@ -67,7 +68,7 @@ const dueQuery = gql`
     query MyDueFlashcards($courseId: String!, $limit: Int!) {
         myDueFlashcards(courseId: $courseId, limit: $limit) {
             success message error
-            data { dueCount cards { cardId deckTitle front back level tags } }
+            data { dueCount cards { cardId deckTitle front back answerAvailable level tags } }
         }
     }
 `

@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useLocale } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
+import { useSessionRefresh } from "@/hooks/auth/useSessionRefresh"
 import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
 import { useQueryMyInProgressMockInterviewSessionSwr } from "@/hooks/swr/useQueryMyInProgressMockInterviewSessionSwr"
 import { useMutateStartMockInterviewSessionSwr } from "@/hooks/swr/useMutateStartMockInterviewSessionSwr"
@@ -18,11 +19,13 @@ type StatsData = { readonly insufficientData: boolean; readonly byPhase: Readonl
 
 const setupStateOf = (
     failed: boolean,
+    locked: boolean,
     starting: boolean,
     pending: boolean,
     hasResumableSession: boolean,
 ): CourseMockInterviewSetupState => {
     if (failed) return "failed"
+    if (locked) return "locked"
     if (starting) return "starting"
     if (pending) return "pending"
     return hasResumableSession ? "resumable" : "ready"
@@ -61,20 +64,17 @@ const COPY = {
         resume: "Resume interview",
         resumable: "You have an unfinished interview. Resume it or start a fresh draw.",
         failed: "The interview setup could not be loaded.",
+        startFailed: "The session could not be created. Check your connection and try again.",
         retry: "Try again",
+        accessMessage: "Mock interviews unlock with full course access. Enrol in this course to create and resume interview sessions.",
+        accessLabel: "View course access",
         tabsLabel: "Mock interview setup",
         tabs: { begin: "Begin", history: "History", stats: "Statistics" },
         beginTitle: "Interview room",
         briefingEyebrow: "Course-grounded interview",
         briefingTitle: "Get ready for a focused technical interview",
-        setupTitle: "Session setup",
-        setupDescription: "Choose two settings before entering the interview room.",
-        sequenceTitle: "After you begin",
-        sequenceSteps: [
-            { id: "create", title: "The server creates a session", description: "Questions are drawn from this course and your current setup." },
-            { id: "answer", title: "You answer in the interview room", description: "The session is persisted so your progress is not lost." },
-            { id: "feedback", title: "Receive detailed feedback", description: "The result appears in History and Statistics." },
-        ],
+        setupTitle: "Customize session",
+        setupDescription: "Adjust the defaults only when you want a different interview.",
         serverNote: "Questions are generated only after you begin. These settings do not change the course content.",
         savedNote: "A new session will be saved to your interview history.",
         historyTitle: "Interview history",
@@ -101,20 +101,17 @@ const COPY = {
         resume: "Tiếp tục phỏng vấn", // vn-ok: approved Vietnamese runtime copy
         resumable: "Bạn có một buổi phỏng vấn chưa hoàn thành. Hãy tiếp tục hoặc bắt đầu đề mới.", // vn-ok: approved Vietnamese runtime copy
         failed: "Không tải được phần chuẩn bị phỏng vấn.", // vn-ok: approved Vietnamese runtime copy
+        startFailed: "Không thể tạo phiên phỏng vấn. Hãy kiểm tra kết nối rồi thử lại.", // vn-ok: approved Vietnamese runtime copy
         retry: "Thử lại", // vn-ok: approved Vietnamese runtime copy
+        accessMessage: "Phỏng vấn thử chỉ dành cho học viên đã mở khóa khóa học. Hãy đăng ký khóa học để tạo hoặc tiếp tục phiên phỏng vấn.", // vn-ok: approved Vietnamese runtime copy
+        accessLabel: "Xem quyền truy cập", // vn-ok: approved Vietnamese runtime copy
         tabsLabel: "Thiết lập phỏng vấn thử", // vn-ok: approved Vietnamese runtime copy
         tabs: { begin: "Bắt đầu", history: "Lịch sử", stats: "Thống kê" }, // vn-ok: approved Vietnamese runtime copy
         beginTitle: "Phòng chuẩn bị", // vn-ok: approved Vietnamese runtime copy
         briefingEyebrow: "Phiên phỏng vấn theo khóa học", // vn-ok: approved Vietnamese runtime copy
         briefingTitle: "Sẵn sàng cho một phiên phỏng vấn kỹ thuật có trọng tâm", // vn-ok: approved Vietnamese runtime copy
-        setupTitle: "Thiết lập phiên", // vn-ok: approved Vietnamese runtime copy
-        setupDescription: "Chọn hai thông số trước khi bước vào phòng phỏng vấn.", // vn-ok: approved Vietnamese runtime copy
-        sequenceTitle: "Sau khi bắt đầu", // vn-ok: approved Vietnamese runtime copy
-        sequenceSteps: [
-            { id: "create", title: "Máy chủ tạo phiên", description: "Câu hỏi được chọn theo khóa học và thiết lập hiện tại." }, // vn-ok: approved Vietnamese runtime copy
-            { id: "answer", title: "Bạn trả lời trong phòng phỏng vấn", description: "Phiên được lưu để không mất tiến độ." }, // vn-ok: approved Vietnamese runtime copy
-            { id: "feedback", title: "Nhận phản hồi chi tiết", description: "Kết quả xuất hiện trong Lịch sử và Thống kê." }, // vn-ok: approved Vietnamese runtime copy
-        ],
+        setupTitle: "Tùy chỉnh phiên", // vn-ok: approved Vietnamese runtime copy
+        setupDescription: "Chỉ thay đổi thiết lập mặc định khi bạn muốn một phiên phỏng vấn khác.", // vn-ok: approved Vietnamese runtime copy
         serverNote: "Câu hỏi chỉ được tạo sau khi bạn bắt đầu. Thiết lập này không làm thay đổi nội dung khóa học.", // vn-ok: approved Vietnamese runtime copy
         savedNote: "Phiên mới sẽ được lưu vào lịch sử của bạn.", // vn-ok: approved Vietnamese runtime copy
         historyTitle: "Lịch sử phỏng vấn", // vn-ok: approved Vietnamese runtime copy
@@ -136,8 +133,9 @@ export const CourseMockInterviewSetupBlock = ({ displayId }: CourseMockInterview
     const locale = useLocale()
     const copy = locale === "vi" ? COPY.vi : COPY.en
     const router = useRouter()
+    const session = useSessionRefresh()
     const course = useQueryCourseSwr({ displayId })
-    const courseId = course.data?.id
+    const courseId = course.data?.isEnrolled === true ? course.data.id : undefined
     const inProgress = useQueryMyInProgressMockInterviewSessionSwr(courseId)
     const startSession = useMutateStartMockInterviewSessionSwr(courseId)
     const attempts = useQueryMyMockInterviewAttemptsSwr(courseId)
@@ -146,9 +144,10 @@ export const CourseMockInterviewSetupBlock = ({ displayId }: CourseMockInterview
     const [mode, setMode] = useState("qna")
     const [selectedTab, setSelectedTab] = useState<"begin" | "history" | "stats">("begin")
     const [startError, setStartError] = useState(false)
-    const failed = course.error !== undefined || inProgress.error !== undefined || startError || course.data === null
-    const pending = !failed && (course.data === undefined || inProgress.data === undefined)
-    const state = setupStateOf(failed, startSession.isMutating, pending, inProgress.data !== null)
+    const failed = course.error !== undefined || course.data === null || (courseId !== undefined && inProgress.error !== undefined)
+    const pending = !failed && (session.isRestoring || course.data === undefined || (courseId !== undefined && inProgress.data === undefined))
+    const locked = !pending && course.data !== null && course.data !== undefined && course.data.isEnrolled !== true
+    const state = setupStateOf(failed, locked, startSession.isMutating, pending, inProgress.data !== null)
 
     const openSession = (sessionId: string) => {
         router.push(`/courses/${displayId}/learn/mock-interview/interview/${sessionId}`)
@@ -178,7 +177,7 @@ export const CourseMockInterviewSetupBlock = ({ displayId }: CourseMockInterview
                 description: copy.description,
                 journeyLabel: copy.journey,
                 journeyStageLabel: copy.journeyStage,
-                status: setupStatusOf(state, copy),
+                status: startError ? copy.startFailed : setupStatusOf(state, copy),
                 levelLabel: copy.level,
                 modeLabel: copy.mode,
                 levels: Object.entries(copy.levels).map(([id, label]) => ({ id, label })),
@@ -188,6 +187,8 @@ export const CourseMockInterviewSetupBlock = ({ displayId }: CourseMockInterview
                 startLabel: copy.start,
                 resumeLabel: copy.resume,
                 retryLabel: copy.retry,
+                accessMessage: copy.accessMessage,
+                accessLabel: copy.accessLabel,
                 selectedTab,
                 tabsLabel: copy.tabsLabel,
                 tabs: Object.entries(copy.tabs).map(([id, label]) => ({ id, label })),
@@ -196,8 +197,6 @@ export const CourseMockInterviewSetupBlock = ({ displayId }: CourseMockInterview
                 briefingTitle: copy.briefingTitle,
                 setupTitle: copy.setupTitle,
                 setupDescription: copy.setupDescription,
-                sequenceTitle: copy.sequenceTitle,
-                sequenceSteps: copy.sequenceSteps,
                 serverNote: copy.serverNote,
                 savedNote: copy.savedNote,
                 historyTitle: copy.historyTitle,
@@ -236,6 +235,7 @@ export const CourseMockInterviewSetupBlock = ({ displayId }: CourseMockInterview
                     setStartError(false)
                     void Promise.all([course.mutate(), inProgress.mutate()])
                 },
+                access: () => router.push(`/courses/${displayId}`),
             }}
         />
     )

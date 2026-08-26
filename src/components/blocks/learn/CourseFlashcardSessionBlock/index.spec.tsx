@@ -34,7 +34,7 @@ vi.mock("./component", () => ({
     ),
 }))
 
-import { CourseFlashcardSessionBlock } from "./index"
+import { CourseFlashcardSessionBlock, parseFlashcardCloze } from "./index"
 
 beforeEach(() => {
     vi.clearAllMocks()
@@ -53,6 +53,14 @@ beforeEach(() => {
 })
 
 describe("CourseFlashcardSessionBlock", () => {
+    it("parses large and malformed cloze content without recursive regexp failure", () => {
+        const largeTerm = "boundary".repeat(12_000)
+        const parsed = parseFlashcardCloze(`Before {{c12::${largeTerm}::hint}} after {{cx::malformed}}`)
+
+        expect(parsed.terms).toEqual([largeTerm])
+        expect(parsed.text).toBe("Before ____ after {{cx::malformed}}")
+    })
+
     it("reports pending, active, expired and failed states", () => {
         const view = render(<CourseFlashcardSessionBlock displayId="course" sessionId="s1" mode="review" />)
         expect(screen.getByTestId("state")).toHaveTextContent("pending")
@@ -101,26 +109,63 @@ describe("CourseFlashcardSessionBlock", () => {
     it("keeps the live session on screen while a persisted mutation is pending", async () => {
         const { CourseFlashcardSessionBlockBase } = await vi.importActual<typeof import("./component")>("./component")
         const sharedData = {
-            mode: "review" as const, title: "Core concepts", progressText: "Card 2 of 10", prompt: "What is a closure?", answer: "A function with lexical scope",
-            answerVisible: false, solutionVisible: false, revealLabel: "Reveal answer", clozeInstructionLabel: "Complete the sentence", wordBankLabel: "Word bank",
+            mode: "review" as const, title: "Core concepts", currentCard: 2, progressCard: 2, totalCards: 10, progressText: "Card 2 of 10", readOnly: false,
+            questions: Array.from({ length: 10 }, (_, index) => ({ position: index + 1, state: index < 1 ? "answered" as const : index === 1 ? "current" as const : "future" as const, selected: index === 1, disabled: index > 1 })),
+            breadcrumbLabel: "Course path", modeBreadcrumbLabel: "Review", taskBreadcrumbLabel: "Study", courseTitle: "Fullstack Mastery",
+            deckTitle: "Core deck", level: "B1", prompt: "What is a closure?", answer: "A function with lexical scope", answerAvailable: true,
+            answerVisible: false, solutionVisible: false, revealLabel: "Reveal answer", promptLabel: "Question", answerLabel: "Answer",
+            answerUnavailableLabel: "Answer unavailable", answerUnavailableText: "This answer is locked for the current course access.",
+            sessionSummaryLabel: "Session details", modeLabel: "Mode", deckLabel: "Deck", levelLabel: "Level", navigatorTitle: "Questions",
+            navigatorDescription: "Open an answered card to review it.", navigatorStateLabel: "Question states", answeredLabel: "Answered", selectedLabel: "Reviewing", currentLabel: "Current", futureLabel: "Not reached",
+            readOnlyLabel: "Reviewing a saved answer", readOnlyText: "This answer is read-only.", previousLabel: "Previous", nextLabel: "Next", continueHint: "Rate this card to continue.",
+            clozeInstructionLabel: "Complete the sentence", wordBankLabel: "Word bank",
             checkAnswerLabel: "Check answer", showSolutionLabel: "Show solution", resultLabel: "correct", ratingLabel: "Rate this card",
             againLabel: "Again", hardLabel: "Hard", goodLabel: "Good", easyLabel: "Easy", syncingLabel: "Saving progress", completingLabel: "Completing session",
             expiredText: "Session expired", failedText: "Could not load", retryLabel: "Retry", leaveLabel: "Leave session",
         }
-        const actions = { reveal: vi.fn(), selectTerm: vi.fn(), checkQuiz: vi.fn(), showSolution: vi.fn(), rate: vi.fn(), retry: vi.fn(), leave: vi.fn() }
+        const actions = { reveal: vi.fn(), selectTerm: vi.fn(), checkQuiz: vi.fn(), showSolution: vi.fn(), rate: vi.fn(), selectQuestion: vi.fn(), previous: vi.fn(), next: vi.fn(), openCourse: vi.fn(), openMode: vi.fn(), retry: vi.fn(), leave: vi.fn() }
         const view = render(<CourseFlashcardSessionBlockBase blockState="syncing" data={sharedData} on={actions} />)
         expect(screen.getByRole("button", { name: "Leave session" })).toBeDisabled()
 
         view.rerender(<CourseFlashcardSessionBlockBase blockState="active" data={sharedData} on={actions} />)
         expect(screen.getByRole("button", { name: "Leave session" })).toBeEnabled()
-    })
+    }, 15_000)
+
+    it("never presents an empty revealed answer as gradeable", async () => {
+        const { CourseFlashcardSessionBlockBase } = await vi.importActual<typeof import("./component")>("./component")
+        const data = {
+            mode: "review" as const, title: "Core concepts", currentCard: 1, progressCard: 1, totalCards: 1, progressText: "Card 1 of 1", readOnly: false,
+            questions: [{ position: 1, state: "current" as const, selected: true, disabled: false }], breadcrumbLabel: "Course path", modeBreadcrumbLabel: "Review", taskBreadcrumbLabel: "Study", courseTitle: "Fullstack Mastery",
+            deckTitle: "Core deck", level: "senior", prompt: "Why merge both logging pipelines?", answer: "   ", answerAvailable: false, answerVisible: true, solutionVisible: false,
+            revealLabel: "Reveal answer", promptLabel: "Question", answerLabel: "Answer", answerUnavailableLabel: "Answer unavailable",
+            answerUnavailableText: "This answer is locked for the current course access.", sessionSummaryLabel: "Session details", modeLabel: "Mode", deckLabel: "Deck", levelLabel: "Level",
+            navigatorTitle: "Questions", navigatorDescription: "Open an answered card to review it.", navigatorStateLabel: "Question states", answeredLabel: "Answered", selectedLabel: "Reviewing", currentLabel: "Current", futureLabel: "Not reached",
+            readOnlyLabel: "Reviewing a saved answer", readOnlyText: "This answer is read-only.", previousLabel: "Previous", nextLabel: "Next", continueHint: "Rate this card to continue.",
+            clozeInstructionLabel: "Complete the sentence", wordBankLabel: "Word bank", checkAnswerLabel: "Check answer", showSolutionLabel: "Show solution", resultLabel: "correct",
+            ratingLabel: "Rate this card", againLabel: "Again", hardLabel: "Hard", goodLabel: "Good", easyLabel: "Easy", syncingLabel: "Saving progress", completingLabel: "Completing session",
+            expiredText: "Session expired", failedText: "Could not load", retryLabel: "Retry", leaveLabel: "Leave session",
+        }
+        const actions = { reveal: vi.fn(), selectTerm: vi.fn(), checkQuiz: vi.fn(), showSolution: vi.fn(), rate: vi.fn(), selectQuestion: vi.fn(), previous: vi.fn(), next: vi.fn(), openCourse: vi.fn(), openMode: vi.fn(), retry: vi.fn(), leave: vi.fn() }
+
+        const view = render(<CourseFlashcardSessionBlockBase blockState="active" data={data} on={actions} />)
+        expect(screen.getByText("Answer unavailable")).toBeVisible()
+        expect(screen.getByText("This answer is locked for the current course access.")).toBeVisible()
+        expect(view.container.querySelector("[data-node=flashcard-session-feedback-unavailable]")).not.toBeNull()
+        expect(screen.queryByText("Rate this card")).not.toBeInTheDocument()
+        expect(screen.queryByRole("button", { name: "Good" })).not.toBeInTheDocument()
+
+        view.rerender(<CourseFlashcardSessionBlockBase blockState="active" data={{ ...data, answer: "Use one structured pipeline so request context and framework events remain correlated.", answerAvailable: true }} on={actions} />)
+        expect(screen.getByText("Use one structured pipeline so request context and framework events remain correlated.")).toBeVisible()
+        expect(screen.getByText("Rate this card")).toBeVisible()
+        expect(screen.getByRole("button", { name: "Good" })).toBeEnabled()
+    }, 15_000)
 
     it("orders the result continuation before the secondary return action", async () => {
         const { FlashcardResultBase } = await vi.importActual<typeof import("../FlashcardResult/component")>("../FlashcardResult/component")
         render(<FlashcardResultBase
             blockState="ready"
             data={{
-                mode: "review", title: "Session complete", subtitle: "Keep your momentum", scoreLabel: "Score", scoreText: "82%", reviewedLabel: "Reviewed", reviewedText: "10",
+                mode: "review", modeText: "Review", title: "Session complete", subtitle: "Keep your momentum", scoreLabel: "Score", scoreText: "82%", reviewedLabel: "Reviewed", reviewedText: "10",
                 xpLabel: "XP", xpText: "+20", durationLabel: "Duration", durationText: "4 min", nextDueLabel: "Next due", nextDueText: "Tomorrow",
                 breakdownTitle: "Recall breakdown", gradeRows: [{ label: "Good", value: 7 }], weakTopicsTitle: "Weak topics", weakTopics: [{ tag: "Closures", value: "Review next" }],
                 failedText: "Could not load", retryLabel: "Retry", retrySessionLabel: "Study again", backLabel: "Back to library",

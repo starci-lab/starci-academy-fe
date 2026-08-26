@@ -21,9 +21,10 @@ describe("CoursePlaygroundCatalogBase", () => {
             />,
         )
 
-        fireEvent.click(screen.getByRole("link", { name: "Docker lab · 3 guided steps" }))
+        fireEvent.click(screen.getByRole("link", { name: "Docker lab" }))
 
         expect(container.querySelector("[data-node=\"course-playground-catalog\"]")).not.toBeNull()
+        expect(screen.getByText("3 guided steps")).toBeInTheDocument()
         expect(openSetup).toHaveBeenCalledWith("docker")
     })
 })

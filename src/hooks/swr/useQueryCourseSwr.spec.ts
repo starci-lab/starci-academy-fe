@@ -3,6 +3,7 @@ import { renderHook, waitFor } from "@testing-library/react"
 import { createElement, type PropsWithChildren } from "react"
 import { SWRConfig } from "swr"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { setSessionToken } from "@/hooks/auth/useSessionToken"
 import { QUERY_COURSE_SWR_KEY, useQueryCourseSwr } from "./useQueryCourseSwr"
 
 /**
@@ -11,9 +12,9 @@ import { QUERY_COURSE_SWR_KEY, useQueryCourseSwr } from "./useQueryCourseSwr"
  * IT SENDS `displayId` AND NEVER `id`. The server answers a UUID with COURSE_NOT_FOUND for the very
  * course it returned that id for, so the variable name is checked at the wire rather than assumed.
  *
- * TWO COURSES IN ONE SESSION ARE TWO KEYS. Navigating from one course to another must produce a
- * second request, not the first course's detail served from cache while the reader decides whether
- * they are on the right page.
+ * TWO COURSES IN ONE SESSION ARE TWO KEYS, and the optional-auth enrollment fact is viewer-scoped.
+ * Navigating or signing in must produce a new request rather than serving a stale course identity
+ * or guest access decision from cache.
  */
 
 const mocks = vi.hoisted(() => ({ queryCourse: vi.fn() }))
@@ -44,6 +45,7 @@ const responseWith = (data: unknown) => ({
 })
 
 beforeEach(() => {
+    setSessionToken(undefined)
     mocks.queryCourse.mockReset()
     mocks.queryCourse.mockResolvedValue(responseWith(course))
 })
@@ -85,6 +87,25 @@ describe("useQueryCourseSwr", () => {
         await waitFor(() => expect(result.current.data).toEqual(other))
         expect(mocks.queryCourse).toHaveBeenCalledTimes(2)
         expect(mocks.queryCourse).toHaveBeenLastCalledWith({ request: { displayId: "systems-design" } })
+    })
+
+    it("refetches viewer-specific enrolment when a guest signs in", async () => {
+        const guestCourse = { ...course, isEnrolled: null }
+        const enrolledCourse = { ...course, isEnrolled: true }
+        mocks.queryCourse
+            .mockResolvedValueOnce(responseWith(guestCourse))
+            .mockResolvedValueOnce(responseWith(enrolledCourse))
+
+        const { result } = renderHook(
+            () => useQueryCourseSwr({ displayId: "fullstack-mastery" }),
+            { wrapper },
+        )
+        await waitFor(() => expect(result.current.data).toEqual(guestCourse))
+
+        setSessionToken("signed-in-viewer")
+
+        await waitFor(() => expect(result.current.data).toEqual(enrolledCourse))
+        expect(mocks.queryCourse).toHaveBeenCalledTimes(2)
     })
 
     it("resolves to null for a course the server does not know", async () => {

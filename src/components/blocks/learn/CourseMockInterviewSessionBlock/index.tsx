@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useLocale } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
+import { useSessionRefresh } from "@/hooks/auth/useSessionRefresh"
 import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
 import { useQueryMockInterviewAttemptBySessionSwr } from "@/hooks/swr/useQueryMockInterviewAttemptBySessionSwr"
 import { useQueryMyInProgressMockInterviewSessionSwr } from "@/hooks/swr/useQueryMyInProgressMockInterviewSessionSwr"
@@ -115,8 +116,9 @@ export const CourseMockInterviewSessionBlock = ({ displayId, sessionId }: Course
     const locale = useLocale()
     const copy = locale === "vi" ? COPY.vi : COPY.en
     const router = useRouter()
+    const sessionRefresh = useSessionRefresh()
     const course = useQueryCourseSwr({ displayId })
-    const courseId = course.data?.id
+    const courseId = course.data?.isEnrolled === true ? course.data.id : undefined
     const inProgress = useQueryMyInProgressMockInterviewSessionSwr(courseId)
     const attempt = useQueryMockInterviewAttemptBySessionSwr(courseId, sessionId)
     const sync = useMutateSyncMockInterviewSessionTurnsSwr(courseId, sessionId)
@@ -146,6 +148,11 @@ export const CourseMockInterviewSessionBlock = ({ displayId, sessionId }: Course
 
     const setupPath = `/courses/${displayId}/learn/mock-interview`
     const resultPath = `${setupPath}/interview/${sessionId}/result`
+
+    useEffect(() => {
+        if (sessionRefresh.isRestoring || course.data === undefined || course.data === null || course.data.isEnrolled === true) return
+        router.replace(setupPath)
+    }, [course.data, router, sessionRefresh.isRestoring, setupPath])
 
     useEffect(() => {
         if (session === null || hydratedSessionId === sessionId) return
@@ -300,8 +307,9 @@ export const CourseMockInterviewSessionBlock = ({ displayId, sessionId }: Course
         askQuestion(next, nextTurns, isDesign ? content : "")
     }
 
-    const loadFailed = course.error !== undefined || inProgress.error !== undefined || attempt.error !== undefined || course.data === null
-    const pending = !loadFailed && (course.data === undefined || inProgress.data === undefined || attempt.data === undefined)
+    const accessDenied = !sessionRefresh.isRestoring && course.data !== undefined && course.data !== null && course.data.isEnrolled !== true
+    const loadFailed = accessDenied || course.error !== undefined || (courseId !== undefined && (inProgress.error !== undefined || attempt.error !== undefined)) || course.data === null
+    const pending = !loadFailed && (sessionRefresh.isRestoring || course.data === undefined || (courseId !== undefined && (inProgress.data === undefined || attempt.data === undefined)))
     const missing = !pending && session === null && attempt.data === null
     const state = resolveInterviewState({
         loadFailed, pending, session, hydrated: hydratedSessionId !== sessionId,

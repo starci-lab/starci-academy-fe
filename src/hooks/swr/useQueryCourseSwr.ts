@@ -1,4 +1,5 @@
 import useSWR from "swr"
+import { useViewerKey } from "@/hooks/auth/useViewerKey"
 import { queryCourse } from "../../modules/api/graphql/queries/query-course"
 import { type CourseDetail } from "../../modules/api/graphql/queries/types/course"
 
@@ -30,15 +31,22 @@ export const QUERY_COURSE_SWR_KEY = "QUERY_COURSE_SWR"
  * the previous course for a moment after navigating, which is exactly when a reader is deciding
  * whether they are on the right page.
  *
+ * THE VIEWER IS PART OF THE KEY TOO. Course detail is optional-auth because `isEnrolled` belongs to
+ * the current viewer: a guest receives `null`, while an enrolled viewer receives `true`. Keeping
+ * those answers under one key made a cold page retain the guest answer after session restoration,
+ * which in turn left enrolled-only destinations looking locked until a manual reload.
+ *
  * IT DOES NOT FETCH WITHOUT ONE. `null` as the key is SWR's own way of saying "not yet"; a key
  * built from `undefined` would ask the server for a course that cannot exist and then cache the
  * failure under a key the real request would collide with.
  */
-export const useQueryCourseSwr = ({ displayId }: UseQueryCourseSwrParams = {}) =>
-    useSWR<CourseDetail | null>(
-        displayId === undefined ? null : [QUERY_COURSE_SWR_KEY, displayId],
+export const useQueryCourseSwr = ({ displayId }: UseQueryCourseSwrParams = {}) => {
+    const viewer = useViewerKey()
+    return useSWR<CourseDetail | null>(
+        displayId === undefined ? null : [QUERY_COURSE_SWR_KEY, displayId, viewer ?? "guest"],
         async () => {
             const result = await queryCourse({ request: { displayId } })
             return result.data?.course?.data ?? null
         },
     )
+}

@@ -60,6 +60,7 @@ const labels = (locale: string) => locale === "vi" ? {
     due: "cần ôn", // vn-ok: localized Vietnamese interface copy.
     mastered: "đã nhớ", // vn-ok: localized Vietnamese interface copy.
     start: "Bắt đầu", // vn-ok: localized Vietnamese interface copy.
+    quizDeck: "Trắc nghiệm", // vn-ok: localized Vietnamese interface copy.
     resume: "Tiếp tục phiên", // vn-ok: localized Vietnamese interface copy.
     retry: "Thử lại", // vn-ok: localized Vietnamese interface copy.
     empty: "Khóa học này chưa có bộ flashcard.", // vn-ok: localized Vietnamese interface copy.
@@ -108,6 +109,7 @@ const labels = (locale: string) => locale === "vi" ? {
     due: "due",
     mastered: "mastered",
     start: "Start",
+    quizDeck: "Quiz",
     resume: "Resume session",
     retry: "Retry",
     empty: "This course has no flashcard decks yet.",
@@ -244,7 +246,8 @@ export const CourseFlashcardsReviewBlock = ({ displayId }: CourseFlashcardsRevie
                 { label: copy.retention, value: `${stats.data?.retentionRate ?? 0}%` },
                 { label: copy.streak, value: (stats.data?.longestStreak ?? 0).toString() },
             ],
-            decks: visibleDecks.map((deck) => ({ id: deck.id, title: deck.title, description: deck.description, difficulty: difficultyOf(deck.difficulty), cardCount: deck.cards.length, dueCount: deck.dueCount ?? 0, masteredCount: deck.masteredCount ?? 0 })),
+            decks: visibleDecks.map((deck) => ({ id: deck.id, title: deck.title, description: deck.description, difficulty: difficultyOf(deck.difficulty), cardCount: deck.cards.length, dueCount: deck.dueCount ?? 0, masteredCount: deck.masteredCount ?? 0, quizEligible: deck.cards.length >= 5 })),
+            quizDeckLabel: copy.quizDeck,
             evidenceRows, searchLabel: copy.search, searchClearLabel: copy.searchClear, searchValue: search, foundText: `${visibleDecks.length} ${copy.found}`,
             layoutLabel: copy.layout, gridLabel: copy.grid, lineLabel: copy.line, layout,
             resumeSessionId: dueInProgress.data?.sessionId ?? deckInProgress.data?.sessionId,
@@ -255,7 +258,7 @@ export const CourseFlashcardsReviewBlock = ({ displayId }: CourseFlashcardsRevie
             startPending: start.isMutating, startErrorText: start.error === undefined ? undefined : copy.startFailed,
         }}
         on={{
-            openQuiz: () => router.push(`/courses/${displayId}/learn/flashcards/quiz`), selectView: setActiveView, changeSearch: setSearch,
+            openQuiz: (deckId) => router.push(`/courses/${displayId}/learn/flashcards/quiz${deckId === undefined ? "" : `?deckId=${encodeURIComponent(deckId)}`}`), selectView: setActiveView, changeSearch: setSearch,
             changeLayout: (next) => {
                 setLayout(next)
                 try {

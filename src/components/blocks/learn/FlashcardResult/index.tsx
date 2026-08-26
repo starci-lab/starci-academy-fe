@@ -17,6 +17,8 @@ const COPY = {
     en: {
         reviewTitle: "Review complete",
         quizTitle: "Quiz complete",
+        reviewMode: "Review session",
+        quizMode: "Quiz session",
         subtitle: "Your persisted session result is ready.",
         score: "Score",
         reviewed: "Cards reviewed",
@@ -38,6 +40,8 @@ const COPY = {
     vi: {
         reviewTitle: "Đã hoàn tất ôn tập", // vn-ok: localized Vietnamese interface copy.
         quizTitle: "Đã hoàn tất trắc nghiệm", // vn-ok: localized Vietnamese interface copy.
+        reviewMode: "Phiên ôn tập", // vn-ok: localized Vietnamese interface copy.
+        quizMode: "Phiên trắc nghiệm", // vn-ok: localized Vietnamese interface copy.
         subtitle: "Kết quả phiên đã được lưu.", // vn-ok: localized Vietnamese interface copy.
         score: "Điểm", // vn-ok: localized Vietnamese interface copy.
         reviewed: "Số thẻ đã ôn", // vn-ok: localized Vietnamese interface copy.
@@ -60,7 +64,8 @@ const COPY = {
 
 /** Resolves one persisted result projection and its retry/onward destinations. */
 export const FlashcardResultBlock = ({ displayId, sessionId, mode }: FlashcardResultRouteProps) => {
-    const copy = useLocale() === "vi" ? COPY.vi : COPY.en
+    const isVietnamese = useLocale() === "vi"
+    const copy = isVietnamese ? COPY.vi : COPY.en
     const router = useRouter()
     const result = useQueryFlashcardSessionResultSwr(mode, sessionId)
     const state = result.error !== undefined
@@ -79,6 +84,7 @@ export const FlashcardResultBlock = ({ displayId, sessionId, mode }: FlashcardRe
             blockState={state}
             data={{
                 mode,
+                modeText: mode === "review" ? copy.reviewMode : copy.quizMode,
                 title: mode === "review" ? copy.reviewTitle : copy.quizTitle,
                 subtitle: copy.subtitle,
                 scoreLabel: copy.score,

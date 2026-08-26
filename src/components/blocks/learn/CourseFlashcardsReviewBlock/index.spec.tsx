@@ -28,7 +28,10 @@ vi.mock("next-intl", () => ({ useLocale: () => "en" }))
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
 vi.mock("@/hooks/swr/useQueryCourseSwr", () => ({ useQueryCourseSwr: () => ({ data: { id: "course-id" }, error: undefined, mutate: mocks.mutateCourse }) }))
 vi.mock("@/hooks/swr/useQueryFlashcardDecksByCourseSwr", () => ({
-    useQueryFlashcardDecksByCourseSwr: () => ({ data: [{ id: "deck-1", title: "Core", description: "Core concepts", difficulty: "hard", dueCount: 1, masteredCount: 0, cards: [{ id: "card-1" }, { id: "card-2" }] }], error: undefined, mutate: mocks.mutateDecks }),
+    useQueryFlashcardDecksByCourseSwr: () => ({ data: [
+        { id: "deck-1", title: "Core", description: "Core concepts", difficulty: "hard", dueCount: 1, masteredCount: 0, cards: [{ id: "card-1" }, { id: "card-2" }, { id: "card-3" }, { id: "card-4" }, { id: "card-5" }] },
+        { id: "deck-2", title: "Small", description: "Small deck", difficulty: "easy", dueCount: 0, masteredCount: 0, cards: [{ id: "small-1" }, { id: "small-2" }] },
+    ], error: undefined, mutate: mocks.mutateDecks }),
     useQueryMyDueFlashcardsSwr: () => ({ data: { dueCount: 2, cards: [{ cardId: "card-2" }, { cardId: "card-other" }] }, error: undefined, mutate: mocks.mutateDue }),
 }))
 vi.mock("@/hooks/swr/useQueryMyFlashcardStatsSwr", () => ({ useQueryMyFlashcardStatsSwr: () => ({ data: { retentionRate: 0, totalReviewed: 0, currentStreak: 0, longestStreak: 0 }, error: undefined, mutate: mocks.mutateStats }) }))
@@ -82,5 +85,16 @@ describe("CourseFlashcardsReviewBlock", () => {
         mocks.input = undefined
         render(<CourseFlashcardsReviewBlock displayId="fullstack-mastery" />)
         await waitFor(() => expect(mocks.input?.props.layout).toBe("line"))
+    })
+
+    it("marks only decks with a valid quick-quiz draw and routes that deck scope", () => {
+        render(<CourseFlashcardsReviewBlock displayId="fullstack-mastery" />)
+
+        expect(mocks.input?.props.decks.map((deck) => [deck.id, deck.quizEligible])).toEqual([
+            ["deck-1", true],
+            ["deck-2", false],
+        ])
+        act(() => { mocks.input?.on.openQuiz("deck-1") })
+        expect(mocks.push).toHaveBeenCalledWith("/courses/fullstack-mastery/learn/flashcards/quiz?deckId=deck-1")
     })
 })

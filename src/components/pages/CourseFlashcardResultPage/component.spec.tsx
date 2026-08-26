@@ -7,6 +7,7 @@ const makeInput = (): FlashcardResultBlockProps => ({
     blockState: "ready",
     data: {
         mode: "review",
+        modeText: "Review session",
         title: "Review complete",
         subtitle: "Result persisted",
         scoreLabel: "Score",
@@ -39,6 +40,10 @@ describe("FlashcardResultBase", () => {
         const { container } = render(<FlashcardResultBase {...input} />)
 
         expect(container.querySelector("[data-node=flashcard-result-workspace]")).toBeTruthy()
+        expect(container.querySelector("[data-node=flashcard-result-summary-card]")).toBeTruthy()
+        expect(container.querySelector("[data-node=flashcard-result-stat-grid]")).toBeTruthy()
+        expect(container.querySelector("[data-node=flashcard-result-body]")).toBeTruthy()
+        expect(container.querySelector("[data-node=flashcard-result-next-action-panel]")).toBeTruthy()
         expect(container.querySelectorAll("[data-node=flashcard-result-stat]")).toHaveLength(4)
         expect(screen.getByText("75%")).toBeTruthy()
         expect(screen.getByText("Redis")).toBeTruthy()

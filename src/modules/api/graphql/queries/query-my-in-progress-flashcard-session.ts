@@ -14,6 +14,7 @@ export type FlashcardSessionCard = {
     readonly deckTitle: string
     readonly front: string
     readonly back: string
+    readonly answerAvailable: boolean
     readonly level?: string | null
     readonly tags: ReadonlyArray<string>
     readonly nextIntervals?: {
@@ -141,7 +142,7 @@ const cardsQuery = gql`
             success message error
             data {
                 cards {
-                    cardId deckTitle front back level tags
+                    cardId deckTitle front back answerAvailable level tags
                     nextIntervals { again hard good easy }
                 }
             }

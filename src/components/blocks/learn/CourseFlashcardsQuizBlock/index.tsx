@@ -12,7 +12,7 @@ import { useQueryMyFlashcardQuizStatsSwr } from "@/hooks/swr/useQueryMyFlashcard
 import { CourseFlashcardsQuizBlockBase, type FlashcardQuizView } from "./component"
 
 /** Route identity required by the connected flashcard quiz setup. */
-export type CourseFlashcardsQuizBlockProps = { readonly displayId: string }
+export type CourseFlashcardsQuizBlockProps = { readonly displayId: string, readonly deckId?: string }
 
 const quizStateOf = (failed: boolean, pending: boolean, empty: boolean) => {
     if (failed) return "failed" as const
@@ -101,7 +101,7 @@ const shuffle = <T,>(values: ReadonlyArray<T>): Array<T> => {
 }
 
 /** Resolves quiz configuration, card draw, and start/resume actions. */
-export const CourseFlashcardsQuizBlock = ({ displayId }: CourseFlashcardsQuizBlockProps) => {
+export const CourseFlashcardsQuizBlock = ({ displayId, deckId }: CourseFlashcardsQuizBlockProps) => {
     const copy = labels(useLocale())
     const router = useRouter()
     const [practiceMode, setPracticeMode] = useState<"quick" | "deep">("quick")
@@ -120,11 +120,12 @@ export const CourseFlashcardsQuizBlock = ({ displayId }: CourseFlashcardsQuizBlo
     const cardLimit = practiceMode === "quick" ? 5 : 10
     const dueIds = useMemo(() => new Set((due.data?.cards ?? []).map((card) => card.cardId)), [due.data?.cards])
     const cardIds = useMemo(() => shuffle((decks.data ?? [])
+        .filter((deck) => deckId === undefined || deck.id === deckId)
         .flatMap((deck) => deck.cards)
         .filter((card) => level === null || card.level === level)
         .filter((card) => scope === "all" || dueIds.has(card.id))
         .map((card) => card.id))
-        .slice(0, cardLimit), [cardLimit, decks.data, dueIds, level, scope])
+        .slice(0, cardLimit), [cardLimit, deckId, decks.data, dueIds, level, scope])
     const failed = course.error !== undefined || decks.error !== undefined || due.error !== undefined || start.error !== undefined || history.error !== undefined || stats.error !== undefined
     const pending = course.data === undefined || decks.data === undefined || due.data === undefined
         || (activeView === "history" && history.data === undefined)

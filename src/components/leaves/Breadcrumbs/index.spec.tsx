@@ -29,4 +29,18 @@ describe("Breadcrumbs", () => {
         expect(screen.queryByText("Backend foundations")).not.toBeInTheDocument()
         expect(screen.queryByText("Frameworks")).not.toBeInTheDocument()
     })
+
+    it("keeps a meaningful journey trail expanded when requested", () => {
+        render(<Breadcrumbs props={{ label: "Study path", showFullTrail: true, steps: [
+            { id: "course", label: "Fullstack Mastery" },
+            { id: "mode", label: "Review" },
+            { id: "session", label: "Study" },
+        ] }} on={{ course: vi.fn(), mode: vi.fn() }} />)
+
+        expect(screen.getByRole("list", { name: "Study path" })).toBeInTheDocument()
+        expect(screen.getByText("Fullstack Mastery")).toBeInTheDocument()
+        expect(screen.getByText("Review")).toBeInTheDocument()
+        expect(screen.getByText("Study")).toBeInTheDocument()
+        expect(screen.queryByText("Back")).not.toBeInTheDocument()
+    })
 })
