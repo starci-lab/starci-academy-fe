@@ -8,12 +8,12 @@ export type StarCiOutlineIconProps = SVGProps<SVGSVGElement> & {
 
 /** Build one fixed 24px outline cut while preserving Heroicons-compatible SVG props. */
 const outlineIcon = (name: string, body: ReactNode) => {
-    const Component = forwardRef<SVGSVGElement, StarCiOutlineIconProps>((input, ref) => {
-        const { title, titleId, ...props } = input
+    const Component = forwardRef<SVGSVGElement, StarCiOutlineIconProps>((props, ref) => {
+        const { title, titleId, ...svgProps } = props
         return (
             <svg
                 ref={ref}
-                {...props}
+                {...svgProps}
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"

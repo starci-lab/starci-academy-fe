@@ -8,12 +8,12 @@ export type StarCiSolidIconProps = SVGProps<SVGSVGElement> & {
 
 /** Build one fixed 16px solid cut while preserving Heroicons-compatible SVG props. */
 const solidIcon = (name: string, body: ReactNode) => {
-    const Component = forwardRef<SVGSVGElement, StarCiSolidIconProps>((input, ref) => {
-        const { title, titleId, ...props } = input
+    const Component = forwardRef<SVGSVGElement, StarCiSolidIconProps>((props, ref) => {
+        const { title, titleId, ...svgProps } = props
         return (
             <svg
                 ref={ref}
-                {...props}
+                {...svgProps}
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 16 16"
                 fill="currentColor"
