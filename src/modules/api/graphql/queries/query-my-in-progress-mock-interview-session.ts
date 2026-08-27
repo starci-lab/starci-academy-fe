@@ -33,6 +33,14 @@ export type InProgressMockInterviewSession = {
     readonly turns?: ReadonlyArray<MockInterviewTurn> | null
     readonly questionIndex: number
     readonly phaseIndex: number
+    readonly status: "in_progress" | "grading" | "grading_failed"
+    readonly revision: number
+    readonly rubricVersion?: string | null
+    readonly gradingJobId?: string | null
+    readonly gradingJobStatus?: string | null
+    readonly gradingAttemptCount?: number | null
+    readonly gradingMaxAttempts?: number | null
+    readonly gradingLastError?: string | null
     readonly updatedAt: string
     readonly deadlineAt: string
 }
@@ -64,6 +72,14 @@ const query1 = gql`
                 turns { role phase content questionIndex artifactHint }
                 questionIndex
                 phaseIndex
+                status
+                revision
+                rubricVersion
+                gradingJobId
+                gradingJobStatus
+                gradingAttemptCount
+                gradingMaxAttempts
+                gradingLastError
                 updatedAt
                 deadlineAt
             }

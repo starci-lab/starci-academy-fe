@@ -1,20 +1,22 @@
 import { act, render, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-type TestInput = { state: string; props: { status?: string }; on: { access: () => void; configure: (field: string, value: string) => void; start: () => void; resume?: () => void; retry: () => void; selectTab: (tab: string) => void } }
+type TestInput = { state: string; props: { status?: string; selectedTab?: string }; on: { access: () => void; configure: (field: string, value: string) => void; start: () => void; resume?: () => void; retry: () => void; selectTab: (tab: string) => void } }
 const mocks = vi.hoisted(() => ({
     input: undefined as TestInput | undefined,
     course: { data: undefined as unknown, error: undefined as unknown, mutate: vi.fn() },
     session: { data: undefined as unknown, error: undefined as unknown, mutate: vi.fn() },
     attempts: { data: undefined as unknown, error: undefined as unknown, mutate: vi.fn() },
     stats: { data: undefined as unknown, error: undefined as unknown, mutate: vi.fn() },
-    start: { isMutating: false, trigger: vi.fn() }, push: vi.fn(), locale: "en",
+    start: { isMutating: false, trigger: vi.fn() }, push: vi.fn(), replace: vi.fn(), locale: "en",
     restoring: false,
+    searchTab: null as string | null,
     sessionHook: vi.fn(), startHook: vi.fn(), attemptsHook: vi.fn(), statsHook: vi.fn(),
 }))
 
 vi.mock("next-intl", () => ({ useLocale: () => mocks.locale }))
-vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
+vi.mock("next/navigation", () => ({ useSearchParams: () => ({ get: () => mocks.searchTab }) }))
+vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push, replace: mocks.replace }) }))
 vi.mock("@/hooks/auth/useSessionRefresh", () => ({ useSessionRefresh: () => ({ isRestoring: mocks.restoring }) }))
 vi.mock("@/hooks/swr/useQueryCourseSwr", () => ({ useQueryCourseSwr: () => mocks.course }))
 vi.mock("@/hooks/swr/useQueryMyInProgressMockInterviewSessionSwr", () => ({ useQueryMyInProgressMockInterviewSessionSwr: (courseId: string | undefined) => { mocks.sessionHook(courseId); return mocks.session } }))
@@ -30,11 +32,18 @@ beforeEach(() => {
     mocks.input = undefined
     mocks.locale = "en"
     mocks.restoring = false
+    mocks.searchTab = null
     mocks.start.isMutating = false
     for (const item of [mocks.course, mocks.session, mocks.attempts, mocks.stats]) { item.data = undefined; item.error = undefined }
 })
 
 describe("CourseMockInterviewSetupBlock", () => {
+    it("opens a report-linked history destination", () => {
+        mocks.searchTab = "history"
+        render(<CourseMockInterviewSetupBlock displayId="course" />)
+        expect(mocks.input?.props).toMatchObject({ selectedTab: "history" })
+    })
+
     it("handles pending, failed, resumable and successful start states", async () => {
         const view = render(<CourseMockInterviewSetupBlock displayId="course" />)
         expect(mocks.input?.state).toBe("pending")
@@ -56,6 +65,7 @@ describe("CourseMockInterviewSetupBlock", () => {
         mocks.start.trigger.mockResolvedValue({ data: { startMockInterviewSession: { success: true, data: { sessionId: "new" } } } })
         view.rerender(<CourseMockInterviewSetupBlock displayId="course" />)
         act(() => { mocks.input?.on.configure("level", "senior"); mocks.input?.on.configure("mode", "design"); mocks.input?.on.selectTab("history") })
+        expect(mocks.replace).toHaveBeenCalledWith("/courses/course/learn/mock-interview?tab=history")
         act(() => { mocks.input?.on.start() })
         await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/courses/course/learn/mock-interview/interview/new"))
         act(() => { mocks.input?.on.retry() })

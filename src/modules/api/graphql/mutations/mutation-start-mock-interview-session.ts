@@ -27,6 +27,8 @@ export type StartMockInterviewSessionData = {
     readonly mode: string
     readonly seedTopics: ReadonlyArray<MockInterviewSeedQuestion>
     readonly deadlineAt: string
+    readonly revision: number
+    readonly status: string
 }
 
 /** GraphQL envelope returned by session creation. */
@@ -40,7 +42,7 @@ export const startMockInterviewSessionDocument: DocumentNode = gql`
         startMockInterviewSession(request: $request) {
             success message error
             data {
-                sessionId promptId promptTitle difficulty source level mode deadlineAt
+                sessionId promptId promptTitle difficulty source level mode deadlineAt revision status
                 seedTopics { cardId kind title givenCodes { lang code } }
             }
         }

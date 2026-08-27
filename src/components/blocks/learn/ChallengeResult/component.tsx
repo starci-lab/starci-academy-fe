@@ -3,6 +3,7 @@ import { defineContractComponent, defineLeafComponent } from "@/components/contr
 import { Button } from "@/components/leaves/Button"
 import { Heading } from "@/components/leaves/Heading"
 import { Text } from "@/components/leaves/Text"
+import { ChallengeAttemptHistoryDrawer } from "@/components/overlays/learn/ChallengeAttemptHistoryDrawer"
 
 /** One backend-authored scorer finding shown without client interpretation. */
 export type CourseLearnChallengeFeedback = {
@@ -27,6 +28,11 @@ export type ChallengeResultBlockProps = {
         readonly reloadLabel: string
         readonly retryLabel: string
         readonly nextLabel: string
+        readonly historyLabel?: string
+        readonly courseId?: string
+        readonly submissionId?: string
+        readonly selectedAttemptId?: string
+        readonly isHistoryOpen?: boolean
         readonly evaluationTitle?: string
         readonly evaluationDetail?: string
         readonly unavailableTitle?: string
@@ -40,6 +46,9 @@ export type ChallengeResultBlockProps = {
         readonly reload?: () => void
         readonly retry?: () => void
         readonly next?: () => void
+        readonly openHistory?: () => void
+        readonly closeHistory?: () => void
+        readonly selectHistoryAttempt?: (attemptId: string, attemptGroupId?: string) => void
     }
 }
 
@@ -151,35 +160,52 @@ export const ChallengeResultBase = (input: ChallengeResultBlockProps) => {
                     isLoading={loading}
                 />
             )),
+            defineLeafComponent("button", {}, () => (
+                <Button
+                    props={{ label: input.props.historyLabel ?? "History", variant: "outline" }}
+                    on={{ press: input.on?.openHistory }}
+                    isLoading={loading}
+                />
+            )),
         ]
 
     return (
-        <Tree
-            contract="challenge-result-workspace"
-            render={defineContractComponent("challenge-result-workspace", {
-                summary: defineContractComponent("challenge-result-summary", {
-                    header: defineContractComponent("centred-title-pair", {
-                        title: defineLeafComponent("heading", {}, () => (
-                            <Heading props={{ content: input.props.title, level: 1 }} isLoading={loading} />
+        <>
+            <Tree
+                contract="challenge-result-workspace"
+                render={defineContractComponent("challenge-result-workspace", {
+                    summary: defineContractComponent("challenge-result-summary", {
+                        header: defineContractComponent("centred-title-pair", {
+                            title: defineLeafComponent("heading", {}, () => (
+                                <Heading props={{ content: input.props.title, level: 1 }} isLoading={loading} />
+                            )),
+                            description: defineLeafComponent("text", { size: "sm" }, () => (
+                                <Text props={{ content: input.props.description, size: "sm" }} isLoading={loading} />
+                            )),
+                        }),
+                        score: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                            <Text
+                                props={{ content: input.props.scoreLine, size: "sm", tone: "muted" }}
+                                isLoading={loading}
+                            />
                         )),
-                        description: defineLeafComponent("text", { size: "sm" }, () => (
-                            <Text props={{ content: input.props.description, size: "sm" }} isLoading={loading} />
-                        )),
+                        status: defineContractComponent("stacked-peer-controls", { control: summaryControls }),
                     }),
-                    score: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                        <Text
-                            props={{ content: input.props.scoreLine, size: "sm", tone: "muted" }}
-                            isLoading={loading}
-                        />
-                    )),
-                    status: defineContractComponent("stacked-peer-controls", { control: summaryControls }),
-                }),
-                ...(feedbackGroups.length === 0 ? {} : {
-                    feedback: defineContractComponent("challenge-criterion-feedback-list", { feedback: feedbackGroups }),
-                }),
-                actions: defineContractComponent("challenge-result-actions", { action: actions }),
-            })}
-        />
+                    ...(feedbackGroups.length === 0 ? {} : {
+                        feedback: defineContractComponent("challenge-criterion-feedback-list", { feedback: feedbackGroups }),
+                    }),
+                    actions: defineContractComponent("challenge-result-actions", { action: actions }),
+                })}
+            />
+            {input.props.isHistoryOpen === true ? <ChallengeAttemptHistoryDrawer
+                isOpen
+                courseId={input.props.courseId}
+                submissionId={input.props.submissionId}
+                selectedAttemptId={input.props.selectedAttemptId}
+                onDismiss={() => input.on?.closeHistory?.()}
+                onSelect={(attempt) => input.on?.selectHistoryAttempt?.(attempt.id, attempt.attemptGroupId)}
+            /> : null}
+        </>
     )
 }
 

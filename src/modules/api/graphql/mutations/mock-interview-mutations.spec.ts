@@ -12,6 +12,14 @@ import {
     mutationSyncMockInterviewSessionTurns,
     syncMockInterviewSessionTurnsDocument,
 } from "./mutation-sync-mock-interview-session-turns"
+import {
+    abandonMockInterviewSessionDocument,
+    completeMockInterviewSessionDocument,
+    mutationAbandonMockInterviewSession,
+    mutationCompleteMockInterviewSession,
+    mutationRetryMockInterviewSessionGrading,
+    retryMockInterviewSessionGradingDocument,
+} from "./mutation-mock-interview-session-lifecycle"
 
 const mocks = vi.hoisted(() => ({ mutate: vi.fn(), createApolloClient: vi.fn() }))
 
@@ -135,11 +143,13 @@ describe("mutationGradeMockInterviewSession", () => {
 })
 
 describe("mutationSyncMockInterviewSessionTurns", () => {
-    it("selects only the acknowledgement a best-effort write needs", () => {
+    it("selects the authoritative revision and transcript snapshot", () => {
         const document = print(syncMockInterviewSessionTurnsDocument)
         expect(document).toContain("syncMockInterviewSessionTurns(request: $request)")
         expect(document).toContain("data {")
-        expect(document).not.toContain("turns {")
+        expect(document).toContain("conflict")
+        expect(document).toContain("revision")
+        expect(document).toContain("turns {")
     })
 
     it("persists the transcript and both resume cursors on an authenticated client", async () => {
@@ -178,6 +188,36 @@ describe("mutationSyncMockInterviewSessionTurns", () => {
             mutationSyncMockInterviewSessionTurns({ sessionId: "s-1", turns: [], questionIndex: 0, phaseIndex: 0 }),
         ).resolves.toEqual({
             data: { syncMockInterviewSessionTurns: { success: true, message: "ok", data: { success: true } } },
+        })
+    })
+})
+
+describe("mock interview lifecycle mutations", () => {
+    it("selects durable state for complete, abandon and grading retry", () => {
+        expect(print(completeMockInterviewSessionDocument)).toContain("gradingJobId")
+        expect(print(completeMockInterviewSessionDocument)).toContain("revision")
+        expect(print(abandonMockInterviewSessionDocument)).toContain("status")
+        expect(print(retryMockInterviewSessionGradingDocument)).toContain("gradingJobId")
+    })
+
+    it("sends each optimistic lifecycle command unchanged", async () => {
+        const request = { courseId: "course-1", sessionId: "s-1", expectedRevision: 4 }
+
+        await mutationCompleteMockInterviewSession(request)
+        await mutationAbandonMockInterviewSession(request)
+        await mutationRetryMockInterviewSessionGrading(request)
+
+        expect(mocks.mutate).toHaveBeenNthCalledWith(1, {
+            mutation: completeMockInterviewSessionDocument,
+            variables: { request },
+        })
+        expect(mocks.mutate).toHaveBeenNthCalledWith(2, {
+            mutation: abandonMockInterviewSessionDocument,
+            variables: { request },
+        })
+        expect(mocks.mutate).toHaveBeenNthCalledWith(3, {
+            mutation: retryMockInterviewSessionGradingDocument,
+            variables: { request },
         })
     })
 })

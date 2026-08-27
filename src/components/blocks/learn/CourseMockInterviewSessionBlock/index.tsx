@@ -7,7 +7,10 @@ import { useSessionRefresh } from "@/hooks/auth/useSessionRefresh"
 import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
 import { useQueryMockInterviewAttemptBySessionSwr } from "@/hooks/swr/useQueryMockInterviewAttemptBySessionSwr"
 import { useQueryMyInProgressMockInterviewSessionSwr } from "@/hooks/swr/useQueryMyInProgressMockInterviewSessionSwr"
-import { useMutateGradeMockInterviewSessionSwr } from "@/hooks/swr/useMutateGradeMockInterviewSessionSwr"
+import {
+    useMutateAbandonMockInterviewSessionSwr,
+    useMutateCompleteMockInterviewSessionSwr,
+} from "@/hooks/swr/useMutateMockInterviewSessionLifecycleSwr"
 import { useMutateSyncMockInterviewSessionTurnsSwr } from "@/hooks/swr/useMutateSyncMockInterviewSessionTurnsSwr"
 import { useMockInterviewSocketIo } from "@/hooks/socketio/useMockInterviewSocketIo"
 import type { MockInterviewTurn } from "@/modules/api/graphql/queries/query-my-in-progress-mock-interview-session"
@@ -55,13 +58,11 @@ const resolveInterviewStateLabel = (state: CourseMockInterviewSessionState, copy
 const COPY = {
     en: {
         title: "Mock interview",
-        journey: "Practice journey",
-        journeyStage: "Step 2 of 3 · Interview",
         connecting: "Connecting to your interview…",
         reconnecting: "Connection lost. Reconnecting without discarding your transcript…",
         syncing: "Saving your transcript…",
-        grading: "Grading the answers you have completed…",
-        expired: "This session reached its server deadline. Completed answers are being graded.",
+        grading: "Handing your completed answers to the grading queue…",
+        expired: "This session reached its deadline. Finish now to grade the answers already saved.",
         failed: "The interview could not be restored.",
         interviewer: "Interviewer",
         candidate: "Your answer",
@@ -72,6 +73,15 @@ const COPY = {
         finish: "Finish and grade",
         abort: "Stop response",
         leave: "Leave interview",
+        abandon: "Discard interview",
+        keepInterview: "Keep interviewing",
+        finishTitle: "Finish and submit this interview?",
+        finishDescription: "Your saved answers will be locked and sent to the grading queue.",
+        abandonTitle: "Discard this interview?",
+        abandonDescription: "This unfinished session will be closed and cannot be resumed.",
+        saved: "Answers saved",
+        saving: "Saving answers…",
+        conflict: "A newer saved version was found. The room has been restored to the server copy.",
         retry: "Try again",
         workspace: "Question workspace",
         workspaceEmpty: "No code or reference material is attached to this question.",
@@ -83,13 +93,11 @@ const COPY = {
     },
     vi: {
         title: "Phỏng vấn thử", // vn-ok: approved Vietnamese runtime copy
-        journey: "Hành trình luyện tập", // vn-ok: approved Vietnamese runtime copy
-        journeyStage: "Bước 2/3 · Phỏng vấn", // vn-ok: approved Vietnamese runtime copy
         connecting: "Đang kết nối tới buổi phỏng vấn…", // vn-ok: approved Vietnamese runtime copy
         reconnecting: "Mất kết nối. Đang kết nối lại mà không làm mất bản ghi…", // vn-ok: approved Vietnamese runtime copy
         syncing: "Đang lưu bản ghi phỏng vấn…", // vn-ok: approved Vietnamese runtime copy
-        grading: "Đang chấm các câu trả lời đã hoàn thành…", // vn-ok: approved Vietnamese runtime copy
-        expired: "Buổi phỏng vấn đã hết thời gian trên máy chủ. Các câu đã hoàn thành đang được chấm.", // vn-ok: approved Vietnamese runtime copy
+        grading: "Đang chuyển các câu trả lời đã hoàn thành sang hàng đợi chấm điểm…", // vn-ok: approved Vietnamese runtime copy
+        expired: "Phiên đã hết hạn. Hãy kết thúc để chấm những câu trả lời đã được lưu.", // vn-ok: approved Vietnamese runtime copy
         failed: "Không thể khôi phục buổi phỏng vấn.", // vn-ok: approved Vietnamese runtime copy
         interviewer: "Người phỏng vấn", // vn-ok: approved Vietnamese runtime copy
         candidate: "Câu trả lời của bạn", // vn-ok: approved Vietnamese runtime copy
@@ -100,6 +108,15 @@ const COPY = {
         finish: "Kết thúc và chấm điểm", // vn-ok: approved Vietnamese runtime copy
         abort: "Dừng phản hồi", // vn-ok: approved Vietnamese runtime copy
         leave: "Rời buổi phỏng vấn", // vn-ok: approved Vietnamese runtime copy
+        abandon: "Hủy phiên phỏng vấn", // vn-ok: approved Vietnamese runtime copy
+        keepInterview: "Tiếp tục phỏng vấn", // vn-ok: approved Vietnamese runtime copy
+        finishTitle: "Kết thúc và nộp buổi phỏng vấn?", // vn-ok: approved Vietnamese runtime copy
+        finishDescription: "Các câu trả lời đã lưu sẽ được khóa và chuyển sang hàng đợi chấm điểm.", // vn-ok: approved Vietnamese runtime copy
+        abandonTitle: "Hủy phiên phỏng vấn này?", // vn-ok: approved Vietnamese runtime copy
+        abandonDescription: "Phiên chưa hoàn thành sẽ được đóng và không thể tiếp tục lại.", // vn-ok: approved Vietnamese runtime copy
+        saved: "Đã lưu câu trả lời", // vn-ok: approved Vietnamese runtime copy
+        saving: "Đang lưu câu trả lời…", // vn-ok: approved Vietnamese runtime copy
+        conflict: "Phát hiện bản lưu mới hơn. Phòng phỏng vấn đã khôi phục theo dữ liệu máy chủ.", // vn-ok: approved Vietnamese runtime copy
         retry: "Thử lại", // vn-ok: approved Vietnamese runtime copy
         workspace: "Không gian câu hỏi", // vn-ok: approved Vietnamese runtime copy
         workspaceEmpty: "Câu hỏi này không có mã nguồn hoặc tài liệu tham chiếu đính kèm.", // vn-ok: approved Vietnamese runtime copy
@@ -122,20 +139,25 @@ export const CourseMockInterviewSessionBlock = ({ displayId, sessionId }: Course
     const inProgress = useQueryMyInProgressMockInterviewSessionSwr(courseId)
     const attempt = useQueryMockInterviewAttemptBySessionSwr(courseId, sessionId)
     const sync = useMutateSyncMockInterviewSessionTurnsSwr(courseId, sessionId)
-    const grade = useMutateGradeMockInterviewSessionSwr(courseId, sessionId)
+    const complete = useMutateCompleteMockInterviewSessionSwr(courseId, sessionId)
+    const abandon = useMutateAbandonMockInterviewSessionSwr(courseId, sessionId)
     const socket = useMockInterviewSocketIo()
     const [turns, setTurns] = useState<ReadonlyArray<MockInterviewTurn>>([])
     const [questionIndex, setQuestionIndex] = useState(0)
     const [phaseIndex, setPhaseIndex] = useState(0)
+    const [revision, setRevision] = useState(0)
     const [answer, setAnswer] = useState("")
     const [streamingText, setStreamingText] = useState<string | undefined>(undefined)
     const streamingRef = useRef("")
     const [runtimeError, setRuntimeError] = useState<string | undefined>(undefined)
+    const [finishConfirmationOpen, setFinishConfirmationOpen] = useState(false)
+    const [abandonConfirmationOpen, setAbandonConfirmationOpen] = useState(false)
     const [hydratedSessionId, setHydratedSessionId] = useState<string | undefined>(undefined)
     const [now, setNow] = useState(() => Date.now())
     const openingRequestedRef = useRef(false)
     const autoGradeRequestedRef = useRef(false)
     const lastSyncedRef = useRef("")
+    const revisionRef = useRef(0)
 
     const session = inProgress.data?.sessionId === sessionId ? inProgress.data : null
     const isDesign = session?.mode === "design"
@@ -160,6 +182,8 @@ export const CourseMockInterviewSessionBlock = ({ displayId, sessionId }: Course
         setTurns(restoredTurns)
         setQuestionIndex(session.questionIndex)
         setPhaseIndex(session.phaseIndex)
+        setRevision(session.revision)
+        revisionRef.current = session.revision
         lastSyncedRef.current = JSON.stringify(restoredTurns)
         setHydratedSessionId(sessionId)
         setRuntimeError(undefined)
@@ -173,6 +197,10 @@ export const CourseMockInterviewSessionBlock = ({ displayId, sessionId }: Course
 
     useEffect(() => {
         if (courseId === undefined || inProgress.data === undefined || attempt.data === undefined) return
+        if (session?.status === "grading" || session?.status === "grading_failed") {
+            router.replace(resultPath)
+            return
+        }
         if (session === null && attempt.data !== null) router.replace(resultPath)
     }, [attempt.data, courseId, inProgress.data, resultPath, router, session])
 
@@ -235,56 +263,92 @@ export const CourseMockInterviewSessionBlock = ({ displayId, sessionId }: Course
         askQuestion(current, [], "")
     }, [askQuestion, current, expired, hydratedSessionId, session, sessionId, socket.isConnected, turns.length])
 
+    const persistSnapshot = useCallback(async (
+        nextTurns: ReadonlyArray<MockInterviewTurn>,
+        nextQuestionIndex: number,
+        nextPhaseIndex: number,
+    ) => {
+        const response = await sync.trigger({
+            sessionId,
+            expectedRevision: revisionRef.current,
+            turns: nextTurns,
+            questionIndex: nextQuestionIndex,
+            phaseIndex: nextPhaseIndex,
+        })
+        const envelope = response.data?.syncMockInterviewSessionTurns
+        const snapshot = envelope?.data
+        if (envelope?.success !== true || snapshot === null || snapshot === undefined) {
+            throw new Error(envelope?.message ?? envelope?.error ?? "SYNC_FAILED")
+        }
+        revisionRef.current = snapshot.revision
+        setRevision(snapshot.revision)
+        if (snapshot.conflict) {
+            setTurns(snapshot.turns)
+            setQuestionIndex(snapshot.questionIndex)
+            setPhaseIndex(snapshot.phaseIndex)
+            lastSyncedRef.current = JSON.stringify(snapshot.turns)
+            setRuntimeError(copy.conflict)
+        }
+        return snapshot.revision
+    }, [copy.conflict, sessionId, sync])
+
     useEffect(() => {
         if (hydratedSessionId !== sessionId || turns.length === 0) return
         const fingerprint = JSON.stringify(turns)
         if (fingerprint === lastSyncedRef.current) return
         lastSyncedRef.current = fingerprint
-        void sync.trigger({
-            sessionId,
-            turns,
-            questionIndex,
-            phaseIndex,
-        }).then((response) => {
-            const payload = response.data?.syncMockInterviewSessionTurns
-            if (payload?.success !== true) setRuntimeError(payload?.message ?? payload?.error ?? "SYNC_FAILED")
-        }).catch(() => setRuntimeError("SYNC_FAILED"))
-    }, [hydratedSessionId, phaseIndex, questionIndex, sessionId, sync, turns])
+        void persistSnapshot(turns, questionIndex, phaseIndex).catch(() => setRuntimeError("SYNC_FAILED"))
+    }, [hydratedSessionId, persistSnapshot, phaseIndex, questionIndex, sessionId, turns])
 
     const finish = useCallback(async (completedTurns: ReadonlyArray<MockInterviewTurn> = turns) => {
-        if (session === null || courseId === undefined || grade.isMutating || socket.isStreaming) return
+        if (session === null || courseId === undefined || complete.isMutating || socket.isStreaming) return
         setRuntimeError(undefined)
         try {
-            const response = await grade.trigger({
+            const synchronizedRevision = await persistSnapshot(completedTurns, questionIndex, phaseIndex)
+            const response = await complete.trigger({
                 courseId,
-                promptId: session.promptId,
-                promptTitle: session.promptTitle,
-                level: session.level ?? undefined,
-                turns: completedTurns.map((turn) => ({
-                    role: turn.role,
-                    phase: turn.phase,
-                    content: turn.content,
-                    questionIndex: turn.questionIndex,
-                })),
                 sessionId,
+                expectedRevision: synchronizedRevision,
             })
-            const payload = response.data?.gradeMockInterviewSession
+            const payload = response.data?.completeMockInterviewSession
             if (payload?.success !== true || payload.data === null || payload.data === undefined) {
-                setRuntimeError(payload?.message ?? payload?.error ?? "GRADE_FAILED")
+                setRuntimeError(payload?.message ?? payload?.error ?? "COMPLETE_FAILED")
+                await inProgress.mutate()
                 return
             }
+            revisionRef.current = payload.data.revision
+            setRevision(payload.data.revision)
             router.replace(resultPath)
         } catch {
-            setRuntimeError("GRADE_FAILED")
+            setRuntimeError("COMPLETE_FAILED")
+            await inProgress.mutate()
         }
-    }, [courseId, grade, resultPath, router, session, sessionId, socket.isStreaming, turns])
+    }, [complete, courseId, inProgress, persistSnapshot, phaseIndex, questionIndex, resultPath, router, session, sessionId, socket.isStreaming, turns])
+
+    const abandonSession = useCallback(async () => {
+        if (courseId === undefined || abandon.isMutating) return
+        setRuntimeError(undefined)
+        try {
+            const response = await abandon.trigger({ courseId, sessionId, expectedRevision: revisionRef.current })
+            const payload = response.data?.abandonMockInterviewSession
+            if (payload?.success !== true || payload.data === null || payload.data === undefined) {
+                setRuntimeError(payload?.message ?? payload?.error ?? "ABANDON_FAILED")
+                await inProgress.mutate()
+                return
+            }
+            router.replace(setupPath)
+        } catch {
+            setRuntimeError("ABANDON_FAILED")
+            await inProgress.mutate()
+        }
+    }, [abandon, courseId, inProgress, router, sessionId, setupPath])
 
     useEffect(() => {
         if (!expired || session === null || hydratedSessionId !== sessionId || autoGradeRequestedRef.current) return
         autoGradeRequestedRef.current = true
         socket.abort()
-        void finish()
-    }, [expired, finish, hydratedSessionId, session, sessionId, socket])
+        setFinishConfirmationOpen(true)
+    }, [expired, hydratedSessionId, session, sessionId, socket])
 
     const submit = () => {
         const content = answer.trim()
@@ -298,7 +362,7 @@ export const CourseMockInterviewSessionBlock = ({ displayId, sessionId }: Course
         setTurns(nextTurns)
         setAnswer("")
         if (current >= total - 1) {
-            void finish(nextTurns)
+            setFinishConfirmationOpen(true)
             return
         }
         const next = current + 1
@@ -313,19 +377,17 @@ export const CourseMockInterviewSessionBlock = ({ displayId, sessionId }: Course
     const missing = !pending && session === null && attempt.data === null
     const state = resolveInterviewState({
         loadFailed, pending, session, hydrated: hydratedSessionId !== sessionId,
-        expired, missing, syncing: sync.isMutating, grading: grade.isMutating,
+        expired, missing, syncing: sync.isMutating, grading: complete.isMutating,
     })
-    const stateLabel = resolveInterviewStateLabel(state, copy, session?.promptTitle, grade.isMutating, sync.isMutating, socket.state)
+    const stateLabel = resolveInterviewStateLabel(state, copy, session?.promptTitle, complete.isMutating, sync.isMutating, socket.state)
     const activeSeed = isDesign ? undefined : session?.seedQuestions[questionIndex]
 
     return (
         <CourseMockInterviewSessionBlockBase
             state={state}
             props={{
-                operation: grade.isMutating ? "grading" : sync.isMutating ? "syncing" : socket.isStreaming ? "streaming" : undefined,
+                operation: complete.isMutating ? "grading" : sync.isMutating ? "syncing" : socket.isStreaming ? "streaming" : undefined,
                 title: copy.title,
-                journeyLabel: copy.journey,
-                journeyStageLabel: copy.journeyStage,
                 promptTitle: session?.promptTitle ?? copy.title,
                 stateLabel,
                 counterLabel: copy.counter(Math.min(current + 1, total), total),
@@ -354,13 +416,36 @@ export const CourseMockInterviewSessionBlock = ({ displayId, sessionId }: Course
                 turnsEmptyLabel: copy.turnsEmpty,
                 workspaceCode: activeSeed?.givenCodes[0]?.code,
                 notice: runtimeError,
+                syncStatusLabel: sync.isMutating ? copy.saving : copy.saved,
+                finishConfirmationOpen,
+                finishConfirmationTitle: copy.finishTitle,
+                finishConfirmationDescription: copy.finishDescription,
+                abandonConfirmationOpen,
+                abandonConfirmationTitle: copy.abandonTitle,
+                abandonConfirmationDescription: copy.abandonDescription,
+                confirmLabel: copy.finish,
+                abandonLabel: copy.abandon,
+                cancelLabel: copy.keepInterview,
+                revisionLabel: `v${revision}`,
             }}
             on={{
                 answer: setAnswer,
                 ask: submit,
                 abort: socket.abort,
-                leave: () => router.push(setupPath),
-                finish: () => { void finish() },
+                leave: () => setAbandonConfirmationOpen(true),
+                finish: () => setFinishConfirmationOpen(true),
+                dismissConfirmation: () => {
+                    setFinishConfirmationOpen(false)
+                    setAbandonConfirmationOpen(false)
+                },
+                confirmFinish: () => {
+                    setFinishConfirmationOpen(false)
+                    void finish()
+                },
+                confirmAbandon: () => {
+                    setAbandonConfirmationOpen(false)
+                    void abandonSession()
+                },
                 retry: () => {
                     setRuntimeError(undefined)
                     void Promise.all([course.mutate(), inProgress.mutate(), attempt.mutate()])

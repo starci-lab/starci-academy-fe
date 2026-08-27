@@ -86,6 +86,9 @@ export type LayoutClassName = CoreLayoutClassName
     | "md:[&>[data-node=content-outline-rail]]:overflow-y-auto"
     | "md:[&>*:first-child]:w-72" | "md:[&>*:first-child]:shrink-0"
     | "md:[&>*:last-child]:min-w-0" | "md:[&>*:last-child]:grow"
+    | "md:[&>*:nth-child(1)]:order-2" | "md:[&>*:nth-child(2)]:order-1"
+    | "[&>*:first-child]:order-2" | "[&>*:last-child]:order-1"
+    | "md:[&>*:first-child]:order-1" | "md:[&>*:last-child]:order-2"
     | "md:[&>*:first-child]:overflow-y-auto"
     | "md:[&>*:nth-child(2)]:min-w-0" | "md:[&>*:nth-child(2)]:grow"
     | "[&>*]:min-w-0" | "[&>*]:grow" | "[&>*]:whitespace-nowrap"
@@ -1219,24 +1222,21 @@ export const CONTRACTS = buildContracts({
         why: "if you need the concept-map body to remain a legal non-landmark subtree under its route-owned main shell.",
     },
     "course-mock-interview-hub-page": {
-        classes: ["mx-auto", "w-full", "max-w-app-md", "px-6", "py-6"],
-        children: { content: { contract: "mock-interview-hub-content" } },
+        classes: ["mx-auto", "flex", "w-full", "max-w-app-md", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            breadcrumb: { leaf: "breadcrumbs" },
+            content: { contract: "mock-interview-hub-content" },
+        },
         why: "if the mock-interview route needs one measured page plane inside the learn shell's existing main landmark while its connected block owns the changing green-room content.",
     },
     "mock-interview-hub-content": {
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6"],
         children: {
             header: { contract: "mock-interview-page-header" },
-            journey: { contract: "mock-interview-journey-progress" },
             navigation: { contract: "mock-interview-setup-tabs-over-panel", optional: true },
             panel: { contract: "mock-interview-setup-panel" },
         },
         why: "if you need the interview setup route to keep its orientation and three setup destinations stable while one selected panel changes beneath them.",
-    },
-    "mock-interview-journey-progress": {
-        classes: ["w-full", "min-w-0", "p-4"],
-        children: { progress: { composite: "labelled-progress-row" } },
-        why: "if setup, interview and result need one consistent journey checkpoint without replacing each page's local task progress.",
     },
     "mock-interview-page-header": {
         classes: ["flex", "flex-col", "gap-4", "sm:flex-row", "sm:items-start", "sm:justify-between"],
@@ -1259,6 +1259,7 @@ export const CONTRACTS = buildContracts({
             begin: { contract: "mock-interview-begin-panel", optional: true },
             history: { contract: "mock-interview-history-panel", optional: true },
             stats: { contract: "mock-interview-stats-panel", optional: true },
+            trust: { contract: "mock-interview-trust-panel", optional: true },
             notice: { composite: "empty-notice", optional: true },
         },
         why: "if you need one selected mock-interview destination to own its settled, waiting or recovery content without moving the setup navigation.",
@@ -1293,7 +1294,7 @@ export const CONTRACTS = buildContracts({
             readiness: { contract: "mock-interview-readiness-snapshot" },
             status: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
             action: { leaf: "button" },
-            fine: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            fine: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
         },
         why: "if the learner needs the course-grounded purpose, resolved defaults and primary room-entry action together before optional configuration, matching the legacy green room.",
     },
@@ -1306,7 +1307,7 @@ export const CONTRACTS = buildContracts({
             level: { leaf: "choice-tabs" },
             modeLabel: { leaf: "text", props: { size: "sm", tone: "muted" } },
             mode: { leaf: "choice-tabs" },
-            note: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            note: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
         },
         why: "if two independent interview choices should remain available as a quieter customization area after the default interview is already ready to enter.",
     },
@@ -1345,13 +1346,15 @@ export const CONTRACTS = buildContracts({
     "course-mock-interview-session-page": {
         host: "div",
         classes: ["mx-auto", "flex", "min-h-screen", "w-full", "max-w-6xl", "min-w-0", "flex-col", "gap-6", "bg-background", "px-4", "py-6"],
-        children: { content: { contract: "mock-interview-session-content" } },
+        children: {
+            breadcrumb: { leaf: "breadcrumbs" },
+            content: { contract: "mock-interview-session-content" },
+        },
         why: "if one live interview route must own the main landmark and measured Focus Desk plane around its connected session content.",
     },
     "mock-interview-session-content": {
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6"],
         children: {
-            journey: { contract: "mock-interview-journey-progress" },
             header: { contract: "mock-interview-session-header-owner" },
             workspace: { contract: "mock-interview-session-workspace" },
         },
@@ -1385,13 +1388,14 @@ export const CONTRACTS = buildContracts({
         classes: [
             "flex", "w-full", "min-w-0", "flex-col", "items-start", "gap-6",
             "md:flex-row", "md:items-start", "md:gap-8",
-            "md:[&>*:first-child]:min-w-0", "md:[&>*:first-child]:grow",
-            "md:[&>*:last-child]:w-80", "md:[&>*:last-child]:shrink-0",
-            "md:[&>*:last-child]:sticky", "md:[&>*:last-child]:top-rail", "md:[&>*:last-child]:self-start",
+            "md:[&>*:nth-child(1)]:order-2", "md:[&>*:nth-child(2)]:order-1",
+            "md:[&>*:first-child]:w-80", "md:[&>*:first-child]:shrink-0",
+            "md:[&>*:first-child]:sticky", "md:[&>*:first-child]:top-rail", "md:[&>*:first-child]:self-start",
+            "md:[&>*:last-child]:min-w-0", "md:[&>*:last-child]:grow",
         ],
         children: {
-            primary: { contract: "mock-interview-session-main-column" },
             rail: { contract: "mock-interview-session-rail" },
+            primary: { contract: "mock-interview-session-main-column" },
         },
         why: "if the prompt, answer and saved turns must own the flexible reading column beside one continuously reachable supporting question rail.",
     },
@@ -1400,6 +1404,7 @@ export const CONTRACTS = buildContracts({
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6"],
         children: {
             notice: { contract: "mock-interview-session-notice", optional: true },
+            workspace: { contract: "mock-interview-question-workspace" },
             prompt: { contract: "mock-interview-active-prompt" },
             answer: { contract: "mock-interview-answer-operation" },
         },
@@ -1456,7 +1461,6 @@ export const CONTRACTS = buildContracts({
         host: "aside",
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6"],
         children: {
-            workspace: { contract: "mock-interview-question-workspace" },
             outcomes: { contract: "mock-interview-session-outcomes" },
             history: { contract: "mock-interview-turn-list" },
         },
@@ -1473,18 +1477,54 @@ export const CONTRACTS = buildContracts({
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "p-4"],
         children: {
             status: { leaf: "text", props: { size: "sm" } },
+            sync: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            revision: { leaf: "text", props: { size: "xs", tone: "muted" } },
             action: { leaf: "button", repeats: true, restingCount: 2 },
         },
         why: "if one quiet supporting surface must state the current connection or operation outcome beside finish and leave recovery without duplicating the primary answer action.",
     },
-    "course-mock-interview-result-page": {
-        host: "main",
-        classes: ["mx-auto", "flex", "w-full", "max-w-app-lg", "flex-col", "gap-6", "px-6", "py-6"],
+    "mock-interview-trust-panel": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "rounded-2xl", "p-6"],
         children: {
-            journey: { contract: "mock-interview-journey-progress" },
+            title: { leaf: "heading" },
+            item: { leaf: "text", props: { size: "sm", tone: "muted" }, repeats: true, restingCount: 2 },
+        },
+        why: "if the learner needs durable-session and question-generation assurances kept outside the primary setup operation.",
+    },
+    "mock-interview-confirmation": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4", "p-6"],
+        children: {
+            title: { leaf: "heading" },
+            description: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            action: { leaf: "button", repeats: true, restingCount: 2 },
+        },
+        why: "if finishing or abandoning an interview needs an explicit consequence and reversible dismissal before the durable transition.",
+    },
+    "mock-interview-grading-recovery": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "rounded-2xl", "border", "border-separator", "p-6"],
+        children: {
+            title: { leaf: "heading" },
+            description: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            attempt: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
+        },
+        why: "if a terminal grading failure must expose the server reason and bounded retry evidence without pretending a report exists.",
+    },
+    "mock-interview-result-recommendation": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "p-6"],
+        children: {
+            title: { leaf: "heading" },
+            description: { leaf: "text", props: { size: "sm" } },
+        },
+        why: "if the report needs one course-grounded next practice recommendation after the scored evidence.",
+    },
+    "course-mock-interview-result-page": {
+        host: "div",
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6"],
+        children: {
             header: { contract: "learn-page-title-pair" },
             notice: { composite: "empty-notice", optional: true },
             grading: { leaf: "progress", optional: true },
+            gradingFailure: { contract: "mock-interview-grading-recovery", optional: true },
             workspace: { contract: "mock-interview-result-workspace", optional: true },
             actions: { contract: "mock-interview-result-actions", optional: true },
         },
@@ -1512,6 +1552,7 @@ export const CONTRACTS = buildContracts({
             rubric: { contract: "mock-interview-result-rubric" },
             insights: { contract: "mock-interview-result-insights" },
             reviews: { contract: "mock-interview-result-reviews", optional: true },
+            recommendation: { contract: "mock-interview-result-recommendation", optional: true },
         },
         why: "if the learner must understand the outcome before inspecting rubric, improvement signals and per-question evidence.",
     },
@@ -1559,8 +1600,20 @@ export const CONTRACTS = buildContracts({
     "mock-interview-result-rail": {
         host: "aside",
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6"],
-        children: { actions: { contract: "mock-interview-result-actions" } },
+        children: {
+            summary: { contract: "mock-interview-report-session-summary" },
+            actions: { contract: "mock-interview-result-actions" },
+        },
         why: "if the next interview consequence must remain reachable without competing with assessment evidence.",
+    },
+    "mock-interview-report-session-summary": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "p-4"],
+        children: {
+            title: { leaf: "heading" },
+            prompt: { leaf: "text", props: { size: "sm" } },
+            questions: { leaf: "text", props: { size: "sm", tone: "muted" } },
+        },
+        why: "if a completed report must preserve the interview identity and graded-question count beside its next actions.",
     },
     "mock-interview-result-actions": {
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "p-4"],
@@ -1602,6 +1655,8 @@ export const CONTRACTS = buildContracts({
             back: { leaf: "button" },
             header: { contract: "challenge-header" },
             body: { contract: "challenge-workspace" },
+            actionBar: { contract: "challenge-workspace-action-bar", optional: true },
+            selection: { contract: "selection-ai-actions", optional: true },
         },
         why: "if you need the challenge document to own its header, long brief and submission consequence while the viewport remains the only document-height scroll owner.",
     },
@@ -1612,6 +1667,7 @@ export const CONTRACTS = buildContracts({
             title: { leaf: "heading" },
             description: { leaf: "text" },
             meta: { contract: "profile-fact-run" },
+            actions: { contract: "challenge-header-actions", optional: true },
         },
         why: "if a challenge needs authored identity, summary, difficulty, score and attempt status in one opening cluster.",
     },
@@ -1619,13 +1675,15 @@ export const CONTRACTS = buildContracts({
         classes: [
             "flex", "w-full", "min-w-0", "flex-col", "items-start", "gap-6",
             "md:flex-row", "md:items-start", "md:gap-8",
+            "[&>*:first-child]:order-2", "[&>*:last-child]:order-1",
+            "md:[&>*:first-child]:order-1", "md:[&>*:last-child]:order-2",
             "md:[&>*:first-child]:min-w-0", "md:[&>*:first-child]:grow",
             "md:[&>*:last-child]:w-80", "md:[&>*:last-child]:shrink-0",
             "md:[&>*:last-child]:sticky", "md:[&>*:last-child]:top-rail", "md:[&>*:last-child]:self-start",
         ],
         children: {
-            brief: { contract: "challenge-brief" },
-            workbench: { contract: "challenge-attempt-workbench" },
+            main: { contract: "challenge-workspace-main" },
+            summary: { contract: "challenge-attempt-readiness-summary" },
         },
         why: "if you need the accepted flexible technical brief beside a bounded sticky submission rail, reflowing in the same order on narrow screens.",
     },
@@ -1679,6 +1737,7 @@ export const CONTRACTS = buildContracts({
             field: { composite: "field", optional: true },
             status: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
             actions: { contract: "challenge-deliverable-actions", optional: true },
+            model: { contract: "challenge-deliverable-model", optional: true },
         },
         why: "if one authored deliverable needs its score, repository evidence, settled status and exact available action as one list member.",
     },
@@ -1697,25 +1756,138 @@ export const CONTRACTS = buildContracts({
         },
         why: "if a deliverable exposes its one current submit, retry or result action without moving the field around it.",
     },
-    "challenge-attempt-workbench": {
-        host: "aside",
-        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4"],
+    "course-mock-interview-result-route-page": {
+        classes: ["mx-auto", "flex", "w-full", "max-w-app-lg", "min-w-0", "flex-col", "gap-6", "px-6", "py-6"],
         children: {
-            deliverables: { contract: "challenge-deliverable-list" },
-            draftStatus: { contract: "challenge-draft-status" },
-            actions: { contract: "challenge-submission-actions" },
+            breadcrumb: { leaf: "breadcrumbs" },
+            content: { contract: "course-mock-interview-result-page" },
         },
-        why: "if one recoverable attempt must keep its complete deliverable collection, saved revision and consequential action together.",
+        why: "if the result route must own the approved course path before its grading or report content without nesting a second main landmark.",
     },
     "challenge-draft-status": {
         classes: ["flex", "min-h-16", "w-full", "min-w-0", "items-center"],
         children: { status: { leaf: "text", props: { size: "sm", tone: "muted" } } },
         why: "if save, conflict and recovery state must remain explicit without moving the submission controls.",
     },
+    "challenge-attempt-workbench": {
+        host: "aside",
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4"],
+        children: { summary: { contract: "challenge-attempt-readiness-summary" } },
+        why: "if the legacy attempt-workbench identity must resolve to the approved sticky readiness summary during the Challenge migration.",
+    },
     "challenge-submission-actions": {
         classes: ["flex", "w-full", "flex-col", "gap-2", "sm:flex-row", "justify-end"],
         children: { action: { leaf: "button", repeats: true, restingCount: 2 } },
         why: "if draft save and whole-attempt submit need one stable, keyboard-operable action row.",
+    },
+    "challenge-header-actions": {
+        classes: ["flex", "w-full", "min-w-0", "flex-row", "flex-wrap", "items-center", "gap-2"],
+        children: {
+            language: { leaf: "select" },
+            model: { leaf: "button" },
+        },
+        why: "if challenge language and model context need explicit learner-owned controls beside the authored identity.",
+    },
+    "challenge-workspace-main": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6"],
+        children: {
+            brief: { contract: "challenge-brief" },
+            deliverables: { contract: "challenge-deliverable-list" },
+            review: { contract: "challenge-attempt-review", optional: true },
+        },
+        why: "if authored guidance, editable evidence and the immutable review must read as one primary challenge document.",
+    },
+    "challenge-attempt-readiness-summary": {
+        host: "aside",
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4", "rounded-xl", "border", "border-separator", "p-4"],
+        children: {
+            title: { leaf: "text", props: { weight: "semibold" } },
+            status: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            progress: { leaf: "progress" },
+            model: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
+            draftStatus: { contract: "challenge-draft-status" },
+            actions: { contract: "challenge-submission-actions" },
+        },
+        why: "if readiness, saved revision, grading model and the next legal action must stay continuously visible before submission.",
+    },
+    "challenge-attempt-review": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4", "rounded-xl", "border", "border-separator", "p-4"],
+        children: {
+            title: { leaf: "heading" },
+            description: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            deliverable: { contract: "challenge-review-deliverable", repeats: true, restingCount: 2 },
+            actions: { contract: "challenge-submission-actions" },
+        },
+        why: "if the learner must inspect the exact evidence and model snapshot before creating an immutable grading attempt.",
+    },
+    "challenge-review-deliverable": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-2", "border-t", "border-separator", "py-3"],
+        children: {
+            title: { leaf: "text", props: { weight: "semibold" } },
+            evidence: { leaf: "text", props: { size: "sm" } },
+            model: { leaf: "text", props: { size: "xs", tone: "muted" } },
+        },
+        why: "if one deliverable's evidence and grading choice must be verified together before submission.",
+    },
+    "challenge-deliverable-model": {
+        classes: ["flex", "w-full", "min-w-0", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-2"],
+        children: {
+            value: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            action: { leaf: "button" },
+        },
+        why: "if every evidence row must expose the grading model that will be frozen into its attempt snapshot.",
+    },
+    "challenge-workspace-action-bar": {
+        classes: ["sticky", "bottom-0", "z-40", "flex", "w-full", "min-w-0", "flex-row", "items-center", "justify-between", "gap-3", "border-t", "border-separator", "bg-background", "px-4", "py-3"],
+        children: {
+            ai: { leaf: "button" },
+            exit: { leaf: "button" },
+        },
+        why: "if course-context assistance and safe exit must remain reachable without competing with the submit consequence.",
+    },
+    "challenge-model-drawer": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4", "p-4"],
+        children: {
+            description: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            quota: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
+            model: { contract: "challenge-model-option", repeats: true, restingCount: 3 },
+            apply: { leaf: "button" },
+            override: { contract: "challenge-model-override", repeats: true, restingCount: 1, optional: true },
+        },
+        why: "if a learner compares eligible grading models once, applies one default and can still override exact deliverables.",
+    },
+    "challenge-model-option": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-2", "rounded-xl", "border", "border-separator", "p-4"],
+        children: {
+            action: { leaf: "button" },
+            detail: { leaf: "text", props: { size: "xs", tone: "muted" } },
+        },
+        why: "if model identity, availability and cost category must be compared before a learner-owned selection.",
+    },
+    "challenge-model-override": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-2", "border-t", "border-separator", "py-3"],
+        children: {
+            label: { leaf: "text", props: { size: "sm", weight: "semibold" } },
+            model: { leaf: "select" },
+        },
+        why: "if one deliverable intentionally uses a different eligible model from the attempt default.",
+    },
+    "challenge-attempt-history-drawer": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "p-4"],
+        children: {
+            summary: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            attempt: { contract: "challenge-attempt-history-row", repeats: true, restingCount: 3, optional: true },
+            notice: { leaf: "text", optional: true },
+        },
+        why: "if immutable challenge attempts are browsed newest-first without changing the active result until selection.",
+    },
+    "challenge-attempt-history-row": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-2", "border-t", "border-separator", "py-3"],
+        children: {
+            action: { leaf: "button" },
+            meta: { leaf: "text", props: { size: "xs", tone: "muted" } },
+        },
+        why: "if one historical attempt needs its sequence, outcome, model and time as one selectable immutable record.",
     },
     "challenge-submit-confirmation": {
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4", "p-6"],
@@ -1753,23 +1925,6 @@ export const CONTRACTS = buildContracts({
             status: { contract: "stacked-peer-controls", optional: true },
         },
         why: "if the immutable attempt outcome needs its title, aggregate score and platform-owned decision before criterion evidence.",
-    },
-    "challenge-score-card": {
-        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "p-4"],
-        children: {
-            heading: { contract: "challenge-score-heading" },
-            progress: { leaf: "progress" },
-            caption: { leaf: "text", props: { size: "xs", tone: "muted" } },
-        },
-        why: "if a challenge needs one aggregate earned score read against an explicit passing threshold.",
-    },
-    "challenge-score-heading": {
-        classes: ["flex", "w-full", "min-w-0", "flex-row", "items-end", "justify-between", "gap-3"],
-        children: {
-            value: { leaf: "heading" },
-            threshold: { leaf: "badge" },
-        },
-        why: "if the earned score and pass threshold need to remain one visible grading sentence.",
     },
     "course-learn-challenge-result-page": {
         host: "main",

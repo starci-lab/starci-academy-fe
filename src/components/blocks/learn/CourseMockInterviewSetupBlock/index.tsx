@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useLocale } from "next-intl"
+import { useSearchParams } from "next/navigation"
 import { useRouter } from "@/i18n/navigation"
 import { useSessionRefresh } from "@/hooks/auth/useSessionRefresh"
 import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
@@ -55,14 +56,13 @@ const COPY = {
     en: {
         title: "Mock interview",
         description: "Practise a technical interview grounded in this course, then receive detailed feedback.",
-        journey: "Practice journey",
-        journeyStage: "Step 1 of 3 · Setup",
         level: "Seniority",
         mode: "Interview format",
         start: "Start interview",
         starting: "Starting your interview…",
         resume: "Resume interview",
-        resumable: "You have an unfinished interview. Resume it or start a fresh draw.",
+        viewGrading: "View grading status",
+        resumable: "You have an unfinished interview. Resume it before starting another session.",
         failed: "The interview setup could not be loaded.",
         startFailed: "The session could not be created. Check your connection and try again.",
         retry: "Try again",
@@ -92,14 +92,13 @@ const COPY = {
     vi: {
         title: "Phỏng vấn thử", // vn-ok: approved Vietnamese runtime copy
         description: "Luyện phỏng vấn kỹ thuật theo nội dung khóa học và nhận phản hồi chi tiết.", // vn-ok: approved Vietnamese runtime copy
-        journey: "Hành trình luyện tập", // vn-ok: approved Vietnamese runtime copy
-        journeyStage: "Bước 1/3 · Thiết lập", // vn-ok: approved Vietnamese runtime copy
         level: "Cấp độ", // vn-ok: approved Vietnamese runtime copy
         mode: "Hình thức phỏng vấn", // vn-ok: approved Vietnamese runtime copy
         start: "Bắt đầu phỏng vấn", // vn-ok: approved Vietnamese runtime copy
         starting: "Đang tạo buổi phỏng vấn…", // vn-ok: approved Vietnamese runtime copy
         resume: "Tiếp tục phỏng vấn", // vn-ok: approved Vietnamese runtime copy
-        resumable: "Bạn có một buổi phỏng vấn chưa hoàn thành. Hãy tiếp tục hoặc bắt đầu đề mới.", // vn-ok: approved Vietnamese runtime copy
+        viewGrading: "Xem trạng thái chấm điểm", // vn-ok: approved Vietnamese runtime copy
+        resumable: "Bạn có một buổi phỏng vấn chưa hoàn thành. Hãy tiếp tục phiên này trước khi bắt đầu phiên khác.", // vn-ok: approved Vietnamese runtime copy
         failed: "Không tải được phần chuẩn bị phỏng vấn.", // vn-ok: approved Vietnamese runtime copy
         startFailed: "Không thể tạo phiên phỏng vấn. Hãy kiểm tra kết nối rồi thử lại.", // vn-ok: approved Vietnamese runtime copy
         retry: "Thử lại", // vn-ok: approved Vietnamese runtime copy
@@ -133,6 +132,7 @@ export const CourseMockInterviewSetupBlock = ({ displayId }: CourseMockInterview
     const locale = useLocale()
     const copy = locale === "vi" ? COPY.vi : COPY.en
     const router = useRouter()
+    const requestedTab = useSearchParams().get("tab")
     const session = useSessionRefresh()
     const course = useQueryCourseSwr({ displayId })
     const courseId = course.data?.isEnrolled === true ? course.data.id : undefined
@@ -142,15 +142,23 @@ export const CourseMockInterviewSetupBlock = ({ displayId }: CourseMockInterview
     const stats = useQueryMyMockInterviewStatsSwr(courseId)
     const [level, setLevel] = useState("middle")
     const [mode, setMode] = useState("qna")
-    const [selectedTab, setSelectedTab] = useState<"begin" | "history" | "stats">("begin")
+    const [selectedTab, setSelectedTab] = useState<"begin" | "history" | "stats">(
+        requestedTab === "history" || requestedTab === "stats" ? requestedTab : "begin",
+    )
     const [startError, setStartError] = useState(false)
     const failed = course.error !== undefined || course.data === null || (courseId !== undefined && inProgress.error !== undefined)
     const pending = !failed && (session.isRestoring || course.data === undefined || (courseId !== undefined && inProgress.data === undefined))
     const locked = !pending && course.data !== null && course.data !== undefined && course.data.isEnrolled !== true
     const state = setupStateOf(failed, locked, startSession.isMutating, pending, inProgress.data !== null)
 
-    const openSession = (sessionId: string) => {
-        router.push(`/courses/${displayId}/learn/mock-interview/interview/${sessionId}`)
+    const openSession = (sessionId: string, status = "in_progress") => {
+        const roomPath = `/courses/${displayId}/learn/mock-interview/interview/${sessionId}`
+        router.push(status === "in_progress" ? roomPath : `${roomPath}/result`)
+    }
+    const selectDestination = (destination: "begin" | "history" | "stats") => {
+        setSelectedTab(destination)
+        const setupPath = `/courses/${displayId}/learn/mock-interview`
+        router.replace(destination === "begin" ? setupPath : `${setupPath}?tab=${destination}`)
     }
 
     const start = async () => {
@@ -163,6 +171,11 @@ export const CourseMockInterviewSetupBlock = ({ displayId }: CourseMockInterview
             await inProgress.mutate()
             openSession(payload.data.sessionId)
         } catch {
+            const authoritative = await inProgress.mutate()
+            if (authoritative !== undefined && authoritative !== null) {
+                openSession(authoritative.sessionId, authoritative.status)
+                return
+            }
             setStartError(true)
         }
     }
@@ -175,8 +188,6 @@ export const CourseMockInterviewSetupBlock = ({ displayId }: CourseMockInterview
             props={{
                 title: copy.title,
                 description: copy.description,
-                journeyLabel: copy.journey,
-                journeyStageLabel: copy.journeyStage,
                 status: startError ? copy.startFailed : setupStatusOf(state, copy),
                 levelLabel: copy.level,
                 modeLabel: copy.mode,
@@ -185,7 +196,7 @@ export const CourseMockInterviewSetupBlock = ({ displayId }: CourseMockInterview
                 selectedLevel: level,
                 selectedMode: mode,
                 startLabel: copy.start,
-                resumeLabel: copy.resume,
+                resumeLabel: inProgress.data?.status === "in_progress" ? copy.resume : copy.viewGrading,
                 retryLabel: copy.retry,
                 accessMessage: copy.accessMessage,
                 accessLabel: copy.accessLabel,
@@ -224,13 +235,13 @@ export const CourseMockInterviewSetupBlock = ({ displayId }: CourseMockInterview
                 focus: course.data?.title ?? displayId,
             }}
             on={{
-                selectTab: setSelectedTab,
+                selectTab: selectDestination,
                 configure: (field, value) => {
                     if (field === "level") setLevel(value)
                     else setMode(value)
                 },
                 start: () => { void start() },
-                resume: resumableSessionId === undefined ? undefined : () => openSession(resumableSessionId),
+                resume: resumableSessionId === undefined ? undefined : () => openSession(resumableSessionId, inProgress.data?.status),
                 retry: () => {
                     setStartError(false)
                     void Promise.all([course.mutate(), inProgress.mutate()])

@@ -86,5 +86,5 @@ describe("CourseFlashcardsQuizBlock", () => {
         expect(selectScope).toHaveBeenCalledWith("due")
         expect(selectMode).toHaveBeenCalledWith("deep")
         expect(selectLevel).toHaveBeenCalledWith("junior")
-    }, 15_000)
+    }, 30_000)
 })

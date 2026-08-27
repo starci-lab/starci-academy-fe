@@ -15,7 +15,7 @@ import {
 import { SurfaceCard } from "@starci/grammar/core"
 
 /** Finite situations shown by the result route. */
-export type CourseMockInterviewResultState = "grading" | "ready" | "failed"
+export type CourseMockInterviewResultState = "grading" | "gradingFailed" | "ready" | "failed"
 
 /** One scored rubric row in the debrief. */
 export type CourseMockInterviewScoreRow = {
@@ -43,6 +43,10 @@ export type CourseMockInterviewResultData = {
     readonly journeyLabel?: string
     readonly journeyStageLabel?: string
     readonly gradingLabel: string
+    readonly gradingFailedLabel: string
+    readonly gradingFailureDetail: string
+    readonly gradingAttemptLabel?: string
+    readonly retryingLabel: string
     readonly failedLabel: string
     readonly scoreLabel: string
     readonly score?: number
@@ -57,14 +61,29 @@ export type CourseMockInterviewResultData = {
     readonly reviewsTitle: string
     readonly reviews: ReadonlyArray<CourseMockInterviewQuestionReview>
     readonly retryLabel: string
+    readonly abandonLabel: string
     readonly newSessionLabel: string
+    readonly openTranscriptLabel: string
+    readonly openHistoryLabel: string
+    readonly returnToCourseLabel: string
     readonly actionsTitle?: string
+    readonly sessionSummaryTitle: string
+    readonly sessionSummaryPromptLabel: string
+    readonly sessionSummaryQuestionLabel: string
+    readonly recommendationTitle: string
+    readonly recommendation?: string
+    readonly retrying: boolean
+    readonly canRetryGrading: boolean
 }
 
 /** User intents emitted by the pure result page. */
 export type CourseMockInterviewResultActions = {
     readonly retry?: () => void
+    readonly abandon?: () => void
     readonly newSession?: () => void
+    readonly openTranscript?: () => void
+    readonly openHistory?: () => void
+    readonly returnToCourse?: () => void
 }
 
 /** Public boundary of the presentational result twin. */
@@ -79,39 +98,27 @@ export const CourseMockInterviewResultBlockBase = (input: CourseMockInterviewRes
     const resultState = input.props.resultState ?? input.state
     const loading = resultState === "grading"
     const ready = resultState === "ready"
-    const action = [
+    const action = resultState === "gradingFailed" ? [
+        ...(input.props.canRetryGrading ? [defineLeafComponent("button", {}, () => (
+            <Button props={{ label: input.props.retrying ? input.props.retryingLabel : input.props.retryLabel, variant: "primary", isPending: input.props.retrying }} on={{ press: input.on?.retry }} />
+        ))] : []),
+        defineLeafComponent("button", {}, () => (
+            <Button props={{ label: input.props.abandonLabel, variant: "outline", disabled: input.props.retrying }} on={{ press: input.on?.abandon }} />
+        )),
+    ] : [
         defineLeafComponent("button", {}, () => (
             <Button props={{ label: input.props.newSessionLabel, variant: "primary" }} on={{ press: input.on?.newSession }} />
         )),
-        ...(ready ? [] : [
-            defineLeafComponent("button", {}, () => (
-                <Button props={{ label: input.props.retryLabel, variant: "outline" }} on={{ press: input.on?.retry }} />
-            )),
-        ]),
+        defineLeafComponent("button", {}, () => (
+            <Button props={{ label: input.props.openTranscriptLabel, variant: "outline" }} on={{ press: input.on?.openTranscript }} />
+        )),
+        defineLeafComponent("button", {}, () => (
+            <Button props={{ label: input.props.openHistoryLabel, variant: "outline" }} on={{ press: input.on?.openHistory }} />
+        )),
+        defineLeafComponent("button", {}, () => (
+            <Button props={{ label: input.props.returnToCourseLabel, variant: "outline" }} on={{ press: input.on?.returnToCourse }} />
+        )),
     ]
-    const journeySurface = (
-        <SurfaceCard
-            ariaLabel={input.props.journeyLabel ?? input.props.title}
-            state={loading ? "pending" : "neutral"}
-        >
-            <Tree
-                contract="mock-interview-journey-progress"
-                render={defineContractComponent("mock-interview-journey-progress", {
-                    progress: defineCompositeComponent("labelled-progress-row", {}, () => (
-                        <LabelledProgressRow
-                            props={{
-                                id: "mock-interview-journey-result",
-                                title: input.props.journeyLabel ?? input.props.title,
-                                percent: 100,
-                                percentText: input.props.journeyStageLabel ?? "3 / 3",
-                            }}
-                            isLoading={loading}
-                        />
-                    )),
-                })}
-            />
-        </SurfaceCard>
-    )
     const summarySurface = (
         <SurfaceCard ariaLabel={input.props.scoreLabel}>
             <Tree
@@ -224,12 +231,32 @@ export const CourseMockInterviewResultBlockBase = (input: CourseMockInterviewRes
             />
         </SurfaceCard>
     )
+    const recommendationSurface = input.props.recommendation === undefined ? null : (
+        <SurfaceCard ariaLabel={input.props.recommendationTitle}>
+            <Tree contract="mock-interview-result-recommendation" render={defineContractComponent("mock-interview-result-recommendation", {
+                title: defineLeafComponent("heading", {}, () => <Heading props={{ content: input.props.recommendationTitle, level: 2 }} />),
+                description: defineLeafComponent("text", { size: "sm" }, () => <Text props={{ content: input.props.recommendation ?? "", size: "sm" }} />),
+            })} />
+        </SurfaceCard>
+    )
+    const sessionSummarySurface = (
+        <SurfaceCard ariaLabel={input.props.sessionSummaryTitle}>
+            <Tree contract="mock-interview-report-session-summary" render={defineContractComponent("mock-interview-report-session-summary", {
+                title: defineLeafComponent("heading", {}, () => <Heading props={{ content: input.props.sessionSummaryTitle, level: 2 }} />),
+                prompt: defineLeafComponent("text", { size: "sm" }, () => (
+                    <Text props={{ content: `${input.props.sessionSummaryPromptLabel}: ${input.props.promptTitle ?? "—"}`, size: "sm" }} />
+                )),
+                questions: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                    <Text props={{ content: `${input.props.sessionSummaryQuestionLabel}: ${input.props.reviews.length}`, size: "sm", tone: "muted" }} />
+                )),
+            })} />
+        </SurfaceCard>
+    )
 
     return (
         <Tree
             contract={"course-mock-interview-result-page"}
             render={defineContractComponent("course-mock-interview-result-page", {
-                journey: defineContractProjection("mock-interview-journey-progress", () => journeySurface),
                 header: defineContractComponent("learn-page-title-pair", {
                     title: defineLeafComponent("heading", {}, () => (
                         <Heading props={{ content: input.props.title, level: 1 }} isLoading={loading} />
@@ -254,6 +281,13 @@ export const CourseMockInterviewResultBlockBase = (input: CourseMockInterviewRes
                         <Progress props={{ label: input.props.gradingLabel }} isLoading />
                     )),
                 } : {}),
+                ...(resultState === "gradingFailed" ? {
+                    gradingFailure: defineContractComponent("mock-interview-grading-recovery", {
+                        title: defineLeafComponent("heading", {}, () => <Heading props={{ content: input.props.gradingFailedLabel, level: 2 }} />),
+                        description: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: input.props.gradingFailureDetail, size: "sm", tone: "muted" }} />),
+                        attempt: input.props.gradingAttemptLabel === undefined ? undefined : defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: input.props.gradingAttemptLabel ?? "", size: "xs", tone: "muted" }} />),
+                    }),
+                } : {}),
                 ...(ready ? {
                     workspace: defineContractComponent("mock-interview-result-workspace", {
                         primary: defineContractComponent("mock-interview-result-primary", {
@@ -266,8 +300,12 @@ export const CourseMockInterviewResultBlockBase = (input: CourseMockInterviewRes
                             ...(input.props.reviews.length === 0 ? {} : {
                                 reviews: defineContractProjection("mock-interview-result-reviews", () => reviewsSurface),
                             }),
+                            ...(recommendationSurface === null ? {} : {
+                                recommendation: defineContractProjection("mock-interview-result-recommendation", () => recommendationSurface),
+                            }),
                         }),
                         rail: defineContractComponent("mock-interview-result-rail", {
+                            summary: defineContractProjection("mock-interview-report-session-summary", () => sessionSummarySurface),
                             actions: defineContractProjection("mock-interview-result-actions", () => actionsSurface),
                         }),
                     }),

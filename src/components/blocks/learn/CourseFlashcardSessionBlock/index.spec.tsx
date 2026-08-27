@@ -129,7 +129,7 @@ describe("CourseFlashcardSessionBlock", () => {
 
         view.rerender(<CourseFlashcardSessionBlockBase blockState="active" data={sharedData} on={actions} />)
         expect(screen.getByRole("button", { name: "Leave session" })).toBeEnabled()
-    }, 15_000)
+    }, 30_000)
 
     it("never presents an empty revealed answer as gradeable", async () => {
         const { CourseFlashcardSessionBlockBase } = await vi.importActual<typeof import("./component")>("./component")

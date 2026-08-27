@@ -33,6 +33,17 @@ const props: CourseMockInterviewSessionData = {
     workspaceEmptyLabel: "No code is attached.",
     turnsLabel: "Completed turns",
     turnsEmptyLabel: "Completed answers will collect here.",
+    syncStatusLabel: "Answers saved",
+    revisionLabel: "v3",
+    finishConfirmationOpen: false,
+    finishConfirmationTitle: "Finish this interview?",
+    finishConfirmationDescription: "Saved answers will be graded.",
+    abandonConfirmationOpen: false,
+    abandonConfirmationTitle: "Discard this interview?",
+    abandonConfirmationDescription: "This cannot be resumed.",
+    confirmLabel: "Finish and grade",
+    abandonLabel: "Discard interview",
+    cancelLabel: "Keep interviewing",
 }
 
 describe("CourseMockInterviewSessionPageBase", () => {

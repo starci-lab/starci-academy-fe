@@ -194,15 +194,13 @@ describe("CourseMockInterviewSetupPageBase", () => {
         expect(start).not.toHaveBeenCalled()
     })
 
-    it("stays inert rather than throwing when the owner registered no handlers", () => {
+    it("keeps an unresolved active session inert when the owner registered no resume handler", () => {
         draw("resumable")
 
-        expect(() => {
-            fireEvent.click(screen.getByRole("tab", { name: "Junior" }))
-            fireEvent.click(screen.getByRole("tab", { name: "System design" }))
-            fireEvent.click(screen.getByRole("button", { name: "Start interview" }))
-            fireEvent.click(screen.getByRole("button", { name: "Resume interview" }))
-        }).not.toThrow()
+        expect(screen.queryByRole("tab", { name: "Junior" })).not.toBeInTheDocument()
+        expect(screen.queryByRole("tab", { name: "System design" })).not.toBeInTheDocument()
+        expect(screen.queryByRole("button", { name: "Start interview" })).not.toBeInTheDocument()
+        expect(() => fireEvent.click(screen.getByRole("button", { name: "Resume interview" }))).not.toThrow()
     })
 
     it("stays inert rather than throwing when the failed green room was given no retry handler", () => {

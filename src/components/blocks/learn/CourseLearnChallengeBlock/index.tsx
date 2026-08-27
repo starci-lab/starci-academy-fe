@@ -11,6 +11,11 @@ import { useQueryContentSwr } from "@/hooks/swr/useQueryContentSwr"
 import { useQueryCourseOutlineSwr } from "@/hooks/swr/useQueryCourseOutlineSwr"
 import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
 import { filterCourseOutlineModules } from "@/modules/learn/course-outline"
+import { useGlobalAiChat } from "@/modules/ai/global-ai-chat-context"
+import {
+    normalizeContentAiSelection,
+    type ContentAiSelectionContext,
+} from "@/modules/ai/content-ai-selection-context"
 import {
     CourseLearnChallengeBlockBase,
     type CourseLearnChallengeBlockState,
@@ -29,6 +34,7 @@ export const CourseLearnChallengeBlock = (input: CourseLearnChallengeBlockProps)
     const contentText = useTranslations("learn.content")
     const contentHomeText = useTranslations("learn.contentHome")
     const router = useRouter()
+    const globalAi = useGlobalAiChat()
     const content = useQueryContentSwr({ id: input.contentId })
     const course = useQueryCourseSwr({ displayId: input.displayId })
     const courseOutline = useQueryCourseOutlineSwr(input.displayId)
@@ -46,6 +52,18 @@ export const CourseLearnChallengeBlock = (input: CourseLearnChallengeBlockProps)
     const [draftRevisions, setDraftRevisions] = useState<Readonly<Record<string, number>>>({})
     const [draftState, setDraftState] = useState<"ready" | "saving" | "saveFailed" | "conflict">("ready")
     const [isConfirmOpen, setIsConfirmOpen] = useState(false)
+    const [isExitConfirmOpen, setIsExitConfirmOpen] = useState(false)
+    const [isReviewing, setIsReviewing] = useState(false)
+    const [isModelDrawerOpen, setIsModelDrawerOpen] = useState(false)
+    const [isAiDrawerOpen, setIsAiDrawerOpen] = useState(false)
+    const [selectedLanguage, setSelectedLanguage] = useState<string>()
+    const [defaultModelId, setDefaultModelId] = useState("auto")
+    const [modelOverrides, setModelOverrides] = useState<Readonly<Record<string, string>>>({})
+    const [activeSelection, setActiveSelection] = useState<{
+        readonly context: ContentAiSelectionContext
+        readonly position: { readonly x: number; readonly y: number }
+    }>()
+    const [aiStarterPrompt, setAiStarterPrompt] = useState<string>()
     const challenges = useMemo(
         () => [...(content.data?.challenges ?? [])].sort((first, second) => first.orderIndex - second.orderIndex),
         [content.data?.challenges],
@@ -56,6 +74,44 @@ export const CourseLearnChallengeBlock = (input: CourseLearnChallengeBlockProps)
     const persistedSubmissions = useQueryContentChallengeSubmissionsSwr(course.data?.id, challenge?.id)
     const challengeSubmissions = persistedSubmissions.data ?? challenge?.submissions ?? []
     const challengeProgress = progress.data?.find((candidate) => candidate.id === challenge?.id)
+
+    useEffect(() => {
+        const languages = content.data?.bodies?.map((body) => body.lang) ?? []
+        setSelectedLanguage((current) => current ?? languages[0] ?? "agnostic")
+    }, [content.data?.bodies])
+
+    useEffect(() => {
+        if (!globalAi.isOpen) return
+        globalAi.close()
+        setAiStarterPrompt(undefined)
+        setIsAiDrawerOpen(true)
+    }, [globalAi.isOpen])
+
+    useEffect(() => {
+        const readSelection = () => {
+            const selection = window.getSelection()
+            if (selection === null || selection.isCollapsed || selection.rangeCount === 0) {
+                setActiveSelection(undefined)
+                return
+            }
+            const container = selection.getRangeAt(0).commonAncestorContainer
+            const element = container instanceof HTMLElement ? container : container.parentElement
+            const root = element?.closest("[data-node=challenge-page-document]")
+            if (root === null || root === undefined) {
+                setActiveSelection(undefined)
+                return
+            }
+            const context = normalizeContentAiSelection({ kind: "prose", quote: selection.toString() })
+            if (context === null) {
+                setActiveSelection(undefined)
+                return
+            }
+            const rect = selection.getRangeAt(0).getBoundingClientRect()
+            setActiveSelection({ context, position: { x: rect.left + rect.width / 2, y: rect.top } })
+        }
+        document.addEventListener("selectionchange", readSelection)
+        return () => document.removeEventListener("selectionchange", readSelection)
+    }, [])
 
     useEffect(() => {
         setExpandedRequirementIds(challengeSubmissions[0] === undefined ? [] : [challengeSubmissions[0].id])
@@ -147,21 +203,46 @@ export const CourseLearnChallengeBlock = (input: CourseLearnChallengeBlockProps)
         setActiveSubmissionId(challengeSubmissions[0]?.id)
         try {
             const attemptGroupId = crypto.randomUUID()
-            const result = await submission.trigger({
-                courseId,
-                request: {
-                    challengeSubmissionId: challengeSubmissions[0]?.id ?? "",
-                    deliverables: challengeSubmissions.map((deliverable) => ({
+            const modelIdFor = (deliverableId: string) => modelOverrides[deliverableId] ?? defaultModelId
+            const modelFields = (modelId: string) => {
+                if (modelId === "auto") return {}
+                const separator = modelId.indexOf(":")
+                return separator < 0
+                    ? { selectedModel: modelId }
+                    : { selectedModelProvider: modelId.slice(0, separator), selectedModel: modelId.slice(separator + 1) }
+            }
+            const modelIds = [...new Set(challengeSubmissions.map((item) => modelIdFor(item.id)))]
+            const results = modelIds.length === 1
+                ? [await submission.trigger({
+                    courseId,
+                    request: {
+                        challengeSubmissionId: challengeSubmissions[0]?.id ?? "",
+                        deliverables: challengeSubmissions.map((deliverable) => ({
+                            challengeSubmissionId: deliverable.id,
+                            idempotencyKey: crypto.randomUUID(),
+                        })),
+                        attemptGroupId,
+                        lang: selectedLanguage === "agnostic" ? undefined : selectedLanguage,
+                        ...modelFields(modelIds[0] ?? "auto"),
+                    },
+                })]
+                : await Promise.all(challengeSubmissions.map((deliverable) => submission.trigger({
+                    courseId,
+                    request: {
                         challengeSubmissionId: deliverable.id,
                         idempotencyKey: crypto.randomUUID(),
-                    })),
-                    attemptGroupId,
-                },
-            })
+                        attemptGroupId,
+                        lang: selectedLanguage === "agnostic" ? undefined : selectedLanguage,
+                        ...modelFields(modelIdFor(deliverable.id)),
+                    },
+                })))
             const first = challengeSubmissions[0]
-            const firstResult = result.items?.[0] ?? result
+            const flattened = results.flatMap((result) => result.items === undefined
+                ? [{ challengeSubmissionId: challengeSubmissions[0]?.id ?? "", jobId: result.jobId, attemptId: result.attemptId }]
+                : [...result.items])
+            const firstResult = flattened[0]
             if (first !== undefined && firstResult !== undefined) {
-                const jobs = result.items?.map((item) => item.jobId) ?? [result.jobId]
+                const jobs = flattened.map((item) => item.jobId)
                 router.push(`${resultPath(first.id)}&attempt=${encodeURIComponent(firstResult.attemptId)}&attemptGroup=${encodeURIComponent(attemptGroupId)}&jobs=${encodeURIComponent(jobs.join(","))}`)
             }
         } catch (error) {
@@ -218,7 +299,6 @@ export const CourseLearnChallengeBlock = (input: CourseLearnChallengeBlockProps)
             ? "empty"
             : courseOutline.error === undefined ? "ready" : "partial"
     const maximumScore = challengeProgress?.maxScore ?? challenge?.score ?? 0
-    const earnedScore = challengeProgress?.lastScore ?? 0
     const isPassed = blockState === "passed"
     const allDraftsComplete = challengeSubmissions.length > 0
         && challengeSubmissions.every((deliverable) => (urls[deliverable.id]?.trim().length ?? 0) > 0)
@@ -234,6 +314,9 @@ export const CourseLearnChallengeBlock = (input: CourseLearnChallengeBlockProps)
         <CourseLearnChallengeBlockBase
             blockState={blockState}
             props={{
+                displayId: input.displayId,
+                courseId: course.data?.id,
+                challengeId: challenge?.id ?? input.challengeId,
                 title: challenge?.title ?? contentText("failedMessage"),
                 courseTitle: course.data?.title ?? input.displayId,
                 moduleTitle: courseOutline.data?.modules.find((item) => item.id === input.moduleId)?.title ?? input.moduleId,
@@ -246,16 +329,24 @@ export const CourseLearnChallengeBlock = (input: CourseLearnChallengeBlockProps)
                     ? contentText("challengePassed")
                     : contentText("challengeNotSubmitted"),
                 hint: challenge?.hint ?? undefined,
-                earnedScore,
                 maximumScore,
                 expandedRequirementIds,
-                activeSubmissionId,
                 failedSubmissionId,
                 notice: submitError ?? contentText("failedMessage"),
                 draftStatus,
                 isConfirmOpen,
+                isExitConfirmOpen,
+                isReviewing,
+                isModelDrawerOpen,
+                isAiDrawerOpen,
                 allDraftsComplete,
                 isCourseMapOpen,
+                languageOptions: (content.data?.bodies?.map((body) => ({ id: body.lang, label: body.lang })) ?? [{ id: "agnostic", label: contentText("challengeLanguageAgnostic") }]),
+                selectedLanguage,
+                defaultModelId,
+                aiSelection: activeSelection?.context,
+                aiSelectionPosition: activeSelection?.position,
+                aiStarterPrompt,
                 courseMap: {
                     state: courseMapState,
                     props: {
@@ -308,19 +399,20 @@ export const CourseLearnChallengeBlock = (input: CourseLearnChallengeBlockProps)
                         description: deliverable.description ?? undefined,
                         score: deliverable.score,
                         url: urls[deliverable.id] ?? "",
+                        modelId: modelOverrides[deliverable.id] ?? defaultModelId,
+                        modelLabel: (modelOverrides[deliverable.id] ?? defaultModelId) === "auto"
+                            ? contentText("challengeModelAuto")
+                            : (modelOverrides[deliverable.id] ?? defaultModelId).split(":").at(-1) ?? defaultModelId,
                     })),
                 labels: {
                     backToLesson: contentText("challengeBackToLesson"),
                     openCourseMap: contentText("challengeCourseMap"),
-                    closeCourseMap: contentText("challengeCloseCourseMap"),
                     brief: contentText("challengeBrief"),
                     deliverables: contentText("challengeDeliverables"),
-                    score: contentText("challengeScore"),
                     repositoryPlaceholder: contentText("challengeRepositoryPlaceholder"),
                     saved: contentText("challengeSaved"),
-                    saving: contentText("challengeDraftSaving"),
-                    saveFailed: contentText("challengeDraftSaveFailed"),
-                    conflict: contentText("challengeDraftConflict"),
+                    required: contentText("challengeEvidenceRequired"),
+                    validEvidence: contentText("challengeEvidenceValid"),
                     saveDraft: contentText("challengeSaveDraft"),
                     retrySave: contentText("challengeRetrySave"),
                     submitAttempt: contentText("challengeSubmitAttempt"),
@@ -329,18 +421,42 @@ export const CourseLearnChallengeBlock = (input: CourseLearnChallengeBlockProps)
                     confirmSubmit: contentText("challengeConfirmSubmit"),
                     cancel: contentText("challengeCancel"),
                     breadcrumb: contentText("challengeBreadcrumb"),
-                    submit: contentText("challengeSubmit"),
-                    submitting: contentText("challengeSubmitting"),
                     retry: contentText("challengeRetry"),
                     result: contentText("challengeResult"),
                     points: (score) => contentText("challengePoints", { score }),
-                    scoreValue: (score, maximum) => contentText("challengeScoreValue", { score, maximum }),
-                    passing: (score) => contentText("challengePassing", { score }),
-                    scoreCaption: contentText("challengeScoreCaption"),
+                    readinessTitle: contentText("challengeReadinessTitle"),
+                    readinessReady: contentText("challengeReadinessReady"),
+                    readinessIncomplete: (complete, total) => contentText("challengeReadinessIncomplete", { complete, total }),
+                    reviewAttempt: contentText("challengeReviewAttempt"),
+                    reviewTitle: contentText("challengeReviewTitle"),
+                    reviewDescription: contentText("challengeReviewDescription"),
+                    returnToEdit: contentText("challengeReturnToEdit"),
+                    gradingModel: contentText("challengeGradingModel"),
+                    changeModel: contentText("challengeChangeModel"),
+                    language: contentText("challengeLanguage"),
+                    askAi: contentText("challengeAskAi"),
+                    explainSelection: contentText("challengeExplainSelection"),
+                    translateSelection: contentText("challengeTranslateSelection"),
+                    dismissSelection: contentText("challengeDismissSelection"),
+                    saveAndExit: contentText("challengeExit"),
+                    exitTitle: contentText("challengeExitTitle"),
+                    exitDescription: contentText("challengeExitDescription"),
+                    exitWithoutSaving: contentText("challengeExitWithoutSaving"),
                 },
             }}
             on={{
-                back: () => router.push(lessonPath),
+                requestExit: () => {
+                    if (Object.values(urls).some((url) => url.trim().length > 0) && !isPassed) {
+                        setIsExitConfirmOpen(true)
+                        return
+                    }
+                    router.push(lessonPath)
+                },
+                cancelExit: () => setIsExitConfirmOpen(false),
+                confirmExit: () => {
+                    setIsExitConfirmOpen(false)
+                    router.push(lessonPath)
+                },
                 openCourseMap: () => setIsCourseMapOpen(true),
                 closeCourseMap: () => setIsCourseMapOpen(false),
                 searchCourseMap: onSearchCourseMap,
@@ -357,6 +473,8 @@ export const CourseLearnChallengeBlock = (input: CourseLearnChallengeBlockProps)
                 )),
                 changeUrl: (id, value) => setUrls((current) => ({ ...current, [id]: value })),
                 saveDraft: () => { void saveDraft() },
+                reviewAttempt: () => setIsReviewing(true),
+                returnToEdit: () => setIsReviewing(false),
                 submitAttempt: () => setIsConfirmOpen(true),
                 cancelSubmit: () => setIsConfirmOpen(false),
                 confirmSubmit: () => {
@@ -376,6 +494,33 @@ export const CourseLearnChallengeBlock = (input: CourseLearnChallengeBlockProps)
                 openCourse: () => router.push(`/courses/${input.displayId}/learn`),
                 openModule: () => router.push(lessonPath),
                 openContent: () => router.push(lessonPath),
+                selectLanguage: setSelectedLanguage,
+                openModelDrawer: () => setIsModelDrawerOpen(true),
+                closeModelDrawer: () => setIsModelDrawerOpen(false),
+                selectDefaultModel: setDefaultModelId,
+                applyDefaultModel: () => {
+                    setModelOverrides(Object.fromEntries(challengeSubmissions.map((item) => [item.id, defaultModelId])))
+                    setIsModelDrawerOpen(false)
+                },
+                overrideModel: (deliverableId, modelId) => setModelOverrides((current) => ({ ...current, [deliverableId]: modelId })),
+                openAi: () => {
+                    setAiStarterPrompt(undefined)
+                    setIsAiDrawerOpen(true)
+                },
+                closeAi: () => setIsAiDrawerOpen(false),
+                explainSelection: () => {
+                    setAiStarterPrompt(contentText("challengeExplainSelectionPrompt"))
+                    setIsAiDrawerOpen(true)
+                },
+                translateSelection: () => {
+                    setAiStarterPrompt(contentText("challengeTranslateSelectionPrompt"))
+                    setIsAiDrawerOpen(true)
+                },
+                dismissSelection: () => setActiveSelection(undefined),
+                clearAiSelection: () => {
+                    setActiveSelection(undefined)
+                    globalAi.clearCodeContext()
+                },
             }}
         />
     )

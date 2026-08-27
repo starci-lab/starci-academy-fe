@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
@@ -37,6 +37,7 @@ export const ChallengeResultBlock = (input: ChallengeResultRouteProps) => {
     const attemptId = searchParams.get("attempt") ?? undefined
     const attemptGroupId = searchParams.get("attemptGroup") ?? undefined
     const routeJobId = searchParams.get("jobs")?.split(",")[0] || undefined
+    const [isHistoryOpen, setIsHistoryOpen] = useState(false)
     const content = useQueryContentSwr({ id: input.contentId })
     const course = useQueryCourseSwr({ displayId: input.displayId })
     const module = useQueryModuleSwr({ id: input.moduleId })
@@ -207,6 +208,11 @@ export const ChallengeResultBlock = (input: ChallengeResultRouteProps) => {
                 reloadLabel: practice("retry"),
                 retryLabel: practice("retry"),
                 nextLabel: contentText("nextLabel"),
+                historyLabel: contentText("challengeHistoryTitle"),
+                courseId: course.data?.id,
+                submissionId,
+                selectedAttemptId: selectedAttempt?.id,
+                isHistoryOpen,
             }}
             on={{
                 reload: () => {
@@ -225,6 +231,16 @@ export const ChallengeResultBlock = (input: ChallengeResultRouteProps) => {
                 },
                 retry: () => router.push(challengePath),
                 next: () => router.push(readerPath),
+                openHistory: () => setIsHistoryOpen(true),
+                closeHistory: () => setIsHistoryOpen(false),
+                selectHistoryAttempt: (selectedId, selectedGroupId) => {
+                    const params = new URLSearchParams(searchParams.toString())
+                    params.set("attempt", selectedId)
+                    if (selectedGroupId === undefined) params.delete("attemptGroup")
+                    else params.set("attemptGroup", selectedGroupId)
+                    setIsHistoryOpen(false)
+                    router.push(`${challengePath}/result?${params.toString()}`)
+                },
             }}
         />
     )

@@ -17,6 +17,9 @@ const copy: CourseMockInterviewResultData = {
     title: "Interview debrief",
     description: "Persisted result",
     gradingLabel: "Grading your answers",
+    gradingFailedLabel: "Grading stopped",
+    gradingFailureDetail: "Retry or discard",
+    retryingLabel: "Retrying grading",
     failedLabel: "The debrief could not be read",
     scoreLabel: "Overall score",
     score: 82,
@@ -42,7 +45,17 @@ const copy: CourseMockInterviewResultData = {
         },
     ],
     retryLabel: "Check again",
+    abandonLabel: "Discard session",
     newSessionLabel: "Interview again",
+    openTranscriptLabel: "View transcript",
+    openHistoryLabel: "Interview history",
+    returnToCourseLabel: "Back to course",
+    sessionSummaryTitle: "Session summary",
+    sessionSummaryPromptLabel: "Interview",
+    sessionSummaryQuestionLabel: "Questions graded",
+    recommendationTitle: "Recommended next practice",
+    retrying: false,
+    canRetryGrading: true,
 }
 
 const draw = (
@@ -133,12 +146,15 @@ describe("CourseMockInterviewResultPageBase", () => {
         expect(retry).toHaveBeenCalledTimes(1)
     })
 
-    it("keeps a second retry in the action row so a reader who scrolled past the notice still has one", () => {
+    it("offers retry and discard only after grading reaches a terminal failure", () => {
         const retry = vi.fn()
-        draw("grading", {}, { retry })
+        const abandon = vi.fn()
+        draw("gradingFailed", {}, { retry, abandon })
 
         fireEvent.click(screen.getByRole("button", { name: "Check again" }))
+        fireEvent.click(screen.getByRole("button", { name: "Discard session" }))
         expect(retry).toHaveBeenCalledTimes(1)
+        expect(abandon).toHaveBeenCalledTimes(1)
     })
 
     it("starts a fresh interview from a state that never produced a result at all", () => {

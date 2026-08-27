@@ -1,6 +1,7 @@
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { SurfaceFormCard } from "@/components/branches/SurfaceFormCard"
 import { SurfaceListCard, type SurfaceListCardActions } from "@/components/branches/SurfaceListCard"
+import { ModalBranch } from "@/components/branches/ModalBranch"
 import { Tree } from "@/components/branches/Tree"
 import { LabelledProgressRow } from "@/components/composites/LabelledProgressRow"
 import {
@@ -15,7 +16,6 @@ import { CodeBlock } from "@/components/leaves/CodeBlock"
 import { Heading } from "@/components/leaves/Heading"
 import { Text } from "@/components/leaves/Text"
 import { Textarea } from "@/components/leaves/Textarea"
-import { SurfaceCard as GrammarSurfaceCard } from "@starci/grammar/core"
 
 /** Finite runtime situations shown by the interview room. */
 export type CourseMockInterviewSessionState = "connecting" | "live" | "syncing" | "expired" | "failed"
@@ -62,6 +62,17 @@ export type CourseMockInterviewSessionData = {
     readonly workspaceEmptyLabel: string
     readonly workspaceCode?: string
     readonly notice?: string
+    readonly syncStatusLabel: string
+    readonly revisionLabel: string
+    readonly finishConfirmationOpen: boolean
+    readonly finishConfirmationTitle: string
+    readonly finishConfirmationDescription: string
+    readonly abandonConfirmationOpen: boolean
+    readonly abandonConfirmationTitle: string
+    readonly abandonConfirmationDescription: string
+    readonly confirmLabel: string
+    readonly abandonLabel: string
+    readonly cancelLabel: string
 }
 
 /** User intents emitted by the pure room. */
@@ -72,6 +83,9 @@ export type CourseMockInterviewSessionActions = {
     readonly leave?: () => void
     readonly finish?: () => void
     readonly retry?: () => void
+    readonly dismissConfirmation?: () => void
+    readonly confirmFinish?: () => void
+    readonly confirmAbandon?: () => void
 }
 
 /** Public boundary of the presentational interview room. */
@@ -154,30 +168,6 @@ export const CourseMockInterviewSessionBlockBase = (input: CourseMockInterviewSe
         )
     })
     const workspaceCode = input.props.workspaceCode
-
-    const journeySurface = (
-        <GrammarSurfaceCard
-            ariaLabel={input.props.journeyLabel ?? input.props.title}
-            state={isPending ? "pending" : "neutral"}
-        >
-            <Tree
-                contract="mock-interview-journey-progress"
-                render={defineContractComponent("mock-interview-journey-progress", {
-                    progress: defineCompositeComponent("labelled-progress-row", {}, () => (
-                        <LabelledProgressRow
-                            props={{
-                                id: "mock-interview-journey-session",
-                                title: input.props.journeyLabel ?? input.props.title,
-                                percent: (100 / 3) * 2,
-                                percentText: input.props.journeyStageLabel ?? "2 / 3",
-                            }}
-                            isLoading={isPending}
-                        />
-                    )),
-                })}
-            />
-        </GrammarSurfaceCard>
-    )
 
     const headerSurface = (
         <SurfaceCard
@@ -292,6 +282,12 @@ export const CourseMockInterviewSessionBlockBase = (input: CourseMockInterviewSe
                         isLoading={isPending}
                     />
                 )),
+                sync: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                    <Text props={{ content: input.props.syncStatusLabel, size: "xs", tone: "muted", live: "polite" }} />
+                )),
+                revision: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                    <Text props={{ content: input.props.revisionLabel, size: "xs", tone: "muted" }} />
+                )),
                 action: outcomeActions,
             })}
         />
@@ -317,31 +313,68 @@ export const CourseMockInterviewSessionBlockBase = (input: CourseMockInterviewSe
         />
     ) : null
 
-    return (
+    const confirmation = (
+        title: string,
+        description: string,
+        confirmLabel: string,
+        confirm: (() => void) | undefined,
+    ) => defineContractComponent("mock-interview-confirmation", {
+        title: defineLeafComponent("heading", {}, () => <Heading props={{ content: title, level: 2 }} />),
+        description: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+            <Text props={{ content: description, size: "sm", tone: "muted" }} />
+        )),
+        action: [
+            defineLeafComponent("button", {}, () => (
+                <Button props={{ label: input.props.cancelLabel, variant: "outline" }} on={{ press: input.on?.dismissConfirmation }} />
+            )),
+            defineLeafComponent("button", {}, () => (
+                <Button props={{ label: confirmLabel, variant: "primary" }} on={{ press: confirm }} />
+            )),
+        ],
+    })
+
+    const primaryColumn = defineContractComponent("mock-interview-session-main-column", {
+        ...(noticeSurface === null ? {} : {
+            notice: defineContractProjection("mock-interview-session-notice", () => noticeSurface),
+        }),
+        workspace: defineContractProjection("mock-interview-question-workspace", () => workspaceSurface),
+        prompt: defineContractProjection("mock-interview-active-prompt", () => promptSurface),
+        answer: defineContractProjection("mock-interview-answer-operation", () => answerSurface),
+    })
+    const summaryRail = defineContractComponent("mock-interview-session-rail", {
+        outcomes: defineContractProjection("mock-interview-session-outcomes", () => outcomesSurface),
+        history: defineContractProjection("mock-interview-turn-list", () => historySurface),
+    })
+    const workspace = defineContractComponent("mock-interview-session-workspace", {
+        rail: summaryRail,
+        primary: primaryColumn,
+    })
+
+    return (<>
         <Tree
             contract="mock-interview-session-content"
             render={defineContractComponent("mock-interview-session-content", {
-                journey: defineContractProjection("mock-interview-journey-progress", () => journeySurface),
                 header: defineContractComponent("mock-interview-session-header-owner", {
                     surface: defineContractProjection("mock-interview-session-header", () => headerSurface),
                 }),
-                workspace: defineContractComponent("mock-interview-session-workspace", {
-                    primary: defineContractComponent("mock-interview-session-main-column", {
-                        ...(noticeSurface === null ? {} : {
-                            notice: defineContractProjection("mock-interview-session-notice", () => noticeSurface),
-                        }),
-                        prompt: defineContractProjection("mock-interview-active-prompt", () => promptSurface),
-                        answer: defineContractProjection("mock-interview-answer-operation", () => answerSurface),
-                    }),
-                    rail: defineContractComponent("mock-interview-session-rail", {
-                        workspace: defineContractProjection("mock-interview-question-workspace", () => workspaceSurface),
-                        outcomes: defineContractProjection("mock-interview-session-outcomes", () => outcomesSurface),
-                        history: defineContractProjection("mock-interview-turn-list", () => historySurface),
-                    }),
-                }),
+                workspace,
             })}
         />
-    )
+        <ModalBranch
+            isOpen={input.props.finishConfirmationOpen}
+            size="sm"
+            contract="mock-interview-confirmation"
+            render={confirmation(input.props.finishConfirmationTitle, input.props.finishConfirmationDescription, input.props.confirmLabel, input.on?.confirmFinish)}
+            onDismiss={() => input.on?.dismissConfirmation?.()}
+        />
+        <ModalBranch
+            isOpen={input.props.abandonConfirmationOpen}
+            size="sm"
+            contract="mock-interview-confirmation"
+            render={confirmation(input.props.abandonConfirmationTitle, input.props.abandonConfirmationDescription, input.props.abandonLabel, input.on?.confirmAbandon)}
+            onDismiss={() => input.on?.dismissConfirmation?.()}
+        />
+    </>)
 }
 
 /** Source-level ownership marker for the pure session twin. */

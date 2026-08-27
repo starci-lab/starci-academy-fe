@@ -1,4 +1,5 @@
 import { ContinuationHighlightCard } from "@/components/branches/ContinuationHighlightCard"
+import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { SurfaceFormCard } from "@/components/branches/SurfaceFormCard"
 import { SurfaceListCard, type SurfaceListCardData } from "@/components/branches/SurfaceListCard"
 import { Tree } from "@/components/branches/Tree"
@@ -16,7 +17,6 @@ import {
     defineLeafComponent,
     type LeafProps,
 } from "@/components/contracts/props"
-import { SurfaceCard } from "@starci/grammar/core"
 
 /** One selectable setup value presented to the learner. */
 export type MockInterviewSetupChoice = { readonly id: string; readonly label: string }
@@ -140,30 +140,6 @@ export const CourseMockInterviewSetupBlockBase = (input: CourseMockInterviewSetu
         title: defineLeafComponent("heading", {}, () => <Heading props={{ content: input.props.readinessLabels[index] ?? "", level: 3 }} isLoading={loading} />),
         fact: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: value, size: "sm", tone: "muted" }} isLoading={loading} />),
     }))
-    const journeySurface = (
-        <SurfaceCard
-            ariaLabel={input.props.journeyLabel ?? input.props.title}
-            state={loading ? "pending" : "neutral"}
-        >
-            <Tree
-                contract="mock-interview-journey-progress"
-                render={defineContractComponent("mock-interview-journey-progress", {
-                    progress: defineCompositeComponent("labelled-progress-row", {}, () => (
-                        <LabelledProgressRow
-                            props={{
-                                id: "mock-interview-journey-setup",
-                                title: input.props.journeyLabel ?? input.props.title,
-                                percent: 100 / 3,
-                                percentText: input.props.journeyStageLabel ?? "1 / 3",
-                            }}
-                            isLoading={loading}
-                        />
-                    )),
-                })}
-            />
-        </SurfaceCard>
-    )
-
     const begin = defineContractProjection("mock-interview-begin-panel", () => (
         <SurfaceFormCard
             props={{ label: input.props.beginTitle }}
@@ -176,7 +152,6 @@ export const CourseMockInterviewSetupBlockBase = (input: CourseMockInterviewSetu
                     readiness: defineContractComponent("mock-interview-readiness-snapshot", { fact: readiness }),
                     status: input.props.status === undefined || setupState === "resumable" ? undefined : defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: input.props.status ?? "", size: "xs", tone: "muted", live: "polite" }} />),
                     action: defineLeafComponent("button", {}, () => <Button props={{ label: input.props.startLabel, variant: "primary", disabled: loading || starting, isPending: starting, icon: "next", iconPlacement: "trailing" }} on={{ press: input.on?.start }} isLoading={loading} />),
-                    fine: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: input.props.savedNote, size: "xs", tone: "muted" }} isLoading={loading} />),
                 }),
                 configuration: defineContractComponent("mock-interview-configuration-track", {
                     title: defineLeafComponent("heading", {}, () => <Heading props={{ content: input.props.setupTitle, level: 2 }} isLoading={loading} />),
@@ -185,10 +160,17 @@ export const CourseMockInterviewSetupBlockBase = (input: CourseMockInterviewSetu
                     level: defineLeafComponent("choice-tabs", {}, () => <ChoiceTabs props={{ label: input.props.levelLabel, selectedKey: input.props.selectedLevel, tabs: input.props.levels, variant: "primary" }} on={{ select: (key) => input.on?.configure?.("level", key) }} />),
                     modeLabel: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: input.props.modeLabel, size: "sm", tone: "muted", weight: "semibold" }} isLoading={loading} />),
                     mode: defineLeafComponent("choice-tabs", {}, () => <ChoiceTabs props={{ label: input.props.modeLabel, selectedKey: input.props.selectedMode, tabs: input.props.modes, variant: "primary" }} on={{ select: (key) => input.on?.configure?.("mode", key) }} />),
-                    note: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: input.props.serverNote, size: "xs", tone: "muted", icon: "practice" }} isLoading={loading} />),
                 }),
             })}
         />
+    ))
+    const trust = defineContractProjection("mock-interview-trust-panel", () => (
+        <SurfaceCard contract="mock-interview-trust-panel" render={defineContractComponent("mock-interview-trust-panel", {
+            title: defineLeafComponent("heading", {}, () => <Heading props={{ content: input.props.briefingEyebrow, level: 3 }} isLoading={loading} />),
+            item: [input.props.serverNote, input.props.savedNote].map((content) => defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                <Text props={{ content, size: "sm", tone: "muted" }} isLoading={loading} />
+            ))),
+        })} />
     ))
 
     const historyNotice = input.props.historyState === "failed" ? input.props.historyFailed : input.props.historyState === "empty" ? input.props.historyEmpty : undefined
@@ -203,7 +185,6 @@ export const CourseMockInterviewSetupBlockBase = (input: CourseMockInterviewSetu
                 }),
                 focus: defineLeafComponent("badge", {}, () => <Badge props={{ content: input.props.focus, icon: "course" }} isLoading={loading} />),
             }),
-            journey: defineContractProjection("mock-interview-journey-progress", () => journeySurface),
             navigation: setupState === "locked" || setupState === "failed" ? undefined : defineContractComponent("mock-interview-setup-tabs-over-panel", {
                 tabs: defineLeafComponent("choice-tabs", {}, () => <ChoiceTabs props={{ label: input.props.tabsLabel, selectedKey: selectedTab, tabs: input.props.tabs, variant: "secondary" }} on={{ select: (key) => input.on?.selectTab?.(key as "begin" | "history" | "stats") }} />),
             }),
@@ -218,7 +199,8 @@ export const CourseMockInterviewSetupBlockBase = (input: CourseMockInterviewSetu
                         action: defineLeafComponent("button", {}, () => <Button props={{ label: input.props.resumeLabel, variant: "primary", icon: "next", iconPlacement: "trailing" }} on={{ press: input.on?.resume }} />),
                     })} />
                 )) : undefined,
-                begin: selectedTab === "begin" && setupState !== "failed" && setupState !== "locked" ? begin : undefined,
+                begin: selectedTab === "begin" && setupState !== "failed" && setupState !== "locked" && setupState !== "resumable" ? begin : undefined,
+                trust: selectedTab === "begin" && setupState !== "failed" && setupState !== "locked" && setupState !== "resumable" ? trust : undefined,
                 history: selectedTab === "history" ? defineContractProjection("mock-interview-history-panel", () => (
                     <SurfaceListCard props={{ label: input.props.historyTitle, rows: historyRows, notice: historyNotice, recoveryLabel: input.props.returnToBegin }} contract="mock-interview-history-panel" render={HistoryList} on={{ act: () => input.on?.selectTab?.("begin") }} isLoading={historyLoading} />
                 )) : undefined,
