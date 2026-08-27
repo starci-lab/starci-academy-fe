@@ -6,11 +6,9 @@ import { CourseFoundationsPageBase } from "./component"
 export type CourseFoundationsPageProps = { readonly displayId: string }
 
 /** Connect the foundations hub route to the localized server category catalog. */
-export const CourseFoundationsPage = ({ displayId }: CourseFoundationsPageProps) => {
+export const CourseFoundationsPage = (props: CourseFoundationsPageProps) => {
+    const { displayId } = props
     return (
         <CourseFoundationsPageBase displayId={displayId} />
     )
 }
-
-/** Source-level ownership marker. */
-export const meta = { world: "connected", domain: "learn" } as const

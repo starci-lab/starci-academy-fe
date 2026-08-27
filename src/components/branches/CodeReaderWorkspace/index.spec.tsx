@@ -55,7 +55,7 @@ describe("CodeReaderWorkspace", () => {
             />,
         )
 
-        expect(container.querySelector("[data-node=source-code-reader-grid]")).not.toBeNull()
+        expect(container.querySelector("nav")).toBeInTheDocument()
         expect(screen.getByLabelText("Readonly source")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Open /src/dog/dog.service.ts" }))
         expect(activateFile).toHaveBeenCalledWith("/src/dog/dog.service.ts")

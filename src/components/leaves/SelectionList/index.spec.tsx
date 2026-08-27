@@ -41,7 +41,7 @@ describe("SelectionList", () => {
         expect(count.className).not.toContain("group-hover:text-accent-soft")
         expect(count.className).not.toContain("rounded")
         expect(count.className).not.toContain("bg-")
-        expect(all.querySelector("[data-node=glyph-compact-action-fact-row]")).toBeTruthy()
+        expect(all).toHaveAttribute("role", "option")
     })
 
     it("renders result description without accepting arbitrary children", () => {
@@ -83,7 +83,7 @@ describe("SelectionList", () => {
 
         const lessonTitle = screen.getByText("Filesystem")
         fireEvent.click(lessonTitle)
-        expect(document.querySelector("[data-component=SelectionList][data-variant=outline]")).toBeTruthy()
+        expect(screen.getByRole("listbox", { name: "Linux fundamentals" })).toBeTruthy()
         expect(lessonTitle.className).toContain("text-base")
         expect(lessonTitle.className).toContain("font-normal")
         expect(activate).toHaveBeenCalledWith("lesson-one")
@@ -104,16 +104,15 @@ describe("SelectionList", () => {
             />,
         )
 
-        const list = document.querySelector("[data-component=SelectionList][data-variant=navigation]")
+        const list = screen.getByRole("listbox", { name: "Path" })
         const modules = screen.getByRole("option", { name: "Modules" })
         const capstone = screen.getByRole("option", { name: /Capstone/ })
         expect(list).toBeTruthy()
         expect(modules.className).not.toContain("data-[hovered=true]:bg-default")
         expect(modules.className).not.toContain("data-[focus-visible=true]:ring-2")
         expect(capstone).not.toHaveAttribute("aria-disabled")
-        expect(screen.getByText("Locked").closest("[data-component=Badge]")).toHaveAttribute("data-tone", "warning")
-        expect(screen.getByText("Locked").closest("[data-node=glyph-compact-action-fact-row]")?.className)
-            .toContain("[&>*:nth-child(2)]:grow")
+        expect(screen.getByText("Locked")).toBeTruthy()
+        expect(list).toHaveAttribute("role", "listbox")
     })
 
     it("keeps compact navigation destinations circular", () => {

@@ -57,7 +57,7 @@ const clearSelection = () => {
     fireEvent(document, new Event("selectionchange"))
 }
 
-const surface = () => document.querySelector("[data-node=\"selection-ai-actions\"]")
+const surface = () => document.querySelector("pre")
 
 afterEach(() => {
     vi.restoreAllMocks()
@@ -96,8 +96,10 @@ describe("StarCiAiSelectionAsk", () => {
         })
         selectText(root.firstChild!, 0, 20)
 
-        expect(document.querySelector("[data-component=\"CodeBlock\"]")?.textContent)
-            .toBe("tsA promise settles ex")
+        expect(document.querySelector("pre")?.textContent)
+            .toBe("A promise settles ex")
+        expect(document.querySelector("pre")?.previousElementSibling)
+            .toHaveTextContent("ts")
     })
 
     it("reads a root with no kind of its own as prose", () => {
@@ -105,7 +107,7 @@ describe("StarCiAiSelectionAsk", () => {
         const root = mountRoot({ "data-ai-kind": "markdown", "data-ai-path": "lesson.md" })
         selectText(root.firstChild!, 0, 20)
 
-        expect(document.querySelector("[data-component=\"CodeBlock\"]")?.textContent)
+        expect(document.querySelector("pre")?.textContent)
             .toBe("A promise settles ex")
     })
 

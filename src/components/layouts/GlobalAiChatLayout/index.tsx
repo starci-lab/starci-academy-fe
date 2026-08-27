@@ -3,12 +3,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react"
 import { usePathname } from "@/i18n/navigation"
 import { useSessionToken } from "@/hooks/auth/useSessionToken"
-import { Tree } from "@/components/branches/Tree"
-import {
-    defineContractComponent,
-    defineContractProjection,
-    defineLeafComponent,
-} from "@/components/contracts/props"
 import { StarCiAiFab } from "@/components/blocks/ai/StarCiAiFab/component"
 import { StarCiAiSelectionAsk } from "@/components/blocks/ai/StarCiAiSelectionAsk"
 import { StarCiAiDrawer } from "@/components/overlays/ai/StarCiAiDrawer"
@@ -25,7 +19,8 @@ export type GlobalAiChatLayoutProps = {
 }
 
 /** Keep one AI conversation owner alive while routed product surfaces change beneath it. */
-export const GlobalAiChatLayout = ({ surface }: GlobalAiChatLayoutProps) => {
+export const GlobalAiChatLayout = (props: GlobalAiChatLayoutProps) => {
+    const { surface } = props
     const pathname = usePathname()
     const token = useSessionToken()
     const anchor = useMemo(() => resolveContentAiRouteAnchor(pathname), [pathname])
@@ -63,25 +58,12 @@ export const GlobalAiChatLayout = ({ surface }: GlobalAiChatLayoutProps) => {
 
     return (
         <GlobalAiChatContext.Provider value={value}>
-            <Tree
-                contract="global-ai-layout"
-                render={defineContractComponent("global-ai-layout", {
-                    surface: defineLeafComponent("page", {}, () => <>{surface}</>),
-                    selection: defineContractProjection("selection-ai-actions", () => <StarCiAiSelectionAsk />),
-                    trigger: defineContractProjection("floating-ai-trigger", () => (
-                        <StarCiAiFab
-                            props={{ label: "StarCi AI", isOpen }}
-                            on={{ press: value.open }}
-                        />
-                    )),
-                    drawer: defineContractProjection("starci-ai-drawer-column", () => <StarCiAiDrawer />),
-                })}
-            />
+            {surface}
+            <StarCiAiSelectionAsk />
+            <StarCiAiFab props={{ label: "StarCi AI", isOpen }} on={{ press: value.open }} />
+            <StarCiAiDrawer {...{}} />
         </GlobalAiChatContext.Provider>
     )
 }
 
 export { useGlobalAiChat } from "@/modules/ai/global-ai-chat-context"
-
-/** Source-level owner marker. */
-export const meta = { world: "connected", domain: "ai" } as const

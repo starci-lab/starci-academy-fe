@@ -6,4 +6,3 @@ import { CourseFlashcardsReviewPageBase, type CourseFlashcardsReviewPageProps } 
 export const CourseFlashcardsReviewPage = (props: CourseFlashcardsReviewPageProps) => <CourseFlashcardsReviewPageBase {...props} />
 
 /** Ownership metadata for the route entry. */
-export const meta = { world: "connected", domain: "learn" } as const

@@ -2,7 +2,6 @@ import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { PressableSurface } from "@/components/branches/PressableSurface"
 import { Badge } from "@/components/leaves/Badge"
 import { Text } from "@/components/leaves/Text"
-import { defineContractComponent, defineLeafComponent, type CompositeProps } from "@/components/contracts/props"
 
 /** Resolved showcase facts for one pinned project. */
 export type ProfileProjectCardData = {
@@ -16,39 +15,20 @@ export type ProfileProjectCardData = {
 /** Optional external-project outcome reported by a pressable showcase. */
 export type ProfileProjectCardActions = { readonly press?: () => void }
 /** Closed composite input for one project showcase tile. */
-export type ProfileProjectCardProps = CompositeProps<ProfileProjectCardData, ProfileProjectCardActions>
+export type ProfileProjectCardProps = { readonly props: ProfileProjectCardData; readonly on?: ProfileProjectCardActions; readonly isLoading?: boolean }
 
 /** One pinned-project tile; unlike a proof row, its tags and verification form a bounded showcase. */
-export const ProfileProjectCard = ({ props, on, isLoading = false }: ProfileProjectCardProps) => {
-    const content = defineContractComponent("profile-project-card", {
-        badge: defineLeafComponent("badge", {}, () => (
-            <Badge props={{ content: props.verified ? "Verified by StarCi" : props.kind ?? "External", tone: props.verified ? "success" : "neutral" }} isLoading={isLoading} />
-        )),
-        title: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
-            <Text props={{ content: props.title, size: "sm", weight: "semibold" }} isLoading={isLoading} />
-        )),
-        ...(props.description === undefined ? {} : {
-            description: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                <Text props={{ content: props.description, size: "xs" }} isLoading={isLoading} />
-            )),
-        }),
-        ...(props.technologies.length === 0 ? {} : {
-            tech: defineContractComponent("profile-project-tech-run", {
-                tech: props.technologies.map((technology) => defineLeafComponent("badge", {}, () => (
-                    <Badge props={{ content: technology }} isLoading={isLoading} />
-                ))),
-            }),
-        }),
-    })
+export const ProfileProjectCard = (props: ProfileProjectCardProps) => {
+    const data = props.props
+    const on = props.on
+    const isLoading = props.isLoading ?? false
+    const content = <><Badge props={{ content: data.verified ? "Verified by StarCi" : data.kind ?? "External", tone: data.verified ? "success" : "neutral" }} isLoading={isLoading} /><Text props={{ content: data.title, size: "sm", weight: "semibold" }} isLoading={isLoading} />{data.description === undefined ? null : <Text props={{ content: data.description, size: "xs" }} isLoading={isLoading} />}{data.technologies.length === 0 ? null : <div>{data.technologies.map((technology) => <Badge key={technology} props={{ content: technology }} isLoading={isLoading} />)}</div>}</>
     /*
      * ONE GRID, ONE KIND OF CARD. A project with a link is pressable and a project without one is
      * not, but both are the same object standing on the same ground - so the surface comes from the
      * same branch either way and only the press target differs.
      */
     return on?.press === undefined
-        ? <SurfaceCard contract="profile-project-card" render={content} />
-        : <PressableSurface contract="profile-project-card" render={content} label={props.title ?? "Project"} press={on.press} isRaised />
+        ? <SurfaceCard>{content}</SurfaceCard>
+        : <PressableSurface label={data.title ?? "Project"} press={on.press} isRaised>{content}</PressableSurface>
 }
-
-/** Source-level tier marker. */
-export const meta = { shape: "composite", world: "pure" } as const

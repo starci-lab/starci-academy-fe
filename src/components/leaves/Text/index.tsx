@@ -1,6 +1,5 @@
-import { skeletonVariants } from "@heroui/react"
 import { Icon, type IconName } from "@/components/leaves/Icon"
-import type { LeafProps } from "@/components/contracts/props"
+import { textClassName, textRestingClassNames } from "./classNames"
 
 /**
  * LEAF - `Text`: one line of resolved copy, at one of two weights of attention.
@@ -73,8 +72,8 @@ export type TextData = TextCommonData & (
     | { readonly size?: Exclude<TextSize, "xs">; readonly tone?: TextTone }
 )
 
-/** Props for {@link Text}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type TextProps = LeafProps<TextData>
+/** Props for {@link Text}. */
+export type TextProps = { readonly props: TextData; readonly isLoading?: boolean }
 
 /**
  * The role a live line carries. `off` is not a live region at all, so it takes no role - a
@@ -88,7 +87,8 @@ const LIVE_ROLES = { off: undefined, polite: "status", assertive: "alert" } as c
  * Data variants keep every possible class literal visible to Tailwind without composing classes
  * at a call site or allowing a typography vendor to silently replace the requested leading.
  */
-const TEXT_CLASSES = [
+/* legacy recipe moved to colocated classNames.ts */
+/*
     "text-base leading-6 font-normal text-foreground",
     "data-[size=xs]:text-xs data-[size=xs]:leading-4 data-[size=xs]:text-muted",
     "data-[size=sm]:text-sm data-[size=sm]:leading-5",
@@ -98,7 +98,7 @@ const TEXT_CLASSES = [
     "data-[weight=medium]:font-medium data-[weight=semibold]:font-semibold",
     "data-[icon=true]:inline-flex data-[icon=true]:items-center data-[icon=true]:gap-2",
     "data-[superseded=true]:line-through",
-    /*
+    //
      * The rule takes the colour of the words, held one step off the letters so a two-line title
      * still reads as words rather than as struck-through text.
      *
@@ -107,13 +107,14 @@ const TEXT_CLASSES = [
      * back to `currentColor`. Naming a token here made the title's rule a hairline at 92% lightness
      * beside a link ruled in ink - two underlines in one card claiming two different weights of the
      * same promise. Inheriting is what makes them the same mark.
-     */
+     //
     "data-[press-label=true]:underline-offset-4",
     "data-[press-label=true]:group-hover:underline",
-].join(" ")
+*/
 
 /** The resting shape - the same line box, wearing the vendor's skeleton, glyphs out. */
-const RESTING_CLASSES = {
+/*
+const UNUSED_RESTING_CLASSES = {
     xs: skeletonVariants({ animationType: "shimmer" }).base({
         className: "inline-block w-10 select-none rounded text-xs leading-4 text-muted text-transparent",
     }),
@@ -124,43 +125,41 @@ const RESTING_CLASSES = {
         className: "inline-block w-40 max-w-full select-none rounded text-base leading-6 text-transparent",
     }),
 } as const
+*/
 
 /**
  * Draw one line of copy.
  *
  * @param input - {@link TextProps}
  */
-export const Text = ({ props, isLoading = false }: TextProps) => {
-    const size = props.size ?? "md"
-    const tone = size === "xs" ? "muted" : props.tone ?? "default"
-    const weight = props.weight ?? "normal"
-    const live = props.live ?? "off"
+export const Text = (props: TextProps) => {
+    const data = props.props
+    const isLoading = props.isLoading ?? false
+    const size = data.size ?? "md"
+    const tone = size === "xs" ? "muted" : data.tone ?? "default"
+    const weight = data.weight ?? "normal"
+    const live = data.live ?? "off"
     // The glyph drops while the line rests: the skeleton already covers the measure, and a glyph
     // shimmering beside it is a second thing to look at where there is nothing to read yet.
-    const showsIcon = props.icon !== undefined && !isLoading
+    const showsIcon = data.icon !== undefined && !isLoading
     return (
         <div
-            id={props.id}
-            data-tier="leaf"
-            data-component="Text"
+            id={data.id}
             data-tone={tone}
             data-size={size}
             data-weight={weight}
             data-icon={showsIcon ? "true" : "false"}
-            data-superseded={props.isSuperseded === true ? "true" : "false"}
-            data-press-label={props.isPressLabel === true ? "true" : "false"}
+            data-superseded={data.isSuperseded === true ? "true" : "false"}
+            data-press-label={data.isPressLabel === true ? "true" : "false"}
             data-live={live}
-            data-parent-emphasis={props.parentEmphasis}
+            data-parent-emphasis={data.parentEmphasis}
             data-loading={isLoading ? "true" : "false"}
             role={LIVE_ROLES[live]}
             aria-live={live === "off" ? undefined : live}
-            className={isLoading ? RESTING_CLASSES[size] : TEXT_CLASSES}
+            className={isLoading ? textRestingClassNames[size] : textClassName}
         >
-            {showsIcon && props.icon !== undefined ? <Icon props={{ name: props.icon, role: "chip" }} /> : null}
-            {isLoading ? "\u00a0" : props.content ?? ""}
+            {showsIcon && data.icon !== undefined ? <Icon props={{ name: data.icon, role: "chip" }} /> : null}
+            {isLoading ? "\u00a0" : data.content ?? ""}
         </div>
     )
 }
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const

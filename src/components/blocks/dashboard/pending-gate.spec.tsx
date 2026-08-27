@@ -93,7 +93,7 @@ describe("dashboard viewer-key gate", () => {
         const { container } = render(<Component />)
 
         expect(container.querySelector("[data-loading=\"true\"]")).not.toBeNull()
-        expect(container.querySelector("[data-node=\"empty-notice-stack\"]")).toBeNull()
+        expect(container.textContent).not.toContain("Unavailable")
     })
 
     it("keeps every overview region mounted while independent requests are unresolved", () => {

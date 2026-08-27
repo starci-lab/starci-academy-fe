@@ -3,12 +3,6 @@ import { LeaderboardStandingRow, type LeaderboardStandingRowData } from "@/compo
 import { Button } from "@/components/leaves/Button"
 import { Progress } from "@/components/leaves/Progress"
 import { Text } from "@/components/leaves/Text"
-import {
-    defineCompositeComponent,
-    defineContractComponent,
-    defineLeafComponent,
-    type CompositeProps,
-} from "@/components/contracts/props"
 
 /**
  * COMPOSITE - `StandingHeroCard`: the viewer's place, the distance to the next one, and the one
@@ -47,42 +41,15 @@ export type StandingHeroCardActions = {
 }
 
 /** Props for {@link StandingHeroCard}. */
-export type StandingHeroCardProps = CompositeProps<StandingHeroCardData, StandingHeroCardActions>
+export type StandingHeroCardProps = { readonly props: StandingHeroCardData; readonly on?: StandingHeroCardActions; readonly isLoading?: boolean }
 
 /** Draw the viewer standing, the goal meter and the climb action. */
-export const StandingHeroCard = ({ props, on, isLoading = false }: StandingHeroCardProps) => {
-    const progress = props.progress
+export const StandingHeroCard = (props: StandingHeroCardProps) => {
+    const data = props.props
+    const on = props.on
+    const isLoading = props.isLoading ?? false
+    const progress = data.progress
     return (
-        <SurfaceCard contract="standing-hero-card" render={defineContractComponent("standing-hero-card", {
-            standing: defineCompositeComponent("leaderboard-standing-row", {}, () => (
-                <LeaderboardStandingRow props={props.standing} isLoading={isLoading} />
-            )),
-            ...(progress === undefined ? {} : {
-                goal: defineContractComponent("standing-goal-meter", {
-                    label: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                        <Text props={{ content: progress.label, size: "xs", tone: "muted" }} isLoading={isLoading} />
-                    )),
-                    progress: defineLeafComponent("progress", {}, () => (
-                        <Progress
-                            props={{
-                                value: Math.round(progress.ratio * 100),
-                                label: props.progressAccessibleLabel,
-                            }}
-                            isLoading={isLoading}
-                        />
-                    )),
-                }),
-            }),
-            action: defineLeafComponent("button", {}, () => (
-                <Button
-                    props={{ label: props.ctaLabel, variant: "primary", size: "md" }}
-                    on={{ press: on?.cta }}
-                    isLoading={isLoading}
-                />
-            )),
-        })} />
+        <SurfaceCard><LeaderboardStandingRow props={data.standing} isLoading={isLoading} />{progress === undefined ? null : <div><Text props={{ content: progress.label, size: "xs", tone: "muted" }} isLoading={isLoading} /><Progress props={{ value: Math.round(progress.ratio * 100), label: data.progressAccessibleLabel }} isLoading={isLoading} /></div>}<Button props={{ label: data.ctaLabel, variant: "primary", size: "md" }} on={{ press: on?.cta }} isLoading={isLoading} /></SurfaceCard>
     )
 }
-
-/** Source-level tier marker. */
-export const meta = { shape: "composite", world: "pure" } as const

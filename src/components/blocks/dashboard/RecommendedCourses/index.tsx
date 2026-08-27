@@ -5,7 +5,7 @@ import { useQueryRecommendedCoursesSwr } from "@/hooks"
 import { RecommendedCoursesBase } from "./component"
 
 /** What the surrounding tab owns: which course is currently explaining its price. */
-export type RecommendedCoursesConnectedProps = {
+export type RecommendedCoursesRouteProps = {
     /**
      * Called when a reader asks why a suggested course costs what it costs.
      *
@@ -19,9 +19,10 @@ export type RecommendedCoursesConnectedProps = {
 /**
  * Fetch and resolve recommended courses for the dashboard.
  *
- * @param input - {@link RecommendedCoursesConnectedProps}
+ * @param props - {@link RecommendedCoursesRouteProps}
  */
-export const RecommendedCourses = ({ onOpenPriceDetail }: RecommendedCoursesConnectedProps = {}) => {
+export const RecommendedCourses = (props: RecommendedCoursesRouteProps = {}) => {
+    const { onOpenPriceDetail } = props
     const t = useTranslations("courses.recommended")
     // The question beside a price is the same sentence the catalog asks, so it is read from the one
     // place that owns it rather than translated a second time under this block's own namespace.
@@ -52,18 +53,18 @@ export const RecommendedCourses = ({ onOpenPriceDetail }: RecommendedCoursesConn
         reason: item.discountReason === "none" ? undefined : t("reason", { count: item.enrolledCount }),
     }))
 
-    const props = { label: t("heading"), rows, errorMessage: t("failed"), retryLabel: t("retry") }
+    const viewProps = { label: t("heading"), rows, errorMessage: t("failed"), retryLabel: t("retry") }
 
     if (query.error !== undefined && query.data === undefined) {
-        return <RecommendedCoursesBase state="failed" props={props} on={{ retry: () => { void query.mutate() } }} />
+        return <RecommendedCoursesBase state="failed" props={viewProps} on={{ retry: () => { void query.mutate() } }} />
     }
-    if (query.data === undefined) return <RecommendedCoursesBase state="pending" props={props} />
-    if (rows.length === 0) return <RecommendedCoursesBase state="hidden" props={props} />
+    if (query.data === undefined) return <RecommendedCoursesBase state="pending" props={viewProps} />
+    if (rows.length === 0) return <RecommendedCoursesBase state="hidden" props={viewProps} />
 
     return (
         <RecommendedCoursesBase
             state="ready"
-            props={props}
+            props={viewProps}
             on={{
                 ...Object.fromEntries(rows.map((row) => [`open:${row.id}`, () => router.push(`/courses/${row.id}`)])),
                 ...Object.fromEntries(rows.map((row) => [`priceDetail:${row.id}`, () => onOpenPriceDetail?.(row.id)])),
@@ -71,6 +72,3 @@ export const RecommendedCourses = ({ onOpenPriceDetail }: RecommendedCoursesConn
         />
     )
 }
-
-/** Source-level ownership marker. */
-export const meta = { world: "connected", domain: "courses" } as const

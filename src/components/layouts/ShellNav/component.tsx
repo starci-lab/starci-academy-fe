@@ -1,4 +1,3 @@
-import { Tree } from "@/components/branches/Tree"
 import { Link } from "@/components/leaves/Link"
 import { NavLink } from "@/components/leaves/NavLink"
 import { IconButton } from "@/components/leaves/IconButton"
@@ -8,7 +7,15 @@ import { PressableInputLike } from "@/components/leaves/PressableInputLike"
 import { ThemeSwitch } from "@/components/leaves/ThemeSwitch"
 import { ExtendedTabs } from "@/components/leaves/ExtendedTabs"
 import type { IconName } from "@/components/leaves/Icon"
-import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
+import {
+    shellNavClassName,
+    shellNavDesktopToolsClassName,
+    shellNavNavigationClassName,
+    shellNavPrimaryClassName,
+    shellNavRoutesClassName,
+    shellNavTabsClassName,
+    shellNavToolsClassName,
+} from "./classNames"
 
 /** One destination in the primary navbar row. */
 export type ShellNavRoute = {
@@ -22,7 +29,7 @@ export type ShellNavTab = ShellNavRoute & {
     readonly icon: IconName
 }
 
-/** Resolved copy and state drawn by the double navbar. */
+/** Resolved copy and state drawn by the navbar. */
 export type ShellNavData = {
     readonly brand: string
     readonly routes: ReadonlyArray<ShellNavRoute>
@@ -49,85 +56,40 @@ export type ShellNavActions = {
     readonly openCart?: () => void
 }
 
-/** Props for the presentational double navbar. */
+/** Props for the presentational navbar. */
 export type ShellNavProps = {
     readonly props: ShellNavData
     readonly on?: ShellNavActions
 }
 
 /** Draw the primary navbar and its optional page-tab bottom layer as one landmark. */
-export const ShellNavBase = (input: ShellNavProps) => {
-    const tabs = input.props.tabs
+export const ShellNavBase = (props: ShellNavProps) => {
+    const tabs = props.props.tabs
     return (
-        <Tree
-            contract="double-navbar"
-            render={defineContractComponent("double-navbar", {
-                primary: defineContractComponent("brand-links-then-tools-bar", {
-                    navigation: defineContractComponent("inline-nav-links", {
-                        brand: defineLeafComponent("link", { emphasis: "brand" }, () => (
-                            <Link
-                                props={{ label: input.props.brand, emphasis: "brand" }}
-                                on={{ press: () => input.on?.navigate?.("dashboard") }}
-                            />
-                        )),
-                        routes: defineContractComponent("inline-route-links", {
-                            route: input.props.routes.map((route) => defineLeafComponent("nav-link", { kind: "route" }, () => (
-                                <NavLink
-                                    props={{ label: route.label, isCurrent: route.isCurrent, kind: "route" }}
-                                    on={{ press: () => input.on?.navigate?.(route.id) }}
-                                />
-                            ))),
-                        }),
-                    }),
-                    tools: defineContractComponent("inline-tool-row", {
-                        desktop: defineContractComponent("desktop-navbar-tools", {
-                            search: defineLeafComponent("pressable-input-like", {}, () => (
-                                <PressableInputLike
-                                    props={{ placeholder: input.props.searchPlaceholder, label: input.props.searchLabel, shortcut: input.props.searchShortcut }}
-                                    on={{ press: input.on?.openSearch }}
-                                />
-                            )),
-                            locale: defineLeafComponent("language-menu", {}, () => (
-                                <LanguageMenu />
-                            )),
-                            theme: defineLeafComponent("theme-switch", {}, () => (
-                                <ThemeSwitch
-                                    props={{ isDark: input.props.isDark, label: input.props.themeLabel }}
-                                    on={{ change: input.on?.toggleTheme }}
-                                />
-                            )),
-                        }),
-                        tool: [
-                            defineLeafComponent("icon-button", {}, () => (
-                                <IconButton props={{ icon: "cart", label: input.props.cartLabel }} on={{ press: input.on?.openCart }} />
-                            )),
-                            ...(input.props.isSignedIn ? [defineLeafComponent("icon-button", {}, () => (
-                                <IconButton props={{ icon: "notification", label: input.props.notificationLabel }} />
-                            ))] : []),
-                            defineLeafComponent("account-menu", {}, () => (
-                                <AccountMenu
-                                    on={{ signIn: input.on?.openSignIn, signUp: input.on?.openSignUp }}
-                                />
-                            )),
-                        ],
-                    }),
-                }),
-                bottom: tabs === undefined ? undefined : defineContractComponent("underlined-tab-strip", {
-                    tabs: defineLeafComponent("extended-tabs", {}, () => (
-                        <ExtendedTabs
-                            props={{
-                                label: input.props.brand,
-                                selectedKey: tabs.find((tab) => tab.isCurrent)?.id ?? "overview",
-                                tabs,
-                            }}
-                            on={{ select: input.on?.selectTab }}
-                        />
-                    )),
-                }),
-            })}
-        />
+        <nav className={shellNavClassName}>
+            <div className={shellNavPrimaryClassName}>
+                <div className={shellNavNavigationClassName}>
+                    <Link props={{ label: props.props.brand, emphasis: "brand" }} on={{ press: () => props.on?.navigate?.("dashboard") }} />
+                    <div className={shellNavRoutesClassName}>
+                        {props.props.routes.map((route) => (
+                            <NavLink key={route.id} props={{ label: route.label, isCurrent: route.isCurrent, kind: "route" }} on={{ press: () => props.on?.navigate?.(route.id) }} />
+                        ))}
+                    </div>
+                </div>
+                <div className={shellNavToolsClassName}>
+                    <div className={shellNavDesktopToolsClassName}>
+                        <PressableInputLike props={{ placeholder: props.props.searchPlaceholder, label: props.props.searchLabel, shortcut: props.props.searchShortcut }} on={{ press: props.on?.openSearch }} />
+                        <LanguageMenu />
+                        <ThemeSwitch props={{ isDark: props.props.isDark, label: props.props.themeLabel }} on={{ change: props.on?.toggleTheme }} />
+                    </div>
+                    <IconButton props={{ icon: "cart", label: props.props.cartLabel }} on={{ press: props.on?.openCart }} />
+                    {props.props.isSignedIn ? <IconButton props={{ icon: "notification", label: props.props.notificationLabel }} /> : null}
+                    <AccountMenu on={{ signIn: props.on?.openSignIn, signUp: props.on?.openSignUp }} />
+                </div>
+            </div>
+            {tabs === undefined ? null : <div className={shellNavTabsClassName}>
+                <ExtendedTabs props={{ label: props.props.brand, selectedKey: tabs.find((tab) => tab.isCurrent)?.id ?? "overview", tabs }} on={{ select: props.on?.selectTab }} />
+            </div>}
+        </nav>
     )
 }
-
-/** Source-level tier marker for the pure shell layout. */
-export const meta = { world: "pure", domain: "shell" } as const

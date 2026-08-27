@@ -8,7 +8,7 @@ import { PlaygroundSession } from "@/components/blocks/learn/PlaygroundSession"
  *
  * This owner exists so that starting a session survives the move from the setup route to the session
  * route: the server session and the relay socket are held here, not by either surface. So what is
- * asserted is the start contract - a playground that has not resolved cannot be started, a server
+ * asserted is the start state - a playground that has not resolved cannot be started, a server
  * answer with no session is a failure the reader is told about rather than a silent no-op, and a
  * successful start subscribes the relay to exactly the session that was created.
  */

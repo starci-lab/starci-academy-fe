@@ -12,9 +12,8 @@
 /*
  * The ONLY stylesheet in the app, and the ONLY place a colour is written down.
  *
- * Every structure on screen is drawn by a registry entry in
- * `src/components/contracts/shapes.ts`; every leaf is drawn by an atom that wraps a HeroUI
- * primitive. Neither of them names a colour: they name a TOKEN - `bg-surface`, `text-muted`,
+ * Every structure on screen is drawn by the legacy component hierarchy; every leaf wraps a HeroUI
+ * primitive. Components do not name a colour: they name a TOKEN - `bg-surface`, `text-muted`,
  * `border-border` - and the token resolves here.
  *
  * WHERE THESE VALUES COME FROM. They are PORTED from the live product's own stylesheet
@@ -317,8 +316,7 @@ html {
 }
 
 /*
- * The page ground. The body is the one element no registry key draws, so it is the one element
- * this file may describe.
+ * The page ground. The body is the one element this file may describe.
  */
 body {
     background-color: var(--background);
@@ -326,8 +324,8 @@ body {
 }
 
 /*
- * A registry entry writes `border` with no colour of its own, because a colour there would be a
- * second place to disagree with the theme. Tailwind's default for an unqualified border is
+ * Components write `border` with no colour of their own, because a colour there would be a second
+ * place to disagree with the theme. Tailwind's default for an unqualified border is
  * `currentColor` - a hairline in the text colour, which a seam never is - so it resolves to the
  * border token here, once, for every node that draws one.
  */
@@ -367,7 +365,7 @@ body {
 
 /*
  * HeroUI's dropdown trigger is block-level by default, unlike the other icon-only buttons in the
- * same navigation cluster. Give that vendor trigger the button contract's centring mechanics so
+ * same navigation cluster. Give that vendor trigger the button centring mechanics so
  * its glyph occupies the visual centre of the fixed square hit target.
  */
 [data-slot="dropdown-trigger"].button--icon-only {
@@ -391,24 +389,8 @@ body {
  * important 16px above and the node adds its own inside it, and every card on the screen grows by
  * one whole inset the day the branch stops wearing the node.
  */
-.starci-core-surface-card .card[data-grammar-surface][data-grammar-frame="bounded"] {
+.starci-core-surface-card > .card {
     padding: 0 !important;
-}
-
-/* Pricing rail: the card owns the viewport and only its content scrolls. */
-.card[data-grammar-surface][data-grammar-scroll="contained"][data-scroll-inside="pricing-rail"] {
-    max-height: var(--max-height-pricing-rail);
-    overflow: hidden;
-}
-
-.card[data-grammar-surface][data-grammar-scroll="contained"][data-scroll-inside="pricing-rail"]
-    [data-grammar-surface-content] {
-    min-height: 0;
-}
-
-.card[data-grammar-surface][data-grammar-scroll="contained"][data-scroll-inside="pricing-rail"]
-    [data-node="pricing-rail-scroll-viewport"] {
-    max-height: var(--max-height-pricing-rail);
 }
 
 /*
@@ -429,7 +411,7 @@ body {
  * something else, that sentence is false: the reader is told two destinations answer one gesture.
  * `:has()` is the only thing that can see a descendant's hover, so the exception lives here.
  */
-[data-component="PressableSurface"]:has([data-component="TextLink"]:hover) [data-press-label="true"] {
+.group:has(a:hover, [role="link"]:hover) [data-press-label="true"] {
     text-decoration-line: none;
 }
 
@@ -440,8 +422,8 @@ body {
 }
 
 /* The accepted dashboard direction layers its coordinated surfaces without changing their anatomy. */
-[data-node="course-learn-today-page"] .starci-core-surface-card .card[data-grammar-surface][data-grammar-frame="bounded"],
-[data-node="course-learn-today-page"] .starci-core-surface-list > .card[data-grammar-surface] {
+.group\/course-today .starci-core-surface-card > .card,
+.group\/course-today .starci-core-surface-list > .card[data-grammar-surface] {
     box-shadow: var(--dashboard-calm-elevation);
     transition: box-shadow var(--dashboard-calm-duration) var(--dashboard-calm-easing);
 }

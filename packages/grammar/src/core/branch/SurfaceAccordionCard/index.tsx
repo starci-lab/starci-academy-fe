@@ -1,4 +1,5 @@
 import { useId, type ReactNode } from "react"
+import { accordionCardClassName, accordionHeadingClassName, accordionPanelClassName, accordionRowClassName, getAccordionShellClassName, accordionTriggerClassName } from "./classNames.js"
 
 export type SurfaceAccordionCardItem<Summary, Body> = {
     readonly id: string
@@ -50,15 +51,11 @@ const SurfaceAccordionRows = <Summary, Body>({
 
     return (
         <div
-            className="starci-core-surface-accordion-card"
-            data-grammar-contract="core.surface-accordion-card"
+            className={accordionCardClassName}
             data-grammar-surface-accordion-card="true"
         >
             <div
-                className={bounded
-                    ? "starci-core-surface starci-core-accordion-shell"
-                    : "starci-core-accordion-shell starci-core-accordion-shell-frameless"}
-                data-component="SurfaceAccordionCard"
+                className={getAccordionShellClassName(bounded)}
                 data-grammar-accordion-shell="true"
                 data-grammar-surface={bounded ? "true" : undefined}
                 data-grammar-surface-depth={depth}
@@ -69,17 +66,16 @@ const SurfaceAccordionRows = <Summary, Body>({
                     const panelId = `${ownerId}-panel-${index}`
                     return (
                         <div
-                            className="starci-core-accordion-row"
-                            data-component="SurfaceAccordionCardItem"
+                            className={accordionRowClassName}
                             data-grammar-accordion-row="true"
                             data-grammar-disclosure-state={item.isOpen ? "open" : "closed"}
                             key={item.id}
                         >
-                            <h3 className="starci-core-accordion-heading">
+                            <h3 className={accordionHeadingClassName}>
                                 <button
                                     aria-controls={panelId}
                                     aria-expanded={item.isOpen}
-                                    className="starci-core-accordion-trigger"
+                                    className={accordionTriggerClassName}
                                     disabled={item.isDisabled}
                                     id={triggerId}
                                     onClick={() => onItemOpenChange(item.id, !item.isOpen)}
@@ -91,7 +87,7 @@ const SurfaceAccordionRows = <Summary, Body>({
                             {item.isOpen ? (
                                 <div
                                     aria-labelledby={triggerId}
-                                    className="starci-core-accordion-panel"
+                                    className={accordionPanelClassName}
                                     id={panelId}
                                     role="region"
                                 >
@@ -107,30 +103,28 @@ const SurfaceAccordionRows = <Summary, Body>({
 }
 
 /** Draw one full-width joined disclosure surface whose reusable anatomy is owned by Core Grammar. */
-export const SurfaceAccordionCard = <Summary, Body>(input: SurfaceAccordionCardProps<Summary, Body>) => input.items === undefined
+export const SurfaceAccordionCard = <Summary, Body>(props: SurfaceAccordionCardProps<Summary, Body>) => props.items === undefined
     ? (
         <SurfaceAccordionRows
-            {...(input.depth === undefined ? {} : { depth: input.depth })}
+            {...(props.depth === undefined ? {} : { depth: props.depth })}
             items={[{
                 id: "surface-accordion-item",
-                isOpen: input.isOpen,
-                ...(input.isDisabled === undefined ? {} : { isDisabled: input.isDisabled }),
-                summaryRender: input.summaryRender,
-                bodyRender: input.bodyRender,
+                isOpen: props.isOpen,
+                ...(props.isDisabled === undefined ? {} : { isDisabled: props.isDisabled }),
+                summaryRender: props.summaryRender,
+                bodyRender: props.bodyRender,
             }]}
-            renderSummary={input.renderSummary}
-            renderBody={input.renderBody}
-            onItemOpenChange={(_id, isOpen) => input.onOpenChange(isOpen)}
+            renderSummary={props.renderSummary}
+            renderBody={props.renderBody}
+            onItemOpenChange={(_id, isOpen) => props.onOpenChange(isOpen)}
         />
     )
     : (
         <SurfaceAccordionRows
-            {...(input.depth === undefined ? {} : { depth: input.depth })}
-            items={input.items}
-            renderSummary={input.renderSummary}
-            renderBody={input.renderBody}
-            onItemOpenChange={input.onItemOpenChange}
+            {...(props.depth === undefined ? {} : { depth: props.depth })}
+            items={props.items}
+            renderSummary={props.renderSummary}
+            renderBody={props.renderBody}
+            onItemOpenChange={props.onItemOpenChange}
         />
     )
-
-export const meta = { shape: "branch", grammar: "core", contract: "core.branch.surface-accordion-card" } as const

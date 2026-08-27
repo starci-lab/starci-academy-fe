@@ -1,17 +1,22 @@
 import { SurfaceCard as GrammarSurfaceCard } from "@starci/grammar/core"
-import { Tree } from "@/components/branches/Tree"
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { Button } from "@/components/leaves/Button"
 import { Heading } from "@/components/leaves/Heading"
 import { Text } from "@/components/leaves/Text"
-import {
-    defineCompositeComponent,
-    defineContractComponent,
-    defineContractProjection,
-    defineLeafComponent,
-} from "@/components/contracts/props"
 import type { FlashcardSessionMode } from "@/modules/api/graphql/queries/query-my-in-progress-flashcard-session"
+import {
+    flashcardEvidenceClassName,
+    flashcardFactListClassName,
+    flashcardFactRowClassName,
+    flashcardResultBodyClassName,
+    flashcardResultWorkspaceClassName,
+    flashcardStatClassName,
+    flashcardStatGridClassName,
+    flashcardSummaryClassName,
+    nextActionClassName,
+    titlePairClassName,
+} from "./classNames"
 
 /** One resolved weak-topic row from a persisted result projection. */
 export type CourseFlashcardResultWeakTopic = {
@@ -22,7 +27,7 @@ export type CourseFlashcardResultWeakTopic = {
 /** Pure result input after its route-specific projection resolves. */
 export type CourseFlashcardResultBlockState = "pending" | "ready" | "failed"
 /** Resolved flashcard result data and route actions owned by the block. */
-export type FlashcardResultBlockProps = {
+export type FlashcardResultProps = {
     readonly blockState: CourseFlashcardResultBlockState
     readonly data: {
         readonly mode: FlashcardSessionMode
@@ -56,8 +61,8 @@ export type FlashcardResultBlockProps = {
 }
 
 /** Renders the stable review/quiz result URL with score, history, and onward actions. */
-export const FlashcardResultBase = (input: FlashcardResultBlockProps) => {
-    const { blockState, data, on } = input
+export const FlashcardResultBase = (props: FlashcardResultProps) => {
+    const { blockState, data, on } = props
     const isLoading = blockState === "pending"
     const statValues = [
         [data.scoreLabel, data.scoreText],
@@ -65,130 +70,29 @@ export const FlashcardResultBase = (input: FlashcardResultBlockProps) => {
         [data.xpLabel, data.xpText],
         [data.durationLabel, data.durationText],
     ] as const
-    const header = defineContractComponent("centred-title-pair", {
-        title: defineLeafComponent("heading", {}, () => (
-            <Heading props={{ content: data.title, level: 1 }} isLoading={isLoading} />
-        )),
-        description: defineLeafComponent("text", { size: "sm" }, () => (
-            <Text props={{ content: data.subtitle, size: "sm", tone: "muted" }} isLoading={isLoading} />
-        )),
-    })
-    const stats = blockState === "failed"
-        ? undefined
-        : statValues.map(([label, value]) => defineContractComponent("flashcard-result-stat", {
-            label: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                <Text props={{ content: label, size: "xs" }} isLoading={isLoading} />
-            )),
-            value: defineLeafComponent("heading", {}, () => (
-                <Heading props={{ content: value, level: 2 }} isLoading={isLoading} />
-            )),
-        }))
-    const nextDue = blockState === "ready" && data.nextDueText !== undefined
-        ? defineContractComponent("centred-title-pair", {
-            title: defineLeafComponent("heading", {}, () => (
-                <Heading props={{ content: data.nextDueLabel, level: 3 }} />
-            )),
-            description: defineLeafComponent("text", { size: "sm" }, () => (
-                <Text props={{ content: data.nextDueText, size: "sm", weight: "semibold" }} />
-            )),
-        })
-        : undefined
-    const grades = blockState === "ready"
-        ? data.gradeRows.map((row) => defineContractComponent("flashcard-result-fact-row", {
-            label: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
-                <Text props={{ content: row.label, size: "sm", weight: "medium" }} />
-            )),
-            value: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                <Text props={{ content: row.value.toString(), size: "sm", tone: "muted" }} />
-            )),
-        }))
-        : undefined
-    const weakTopics = blockState === "ready"
-        ? data.weakTopics.map((topic) => defineContractComponent("flashcard-result-fact-row", {
-            label: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
-                <Text props={{ content: topic.tag, size: "sm", weight: "medium" }} />
-            )),
-            value: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                <Text props={{ content: topic.value, size: "sm", tone: "muted" }} />
-            )),
-        }))
-        : undefined
-    const actions = blockState === "ready"
-        ? [
-            defineLeafComponent("button", {}, () => (
-                <Button props={{ label: data.retrySessionLabel, variant: "primary" }} on={{ press: on.retrySession }} />
-            )),
-            defineLeafComponent("button", {}, () => (
-                <Button props={{ label: data.backLabel, variant: "outline" }} on={{ press: on.back }} />
-            )),
-        ]
-        : undefined
-    const notice = blockState === "failed"
-        ? defineCompositeComponent("empty-notice", {}, () => (
-            <EmptyNotice
-                props={{ message: data.failedText, actionLabel: data.retryLabel }}
-                on={{ act: on.retryLoad }}
-            />
-        ))
-        : undefined
     const grammarState = blockState === "pending" ? "pending" : blockState === "failed" ? "negative" : "affirmative"
-
-    const summary = blockState === "failed" ? undefined : defineContractProjection("flashcard-result-summary-card", () => (
-        <SurfaceCard
-            contract="flashcard-result-summary-card"
-            render={defineContractComponent("flashcard-result-summary-card", {
-                mode: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                    <Text props={{ content: data.modeText, size: "sm", tone: "muted" }} />
-                )),
-                header,
-                stats: stats === undefined ? undefined : defineContractComponent("flashcard-result-stat-grid", { stat: stats }),
-            })}
-        />
-    ))
-    const breakdown = blockState === "ready" && grades !== undefined && grades.length > 0
-        ? defineContractProjection("flashcard-result-fact-list", () => (
-            <SurfaceCard
-                props={{ label: data.breakdownTitle }}
-                contract="flashcard-result-fact-list"
-                render={defineContractComponent("flashcard-result-fact-list", { fact: grades })}
-            />
-        ))
-        : undefined
-    const weakTopicEvidence = blockState === "ready" && weakTopics !== undefined && weakTopics.length > 0
-        ? defineContractProjection("flashcard-result-fact-list", () => (
-            <SurfaceCard
-                props={{ label: data.weakTopicsTitle }}
-                contract="flashcard-result-fact-list"
-                render={defineContractComponent("flashcard-result-fact-list", { fact: weakTopics })}
-            />
-        ))
-        : undefined
-    const body = blockState !== "ready" || actions === undefined ? undefined : defineContractComponent("flashcard-result-body", {
-        evidence: defineContractComponent("flashcard-result-evidence-column", {
-            breakdown,
-            weakTopics: weakTopicEvidence,
-        }),
-        next: defineContractProjection("flashcard-result-next-action-panel", () => (
-            <SurfaceCard
-                contract="flashcard-result-next-action-panel"
-                render={defineContractComponent("flashcard-result-next-action-panel", {
-                    nextDue,
-                    action: actions,
-                })}
-            />
-        )),
-    })
-
     return (
         <GrammarSurfaceCard ariaLabel={data.title} frame="frameless" state={grammarState}>
-            <Tree contract="flashcard-result-workspace" render={defineContractComponent("flashcard-result-workspace", {
-                summary,
-                body,
-                notice,
-            })} />
+            <main className={flashcardResultWorkspaceClassName}>
+                {blockState === "failed" ? <EmptyNotice props={{ message: data.failedText, actionLabel: data.retryLabel }} on={{ act: on.retryLoad }} /> : <>
+                    <SurfaceCard><section className={flashcardSummaryClassName}>
+                        <Text props={{ content: data.modeText, size: "sm", tone: "muted" }} />
+                        <div className={titlePairClassName}><Heading props={{ content: data.title, level: 1 }} isLoading={isLoading} /><Text props={{ content: data.subtitle, size: "sm", tone: "muted" }} isLoading={isLoading} /></div>
+                        <div className={flashcardStatGridClassName}>{statValues.map(([label, value]) => <div key={label} className={flashcardStatClassName}><Text props={{ content: label, size: "xs" }} isLoading={isLoading} /><Heading props={{ content: value, level: 2 }} isLoading={isLoading} /></div>)}</div>
+                    </section></SurfaceCard>
+                    {blockState === "ready" ? <div className={flashcardResultBodyClassName}>
+                        <div className={flashcardEvidenceClassName}>
+                            {data.gradeRows.length === 0 ? null : <SurfaceCard props={{ label: data.breakdownTitle }}><div className={flashcardFactListClassName}>{data.gradeRows.map((row) => <div key={row.label} className={flashcardFactRowClassName}><Text props={{ content: row.label, size: "sm", weight: "medium" }} /><Text props={{ content: row.value.toString(), size: "sm", tone: "muted" }} /></div>)}</div></SurfaceCard>}
+                            {data.weakTopics.length === 0 ? null : <SurfaceCard props={{ label: data.weakTopicsTitle }}><div className={flashcardFactListClassName}>{data.weakTopics.map((topic) => <div key={topic.tag} className={flashcardFactRowClassName}><Text props={{ content: topic.tag, size: "sm", weight: "medium" }} /><Text props={{ content: topic.value, size: "sm", tone: "muted" }} /></div>)}</div></SurfaceCard>}
+                        </div>
+                        <SurfaceCard><aside className={nextActionClassName}>
+                            {data.nextDueText === undefined ? null : <div className={titlePairClassName}><Heading props={{ content: data.nextDueLabel, level: 3 }} /><Text props={{ content: data.nextDueText, size: "sm", weight: "semibold" }} /></div>}
+                            <Button props={{ label: data.retrySessionLabel, variant: "primary" }} on={{ press: on.retrySession }} />
+                            <Button props={{ label: data.backLabel, variant: "outline" }} on={{ press: on.back }} />
+                        </aside></SurfaceCard>
+                    </div> : null}
+                </>}
+            </main>
         </GrammarSurfaceCard>
     )
 }
-
-/** Canon metadata for the pure page half. */
-export const meta = { world: "pure", domain: "learn" } as const

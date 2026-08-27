@@ -1,6 +1,5 @@
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { SurfaceListCard, type SurfaceListCardData } from "@/components/branches/SurfaceListCard"
-import { Tree } from "@/components/branches/Tree"
+import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { Button } from "@/components/leaves/Button"
 import { ChoiceTabs } from "@/components/leaves/ChoiceTabs"
@@ -9,222 +8,27 @@ import { Heading } from "@/components/leaves/Heading"
 import { Pagination } from "@/components/leaves/Pagination"
 import { SearchBox } from "@/components/leaves/SearchBox"
 import { Text } from "@/components/leaves/Text"
-import {
-    defineCompositeComponent,
-    defineContractComponent,
-    defineContractProjection,
-    defineLeafComponent,
-    type LeafProps,
-} from "@/components/contracts/props"
 
-/** Presentation-owned category row; API response shapes stop at the connected mapper. */
+/** Presentation-owned foundation category row. */
 export type FoundationCategoryRow = { readonly id: string; readonly title: string; readonly description: string | null; readonly thumbnailUrl: string | null }
-/** Reader-selected presentation for the same category collection. */
+/** Reader-selected presentation for the category collection. */
 export type FoundationCategoryLayout = "grid" | "line"
+/** Resolved actions for the pure foundations catalog. */
+export type CourseFoundationsActions = { readonly openCategory?: (id: string) => void; readonly search?: (query: string) => void; readonly changeLayout?: (layout: FoundationCategoryLayout) => void; readonly page?: (page: number) => void; readonly enroll?: () => void; readonly retry?: () => void }
+/** Resolved state, copy and actions for the pure foundations hub. */
+export type CourseFoundationsBlockProps = { readonly state: "pending" | "ready" | "empty" | "failed" | "partial"; readonly props: { readonly title: string; readonly description: string; readonly empty: string; readonly failed: string; readonly retry: string; readonly search: string; readonly clearSearch: string; readonly count: string; readonly open: string; readonly pager: string; readonly previous: string; readonly next: string; readonly resultsTitle: string; readonly resultsDescription: string; readonly layoutLabel: string; readonly gridLabel: string; readonly lineLabel: string; readonly activeGrid: string; readonly activeLine: string; readonly layout: FoundationCategoryLayout; readonly page: number; readonly totalPages: number; readonly trialMessage?: string; readonly trialAction?: string; readonly categories: ReadonlyArray<FoundationCategoryRow> }; readonly on?: CourseFoundationsActions }
 
-/** Resolved actions for the pure foundation catalog. */
-export type CourseFoundationsBlockActions = {
-    readonly openCategory?: (id: string) => void
-    readonly search?: (query: string) => void
-    readonly changeLayout?: (layout: FoundationCategoryLayout) => void
-    readonly page?: (page: number) => void
-    readonly enroll?: () => void
-    readonly retry?: () => void
-    readonly [key: string]: ((...args: Array<never>) => void) | undefined
-}
-
-/** Resolved states, copy and actions for the pure foundations hub. */
-export type CourseFoundationsBlockProps = {
-    readonly state: "pending" | "ready" | "empty" | "failed" | "partial"
-    readonly props: {
-        readonly title: string
-        readonly description: string
-        readonly empty: string
-        readonly failed: string
-        readonly retry: string
-        readonly search: string
-        readonly clearSearch: string
-        readonly count: string
-        readonly open: string
-        readonly pager: string
-        readonly previous: string
-        readonly next: string
-        readonly resultsTitle: string
-        readonly resultsDescription: string
-        readonly layoutLabel: string
-        readonly gridLabel: string
-        readonly lineLabel: string
-        readonly activeGrid: string
-        readonly activeLine: string
-        readonly layout: FoundationCategoryLayout
-        readonly page: number
-        readonly totalPages: number
-        readonly trialMessage?: string
-        readonly trialAction?: string
-        readonly categories: ReadonlyArray<FoundationCategoryRow>
-    }
-    readonly on?: CourseFoundationsBlockActions
-}
-
-type FoundationCategoryListData = SurfaceListCardData & {
-    readonly categories: ReadonlyArray<FoundationCategoryRow>
-    readonly openLabel: string
-}
-
-/** One surface-free category row run mounted inside the single list-card ground. */
-const FoundationCategoryListView = ({ props, on, isLoading = false }: LeafProps<FoundationCategoryListData, CourseFoundationsBlockActions>) => (
-    <Tree
-        contract="foundation-category-destination-list"
-        render={defineContractComponent("foundation-category-destination-list", {
-            category: props.categories.map((category) => defineContractComponent("foundation-category-destination-row", {
-                artwork: defineLeafComponent("cover-image", {}, () => (
-                    <CoverImage props={{ src: category.thumbnailUrl, alt: "", ratio: "thumb" }} isLoading={isLoading} />
-                )),
-                identity: defineContractComponent("foundation-category-identity", {
-                    title: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
-                        <Text props={{ content: category.title, size: "sm", weight: "medium" }} isLoading={isLoading} />
-                    )),
-                    description: category.description === null ? undefined : defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                        <Text props={{ content: category.description ?? "", size: "sm", tone: "muted" }} isLoading={isLoading} />
-                    )),
-                }),
-                action: isLoading ? undefined : defineLeafComponent("button", {}, () => (
-                    <Button props={{ label: props.openLabel, variant: "ghost", size: "sm" }} on={{ press: () => on?.openCategory?.(category.id) }} />
-                )),
-            })),
-        })}
-    />
-)
-
-const FoundationCategoryList = defineContractComponent("foundation-category-destination-list", FoundationCategoryListView)
-
-/** Draw the live foundation category catalog in pending, ready, empty and failed states. */
-export const CourseFoundationsBlockBase = (input: CourseFoundationsBlockProps) => {
-    const loading = input.state === "pending"
-    const categories: ReadonlyArray<FoundationCategoryRow> = loading && input.props.categories.length === 0
-        ? Array.from({ length: 10 }, (_, index) => ({ id: `pending-${index}`, title: "", description: null, thumbnailUrl: null }))
-        : input.props.categories
-    const notice = input.state === "empty" || input.state === "failed"
-        ? defineCompositeComponent("empty-notice", {}, () => (
-            <EmptyNotice
-                props={{
-                    message: input.state === "failed" ? input.props.failed : input.props.empty,
-                    actionLabel: input.state === "failed" ? input.props.retry : undefined,
-                }}
-                on={{ act: input.on?.retry }}
-            />
-        ))
-        : undefined
-
-    const toolbar = defineContractComponent("catalog-search-count-view-row", {
-        search: defineContractComponent("catalog-query-with-count", {
-            query: defineLeafComponent("search-box", {}, () => (
-                <SearchBox
-                    props={{ label: input.props.search, placeholder: input.props.search, clearLabel: input.props.clearSearch }}
-                    on={{ search: input.on?.search }}
-                />
-            )),
-            count: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                <Text props={{ content: input.props.count, size: "sm", tone: "muted" }} isLoading={loading} />
-            )),
-        }),
-        view: defineLeafComponent("choice-tabs", {}, () => (
-            <ChoiceTabs
-                props={{
-                    label: input.props.layoutLabel,
-                    selectedKey: input.props.layout,
-                    variant: "primary",
-                    tabs: [
-                        { id: "grid", label: input.props.gridLabel, icon: "viewGrid" },
-                        { id: "line", label: input.props.lineLabel, icon: "viewList" },
-                    ],
-                }}
-                on={{ select: (layout) => input.on?.changeLayout?.(layout === "line" ? "line" : "grid") }}
-            />
-        )),
-    })
-
-    const collection = categories.length === 0
-        ? undefined
-        : input.props.layout === "line"
-            ? defineContractProjection("foundation-category-destination-list", () => (
-                <SurfaceListCard
-                    contract="foundation-category-destination-list"
-                    render={FoundationCategoryList}
-                    props={{ label: input.props.resultsTitle, isLabelHidden: true, categories: [...categories], openLabel: input.props.open }}
-                    on={input.on}
-                    isLoading={loading}
-                />
-            ))
-            : defineContractComponent("foundation-category-card-grid", {
-                category: categories.map((category) => defineContractProjection("foundation-category-grid-card", () => (
-                    <SurfaceCard
-                        contract="foundation-category-grid-card"
-                        render={defineContractComponent("foundation-category-grid-card", {
-                            artwork: defineLeafComponent("cover-image", {}, () => (
-                                <CoverImage props={{ src: category.thumbnailUrl, alt: "", ratio: "wide" }} isLoading={loading} />
-                            )),
-                            body: defineContractComponent("foundation-category-grid-card-body", {
-                                identity: defineContractComponent("foundation-category-identity", {
-                                    title: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
-                                        <Text props={{ content: category.title, size: "sm", weight: "medium" }} isLoading={loading} />
-                                    )),
-                                    description: category.description === null ? undefined : defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                                        <Text props={{ content: category.description ?? "", size: "sm", tone: "muted" }} isLoading={loading} />
-                                    )),
-                                }),
-                                action: loading ? undefined : defineLeafComponent("button", {}, () => (
-                                    <Button props={{ label: input.props.open, variant: "ghost", size: "sm", icon: "next", iconPlacement: "trailing" }} on={{ press: () => input.on?.openCategory?.(category.id) }} />
-                                )),
-                            }),
-                        })}
-                        isLoading={loading}
-                    />
-                ))),
-            })
-
-    return (
-        <Tree contract="course-foundations-workspace" render={defineContractComponent("course-foundations-workspace", {
-            header: defineContractComponent("page-header-stack", {
-                title: defineLeafComponent("heading", {}, () => (
-                    <Heading props={{ content: input.props.title, level: 1 }} isLoading={loading} />
-                )),
-            }),
-            description: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                <Text props={{ content: input.props.description, size: "sm", tone: "muted" }} isLoading={loading} />
-            )),
-            trial: input.props.trialMessage === undefined ? undefined : defineContractComponent("foundation-trial-enrollment-nudge", {
-                message: defineLeafComponent("text", { size: "sm" }, () => <Text props={{ content: input.props.trialMessage ?? "", size: "sm" }} />),
-                action: input.props.trialAction === undefined ? undefined : defineLeafComponent("button", {}, () => (
-                    <Button props={{ label: input.props.trialAction ?? "", variant: "secondary", size: "sm" }} on={{ press: input.on?.enroll }} />
-                )),
-            }),
-            toolbar,
-            results: defineContractComponent("foundation-category-result-run", {
-                header: defineContractComponent("foundation-category-results-header", {
-                    identity: defineContractComponent("foundation-category-results-identity", {
-                        title: defineLeafComponent("heading", {}, () => (
-                            <Heading props={{ content: input.props.resultsTitle, level: 2 }} />
-                        )),
-                        description: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                            <Text props={{ content: input.props.resultsDescription, size: "sm", tone: "muted" }} />
-                        )),
-                    }),
-                    status: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                        <Text
-                            props={{ content: input.props.layout === "grid" ? input.props.activeGrid : input.props.activeLine, size: "xs", tone: "muted", live: "polite" }}
-                        />
-                    )),
-                }),
-                collection,
-                notice,
-                pager: (input.state === "ready" || input.state === "partial") && input.props.totalPages > 1 ? defineLeafComponent("pagination", {}, () => (
-                    <Pagination
-                        props={{ label: input.props.pager, total: input.props.totalPages, page: input.props.page, previousLabel: input.props.previous, nextLabel: input.props.next }}
-                        on={{ change: input.on?.page }}
-                    />
-                )) : undefined,
-            }),
-        })} />
-    )
+/** Draw the live foundation category catalog in all transport states. */
+export const CourseFoundationsBlockBase = (props: CourseFoundationsBlockProps) => {
+    const loading = props.state === "pending"
+    const categories = loading && props.props.categories.length === 0 ? Array.from({ length: 10 }, (_unused, index) => ({ id: `pending-${index}`, title: "", description: null, thumbnailUrl: null })) : props.props.categories
+    return <main aria-label={props.props.title}>
+        <header><Heading props={{ content: props.props.title, level: 1 }} isLoading={loading} /><Text props={{ content: props.props.description, size: "sm", tone: "muted" }} isLoading={loading} /></header>
+        {props.props.trialMessage === undefined ? null : <section><Text props={{ content: props.props.trialMessage, size: "sm" }} /><Button props={{ label: props.props.trialAction ?? "", variant: "secondary", size: "sm" }} on={{ press: props.on?.enroll }} /></section>}
+        <section aria-label={props.props.search}><SearchBox props={{ label: props.props.search, placeholder: props.props.search, clearLabel: props.props.clearSearch }} on={{ search: props.on?.search }} /><Text props={{ content: props.props.count, size: "sm", tone: "muted" }} isLoading={loading} /><ChoiceTabs props={{ label: props.props.layoutLabel, selectedKey: props.props.layout, variant: "primary", tabs: [{ id: "grid", label: props.props.gridLabel, icon: "viewGrid" }, { id: "line", label: props.props.lineLabel, icon: "viewList" }] }} on={{ select: (layout) => props.on?.changeLayout?.(layout === "line" ? "line" : "grid") }} /></section>
+        <section aria-label={props.props.resultsTitle}><Heading props={{ content: props.props.resultsTitle, level: 2 }} /><Text props={{ content: props.props.resultsDescription, size: "sm", tone: "muted" }} /><Text props={{ content: props.props.layout === "grid" ? props.props.activeGrid : props.props.activeLine, size: "xs", tone: "muted", live: "polite" }} />
+            {props.state === "empty" || props.state === "failed" ? <EmptyNotice props={{ message: props.state === "failed" ? props.props.failed : props.props.empty, actionLabel: props.state === "failed" ? props.props.retry : undefined }} on={{ act: props.on?.retry }} /> : props.props.layout === "line" ? <SurfaceListCard props={{ label: props.props.resultsTitle, isLabelHidden: true }} isLoading={loading}><ul>{categories.map((category) => <li key={category.id}><CoverImage props={{ src: category.thumbnailUrl, alt: "", ratio: "thumb" }} isLoading={loading} /><Text props={{ content: category.title, size: "sm", weight: "medium" }} isLoading={loading} />{category.description === null ? null : <Text props={{ content: category.description, size: "sm", tone: "muted" }} isLoading={loading} />} {!loading && <Button props={{ label: props.props.open, variant: "ghost", size: "sm" }} on={{ press: () => props.on?.openCategory?.(category.id) }} />}</li>)}</ul></SurfaceListCard> : <div>{categories.map((category) => <SurfaceCard key={category.id} isLoading={loading}><CoverImage props={{ src: category.thumbnailUrl, alt: "", ratio: "wide" }} isLoading={loading} /><Text props={{ content: category.title, size: "sm", weight: "medium" }} isLoading={loading} />{category.description === null ? null : <Text props={{ content: category.description, size: "sm", tone: "muted" }} isLoading={loading} />} {!loading && <Button props={{ label: props.props.open, variant: "ghost", size: "sm", icon: "next", iconPlacement: "trailing" }} on={{ press: () => props.on?.openCategory?.(category.id) }} />}</SurfaceCard>)}</div>}
+            {(props.state === "ready" || props.state === "partial") && props.props.totalPages > 1 ? <Pagination props={{ label: props.props.pager, total: props.props.totalPages, page: props.props.page, previousLabel: props.props.previous, nextLabel: props.props.next }} on={{ change: props.on?.page }} /> : null}
+        </section>
+    </main>
 }

@@ -8,6 +8,3 @@ export const CoursePersonalProjectTaskPage = (props: CoursePersonalProjectTaskPa
 )
 
 export type { CoursePersonalProjectTaskPageProps }
-
-/** Source-level ownership marker for the route identity adapter. */
-export const meta = { world: "connected", domain: "learn" } as const

@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react"
 import { codeToHtml } from "shiki"
 import { FencedCodeBlock } from "@starci/grammar/core"
-import type { LeafProps } from "@/components/contracts/props"
 
 /**
  * BRANCH - `MarkdownCodeBlock`: a run of code inside an authored document, set apart from the prose.
@@ -35,7 +34,7 @@ import type { LeafProps } from "@/components/contracts/props"
  */
 
 /** What this leaf draws. */
-export type CodeBlockData = {
+export type MarkdownCodeBlockData = {
     /** The code exactly as authored - never trimmed, never re-indented. */
     readonly code: string
     /** The fence's language, when the author wrote one. */
@@ -44,7 +43,7 @@ export type CodeBlockData = {
 }
 
 /** Props for {@link CodeBlock}. */
-export type CodeBlockProps = LeafProps<CodeBlockData>
+export type MarkdownCodeBlockProps = { readonly props: MarkdownCodeBlockData }
 
 const LANGUAGE_LABELS: Readonly<Record<string, string>> = {
     bash: "Bash", csharp: "C#", cs: "C#", css: "CSS", dockerfile: "Dockerfile",
@@ -57,13 +56,13 @@ const LANGUAGE_LABELS: Readonly<Record<string, string>> = {
 /**
  * Draw a run of code.
  *
- * @param input - {@link CodeBlockProps}
+ * @param props - {@link MarkdownCodeBlockProps}
  */
-export const MarkdownCodeBlock = (input: CodeBlockProps) => {
+export const MarkdownCodeBlock = (props: MarkdownCodeBlockProps) => {
     const hostRef = useRef<HTMLDivElement>(null)
     const [visible, setVisible] = useState(false)
     const [html, setHtml] = useState<string>()
-    const language = input.props.language ?? "text"
+    const language = props.props.language ?? "text"
 
     useEffect(() => {
         const host = hostRef.current
@@ -87,27 +86,24 @@ export const MarkdownCodeBlock = (input: CodeBlockProps) => {
         const theme = document.documentElement.classList.contains("dark")
             ? "material-theme-darker"
             : "material-theme-lighter"
-        void codeToHtml(input.props.code, { lang: language, theme })
+        void codeToHtml(props.props.code, { lang: language, theme })
             .then((value) => { if (active) setHtml(value) })
             .catch(() => { if (active) setHtml(undefined) })
         return () => { active = false }
-    }, [input.props.code, language, visible])
+    }, [props.props.code, language, visible])
 
-    const copy = () => { void navigator.clipboard?.writeText(input.props.code) }
+    const copy = () => { void navigator.clipboard?.writeText(props.props.code) }
 
     return (
-        <div ref={hostRef} data-tier="branch" data-component="MarkdownCodeBlock">
+        <div ref={hostRef}>
             <FencedCodeBlock
                 language={LANGUAGE_LABELS[language.toLowerCase()] ?? language}
-                action={<button type="button" onClick={copy}>{input.props.copyLabel ?? "Copy"}</button>}
+                action={<button type="button" onClick={copy}>{props.props.copyLabel ?? "Copy"}</button>}
             >
                 {html === undefined
-                    ? <pre><code>{input.props.code}</code></pre>
+                    ? <pre><code>{props.props.code}</code></pre>
                     : <div data-grammar-fenced-code-highlight="true" dangerouslySetInnerHTML={{ __html: html }} />}
             </FencedCodeBlock>
         </div>
     )
 }
-
-/** Source-level tier marker. */
-export const meta = { shape: "branch", world: "pure" } as const

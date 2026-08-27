@@ -15,7 +15,7 @@ import { useJobVerdictSocketIo } from "@/hooks/socketio/useJobVerdictSocketIo"
 import { ChallengeResultBase } from "./component"
 
 /** Route identity required to resolve one deliverable's grading result. */
-export type ChallengeResultRouteProps = {
+export type ChallengeResultBlockProps = {
     readonly displayId: string
     readonly moduleId: string
     readonly contentId: string
@@ -29,7 +29,7 @@ type StaleEvaluationCandidate = {
 }
 
 /** Resolves the selected attempt and ordered feedback, polling until grading has settled. */
-export const ChallengeResultBlock = (input: ChallengeResultRouteProps) => {
+export const ChallengeResultBlock = (props: ChallengeResultBlockProps) => {
     const practice = useTranslations("practice")
     const contentText = useTranslations("learn.content")
     const router = useRouter()
@@ -40,12 +40,12 @@ export const ChallengeResultBlock = (input: ChallengeResultRouteProps) => {
     const routeJobId = searchParams.get("jobs")?.split(",")[0] || undefined
     const jobNotifications = useJobVerdictSocketIo(routeJobId)
     const [isHistoryOpen, setIsHistoryOpen] = useState(false)
-    const content = useQueryContentSwr({ id: input.contentId })
-    const course = useQueryCourseSwr({ displayId: input.displayId })
-    const module = useQueryModuleSwr({ id: input.moduleId })
+    const content = useQueryContentSwr({ id: props.contentId })
+    const course = useQueryCourseSwr({ displayId: props.displayId })
+    const module = useQueryModuleSwr({ id: props.moduleId })
     const submit = useMutateSubmitContentChallengeSwr()
     const challenge = content.data?.challenges?.find((candidate) => (
-        candidate.id === input.challengeId || candidate.displayId === input.challengeId
+        candidate.id === props.challengeId || candidate.displayId === props.challengeId
     ))
     const attempts = useQueryContentChallengeAttemptsSwr(
         course.data?.id,
@@ -100,7 +100,7 @@ export const ChallengeResultBlock = (input: ChallengeResultRouteProps) => {
         () => [...(module.data?.contents ?? [])].sort((first, second) => first.orderIndex - second.orderIndex),
         [module.data?.contents],
     )
-    const contentPosition = orderedContents.findIndex((candidate) => candidate.id === input.contentId)
+    const contentPosition = orderedContents.findIndex((candidate) => candidate.id === props.contentId)
     const nextContent = contentPosition === -1 ? undefined : orderedContents[contentPosition + 1]
     const loadError = [content.error,
         course.error,
@@ -156,11 +156,11 @@ export const ChallengeResultBlock = (input: ChallengeResultRouteProps) => {
         || feedbacks.data === undefined
     )
     const readerPath = nextContent === undefined
-        ? `/courses/${input.displayId}/learn/content/modules/${input.moduleId}/contents/${input.contentId}`
-        : `/courses/${input.displayId}/learn/content/modules/${input.moduleId}/contents/${nextContent.id}`
+        ? `/courses/${props.displayId}/learn/content/modules/${props.moduleId}/contents/${props.contentId}`
+        : `/courses/${props.displayId}/learn/content/modules/${props.moduleId}/contents/${nextContent.id}`
     const challengePath = (
-        `/courses/${input.displayId}/learn/content/modules/${input.moduleId}/contents/${input.contentId}`
-        + `/challenges/${input.challengeId}`
+        `/courses/${props.displayId}/learn/content/modules/${props.moduleId}/contents/${props.contentId}`
+        + `/challenges/${props.challengeId}`
     )
     const totalScore = groupedAttempts.reduce((sum, attempt) => sum + (attempt.score ?? 0), 0)
     const maxScore = submissions.data?.reduce((sum, item) => sum + item.score, 0) ?? challenge?.score
@@ -274,9 +274,9 @@ export const ChallengeResultBlock = (input: ChallengeResultRouteProps) => {
                 selectedAttemptId: selectedAttempt?.id,
                 isHistoryOpen,
                 breadcrumbLabel: contentText("challengeBreadcrumb"),
-                courseTitle: course.data?.title ?? input.displayId,
-                moduleTitle: module.data?.title ?? input.moduleId,
-                contentTitle: content.data?.title ?? input.contentId,
+                courseTitle: course.data?.title ?? props.displayId,
+                moduleTitle: module.data?.title ?? props.moduleId,
+                contentTitle: content.data?.title ?? props.contentId,
             }}
             on={{
                 reload: () => {
@@ -295,9 +295,9 @@ export const ChallengeResultBlock = (input: ChallengeResultRouteProps) => {
                 },
                 retry: () => router.push(challengePath),
                 next: () => router.push(readerPath),
-                openCourse: () => router.push(`/courses/${input.displayId}/learn`),
-                openModule: () => router.push(`/courses/${input.displayId}/learn/content/modules/${input.moduleId}/contents/${input.contentId}`),
-                openContent: () => router.push(`/courses/${input.displayId}/learn/content/modules/${input.moduleId}/contents/${input.contentId}`),
+                openCourse: () => router.push(`/courses/${props.displayId}/learn`),
+                openModule: () => router.push(`/courses/${props.displayId}/learn/content/modules/${props.moduleId}/contents/${props.contentId}`),
+                openContent: () => router.push(`/courses/${props.displayId}/learn/content/modules/${props.moduleId}/contents/${props.contentId}`),
                 openHistory: () => setIsHistoryOpen(true),
                 closeHistory: () => setIsHistoryOpen(false),
                 selectHistoryAttempt: (selectedId, selectedGroupId) => {
@@ -314,4 +314,3 @@ export const ChallengeResultBlock = (input: ChallengeResultRouteProps) => {
 }
 
 /** Architectural identity for the connected result twin. */
-export const meta = { world: "connected", domain: "learn" } as const

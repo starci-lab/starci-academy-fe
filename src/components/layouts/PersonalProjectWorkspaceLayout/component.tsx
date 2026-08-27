@@ -1,8 +1,6 @@
 import type { ReactNode } from "react"
-import { Tree } from "@/components/branches/Tree"
 import { RailDivider } from "@/components/leaves/RailDivider"
 import { PersonalProjectContentMap } from "@/components/blocks/learn/PersonalProjectContentMap"
-import { defineContractComponent, defineContractProjection, defineLeafComponent } from "@/components/contracts/props"
 
 /**
  * LAYOUT - `PersonalProjectWorkspaceLayoutBase`: the frame every personal-project surface is read
@@ -20,7 +18,7 @@ import { defineContractComponent, defineContractProjection, defineLeafComponent 
  * belongs to the shared panel.
  */
 
-/** Pure workspace frame data and routed surface contract. */
+/** Pure workspace frame data and routed surface content. */
 export type PersonalProjectWorkspaceLayoutProps = {
     /** The routed surface - the one thing the frame does not decide. */
     readonly surface: ReactNode
@@ -29,34 +27,20 @@ export type PersonalProjectWorkspaceLayoutProps = {
 }
 
 /** Keeps the shared course map mounted around dashboard, task and result surfaces. */
-export const PersonalProjectWorkspaceLayoutBase = (input: PersonalProjectWorkspaceLayoutProps) => (
-    <Tree
-        contract="personal-project-workspace-frame"
-        render={defineContractComponent("personal-project-workspace-frame", {
-            rail: defineContractComponent("personal-project-milestone-rail", {
-                panel: defineContractProjection("content-map-panel", () => (
-                    <PersonalProjectContentMap />
-                )),
-            }),
-            // Milestone labels are authored content, so this route rail resizes instead of
-            // collapsing them into an icon-only state that cannot preserve their meaning.
-            divider: defineLeafComponent("rail-divider", {}, () => (
-                <RailDivider
-                    props={{
-                        label: input.resizeLabel,
-                        storageKey: "starci.learn.milestoneMap.width",
-                        defaultWidth: 320,
-                        minWidth: 256,
-                        maxWidth: 560,
-                    }}
-                />
-            )),
-            body: defineContractComponent("learn-routed-body", {
-                page: defineLeafComponent("page", {}, () => <>{input.surface}</>),
-            }),
-        })}
-    />
+export const PersonalProjectWorkspaceLayoutBase = (props: PersonalProjectWorkspaceLayoutProps) => (
+    <>
+        <aside><PersonalProjectContentMap /></aside>
+        {/* Milestone labels are authored content, so this route rail resizes instead of
+                collapsing them into an icon-only state that cannot preserve their meaning. */}
+        <RailDivider
+            props={{
+                label: props.resizeLabel,
+                storageKey: "starci.learn.milestoneMap.width",
+                defaultWidth: 320,
+                minWidth: 256,
+                maxWidth: 560,
+            }}
+        />
+        <main>{props.surface}</main>
+    </>
 )
-
-/** Architectural identity for the pure personal-project layout twin. */
-export const meta = { shape: "layout", world: "pure", domain: "learn" } as const

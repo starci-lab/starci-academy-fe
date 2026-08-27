@@ -1,4 +1,4 @@
-import type { LeafProps } from "@/components/contracts/props"
+import { codeBlockClassName, codeBlockLanguageClassName, codeBlockPreClassName } from "./classNames"
 
 /** Plain code used outside authored Markdown documents. */
 export type CodeBlockData = {
@@ -7,15 +7,12 @@ export type CodeBlockData = {
 }
 
 /** Props for the plain code leaf. */
-export type CodeBlockProps = LeafProps<CodeBlockData>
+export type CodeBlockProps = { readonly props: CodeBlockData; readonly isLoading?: boolean }
 
 /** Draw one non-document code value without owning Markdown viewer chrome. */
-export const CodeBlock = (input: CodeBlockProps) => (
-    <div data-tier="leaf" data-component="CodeBlock" className="flex w-full min-w-0 flex-col gap-2 rounded-medium bg-surface p-4">
-        {input.props.language === undefined ? null : <span className="text-xs leading-4 text-muted">{input.props.language}</span>}
-        <pre className="w-full min-w-0 overflow-x-auto whitespace-pre-wrap break-words font-mono text-sm leading-5 text-foreground"><code>{input.props.code}</code></pre>
+export const CodeBlock = (props: CodeBlockProps) => (
+    <div className={codeBlockClassName}>
+        {props.props.language === undefined ? null : <span className={codeBlockLanguageClassName}>{props.props.language}</span>}
+        <pre className={codeBlockPreClassName}><code>{props.props.code}</code></pre>
     </div>
 )
-
-/** Source-level tier marker. */
-export const meta = { shape: "leaf", world: "pure" } as const

@@ -77,15 +77,15 @@ const COPY = {
 
 const isGithubRepository = (value: string) => /^https:\/\/github\.com\/[^/\s]+\/[^/\s]+\/?$/u.test(value.trim())
 
-/** Resolves real task/settings contracts, persists grading choices and opens the result route. */
-export const PersonalProjectTask = ({ displayId, taskId }: PersonalProjectTaskProps) => {
+/** Resolves real task/settings data, persists grading choices and opens the result route. */
+export const PersonalProjectTask = (props: PersonalProjectTaskProps) => {
     const locale = useLocale()
     const copy = locale === "vi" ? COPY.vi : COPY.en
     const router = useRouter()
-    const project = useQueryCoursePersonalProjectSwr(displayId)
+    const project = useQueryCoursePersonalProjectSwr(props.displayId)
     const courseId = project.data?.course.id
-    const workspace = useQueryPersonalProjectTaskWorkspaceSwr(courseId, taskId)
-    const attempts = useQueryPersonalTaskAttemptsSwr(courseId, taskId)
+    const workspace = useQueryPersonalProjectTaskWorkspaceSwr(courseId, props.taskId)
+    const attempts = useQueryPersonalTaskAttemptsSwr(courseId, props.taskId)
     const submission = useMutateSubmitPersonalTaskAttemptSwr()
     const [repository, setRepository] = useState("")
     const [repositoryTouched, setRepositoryTouched] = useState(false)
@@ -101,7 +101,7 @@ export const PersonalProjectTask = ({ displayId, taskId }: PersonalProjectTaskPr
     const task = workspace.data?.task
     const roadmapTask = project.data?.milestones
         .flatMap((milestone) => milestone.tasks)
-        .find((item) => item.id === taskId)
+        .find((item) => item.id === props.taskId)
     const selectedLanguage = task?.briefs[0]?.lang ?? task?.codeImplementations[0]?.lang ?? "agnostic"
     const brief = task?.briefs.find((item) => item.lang === selectedLanguage)?.body
         ?? task?.briefs[0]?.body
@@ -152,13 +152,13 @@ export const PersonalProjectTask = ({ displayId, taskId }: PersonalProjectTaskPr
         try {
             await submission.trigger({
                 courseId,
-                taskId,
+                taskId: props.taskId,
                 githubUrl: repository,
                 branch: workspace.data?.repository.branch ?? null,
                 lang: selectedLanguage === "agnostic" ? undefined : selectedLanguage,
             })
             await Promise.all([project.mutate(), workspace.mutate(), attempts.mutate()])
-            router.push(`/courses/${displayId}/learn/personal-project/tasks/${taskId}/result`)
+            router.push(`/courses/${props.displayId}/learn/personal-project/tasks/${props.taskId}/result`)
         } catch {
             // Mutation hooks retain the backend error for the pure state mapper.
         }
@@ -183,7 +183,7 @@ export const PersonalProjectTask = ({ displayId, taskId }: PersonalProjectTaskPr
             labels: copy,
         }}
         on={{
-            back: () => router.push(`/courses/${displayId}/learn/personal-project`),
+            back: () => router.push(`/courses/${props.displayId}/learn/personal-project`),
             toggleBriefSection: (id, isOpen) => setExpandedBriefSectionIds((current) => isOpen
                 ? current.includes(id) ? current : [...current, id]
                 : current.filter((value) => value !== id)),
@@ -194,13 +194,10 @@ export const PersonalProjectTask = ({ displayId, taskId }: PersonalProjectTaskPr
                 if (state === "submission-error") void submit()
                 else void Promise.all([project.mutate(), workspace.mutate()])
             },
-            openFeedback: () => router.push(`/courses/${displayId}/learn/personal-project/tasks/${taskId}/result`),
-            openHistory: () => router.push(`/courses/${displayId}/learn/personal-project/tasks/${taskId}/result?history=1`),
+            openFeedback: () => router.push(`/courses/${props.displayId}/learn/personal-project/tasks/${props.taskId}/result`),
+            openHistory: () => router.push(`/courses/${props.displayId}/learn/personal-project/tasks/${props.taskId}/result?history=1`),
         }}
         settingsOverlay={PersonalProjectGradingSettingsDrawer}
-        settingsOverlayProps={courseId === undefined ? undefined : { courseId, taskId, isOpen: settingsOpen && state !== "forbidden", onDismiss: () => setSettingsOpen(false) }}
+        settingsOverlayProps={courseId === undefined ? undefined : { courseId, taskId: props.taskId, isOpen: settingsOpen && state !== "forbidden", onDismiss: () => setSettingsOpen(false) }}
     />
 }
-
-/** Source-level ownership marker for the connected learning page. */
-export const meta = { world: "connected", domain: "learn" } as const

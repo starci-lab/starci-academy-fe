@@ -1,14 +1,6 @@
 import { SurfaceListCard, type SurfaceListCardActions, type SurfaceListCardData } from "@/components/branches/SurfaceListCard"
-import { Tree } from "@/components/branches/Tree"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { SelectionList, type SelectionListItem } from "@/components/leaves/SelectionList"
-import {
-    defineCompositeComponent,
-    defineContractComponent,
-    defineContractProjection,
-    defineLeafComponent,
-    type LeafProps,
-} from "@/components/contracts/props"
 
 /** Existing list and empty-state data owned by the middle Global Search region. */
 export type GlobalSearchResultsData = SurfaceListCardData & {
@@ -32,56 +24,39 @@ export type GlobalSearchResultsProps = {
     readonly isLoading?: boolean
 }
 
-const ResultsListView = ({ props, on, isLoading = false }: LeafProps<GlobalSearchResultsData, GlobalSearchResultsActions>) => (
-    <Tree
-        contract="global-search-surface-list"
-        render={defineContractComponent("global-search-surface-list", {
-            list: [defineLeafComponent("selection-list", {}, () => (
-                <SelectionList
-                    props={{
-                        label: props.label,
-                        variant: "results",
-                        selectedKey: props.selectedKey,
-                        items: props.items,
-                    }}
-                    isLoading={isLoading}
-                    on={{ select: on?.select }}
-                />
-            ))],
-        })}
+const ResultsListView = ({ props, on, isLoading = false }: GlobalSearchResultsProps) => (
+    <SelectionList
+        props={{
+            label: props.label,
+            variant: "results",
+            selectedKey: props.selectedKey,
+            items: props.items,
+        }}
+        isLoading={isLoading}
+        on={{ select: on?.select }}
     />
 )
-
-const ResultsList = defineContractComponent("global-search-surface-list", ResultsListView)
 
 /** Draw a label-less nested list surface, or replace the whole middle region with EmptyNotice. */
-export const GlobalSearchResultsBase = (input: GlobalSearchResultsProps) => (
-    <Tree
-        contract="global-search-result-region"
-        render={defineContractComponent("global-search-result-region", {
-            list: input.props.items.length === 0 ? undefined : defineContractProjection("global-search-surface-list", () => (
-                <SurfaceListCard
-                    contract="global-search-surface-list"
-                    render={ResultsList}
-                    props={{ ...input.props, isNested: true, isLabelHidden: true }}
-                    on={input.on}
-                    isLoading={input.isLoading}
-                />
-            )),
-            notice: input.props.items.length > 0 ? undefined : defineCompositeComponent("empty-notice", {}, () => (
-                <EmptyNotice
-                    props={{
-                        icon: "search",
-                        message: input.props.emptyMessage,
-                        description: input.props.emptyDescription,
-                        actionLabel: input.props.emptyActionLabel,
-                    }}
-                    on={{ act: input.on?.recover }}
-                />
-            )),
-        })}
-    />
+export const GlobalSearchResultsBase = (props: GlobalSearchResultsProps) => (
+    <>
+        {props.props.items.length === 0 ? null : (
+            <SurfaceListCard
+                props={{ ...props.props, isNested: true, isLabelHidden: true }}
+                on={props.on}
+                isLoading={props.isLoading}
+            ><ResultsListView props={{ ...props.props, isNested: true, isLabelHidden: true }} on={props.on} isLoading={props.isLoading} /></SurfaceListCard>
+        )}
+        {props.props.items.length > 0 ? null : (
+            <EmptyNotice
+                props={{
+                    icon: "search",
+                    message: props.props.emptyMessage,
+                    description: props.props.emptyDescription,
+                    actionLabel: props.props.emptyActionLabel,
+                }}
+                on={{ act: props.on?.recover }}
+            />
+        )}
+    </>
 )
-
-/** Source-level ownership marker. */
-export const meta = { world: "pure", domain: "search" } as const

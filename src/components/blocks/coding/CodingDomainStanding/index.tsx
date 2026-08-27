@@ -9,7 +9,8 @@ import { CodingDomainStandingBase } from "./component"
 export type CodingDomainStandingProps = { readonly domain: string }
 
 /** Resolve the topic's solved count and render its independent standing block. */
-export const CodingDomainStanding = ({ domain }: CodingDomainStandingProps) => {
+export const CodingDomainStanding = (props: CodingDomainStandingProps) => {
+    const { domain } = props
     const t = useTranslations("practice")
     const problems = useQueryCodingProblemsSwr({ domain })
     const progress = useQueryMyCodingProgressSwr()
@@ -26,5 +27,3 @@ export const CodingDomainStanding = ({ domain }: CodingDomainStandingProps) => {
 }
 
 export { CodingDomainStandingBase } from "./component"
-/** Source-level ownership marker for the connected standing block. */
-export const meta = { world: "connected", domain: "coding" } as const

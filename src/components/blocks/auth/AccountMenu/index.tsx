@@ -23,7 +23,7 @@ export type AccountMenuProps = {
  * this half receives those resolved values and delegates the complete product sentence to its
  * pure twin.
  */
-export const AccountMenu = (input: AccountMenuProps) => {
+export const AccountMenu = (props: AccountMenuProps) => {
     const t = useTranslations("shell")
     const router = useRouter()
     const token = useSessionToken()
@@ -40,7 +40,7 @@ export const AccountMenu = (input: AccountMenuProps) => {
                     signInLabel: t("signIn"),
                     signUpLabel: t("signUp"),
                 }}
-                on={input.on}
+                on={props.on}
             />
         )
     }
@@ -86,6 +86,3 @@ export const AccountMenu = (input: AccountMenuProps) => {
         />
     )
 }
-
-/** Source-level tier marker for the account-menu block. */
-export const meta = { shape: "block", world: "connected", domain: "auth" } as const

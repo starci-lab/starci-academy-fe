@@ -6,7 +6,11 @@ import { useQueryResolveRouteSwr, useQueryTrendingContentsSwr } from "@/hooks"
 import { TrendingContentsBase } from "./component"
 
 /** Load ranked content and resolve its internal routes on demand. */
-export const TrendingContents = () => {
+/** Props for the connected trending contents block. */
+export type TrendingContentsProps = Record<string, never>
+/** Connect the TrendingContents block to its data source. */
+export const TrendingContents = (props: TrendingContentsProps) => {
+    void props
     const t = useTranslations("dashboard.explore")
     const router = useRouter()
     const query = useQueryTrendingContentsSwr()
@@ -25,5 +29,3 @@ export const TrendingContents = () => {
     }]))
     return <TrendingContentsBase state={query.data === undefined ? "pending" : "ready"} props={{ label: t("trending"), items }} on={on} />
 }
-/** Source-level ownership marker for the connected discovery block. */
-export const meta = { world: "connected", domain: "discovery" } as const

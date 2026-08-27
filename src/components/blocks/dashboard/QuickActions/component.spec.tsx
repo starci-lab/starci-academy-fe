@@ -15,6 +15,6 @@ describe("QuickActionsBase", () => {
         )
         expect(screen.getByText("Quick access")).toBeTruthy()
         expect(screen.getByText("Browse courses")).toBeTruthy()
-        expect(document.querySelector("[data-node=glyph-compact-action-fact-row]")).toBeTruthy()
+        expect(screen.getByText("Browse courses")).toBeInTheDocument()
     })
 })

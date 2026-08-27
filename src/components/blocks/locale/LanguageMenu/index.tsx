@@ -5,8 +5,12 @@ import { usePathname, useRouter } from "@/i18n/navigation"
 import { LOCALES, type Locale } from "@/i18n/config"
 import { LanguageMenuBase } from "./component"
 
+/** Props for the connected locale owner; the active locale comes from navigation state. */
+type LanguageMenuProps = Record<never, never>
 /** Connected locale owner: keeps the current path while replacing only its locale prefix. */
-export const LanguageMenu = () => {
+/** Keep the current route while switching its locale prefix. */
+export const LanguageMenu = (props: LanguageMenuProps) => {
+    void props
     const t = useTranslations("shell")
     const locale = useLocale() as Locale
     const pathname = usePathname()
@@ -27,6 +31,3 @@ export const LanguageMenu = () => {
         />
     )
 }
-
-/** Source-level tier marker for the connected language-menu block half. */
-export const meta = { shape: "block", world: "connected", domain: "locale" } as const

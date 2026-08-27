@@ -30,7 +30,7 @@ vi.mock("@/hooks/swr/useQueryCourseLeaderboardSwr", () => ({ useQueryCourseLeade
 vi.mock("@/hooks/swr/useQueryMyWeeklyStatsSwr", () => ({ useQueryMyWeeklyStatsSwr: () => mocks.weekly }))
 vi.mock("@/hooks/swr/useQueryResolveRouteSwr", () => ({ useQueryResolveRouteSwr: () => mocks.route }))
 vi.mock("@/components/layouts/LearnShellLayout", () => ({ useLearnMobileView: () => ({ view: mocks.view }) }))
-vi.mock("./component", () => ({ CourseLearnTodayBlockBase: (input: TestInput) => { mocks.input = input; return <output data-testid="today" /> } }))
+vi.mock("./component", () => ({ CourseLearnTodayBlockView: (props: TestInput) => { mocks.input = props; return <output data-testid="today" /> } }))
 
 import { CourseLearnTodayBlock } from "./index"
 

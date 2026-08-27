@@ -4,9 +4,11 @@ import { CourseHeadhuntingCompanyBlock } from "@/components/blocks/learn/CourseH
 export type CourseHeadhuntingCompanyPageProps = { readonly displayId: string; readonly companyId: string }
 
 /** Route shell composed from the connected company profile block. */
-export const CourseHeadhuntingCompanyPageBase = ({ displayId, companyId }: CourseHeadhuntingCompanyPageProps) => (
-    <CourseHeadhuntingCompanyBlock displayId={displayId} companyId={companyId} />
-)
+export const CourseHeadhuntingCompanyPageBase = (props: CourseHeadhuntingCompanyPageProps) => {
+    const { displayId, companyId } = props
+    return (
+        <CourseHeadhuntingCompanyBlock displayId={displayId} companyId={companyId} />
+    )
+}
 
 /** Ownership metadata for the route shell. */
-export const meta = { world: "pure", domain: "learn" } as const

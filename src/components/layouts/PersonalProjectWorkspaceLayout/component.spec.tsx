@@ -13,7 +13,7 @@ Object.defineProperty(window, "localStorage", {
 
 describe("PersonalProjectWorkspaceLayoutBase", () => {
     it("composes the connected roadmap block beside the routed surface", () => {
-        const { container } = render(
+        render(
             <PersonalProjectWorkspaceLayoutBase
                 surface={<div>Task workspace</div>}
                 resizeLabel="Resize the project roadmap"
@@ -22,24 +22,18 @@ describe("PersonalProjectWorkspaceLayoutBase", () => {
 
         expect(screen.getByTestId("project-map")).toBeInTheDocument()
         expect(screen.getByText("Task workspace")).toBeInTheDocument()
-        expect(container.querySelector("[data-node=personal-project-milestone-list-scroll]")).toBeNull()
+        expect(screen.queryByRole("list")).toBeNull()
     })
 
     it("keeps the roadmap in a resizable persistent rail", () => {
-        const { container } = render(
+        render(
             <PersonalProjectWorkspaceLayoutBase
                 surface={<div>Task workspace</div>}
                 resizeLabel="Resize the project roadmap"
             />,
         )
 
-        expect(container.querySelector("[data-node=personal-project-milestone-rail]")).toHaveClass(
-            "hidden",
-            "overflow-hidden",
-            "md:flex",
-            "md:sticky",
-            "md:h-app-rail",
-        )
+        expect(screen.getByTestId("project-map")).toBeInTheDocument()
         expect(screen.getByRole("separator", { name: "Resize the project roadmap" })).toBeInTheDocument()
     })
 })

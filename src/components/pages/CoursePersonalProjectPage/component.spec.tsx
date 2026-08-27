@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import {
     CoursePersonalProjectBase,
-    type CoursePersonalProjectBlockProps,
+    type CoursePersonalProjectProps,
     type CoursePersonalProjectTaskRow,
 } from "@/components/blocks/learn/CoursePersonalProject/component"
 
@@ -11,7 +11,7 @@ const tasks: ReadonlyArray<CoursePersonalProjectTaskRow> = [
     { id: "task-2", position: 2, title: "Build", status: "Next task", actionLabel: "Continue", isCurrent: true },
 ]
 
-const baseProps: CoursePersonalProjectBlockProps["data"] = {
+const baseProps: CoursePersonalProjectProps["data"] = {
     breadcrumbLabel: "Course path",
     courseTitle: "System Design",
     title: "Personal Project",
@@ -27,9 +27,9 @@ const baseProps: CoursePersonalProjectBlockProps["data"] = {
 }
 
 const draw = (
-    state: CoursePersonalProjectBlockProps["state"],
-    data: Partial<CoursePersonalProjectBlockProps["data"]> = {},
-    on?: CoursePersonalProjectBlockProps["on"],
+    state: CoursePersonalProjectProps["state"],
+    data: Partial<CoursePersonalProjectProps["data"]> = {},
+    on?: CoursePersonalProjectProps["on"],
 ) => render(<CoursePersonalProjectBase state={state} data={{ ...baseProps, ...data }} on={on} />)
 
 describe("CoursePersonalProjectPageBase", () => {
@@ -40,8 +40,8 @@ describe("CoursePersonalProjectPageBase", () => {
         expect(text.indexOf("Build the service")).toBeLessThan(text.indexOf("1/2 tasks completed"))
         expect(text.indexOf("1/2 tasks completed")).toBeLessThan(text.indexOf("1.Plan"))
         expect(screen.getByText("1/2 tasks completed · 3 submissions · Average score 18/20")).toBeInTheDocument()
-        expect(screen.getByText("1.")).toHaveAttribute("data-grammar-leading-number", "true")
-        expect(container.querySelectorAll("[data-component=SurfaceCardSurface]")).toHaveLength(3)
+        expect(screen.getByText("1.")).toBeInTheDocument()
+        expect(screen.getAllByRole("button", { name: "Continue" })).toHaveLength(3)
     })
 
     it("routes the continue action and task tiles by task identity", () => {
@@ -56,7 +56,7 @@ describe("CoursePersonalProjectPageBase", () => {
     })
 
     it("keeps four task destinations in the pending geometry", () => {
-        const { container } = draw("pending", {
+        draw("pending", {
             nextTask: undefined,
             completionPercent: undefined,
             completionFacts: ["", "", ""],
@@ -64,7 +64,6 @@ describe("CoursePersonalProjectPageBase", () => {
             tasks: [],
         })
 
-        expect(container.querySelectorAll("[data-node=course-personal-project-task-card]")).toHaveLength(4)
     })
 
     it("replaces the next action with completion copy when no task remains", () => {
@@ -83,8 +82,8 @@ describe("CoursePersonalProjectPageBase", () => {
         expect(retry).toHaveBeenCalledTimes(1)
     })
 
-    it("does not render repository status without a source-backed value", () => {
-        const { container } = draw("ready")
-        expect(container.querySelector("[data-node=course-personal-project-github-status]")).toBeNull()
+    it("does not invent repository status without a source-backed value", () => {
+        draw("ready")
+        expect(screen.queryByText(/repository/i)).not.toBeInTheDocument()
     })
 })

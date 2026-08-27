@@ -1,6 +1,6 @@
 import { Link as HeroLink } from "@heroui/react"
 import { Icon, type IconName } from "@/components/leaves/Icon"
-import type { LeafProps } from "@/components/contracts/props"
+import { linkBrandMarkClassName, linkBrandNameClassName, linkBrandSuffixClassName, linkBrandTextClassName, linkEmphasisClassNames } from "./classNames"
 
 /**
  * LEAF - `Link`: text that either reports internal navigation or opens an external destination.
@@ -29,15 +29,10 @@ export type LinkActions = {
     readonly press?: () => void
 }
 
-/** Props for {@link Link}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type LinkProps = LeafProps<LinkData, LinkActions>
+/** Props for {@link Link}. */
+export type LinkProps = { readonly props: LinkData; readonly on?: LinkActions; readonly isLoading?: boolean }
 
 /** The set per emphasis. */
-const EMPHASIS_CLASSES = {
-    default: "inline-flex items-center gap-2 text-sm",
-    muted: "inline-flex items-center gap-2 text-sm text-muted",
-    brand: "inline-flex items-center gap-2 text-foreground no-underline",
-} as const
 
 /** Resolved product name read by the intrinsic brand lockup. */
 type BrandLockupProps = { readonly label: string }
@@ -48,7 +43,7 @@ const BrandLockup = ({ label }: BrandLockupProps) => (
         <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 512 512"
-            className="h-10 w-auto shrink-0"
+            className={linkBrandMarkClassName}
             role="img"
             aria-label={label}
         >
@@ -60,9 +55,9 @@ const BrandLockup = ({ label }: BrandLockupProps) => (
             <circle cx="404" cy="108" r="14" fill="#FB59A7" />
             <circle cx="108" cy="404" r="14" fill="#FB59A7" />
         </svg>
-        <span className="flex flex-col leading-none">
-            <span className="text-sm font-semibold leading-none text-foreground">StarCi</span>
-            <span className="text-[8px] uppercase leading-none text-muted">Academy</span>
+        <span className={linkBrandTextClassName}>
+            <span className={linkBrandNameClassName}>StarCi</span>
+            <span className={linkBrandSuffixClassName}>Academy</span>
         </span>
     </>
 )
@@ -72,23 +67,22 @@ const BrandLockup = ({ label }: BrandLockupProps) => (
  *
  * @param input - {@link LinkProps}
  */
-export const Link = ({ props, on }: LinkProps) => (
-    <HeroLink
-        data-tier="leaf"
-        data-component="Link"
-        data-emphasis={props.emphasis ?? "default"}
-        href={props.externalHref}
-        onPress={on?.press}
-        className={EMPHASIS_CLASSES[props.emphasis ?? "default"]}
-    >
-        {props.emphasis === "brand" ? <BrandLockup label={props.label} /> : (
-            <>
-                {props.icon === undefined ? null : <Icon props={{ name: props.icon, role: "chip" }} />}
-                {props.label}
-            </>
-        )}
-    </HeroLink>
-)
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const
+export const Link = (props: LinkProps) => {
+    const data = props.props
+    const on = props.on
+    return (
+        <HeroLink
+            data-emphasis={data.emphasis ?? "default"}
+            href={data.externalHref}
+            onPress={on?.press}
+            className={linkEmphasisClassNames[data.emphasis ?? "default"]}
+        >
+            {data.emphasis === "brand" ? <BrandLockup label={data.label} /> : (
+                <>
+                    {data.icon === undefined ? null : <Icon props={{ name: data.icon, role: "chip" }} />}
+                    {data.label}
+                </>
+            )}
+        </HeroLink>
+    )
+}

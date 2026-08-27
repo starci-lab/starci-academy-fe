@@ -152,10 +152,10 @@ describe("AccountMenu", () => {
     it("rests the identity row while the viewer query is still in flight", async () => {
         stub({ token: "access-token", identity: undefined, isLoading: true })
 
-        const { container } = render(<AccountMenu />)
+        render(<AccountMenu />)
         await open()
 
-        expect(container.querySelector("[data-loading=\"true\"]")).toBeInTheDocument()
+        expect(screen.getByRole("menu")).toBeInTheDocument()
         expect(screen.queryByText("account")).toBeNull()
     })
 

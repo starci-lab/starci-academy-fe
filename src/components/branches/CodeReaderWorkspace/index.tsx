@@ -9,8 +9,6 @@ import { javascript } from "@codemirror/lang-javascript"
 import { python } from "@codemirror/lang-python"
 import type { SandpackFiles } from "@codesandbox/sandpack-react"
 import { SourceFileTree } from "@/components/branches/SourceFileTree"
-import { Tree } from "@/components/branches/Tree"
-import { defineContractComponent, defineContractProjection, defineLeafComponent } from "@/components/contracts/props"
 import {
     normalizeSandboxPath,
     sandboxFileCode,
@@ -49,57 +47,45 @@ const grammarFor = (path: string) => {
 }
 
 /** Read one synchronized repository without exposing edit or runtime controls. */
-export const CodeReaderWorkspace = (input: CodeReaderWorkspaceProps) => {
-    const data = input.props
-    const on = input.on
+export const CodeReaderWorkspace = (props: CodeReaderWorkspaceProps) => {
+    const data = props.props
+    const on = props.on
     const activePath = normalizeSandboxPath(data.activePath)
     const code = sandboxFileCode(data.files, activePath)
     const extensions = useMemo(() => [grammarFor(activePath), EditorView.lineWrapping], [activePath])
 
     return (
-        <Tree
-            contract="source-code-reader-grid"
-            render={defineContractComponent("source-code-reader-grid", {
-                files: defineContractProjection("source-file-navigation", () => (
-                    <SourceFileTree
-                        props={{
-                            label: data.filesLabel,
-                            files: Object.keys(data.files).map((path) => ({ path })),
-                            activePath,
-                        }}
-                        on={{ activate: on?.activateFile }}
-                    />
-                )),
-                editor: defineContractComponent("source-code-editor-frame", {
-                    editor: defineLeafComponent("code-editor", {}, () => (
-                        <CodeMirror
-                            aria-label={data.editorLabel}
-                            value={code}
-                            theme={vscodeDark}
-                            height="100%"
-                            editable={false}
-                            extensions={extensions}
-                            onUpdate={(update) => {
-                                if (!update.selectionSet) return
-                                const range = update.state.selection.main
-                                if (range.empty) {
-                                    on?.selectionChange?.(undefined)
-                                    return
-                                }
-                                on?.selectionChange?.({
-                                    path: activePath,
-                                    startLine: update.state.doc.lineAt(range.from).number,
-                                    endLine: update.state.doc.lineAt(range.to).number,
-                                    text: update.state.sliceDoc(range.from, range.to),
-                                })
-                            }}
-                        />
-                    )),
-                }),
-            })}
-        />
+        <div>
+            <SourceFileTree
+                props={{
+                    label: data.filesLabel,
+                    files: Object.keys(data.files).map((path) => ({ path })),
+                    activePath,
+                }}
+                on={{ activate: on?.activateFile }}
+            />
+            <CodeMirror
+                aria-label={data.editorLabel}
+                value={code}
+                theme={vscodeDark}
+                height="100%"
+                editable={false}
+                extensions={extensions}
+                onUpdate={(update) => {
+                    if (!update.selectionSet) return
+                    const range = update.state.selection.main
+                    if (range.empty) {
+                        on?.selectionChange?.(undefined)
+                        return
+                    }
+                    on?.selectionChange?.({
+                        path: activePath,
+                        startLine: update.state.doc.lineAt(range.from).number,
+                        endLine: update.state.doc.lineAt(range.to).number,
+                        text: update.state.sliceDoc(range.from, range.to),
+                    })
+                }}
+            />
+        </div>
     )
 }
-
-/** Source-level tier marker. */
-export const meta = { shape: "branch", world: "pure" } as const

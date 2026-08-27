@@ -14,7 +14,7 @@ import {
     type GlobalSearchScope,
 } from "@/modules/search/global-search"
 import {
-    GlobalSearchOverlayBase,
+    GlobalSearchOverlayView,
     type GlobalSearchOverlayRenderState,
     type GlobalSearchResultView,
 } from "./component"
@@ -48,14 +48,14 @@ const SCOPE_ICONS: Record<GlobalSearchScope, IconName> = {
 }
 
 /** Connected owner for query timing, bucket mapping, selection and canonical navigation. */
-export const GlobalSearchOverlay = ({ intent, on }: GlobalSearchOverlayProps) => {
+export const GlobalSearchOverlay = (props: GlobalSearchOverlayProps) => {
     const t = useTranslations("globalSearch")
     const router = useRouter()
     const [query, setQuery] = useState("")
     const [debouncedQuery, setDebouncedQuery] = useState("")
     const [scope, setScope] = useState<GlobalSearchScope>("all")
     const [selectedResult, setSelectedResult] = useState<string>()
-    const isOpen = intent !== undefined
+    const isOpen = props.intent !== undefined
 
     useEffect(() => {
         const timer = window.setTimeout(() => setDebouncedQuery(query.trim()), 200)
@@ -138,9 +138,9 @@ export const GlobalSearchOverlay = ({ intent, on }: GlobalSearchOverlayProps) =>
     const openResult = useCallback((key: string) => {
         const result = results.find((candidate) => candidate.key === key)
         if (result?.path === undefined || result.path === null) return
-        on?.dismissed?.()
+        props.on?.dismissed?.()
         router.push(result.path)
-    }, [on, results, router])
+    }, [props.on, results, router])
     const move = useCallback((offset: number) => {
         if (results.length === 0) return
         const current = Math.max(0, results.findIndex((result) => result.key === selectedResult))
@@ -149,7 +149,7 @@ export const GlobalSearchOverlay = ({ intent, on }: GlobalSearchOverlayProps) =>
     }, [results, selectedResult])
 
     return (
-        <GlobalSearchOverlayBase
+        <GlobalSearchOverlayView
             isOpen={isOpen}
             state={state}
             copy={{
@@ -182,14 +182,13 @@ export const GlobalSearchOverlay = ({ intent, on }: GlobalSearchOverlayProps) =>
                 submit: () => selectedResult === undefined ? undefined : openResult(selectedResult),
                 retry: () => selected === undefined ? void search.mutate() : void detail.mutate(),
                 browseCourses: () => {
-                    on?.dismissed?.()
+                    props.on?.dismissed?.()
                     router.push("/courses")
                 },
-                dismiss: on?.dismissed,
+                dismiss: props.on?.dismissed,
             }}
         />
     )
 }
 
 /** Source-level identity for the connected search owner. */
-export const meta = { world: "connected", domain: "search" } as const

@@ -2,7 +2,7 @@
 
 import { Input as HeroInput, Kbd, Spinner } from "@heroui/react"
 import { Icon } from "@/components/leaves/Icon"
-import type { LeafProps } from "@/components/contracts/props"
+import { searchCommandFieldActionsClassName, searchCommandFieldClassName, searchCommandFieldIconClassName, searchCommandFieldInputClassName } from "./classNames"
 
 /** Resolved controlled value and accessible command-field copy. */
 export type SearchCommandFieldData = {
@@ -26,53 +26,54 @@ export type SearchCommandFieldActions = {
 }
 
 /** Closed data/action slots accepted by the search command primitive. */
-export type SearchCommandFieldProps = LeafProps<SearchCommandFieldData, SearchCommandFieldActions>
+export type SearchCommandFieldProps = { readonly props: SearchCommandFieldData; readonly on?: SearchCommandFieldActions; readonly isLoading?: boolean }
 
 /** Controlled command input translating navigation keys into named search outcomes. */
-export const SearchCommandField = ({ props, on }: SearchCommandFieldProps) => (
-    <span data-tier="leaf" data-component="SearchCommandField" className="relative flex w-full items-center">
-        <span className="pointer-events-none absolute left-3 z-10 text-muted">
-            <Icon props={{ name: "search", role: "leading" }} />
+export const SearchCommandField = (props: SearchCommandFieldProps) => {
+    const data = props.props
+    const on = props.on
+    return (
+        <span className={searchCommandFieldClassName}>
+            <span className={searchCommandFieldIconClassName}>
+                <Icon props={{ name: "search", role: "leading" }} />
+            </span>
+            <HeroInput
+                id={data.id}
+                aria-label={data.label}
+                aria-activedescendant={data.activeDescendant}
+                aria-controls="global-search-results"
+                role="combobox"
+                autoFocus
+                value={data.value}
+                placeholder={data.placeholder}
+                variant="secondary"
+                fullWidth
+                className={searchCommandFieldInputClassName}
+                onChange={(event) => on?.change?.(event.target.value)}
+                onKeyDown={(event) => {
+                    if (event.key === "ArrowUp") {
+                        event.preventDefault()
+                        on?.previous?.()
+                    } else if (event.key === "ArrowDown") {
+                        event.preventDefault()
+                        on?.next?.()
+                    } else if (event.key === "Enter") {
+                        event.preventDefault()
+                        on?.submit?.()
+                    }
+                }}
+            />
+            <span className={searchCommandFieldActionsClassName}>
+                {data.isPending === true
+                    ? <Spinner size="sm" aria-label={data.label} />
+                    : data.value.length > 0
+                        ? (
+                            <button type="button" aria-label={data.clearLabel} onClick={on?.clear}>
+                                <Icon props={{ name: "close", role: "chip" }} />
+                            </button>
+                        )
+                        : data.shortcut === undefined ? null : <Kbd>{data.shortcut}</Kbd>}
+            </span>
         </span>
-        <HeroInput
-            id={props.id}
-            aria-label={props.label}
-            aria-activedescendant={props.activeDescendant}
-            aria-controls="global-search-results"
-            role="combobox"
-            autoFocus
-            value={props.value}
-            placeholder={props.placeholder}
-            variant="secondary"
-            fullWidth
-            className="px-10"
-            onChange={(event) => on?.change?.(event.target.value)}
-            onKeyDown={(event) => {
-                if (event.key === "ArrowUp") {
-                    event.preventDefault()
-                    on?.previous?.()
-                } else if (event.key === "ArrowDown") {
-                    event.preventDefault()
-                    on?.next?.()
-                } else if (event.key === "Enter") {
-                    event.preventDefault()
-                    on?.submit?.()
-                }
-            }}
-        />
-        <span className="absolute right-3 z-10 inline-flex items-center">
-            {props.isPending === true
-                ? <Spinner size="sm" aria-label={props.label} />
-                : props.value.length > 0
-                    ? (
-                        <button type="button" aria-label={props.clearLabel} onClick={on?.clear}>
-                            <Icon props={{ name: "close", role: "chip" }} />
-                        </button>
-                    )
-                    : props.shortcut === undefined ? null : <Kbd>{props.shortcut}</Kbd>}
-        </span>
-    </span>
-)
-
-/** Source-level tier marker for the controlled command primitive. */
-export const meta = { shape: "leaf", world: "pure" } as const
+    )
+}

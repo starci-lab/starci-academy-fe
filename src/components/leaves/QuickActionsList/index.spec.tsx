@@ -10,6 +10,6 @@ describe("QuickActionsList", () => {
         const option = screen.getByRole("option", { name: "Browse" })
         fireEvent.click(option)
         expect(activate).toHaveBeenCalledWith("course")
-        expect(document.querySelector("[data-node=glyph-compact-action-fact-row]")).toBeTruthy()
+        expect(option).toHaveTextContent("Browse")
     })
 })

@@ -18,10 +18,10 @@ import type { CourseLearningSignal, CourseLearningSignalsProps } from "@/compone
 import type { CourseNextAction, CourseNextActionsProps } from "@/components/blocks/learn/CourseNextActions"
 import type { CourseProgressOverviewProps } from "@/components/blocks/learn/CourseProgressOverview"
 import type { CourseLearningSignalDetailProps } from "@/components/blocks/learn/CourseLearningSignalDetail"
-import { CourseLearnTodayBlockBase, type CourseLearnTodayItem, type CourseLearnTodayState } from "./component"
+import { CourseLearnTodayBlockView, type CourseLearnTodayItem, type CourseLearnTodayState } from "./component"
 
 /** Route identity required by the connected course dashboard. */
-export type CourseLearnTodayPageProps = { readonly displayId: string }
+export type CourseLearnTodayBlockProps = { readonly displayId: string }
 type TodayResumeInterview = { readonly sessionId: string; readonly promptTitle: string }
 type TodayResumeItem = { readonly globalId: string; readonly label: string }
 type TodayTranslator = (key: string, values?: Record<string, string | number | Date>) => string
@@ -89,7 +89,8 @@ const signalDetailBlockOf = (state: CourseLearnTodayState | "partial", t: TodayT
 }
 
 /** Rank live learning facts into the accepted course-dashboard composition. */
-export const CourseLearnTodayBlock = ({ displayId }: CourseLearnTodayPageProps) => {
+export const CourseLearnTodayBlock = (props: CourseLearnTodayBlockProps) => {
+    const { displayId } = props
     const t = useTranslations("learn.today")
     const router = useRouter()
     const mobile = useLearnMobileView()
@@ -258,7 +259,7 @@ export const CourseLearnTodayBlock = ({ displayId }: CourseLearnTodayPageProps) 
     const signalDetailBlock = signalDetailBlockOf(signalsState, t, selectedSignal)
 
     return (
-        <CourseLearnTodayBlockBase
+        <CourseLearnTodayBlockView
             blockState={state}
             mobileView={view}
             props={{
@@ -299,6 +300,3 @@ export const CourseLearnTodayBlock = ({ displayId }: CourseLearnTodayPageProps) 
         />
     )
 }
-
-/** Source-level ownership marker. */
-export const meta = { world: "connected", domain: "learn" } as const

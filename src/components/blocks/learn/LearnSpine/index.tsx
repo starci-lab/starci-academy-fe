@@ -21,7 +21,8 @@ const GROUPS: ReadonlyArray<{ id: string; rows: ReadonlyArray<SpineRoute> }> = [
 const LEARN_RAIL_COLLAPSED_KEY = "starci.learn.sidebar.collapsed"
 
 /** Connected owner for course navigation data, collapse state and route actions. */
-export const LearnSpine = ({ displayId, presentation = "rail", onNavigate }: LearnSpineProps) => {
+export const LearnSpine = (props: LearnSpineProps) => {
+    const { displayId, presentation = "rail", onNavigate } = props
     const t = useTranslations("learn.shell")
     const pathname = usePathname()
     const router = useRouter()
@@ -48,7 +49,7 @@ export const LearnSpine = ({ displayId, presentation = "rail", onNavigate }: Lea
             fact: row.id === "leaderboard" && viewerRank !== null && viewerRank !== undefined ? `#${viewerRank}` : undefined,
         })),
     })), [t, pathname, base, enrollmentKnown, course.data?.isEnrolled, viewerRank])
-    const props = {
+    const viewProps = {
         lockedLabel: t("locked"), collapseLabel: t("collapse"), expandLabel: t("expand"), isCollapsed,
         home: { id: "home", label: t("rows.home"), icon: "learnHome" as const, isCurrent: pathname === `${base}/learn` },
         groups,
@@ -63,10 +64,7 @@ export const LearnSpine = ({ displayId, presentation = "rail", onNavigate }: Lea
         resume: () => { router.push(`${base}/learn/content`); onNavigate?.() },
         toggleCollapse: () => setIsCollapsed((current) => { const next = !current; if (typeof window.localStorage.setItem === "function") window.localStorage.setItem(LEARN_RAIL_COLLAPSED_KEY, String(next)); return next }),
     }
-    return <LearnSpineBase isCollapsed={isCollapsed} presentation={presentation} props={props} on={on} />
+    return <LearnSpineBase isCollapsed={isCollapsed} presentation={presentation} props={viewProps} on={on} />
 }
 
 export * from "./component"
-
-/** Source-level ownership marker for the connected navigation block. */
-export const meta = { world: "connected", domain: "learn" } as const

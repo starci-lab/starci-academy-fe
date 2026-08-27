@@ -15,13 +15,11 @@ export type PersonalProjectHistoryDrawerProps = {
 }
 
 /** Resolve overlay copy and hand mechanics only stable identity/control props. */
-export const PersonalProjectHistoryDrawer = (input: PersonalProjectHistoryDrawerProps) => (
+export const PersonalProjectHistoryDrawer = (props: PersonalProjectHistoryDrawerProps) => (
     <PersonalProjectHistoryDrawerBase
-        {...input}
+        {...props}
         title={useLocale() === "vi" ? "Lịch sử chấm bài" : "Attempt history"} // vn-ok: runtime locale copy.
     />
 )
 
 export * from "./component"
-/** Source-level ownership marker for the connected drawer wrapper. */
-export const meta = { shape: "overlay", world: "connected", domain: "learn" } as const

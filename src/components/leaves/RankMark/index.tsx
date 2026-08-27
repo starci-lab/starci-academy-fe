@@ -1,6 +1,5 @@
-import { skeletonVariants } from "@heroui/react"
 import { Icon, type IconName } from "@/components/leaves/Icon"
-import type { LeafProps } from "@/components/contracts/props"
+import { rankLoadingClassNames, rankPlacementClassNames } from "./classNames"
 
 /** Where the closed rank artwork is being used. */
 export type RankMarkPlacement = "standing" | "row"
@@ -16,7 +15,7 @@ export type RankMarkData = {
 }
 
 /** Props accepted by the closed rank-artwork leaf. */
-export type RankMarkProps = LeafProps<RankMarkData>
+export type RankMarkProps = { readonly props: RankMarkData; readonly isLoading?: boolean }
 
 const PLACE_MEDALS: Readonly<Record<number, IconName>> = {
     1: "rankFirst",
@@ -24,49 +23,33 @@ const PLACE_MEDALS: Readonly<Record<number, IconName>> = {
     3: "rankThird",
 }
 
-const PLACEMENT_CLASSES = {
-    standing: "size-7 shrink-0",
-    row: "size-5 shrink-0",
-} as const
-
-const RESTING_CLASSES = {
-    standing: skeletonVariants({ animationType: "shimmer" }).base({ className: "size-7 shrink-0 rounded-full" }),
-    row: skeletonVariants({ animationType: "shimmer" }).base({ className: "size-5 shrink-0 rounded-full" }),
-} as const
 
 /** Resolve the exact Fluent Emoji Flat artwork ID for a one-based rank. */
 export const RankMarkIconId = (rank: number): IconName =>
     PLACE_MEDALS[rank] ?? "rankOther"
 
 /** Draw one closed rank artwork mark without exposing Iconify IDs to callers. */
-export const RankMark = ({ props, isLoading = false }: RankMarkProps) => {
-    const placement = props.placement
-    if (isLoading || props.rank === undefined) {
+export const RankMark = (props: RankMarkProps) => {
+    const placement = props.props.placement
+    if (props.isLoading === true || props.props.rank === undefined) {
         return (
             <span
-                data-tier="leaf"
-                data-component="RankMark"
                 data-placement={placement}
                 data-loading="true"
                 aria-hidden="true"
-                className={RESTING_CLASSES[placement]}
+                className={rankLoadingClassNames[placement]}
             />
         )
     }
     return (
         <span
-            data-tier="leaf"
-            data-component="RankMark"
             data-placement={placement}
             data-loading="false"
-            data-icon={RankMarkIconId(props.rank)}
-            aria-label={props.accessibleLabel}
-            className={PLACEMENT_CLASSES[placement]}
+            data-icon={RankMarkIconId(props.props.rank)}
+            aria-label={props.props.accessibleLabel}
+            className={rankPlacementClassNames[placement]}
         >
-            <Icon props={{ name: RankMarkIconId(props.rank), role: placement === "standing" ? "heading" : "leading" }} />
+            <Icon props={{ name: RankMarkIconId(props.props.rank), role: placement === "standing" ? "heading" : "leading" }} />
         </span>
     )
 }
-
-/** Source-level tier marker. */
-export const meta = { shape: "leaf", world: "pure" } as const

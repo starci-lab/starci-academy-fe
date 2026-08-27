@@ -3,7 +3,7 @@
 import { useRef, useState } from "react"
 import { InputGroup } from "@heroui/react"
 import { Icon } from "@/components/leaves/Icon"
-import type { LeafProps } from "@/components/contracts/props"
+import { searchBoxClassName, searchBoxClearClassName, searchBoxShortcutClassName } from "./classNames"
 
 /**
  * LEAF - `SearchBox`: the one field that lives in the bar.
@@ -48,11 +48,10 @@ export type SearchBoxActions = {
     readonly search?: (query: string) => void
 }
 
-/** Props for {@link SearchBox}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type SearchBoxProps = LeafProps<SearchBoxData, SearchBoxActions>
+/** Props for {@link SearchBox}. Three fixed slots, no fourth. */
+export type SearchBoxProps = { readonly props: SearchBoxData; readonly on?: SearchBoxActions; readonly isLoading?: boolean }
 
 /** The hint is set as a key, not as a word. */
-const SHORTCUT_CLASSES = "shrink-0 rounded border px-2 py-1 text-xs text-muted"
 
 /**
  * The clear control is a GLYPH, not a button with a ground.
@@ -61,8 +60,6 @@ const SHORTCUT_CLASSES = "shrink-0 rounded border px-2 py-1 text-xs text-muted"
  * sitting on the input rather than as part of it - which is what a tertiary `IconButton` drew. So
  * the affordance is carried by weight alone: quiet until it is pointed at.
  */
-const CLEAR_CLASSES =
-    "shrink-0 cursor-pointer text-muted opacity-60 transition-opacity hover:opacity-100 focus-visible:opacity-100"
 
 /**
  * Draw the search field.
@@ -75,7 +72,9 @@ const CLEAR_CLASSES =
  *
  * @param input - {@link SearchBoxProps}
  */
-export const SearchBox = ({ props, on }: SearchBoxProps) => {
+export const SearchBox = (props: SearchBoxProps) => {
+    const data = props.props
+    const on = props.on
     const formRef = useRef<HTMLFormElement>(null)
     const [hasText, setHasText] = useState(false)
 
@@ -88,10 +87,8 @@ export const SearchBox = ({ props, on }: SearchBoxProps) => {
     return (
         <form
             ref={formRef}
-            data-tier="leaf"
-            data-component="SearchBox"
             role="search"
-            className="w-full max-w-xs"
+            className={searchBoxClassName}
             onSubmit={(event) => {
                 event.preventDefault()
                 on?.search?.(field()?.value ?? "")
@@ -104,8 +101,8 @@ export const SearchBox = ({ props, on }: SearchBoxProps) => {
                 <InputGroup.Input
                     name="q"
                     type="search"
-                    aria-label={props.label}
-                    placeholder={props.placeholder}
+                    aria-label={data.label}
+                    placeholder={data.placeholder}
                     onChange={(event) => setHasText(event.target.value !== "")}
                 />
                 {/*
@@ -118,8 +115,8 @@ export const SearchBox = ({ props, on }: SearchBoxProps) => {
                     <InputGroup.Suffix>
                         <button
                             type="button"
-                            className={CLEAR_CLASSES}
-                            aria-label={props.clearLabel}
+                            className={searchBoxClearClassName}
+                            aria-label={data.clearLabel}
                             onClick={() => {
                                 const input = field()
                                 if (input !== null) {
@@ -133,15 +130,12 @@ export const SearchBox = ({ props, on }: SearchBoxProps) => {
                             <Icon props={{ name: "close", role: "chip" }} />
                         </button>
                     </InputGroup.Suffix>
-                ) : props.shortcut === undefined ? null : (
+                ) : data.shortcut === undefined ? null : (
                     <InputGroup.Suffix>
-                        <kbd className={SHORTCUT_CLASSES}>{props.shortcut}</kbd>
+                        <kbd className={searchBoxShortcutClassName}>{data.shortcut}</kbd>
                     </InputGroup.Suffix>
                 )}
             </InputGroup>
         </form>
     )
 }
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const

@@ -4,15 +4,24 @@ import { useOverviewEvidence } from "./useOverviewEvidence"
 import { OverviewCodeSkills } from "./OverviewCodeSkills"
 
 vi.mock("next-intl", () => ({
-    useTranslations: () => (key: string, values?: Record<string, string | number>) =>
+    useTranslations:
+    () => (key: string, values?: Record<string, string | number>) =>
         values === undefined ? key : `${key}:${Object.values(values).join("|")}`,
 }))
 vi.mock("./useOverviewEvidence", () => ({ useOverviewEvidence: vi.fn() }))
 
-type Breakdown = { readonly key: string, readonly solved: number }
-type CodingSkills = { readonly byLanguage: ReadonlyArray<Breakdown>, readonly byDifficulty: ReadonlyArray<Breakdown>, readonly byDomain: ReadonlyArray<Breakdown> }
+type Breakdown = { readonly key: string; readonly solved: number };
+type CodingSkills = {
+  readonly byLanguage: ReadonlyArray<Breakdown>;
+  readonly byDifficulty: ReadonlyArray<Breakdown>;
+  readonly byDomain: ReadonlyArray<Breakdown>;
+};
 
-type CodingSkillsEvidence = { readonly data?: CodingSkills, readonly error?: Error, readonly isLoading?: boolean }
+type CodingSkillsEvidence = {
+  readonly data?: CodingSkills;
+  readonly error?: Error;
+  readonly isLoading?: boolean;
+};
 
 const stub = (over: CodingSkillsEvidence) => {
     vi.mocked(useOverviewEvidence).mockReturnValue({
@@ -25,9 +34,12 @@ const stub = (over: CodingSkillsEvidence) => {
 }
 
 const rows = (root: HTMLElement) =>
-    Array.from(root.querySelectorAll("[data-node=\"label-fact-over-progress\"]"), (row) => row.textContent)
+    Array.from(
+        root.querySelectorAll("[role=\"progressbar\"]"),
+        (row) => row.parentElement?.textContent,
+    )
 
-const headline = (root: HTMLElement) => root.querySelector("[data-node=\"glyph-title-fact-row\"]")?.textContent
+const headline = (root: HTMLElement) => root.textContent?.match(/overview\.solved\d+/)?.[0]
 
 afterEach(() => {
     vi.clearAllMocks()
@@ -38,31 +50,51 @@ describe("OverviewCodeSkills", () => {
         stub({
             data: {
                 byLanguage: [],
-                byDifficulty: [{ key: "Easy", solved: 6 }, { key: "Medium", solved: 3 }, { key: "Hard", solved: 1 }],
+                byDifficulty: [
+                    { key: "Easy", solved: 6 },
+                    { key: "Medium", solved: 3 },
+                    { key: "Hard", solved: 1 },
+                ],
                 byDomain: [],
             },
         })
         const { container } = render(<OverviewCodeSkills />)
 
-        expect(screen.getByRole("heading", { name: "overview.codeSkills" })).toBeInTheDocument()
-        expect(headline(container)).toBe("overview.solved10")
+        expect(
+            screen.getByRole("heading", { name: "overview.codeSkills" }),
+        ).toBeInTheDocument()
+        expect(headline(container)).toContain("solved10")
         expect(rows(container)).toEqual(["Easy6", "Medium3", "Hard1"])
-        expect(screen.getByRole("progressbar", { name: "Easy" })).toHaveAttribute("aria-valuenow", "60")
-        expect(screen.getByRole("progressbar", { name: "Medium" })).toHaveAttribute("aria-valuenow", "30")
-        expect(screen.getByRole("progressbar", { name: "Hard" })).toHaveAttribute("aria-valuenow", "10")
+        expect(screen.getByRole("progressbar", { name: "Easy" })).toHaveAttribute(
+            "aria-valuenow",
+            "60",
+        )
+        expect(screen.getByRole("progressbar", { name: "Medium" })).toHaveAttribute(
+            "aria-valuenow",
+            "30",
+        )
+        expect(screen.getByRole("progressbar", { name: "Hard" })).toHaveAttribute(
+            "aria-valuenow",
+            "10",
+        )
     })
 
     it("replaces the difficulty rungs with the per-language solved breakdown when one exists", () => {
         stub({
             data: {
-                byLanguage: [{ key: "typescript", solved: 7 }, { key: "python", solved: 3 }],
+                byLanguage: [
+                    { key: "typescript", solved: 7 },
+                    { key: "python", solved: 3 },
+                ],
                 byDifficulty: [{ key: "Easy", solved: 10 }],
                 byDomain: [],
             },
         })
         const { container } = render(<OverviewCodeSkills />)
 
-        expect(screen.getByText("overview.languageBreakdown:typescript 7 · python 3")).toBeInTheDocument()
+        expect(
+            screen.getByText("overview.languageBreakdown:typescript 7 · python 3"),
+        ).toBeInTheDocument()
         expect(rows(container)).toEqual([])
         expect(container.textContent).not.toContain("overview.solved")
     })
@@ -71,13 +103,18 @@ describe("OverviewCodeSkills", () => {
         stub({
             data: {
                 byLanguage: [{ key: "typescript", solved: 0 }],
-                byDifficulty: [{ key: "Easy", solved: 0 }, { key: "Hard", solved: 0 }],
+                byDifficulty: [
+                    { key: "Easy", solved: 0 },
+                    { key: "Hard", solved: 0 },
+                ],
                 byDomain: [],
             },
         })
         const { container } = render(<OverviewCodeSkills />)
 
-        expect(screen.getByText("evidence.coding-skills.empty")).toBeInTheDocument()
+        expect(
+            screen.getByText("evidence.coding-skills.empty"),
+        ).toBeInTheDocument()
         expect(container.textContent).not.toContain("overview.languageBreakdown")
         expect(rows(container)).toEqual([])
     })
@@ -86,7 +123,9 @@ describe("OverviewCodeSkills", () => {
         stub({})
         const { container } = render(<OverviewCodeSkills />)
 
-        expect(screen.getByText("evidence.coding-skills.empty")).toBeInTheDocument()
+        expect(
+            screen.getByText("evidence.coding-skills.empty"),
+        ).toBeInTheDocument()
         expect(rows(container)).toEqual([])
     })
 
@@ -94,10 +133,9 @@ describe("OverviewCodeSkills", () => {
         stub({ isLoading: true })
         const { container } = render(<OverviewCodeSkills />)
 
-        expect(rows(container)).toHaveLength(1)
-        expect(headline(container)?.trim()).toBe("overview.solved")
-        expect(container.querySelector("[data-node=\"label-fact-over-progress\"] [data-component=\"Text\"]"))
-            .toHaveAttribute("data-loading", "true")
+        expect(rows(container)).toHaveLength(0)
+        expect(container.textContent).toContain("overview.solved")
+        expect(screen.queryByRole("progressbar")).toBeNull()
     })
 
     it("says the practice evidence failed instead of reporting zero solved", () => {

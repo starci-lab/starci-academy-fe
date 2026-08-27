@@ -15,13 +15,12 @@ export type ChallengeAttemptHistoryDrawerProps = {
 }
 
 /** Resolve Challenge-specific copy and preserve focus-return lifecycle. */
-export const ChallengeAttemptHistoryDrawer = (input: ChallengeAttemptHistoryDrawerProps) => (
+export const ChallengeAttemptHistoryDrawer = (props: ChallengeAttemptHistoryDrawerProps) => (
     <ChallengeAttemptHistoryDrawerBase
-        {...input}
+        {...props}
         title={useTranslations("learn.content")("challengeHistoryTitle")}
     />
 )
 
 export * from "./component"
 /** Connected overlay ownership marker. */
-export const meta = { shape: "overlay", world: "connected", domain: "learn" } as const

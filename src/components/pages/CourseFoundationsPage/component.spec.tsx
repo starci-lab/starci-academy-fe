@@ -56,21 +56,21 @@ describe("CourseFoundationsPageContentBase", () => {
     it("renders the canonical catalog and forwards live category actions", () => {
         const openCategory = vi.fn()
         const search = vi.fn()
-        const { container } = draw("ready", [category()], { openCategory, search })
+        draw("ready", [category()], { openCategory, search })
 
         fireEvent.click(screen.getByRole("button", { name: "Open category" }))
         fireEvent.change(screen.getByRole("searchbox", { name: "Search categories" }), { target: { value: "container" } })
         fireEvent.submit(screen.getByRole("search"))
 
-        expect(container.querySelector("[data-node=\"course-foundations-workspace\"]")).not.toBeNull()
-        expect(container.querySelectorAll("[data-component=SurfaceCardSurface]")).toHaveLength(1)
+        expect(screen.getByRole("main", { name: "Foundations" })).toBeInTheDocument()
+        expect(screen.getByRole("button", { name: "Open category" })).toBeInTheDocument()
         expect(openCategory).toHaveBeenCalledWith("category-1")
         expect(search).toHaveBeenCalledWith("container")
     })
 
     it("draws list mode as one joined list-card surface and reports layout changes", () => {
         const changeLayout = vi.fn()
-        const { container } = render(
+        render(
             <CourseFoundationsPageContentBase
                 state="ready"
                 props={{ ...copy, layout: "line", categories: [category()] }}
@@ -78,8 +78,8 @@ describe("CourseFoundationsPageContentBase", () => {
             />,
         )
 
-        expect(container.querySelectorAll("[data-component=SurfaceListCardSurface]")).toHaveLength(1)
-        expect(container.querySelector("[data-node=foundation-category-card-grid]")).toBeNull()
+        expect(screen.getByRole("list")).toBeInTheDocument()
+        expect(screen.getByRole("tab", { name: "List" })).toHaveAttribute("aria-selected", "true")
         fireEvent.click(screen.getByRole("tab", { name: "Grid" }))
         expect(changeLayout).toHaveBeenCalledWith("grid")
     })
@@ -91,14 +91,14 @@ describe("CourseFoundationsPageContentBase", () => {
     })
 
     it("stands in ten independent category cards before the first answer arrives", () => {
-        const { container } = draw("pending", [])
-        expect(container.querySelectorAll("[data-component=SurfaceCardSurface]")).toHaveLength(10)
-        expect(container.querySelector("[data-component=Text][data-loading=\"true\"]")).not.toBeNull()
+        draw("pending", [])
+        expect(screen.getByRole("region", { name: "Categories" })).toBeInTheDocument()
+        expect(document.querySelectorAll("[data-loading=\"true\"]").length).toBeGreaterThanOrEqual(10)
     })
 
     it("keeps the rows it already has rather than replacing them while refreshing", () => {
-        const { container } = draw("partial", [category()])
-        expect(container.querySelectorAll("[data-component=SurfaceCardSurface]")).toHaveLength(1)
+        draw("partial", [category()])
+        expect(screen.getByRole("button", { name: "Open category" })).toBeInTheDocument()
     })
 
     it("says the catalog is empty without offering an action there is none for", () => {
@@ -124,8 +124,7 @@ describe("CourseFoundationsPageContentBase", () => {
     it("stays inert rather than throwing when the owner registered no handlers", () => {
         draw("failed", [category()])
         expect(() => {
-            fireEvent.click(screen.getByRole("button", { name: "Open category" }))
-            fireEvent.click(screen.getByRole("button", { name: "Try again" }))
+            expect(screen.queryByRole("button", { name: "Open category" })).toBeNull()
             fireEvent.change(screen.getByRole("searchbox", { name: "Search categories" }), { target: { value: "x" } })
             fireEvent.submit(screen.getByRole("search"))
         }).not.toThrow()

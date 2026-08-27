@@ -7,7 +7,11 @@ import type { RankedUserVerdict } from "@/components/composites/RankedUserRow"
 import { LeagueCardBase } from "./component"
 
 /** Fetch and resolve the viewer's weekly league. */
-export const LeagueCard = () => {
+/** Props for the connected league card. */
+export type LeagueCardProps = Record<string, never>
+/** Connect the LeagueCard block to its data source. */
+export const LeagueCard = (props: LeagueCardProps) => {
+    void props
     const t = useTranslations("community")
     const router = useRouter()
     const query = useQueryMyLeagueSwr()
@@ -56,7 +60,7 @@ export const LeagueCard = () => {
         days: Math.floor(remaining / 86_400_000),
         hours: Math.floor((remaining % 86_400_000) / 3_600_000),
     }
-    const props = {
+    const viewProps = {
         label: t("league.heading"),
         seeMoreLabel: t("seeMore"),
         standing: {
@@ -79,14 +83,14 @@ export const LeagueCard = () => {
         retryLabel: t("retry"),
     }
     if (query.error !== undefined && query.data === undefined) {
-        return <LeagueCardBase state="failed" props={props} on={{ retry: () => { void query.mutate() } }} />
+        return <LeagueCardBase state="failed" props={viewProps} on={{ retry: () => { void query.mutate() } }} />
     }
-    if (query.data === undefined) return <LeagueCardBase state="pending" props={props} />
-    if (rows.length === 0) return <LeagueCardBase state="empty" props={props} />
+    if (query.data === undefined) return <LeagueCardBase state="pending" props={viewProps} />
+    if (rows.length === 0) return <LeagueCardBase state="empty" props={viewProps} />
     return (
         <LeagueCardBase
             state="ready"
-            props={props}
+            props={viewProps}
             on={{
                 seeMore: () => router.push("/league"),
                 ...Object.fromEntries(rows.map((row) => [
@@ -99,6 +103,3 @@ export const LeagueCard = () => {
         />
     )
 }
-
-/** Source-level ownership marker. */
-export const meta = { world: "connected", domain: "community" } as const

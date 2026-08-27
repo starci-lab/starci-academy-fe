@@ -7,4 +7,3 @@ export type CourseFlashcardSessionPageProps = { readonly displayId: string; read
 export const CourseFlashcardSessionPageBase = (props: CourseFlashcardSessionPageProps) => <CourseFlashcardSessionBlock {...props} />
 
 /** Ownership metadata for the route shell. */
-export const meta = { world: "pure", domain: "learn" } as const

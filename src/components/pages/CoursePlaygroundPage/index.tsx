@@ -1,7 +1,7 @@
 "use client"
 import { CoursePlaygroundPageBase } from "./component"
 /** Render the playground route shell. */
-export const CoursePlaygroundPage = (input: Parameters<typeof CoursePlaygroundPageBase>[0]) => <CoursePlaygroundPageBase {...input} />
+import type { CoursePlaygroundPageProps } from "./component"
+/** Connected playground catalog route. */
+export const CoursePlaygroundPage = (props: CoursePlaygroundPageProps) => <CoursePlaygroundPageBase {...props} />
 export * from "./component"
-/** Source-level ownership marker. */
-export const meta = { world: "connected", domain: "learn" } as const

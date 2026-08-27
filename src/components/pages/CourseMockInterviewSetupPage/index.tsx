@@ -29,4 +29,3 @@ export const CourseMockInterviewSetupPage = (props: CourseMockInterviewSetupPage
 }
 
 /** Ownership metadata for the route entry. */
-export const meta = { world: "connected", domain: "learn" } as const

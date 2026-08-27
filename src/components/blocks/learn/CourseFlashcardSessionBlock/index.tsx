@@ -13,7 +13,7 @@ import type {
     FlashcardReviewKind,
     FlashcardSessionMode,
 } from "@/modules/api/graphql/queries/query-my-in-progress-flashcard-session"
-import { CourseFlashcardSessionBlockBase, type CourseFlashcardSessionBlockState } from "./component"
+import { CourseFlashcardSessionBlockView, type CourseFlashcardSessionBlockState } from "./component"
 
 /** Route identity required to resume one persisted flashcard session. */
 export type CourseFlashcardSessionBlockProps = {
@@ -197,7 +197,8 @@ const buildQuizCloze = (
 }
 
 /** Connects persisted start/resume state to per-card sync and completion transport. */
-export const CourseFlashcardSessionBlock = ({ displayId, sessionId, mode }: CourseFlashcardSessionBlockProps) => {
+export const CourseFlashcardSessionBlock = (props: CourseFlashcardSessionBlockProps) => {
+    const { displayId, sessionId, mode } = props
     const isVietnamese = useLocale() === "vi"
     const copy = isVietnamese ? COPY.vi : COPY.en
     const router = useRouter()
@@ -382,7 +383,7 @@ export const CourseFlashcardSessionBlock = ({ displayId, sessionId, mode }: Cour
     )
 
     return (
-        <CourseFlashcardSessionBlockBase
+        <CourseFlashcardSessionBlockView
             blockState={state}
             data={{
                 mode,
@@ -473,6 +474,3 @@ export const CourseFlashcardSessionBlock = ({ displayId, sessionId, mode }: Cour
 }
 
 /** Canon metadata for the connected page half. */
-export const meta = { world: "connected", domain: "learn" } as const
-
-

@@ -8,9 +8,8 @@ import type { ReactNode } from "react"
  * group and what a locked one looks like all live one tier down, where they can be rendered and
  * changed without a router.
  *
- * The framework's routed node crosses the client boundary as serializable content. The frame binds
- * that node to its `page` leaf inside a named contract; no component-level `children` slot or
- * function conversion is required.
+ * The framework's routed node crosses the client boundary as serializable content. The frame
+ * receives it as a normal React child surface; no function conversion is required.
  */
 
 /** Props Next hands a segment layout. */

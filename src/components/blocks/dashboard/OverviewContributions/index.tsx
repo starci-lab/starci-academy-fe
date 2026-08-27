@@ -20,7 +20,11 @@ const longestRun = (dates: ReadonlyArray<string>) => {
 }
 
 /** Connected half: owns the selected calendar year and resolves locale labels. */
-export const OverviewContributions = () => {
+/** Props for the connected contributions block. */
+export type OverviewContributionsProps = Record<string, never>
+/** Connect the OverviewContributions block to its data source. */
+export const OverviewContributions = (props: OverviewContributionsProps) => {
+    void props
     const t = useTranslations("contributions")
     const locale = useLocale()
     const [year, setYear] = useState(() => new Date().getFullYear())
@@ -66,6 +70,3 @@ export const OverviewContributions = () => {
 }
 
 export * from "./component"
-
-/** Source-level tier marker for the connected dashboard block. */
-export const meta = { world: "connected", domain: "dashboard" } as const

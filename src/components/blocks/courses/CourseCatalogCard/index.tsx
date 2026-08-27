@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl"
 import { useMutateAddToCartSwr, useQueryCoursePricePreviewSwr } from "@/hooks"
 import { isPersonalPrice } from "@/modules/utils/course-price"
 import { CourseCatalogCardBase, type CourseCatalogCardData } from "./component"
+export type { CourseCatalogCardData } from "./component"
 
 /**
  * One catalog card, priced for the asking learner.
@@ -45,12 +46,13 @@ export type CourseCatalogCardProps = {
  *
  * @param input - {@link CourseCatalogCardProps}
  */
-export const CourseCatalogCard = ({
-    state = "ready",
-    course,
-    onView,
-    onOpenPriceDetail,
-}: CourseCatalogCardProps) => {
+export const CourseCatalogCard = (props: CourseCatalogCardProps) => {
+    const {
+        state = "ready",
+        course,
+        onView,
+        onOpenPriceDetail,
+    } = props
     const t = useTranslations("courses.catalog")
     const locale = useLocale()
     const cart = useMutateAddToCartSwr(state === "pending" ? undefined : course.id)
@@ -109,6 +111,3 @@ export const CourseCatalogCard = ({
         />
     )
 }
-
-/** Source-level ownership marker. */
-export const meta = { world: "connected", domain: "courses" } as const

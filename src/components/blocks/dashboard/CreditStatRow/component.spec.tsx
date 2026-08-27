@@ -12,7 +12,6 @@ describe("CreditStatRowBase", () => {
 
     it("turns the pending situation into a resting value leaf", () => {
         const { container } = render(<CreditStatRowBase state="pending" props={{ label: "AI credit" }} />)
-        expect(container.querySelector("[data-component=\"Text\"][data-loading=\"true\"]")).toBeTruthy()
+        expect(container.querySelector("[data-loading=\"true\"]")).toBeTruthy()
     })
 })
-

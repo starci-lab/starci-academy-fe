@@ -11,7 +11,8 @@ export type ProblemReadingColumnProps = { readonly slug: string }
 const readingBodyOf = (tab: ProblemReadingTab, statement: string | undefined, hint: string, empty: string) => tab === "statement" ? statement : tab === "hint" ? hint : empty
 
 /** Resolve the problem statement and own the reader's tab selection. */
-export const ProblemReadingColumn = ({ slug }: ProblemReadingColumnProps) => {
+export const ProblemReadingColumn = (props: ProblemReadingColumnProps) => {
+    const { slug } = props
     const t = useTranslations("practice")
     const problem = useQueryCodingProblemSwr(slug)
     const [tab, setTab] = useState<ProblemReadingTab>("statement")
@@ -42,5 +43,3 @@ export const ProblemReadingColumn = ({ slug }: ProblemReadingColumnProps) => {
 }
 
 export { ProblemReadingColumnBase } from "./component"
-/** Source-level ownership marker for the connected reading block. */
-export const meta = { world: "connected", domain: "coding" } as const

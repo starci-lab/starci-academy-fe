@@ -3,7 +3,6 @@ import { describe, expect, it, vi } from "vitest"
 import type { PropsWithChildren } from "react"
 import type * as HeroUi from "@heroui/react"
 import { DrawerBranch } from "./index"
-import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
 type VendorPartProps = PropsWithChildren
 type VendorContentProps = PropsWithChildren<{ readonly placement?: string }>
@@ -34,12 +33,10 @@ vi.mock("@heroui/react", () => {
     DrawerRoot.Heading = (input: VendorPartProps) => <h2>{input.children}</h2>
     DrawerRoot.CloseTrigger = () => <button type="button" onClick={() => mocks.openChange?.(false)}>Close</button>
     DrawerRoot.Body = (input: VendorPartProps) => <div>{input.children}</div>
-    return { Drawer: DrawerRoot }
+    return { cn: (...tokens: Array<string>) => tokens.join(" "), Drawer: DrawerRoot }
 })
 
-const drawerBody = (content: string) => defineContractComponent("stacked-peer-controls", {
-    control: [defineLeafComponent("button", {}, () => <>{content}</>)],
-})
+const drawerBody = (content: string) => <>{content}</>
 
 describe("DrawerBranch", () => {
     it("keeps right as the default placement", () => {
@@ -47,10 +44,8 @@ describe("DrawerBranch", () => {
             <DrawerBranch
                 isOpen
                 title={resolvedCopy.cartTitle}
-                contract="stacked-peer-controls"
-                render={drawerBody(resolvedCopy.cartBody)}
                 onDismiss={() => undefined}
-            />,
+            >{drawerBody(resolvedCopy.cartBody)}</DrawerBranch>,
         )
         expect(getByTestId("drawer-content")).toHaveAttribute("data-placement", "right")
     })
@@ -61,10 +56,8 @@ describe("DrawerBranch", () => {
                 isOpen
                 placement="bottom"
                 title={resolvedCopy.aiTitle}
-                contract="stacked-peer-controls"
-                render={drawerBody(resolvedCopy.aiBody)}
                 onDismiss={() => undefined}
-            />,
+            >{drawerBody(resolvedCopy.aiBody)}</DrawerBranch>,
         )
         expect(getByTestId("drawer-content")).toHaveAttribute("data-placement", "bottom")
     })
@@ -75,10 +68,8 @@ describe("DrawerBranch", () => {
             <DrawerBranch
                 isOpen
                 title={resolvedCopy.cartTitle}
-                contract="stacked-peer-controls"
-                render={drawerBody(resolvedCopy.cartBody)}
                 onDismiss={dismiss}
-            />,
+            >{drawerBody(resolvedCopy.cartBody)}</DrawerBranch>,
         )
 
         mocks.openChange?.(true)
@@ -93,13 +84,11 @@ describe("DrawerBranch", () => {
             <DrawerBranch
                 isOpen
                 title={resolvedCopy.aiTitle}
-                contract="stacked-peer-controls"
-                render={drawerBody(resolvedCopy.aiBody)}
                 onDismiss={() => undefined}
-            />,
+            >{drawerBody(resolvedCopy.aiBody)}</DrawerBranch>,
         )
 
         expect(getByRole("heading", { name: resolvedCopy.aiTitle })).toBeInTheDocument()
-        expect(getByText(resolvedCopy.aiBody).closest("[data-node=\"stacked-peer-controls\"]")).not.toBeNull()
+        expect(getByText(resolvedCopy.aiBody)).toBeInTheDocument()
     })
 })

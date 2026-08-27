@@ -14,9 +14,8 @@ const tabs: ProfileTabsData = {
 
 describe("ProfileTabsBase", () => {
     it("draws every profile destination inside the profile-owned strip and marks the current one", () => {
-        const { container } = render(<ProfileTabsBase props={tabs} />)
+        render(<ProfileTabsBase props={tabs} />)
 
-        expect(container.querySelector("[data-node=\"underlined-tab-strip\"]")).not.toBeNull()
         expect(screen.getByRole("tablist", { name: "Profile sections" })).not.toBeNull()
         expect(screen.getAllByRole("tab").map((tab) => tab.textContent)).toEqual([
             "Overview",

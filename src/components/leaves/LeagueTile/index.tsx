@@ -1,6 +1,5 @@
-import { skeletonVariants } from "@heroui/react"
 import { RankMark } from "@/components/leaves/RankMark"
-import type { LeafProps } from "@/components/contracts/props"
+import { leagueTileClassName, leagueTileLoadingClassName } from "./classNames"
 
 /**
  * LEAF - `LeagueTile`: the viewer's own place, on a plate of its own.
@@ -29,44 +28,35 @@ export type LeagueTileData = {
     readonly accessibleLabel?: string
 }
 
-/** Props for {@link LeagueTile}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type LeagueTileProps = LeafProps<LeagueTileData>
+/** Props for {@link LeagueTile}. Three fixed slots, no fourth. */
+export type LeagueTileProps = { readonly props: LeagueTileData; readonly isLoading?: boolean }
 
 /** The plate: one step above `IconTile`'s largest, with the radius kept concentric. */
-const PLATE_CLASSES = "inline-flex size-12 shrink-0 items-center justify-center rounded-2xl bg-default"
 
 /** The resting shape - the plate at its real size, no artwork. */
-const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" })
-    .base({ className: "inline-flex size-12 shrink-0 rounded-2xl" })
 
 /**
  * Draw the viewer's rank artwork on its own framed plate.
  *
  * @param input - {@link LeagueTileProps}
  */
-export const LeagueTile = ({ props, isLoading = false }: LeagueTileProps) => {
+export const LeagueTile = (props: LeagueTileProps) => {
+    const isLoading = props.isLoading === true
     if (isLoading) {
         return (
             <span
-                data-tier="leaf"
-                data-component="LeagueTile"
                 data-loading="true"
                 aria-hidden="true"
-                className={RESTING_CLASSES}
+                className={leagueTileLoadingClassName}
             />
         )
     }
     return (
         <span
-            data-tier="leaf"
-            data-component="LeagueTile"
             data-loading="false"
-            className={PLATE_CLASSES}
+            className={leagueTileClassName}
         >
-            <RankMark props={{ rank: props.rank, placement: "standing", accessibleLabel: props.accessibleLabel }} />
+            <RankMark props={{ rank: props.props.rank, placement: "standing", accessibleLabel: props.props.accessibleLabel }} />
         </span>
     )
 }
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const

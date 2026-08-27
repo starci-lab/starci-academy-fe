@@ -1,9 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { Input as HeroInput, skeletonVariants } from "@heroui/react"
+import { Input as HeroInput } from "@heroui/react"
 import { Icon } from "@/components/leaves/Icon"
-import type { LeafProps } from "@/components/contracts/props"
+import { inputBoxClassName, inputLoadingClassName, inputRevealClassName } from "./classNames"
 
 /**
  * LEAF - `Input`: the box a reader types into.
@@ -50,8 +50,8 @@ export type InputActions = {
     readonly change?: (value: string) => void
 }
 
-/** Props for {@link Input}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type InputProps = LeafProps<InputData, InputActions>
+/** Props for {@link Input}. */
+export type InputProps = { readonly props: InputData; readonly on?: InputActions; readonly isLoading?: boolean }
 
 /** The kind, as the platform's own type attribute plus what it should autocomplete. */
 const KINDS = {
@@ -63,51 +63,49 @@ const KINDS = {
 } as const
 
 /** The resting shape - the box at its real height, empty. */
-const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({
-    className: "h-10 w-full",
-})
 
 /** The box and its intrinsic reveal affordance share one control boundary. */
-const BOX_CLASSES = "relative flex flex-row items-center"
 
 /** The reveal sits inside the input's own inset. */
-const REVEAL_CLASSES = "absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer text-muted"
 
 /**
  * Draw a box to type into.
  *
  * @param input - {@link InputProps}
  */
-export const Input = ({ props, on, isLoading = false }: InputProps) => {
+export const Input = (props: InputProps) => {
+    const data = props.props
+    const on = props.on
+    const isLoading = props.isLoading ?? false
     const [isRevealed, setIsRevealed] = useState(false)
-    const kind = KINDS[props.kind ?? "text"]
-    const isSecret = (props.kind ?? "text") === "password" || props.kind === "newPassword"
-    const revealLabel = isRevealed ? props.hideLabel : props.revealLabel
+    const kind = KINDS[data.kind ?? "text"]
+    const isSecret = (data.kind ?? "text") === "password" || data.kind === "newPassword"
+    const revealLabel = isRevealed ? data.hideLabel : data.revealLabel
     return (
-        <span data-tier="leaf" data-component="Input" className={BOX_CLASSES}>
+        <span className={inputBoxClassName}>
             <HeroInput
-                data-kind={props.kind ?? "text"}
+                data-kind={data.kind ?? "text"}
                 data-loading={isLoading ? "true" : "false"}
-                id={props.id}
-                name={props.name}
+                id={data.id}
+                name={data.name}
                 type={isSecret && isRevealed ? "text" : kind.type}
                 autoComplete={kind.autoComplete}
                 inputMode={kind.inputMode}
-                defaultValue={props.defaultValue}
-                placeholder={props.placeholder}
-                disabled={props.disabled === true || isLoading}
-                aria-invalid={props.isInvalid === true ? true : undefined}
-                aria-describedby={props.describedBy}
+                defaultValue={data.defaultValue}
+                placeholder={data.placeholder}
+                disabled={data.disabled === true || isLoading}
+                aria-invalid={data.isInvalid === true ? true : undefined}
+                aria-describedby={data.describedBy}
                 fullWidth
                 variant="secondary"
-                className={isLoading ? RESTING_CLASSES : undefined}
+                className={isLoading ? inputLoadingClassName : undefined}
                 onChange={(event) => on?.change?.(event.target.value)}
             />
             {!isSecret || revealLabel === undefined ? null : (
                 <button
                     type="button"
                     aria-label={revealLabel}
-                    className={REVEAL_CLASSES}
+                    className={inputRevealClassName}
                     onClick={() => setIsRevealed(!isRevealed)}
                 >
                     <Icon props={{ name: isRevealed ? "hidePassword" : "revealPassword", role: "chip" }} />
@@ -116,6 +114,3 @@ export const Input = ({ props, on, isLoading = false }: InputProps) => {
         </span>
     )
 }
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const

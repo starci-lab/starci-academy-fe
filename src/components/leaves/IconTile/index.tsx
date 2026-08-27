@@ -1,6 +1,5 @@
-import { skeletonVariants } from "@heroui/react"
 import { Icon, type IconName } from "@/components/leaves/Icon"
-import type { LeafProps } from "@/components/contracts/props"
+import { getIconTileClassName, iconTileImageClassName } from "./classNames"
 
 /**
  * LEAF - `IconTile`: a glyph on a filled plate, for the one mark that leads a row.
@@ -39,65 +38,37 @@ export type IconTileData = {
     readonly size?: IconTileSize
 }
 
-/** Props for {@link IconTile}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type IconTileProps = LeafProps<IconTileData>
+/** Props for {@link IconTile}. Three fixed slots, no fourth. */
+export type IconTileProps = { readonly props: IconTileData; readonly isLoading?: boolean }
 
 /** The fill and its foreground, always as a pair. */
-const TONE_CLASSES = {
-    neutral: "bg-default text-muted",
-    accent: "bg-accent-soft text-accent-soft-foreground",
-    success: "bg-success-soft text-success-soft-foreground",
-    warning: "bg-warning-soft text-warning-soft-foreground",
-    danger: "bg-danger-soft text-danger-soft-foreground",
-} as const
-
-/** The plate per step. */
-const SIZE_CLASSES = { sm: "size-8 rounded-lg", md: "size-10 rounded-xl" } as const
-
-/** Centres the glyph and stops the plate being squeezed inside a row. */
-const BASE_CLASSES = "inline-flex shrink-0 items-center justify-center overflow-hidden"
-
-/** Artwork fills the plate and is clipped by it, so the tile keeps one silhouette either way. */
-const IMAGE_CLASSES = "size-full object-cover"
-
-/** The resting shape - the plate at its real size, no glyph. */
-const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base()
-
 /**
  * Draw a glyph on a plate.
  *
  * @param input - {@link IconTileProps}
  */
-export const IconTile = ({ props, isLoading = false }: IconTileProps) => {
-    const tone = props.tone ?? "neutral"
-    const size = props.size ?? "sm"
+export const IconTile = (props: IconTileProps) => {
+    const tone = props.props.tone ?? "neutral"
+    const size = props.props.size ?? "sm"
+    const isLoading = props.isLoading === true
     // The artwork replaces the fill as well as the glyph: a soft plate behind a photograph is a
     // colour nobody sees, and it would tint the one pixel row where the image does not reach.
-    const image = props.image
+    const image = props.props.image
     const showsImage = !isLoading && image !== undefined && image !== null && image !== ""
     return (
         <span
-            data-tier="leaf"
-            data-component="IconTile"
             data-tone={tone}
             data-size={size}
             data-artwork={showsImage ? "true" : "false"}
             data-loading={isLoading ? "true" : "false"}
             aria-hidden={isLoading ? true : undefined}
-            className={[
-                BASE_CLASSES,
-                SIZE_CLASSES[size],
-                isLoading ? RESTING_CLASSES : showsImage ? "" : TONE_CLASSES[tone],
-            ].join(" ")}
+            className={getIconTileClassName(tone, size, isLoading, showsImage)}
         >
             {isLoading ? null : showsImage
                 // Decorative: the row states the course by name on the very next line, so a reader
                 // who cannot see the artwork gains nothing from hearing its file described.
-                ? <img src={image} alt="" className={IMAGE_CLASSES} />
-                : <Icon props={{ name: props.icon, role: "leading" }} />}
+                ? <img src={image} alt="" className={iconTileImageClassName} />
+                : <Icon props={{ name: props.props.icon, role: "leading" }} />}
         </span>
     )
 }
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const

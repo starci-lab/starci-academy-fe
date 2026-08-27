@@ -1,10 +1,5 @@
 import { DayCell, type DayCellData } from "@/components/leaves/DayCell"
-import { Tree } from "@/components/branches/Tree"
-import {
-    defineContractComponent,
-    defineLeafComponent,
-    type CompositeProps,
-} from "@/components/contracts/props"
+
 
 /**
  * COMPOSITE - `StreakWeekRun`: the last seven days, as one run of columns.
@@ -34,23 +29,16 @@ export type StreakWeekRunData = {
     readonly days?: ReadonlyArray<DayCellData>
 }
 
-/** Props for {@link StreakWeekRun}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type StreakWeekRunProps = CompositeProps<StreakWeekRunData>
+/** Props for {@link StreakWeekRun}. Three fixed slots, no fourth. */
+export type StreakWeekRunProps = { readonly props: StreakWeekRunData; readonly isLoading?: boolean }
 
 /**
  * Draw the week.
  *
  * @param input - {@link StreakWeekRunProps}
  */
-export const StreakWeekRun = ({ props, isLoading = false }: StreakWeekRunProps) => (
-    <Tree contract="streak-week-run" render={defineContractComponent("streak-week-run", {
-        day: (isLoading ? RESTING_WEEK : (props.days ?? RESTING_WEEK)).map((day) => (
-            defineLeafComponent("day-cell", {}, () => (
-                <DayCell key={day.id} props={day} isLoading={isLoading} />
-            ))
-        )),
-    })} />
-)
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "composite", world: "pure" } as const
+export const StreakWeekRun = (props: StreakWeekRunProps) => {
+    const data = props.props
+    const isLoading = props.isLoading ?? false
+    return <div>{(isLoading ? RESTING_WEEK : (data.days ?? RESTING_WEEK)).map((day) => <DayCell key={day.id} props={day} isLoading={isLoading} />)}</div>
+}

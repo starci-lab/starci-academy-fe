@@ -24,7 +24,8 @@ const verdictStateOf = (jobId: string | undefined, isConnected: boolean, verdict
 const editorStateOf = (isSubmitting: boolean, jobId: string | undefined) => isSubmitting ? "submitting" as const : jobId === undefined ? "ready" as const : "judged" as const
 
 /** Own editor drafts, submit mutation and verdict socket state for one problem's work column. */
-export const CodingProblemWork = ({ slug }: CodingProblemWorkProps) => {
+export const CodingProblemWork = (props: CodingProblemWorkProps) => {
+    const { slug } = props
     const t = useTranslations("practice")
     const problem = useQueryCodingProblemSwr(slug)
     const [language, setLanguage] = useState("python")
@@ -82,5 +83,3 @@ export const CodingProblemWork = ({ slug }: CodingProblemWorkProps) => {
 }
 
 export { CodingProblemWorkBase } from "./component"
-/** Source-level ownership marker for the connected work-column block. */
-export const meta = { world: "connected", domain: "coding" } as const

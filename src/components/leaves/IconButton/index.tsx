@@ -1,6 +1,6 @@
 import { Button as HeroButton } from "@heroui/react"
 import { Icon, type IconName } from "@/components/leaves/Icon"
-import type { LeafProps } from "@/components/contracts/props"
+import { iconButtonClassName } from "./classNames"
 
 /**
  * LEAF - `IconButton`: a control the bar has room for only as a glyph.
@@ -30,29 +30,28 @@ export type IconButtonActions = {
     readonly press?: () => void
 }
 
-/** Props for {@link IconButton}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type IconButtonProps = LeafProps<IconButtonData, IconButtonActions>
+/** Props for {@link IconButton}. */
+export type IconButtonProps = { readonly props: IconButtonData; readonly on?: IconButtonActions; readonly isLoading?: boolean }
 
 /**
  * Draw a glyph that acts.
  *
  * @param input - {@link IconButtonProps}
  */
-export const IconButton = ({ props, on }: IconButtonProps) => (
-    <HeroButton
-        data-tier="leaf"
-        data-component="IconButton"
-        data-active={props.isActive === true ? "true" : "false"}
-        type="button"
-        variant="tertiary"
-        className="rounded-full"
-        isIconOnly
-        aria-label={props.label}
-        onPress={on?.press}
-    >
-        <Icon props={{ name: props.icon, role: "leading" }} />
-    </HeroButton>
-)
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const
+export const IconButton = (props: IconButtonProps) => {
+    const data = props.props
+    const on = props.on
+    return (
+        <HeroButton
+            data-active={data.isActive === true ? "true" : "false"}
+            type="button"
+            variant="tertiary"
+            className={iconButtonClassName}
+            isIconOnly
+            aria-label={data.label}
+            onPress={on?.press}
+        >
+            <Icon props={{ name: data.icon, role: "leading" }} />
+        </HeroButton>
+    )
+}

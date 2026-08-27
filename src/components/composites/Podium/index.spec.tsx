@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react"
+import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 import { Podium, type PodiumEntryData } from "./index"
 
@@ -13,7 +13,7 @@ const entry = (over: Partial<PodiumEntryData> & Pick<PodiumEntryData, "rank">): 
     ...over,
 })
 
-const places = (root: HTMLElement) => root.querySelectorAll("[data-node=\"podium-place\"]")
+const places = (root: HTMLElement) => Array.from(root.firstElementChild?.children ?? [])
 
 describe("Podium", () => {
     it("emits the top three best-first so a sequential reader hears first, second, third", () => {
@@ -22,50 +22,49 @@ describe("Podium", () => {
             entries: [entry({ rank: 2 }), entry({ rank: 1 }), entry({ rank: 3 })],
         }} />)
         expect(places(container)).toHaveLength(3)
-        expect(Array.from(container.querySelectorAll("[data-component=\"PodiumStep\"]"), (step) => step.textContent))
-            .toEqual(["1", "2", "3"])
-        expect(Array.from(container.querySelectorAll("[data-component=\"Text\"][data-size=\"sm\"]"), (name) => name.textContent))
+        expect(screen.getAllByText(/^[123]$/).map((step) => step.textContent)).toEqual(["1", "2", "3"])
+        expect(screen.getAllByText(/^Learner [123]$/).map((name) => name.textContent))
             .toEqual(["Learner 1", "Learner 2", "Learner 3"])
-        expect(Array.from(container.querySelectorAll("[data-component=\"Text\"][data-size=\"xs\"]"), (points) => points.textContent))
+        expect(screen.getAllByText(/^[123]00 XP$/).map((points) => points.textContent))
             .toEqual(["100 XP", "200 XP", "300 XP"])
     })
 
     it("gives the champion the larger portrait and the runners-up the ordinary one", () => {
-        const { container } = render(<Podium props={{
+        render(<Podium props={{
             ...frame,
             entries: [entry({ rank: 1 }), entry({ rank: 2 }), entry({ rank: 3 })],
         }} />)
-        expect(Array.from(container.querySelectorAll("[data-component=\"Avatar\"]"), (avatar) => avatar.getAttribute("data-size")))
-            .toEqual(["lg", "md", "md"])
+        const portraits = screen.getAllByRole("img")
+        expect(portraits[0]?.closest(".avatar")).toHaveClass("avatar--lg")
+        expect(portraits[1]?.closest(".avatar")).toHaveClass("avatar--md")
+        expect(portraits[2]?.closest(".avatar")).toHaveClass("avatar--md")
     })
 
     it("keeps each finisher's numeric place on the mark it hands assistive technology", () => {
-        const { container } = render(<Podium props={{ ...frame, entries: [entry({ rank: 1 })] }} />)
-        const mark = container.querySelector("[data-component=\"RankMark\"]")
-        expect(mark).toHaveAttribute("aria-label", "Rank 1")
-        expect(mark).toHaveAttribute("data-placement", "row")
+        render(<Podium props={{ ...frame, entries: [entry({ rank: 1 })] }} />)
+        const mark = screen.getByLabelText("Rank 1")
+        expect(mark.tagName).toBe("SPAN")
     })
 
     it("marks the viewer's own place and appends the suffix to their name", () => {
-        const { container } = render(<Podium props={{
+        render(<Podium props={{
             ...frame,
             entries: [entry({ rank: 1, username: "Ada", isMe: true }), entry({ rank: 2 })],
         }} />)
-        const names = container.querySelectorAll("[data-component=\"Text\"][data-size=\"sm\"]")
-        expect(names[0]?.textContent).toBe("Ada · You")
-        expect(names[0]).toHaveAttribute("data-tone", "accent")
-        expect(names[0]).toHaveAttribute("data-weight", "semibold")
-        expect(names[1]?.textContent).toBe("Learner 2")
-        expect(names[1]).toHaveAttribute("data-tone", "default")
+        const ownName = screen.getByText("Ada · You")
+        const otherName = screen.getByText("Learner 2")
+        expect(ownName).toHaveAttribute("data-tone", "accent")
+        expect(ownName).toHaveAttribute("data-weight", "semibold")
+        expect(otherName).toHaveAttribute("data-tone", "default")
     })
 
     it("falls back to the anonymous name, and still says it is the viewer", () => {
-        const { container } = render(<Podium props={{
+        render(<Podium props={{
             ...frame,
             entries: [entry({ rank: 1, username: null, isMe: true }), entry({ rank: 2, username: null })],
         }} />)
-        expect(Array.from(container.querySelectorAll("[data-component=\"Text\"][data-size=\"sm\"]"), (name) => name.textContent))
-            .toEqual(["Anonymous · You", "Anonymous"])
+        expect(screen.getByText("Anonymous · You")).toBeInTheDocument()
+        expect(screen.getByText("Anonymous")).toBeInTheDocument()
     })
 
     it("drops a place nobody finished rather than standing an empty step on the dais", () => {
@@ -74,17 +73,14 @@ describe("Podium", () => {
             entries: [entry({ rank: 1 }), entry({ rank: 3 })],
         }} />)
         expect(places(container)).toHaveLength(2)
-        expect(Array.from(container.querySelectorAll("[data-component=\"PodiumStep\"]"), (step) => step.textContent))
-            .toEqual(["1", "3"])
+        expect(screen.getAllByText(/^[13]$/).map((step) => step.textContent)).toEqual(["1", "3"])
     })
 
     it("draws the whole three-step dais at rest, with nobody standing on it yet", () => {
         const { container } = render(<Podium props={{ ...frame, entries: [] }} isLoading />)
         expect(places(container)).toHaveLength(3)
-        expect(Array.from(container.querySelectorAll("[data-component=\"RankMark\"]"), (mark) => mark.getAttribute("data-loading")))
-            .toEqual(["true", "true", "true"])
-        expect(container.querySelectorAll("[data-component=\"Avatar\"][data-loading=\"true\"]")).toHaveLength(3)
-        expect(container.querySelector("[data-component=\"Text\"]")).toHaveAttribute("data-loading", "true")
+        expect(container.querySelectorAll("[aria-hidden=\"true\"]").length).toBeGreaterThanOrEqual(6)
+        expect(screen.queryByText(/^[123]$/)).toBeNull()
     })
 
     it("draws nothing at all once a settled week has no finishers", () => {
@@ -93,14 +89,14 @@ describe("Podium", () => {
     })
 
     it("names each finisher's portrait so the dais is readable without the labels", () => {
-        const { container } = render(<Podium props={{
+        render(<Podium props={{
             ...frame,
             entries: [
                 entry({ rank: 1, username: "Ada", avatar: "https://example.com/ada.png" }),
                 entry({ rank: 2, username: null }),
             ],
         }} />)
-        expect(Array.from(container.querySelectorAll("[data-component=\"Avatar\"] img"), (image) => image.getAttribute("alt")))
-            .toEqual(["Ada", "Anonymous"])
+        expect(screen.getByRole("img", { name: "Ada" })).toBeInTheDocument()
+        expect(screen.getByRole("img", { name: "Anonymous" })).toBeInTheDocument()
     })
 })

@@ -1,6 +1,4 @@
-import { Tree } from "@/components/branches/Tree"
 import { ChoiceTabs, type ChoiceTabsData } from "@/components/leaves/ChoiceTabs"
-import { defineContractComponent, defineLeafComponent, type CompositeProps } from "@/components/contracts/props"
 
 /** Two controlled peer-choice axes sharing one toolbar row. */
 export type DualTabsToolbarData = {
@@ -15,19 +13,7 @@ export type DualTabsToolbarActions = {
 }
 
 /** Props for the closed two-axis toolbar arrangement. */
-export type DualTabsToolbarProps = CompositeProps<DualTabsToolbarData, DualTabsToolbarActions>
+export type DualTabsToolbarProps = { readonly props: DualTabsToolbarData; readonly on?: DualTabsToolbarActions }
 
 /** Draw two primary peer-choice axes on the same toolbar. */
-export const DualTabsToolbar = ({ props, on }: DualTabsToolbarProps) => (
-    <Tree contract="dual-tabs-toolbar" render={defineContractComponent("dual-tabs-toolbar", {
-        leading: defineLeafComponent("choice-tabs", {}, () => (
-            <ChoiceTabs props={{ ...props.leading, variant: "primary" }} on={{ select: on?.selectLeading }} />
-        )),
-        trailing: defineLeafComponent("choice-tabs", {}, () => (
-            <ChoiceTabs props={{ ...props.trailing, variant: "primary" }} on={{ select: on?.selectTrailing }} />
-        )),
-    })} />
-)
-
-/** Source-level tier marker for the pure composite. */
-export const meta = { shape: "composite", world: "pure" } as const
+export const DualTabsToolbar = (props: DualTabsToolbarProps) => <div><ChoiceTabs props={{ ...props.props.leading, variant: "primary" }} on={{ select: props.on?.selectLeading }} /><ChoiceTabs props={{ ...props.props.trailing, variant: "primary" }} on={{ select: props.on?.selectTrailing }} /></div>

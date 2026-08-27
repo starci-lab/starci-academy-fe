@@ -7,4 +7,3 @@ export const CourseLearnChallengePage = (props: CourseLearnChallengePageProps) =
     return <CourseLearnChallengePageBase {...props} resizeLabel={t("resizeRail")} />
 }
 /** Ownership metadata for the route entry. */
-export const meta = { world: "connected", domain: "learn" } as const

@@ -125,7 +125,7 @@ import {
 } from "@starci/heroicons/16/solid"
 import type { ComponentType, SVGProps } from "react"
 import { GithubMark, GoogleMark } from "./brands"
-import type { LeafProps } from "@/components/contracts/props"
+import { getIconClassName, iconLoadingClassName } from "./classNames"
 
 /**
  * LEAF - `Icon`: the picture a word needs when the word alone is slower to find.
@@ -169,8 +169,8 @@ export type IconData = {
     readonly role?: IconRole
 }
 
-/** Props for {@link Icon}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type IconProps = LeafProps<IconData>
+/** Props for {@link Icon}. */
+export type IconProps = { readonly props: IconData; readonly isLoading?: boolean }
 
 /**
  * The meaning-to-glyph map. The only file in the repository that names a Heroicon.
@@ -288,29 +288,20 @@ const GLYPHS: Record<IconName, GlyphCuts> = {
 }
 
 /** Each role keeps the diameter its Heroicon drawing was authored for. */
-const ROLE_CLASSES = {
-    heading: "size-6 shrink-0",
-    leading: "size-5 shrink-0",
-    chip: "size-4 shrink-0",
-} as const
 
 /**
  * Draw one meaning as a glyph.
  *
  * @param input - {@link IconProps}
  */
-export const Icon = ({ props, isLoading = false }: IconProps) => {
-    const glyph = GLYPHS[props.name]
-    const role = props.role ?? "chip"
+export const Icon = (props: IconProps) => {
+    const data = props.props
+    const isLoading = props.isLoading ?? false
+    const glyph = GLYPHS[data.name]
+    const role = data.role ?? "chip"
     const Glyph = glyph[role]
     if (isLoading) {
-        return <span aria-hidden="true" data-tier="leaf" data-component="Icon" className="size-5 shrink-0 animate-pulse rounded-full bg-default" />
+        return <span aria-hidden="true" className={iconLoadingClassName} />
     }
-    const className = props.name === "complete"
-        ? `${ROLE_CLASSES[role]} text-success-soft-foreground`
-        : ROLE_CLASSES[role]
-    return <Glyph aria-hidden className={className} />
+    return <Glyph aria-hidden className={getIconClassName(role, data.name === "complete")} />
 }
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const

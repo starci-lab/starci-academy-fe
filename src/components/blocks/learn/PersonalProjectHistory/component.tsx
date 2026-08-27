@@ -1,7 +1,5 @@
-import { Tree } from "@/components/branches/Tree"
 import { Button } from "@/components/leaves/Button"
 import { Text } from "@/components/leaves/Text"
-import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
 /** One immutable grading attempt shown by the history drawer. */
 export type PersonalProjectHistoryAttempt = {
@@ -26,8 +24,8 @@ export type PersonalProjectHistoryLabels = {
     readonly failed: string
 }
 
-/** Pure attempt-history states, data and actions. */
-export type PersonalProjectHistoryBlockProps = {
+/** Data and actions for the pure attempt-history renderer. */
+export type PersonalProjectHistoryProps = {
     readonly state: "pending" | "ready" | "empty" | "failed"
     readonly props: {
         readonly attempts: ReadonlyArray<PersonalProjectHistoryAttempt>
@@ -45,58 +43,54 @@ export type PersonalProjectHistoryBlockProps = {
     }
 }
 
-/** Draw only the independently stateful history workspace inside its drawer. */
-export const PersonalProjectHistoryBase = (input: PersonalProjectHistoryBlockProps) => {
-    const loading = input.state === "pending"
-    const hasPrevious = input.props.page > 0
-    const hasNext = (input.props.page + 1) * input.props.pageSize < input.props.attemptCount
-    const attempts = input.props.attempts.map((attempt) => defineContractComponent("personal-project-attempt-row", {
-        action: defineLeafComponent("button", {}, () => (
-            <Button
-                props={{
-                    label: input.props.labels.selectAttempt(attempt.attemptNumber, attempt.score),
-                    variant: attempt.id === input.props.selectedAttemptId ? "primary" : "secondary",
-                    size: "sm",
-                }}
-                on={{ press: () => input.on?.select?.(attempt) }}
-                isLoading={loading}
-            />
-        )),
-        meta: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-            <Text
-                props={{
-                    content: [attempt.passed ? input.props.labels.passed : input.props.labels.needsWork, attempt.servedModel, attempt.processedAt]
-                        .filter(Boolean).join(" · "),
-                    size: "xs",
-                    tone: "muted",
-                }}
-                isLoading={loading}
-            />
-        )),
-    }))
-    const notice = input.state === "pending"
-        ? input.props.labels.pending
-        : input.state === "failed"
-            ? input.props.labels.failed
-            : input.props.labels.empty
+/** Draw the independently stateful attempt history with ordinary semantic React markup. */
+export const PersonalProjectHistoryBase = (props: PersonalProjectHistoryProps) => {
+    const loading = props.state === "pending"
+    const hasPrevious = props.props.page > 0
+    const hasNext = (props.props.page + 1) * props.props.pageSize < props.props.attemptCount
+    const notice = props.state === "pending"
+        ? props.props.labels.pending
+        : props.state === "failed"
+            ? props.props.labels.failed
+            : props.props.labels.empty
 
     return (
-        <Tree contract="personal-project-attempt-history-drawer" render={defineContractComponent("personal-project-attempt-history-drawer", {
-            summary: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                <Text props={{ content: input.props.labels.summary(input.props.attemptCount), size: "sm", tone: "muted" }} isLoading={loading} />
-            )),
-            ...(input.state === "ready" && attempts.length > 0
-                ? { attempt: attempts }
-                : { notice: defineLeafComponent("text", {}, () => <Text props={{ content: notice, live: input.state === "failed" ? "assertive" : "polite" }} isLoading={loading} />) }),
-            ...(!hasPrevious && !hasNext ? {} : {
-                pagination: defineContractComponent("stacked-peer-controls", { control: [
-                    defineLeafComponent("button", {}, () => <Button props={{ label: input.props.labels.previous, disabled: !hasPrevious }} on={{ press: input.on?.previous }} />),
-                    defineLeafComponent("button", {}, () => <Button props={{ label: input.props.labels.next, disabled: !hasNext }} on={{ press: input.on?.next }} />),
-                ] }),
-            }),
-        })} />
+        <section aria-label={props.props.labels.summary(props.props.attemptCount)}>
+            <Text props={{ content: props.props.labels.summary(props.props.attemptCount), size: "sm", tone: "muted" }} isLoading={loading} />
+            {props.state === "ready" && props.props.attempts.length > 0 ? (
+                <ul aria-label={props.props.labels.summary(props.props.attemptCount)}>
+                    {props.props.attempts.map((attempt) => (
+                        <li key={attempt.id}>
+                            <Button
+                                props={{
+                                    label: props.props.labels.selectAttempt(attempt.attemptNumber, attempt.score),
+                                    variant: attempt.id === props.props.selectedAttemptId ? "primary" : "secondary",
+                                    size: "sm",
+                                }}
+                                on={{ press: () => props.on?.select?.(attempt) }}
+                                isLoading={loading}
+                            />
+                            <Text
+                                props={{
+                                    content: [attempt.passed ? props.props.labels.passed : props.props.labels.needsWork, attempt.servedModel, attempt.processedAt]
+                                        .filter(Boolean).join(" · "),
+                                    size: "xs",
+                                    tone: "muted",
+                                }}
+                                isLoading={loading}
+                            />
+                        </li>
+                    ))}
+                </ul>
+            ) : (
+                <Text props={{ content: notice, live: props.state === "failed" ? "assertive" : "polite" }} isLoading={loading} />
+            )}
+            {hasPrevious || hasNext ? (
+                <nav aria-label={props.props.labels.summary(props.props.attemptCount)}>
+                    <Button props={{ label: props.props.labels.previous, disabled: !hasPrevious }} on={{ press: props.on?.previous }} />
+                    <Button props={{ label: props.props.labels.next, disabled: !hasNext }} on={{ press: props.on?.next }} />
+                </nav>
+            ) : null}
+        </section>
     )
 }
-
-/** Source-level ownership marker for the pure history renderer. */
-export const meta = { world: "pure", domain: "learn" } as const

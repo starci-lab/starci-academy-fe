@@ -13,6 +13,6 @@ describe("RankMark", () => {
         const { container } = render(
             <RankMark props={{ rank: 4, placement: "row", accessibleLabel: "Rank 4" }} />,
         )
-        expect(container.querySelector("[data-component=\"RankMark\"]")).toHaveAttribute("aria-label", "Rank 4")
+        expect(container.querySelector("[aria-label=\"Rank 4\"]")).toBeInTheDocument()
     })
 })

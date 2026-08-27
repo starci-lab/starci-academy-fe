@@ -42,11 +42,10 @@ const base: PublicProfileLayoutProps = {
 describe("PublicProfileLayoutBase", () => {
     it("owns profile tabs above the identity-and-evidence body", () => {
         const { container } = render(<PublicProfileLayoutBase {...base} />)
-        const profileChrome = container.querySelector("[data-node=\"profile-tabs-over-body\"]")
+        const profileChrome = container.querySelector("main")
         expect(profileChrome).toBeTruthy()
-        expect(profileChrome?.querySelector("[data-node=\"underlined-tab-strip\"]")).toBeTruthy()
-        expect(profileChrome?.querySelector("[data-testid=\"profile-hero\"]")).toBeTruthy()
-        expect(profileChrome?.querySelector("[data-testid=\"profile-body\"]")).toBeTruthy()
+        expect(screen.getByTestId("profile-hero")).toBeTruthy()
+        expect(screen.getByTestId("profile-body")).toBeTruthy()
         expect(screen.getByRole("tablist", { name: "Public profile sections" })).toBeTruthy()
     })
 
@@ -96,7 +95,7 @@ describe("PublicProfileLayoutBase", () => {
     it("keeps the same chrome while the profile is still loading", () => {
         const { container } = render(<PublicProfileLayoutBase {...base} state="loading" />)
 
-        expect(container.querySelector("[data-node=\"profile-tabs-over-body\"]")).toBeTruthy()
+        expect(container.querySelector("main")).toBeTruthy()
         expect(container.querySelector("[data-testid=\"profile-body\"]")).toBeTruthy()
     })
 

@@ -1,7 +1,5 @@
 import type { ReactNode } from "react"
-import { Tree } from "@/components/branches/Tree"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
-import { defineCompositeComponent, defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
 /** Data states the persistent playground frame can expose. */
 export type PlaygroundSessionFrameState = "pending" | "ready" | "failed"
@@ -16,21 +14,11 @@ export type PlaygroundSessionLayoutProps = {
 }
 
 /** Keep the routed setup or session surface mounted inside one persistent data/socket owner. */
-export const PlaygroundSessionLayoutBase = (input: PlaygroundSessionLayoutProps) => (
-    <Tree contract="playground-session-frame" render={defineContractComponent("playground-session-frame", {
-        ...(input.state === "failed" ? {} : {
-            surface: defineLeafComponent("page", {}, () => <>{input.surface}</>),
-        }),
-        ...(input.state !== "failed" ? {} : {
-            notice: defineCompositeComponent("empty-notice", {}, () => (
-                <EmptyNotice
-                    props={{ message: input.failedLabel, actionLabel: input.retryLabel }}
-                    on={{ act: input.onRetry }}
-                />
-            )),
-        }),
-    })} />
+export const PlaygroundSessionLayoutBase = (props: PlaygroundSessionLayoutProps) => (
+    props.state === "failed" ? (
+        <EmptyNotice
+            props={{ message: props.failedLabel, actionLabel: props.retryLabel }}
+            on={{ act: props.onRetry }}
+        />
+    ) : <>{props.surface}</>
 )
-
-/** Source-level ownership marker. */
-export const meta = { shape: "layout", world: "pure", domain: "learn" } as const

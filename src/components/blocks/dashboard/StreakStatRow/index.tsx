@@ -15,7 +15,11 @@ import { StreakStatRowBase } from "./component"
  * that picks a different TREE. Loading, empty, failed and ready all draw the same row here - only
  * the figure changes - so none of them is a state. They are props, and the one flag is `isLoading`.
  */
-export const StreakStatRow = () => {
+/** Props for the connected streak stat row. */
+export type StreakStatRowProps = Record<string, never>
+/** Connect the StreakStatRow block to its data source. */
+export const StreakStatRow = (props: StreakStatRowProps) => {
+    void props
     const t = useTranslations("identity")
     const weekly = useQueryMyWeeklyStatsSwr()
 
@@ -29,6 +33,3 @@ export const StreakStatRow = () => {
 
     return <StreakStatRowBase state="settled" props={{ label: t("streak"), value: t("days", { count: weekly.data.streak ?? 0 }) }} />
 }
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { world: "connected", domain: "identity" } as const

@@ -132,7 +132,7 @@ const setup = (over: Overrides = {}) => {
 
 /** Every turn the drawer currently draws, in reading order. */
 const turns = () =>
-    Array.from(document.querySelectorAll("[data-node=\"starci-ai-turn-list\"] [data-component=\"Article\"]"),
+    Array.from(document.querySelectorAll("[data-measure]"),
         (turn) => turn.textContent)
 
 /** The parameters of the most recent socket ask. */

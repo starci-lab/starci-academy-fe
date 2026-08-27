@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { CoursePersonalProject } from "@/components/blocks/learn/CoursePersonalProject"
-import type { CoursePersonalProjectBlockProps } from "@/components/blocks/learn/CoursePersonalProject/component"
+import type { CoursePersonalProjectProps } from "@/components/blocks/learn/CoursePersonalProject/component"
 
 const mocks = vi.hoisted(() => ({
     locale: "en",
@@ -17,7 +17,7 @@ vi.mock("@/hooks/swr/useQueryCoursePersonalProjectSwr", () => ({
     useQueryCoursePersonalProjectSwr: () => ({ data: mocks.data, error: mocks.error, mutate: mocks.mutate }),
 }))
 
-type PageStubProps = CoursePersonalProjectBlockProps
+type PageStubProps = CoursePersonalProjectProps
 
 vi.mock("@/components/blocks/learn/CoursePersonalProject/component", () => ({
     CoursePersonalProjectBase: (input: PageStubProps) => (
@@ -56,7 +56,7 @@ const data = {
     currentTask: { kind: "milestoneTask", id: "task-2", milestoneId: "milestone-1" },
 }
 
-const props = () => JSON.parse(screen.getByTestId("props").textContent ?? "{}") as CoursePersonalProjectBlockProps["data"]
+const props = () => JSON.parse(screen.getByTestId("props").textContent ?? "{}") as CoursePersonalProjectProps["data"]
 
 describe("CoursePersonalProjectPage", () => {
     beforeEach(() => {

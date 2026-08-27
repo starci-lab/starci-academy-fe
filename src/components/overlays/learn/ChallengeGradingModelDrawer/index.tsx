@@ -22,11 +22,11 @@ export type ChallengeGradingModelDrawerProps = {
 }
 
 /** Resolve the public grading catalogue without adopting Personal Project business ownership. */
-export const ChallengeGradingModelDrawer = (input: ChallengeGradingModelDrawerProps) => {
+export const ChallengeGradingModelDrawer = (props: ChallengeGradingModelDrawerProps) => {
     const t = useTranslations("learn.content")
     const quota = useQueryMyAiQuotaSwr()
     const catalogue = useSWR(
-        input.isOpen ? "CHALLENGE_GRADING_MODEL_CATALOGUE" : null,
+        props.isOpen ? "CHALLENGE_GRADING_MODEL_CATALOGUE" : null,
         async () => {
             const result = await queryPersonalProjectGradingModels()
             return result.data?.aiModels?.data?.gradableModels ?? []
@@ -53,7 +53,7 @@ export const ChallengeGradingModelDrawer = (input: ChallengeGradingModelDrawerPr
 
     return (
         <ChallengeGradingModelDrawerBase
-            {...input}
+            {...props}
             labels={{
                 title: t("challengeModelTitle"),
                 description: t("challengeModelDescription"),
@@ -70,4 +70,3 @@ export const ChallengeGradingModelDrawer = (input: ChallengeGradingModelDrawerPr
 
 export * from "./component"
 /** Connected ownership marker for the Challenge grading catalogue boundary. */
-export const meta = { shape: "overlay", world: "connected", domain: "learn" } as const

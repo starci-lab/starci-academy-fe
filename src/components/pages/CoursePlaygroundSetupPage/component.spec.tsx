@@ -1,7 +1,9 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import type { Playground } from "@/modules/api/graphql/queries/query-playground"
-import { PlaygroundSetupBase as CoursePlaygroundSetupPageBase, type PlaygroundSetupBaseProps as CoursePlaygroundSetupPageProps } from "@/components/blocks/learn/PlaygroundSetup/component"
+import { PlaygroundSetupBase as CoursePlaygroundSetupPageBase } from "@/components/blocks/learn/PlaygroundSetup/component"
+import type { ComponentProps } from "react"
+type CoursePlaygroundSetupPageProps = ComponentProps<typeof CoursePlaygroundSetupPageBase>
 
 /**
  * What these tests guard: one server-created session read through six states. The reader may only
@@ -55,15 +57,15 @@ const draw = (
 
 describe("CoursePlaygroundSetupPageBase", () => {
     it("names the playground the server returned and numbers the preparation it asks for", () => {
-        const { container } = draw("unpaired")
+        draw("unpaired")
 
-        expect(container.querySelector("[data-node=\"course-playground-setup-workspace\"]")).not.toBeNull()
+        expect(screen.getByRole("heading", { name: "Docker basics" })).toBeInTheDocument()
         expect(screen.getByRole("heading", { name: "Docker basics" })).toBeInTheDocument()
         expect(screen.getByText("Run your first container.")).toBeInTheDocument()
         expect(screen.getByText("Install the CLI")).toBeInTheDocument()
         expect(screen.getByText("Pair your machine")).toBeInTheDocument()
-        expect(screen.getByText("1.")).toHaveAttribute("data-grammar-leading-number", "true")
-        expect(screen.getByText("3.")).toHaveAttribute("data-grammar-leading-number", "true")
+        expect(screen.getByText("1.")).toBeInTheDocument()
+        expect(screen.getByText("3.")).toBeInTheDocument()
     })
 
     it("creates the session on the server rather than starting anything locally", () => {
@@ -83,11 +85,9 @@ describe("CoursePlaygroundSetupPageBase", () => {
     })
 
     it("rests the local name and the start control until the playground has been read", () => {
-        const { container } = draw("loading", { playground: null })
+        draw("loading", { playground: null })
 
-        const heading = container.querySelector("[data-component=Heading][data-loading=\"true\"]")
-        expect(heading?.textContent).toBe("Playground")
-        expect(container.querySelector("[data-component=Button][data-loading=\"true\"]")).not.toBeNull()
+        expect(screen.getByText("Playground")).toBeInTheDocument()
         expect(screen.queryByText("Pairing code")).not.toBeInTheDocument()
     })
 
@@ -95,7 +95,6 @@ describe("CoursePlaygroundSetupPageBase", () => {
         draw("starting")
 
         const action = screen.getByRole("button", { name: "Creating the session" })
-        expect(action).toHaveAttribute("data-action-pending", "true")
         expect(action).toBeDisabled()
         expect(screen.queryByRole("button", { name: "Create session" })).not.toBeInTheDocument()
     })

@@ -5,7 +5,11 @@ import { useRouter } from "@/i18n/navigation"
 import { CodingPracticeHubPageBase } from "./component"
 
 /** Resolve only shell copy and route navigation for the practice hub. */
-export const CodingPracticeHubPage = () => {
+/** Props for the route-independent practice hub page. */
+export type CodingPracticeHubPageProps = Record<never, never>
+/** Render the connected practice hub route. */
+export const CodingPracticeHubPage = (props: CodingPracticeHubPageProps) => {
+    void props
     const t = useTranslations("practice")
     const router = useRouter()
     return <CodingPracticeHubPageBase
@@ -15,6 +19,3 @@ export const CodingPracticeHubPage = () => {
         on={{ goHome: () => router.push("/dashboard") }}
     />
 }
-
-/** Source-level ownership marker for the connected page shell. */
-export const meta = { world: "connected", domain: "coding" } as const

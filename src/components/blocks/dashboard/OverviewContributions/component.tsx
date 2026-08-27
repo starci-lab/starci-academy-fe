@@ -3,7 +3,6 @@ import {
     ContributionCalendar,
     type ContributionCalendarDay,
 } from "@/components/composites/ContributionCalendar"
-import { defineCompositeComponent, defineContractComponent } from "@/components/contracts/props"
 
 /** One calendar day with its already-resolved accessible label. */
 export type ContributionDay = ContributionCalendarDay
@@ -37,39 +36,29 @@ export type OverviewContributionsProps = {
 }
 
 /** Draw the complete contribution calendar without owning its query or selected-year state. */
-export const OverviewContributionsBase = (input: OverviewContributionsProps) => {
-    const isLoading = input.state === "pending"
-    const totalLabel = input.state === "failed"
-        ? input.props.errorMessage
-        : input.state === "empty" ? input.props.emptyMessage : input.props.yearLabel
+export const OverviewContributionsBase = (props: OverviewContributionsProps) => {
+    const isLoading = props.state === "pending"
+    const totalLabel = props.state === "failed"
+        ? props.props.errorMessage
+        : props.state === "empty" ? props.props.emptyMessage : props.props.yearLabel
 
     return (
-        <SurfaceCard
-            props={{ label: input.props.label }}
-            contract="contribution-calendar-card"
-            render={defineContractComponent("contribution-calendar-card", {
-                calendar: defineCompositeComponent("contribution-calendar", {}, () => (
-                    <ContributionCalendar
-                        props={{
-                            year: input.props.year,
-                            years: input.props.years,
-                            totalLabel,
-                            streakLabel: input.props.streakLabel,
-                            lessLabel: input.props.lessLabel,
-                            moreLabel: input.props.moreLabel,
-                            monthLabels: input.props.monthLabels,
-                            weekdayLabels: input.props.weekdayLabels,
-                            days: input.state === "ready" ? input.props.days : [],
-                        }}
-                        on={{ selectYear: input.on?.selectYear }}
-                        isLoading={isLoading}
-                    />
-                )),
-            })}
-            isLoading={isLoading}
-        />
+        <SurfaceCard props={{ label: props.props.label }} isLoading={isLoading}>
+            <ContributionCalendar
+                props={{
+                    year: props.props.year,
+                    years: props.props.years,
+                    totalLabel,
+                    streakLabel: props.props.streakLabel,
+                    lessLabel: props.props.lessLabel,
+                    moreLabel: props.props.moreLabel,
+                    monthLabels: props.props.monthLabels,
+                    weekdayLabels: props.props.weekdayLabels,
+                    days: props.state === "ready" ? props.props.days : [],
+                }}
+                on={{ selectYear: props.on?.selectYear }}
+                isLoading={isLoading}
+            />
+        </SurfaceCard>
     )
 }
-
-/** Source-level tier marker for the pure dashboard block. */
-export const meta = { world: "pure", domain: "dashboard" } as const

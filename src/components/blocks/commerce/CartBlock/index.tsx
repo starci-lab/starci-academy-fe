@@ -10,8 +10,12 @@ import { QUERY_MY_CART_SWR_KEY } from "@/hooks/swr/useQueryMyCartSwr"
 import { CartBlockBase, type CartBlockState } from "./component"
 import { type CartLineData } from "@/components/blocks/commerce/CartLine/component"
 
+/** Props for the connected cart owner; cart state is resolved from its data hooks. */
+type CartBlockProps = Record<never, never>
 /** Connected cart block: query, mutation, localized data and actions live here. */
-export const CartBlock = () => {
+/** Resolve the current cart, checkout preview and localized cart actions. */
+export const CartBlock = (props: CartBlockProps) => {
+    void props
     const t = useTranslations("cart")
     const locale = useLocale()
     const router = useRouter()

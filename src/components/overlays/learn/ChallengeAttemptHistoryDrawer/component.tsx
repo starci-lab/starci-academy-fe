@@ -1,9 +1,8 @@
 import { DrawerBranch } from "@/components/branches/DrawerBranch"
 import { ChallengeAttemptHistory, type ChallengeAttemptHistoryItem } from "@/components/blocks/learn/ChallengeAttemptHistory"
-import { defineContractProjection } from "@/components/contracts/props"
 
 /** Pure Challenge history drawer mechanics and connected-body identity. */
-export type ChallengeAttemptHistoryDrawerBaseProps = {
+export type ChallengeAttemptHistoryDrawerProps = {
     readonly isOpen: boolean
     readonly title: string
     readonly courseId?: string
@@ -14,23 +13,18 @@ export type ChallengeAttemptHistoryDrawerBaseProps = {
 }
 
 /** Seat the dedicated Challenge history owner inside shared drawer mechanics. */
-export const ChallengeAttemptHistoryDrawerBase = (input: ChallengeAttemptHistoryDrawerBaseProps) => (
+export const ChallengeAttemptHistoryDrawerBase = (props: ChallengeAttemptHistoryDrawerProps) => (
     <DrawerBranch
-        isOpen={input.isOpen}
+        isOpen={props.isOpen}
         placement="right"
-        title={input.title}
-        onDismiss={input.onDismiss}
-        contract="challenge-attempt-history-drawer"
-        render={defineContractProjection("challenge-attempt-history-drawer", () => (
-            <ChallengeAttemptHistory
-                courseId={input.courseId}
-                submissionId={input.submissionId}
-                selectedAttemptId={input.selectedAttemptId}
-                onSelect={input.onSelect}
-            />
-        ))}
-    />
+        title={props.title}
+        onDismiss={props.onDismiss}
+    >
+        <ChallengeAttemptHistory
+            courseId={props.courseId}
+            submissionId={props.submissionId}
+            selectedAttemptId={props.selectedAttemptId}
+            onSelect={props.onSelect}
+        />
+    </DrawerBranch>
 )
-
-/** Pure overlay ownership marker. */
-export const meta = { shape: "overlay", world: "pure", domain: "learn" } as const

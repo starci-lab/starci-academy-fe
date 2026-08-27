@@ -6,4 +6,3 @@ import { CourseLearnContentPageBase, type CourseLearnContentPageProps } from "./
 export const CourseLearnContentPage = (props: CourseLearnContentPageProps) => <CourseLearnContentPageBase {...props} />
 
 /** Ownership metadata for the route entry. */
-export const meta = { world: "connected", domain: "learn" } as const

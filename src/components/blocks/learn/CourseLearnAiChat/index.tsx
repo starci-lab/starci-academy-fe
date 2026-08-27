@@ -64,11 +64,11 @@ const resolveCourseLearnAiState = (input: CourseLearnAiStateInput): StarCiAiChat
 }
 
 /** Own persisted course-scoped conversations and Challenge grounding without Global Chat data. */
-export const CourseLearnAiChat = (input: CourseLearnAiChatProps) => {
+export const CourseLearnAiChat = (props: CourseLearnAiChatProps) => {
     const t = useTranslations("globalAi")
     const challengeText = useTranslations("learn.content")
     const locale = useLocale()
-    const anchor = input.courseId === undefined ? null : { scope: "course" as const, courseId: input.courseId }
+    const anchor = props.courseId === undefined ? null : { scope: "course" as const, courseId: props.courseId }
     const sessions = useQueryContentAiSessionsSwr(anchor)
     const [mode, setMode] = useState<StarCiAiMode>("general")
     const [activeSessionId, setActiveSessionId] = useState<string>()
@@ -76,7 +76,7 @@ export const CourseLearnAiChat = (input: CourseLearnAiChatProps) => {
     const quota = useQueryMyAiQuotaSwr()
     const createSession = useMutateCreateContentAiSessionSwr()
     const stream = useContentAiStream()
-    const [draft, setDraft] = useState(input.initialPrompt ?? "")
+    const [draft, setDraft] = useState(props.initialPrompt ?? "")
     const [draftKey, setDraftKey] = useState(0)
     const [localTurns, setLocalTurns] = useState<ReadonlyArray<StarCiAiTurn>>([])
     const [terminalState, setTerminalState] = useState<StarCiAiChatState>()
@@ -88,10 +88,10 @@ export const CourseLearnAiChat = (input: CourseLearnAiChatProps) => {
     }, [activeSessionId, sessions.data?.sessions])
 
     useEffect(() => {
-        if (input.initialPrompt === undefined) return
-        setDraft(input.initialPrompt)
+        if (props.initialPrompt === undefined) return
+        setDraft(props.initialPrompt)
         setDraftKey((key) => key + 1)
-    }, [input.initialPrompt])
+    }, [props.initialPrompt])
 
     const persistedTurns = useMemo<ReadonlyArray<StarCiAiTurn>>(
         () => (history.data?.messages ?? []).map((turn, index) => {
@@ -143,13 +143,13 @@ export const CourseLearnAiChat = (input: CourseLearnAiChatProps) => {
         const question = draft.trim()
         setLocalTurns((current) => [
             ...current,
-            { id: `course-user-${id}`, role: "user", body: question, quote: input.selection?.quote },
+            { id: `course-user-${id}`, role: "user", body: question, quote: props.selection?.quote },
             { id: assistantId, role: "assistant", body: "", isPartial: true },
         ])
         stream.ask({
             sessionId,
             ...anchor,
-            question: buildContentAiQuestion(question, input.selection),
+            question: buildContentAiQuestion(question, props.selection),
             history: turns.map((turn) => ({ role: turn.role, content: turn.body })),
             onDelta: (delta) => setLocalTurns((current) => current.map((turn) => (
                 turn.id === assistantId ? { ...turn, body: `${turn.body}${delta}` } : turn
@@ -164,7 +164,7 @@ export const CourseLearnAiChat = (input: CourseLearnAiChatProps) => {
                 )))
                 setDraft("")
                 setDraftKey((key) => key + 1)
-                input.onClearSelection?.()
+                props.onClearSelection?.()
                 setTerminalState(undefined)
                 void Promise.all([history.mutate(), sessions.mutate(), quota.mutate()]).then(() => setLocalTurns([]))
             },
@@ -189,8 +189,8 @@ export const CourseLearnAiChat = (input: CourseLearnAiChatProps) => {
                 labels,
                 mode,
                 contextSummary: challengeText("challengeAiContext", {
-                    course: input.displayId,
-                    challenge: input.challengeTitle,
+                    course: props.displayId,
+                    challenge: props.challengeTitle,
                 }),
                 turns,
                 sessions: (sessions.data?.sessions ?? []).map((session) => ({
@@ -199,7 +199,7 @@ export const CourseLearnAiChat = (input: CourseLearnAiChatProps) => {
                     updatedLabel: new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(session.updatedAt)),
                 })),
                 activeSessionId: mode === "history" ? undefined : activeSessionId,
-                selection: input.selection,
+                selection: props.selection,
                 draft,
                 draftKey,
                 quotaLabel,
@@ -216,7 +216,7 @@ export const CourseLearnAiChat = (input: CourseLearnAiChatProps) => {
                 send: () => { void send() },
                 stop: stream.abort,
                 retry: () => { void send() },
-                clearContext: input.onClearSelection,
+                clearContext: props.onClearSelection,
             }}
         />
     )
@@ -224,4 +224,3 @@ export const CourseLearnAiChat = (input: CourseLearnAiChatProps) => {
 
 export * from "./component"
 /** Connected ownership marker for course-context Learn AI. */
-export const meta = { shape: "block", world: "connected", domain: "learn" } as const

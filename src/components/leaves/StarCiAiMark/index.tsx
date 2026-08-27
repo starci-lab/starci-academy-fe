@@ -1,5 +1,5 @@
-import type { LeafProps } from "@/components/contracts/props"
 import Image from "next/image"
+import { starCiAiMarkClassName, starCiAiMarkImageClassName } from "./classNames"
 
 /** Closed data for the product-owned StarCi AI mark. */
 export type StarCiAiMarkData = {
@@ -8,27 +8,22 @@ export type StarCiAiMarkData = {
 }
 
 /** Props for the fixed StarCi AI brand asset. */
-export type StarCiAiMarkProps = LeafProps<StarCiAiMarkData>
+export type StarCiAiMarkProps = { readonly props: StarCiAiMarkData; readonly isLoading?: boolean }
 
 /** Draw the dedicated conversational-learning mark instead of a generic AI glyph. */
-export const StarCiAiMark = ({ props, isLoading = false }: StarCiAiMarkProps) => (
+export const StarCiAiMark = (props: StarCiAiMarkProps) => (
     <span
-        data-tier="leaf"
-        data-component="StarCiAiMark"
-        data-loading={isLoading ? "true" : "false"}
-        className="inline-flex size-7 shrink-0 items-center justify-center"
+        data-loading={props.isLoading ? "true" : "false"}
+        className={starCiAiMarkClassName}
     >
-        {isLoading ? null : (
+        {props.isLoading ? null : (
             <Image
                 src="/brand/starci-ai-mark-v1.png"
-                alt={props.alt ?? ""}
+                alt={props.props.alt ?? ""}
                 width={28}
                 height={28}
-                className="size-full object-contain"
+                className={starCiAiMarkImageClassName}
             />
         )}
     </span>
 )
-
-/** Source-level tier marker. */
-export const meta = { shape: "leaf", world: "pure", domain: "ai" } as const

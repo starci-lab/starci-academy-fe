@@ -30,9 +30,7 @@ seeded from the repo and is lost on reprovision.
 
 **Community leaderboard + `/league` page.** Rebuilt to match the production render at
 `academy.starci.org`. New owners: `LeagueTile`, `PodiumStep`, `RankDeltaCaret`, `Breadcrumbs`,
-`Podium`, `StandingHeroCard`, `LeaguePage`. New contracts: `podium`, `podium-place`,
-`standing-hero-card`, `standing-goal-meter`, `ranked-user-ellipsis-row`, `page-header-stack`,
-`scope-switch-row`, `league-page-column`, `league-board-stack`, `ranked-user-followable-list`.
+`Podium`, `StandingHeroCard`, and `LeaguePage`.
 
 **Locale routing.** Every route moved under `src/app/[lang]/`. `src/i18n/routing.ts` +
 `navigation.ts` + `src/middleware.ts`. 34 files moved from `next/navigation` to
@@ -76,11 +74,10 @@ These are mechanical, not stylistic. `npm run lint` runs a canon gate first and 
 `starci-fe/*` rules at `error` with inline disables refused. Breaking one is a red build, not a
 review comment.
 
-- **Structure comes from the contract registry.** `src/components/contracts/index.ts` maps a key to
-  its classes, its child grammar and a one-sentence `why`. A raw `<div>` with layout classes in a
-  component is a lint error; name a key and render it through `<Tree contract="…" />`.
-- **`LayoutClassName` is a closed union.** A class not in it is unrepresentable, not discouraged.
-  Widening it is a deliberate one-line edit, not a workaround.
+- **Structure follows the legacy component hierarchy.** Keep leaves, branches, composites, blocks
+  and pages as separate owners, with normal React composition and semantic HTML.
+- **Class names are colocated and composable.** Export reusable class-name constants/functions from
+  a sibling `classNames.ts`; compose valid utility tokens with HeroUI `cn(["token-one", "token-two"])`.
 - **Leaves wrap the vendor.** HeroUI primitives are reached from `src/components/leaves/*` only.
   The last session hand-rolled a breadcrumb trail out of links before noticing HeroUI ships
   `Breadcrumbs`; do not repeat that — check the vendor first.
@@ -92,9 +89,8 @@ review comment.
 - **Comments say why, not what.** `require-export-jsdoc` is on. A comment restating the signature
   fails review even when lint passes.
 
-The rules are authored in `…backend\.claude\sources\fe\` and mirrored into
-`starci-academy-fe/plugins/eslint-canon/` by a sync script. **Do not hand-edit the mirror** — the
-gate detects drift and the next sync overwrites it.
+The remaining lint rules are authored in the shared canon package and applied through
+`eslint.config.mjs`; the product uses the traditional React hierarchy and ordinary typed props.
 
 ---
 
@@ -118,10 +114,6 @@ rows: an `auto` track sizes to that row's own content, so a row without a follow
 expand and pushed its score out of the column. Fixed track widths are what align rows; the follow
 track width lives on the LIST (`ranked-user-followable-list`) because whether a board is followable
 is a property of the board.
-
-**`SurfaceListCard` does not draw its contract node.** It takes the key for typing and leaves the
-drawing to whatever it renders. Return a bare fragment and every separator and row inset silently
-disappears. Wrap in `<Tree contract="…">`.
 
 **Middleware is not hot-reloaded.** Next creates it at boot, so a newly added `src/middleware.ts`
 does nothing until the dev server restarts — `/` will 404 until then.
@@ -151,8 +143,8 @@ without also adding `setRequestLocale` to every page will break the build.
 You will not have the trust tree, its skills, or its verification scripts. That does not make their
 rules optional — it makes them invisible to you, which is worse. So:
 
-- Read `src/components/contracts/index.ts` before adding any markup. It is the whole layout
-  vocabulary and it is enforced.
+- Read the nearest legacy sibling component before adding markup. Preserve its semantic DOM and
+  interaction behavior.
 - Read the nearest existing sibling component before writing a new one. Every convention in this
   repo is visible in the file next door.
 - Run `npm run lint`, `npx tsc --noEmit` and `npm run build` before claiming anything works. The

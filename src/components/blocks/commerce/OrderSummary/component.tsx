@@ -1,10 +1,4 @@
 import { Text } from "@/components/leaves/Text"
-import { Tree } from "@/components/branches/Tree"
-import {
-    defineContractComponent,
-    defineLeafComponent,
-    type BlockProps,
-} from "@/components/contracts/props"
 
 /**
  * BLOCK - `OrderSummary`: what this order costs, and what it is made of.
@@ -59,16 +53,19 @@ export type OrderSummaryLabels = {
 }
 
 /** Props for {@link OrderSummaryBase}. */
-export type OrderSummaryProps = BlockProps<OrderSummaryState, OrderSummaryData>
+export type OrderSummaryProps = {
+    readonly state: OrderSummaryState
+    readonly props: OrderSummaryData
+}
 
 /**
  * Draw the reckoning.
  *
  * @param input - {@link OrderSummaryProps}
  */
-export const OrderSummaryBase = (input: OrderSummaryProps) => {
-    const isLoading = input.state === "pending"
-    const labels = input.props.labels
+export const OrderSummaryBase = (props: OrderSummaryProps) => {
+    const isLoading = props.state === "pending"
+    const labels = props.props.labels
 
     /*
      * A FAILED PRICING REQUEST DOES NOT BLANK THE ROWS, it replaces the figures.
@@ -79,45 +76,25 @@ export const OrderSummaryBase = (input: OrderSummaryProps) => {
      * arriving, and they are not.
      */
     const figure = (value?: string): string | undefined =>
-        input.state === "failed" ? labels.unavailable : value
+        props.state === "failed" ? labels.unavailable : value
 
     /** One muted component of the total: what it is called, and how much of it there is. */
-    const componentRow = (label: string, value?: string) =>
-        defineContractComponent("label-with-muted-fact-row", {
-            label: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
-                <Text props={{ content: label, size: "sm", weight: "semibold" }} />
-            )),
-            fact: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                <Text props={{ content: figure(value), size: "xs", tone: "muted" }} isLoading={isLoading} />
-            )),
-        })
+    const componentRow = (label: string, value?: string) => (
+        <div>
+            <Text props={{ content: label, size: "sm", weight: "semibold" }} />
+            <Text props={{ content: figure(value), size: "xs", tone: "muted" }} isLoading={isLoading} />
+        </div>
+    )
 
     return (
-        <Tree
-            contract="order-summary-stack"
-            render={defineContractComponent("order-summary-stack", {
-                subtotal: componentRow(labels.subtotal, input.props.subtotal),
-                ...(input.props.savings === undefined ? {} : {
-                    savings: componentRow(labels.savings, input.props.savings),
-                }),
-                ...(input.props.surcharge === undefined ? {} : {
-                    surcharge: componentRow(labels.surcharge, input.props.surcharge),
-                }),
-                total: defineContractComponent("order-total-row", {
-                    label: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
-                        <Text props={{ content: labels.total, size: "sm", weight: "semibold" }} />
-                    )),
-                    amount: defineLeafComponent("text", { size: "md", weight: "semibold" }, () => (
-                        <Text
-                            props={{ content: figure(input.props.total), size: "md", weight: "semibold" }}
-                            isLoading={isLoading}
-                        />
-                    )),
-                }),
-            })}
-        />
+        <div>
+            {componentRow(labels.subtotal, props.props.subtotal)}
+            {props.props.savings === undefined ? null : componentRow(labels.savings, props.props.savings)}
+            {props.props.surcharge === undefined ? null : componentRow(labels.surcharge, props.props.surcharge)}
+            <div>
+                <Text props={{ content: labels.total, size: "sm", weight: "semibold" }} />
+                <Text props={{ content: figure(props.props.total), size: "md", weight: "semibold" }} isLoading={isLoading} />
+            </div>
+        </div>
     )
 }
-
-/** Source-level ownership marker. */
-export const meta = { world: "pure", domain: "commerce" } as const

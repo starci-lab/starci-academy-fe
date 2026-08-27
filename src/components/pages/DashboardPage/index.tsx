@@ -21,7 +21,11 @@ const TAB_IDS = ["overview", "explore", "courses", "community"] as const
 /**
  * Resolve the session and draw the dashboard.
  */
-export const DashboardPage = () => {
+/** Props for the URL-owned dashboard page. */
+export type DashboardPageProps = Record<never, never>
+/** Render the connected dashboard route. */
+export const DashboardPage = (props: DashboardPageProps) => {
+    void props
     const t = useTranslations("dashboard")
     const token = useSessionToken()
     const session = useSessionRefresh()
@@ -42,6 +46,3 @@ export const DashboardPage = () => {
         />
     )
 }
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { world: "connected", domain: "dashboard" } as const

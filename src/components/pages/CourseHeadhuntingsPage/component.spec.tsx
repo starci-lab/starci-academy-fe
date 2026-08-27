@@ -39,18 +39,19 @@ describe("CourseHeadhuntingsPage", () => {
     })
 
     it("rests both directories rather than hiding the consultant list while loading", () => {
-        const { container } = render(<TestBlock {...withState("pending")} />)
+        render(<TestBlock {...withState("pending")} />)
 
-        expect(container.querySelectorAll("[data-node=\"next-action-list\"]")).toHaveLength(2)
-        expect(container.querySelectorAll("[data-node=\"next-action-list\"] > [data-component=\"Text\"][data-loading=\"true\"]")).toHaveLength(8)
-        expect(container.querySelector("[data-component=\"TextLink\"]")).toBeNull()
+        expect(screen.getByRole("heading", { name: "Companies" })).toBeInTheDocument()
+        expect(screen.getByRole("heading", { name: "Consultants" })).toBeInTheDocument()
+        expect(document.querySelectorAll("[data-loading=\"true\"]").length).toBeGreaterThanOrEqual(8)
+        expect(screen.queryByRole("link", { name: "Alex" })).toBeNull()
     })
 
     it("replaces both directories with a talents notice when nothing is published", () => {
-        const { container } = render(<TestBlock {...withState("empty")} />)
+        render(<TestBlock {...withState("empty")} />)
 
         expect(screen.getByText("No companies.")).toBeInTheDocument()
-        expect(container.querySelector("[data-node=\"next-action-list\"]")).toBeNull()
+        expect(screen.queryByRole("heading", { name: "Companies" })).toBeNull()
         expect(screen.queryByRole("button", { name: "Try again" })).not.toBeInTheDocument()
     })
 
@@ -68,7 +69,7 @@ describe("CourseHeadhuntingsPage", () => {
         const contact = vi.fn()
         const search = vi.fn()
         const course = vi.fn()
-        const { container } = render(
+        render(
             <TestBlock
                 {...withState("ready", {
                     consultants: [
@@ -84,10 +85,10 @@ describe("CourseHeadhuntingsPage", () => {
         expect(open).toHaveBeenCalledOnce()
         fireEvent.click(screen.getByText("Alex · Recruiter · Contact"))
         expect(contact).toHaveBeenCalledOnce()
-        expect(screen.getByText("Blair · Contact").getAttribute("data-component")).not.toBe("TextLink")
+        expect(screen.getByText("Blair · Contact")).toBeInTheDocument()
 
         fireEvent.change(screen.getByRole("searchbox", { name: "Find a company" }), { target: { value: "acme" } })
-        fireEvent.submit(container.querySelector("form[role=\"search\"]") as HTMLFormElement)
+        fireEvent.submit(screen.getByRole("search"))
         expect(search).toHaveBeenCalledWith("acme")
 
         fireEvent.click(screen.getByText("TypeScript"))
@@ -95,11 +96,11 @@ describe("CourseHeadhuntingsPage", () => {
     })
 
     it("drops the consultant surface entirely when the course has no consultants", () => {
-        const { container } = render(
+        render(
             <TestBlock {...withState("ready", { consultants: [] })} />,
         )
 
-        expect(container.querySelectorAll("[data-node=\"next-action-list\"]")).toHaveLength(1)
+        expect(screen.getByRole("heading", { name: "Companies" })).toBeInTheDocument()
         expect(screen.queryByText("Consultants")).not.toBeInTheDocument()
         expect(screen.getByText("Companies")).toBeInTheDocument()
     })

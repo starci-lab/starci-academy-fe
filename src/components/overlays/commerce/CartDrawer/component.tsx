@@ -1,12 +1,6 @@
 import { Button } from "@/components/leaves/Button"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { DrawerBranch } from "@/components/branches/DrawerBranch"
-import {
-    defineCompositeComponent,
-    defineContractComponent,
-    defineContractProjection,
-    defineLeafComponent,
-} from "@/components/contracts/props"
 import { CartLine } from "@/components/blocks/commerce/CartLine"
 import { type CartLineData } from "@/components/blocks/commerce/CartLine/component"
 import { OrderSummaryBase, type OrderSummaryLabels } from "@/components/blocks/commerce/OrderSummary/component"
@@ -100,88 +94,64 @@ const RESTING_COUNT = 3
  *
  * @param input - {@link CartDrawerProps}
  */
-export const CartDrawerBase = (input: CartDrawerProps) => {
-    const labels = input.props.labels
-    const isLoading = input.state === "pending"
-    const showsNotice = input.state === "empty" || input.state === "failed"
+export const CartDrawerBase = (props: CartDrawerProps) => {
+    const labels = props.props.labels
+    const isLoading = props.state === "pending"
+    const showsNotice = props.state === "empty" || props.state === "failed"
 
     const restingLines: ReadonlyArray<CartLineData> = Array.from(
         { length: RESTING_COUNT },
         (_unused, index) => ({ courseId: `resting-${index + 1}`, removeLabel: labels.summary.total }),
     )
-    const lines = isLoading ? restingLines : input.props.lines ?? []
+    const lines = isLoading ? restingLines : props.props.lines ?? []
 
     return (
         <DrawerBranch
-            isOpen={input.props.isOpen}
+            isOpen={props.props.isOpen}
             title={labels.title}
-            contract="cart-drawer-column"
-            render={defineContractComponent("cart-drawer-column", {
-                ...(showsNotice ? {} : {
-                    lines: defineContractComponent("cart-line-list", {
-                        line: lines.map((line) => defineContractProjection("cart-line-row", () => (
-                            <CartLine state={isLoading ? "pending" : "ready"} line={line} />
-                        ))),
-                    }),
-                }),
-                ...(showsNotice ? {} : {
-                    summary: defineContractProjection("order-summary-stack", () => (
-                        <OrderSummaryBase
-                            state={
-                                isLoading
-                                    ? "pending"
-                                    : input.props.hasPricingFailed === true ? "failed" : "ready"
-                            }
-                            props={{
-                                labels: labels.summary,
-                                subtotal: input.props.subtotal,
-                                savings: input.props.savings,
-                                total: input.props.total,
-                            }}
+            onDismiss={props.on?.dismiss ?? (() => undefined)}
+        >
+            {showsNotice ? (
+                <EmptyNotice
+                    props={{
+                        icon: "cart",
+                        message: props.state === "failed" ? labels.failedMessage : labels.emptyMessage,
+                        actionLabel: props.state === "failed" ? labels.failedAction : labels.emptyAction,
+                    }}
+                    on={{ act: props.on?.browse }}
+                />
+            ) : (
+                <>
+                    <div>
+                        {lines.map((line) => (
+                            <CartLine key={line.courseId} state={isLoading ? "pending" : "ready"} line={line} />
+                        ))}
+                    </div>
+                    <OrderSummaryBase
+                        state={
+                            isLoading
+                                ? "pending"
+                                : props.props.hasPricingFailed === true ? "failed" : "ready"
+                        }
+                        props={{
+                            labels: labels.summary,
+                            subtotal: props.props.subtotal,
+                            savings: props.props.savings,
+                            total: props.props.total,
+                        }}
+                    />
+                    <div>
+                        <Button
+                            props={{ label: labels.checkout, variant: "primary", disabled: isLoading }}
+                            on={{ press: props.on?.checkout }}
                         />
-                    )),
-                }),
-                ...(showsNotice ? {} : {
-                    actions: defineContractComponent("stacked-peer-controls", {
-                        control: [
-                            defineLeafComponent("button", {}, () => (
-                                <Button
-                                    props={{ label: labels.checkout, variant: "primary", disabled: isLoading }}
-                                    on={{ press: input.on?.checkout }}
-                                />
-                            )),
-                            defineLeafComponent("button", {}, () => (
-                                <Button
-                                    props={{ label: labels.viewFullCart, variant: "secondary" }}
-                                    on={{ press: input.on?.viewFullCart }}
-                                />
-                            )),
-                        ],
-                    }),
-                }),
-                ...(showsNotice ? {
-                    notice: defineCompositeComponent("empty-notice", {}, () => (
-                        <EmptyNotice
-                            props={{
-                                icon: "cart",
-                                // EMPTY AND REFUSED ARE NOT THE SAME SENTENCE, and the real page is what proved it: a
-
-                                // signed-out reader was told their basket was empty when nobody had asked them to sign
-
-                                // in. Both states hide the same regions, so only the copy can tell them apart.
-
-                                message: input.state === "failed" ? labels.failedMessage : labels.emptyMessage,
-                                actionLabel: input.state === "failed" ? labels.failedAction : labels.emptyAction,
-                            }}
-                            on={{ act: input.on?.browse }}
+                        <Button
+                            props={{ label: labels.viewFullCart, variant: "secondary" }}
+                            on={{ press: props.on?.viewFullCart }}
                         />
-                    )),
-                } : {}),
-            })}
-            onDismiss={input.on?.dismiss ?? (() => undefined)}
-        />
+                    </div>
+                </>
+            )}
+        </DrawerBranch>
     )
 }
-
-/** Source-level ownership marker. */
-export const meta = { shape: "overlay", world: "pure", domain: "commerce" } as const

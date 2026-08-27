@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest"
 import { ContributionCalendar } from "."
 
 class TestResizeObserver implements ResizeObserver {
-    observe() { /* jsdom has no layout observer; this test asserts the declared full-width contract. */ }
+    observe() { /* jsdom has no layout observer; this test asserts the declared full-width layout. */ }
     unobserve() { /* no-op */ }
     disconnect() { /* no-op */ }
 }
@@ -29,7 +29,7 @@ describe("ContributionCalendar", () => {
         expect(container.querySelector("[data-date=\"2026-08-12\"]")).toHaveAttribute("data-count", "10")
         expect(container.querySelectorAll("[data-part=\"intensity-legend\"] [data-level]")).toHaveLength(5)
         expect(screen.getByText("3 current, 8 longest")).toBeInTheDocument()
-        expect(screen.getByText("3 current, 8 longest").closest("[data-component=\"Text\"]")?.querySelector("[data-component=\"Icon\"]")).toBeNull()
+        expect(screen.getByText("3 current, 8 longest").querySelector("svg")).toBeNull()
         const yearTabs = screen.getByRole("tablist", { name: "16 activities in 2026" })
         expect(yearTabs).not.toHaveClass("w-full")
         expect(yearTabs.closest("[data-variant=\"primary\"]")).not.toBeNull()

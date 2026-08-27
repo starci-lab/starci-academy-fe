@@ -17,7 +17,7 @@ afterEach(cleanup)
 
 describe("StandingHeroCard", () => {
     it("draws the standing, the distance still to close and the action that closes it", () => {
-        const { container } = render(<StandingHeroCard props={{
+        render(<StandingHeroCard props={{
             standing,
             progress: { ratio: 0.625, label: "48 XP to rank 3" },
             ctaLabel: "Practise now",
@@ -25,19 +25,19 @@ describe("StandingHeroCard", () => {
         }} />)
         expect(screen.getByText("Rank #4")).toBeInTheDocument()
         expect(screen.getByText("48 XP to rank 3")).toBeInTheDocument()
-        expect(container.querySelector("[data-node=\"standing-goal-meter\"]")).toBeInTheDocument()
+        expect(screen.getByRole("progressbar")).toBeInTheDocument()
         const meter = screen.getByRole("progressbar", { name: "Progress to the next rank" })
         expect(meter).toHaveAttribute("aria-valuenow", "63")
         expect(screen.getByRole("button", { name: "Practise now" })).toBeInTheDocument()
     })
 
     it("omits the whole meter rather than drawing an unmeasured distance at zero", () => {
-        const { container } = render(<StandingHeroCard props={{
+        render(<StandingHeroCard props={{
             standing: { ...standing, rank: 1, title: "Rank #1" },
             ctaLabel: "Practise now",
             progressAccessibleLabel: "Progress to the next rank",
         }} />)
-        expect(container.querySelector("[data-node=\"standing-goal-meter\"]")).toBeNull()
+        expect(screen.queryByRole("progressbar")).toBeNull()
         expect(screen.queryByRole("progressbar")).toBeNull()
         expect(screen.getByText("Rank #1")).toBeInTheDocument()
         expect(screen.getByRole("button", { name: "Practise now" })).toBeInTheDocument()
@@ -65,9 +65,10 @@ describe("StandingHeroCard", () => {
             on={{ cta }}
             isLoading
         />)
-        expect(container.querySelector("[data-component=\"Button\"][data-loading=\"true\"]")).toBeInTheDocument()
-        expect(container.querySelectorAll("[data-component=\"Text\"][data-loading=\"true\"]").length).toBeGreaterThan(0)
-        fireEvent.click(container.querySelector("[data-component=\"Button\"]") as HTMLElement)
+        const button = screen.getByRole("button", { name: "Practise now" })
+        expect(button).toHaveAttribute("data-loading", "true")
+        expect(container.querySelectorAll("[data-loading=\"true\"]").length).toBeGreaterThan(1)
+        fireEvent.click(button)
         expect(cta).not.toHaveBeenCalled()
     })
 })

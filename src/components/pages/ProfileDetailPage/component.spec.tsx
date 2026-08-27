@@ -7,7 +7,7 @@ describe("ProfileCodingProblemBase", () => {
         const { container } = render(<ProfileCodingProblemBase state="ready" detail={{ problem: { title: "Shortest path", statement: "Find the shortest constrained route.", difficulty: "hard", domain: "graphs", tags: ["Dijkstra"] }, submission: { languages: ["TypeScript"], verdict: "accepted", passedCount: 18, totalCount: 18 } }} on={{ back: vi.fn(), retry: vi.fn() }} />)
         expect(screen.getByText("Find the shortest constrained route.")).toBeInTheDocument()
         expect(screen.getByText("18/18")).toBeInTheDocument()
-        expect(container.querySelector("[data-component='CodeBlock']")).toBeNull()
+        expect(screen.queryByRole("code")).toBeNull()
         expect(container.querySelector("pre code")).toBeNull()
     })
 })

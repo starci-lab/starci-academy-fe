@@ -32,10 +32,10 @@ const MOBILE_SECTION_ROUTES = [
 ] as const
 
 /** Draw the learn frame while its connected navigation block owns course data and rail state. */
-export const LearnShellLayout = (input: LearnShellLayoutProps) => {
+export const LearnShellLayout = (props: LearnShellLayoutProps) => {
     const t = useTranslations("learn.shell")
     const pathname = usePathname()
-    const base = `/courses/${input.displayId}`
+    const base = `/courses/${props.displayId}`
     const isReader = pathname.includes("/learn/content/modules/") && pathname.includes("/contents/") && !pathname.includes("/challenges/")
     const isToday = pathname === `${base}/learn`
     const routeDefault: LearnMobileView = isToday ? "today" : isReader ? "lesson" : "course"
@@ -49,7 +49,7 @@ export const LearnShellLayout = (input: LearnShellLayoutProps) => {
     const currentSection = MOBILE_SECTION_ROUTES.find(([at]) => pathname.includes(at))?.[1]
     return <LearnMobileViewContext.Provider value={{ view: mobileView, openView: setMobileView }}>
         <LearnShellLayoutBase
-            displayId={input.displayId}
+            displayId={props.displayId}
             mobileTabs={tabs?.map((tab) => ({ id: tab.id, label: t(`tabs.${tab.id}`), icon: tab.icon, isCurrent: tab.id === mobileView }))}
             mobileCourseNavigation={tabs !== undefined || fullBleed ? undefined : { label: t("mobileCourseNavigation"), currentLabel: currentSection === undefined ? t("tabs.course") : t(`rows.${currentSection}`), isOpen: isCourseNavigationOpen }}
             isFullBleed={fullBleed}
@@ -58,10 +58,7 @@ export const LearnShellLayout = (input: LearnShellLayoutProps) => {
                 openCourseNavigation: () => setIsCourseNavigationOpen(true),
                 closeCourseNavigation: () => setIsCourseNavigationOpen(false),
             }}
-            surface={input.surface}
+            surface={props.surface}
         />
     </LearnMobileViewContext.Provider>
 }
-
-/** Source-level ownership marker. */
-export const meta = { world: "connected", domain: "learn" } as const

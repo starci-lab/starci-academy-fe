@@ -9,16 +9,25 @@ import { useQueryUserProfileSwr } from "@/hooks/swr/useQueryUserProfileSwr"
 import { useMutateSetFollowSwr } from "@/hooks/swr/useMutateSetFollowSwr"
 import { ProfileHeroBase } from "./component"
 
-type ProfileTranslator = (key: string) => string
+type ProfileTranslator = (key: string) => string;
 
-const primaryLabelOf = (isSelf: boolean, canHire: boolean, followed: boolean | undefined, t: ProfileTranslator) => {
+const primaryLabelOf = (
+    isSelf: boolean,
+    canHire: boolean,
+    followed: boolean | undefined,
+    t: ProfileTranslator,
+) => {
     if (isSelf) return t("actions.edit")
     if (canHire) return t("actions.hire")
     return followed ? t("actions.following") : t("actions.follow")
 }
 
 /** Connected identity rail: resolves viewer context, CTA precedence and share/follow behavior. */
-export const ProfileHero = () => {
+/** Props for the connected profile hero block. */
+export type ProfileHeroProps = Record<never, never>
+/** Load and render the connected profile hero block. */
+export const ProfileHero = (props: ProfileHeroProps) => {
+    void props
     const t = useTranslations("profile")
     const params = useParams<{ username?: string }>()
     const router = useRouter()
@@ -28,12 +37,20 @@ export const ProfileHero = () => {
     const follow = useMutateSetFollowSwr()
     const user = profile.data
     const isSelf = user?.id !== undefined && viewer.data?.id === user.id
-    const canHire = !isSelf && user?.openToWork === true && Boolean(user.githubUsername)
+    const canHire =
+    !isSelf && user?.openToWork === true && Boolean(user.githubUsername)
     const primaryLabel = primaryLabelOf(isSelf, canHire, user?.isFollowedByMe, t)
     const joinedLabel = useMemo(() => {
         if (!user?.createdAt) return ""
         const date = new Date(user.createdAt)
-        return Number.isNaN(date.getTime()) ? "" : t("joined", { date: new Intl.DateTimeFormat(undefined, { month: "long", year: "numeric" }).format(date) })
+        return Number.isNaN(date.getTime())
+            ? ""
+            : t("joined", {
+                date: new Intl.DateTimeFormat(undefined, {
+                    month: "long",
+                    year: "numeric",
+                }).format(date),
+            })
     }, [t, user?.createdAt])
 
     const onPrimary = () => {
@@ -43,15 +60,24 @@ export const ProfileHero = () => {
             return
         }
         if (canHire && user.githubUsername) {
-            window.open(`https://github.com/${user.githubUsername}`, "_blank", "noopener,noreferrer")
+            window.open(
+                `https://github.com/${user.githubUsername}`,
+                "_blank",
+                "noopener,noreferrer",
+            )
             return
         }
-        void follow.trigger({ userId: user.id, follow: !user.isFollowedByMe }).then(() => profile.mutate())
+        void follow
+            .trigger({ userId: user.id, follow: !user.isFollowedByMe })
+            .then(() => profile.mutate())
     }
     const onShare = () => {
         const url = window.location.href
         if (navigator.share) {
-            void navigator.share({ title: user?.displayName ?? user?.username ?? "", url })
+            void navigator.share({
+                title: user?.displayName ?? user?.username ?? "",
+                url,
+            })
         } else {
             void navigator.clipboard.writeText(url)
         }
@@ -73,7 +99,9 @@ export const ProfileHero = () => {
                 primaryLabel,
                 primaryPending: follow.isMutating,
                 shareLabel: t("actions.share"),
-                githubUrl: user?.githubUsername ? `https://github.com/${user.githubUsername}` : undefined,
+                githubUrl: user?.githubUsername
+                    ? `https://github.com/${user.githubUsername}`
+                    : undefined,
                 linkedinUrl: user?.linkedinUrl ?? undefined,
                 websiteUrl: user?.websiteUrl ?? undefined,
                 joinedLabel,
@@ -86,4 +114,3 @@ export const ProfileHero = () => {
 export * from "./component"
 
 /** Source-level marker for the connected profile block. */
-export const meta = { world: "connected", domain: "profile" } as const

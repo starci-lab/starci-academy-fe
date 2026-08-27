@@ -7,12 +7,13 @@ const frame = { id: "one", followLabel: "Follow", followingLabel: "Following" } 
 describe("SuggestedUserRow", () => {
     it("stacks the name over the handle and opens the person from the name alone", () => {
         const open = vi.fn()
-        const { container } = render(<SuggestedUserRow
+        render(<SuggestedUserRow
             props={{ ...frame, name: "Ada Lovelace", username: "@ada", avatar: "https://example.com/ada.png" }}
             on={{ open }}
         />)
-        expect(container.querySelector("[data-node=\"name-over-handle\"]")?.textContent).toBe("Ada Lovelace@ada")
-        expect(container.querySelector("[data-component=\"Avatar\"]")).toHaveAttribute("data-size", "sm")
+        expect(screen.getByText("Ada Lovelace")).toBeInTheDocument()
+        expect(screen.getByText("@ada")).toBeInTheDocument()
+        expect(screen.getByRole("img", { name: "Ada Lovelace" })).toBeInTheDocument()
         fireEvent.click(screen.getByRole("link", { name: "Ada Lovelace" }))
         expect(open).toHaveBeenCalledOnce()
     })
@@ -24,13 +25,12 @@ describe("SuggestedUserRow", () => {
             openToWork: true,
             openToWorkLabel: "Open to work",
         }} />)
-        const badge = open.container.querySelector("[data-component=\"Badge\"]")
-        expect(badge?.textContent).toBe("Open to work")
+        const badge = screen.getByText("Open to work")
         expect(badge).toHaveAttribute("data-tone", "success")
         open.unmount()
 
-        const closed = render(<SuggestedUserRow props={{ ...frame, name: "Grace", openToWork: false }} />)
-        expect(closed.container.querySelector("[data-component=\"Badge\"]")).toBeNull()
+        render(<SuggestedUserRow props={{ ...frame, name: "Grace", openToWork: false }} />)
+        expect(screen.queryByText("Open to work")).toBeNull()
     })
 
     it("offers the follow action and reports the press", () => {
@@ -51,11 +51,11 @@ describe("SuggestedUserRow", () => {
 
     it("spins the action and refuses the press while the follow is in flight", () => {
         const follow = vi.fn()
-        const { container } = render(<SuggestedUserRow
+        render(<SuggestedUserRow
             props={{ ...frame, name: "Ada", isPending: true }}
             on={{ follow }}
         />)
-        const action = container.querySelector("[data-component=\"Button\"]")
+        const action = screen.getByRole("button", { name: "Follow" })
         expect(action).toHaveAttribute("data-action-pending", "true")
         expect(action).toBeDisabled()
         fireEvent.click(action!)
@@ -64,9 +64,9 @@ describe("SuggestedUserRow", () => {
 
     it("rests the identity and the action while the suggestion is in flight", () => {
         const { container } = render(<SuggestedUserRow props={{ ...frame }} isLoading />)
-        expect(container.querySelector("[data-component=\"Avatar\"]")).toHaveAttribute("data-loading", "true")
-        expect(container.querySelector("[data-component=\"Text\"]")).toHaveAttribute("data-loading", "true")
-        expect(container.querySelector("[data-component=\"Button\"]")).toHaveAttribute("data-loading", "true")
+        expect(container.querySelector("[aria-hidden=\"true\"]")).toBeInTheDocument()
+        expect(container.querySelector("[data-loading=\"true\"]")).toBeInTheDocument()
+        expect(screen.getByRole("button", { name: "Follow" })).toHaveAttribute("data-loading", "true")
         expect(screen.getByRole("link").textContent).toBe("")
     })
 })

@@ -5,8 +5,8 @@ export type StateMarkProps = {
     readonly state: PresentationState
 }
 
-export const StateMark = ({ state }: StateMarkProps) => {
-    const treatment = treatmentFor(state)
+export const StateMark = (props: StateMarkProps) => {
+    const treatment = treatmentFor(props.state)
     if (treatment.mark !== "check") return null
 
     return (
@@ -20,5 +20,3 @@ export const StateMark = ({ state }: StateMarkProps) => {
         </svg>
     )
 }
-
-export const meta = { shape: "leaf", grammar: "core" } as const

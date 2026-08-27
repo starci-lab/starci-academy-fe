@@ -1,5 +1,4 @@
-import { skeletonVariants } from "@heroui/react"
-import type { LeafProps } from "@/components/contracts/props"
+import { getCoverImageClassName, coverImageContentClassName } from "./classNames"
 
 /**
  * LEAF - `CoverImage`: one course's artwork, at a fixed aspect.
@@ -35,45 +34,35 @@ export type CoverImageData = {
     readonly ratio?: CoverImageRatio
 }
 
-/** Props for {@link CoverImage}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type CoverImageProps = LeafProps<CoverImageData>
+/** Props for {@link CoverImage}. Three fixed slots, no fourth. */
+export type CoverImageProps = { readonly props: CoverImageData; readonly isLoading?: boolean }
 
 /** The two aspects, written as whole class literals so Tailwind can see them. */
-const RATIO_CLASSES = {
-    wide: "aspect-video w-full",
-    thumb: "aspect-video w-24 shrink-0",
-} as const
-
-const FRAME_CLASSES = "overflow-hidden rounded-2xl bg-surface-secondary"
 
 /**
  * Draw one course's artwork, or the token surface that stands in for a missing one.
  *
  * @param input - {@link CoverImageProps}
  */
-export const CoverImage = ({ props, isLoading = false }: CoverImageProps) => {
-    const ratio = props.ratio ?? "wide"
-    const frame = `${RATIO_CLASSES[ratio]} ${FRAME_CLASSES}`
+export const CoverImage = (props: CoverImageProps) => {
+    const ratio = props.props.ratio ?? "wide"
+    const isLoading = props.isLoading === true
     if (isLoading) {
         return (
             <div
-                data-tier="leaf"
-                data-component="CoverImage"
                 data-ratio={ratio}
                 data-loading="true"
-                className={skeletonVariants({ animationType: "shimmer" }).base({ className: frame })}
+                className={getCoverImageClassName(ratio, true)}
             />
         )
     }
-    const source = props.src ?? null
+    const source = props.props.src ?? null
     return (
         <div
-            data-tier="leaf"
-            data-component="CoverImage"
             data-ratio={ratio}
             data-loading="false"
             data-fallback={source === null ? "true" : "false"}
-            className={frame}
+            className={getCoverImageClassName(ratio, false)}
         >
             {source === null ? null : (
                 // A plain `img`, deliberately: the target has not adopted `next/image` anywhere, so
@@ -83,11 +72,8 @@ export const CoverImage = ({ props, isLoading = false }: CoverImageProps) => {
                 // explained the absence by naming the directive, and the gate flagged the sentence:
                 // the rule matches the token in source text, so prose about a suppression reads to
                 // it exactly like a suppression. Naming it is what tripped it.
-                <img src={source} alt={props.alt} className="size-full object-cover" />
+                <img src={source} alt={props.props.alt} className={coverImageContentClassName} />
             )}
         </div>
     )
 }
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const

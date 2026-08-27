@@ -47,9 +47,6 @@ const stubPreview = (data?: unknown) => {
     vi.mocked(useQueryCoursePricePreviewSwr).mockReturnValue({ data, error: undefined } as never)
 }
 
-const priceLine = (root: HTMLElement) =>
-    root.querySelector("[data-node=\"price-discount-line\"]")?.textContent
-
 afterEach(() => {
     vi.clearAllMocks()
 })
@@ -58,9 +55,9 @@ describe("CourseCatalogCard", () => {
     it("keeps the phase price the page already resolved while no better answer has arrived", () => {
         stubCart()
         stubPreview(undefined)
-        const { container } = render(<CourseCatalogCard course={course} />)
-        expect(priceLine(container)).toBe("990.000 ₫")
-        expect(container.querySelector("[data-component=\"Badge\"]")).toBeNull()
+        render(<CourseCatalogCard course={course} />)
+        expect(screen.getByText("990.000 ₫")).toBeInTheDocument()
+        expect(screen.queryByText("discount:31")).not.toBeInTheDocument()
         expect(useQueryCoursePricePreviewSwr).toHaveBeenCalledWith("backend-basics")
         expect(useMutateAddToCartSwr).toHaveBeenCalledWith("backend-basics")
     })
@@ -68,20 +65,20 @@ describe("CourseCatalogCard", () => {
     it("replaces the phase price once the viewer's own, cheaper answer arrives", () => {
         stubCart()
         stubPreview(personalPreview)
-        const { container } = render(<CourseCatalogCard course={course} />)
-        expect(priceLine(container)).toContain("₫890,000")
-        expect(priceLine(container)).toContain("₫1,290,000")
-        expect(container.querySelector("[data-component=\"Badge\"]")?.textContent).toBe("discount:31")
-        expect(container.querySelector("[data-node=\"price-note-row\"]")?.textContent)
-            .toBe("savings:₫400,000priceDetail")
+        render(<CourseCatalogCard course={course} />)
+        expect(screen.getByText("₫890,000")).toBeInTheDocument()
+        expect(screen.getByText("₫1,290,000")).toBeInTheDocument()
+        expect(screen.getByText("discount:31")).toBeInTheDocument()
+        expect(screen.getByText("savings:₫400,000")).toBeInTheDocument()
+        expect(screen.getByRole("link", { name: "priceDetail" })).toBeInTheDocument()
     })
 
     it("keeps the phase price when the viewer's answer takes nothing off it", () => {
         stubCart()
         stubPreview({ ...personalPreview, discountedPriceVnd: 990000, discountPercent: 0 })
-        const { container } = render(<CourseCatalogCard course={course} />)
-        expect(priceLine(container)).toBe("990.000 ₫")
-        expect(container.querySelector("[data-component=\"Badge\"]")).toBeNull()
+        render(<CourseCatalogCard course={course} />)
+        expect(screen.getByText("990.000 ₫")).toBeInTheDocument()
+        expect(screen.queryByText("discount:0")).not.toBeInTheDocument()
     })
 
     it("asks the server nothing at all about one of the grid's resting shapes", () => {
@@ -90,14 +87,15 @@ describe("CourseCatalogCard", () => {
         const { container } = render(<CourseCatalogCard state="pending" course={{ id: "resting-1" }} />)
         expect(useQueryCoursePricePreviewSwr).toHaveBeenCalledWith(undefined)
         expect(useMutateAddToCartSwr).toHaveBeenCalledWith(undefined)
-        expect(container.querySelector("[data-component=\"Heading\"]")).toHaveAttribute("data-loading", "true")
+        expect(container.querySelector("h2")).toBeInTheDocument()
+        expect(screen.queryByRole("heading", { name: "Backend basics" })).not.toBeInTheDocument()
     })
 
     it("spins the cart control while this card's own add is running", () => {
         stubCart({ isMutating: true })
         stubPreview(undefined)
-        const { container } = render(<CourseCatalogCard course={course} />)
-        expect(container.querySelector("[data-component=\"Button\"]")).toHaveAttribute("data-action-pending", "true")
+        render(<CourseCatalogCard course={course} />)
+        expect(screen.getByRole("button", { name: "addToCart" })).toBeDisabled()
     })
 
     it("remembers a successful add so the control stops offering the same row twice", async () => {

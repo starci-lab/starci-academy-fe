@@ -21,7 +21,8 @@ const taskStatusOf = (task: PersonalProjectTask, index: number, currentIndex: nu
 const completionFactsOf = (progress: ProjectProgress | undefined, copy: ProjectCopy, attempts: number, allTasks: ReadonlyArray<PersonalProjectTask>) => progress === undefined ? ["", "", ""] : [copy.tasksCompleted(progress.tasksCompleted, progress.tasksTotal), copy.submissions(attempts), copy.average(averageScore(allTasks))]
 
 /** Resolve live capstone progress, current milestone and task actions. */
-export const CoursePersonalProject = ({ displayId }: CoursePersonalProjectProps) => {
+export const CoursePersonalProject = (props: CoursePersonalProjectProps) => {
+    const { displayId } = props
     const locale = useLocale()
     const copy = locale === "vi" ? COPY.vi : COPY.en
     const router = useRouter()
@@ -43,5 +44,3 @@ export const CoursePersonalProject = ({ displayId }: CoursePersonalProjectProps)
 }
 
 export { CoursePersonalProjectBase } from "./component"
-/** Source-level ownership marker for the connected project block. */
-export const meta = { world: "connected", domain: "learn" } as const

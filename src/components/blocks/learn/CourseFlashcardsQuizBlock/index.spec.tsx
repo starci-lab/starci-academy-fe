@@ -21,7 +21,7 @@ vi.mock("@/hooks/swr/useQueryMyInProgressFlashcardSessionSwr", () => ({ useQuery
 vi.mock("@/hooks/swr/useMutateStartFlashcardSessionSwr", () => ({ useMutateStartFlashcardSessionSwr: () => mocks.start }))
 vi.mock("@/hooks/swr/useQueryMyFlashcardQuizHistorySwr", () => ({ useQueryMyFlashcardQuizHistorySwr: () => mocks.history }))
 vi.mock("@/hooks/swr/useQueryMyFlashcardQuizStatsSwr", () => ({ useQueryMyFlashcardQuizStatsSwr: () => mocks.stats }))
-vi.mock("./component", () => ({ CourseFlashcardsQuizBlockBase: (input: TestInput) => { mocks.input = input; return <output data-testid="quiz" /> } }))
+vi.mock("./component", () => ({ CourseFlashcardsQuizBlockView: (props: TestInput) => { mocks.input = props; return <output data-testid="quiz" /> } }))
 
 import { CourseFlashcardsQuizBlock } from "./index"
 
@@ -57,12 +57,12 @@ describe("CourseFlashcardsQuizBlock", () => {
     })
 
     it("renders the guided setup controls through the pure quiz owner", async () => {
-        const { CourseFlashcardsQuizBlockBase } = await vi.importActual<typeof import("./component")>("./component")
+        const { CourseFlashcardsQuizBlockView } = await vi.importActual<typeof import("./component")>("./component")
         const selectScope = vi.fn()
         const selectMode = vi.fn()
         const selectLevel = vi.fn()
 
-        render(<CourseFlashcardsQuizBlockBase
+        render(<CourseFlashcardsQuizBlockView
             pageState="setup"
             blockState="ready"
             props={{

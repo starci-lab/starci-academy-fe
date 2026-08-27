@@ -15,7 +15,7 @@ describe("LeaderboardStandingRow", () => {
         expect(screen.getByText("Rank #4 globally")).toBeInTheDocument()
         expect(screen.getByText("105 XP")).toBeInTheDocument()
         expect(screen.getByText("4 days left")).toBeInTheDocument()
-        expect(container.querySelector("[data-component=\"RankMark\"]")).toHaveAttribute(
+        expect(container.querySelector("[data-placement=\"standing\"]")).toHaveAttribute(
             "data-icon",
             RankMarkIconId(4),
         )

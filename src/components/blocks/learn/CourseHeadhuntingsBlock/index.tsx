@@ -43,7 +43,8 @@ const openExternal = (href: string) => {
 }
 
 /** Connected owner for query, search, mapping and directory actions. */
-export const CourseHeadhuntingsBlock = ({ displayId }: CourseHeadhuntingsBlockProps) => {
+export const CourseHeadhuntingsBlock = (props: CourseHeadhuntingsBlockProps) => {
+    const { displayId } = props
     const locale = useLocale() === "vi" ? "vi" : "en"
     const copy = COPY[locale]
     const router = useRouter()

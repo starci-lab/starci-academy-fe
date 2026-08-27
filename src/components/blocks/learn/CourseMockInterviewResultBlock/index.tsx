@@ -82,7 +82,11 @@ const COPY = {
 } as const
 
 /** Poll the durable attempt and render the result route independently of live-session state. */
-export const CourseMockInterviewResultBlock = ({ displayId, sessionId }: CourseMockInterviewResultPageProps) => {
+/** Route identity used to load a mock interview result. */
+export type CourseMockInterviewResultBlockProps = CourseMockInterviewResultPageProps
+/** Load and render the durable mock-interview result route. */
+export const CourseMockInterviewResultBlock = (props: CourseMockInterviewResultBlockProps) => {
+    const { displayId, sessionId } = props
     const locale = useLocale()
     const copy = locale === "vi" ? COPY.vi : COPY.en
     const router = useRouter()
@@ -188,13 +192,10 @@ export const CourseMockInterviewResultBlock = ({ displayId, sessionId }: CourseM
                 retry: () => { void retry() },
                 abandon: () => { void abandonSession() },
                 newSession: () => router.push(setupPath),
-                openTranscript: () => document.querySelector("[data-node=\"mock-interview-result-reviews\"]")?.scrollIntoView({ block: "start", behavior: "smooth" }),
+                openTranscript: () => document.querySelector("main")?.scrollIntoView({ block: "start", behavior: "smooth" }),
                 openHistory: () => router.push(`${setupPath}?tab=history`),
                 returnToCourse: () => router.push(`/courses/${displayId}/learn`),
             }}
         />
     )
 }
-
-/** Source-level ownership marker for the connected result twin. */
-export const meta = { world: "connected", domain: "learn" } as const

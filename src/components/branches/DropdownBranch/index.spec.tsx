@@ -1,7 +1,6 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { DropdownBranch } from "./index"
-import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
 /*
  * Fixture copy, assembled rather than typed into the vocabulary tier: every string a branch draws
@@ -28,8 +27,8 @@ describe("DropdownBranch", () => {
         render(
             <DropdownBranch
                 props={{ label: "Account", sections: [{ items: [{ id: "profile", label: "Profile" }] }] }}
-                trigger={defineLeafComponent("text", {}, () => <span>Avatar</span>)}
-                header={defineLeafComponent("text", {}, () => <span data-testid="static-header" />)}
+                trigger={<span>Avatar</span>}
+                header={<span data-testid="static-header" />}
             />,
         )
 
@@ -53,7 +52,7 @@ describe("DropdownBranch", () => {
                     ] }],
                 }}
                 on={{ action }}
-                trigger={defineLeafComponent("text", {}, () => <span>Open</span>)}
+                trigger={<span>Open</span>}
             />,
         )
 
@@ -66,21 +65,17 @@ describe("DropdownBranch", () => {
         expect(action).toHaveBeenCalledWith("sign-out")
     })
 
-    it("draws a contract header as its own registry node above the menu", async () => {
+    it("draws a header above the menu", async () => {
         render(
             <DropdownBranch
                 props={{ label: "Account", placement: "top left", sections: [{ items: [{ id: "profile", label: "Profile", icon: "profile" }] }] }}
-                trigger={defineLeafComponent("text", {}, () => <span>Avatar</span>)}
-                header={defineContractComponent("title-with-baseline-fact", {
-                    title: defineLeafComponent("heading", {}, () => <h3>{copy.adaLovelace}</h3>),
-                    fact: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <span>{copy.codingXp}</span>),
-                })}
+                trigger={<span>Avatar</span>}
+                header={<><h3>{copy.adaLovelace}</h3><span>{copy.codingXp}</span></>}
             />,
         )
 
         fireEvent.click(screen.getByRole("button", { name: "Account" }))
         const header = await screen.findByRole("heading", { name: copy.adaLovelace })
-        expect(header.closest("[data-node=\"title-with-baseline-fact\"]")).not.toBeNull()
         expect(header.closest("[role=menuitem]")).toBeNull()
         expect(screen.getByRole("menuitem", { name: "Profile" }).querySelector("svg")).not.toBeNull()
     })
@@ -89,7 +84,7 @@ describe("DropdownBranch", () => {
         render(
             <DropdownBranch
                 props={{ label: "Account", sections: [{ items: [{ id: "profile", label: "Profile", isDisabled: true }] }] }}
-                trigger={defineLeafComponent("text", {}, () => <span>Avatar</span>)}
+                trigger={<span>Avatar</span>}
             />,
         )
 

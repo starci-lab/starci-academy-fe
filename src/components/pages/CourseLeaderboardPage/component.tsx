@@ -6,7 +6,4 @@ export type CourseLeaderboardCategory = CourseLeaderboardBlockCategory
 export type CourseLeaderboardPageProps = { readonly displayId: string; readonly selectedCategory: CourseLeaderboardCategory }
 
 /** Compose the connected block directly; the page does not proxy its rendered state or data. */
-export const CourseLeaderboardPageBase = (input: CourseLeaderboardPageProps) => <CourseLeaderboardBlock displayId={input.displayId} category={input.selectedCategory} />
-
-/** Source-level ownership marker for the pure course leaderboard shell. */
-export const meta = { world: "pure", domain: "learn" } as const
+export const CourseLeaderboardPageBase = (props: CourseLeaderboardPageProps) => <CourseLeaderboardBlock displayId={props.displayId} category={props.selectedCategory} />

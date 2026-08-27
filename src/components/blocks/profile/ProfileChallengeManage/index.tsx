@@ -9,7 +9,10 @@ import type { ProfileSolvedChallenge } from "@/modules/api/graphql/queries/types
 import { ProfileChallengeManageBase } from "./component"
 
 /** Resolve route-selected course submissions and own the local search/filter collection. */
-export const ProfileChallengeManage = () => {
+export type ProfileChallengeManageProps = Record<never, never>
+/** Load and render the connected challenge-management block. */
+export const ProfileChallengeManage = (props: ProfileChallengeManageProps) => {
+    void props
     const params = useParams<{ username?: string; courseId?: string }>()
     const router = useRouter()
     const [search, setSearch] = useState("")
@@ -38,5 +41,3 @@ export const ProfileChallengeManage = () => {
 }
 
 export { ProfileChallengeManageBase } from "./component"
-/** Source-level ownership marker for the connected challenge-management block. */
-export const meta = { world: "connected", domain: "profile" } as const

@@ -1,6 +1,4 @@
 import { DrawerBranch } from "@/components/branches/DrawerBranch"
-import { Tree } from "@/components/branches/Tree"
-import { defineContractComponent, defineContractProjection, defineLeafComponent } from "@/components/contracts/props"
 import { Button } from "@/components/leaves/Button"
 import { Select } from "@/components/leaves/Select"
 import { Text } from "@/components/leaves/Text"
@@ -31,7 +29,7 @@ export type ChallengeGradingModelLabels = {
 }
 
 /** Pure model-comparison drawer input. */
-export type ChallengeGradingModelDrawerBaseProps = {
+export type ChallengeGradingModelDrawerProps = {
     readonly isOpen: boolean
     readonly labels: ChallengeGradingModelLabels
     readonly quotaLabel?: string
@@ -45,67 +43,52 @@ export type ChallengeGradingModelDrawerBaseProps = {
 }
 
 /** Draw model comparison, quota evidence, apply-all and exact deliverable overrides. */
-export const ChallengeGradingModelDrawerBase = (input: ChallengeGradingModelDrawerBaseProps) => {
-    const options = input.models.filter((model) => model.disabled !== true)
-    const render = defineContractComponent("challenge-model-drawer", {
-        description: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-            <Text props={{ content: input.labels.description, size: "sm", tone: "muted" }} />
-        )),
-        quota: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-            <Text props={{ content: input.quotaLabel ?? input.labels.quotaUnavailable, size: "xs", tone: "muted" }} />
-        )),
-        model: input.models.map((model) => defineContractComponent("challenge-model-option", {
-            action: defineLeafComponent("button", {}, () => (
-                <Button
-                    props={{
-                        label: model.id === input.selectedDefaultModelId
-                            ? `${model.label} · ${input.labels.selected}`
-                            : model.label,
-                        variant: model.id === input.selectedDefaultModelId ? "primary" : "outline",
-                        disabled: model.disabled,
-                    }}
-                    on={{ press: () => input.onSelectDefault?.(model.id) }}
-                />
-            )),
-            detail: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                <Text props={{ content: model.detail, size: "xs", tone: "muted" }} />
-            )),
-        })),
-        apply: defineLeafComponent("button", {}, () => (
-            <Button props={{ label: input.labels.applyAll, variant: "secondary" }} on={{ press: input.onApplyAll }} />
-        )),
-        override: input.deliverables.map((deliverable) => defineContractComponent("challenge-model-override", {
-            label: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
-                <Text props={{ content: input.labels.override(deliverable.title), size: "sm", weight: "semibold" }} />
-            )),
-            model: defineLeafComponent("select", {}, () => (
-                <Select
-                    props={{
-                        id: `challenge-model-${deliverable.id}`,
-                        name: `challenge-model-${deliverable.id}`,
-                        label: input.labels.override(deliverable.title),
-                        options,
-                        selectedKey: deliverable.selectedModelId,
-                    }}
-                    on={{ select: (modelId) => input.onOverride?.(deliverable.id, modelId) }}
-                />
-            )),
-        })),
-    })
-
+export const ChallengeGradingModelDrawerBase = (props: ChallengeGradingModelDrawerProps) => {
+    const options = props.models.filter((model) => model.disabled !== true)
     return (
         <DrawerBranch
-            isOpen={input.isOpen}
+            isOpen={props.isOpen}
             placement="right"
-            title={input.labels.title}
-            onDismiss={input.onDismiss}
-            contract="challenge-model-drawer"
-            render={defineContractProjection("challenge-model-drawer", () => (
-                <Tree contract="challenge-model-drawer" render={render} />
+            title={props.labels.title}
+            onDismiss={props.onDismiss}
+        >
+            <Text props={{ content: props.labels.description, size: "sm", tone: "muted" }} />
+            <Text props={{ content: props.quotaLabel ?? props.labels.quotaUnavailable, size: "xs", tone: "muted" }} />
+            <div>
+                {props.models.map((model) => (
+                    <div key={model.id}>
+                        <Button
+                            props={{
+                                label: model.id === props.selectedDefaultModelId
+                                    ? `${model.label} · ${props.labels.selected}`
+                                    : model.label,
+                                variant: model.id === props.selectedDefaultModelId ? "primary" : "outline",
+                                disabled: model.disabled,
+                            }}
+                            on={{ press: () => props.onSelectDefault?.(model.id) }}
+                        />
+                        <Text props={{ content: model.detail, size: "xs", tone: "muted" }} />
+                    </div>
+                ))}
+            </div>
+            <Button props={{ label: props.labels.applyAll, variant: "secondary" }} on={{ press: props.onApplyAll }} />
+            {props.deliverables.map((deliverable) => (
+                <div key={deliverable.id}>
+                    <Text props={{ content: props.labels.override(deliverable.title), size: "sm", weight: "semibold" }} />
+                    <Select
+                        props={{
+                            id: `challenge-model-${deliverable.id}`,
+                            name: `challenge-model-${deliverable.id}`,
+                            label: props.labels.override(deliverable.title),
+                            options,
+                            selectedKey: deliverable.selectedModelId,
+                        }}
+                        on={{ select: (modelId: string) => props.onOverride?.(deliverable.id, modelId) }}
+                    />
+                </div>
             ))}
-        />
+        </DrawerBranch>
     )
 }
 
 /** Pure ownership marker for Challenge model-selection mechanics. */
-export const meta = { shape: "overlay", world: "pure", domain: "learn" } as const

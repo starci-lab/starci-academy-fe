@@ -5,10 +5,11 @@ import { useRouter } from "@/i18n/navigation"
 import { CodingDomainPageBase } from "./component"
 
 /** Route input supplied by the application segment. */
-export interface CodingDomainPageRouteProps { readonly domain: string }
+export type CodingDomainPageProps = { readonly domain: string }
 
 /** Resolve only route identity and shell navigation for one coding domain. */
-export const CodingDomainPage = ({ domain }: CodingDomainPageRouteProps) => {
+export const CodingDomainPage = (props: CodingDomainPageProps) => {
+    const { domain } = props
     const t = useTranslations("practice")
     const router = useRouter()
     return <CodingDomainPageBase
@@ -19,6 +20,3 @@ export const CodingDomainPage = ({ domain }: CodingDomainPageRouteProps) => {
         on={{ goHome: () => router.push("/dashboard"), goPractice: () => router.push("/practice") }}
     />
 }
-
-/** Source-level ownership marker for the connected topic page shell. */
-export const meta = { world: "connected", domain: "coding" } as const

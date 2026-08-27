@@ -6,11 +6,6 @@ import { Text } from "@/components/leaves/Text"
 import { Badge } from "@/components/leaves/Badge"
 import { Button } from "@/components/leaves/Button"
 import type { IconName } from "@/components/leaves/Icon"
-import {
-    defineContractComponent,
-    defineContractProjection,
-    defineLeafComponent,
-} from "@/components/contracts/props"
 
 /** One localized scope row shown by the pure workspace. */
 export type GlobalSearchScopeView = {
@@ -101,7 +96,7 @@ export type GlobalSearchOverlayActions = {
 }
 
 /** Pure data, copy and actions accepted by the workspace twin. */
-export type GlobalSearchOverlayViewProps = {
+export type GlobalSearchOverlayContent = {
     readonly isOpen: boolean
     readonly state: GlobalSearchOverlayRenderState
     readonly copy: GlobalSearchOverlayCopy
@@ -109,14 +104,14 @@ export type GlobalSearchOverlayViewProps = {
 }
 
 /** Pure rendering half for the large, keyboard-operated search workspace. */
-export const GlobalSearchOverlayBase = ({ isOpen, state, copy, on }: GlobalSearchOverlayViewProps) => {
-    const scopeList = defineLeafComponent("selection-list", {}, () => (
+export const GlobalSearchOverlayView = (props: GlobalSearchOverlayContent) => {
+    const scopeList = (
         <SelectionList
             props={{
-                label: copy.scopesLabel,
+                label: props.copy.scopesLabel,
                 variant: "scopes",
-                selectedKey: state.selectedScope,
-                items: state.scopes.map((scope) => ({
+                selectedKey: props.state.selectedScope,
+                items: props.state.scopes.map((scope) => ({
                     id: scope.id,
                     textValue: scope.textValue,
                     title: scope.label,
@@ -124,108 +119,80 @@ export const GlobalSearchOverlayBase = ({ isOpen, state, copy, on }: GlobalSearc
                     badge: String(scope.count),
                 })),
             }}
-            on={{ select: on?.scopeSelect, activate: on?.scopeSelect }}
+            on={{ select: props.on?.scopeSelect, activate: props.on?.scopeSelect }}
         />
-    ))
+    )
     const notice = (() => {
-        if (state.status === "error") return { message: copy.errorMessage, description: copy.errorDescription, actionLabel: copy.retry, action: on?.retry }
-        if (state.status === "empty") return { message: copy.emptyMessage, description: copy.emptyDescription, actionLabel: copy.browseCourses, action: on?.browseCourses }
-        return { message: copy.idleMessage, description: copy.idleDescription, actionLabel: copy.browseCourses, action: on?.browseCourses }
+        if (props.state.status === "error") return { message: props.copy.errorMessage, description: props.copy.errorDescription, actionLabel: props.copy.retry, action: props.on?.retry }
+        if (props.state.status === "empty") return { message: props.copy.emptyMessage, description: props.copy.emptyDescription, actionLabel: props.copy.browseCourses, action: props.on?.browseCourses }
+        return { message: props.copy.idleMessage, description: props.copy.idleDescription, actionLabel: props.copy.browseCourses, action: props.on?.browseCourses }
     })()
-    const resultRegion = defineContractProjection("global-search-result-region", () => (
+    const resultRegion = (
         <GlobalSearchResultsBase
             props={{
-                label: copy.resultsLabel,
-                items: state.results.map((result) => ({
+                label: props.copy.resultsLabel,
+                items: props.state.results.map((result) => ({
                     id: result.id,
                     textValue: result.textValue,
                     title: result.title,
                     badge: result.statusLabel ?? result.kindLabel,
                 })),
-                selectedKey: state.selectedResult,
+                selectedKey: props.state.selectedResult,
                 emptyMessage: notice.message,
                 emptyDescription: notice.description,
                 emptyActionLabel: notice.actionLabel,
             }}
-            isLoading={state.status === "pending-stale"}
-            on={{ select: on?.resultPreview, recover: notice.action }}
+            isLoading={props.state.status === "pending-stale"}
+            on={{ select: props.on?.resultPreview, recover: notice.action }}
         />
-    ))
+    )
     const detailTitle = (() => {
-        if (state.detail.status === "idle") return undefined
-        if (state.detail.status === "pending") return copy.detailLoading
-        if (state.detail.status === "error") return copy.detailError
-        return state.detail.title
+        if (props.state.detail.status === "idle") return undefined
+        if (props.state.detail.status === "pending") return props.copy.detailLoading
+        if (props.state.detail.status === "error") return props.copy.detailError
+        return props.state.detail.title
     })()
-    const detailKind = state.detail.status === "idle" ? undefined : state.detail.kindLabel
-    const detailDescription = state.detail.status === "ready" ? state.detail.description : undefined
-    const detailStatus = state.detail.status === "ready" ? state.detail.statusLabel : undefined
-    const detailId = state.detail.status === "ready" ? state.detail.id : undefined
-    const context = detailTitle === undefined || detailKind === undefined ? undefined : defineContractComponent("global-search-context-card", {
-        title: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
+    const detailKind = props.state.detail.status === "idle" ? undefined : props.state.detail.kindLabel
+    const detailDescription = props.state.detail.status === "ready" ? props.state.detail.description : undefined
+    const detailStatus = props.state.detail.status === "ready" ? props.state.detail.statusLabel : undefined
+    const detailId = props.state.detail.status === "ready" ? props.state.detail.id : undefined
+    const context = detailTitle === undefined || detailKind === undefined ? undefined : (
+        <div>
             <Text props={{ content: detailTitle, size: "sm", weight: "medium" }} />
-        )),
-        kind: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
             <Text props={{ content: detailKind, size: "xs", tone: "muted" }} />
-        )),
-        snippet: detailDescription === undefined ? undefined : defineLeafComponent("text", { size: "sm" }, () => (
-            <Text props={{ content: detailDescription, size: "sm" }} />
-        )),
-        status: detailStatus === undefined ? undefined : defineLeafComponent("badge", {}, () => (
-            <Badge props={{ content: detailStatus, tone: "accent" }} />
-        )),
-        action: (() => {
-            if (state.detail.status === "error") {
-                return defineLeafComponent("button", {}, () => (
-                    <Button props={{ label: copy.retry, variant: "secondary", size: "sm" }} on={{ press: on?.retry }} />
-                ))
-            }
-            if (detailId === undefined) return undefined
-            return defineLeafComponent("button", {}, () => (
-                <Button
-                    props={{ label: copy.openResult, variant: "primary", size: "sm", icon: "next", iconPlacement: "trailing" }}
-                    on={{ press: () => on?.resultOpen?.(detailId) }}
-                />
-            ))
-        })(),
-    })
+            {detailDescription === undefined ? null : <Text props={{ content: detailDescription, size: "sm" }} />}
+            {detailStatus === undefined ? null : <Badge props={{ content: detailStatus, tone: "accent" }} />}
+            {(() => {
+                if (props.state.detail.status === "error") {
+                    return <Button props={{ label: props.copy.retry, variant: "secondary", size: "sm" }} on={{ press: props.on?.retry }} />
+                }
+                if (detailId === undefined) return undefined
+                return (
+                    <Button
+                        props={{ label: props.copy.openResult, variant: "primary", size: "sm", icon: "next", iconPlacement: "trailing" }}
+                        on={{ press: () => props.on?.resultOpen?.(detailId) }}
+                    />
+                )
+            })()}
+        </div>
+    )
     return (
         <ModalBranch
-            isOpen={isOpen}
+            isOpen={props.isOpen}
             size="cover"
-            contract="global-search-workspace"
-            render={defineContractComponent("global-search-workspace", {
-                query: defineLeafComponent("search-command-field", {}, () => (
-                    <SearchCommandField
-                        props={{
-                            id: "global-search-command",
-                            value: state.query,
-                            label: copy.label,
-                            placeholder: copy.placeholder,
-                            clearLabel: copy.clearLabel,
-                            shortcut: copy.shortcut,
-                            activeDescendant: state.selectedResult,
-                            isPending: state.isPending,
-                        }}
-                        on={{
-                            change: on?.queryChange,
-                            clear: on?.clear,
-                            previous: on?.previous,
-                            next: on?.next,
-                            submit: on?.submit,
-                        }}
-                    />
-                )),
-                body: defineContractComponent("global-search-body", {
-                    scopes: scopeList,
-                    results: resultRegion,
-                    context,
-                }),
-            })}
-            onDismiss={() => on?.dismiss?.()}
-        />
+            onDismiss={() => props.on?.dismiss?.()}
+        >
+            <SearchCommandField
+                props={{
+                    id: "global-search-command", value: props.state.query, label: props.copy.label,
+                    placeholder: props.copy.placeholder, clearLabel: props.copy.clearLabel, shortcut: props.copy.shortcut,
+                    activeDescendant: props.state.selectedResult, isPending: props.state.isPending,
+                }}
+                on={{ change: props.on?.queryChange, clear: props.on?.clear, previous: props.on?.previous, next: props.on?.next, submit: props.on?.submit }}
+            />
+            <div>{scopeList}{resultRegion}{context}</div>
+        </ModalBranch>
     )
 }
 
 /** Source-level identity for the pure search overlay twin. */
-export const meta = { world: "pure", domain: "search" } as const

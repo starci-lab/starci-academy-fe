@@ -7,7 +7,7 @@ import type { FlashcardSessionMode } from "@/modules/api/graphql/queries/query-m
 import { FlashcardResultBase } from "./component"
 
 /** Stable result-route identity required by the connected result page. */
-export type FlashcardResultRouteProps = {
+export type FlashcardResultBlockProps = {
     readonly displayId: string
     readonly sessionId: string
     readonly mode: FlashcardSessionMode
@@ -63,7 +63,8 @@ const COPY = {
 } as const
 
 /** Resolves one persisted result projection and its retry/onward destinations. */
-export const FlashcardResultBlock = ({ displayId, sessionId, mode }: FlashcardResultRouteProps) => {
+export const FlashcardResultBlock = (props: FlashcardResultBlockProps) => {
+    const { displayId, sessionId, mode } = props
     const isVietnamese = useLocale() === "vi"
     const copy = isVietnamese ? COPY.vi : COPY.en
     const router = useRouter()
@@ -124,4 +125,3 @@ export const FlashcardResultBlock = ({ displayId, sessionId, mode }: FlashcardRe
 }
 
 /** Canon metadata for the connected page half. */
-export const meta = { world: "connected", domain: "learn" } as const

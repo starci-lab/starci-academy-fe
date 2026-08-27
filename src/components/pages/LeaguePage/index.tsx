@@ -11,7 +11,11 @@ import { LeaguePageBase, type LeagueScope } from "./component"
 const SCOPES = ["weekly", "global"] as const
 
 /** Resolve URL scope/auth and compose the page shell; board state lives in LeagueBlock. */
-export const LeaguePage = () => {
+/** Props for the URL-owned league page. */
+export type LeaguePageProps = Record<never, never>
+/** Render the connected league route. */
+export const LeaguePage = (props: LeaguePageProps) => {
+    void props
     const t = useTranslations("community")
     const router = useRouter()
     const requested = useSearchParams().get("scope")
@@ -30,6 +34,3 @@ export const LeaguePage = () => {
         on={{ selectScope: (key) => router.push(`/league?scope=${key === "global" ? "global" : "weekly"}`), goHome: () => router.push("/dashboard") }}
     />
 }
-
-/** Source-level ownership marker. */
-export const meta = { world: "connected", domain: "community" } as const

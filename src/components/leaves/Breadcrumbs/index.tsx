@@ -1,6 +1,6 @@
-import { Breadcrumbs as HeroBreadcrumbs, Link as HeroLink, skeletonVariants } from "@heroui/react"
+import { Breadcrumbs as HeroBreadcrumbs, Link as HeroLink } from "@heroui/react"
 import { Icon } from "@/components/leaves/Icon"
-import type { LeafProps } from "@/components/contracts/props"
+import { breadcrumbsBackLinkClassName, breadcrumbsLoadingClassName, breadcrumbsTrailClassName } from "./classNames"
 
 /**
  * LEAF - `Breadcrumbs`: the path that got the reader here.
@@ -39,15 +39,13 @@ export type BreadcrumbsActions = {
     readonly [key: string]: (() => void) | undefined
 }
 
-/** Props for {@link Breadcrumbs}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type BreadcrumbsProps = LeafProps<BreadcrumbsData, BreadcrumbsActions>
+/** Props for {@link Breadcrumbs}. Three fixed slots, no fourth. */
+export type BreadcrumbsProps = { readonly props: BreadcrumbsData; readonly on?: BreadcrumbsActions; readonly isLoading?: boolean }
 
 /** The resting shape - one short bar where the trail will be. */
-const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({ className: "h-4 w-40 rounded-sm" })
 /** Three path steps no longer aid orientation; the nearest ancestor is the useful way out. */
 const BACK_LINK_MIN_DEPTH = 3
 /** Back-link anatomy owned by this leaf so every deep trail resolves to the same quiet control. */
-const BACK_LINK_CLASSES = "inline-flex w-fit items-center gap-1 text-sm text-muted"
 /** Deep trails use the short legacy wording; the surrounding accessible label still names the path. */
 const BACK_LABEL = "Back"
 
@@ -56,28 +54,27 @@ const BACK_LABEL = "Back"
  *
  * @param input - {@link BreadcrumbsProps}
  */
-export const Breadcrumbs = ({ props, on, isLoading = false }: BreadcrumbsProps) => {
+export const Breadcrumbs = (props: BreadcrumbsProps) => {
+    const data = props.props
+    const on = props.on
+    const isLoading = props.isLoading ?? false
     if (isLoading) {
         return (
             <span
-                data-tier="leaf"
-                data-component="Breadcrumbs"
                 data-loading="true"
                 aria-hidden="true"
-                className={RESTING_CLASSES}
+                className={breadcrumbsLoadingClassName}
             />
         )
     }
-    const last = props.steps.length - 1
-    const parent = [...props.steps.slice(0, last)].reverse().find((step) => on?.[step.id] !== undefined)
-    if (props.showFullTrail !== true && props.steps.length >= BACK_LINK_MIN_DEPTH && parent !== undefined) {
+    const last = data.steps.length - 1
+    const parent = [...data.steps.slice(0, last)].reverse().find((step) => on?.[step.id] !== undefined)
+    if (data.showFullTrail !== true && data.steps.length >= BACK_LINK_MIN_DEPTH && parent !== undefined) {
         return (
             <HeroLink
-                data-tier="leaf"
-                data-component="Breadcrumbs"
                 data-variant="back"
                 onPress={on?.[parent.id]}
-                className={BACK_LINK_CLASSES}
+                className={breadcrumbsBackLinkClassName}
             >
                 <Icon props={{ name: "back", role: "chip" }} />
                 {BACK_LABEL}
@@ -86,13 +83,11 @@ export const Breadcrumbs = ({ props, on, isLoading = false }: BreadcrumbsProps) 
     }
     return (
         <HeroBreadcrumbs
-            data-tier="leaf"
-            data-component="Breadcrumbs"
             data-loading="false"
-            aria-label={props.label}
-            className="scroll-shadow--hide-scrollbar w-full min-w-0 overflow-x-auto"
+            aria-label={data.label}
+            className={breadcrumbsTrailClassName}
         >
-            {props.steps.map((step, index) => {
+            {data.steps.map((step, index) => {
                 // Do not pass an `onPress` prop at all for the current page. React
                 // Aria treats an explicitly present-but-undefined press handler as
                 // a changing interactive registration, which can loop during a
@@ -116,6 +111,3 @@ export const Breadcrumbs = ({ props, on, isLoading = false }: BreadcrumbsProps) 
         </HeroBreadcrumbs>
     )
 }
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const

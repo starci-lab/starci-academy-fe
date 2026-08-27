@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { CourseLearnTodayBlockBase as RawCourseLearnTodayPageBase, type CourseLearnTodayData } from "@/components/blocks/learn/CourseLearnTodayBlock/component"
+import { CourseLearnTodayBlockView as RawCourseLearnTodayPageBase, type CourseLearnTodayData } from "@/components/blocks/learn/CourseLearnTodayBlock/component"
 type TestTodayProps = { readonly state: string; readonly mobileView: "today" | "course" | "progress"; readonly props: Record<string, unknown>; readonly on?: Record<string, (...args: Array<never>) => void> }
 const CourseLearnTodayPageBase = ({ state, mobileView, props, on }: TestTodayProps) => <RawCourseLearnTodayPageBase blockState={state as never} mobileView={mobileView} props={props as never} on={on} />
 
@@ -68,9 +68,9 @@ describe("CourseLearnTodayPageBase", () => {
         expect(screen.getByText("Resume lesson")).toBeTruthy()
         expect(screen.getByText("Three cards due")).toBeTruthy()
         expect(screen.getByText("42% complete")).toBeTruthy()
-        const resume = screen.getByText("Resume lesson").closest("[data-node=resume-item-card]")?.querySelector("[role=link]")
-        expect(resume).not.toBeNull()
-        fireEvent.click(resume!)
+        const resumeAction = screen.getByText("Resume lesson").parentElement?.querySelector<HTMLElement>("[role=link]")
+        expect(resumeAction).not.toBeNull()
+        fireEvent.click(resumeAction!)
         expect(open).toHaveBeenCalledWith("lesson")
     })
 

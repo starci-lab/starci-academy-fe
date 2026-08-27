@@ -5,7 +5,7 @@ import { cpp } from "@codemirror/lang-cpp"
 import { java } from "@codemirror/lang-java"
 import { javascript } from "@codemirror/lang-javascript"
 import { python } from "@codemirror/lang-python"
-import type { LeafProps } from "@/components/contracts/props"
+import { codeEditorHostClassName } from "./classNames"
 
 /**
  * LEAF - `CodeEditor`: the surface a solution is written on.
@@ -66,18 +66,19 @@ export type CodeEditorActions = {
     readonly telemetry?: (reading: EditorTelemetry) => void
 }
 
-/** Props for {@link CodeEditor}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type CodeEditorProps = LeafProps<CodeEditorData, CodeEditorActions>
+/** Props for {@link CodeEditor}. Three fixed slots, no fourth. */
+export type CodeEditorProps = { readonly props: CodeEditorData; readonly on?: CodeEditorActions; readonly isLoading?: boolean }
 
 /** The editor fills whatever height the column left it. */
-const HOST_CLASSES = "h-full min-h-64 w-full overflow-auto"
 
 /**
  * Draw the editor.
  *
  * @param input - {@link CodeEditorProps}
  */
-export const CodeEditor = ({ props, on }: CodeEditorProps) => {
+export const CodeEditor = (props: CodeEditorProps) => {
+    const data = props.props
+    const on = props.on
     // A MUTABLE tally behind a readonly REPORT. `EditorTelemetry` is the settled reading handed
     // upward and is readonly for the reason every data type here is - a caller must not edit what
     // it was told. The running tally underneath it is a different thing and has to be writable.
@@ -92,15 +93,15 @@ export const CodeEditor = ({ props, on }: CodeEditorProps) => {
         /** Publish the settled counters. Called after one moves, never on a timer. */
         const report = () => on?.telemetry?.({ ...counters.current })
 
-        const grammar = props.language === "python"
+        const grammar = data.language === "python"
             ? [python()]
-            : props.language === "java"
+            : data.language === "java"
                 ? [java()]
-                : props.language === "cpp"
+                : data.language === "cpp"
                     ? [cpp()]
-                    : props.language === "typescript"
+                    : data.language === "typescript"
                         ? [javascript({ typescript: true })]
-                        : props.language === "javascript"
+                        : data.language === "javascript"
                             ? [javascript()]
                             : []
 
@@ -132,21 +133,19 @@ export const CodeEditor = ({ props, on }: CodeEditorProps) => {
                 },
             }),
         ]
-    }, [props.language, on])
+    }, [data.language, on])
 
     return (
         <div
-            data-tier="leaf"
-            data-component="CodeEditor"
-            data-language={props.language}
-            className={HOST_CLASSES}
+            data-language={data.language}
+            className={codeEditorHostClassName}
         >
             <CodeMirror
-                id={props.id}
-                aria-label={props.label}
-                value={props.defaultValue}
+                id={data.id}
+                aria-label={data.label}
+                value={data.defaultValue}
                 theme={vscodeDark}
-                editable={props.readOnly !== true}
+                editable={data.readOnly !== true}
                 extensions={extensions}
                 height="100%"
                 onChange={(code) => on?.change?.(code)}
@@ -154,6 +153,3 @@ export const CodeEditor = ({ props, on }: CodeEditorProps) => {
         </div>
     )
 }
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const

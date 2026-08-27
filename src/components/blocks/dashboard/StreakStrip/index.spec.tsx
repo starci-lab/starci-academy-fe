@@ -34,7 +34,7 @@ const stub = (over: Record<string, unknown>) => {
     return mutate
 }
 
-const cells = (root: HTMLElement) => root.querySelectorAll("[data-component=\"DayCell\"]")
+const cells = (root: HTMLElement) => root.querySelectorAll("li")
 
 beforeEach(() => {
     vi.useFakeTimers()
@@ -50,10 +50,10 @@ describe("StreakStrip", () => {
     it("draws the seven days the server sent, dated in the fixed product locale", () => {
         stub({ data: { streak: 3, longestStreak: 9, days: week } })
         const { container } = render(<StreakStrip />)
-        expect(Array.from(cells(container), (cell) => cell.querySelector("[data-part=\"weekday\"]")?.textContent)).toEqual([
+        expect(Array.from(cells(container), (cell) => cell.querySelectorAll("span")[1]?.textContent)).toEqual([
             "T", "F", "S", "S", "M", "T", "W",
         ])
-        expect(Array.from(cells(container), (cell) => cell.querySelector("[data-part=\"date\"]")?.textContent))
+        expect(Array.from(cells(container), (cell) => cell.querySelectorAll("span")[2]?.textContent))
             .toEqual([
                 "Aug 13, 2026",
                 "Aug 14, 2026",
@@ -71,7 +71,7 @@ describe("StreakStrip", () => {
         stub({ data: null })
         const { container } = render(<StreakStrip />)
         expect(cells(container)).toHaveLength(7)
-        expect(Array.from(cells(container), (cell) => cell.querySelector("[data-part=\"date\"]")?.textContent)).toEqual([
+        expect(Array.from(cells(container), (cell) => cell.querySelectorAll("span")[2]?.textContent)).toEqual([
             "Aug 13, 2026",
             "Aug 14, 2026",
             "Aug 15, 2026",
@@ -81,7 +81,7 @@ describe("StreakStrip", () => {
             "Aug 19, 2026",
         ])
         expect(container.textContent).toContain("empty")
-        expect(container.querySelectorAll("[data-component=\"DayCell\"][data-active=\"true\"]")).toHaveLength(0)
+        expect(screen.queryByText("current:0")).toBeNull()
         expect(container.textContent).not.toContain("failed")
     })
 
@@ -89,14 +89,14 @@ describe("StreakStrip", () => {
         stub({ data: { streak: 0, longestStreak: 0, days: week.map((day) => ({ ...day, active: false })) } })
         const { container } = render(<StreakStrip />)
         expect(container.textContent).toContain("empty")
-        fireEvent.click(container.querySelector("[data-component=\"Button\"]")!)
+        fireEvent.click(screen.getByRole("button", { name: "action" }))
         expect(push).toHaveBeenCalledExactlyOnceWith("/courses")
     })
 
     it("rests the strip while the week is in flight and still offers the way to learn", () => {
         stub({})
         const { container } = render(<StreakStrip />)
-        expect(container.querySelector("[data-loading=\"true\"]")).toBeInTheDocument()
+        expect(container.querySelectorAll("[data-loading=\"true\"]").length).toBeGreaterThan(0)
         expect(container.textContent).not.toContain("failed")
     })
 

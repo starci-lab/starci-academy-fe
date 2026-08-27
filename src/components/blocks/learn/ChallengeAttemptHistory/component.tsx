@@ -1,7 +1,6 @@
-import { Tree } from "@/components/branches/Tree"
-import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 import { Button } from "@/components/leaves/Button"
 import { Text } from "@/components/leaves/Text"
+import { challengeAttemptHistoryClassName, challengeAttemptHistoryRowClassName } from "./classNames"
 
 /** One immutable Challenge grading attempt shown newest-first. */
 export type ChallengeAttemptHistoryItem = {
@@ -24,8 +23,8 @@ export type ChallengeAttemptHistoryLabels = {
     readonly failed: string
 }
 
-/** Pure attempt-history state and selection contract. */
-export type ChallengeAttemptHistoryBaseProps = {
+/** Pure attempt-history state and selection data. */
+export type ChallengeAttemptHistoryProps = {
     readonly state: "pending" | "ready" | "empty" | "failed"
     readonly attempts: ReadonlyArray<ChallengeAttemptHistoryItem>
     readonly selectedAttemptId?: string
@@ -33,57 +32,43 @@ export type ChallengeAttemptHistoryBaseProps = {
     readonly onSelect?: (attempt: ChallengeAttemptHistoryItem) => void
 }
 
-const resolveNotice = (input: ChallengeAttemptHistoryBaseProps) => {
-    if (input.state === "pending") return input.labels.pending
-    if (input.state === "failed") return input.labels.failed
-    return input.labels.empty
+const resolveNotice = (props: ChallengeAttemptHistoryProps) => {
+    if (props.state === "pending") return props.labels.pending
+    if (props.state === "failed") return props.labels.failed
+    return props.labels.empty
 }
 
 /** Draw immutable attempts without changing the selected result until the learner chooses one. */
-export const ChallengeAttemptHistoryBase = (input: ChallengeAttemptHistoryBaseProps) => {
-    const notice = resolveNotice(input)
+export const ChallengeAttemptHistoryBase = (props: ChallengeAttemptHistoryProps) => {
+    const notice = resolveNotice(props)
     return (
-        <Tree
-            contract="challenge-attempt-history-drawer"
-            render={defineContractComponent("challenge-attempt-history-drawer", {
-                summary: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                    <Text
-                        props={{ content: input.labels.summary(input.attempts.length), size: "sm", tone: "muted" }}
-                        isLoading={input.state === "pending"}
+        <section className={challengeAttemptHistoryClassName} aria-label={props.labels.summary(props.attempts.length)}>
+            <Text
+                props={{ content: props.labels.summary(props.attempts.length), size: "sm", tone: "muted" }}
+                isLoading={props.state === "pending"}
+            />
+            {props.state === "ready" ? props.attempts.map((attempt) => (
+                <div key={attempt.id} className={challengeAttemptHistoryRowClassName}>
+                    <Button
+                        props={{
+                            label: props.labels.attempt(attempt.attemptNumber, attempt.score),
+                            variant: attempt.id === props.selectedAttemptId ? "primary" : "outline",
+                            size: "sm",
+                        }}
+                        on={{ press: () => props.onSelect?.(attempt) }}
                     />
-                )),
-                ...(input.state === "ready" ? {
-                    attempt: input.attempts.map((attempt) => defineContractComponent("challenge-attempt-history-row", {
-                        action: defineLeafComponent("button", {}, () => (
-                            <Button
-                                props={{
-                                    label: input.labels.attempt(attempt.attemptNumber, attempt.score),
-                                    variant: attempt.id === input.selectedAttemptId ? "primary" : "outline",
-                                    size: "sm",
-                                }}
-                                on={{ press: () => input.onSelect?.(attempt) }}
-                            />
-                        )),
-                        meta: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                            <Text
-                                props={{
-                                    content: [input.labels.outcome[attempt.outcome], attempt.servedModel, attempt.processedAt]
-                                        .filter(Boolean).join(" · "),
-                                    size: "xs",
-                                    tone: "muted",
-                                }}
-                            />
-                        )),
-                    })),
-                } : {
-                    notice: defineLeafComponent("text", {}, () => (
-                        <Text props={{ content: notice, live: input.state === "failed" ? "assertive" : "polite" }} />
-                    )),
-                }),
-            })}
-        />
+                    <Text
+                        props={{
+                            content: [props.labels.outcome[attempt.outcome], attempt.servedModel, attempt.processedAt]
+                                .filter(Boolean).join(" · "),
+                            size: "xs",
+                            tone: "muted",
+                        }}
+                    />
+                </div>
+            )) : (
+                <Text props={{ content: notice, live: props.state === "failed" ? "assertive" : "polite" }} />
+            )}
+        </section>
     )
 }
-
-/** Pure ownership marker for Challenge history. */
-export const meta = { shape: "block", world: "pure", domain: "learn" } as const

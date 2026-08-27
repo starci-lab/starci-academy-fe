@@ -1,9 +1,9 @@
 /** @vitest-environment jsdom */
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { FlashcardResultBase, type FlashcardResultBlockProps } from "@/components/blocks/learn/FlashcardResult/component"
+import { FlashcardResultBase, type FlashcardResultProps } from "@/components/blocks/learn/FlashcardResult/component"
 
-const makeInput = (): FlashcardResultBlockProps => ({
+const makeInput = (): FlashcardResultProps => ({
     blockState: "ready",
     data: {
         mode: "review",
@@ -37,14 +37,12 @@ afterEach(cleanup)
 describe("FlashcardResultBase", () => {
     it("renders the persisted score, breakdown, weak topics, and retry path", () => {
         const input = makeInput()
-        const { container } = render(<FlashcardResultBase {...input} />)
+        render(<FlashcardResultBase {...input} />)
 
-        expect(container.querySelector("[data-node=flashcard-result-workspace]")).toBeTruthy()
-        expect(container.querySelector("[data-node=flashcard-result-summary-card]")).toBeTruthy()
-        expect(container.querySelector("[data-node=flashcard-result-stat-grid]")).toBeTruthy()
-        expect(container.querySelector("[data-node=flashcard-result-body]")).toBeTruthy()
-        expect(container.querySelector("[data-node=flashcard-result-next-action-panel]")).toBeTruthy()
-        expect(container.querySelectorAll("[data-node=flashcard-result-stat]")).toHaveLength(4)
+        expect(screen.getByRole("heading", { name: "Review complete" })).toBeInTheDocument()
+        expect(screen.getByRole("heading", { name: "Review breakdown" })).toBeInTheDocument()
+        expect(screen.getByRole("heading", { name: "Topics to revisit" })).toBeInTheDocument()
+        expect(screen.getByRole("heading", { name: "Next review" })).toBeInTheDocument()
         expect(screen.getByText("75%")).toBeTruthy()
         expect(screen.getByText("Redis")).toBeTruthy()
         expect(screen.getByText("1")).toBeTruthy()

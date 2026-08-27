@@ -138,20 +138,20 @@ const outlineOf = (body: string): Array<ContentOutlineEntry> => {
 /**
  * Read one content.
  *
- * @param input - {@link CourseLearnContentBlockProps}
+ * @param props - {@link CourseLearnContentBlockProps}
  */
-export const CourseLearnContentBlock = (input: CourseLearnContentBlockProps) => {
+export const CourseLearnContentBlock = (props: CourseLearnContentBlockProps) => {
     const t = useTranslations("learn.content")
     const contentHomeT = useTranslations("learn.contentHome")
     const locale = useLocale()
     const reactionText = useTranslations("dashboard.explore.reactions")
     const router = useRouter()
-    const content = useQueryContentSwr({ id: input.contentId })
-    const module = useQueryModuleSwr({ id: input.moduleId })
-    const courseOutline = useQueryCourseOutlineSwr(input.displayId)
-    const reactions = useQueryContentReactionsSwr(input.contentId)
+    const content = useQueryContentSwr({ id: props.contentId })
+    const module = useQueryModuleSwr({ id: props.moduleId })
+    const courseOutline = useQueryCourseOutlineSwr(props.displayId)
+    const reactions = useQueryContentReactionsSwr(props.contentId)
     const react = useMutateReactContentSwr()
-    const comments = useQueryContentCommentsSwr({ contentId: input.contentId })
+    const comments = useQueryContentCommentsSwr({ contentId: props.contentId })
     const submitComment = useMutateSubmitContentCommentSwr()
     const ai = useGlobalAiChat()
     const { view } = useLearnMobileView()
@@ -160,7 +160,7 @@ export const CourseLearnContentBlock = (input: CourseLearnContentBlockProps) => 
     const [discussionDraftKey, setDiscussionDraftKey] = useState(0)
     const [discussionError, setDiscussionError] = useState(false)
     const [contentSearch, setContentSearch] = useState("")
-    const [expandedModuleIds, setExpandedModuleIds] = useState<ReadonlySet<string>>(new Set([input.moduleId]))
+    const [expandedModuleIds, setExpandedModuleIds] = useState<ReadonlySet<string>>(new Set([props.moduleId]))
     const [selectedFace, setSelectedFace] = useState<ContentFaceId>("reading")
     const [selectedLanguage, setSelectedLanguage] = useState<string>()
     const [sourceFiles, setSourceFiles] = useState<SandpackFiles>({})
@@ -199,7 +199,7 @@ export const CourseLearnContentBlock = (input: CourseLearnContentBlockProps) => 
         setActiveSourcePath("")
         setEditedSourcePaths([])
         setSourceRuntimeError(undefined)
-    }, [input.contentId])
+    }, [props.contentId])
 
     useEffect(() => {
         if (selectedFace !== "source") ai.clearCodeContext()
@@ -233,7 +233,7 @@ export const CourseLearnContentBlock = (input: CourseLearnContentBlockProps) => 
         () => [...contents].sort((first, second) => first.orderIndex - second.orderIndex),
         [contents],
     )
-    const position = ordered.findIndex((sibling) => sibling.id === input.contentId)
+    const position = ordered.findIndex((sibling) => sibling.id === props.contentId)
     const challenges = useMemo(
         () => [...(content.data?.challenges ?? [])].sort((first, second) => first.orderIndex - second.orderIndex),
         [content.data?.challenges],
@@ -244,14 +244,14 @@ export const CourseLearnContentBlock = (input: CourseLearnContentBlockProps) => 
     )
 
     useEffect(() => {
-        setExpandedModuleIds((current) => new Set([...current, input.moduleId]))
-    }, [input.moduleId])
+        setExpandedModuleIds((current) => new Set([...current, props.moduleId]))
+    }, [props.moduleId])
 
     const onSearchContent = (query: string) => {
         setContentSearch(query)
         const matches = filterCourseOutlineModules(courseOutline.data?.modules ?? [], query)
         setExpandedModuleIds(query.trim() === ""
-            ? new Set([input.moduleId])
+            ? new Set([props.moduleId])
             : new Set(matches.map((courseModule) => courseModule.id)))
     }
 
@@ -271,7 +271,7 @@ export const CourseLearnContentBlock = (input: CourseLearnContentBlockProps) => 
     ), [courseOutline.data?.modules])
     const activeLesson = courseOutline.data?.modules
         .flatMap((courseModule) => courseModule.lessons)
-        .find((lesson) => lesson.id === input.contentId)
+        .find((lesson) => lesson.id === props.contentId)
     const discussionComments = useMemo(() => (comments.data?.comments ?? []).map((comment) => ({
         id: comment.id,
         author: comment.author.username,
@@ -286,13 +286,13 @@ export const CourseLearnContentBlock = (input: CourseLearnContentBlockProps) => 
     const discussionState = discussionStateOf(discussionFailed, discussionPending, submitComment.isMutating, discussionComments.length)
 
     const openContent = (id: string) => {
-        const targetModuleId = lessonRoutes.get(id) ?? input.moduleId
-        router.push(`/courses/${input.displayId}/learn/content/modules/${targetModuleId}/contents/${id}`)
+        const targetModuleId = lessonRoutes.get(id) ?? props.moduleId
+        router.push(`/courses/${props.displayId}/learn/content/modules/${targetModuleId}/contents/${id}`)
     }
 
     let act: (() => void) | undefined
     if (isLocked) {
-        act = () => router.push(`/courses/${input.displayId}`)
+        act = () => router.push(`/courses/${props.displayId}`)
     } else if (hasFailed) {
         act = () => {
             void Promise.all([
@@ -434,7 +434,7 @@ export const CourseLearnContentBlock = (input: CourseLearnContentBlockProps) => 
                         contents: ordered.map((sibling) => ({
                             id: sibling.id,
                             title: sibling.title,
-                            isCurrent: sibling.id === input.contentId,
+                            isCurrent: sibling.id === props.contentId,
                         })),
                     }]
                     : filteredCourseModules.map((courseModule) => ({
@@ -447,7 +447,7 @@ export const CourseLearnContentBlock = (input: CourseLearnContentBlockProps) => 
                             title: lesson.title,
                             meta: t("minutes", { minutes: lesson.minutesRead }),
                             isComplete: lesson.isRead,
-                            isCurrent: lesson.id === input.contentId,
+                            isCurrent: lesson.id === props.contentId,
                         })),
                     })),
                 page: position === -1 ? 1 : position + 1,
@@ -462,8 +462,8 @@ export const CourseLearnContentBlock = (input: CourseLearnContentBlockProps) => 
                 searchContent: onSearchContent,
                 toggleModule: onToggleModule,
                 openContent,
-                goCourse: () => router.push(`/courses/${input.displayId}`),
-                goModule: () => router.push(`/courses/${input.displayId}/learn/content/modules/${input.moduleId}`),
+                goCourse: () => router.push(`/courses/${props.displayId}`),
+                goModule: () => router.push(`/courses/${props.displayId}/learn/content/modules/${props.moduleId}`),
                 act,
                 selectReading: () => setSelectedFace("reading"),
                 selectLanguage: setSelectedLanguage,
@@ -471,7 +471,7 @@ export const CourseLearnContentBlock = (input: CourseLearnContentBlockProps) => 
                 selectChallenge: () => {
                     const challenge = challenges[0]
                     if (challenge === undefined) return
-                    router.push(`/courses/${input.displayId}/learn/content/modules/${input.moduleId}/contents/${input.contentId}/challenges/${challenge.id}`)
+                    router.push(`/courses/${props.displayId}/learn/content/modules/${props.moduleId}/contents/${props.contentId}/challenges/${challenge.id}`)
                 },
                 source: selectedFace !== "source" || !hasSource ? undefined : {
                     activateFile: setActiveSourcePath,
@@ -526,7 +526,7 @@ export const CourseLearnContentBlock = (input: CourseLearnContentBlockProps) => 
                     retry: () => { void source.mutate() },
                 },
                 selectReaction: (type) => {
-                    void react.trigger({ contentId: input.contentId, type }).then((result) => {
+                    void react.trigger({ contentId: props.contentId, type }).then((result) => {
                         const next = result.data?.reactToContent?.data
                         if (next !== null && next !== undefined) void reactions.mutate(next, { revalidate: false })
                     })
@@ -536,7 +536,7 @@ export const CourseLearnContentBlock = (input: CourseLearnContentBlockProps) => 
                     const body = discussionDraft.trim()
                     if (body === "") return
                     setDiscussionError(false)
-                    void submitComment.trigger({ contentId: input.contentId, parentCommentId: null, body })
+                    void submitComment.trigger({ contentId: props.contentId, parentCommentId: null, body })
                         .then(async (result) => {
                             if (result.data?.createComment?.success !== true) {
                                 setDiscussionError(true)
@@ -556,7 +556,3 @@ export const CourseLearnContentBlock = (input: CourseLearnContentBlockProps) => 
         />
     )
 }
-
-/** Source-level ownership marker. */
-export const meta = { world: "connected", domain: "learn" } as const
-

@@ -8,8 +8,12 @@ import { useQueryMyCodingProgressSwr } from "@/hooks/swr/useQueryMyCodingProgres
 import { useSessionToken } from "@/hooks/auth/useSessionToken"
 import { DomainMasteryGridBase, type DomainMastery } from "./component"
 
+/** Props for the connected mastery grid; domains are resolved from the coding queries. */
+type DomainMasteryGridProps = Record<never, never>
 /** Resolve catalog, viewer progress and the region's own recovery actions. */
-export const DomainMasteryGrid = () => {
+/** Resolve coding-domain mastery and connect recovery and navigation actions. */
+export const DomainMasteryGrid = (props: DomainMasteryGridProps) => {
+    void props
     const t = useTranslations("practice")
     const router = useRouter()
     const token = useSessionToken()
@@ -62,5 +66,3 @@ export const DomainMasteryGrid = () => {
 
 export { DomainMasteryGridBase } from "./component"
 export type { DomainMastery, DomainMasteryGridData, DomainMasteryGridActions, DomainMasteryGridState } from "./component"
-/** Source-level ownership marker for the connected domain region. */
-export const meta = { world: "connected", domain: "coding" } as const

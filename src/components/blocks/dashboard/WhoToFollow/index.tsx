@@ -7,7 +7,11 @@ import { useMutateSetFollowSwr, useQueryResolveRouteSwr, useQuerySuggestedUsersS
 import { WhoToFollowBase } from "./component"
 
 /** Load suggestions and own per-user route and follow mutations. */
-export const WhoToFollow = () => {
+/** Props for the connected who-to-follow block. */
+export type WhoToFollowProps = Record<string, never>
+/** Connect the WhoToFollow block to its data source. */
+export const WhoToFollow = (props: WhoToFollowProps) => {
+    void props
     const t = useTranslations("dashboard.explore")
     const router = useRouter()
     const query = useQuerySuggestedUsersSwr()
@@ -61,5 +65,3 @@ export const WhoToFollow = () => {
     ]))
     return <WhoToFollowBase state={query.data === undefined ? "pending" : "ready"} props={{ label: t("whoToFollow"), users }} on={on} />
 }
-/** Source-level ownership marker for the connected social block. */
-export const meta = { world: "connected", domain: "social" } as const

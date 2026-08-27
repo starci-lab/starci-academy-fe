@@ -12,7 +12,7 @@ import { MarkdownCodeBlock } from "@/components/branches/MarkdownCodeBlock"
 import { TableBranch } from "@/components/branches/TableBranch"
 import { MermaidDiagram } from "@/components/branches/MermaidDiagram"
 import { Badge } from "@/components/leaves/Badge"
-import type { LeafProps } from "@/components/contracts/props"
+import * as articleClasses from "./classNames"
 
 /**
  * LEAF - `Article`: the body of one content, as its author wrote it.
@@ -57,7 +57,7 @@ export type ArticleData = {
 }
 
 /** Props for {@link Article}. */
-export type ArticleProps = LeafProps<ArticleData>
+export type ArticleProps = { readonly props: ArticleData; readonly isLoading?: boolean }
 
 /** How many lines rest while the body is in flight, and how wide each one is. */
 const RESTING_WIDTHS = [
@@ -67,7 +67,6 @@ const RESTING_WIDTHS = [
     { id: "resting-4", width: "w-5/6" },
     { id: "resting-5", width: "w-2/3" },
 ] as const
-const RESTING_LINE = "h-6 select-none rounded bg-default text-transparent animate-pulse"
 
 /**
  * One node of the document, in THIS house's words.
@@ -194,12 +193,12 @@ type DirectiveTabsProps = { readonly preview: ReactNode, readonly code: ReactNod
 const DirectiveTabs = (props: DirectiveTabsProps) => {
     const [selected, setSelected] = useState<"preview" | "code">("preview")
     return (
-        <div className="flex w-full min-w-0 flex-col gap-3">
-            <div role="tablist" className="flex w-fit gap-1 rounded-full bg-default p-1">
-                <button type="button" role="tab" aria-selected={selected === "preview"} className="rounded-full px-3 py-2 aria-selected:bg-surface" onClick={() => setSelected("preview")}>Preview</button>
-                <button type="button" role="tab" aria-selected={selected === "code"} className="rounded-full px-3 py-2 aria-selected:bg-surface" onClick={() => setSelected("code")}>Code</button>
+        <div className={articleClasses.articleStackClassName}>
+            <div role="tablist" className={articleClasses.articleTabsClassName}>
+                <button type="button" role="tab" aria-selected={selected === "preview"} className={articleClasses.articleTabClassName} onClick={() => setSelected("preview")}>Preview</button>
+                <button type="button" role="tab" aria-selected={selected === "code"} className={articleClasses.articleTabClassName} onClick={() => setSelected("code")}>Code</button>
             </div>
-            <div className={selected === "preview" ? "rounded-medium border border-separator p-3" : undefined}>{selected === "preview" ? props.preview : props.code}</div>
+            <div className={selected === "preview" ? articleClasses.articlePreviewClassName : undefined}>{selected === "preview" ? props.preview : props.code}</div>
         </div>
     )
 }
@@ -245,9 +244,9 @@ const block = (node: MarkdownNode, key: string, context: BlockContext): ReactNod
          * of an outline that rescanned the DOM - the exact thing the document grammar refuses.
          */
         return (
-            <div key={key} id={id} className="group scroll-mt-20">
+            <div key={key} id={id} className={articleClasses.articleHeadingClassName}>
                 <Heading props={{ content: heading, level }} />
-                <a href={`#${id}`} aria-label={heading} className="ml-2 text-muted opacity-0 group-hover:opacity-100">#</a>
+                <a href={`#${id}`} aria-label={heading} className={articleClasses.articleAnchorClassName}>#</a>
             </div>
         )
     }
@@ -298,44 +297,44 @@ const block = (node: MarkdownNode, key: string, context: BlockContext): ReactNod
         return <hr key={key} />
     case "image":
         return node.alt === undefined || node.alt === ""
-            ? <Image key={key} src={node.url ?? "/starci.svg"} alt="" width={1200} height={675} unoptimized className="h-auto w-full rounded-2xl" />
+            ? <Image key={key} src={node.url ?? "/starci.svg"} alt="" width={1200} height={675} unoptimized className={articleClasses.articleImageClassName} />
             : (
-                <figure key={key} className="w-full">
-                    <Image src={node.url ?? "/starci.svg"} alt={node.alt} width={1200} height={675} unoptimized className="h-auto w-full rounded-2xl" />
-                    <figcaption className="mt-2 text-center text-sm italic text-muted">{node.alt}</figcaption>
+                <figure key={key} className={articleClasses.articleFigureClassName}>
+                    <Image src={node.url ?? "/starci.svg"} alt={node.alt} width={1200} height={675} unoptimized className={articleClasses.articleImageClassName} />
+                    <figcaption className={articleClasses.articleCaptionClassName}>{node.alt}</figcaption>
                 </figure>
             )
     case "containerDirective": {
         if (node.name === "panel") {
             return (
-                <details key={key} className="group rounded-medium border border-separator bg-surface" open>
-                    <summary className="cursor-pointer list-none px-4 py-3 font-medium">{node.attributes?.["title"] ?? "Details"}</summary>
-                    <div className="flex flex-col gap-4 border-t border-separator p-4">
+                <details key={key} className={articleClasses.articleDetailsClassName} open>
+                    <summary className={articleClasses.articleSummaryClassName}>{node.attributes?.["title"] ?? "Details"}</summary>
+                    <div className={articleClasses.articleDetailsBodyClassName}>
                         {node.parts.map((child) => block(child, `${key}-${child.id}`, context))}
                     </div>
                 </details>
             )
         }
         if (node.name === "accordion") {
-            return <div key={key} className="flex w-full min-w-0 flex-col gap-2">{node.parts.map((child) => block(child, `${key}-${child.id}`, context))}</div>
+            return <div key={key} className={articleClasses.articleColumnClassName}>{node.parts.map((child) => block(child, `${key}-${child.id}`, context))}</div>
         }
         if (node.name === "muted") {
-            return <div key={key} className="text-sm font-semibold text-muted [&_*]:text-muted">{node.parts.map((child) => block(child, `${key}-${child.id}`, context))}</div>
+            return <div key={key} className={articleClasses.articleMutedClassName}>{node.parts.map((child) => block(child, `${key}-${child.id}`, context))}</div>
         }
         if (node.name === "chip") {
-            return <div key={key} className="my-2 flex flex-wrap gap-3">{plainText(node).split(/[\n·]+/).map((item) => item.trim()).filter(Boolean).map((item) => <Badge key={item} props={{ content: item, tone: "neutral" }} />)}</div>
+            return <div key={key} className={articleClasses.articleTagRunClassName}>{plainText(node).split(/[\n·]+/).map((item) => item.trim()).filter(Boolean).map((item) => <Badge key={item} props={{ content: item, tone: "neutral" }} />)}</div>
         }
         if (node.name === "tab") {
             const preview = node.parts.find((part) => part.name === "preview")
             const code = node.parts.find((part) => part.name === "code")
             return <DirectiveTabs key={key} preview={preview?.parts.map((child) => block(child, `${key}-preview-${child.id}`, context))} code={code?.parts.map((child) => block(child, `${key}-code-${child.id}`, context))} />
         }
-        return <div key={key} className="flex w-full min-w-0 flex-col gap-4">{node.parts.map((child) => block(child, `${key}-${child.id}`, context))}</div>
+        return <div key={key} className={articleClasses.articleCompactColumnClassName}>{node.parts.map((child) => block(child, `${key}-${child.id}`, context))}</div>
     }
     case "textDirective":
     case "leafDirective":
         return node.name === "muted"
-            ? <span key={key} className="text-sm font-semibold text-muted">{inline(node.parts)}</span>
+            ? <span key={key} className={articleClasses.articleMutedInlineClassName}>{inline(node.parts)}</span>
             : <Fragment key={key}>{inline(node.parts)}</Fragment>
     default:
         // A node this leaf has no shape for keeps its words rather than disappearing: losing a
@@ -451,32 +450,29 @@ export const segmentArticleSurfaces = (markdown?: string): ReadonlyArray<Article
 /**
  * Draw one content body.
  *
- * @param input - {@link ArticleProps}
+ * @param props - {@link ArticleProps}
  */
-export const Article = ({ props, isLoading = false }: ArticleProps) => {
-    const selectable = props.aiSelectable === true ? { "data-ai-selectable": "true" } : {}
-    const measure = props.measure ?? "reading"
-    if (isLoading || props.body === undefined) {
+export const Article = (props: ArticleProps) => {
+    const selectable = props.props.aiSelectable === true ? { "data-ai-selectable": "true" } : {}
+    const measure = props.props.measure ?? "reading"
+    if (props.isLoading === true || props.props.body === undefined) {
         return (
-            <div {...selectable} data-tier="branch" data-component="Article" data-measure={measure} data-resting="true">
+            <div {...selectable} data-measure={measure} data-resting="true">
                 <MarkdownArticle measure={measure}>
                     {RESTING_WIDTHS.map((line) => (
-                        <span key={line.id} className={`${RESTING_LINE} ${line.width}`} />
+                        <span key={line.id} className={articleClasses.getArticleRestingLineClassName(line.width)} />
                     ))}
                 </MarkdownArticle>
             </div>
         )
     }
-    const prepared = prepareMarkdown(props.body)
+    const prepared = prepareMarkdown(props.props.body)
     const root = toNode(parser.parse(prepared.source))
     return (
-        <div {...selectable} data-tier="branch" data-component="Article" data-measure={measure}>
+        <div {...selectable} data-measure={measure}>
             <MarkdownArticle measure={measure}>
                 {(root?.parts ?? []).map((node) => block(node, node.id, { mermaidCaptions: prepared.captions }))}
             </MarkdownArticle>
         </div>
     )
 }
-
-/** Source-level tier marker. */
-export const meta = { shape: "branch", world: "pure" } as const

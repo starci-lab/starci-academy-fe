@@ -1,143 +1,30 @@
 "use client"
-
 import { useState } from "react"
 import { SurfaceAccordionCard } from "@starci/grammar/core"
 import { PressableSurface } from "@/components/branches/PressableSurface"
-import { Tree } from "@/components/branches/Tree"
 import { Badge } from "@/components/leaves/Badge"
 import { Button } from "@/components/leaves/Button"
 import { DisclosureIndicator } from "@/components/leaves/DisclosureIndicator"
 import { Text } from "@/components/leaves/Text"
-import {
-    defineContractComponent,
-    defineLeafComponent,
-    type CompositeProps,
-} from "@/components/contracts/props"
 
 /** One lesson inside a module. */
-export type CurriculumLesson = {
-    /** Stable identity within the module. */
-    readonly id: string
-    /** The already-resolved lesson title. */
-    readonly title: string
-    /** Whether this lesson is previewable before enrolment. */
-    readonly isPreview?: boolean
-}
-
-/** Stable module difficulty identity; labels stay localized at the connected owner. */
+export type CurriculumLesson = { readonly id: string; readonly title: string; readonly isPreview?: boolean }
+/** Stable module difficulty identity. */
 export type CurriculumLevel = "foundation" | "intermediate" | "advanced"
+/** Resolved module identity, facts and lessons. */
+export type CurriculumModuleRowData = { readonly title: string; readonly level?: CurriculumLevel; readonly levelLabel?: string; readonly previewLabel?: string; readonly lessons?: ReadonlyArray<CurriculumLesson>; readonly isOpen?: boolean }
+/** Navigation actions emitted by the module. */
+export type CurriculumModuleRowActions = { readonly press?: () => void; readonly pressLesson?: (id: string) => void }
+/** Public inputs for a curriculum module row. */
+export type CurriculumModuleRowProps = { readonly props: CurriculumModuleRowData; readonly on?: CurriculumModuleRowActions; readonly isLoading?: boolean }
+const LEVEL_TONES = { foundation: "success", intermediate: "warning", advanced: "danger" } as const
 
-/** Resolved module identity, facts and optional lesson disclosure. */
-export type CurriculumModuleRowData = {
-    /** The already-resolved module title. */
-    readonly title: string
-    /** Stable difficulty identity used to select a semantic badge tone. */
-    readonly level?: CurriculumLevel
-    /** The already-resolved level word shown beside the title. */
-    readonly levelLabel?: string
-    /** The already-resolved preview count sentence. */
-    readonly previewLabel?: string
-    /** The lessons revealed on open. An empty run makes the row non-disclosing. */
-    readonly lessons?: ReadonlyArray<CurriculumLesson>
-    /** Whether this module starts open. */
-    readonly isOpen?: boolean
+/** Draw one module summary and its optional lesson disclosure. */
+export const CurriculumModuleRow = (props: CurriculumModuleRowProps) => {
+    const [isOpen, setIsOpen] = useState(props.props.isOpen ?? false)
+    const lessons = props.props.lessons ?? []
+    const loading = props.isLoading === true
+    const summary = <><Text props={{ content: props.props.title, size: "sm", weight: "medium" }} isLoading={loading} />{props.props.levelLabel === undefined ? null : <Badge props={{ content: props.props.levelLabel, tone: props.props.level === undefined ? "neutral" : LEVEL_TONES[props.props.level] }} isLoading={loading} />}{props.props.previewLabel === undefined ? null : <Text props={{ content: props.props.previewLabel, size: "xs", tone: "muted" }} />}{lessons.length === 0 || loading ? null : <DisclosureIndicator props={{ isOpen }} />}</>
+    if (lessons.length === 0 || loading) return props.on?.press === undefined ? <div>{summary}</div> : <PressableSurface label={props.props.title} press={props.on.press} disabled={loading}>{summary}</PressableSurface>
+    return <SurfaceAccordionCard isOpen={isOpen} renderSummary={(value) => <>{value}</>} summaryRender={summary} renderBody={(value) => <>{value}</>} bodyRender={<ol>{lessons.map((lesson) => <li key={lesson.id}>{props.on?.pressLesson === undefined ? <Text props={{ content: lesson.title, size: "sm" }} /> : <Button props={{ label: lesson.title, size: "sm", variant: "ghost" }} on={{ press: () => props.on?.pressLesson?.(lesson.id) }} />}</li>)}</ol>} onOpenChange={setIsOpen} />
 }
-
-/** Navigation emitted by a flat module row or one lesson inside its disclosure. */
-export type CurriculumModuleRowActions = {
-    readonly press?: () => void
-    readonly pressLesson?: (id: string) => void
-}
-
-/** Props for {@link CurriculumModuleRow}. */
-export type CurriculumModuleRowProps = CompositeProps<CurriculumModuleRowData, CurriculumModuleRowActions>
-
-/** Difficulty is the meaning; the Badge leaf remains the sole owner of palette tokens. */
-const LEVEL_TONES = {
-    foundation: "success",
-    intermediate: "warning",
-    advanced: "danger",
-} as const
-
-/** Draw one module through named summary, metadata and lesson contracts. */
-export const CurriculumModuleRow = (input: CurriculumModuleRowProps) => {
-    const [isOpen, setIsOpen] = useState(input.props.isOpen ?? false)
-    const lessons = input.props.lessons ?? []
-    const isLoading = input.isLoading ?? false
-    const canDisclose = lessons.length > 0 && !isLoading
-    const metadata = input.props.levelLabel === undefined && input.props.previewLabel === undefined
-        ? undefined
-        : defineContractComponent("curriculum-module-meta-row", {
-            level: input.props.levelLabel === undefined
-                ? undefined
-                : defineLeafComponent("badge", {}, () => (
-                    <Badge
-                        props={{
-                            content: input.props.levelLabel,
-                            tone: input.props.level === undefined ? "neutral" : LEVEL_TONES[input.props.level],
-                        }}
-                        isLoading={isLoading}
-                    />
-                )),
-            preview: input.props.previewLabel === undefined
-                ? undefined
-                : defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                    <Text props={{ content: input.props.previewLabel, size: "xs", tone: "muted" }} />
-                )),
-        })
-    const summary = defineContractComponent("curriculum-module-summary-row", {
-        title: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
-            <Text
-                props={{ content: input.props.title, size: "sm", weight: "medium" }}
-                isLoading={isLoading}
-            />
-        )),
-        meta: metadata,
-        indicator: canDisclose
-            ? defineLeafComponent("disclosure-indicator", {}, () => (
-                <DisclosureIndicator props={{ isOpen }} />
-            ))
-            : undefined,
-    })
-
-    if (!canDisclose) {
-        return input.on?.press === undefined ? (
-            <Tree contract="curriculum-module-summary-row" render={summary} />
-        ) : (
-            <PressableSurface
-                contract="curriculum-module-summary-row"
-                render={summary}
-                label={input.props.title}
-                press={input.on.press}
-                disabled={isLoading}
-            />
-        )
-    }
-
-    return (
-        <SurfaceAccordionCard
-            isOpen={isOpen}
-            renderSummary={(summaryRender) => <Tree contract="curriculum-module-summary-row" render={summaryRender} />}
-            summaryRender={summary}
-            renderBody={(bodyRender) => <Tree contract="curriculum-lesson-list" render={bodyRender} />}
-            bodyRender={defineContractComponent("curriculum-lesson-list", {
-                lesson: lessons.map((lesson) => defineContractComponent("curriculum-lesson-row", {
-                    title: input.on?.pressLesson === undefined
-                        ? defineLeafComponent("text", { size: "sm" }, () => (
-                            <Text props={{ content: lesson.title, size: "sm" }} />
-                        ))
-                        : defineLeafComponent("button", {}, () => (
-                            <Button
-                                props={{ label: lesson.title, size: "sm", variant: "ghost" }}
-                                on={{ press: () => input.on?.pressLesson?.(lesson.id) }}
-                            />
-                        )),
-                })),
-            })}
-            onOpenChange={setIsOpen}
-        />
-    )
-}
-
-/** Source-level tier marker. */
-export const meta = { shape: "composite", world: "pure" } as const

@@ -5,7 +5,7 @@ import { DashboardPageBase } from "./component"
 /**
  * What these tests guard.
  *
- * The dashboard owns no request; what it owns is which panel the navbar's `?tab=` contract selects
+ * The dashboard owns no request; what it owns is which panel the navbar's `?tab=` value selects
  * and, for the overview, the legacy reading order of its eight blocks. A tab nobody published must
  * settle as a notice rather than as an empty main, and every named tab must reach exactly one panel.
  */
@@ -34,7 +34,7 @@ describe("DashboardPageBase", () => {
     it("keeps the identity rail above the shortcuts in every panel", () => {
         const { container } = render(<DashboardPageBase props={{ selectedTab: "overview", unavailableMessage }} />)
 
-        const rail = container.querySelector("[data-node=\"dashboard-rail\"]")
+        const rail = container.querySelector("aside")
         const railText = rail?.innerHTML ?? ""
         expect(railText.indexOf("IdentityRail")).toBeLessThan(railText.indexOf("QuickActions"))
         expect(screen.getByTestId("IdentityRail")).toBeInTheDocument()
@@ -44,7 +44,7 @@ describe("DashboardPageBase", () => {
     it("draws the eight legacy overview blocks in their published reading order", () => {
         const { container } = render(<DashboardPageBase props={{ selectedTab: "overview", unavailableMessage }} />)
 
-        const main = container.querySelector("[data-node=\"dashboard-main\"]")
+        const main = container.querySelector("main")
         const order = Array.from(main?.querySelectorAll("[data-testid]") ?? []).map((node) => node.getAttribute("data-testid"))
         expect(order).toEqual([
             "ContinueLearning",
@@ -81,11 +81,11 @@ describe("DashboardPageBase", () => {
     })
 
     it("settles an unpublished tab as a centred notice instead of an empty main", () => {
-        const { container } = render(<DashboardPageBase props={{ selectedTab: "invoices", unavailableMessage }} />)
+        render(<DashboardPageBase props={{ selectedTab: "invoices", unavailableMessage }} />)
 
         expect(screen.getByText(unavailableMessage)).toBeInTheDocument()
-        expect(container.querySelector("[data-node=\"centred-empty-notice\"]")).not.toBeNull()
-        expect(container.querySelector("[data-node=\"dashboard-main\"]")).toBeNull()
+        expect(screen.getByRole("main")).toBeInTheDocument()
+        expect(screen.queryByTestId("ContinueLearning")).toBeNull()
         expect(screen.getByTestId("IdentityRail")).toBeInTheDocument()
     })
 })

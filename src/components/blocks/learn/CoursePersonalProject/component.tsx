@@ -1,4 +1,3 @@
-import { Tree } from "@/components/branches/Tree"
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { Breadcrumbs } from "@/components/leaves/Breadcrumbs"
@@ -6,8 +5,17 @@ import { Button } from "@/components/leaves/Button"
 import { Heading } from "@/components/leaves/Heading"
 import { Progress } from "@/components/leaves/Progress"
 import { Text } from "@/components/leaves/Text"
-import { defineCompositeComponent, defineContractComponent, defineContractProjection, defineLeafComponent } from "@/components/contracts/props"
 import { LeadingNumber } from "@starci/grammar/core"
+import {
+    coursePersonalProjectClassName,
+    projectCompletionClassName,
+    projectHeaderClassName,
+    projectMilestoneClassName,
+    projectNextTaskClassName,
+    projectTaskCardClassName,
+    projectTaskGridClassName,
+    projectTaskHeadingClassName,
+} from "./classNames"
 
 /** One task destination in the current milestone. */
 export type CoursePersonalProjectTaskRow = { readonly id: string; readonly position: number; readonly title: string; readonly status: string; readonly actionLabel: string; readonly isCurrent?: boolean }
@@ -16,7 +24,7 @@ export type CoursePersonalProjectNextTask = { readonly id: string; readonly posi
 /** Genuine whole-block states; only these alter the block's notices and resting geometry. */
 export type CoursePersonalProjectState = "pending" | "ready" | "empty" | "failed"
 /** Pure project dashboard data and actions. */
-export type CoursePersonalProjectBlockProps = {
+export type CoursePersonalProjectProps = {
     readonly state: CoursePersonalProjectState
     readonly data: {
         readonly breadcrumbLabel: string
@@ -37,38 +45,39 @@ export type CoursePersonalProjectBlockProps = {
 }
 
 /** Render the legacy-shaped capstone dashboard without owning transport or routing. */
-export const CoursePersonalProjectBase = (input: CoursePersonalProjectBlockProps) => {
-    const loading = input.state === "pending"
-    const tasks = loading && input.data.tasks.length === 0 ? Array.from({ length: 4 }, (_, index): CoursePersonalProjectTaskRow => ({ id: `pending-${index}`, position: index + 1, title: "", status: "", actionLabel: input.data.continueLabel })) : input.data.tasks
-    const header = defineContractComponent("page-header-stack", {
-        trail: input.data.courseTitle === undefined && !loading ? undefined : defineLeafComponent("breadcrumbs", {}, () => <Breadcrumbs props={{ label: input.data.breadcrumbLabel, steps: [{ id: "course", label: input.data.courseTitle ?? "" }, { id: "project", label: input.data.title }] }} on={loading ? undefined : { course: input.on?.openCourse }} isLoading={loading} />),
-        title: defineLeafComponent("heading", {}, () => <Heading props={{ content: input.data.title, level: 1 }} isLoading={loading} />),
-    })
-    const next = input.state === "empty" || input.state === "failed" ? undefined : defineContractProjection("course-personal-project-next-task", () => <SurfaceCard contract="course-personal-project-next-task" render={defineContractComponent("course-personal-project-next-task", {
-        position: input.data.nextTask === undefined ? undefined : defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: input.data.nextTask?.position, size: "xs", tone: "muted" }} isLoading={loading} />),
-        title: input.data.nextTask === undefined && !loading ? undefined : defineLeafComponent("heading", {}, () => <Heading props={{ content: input.data.nextTask?.title, level: 2 }} isLoading={loading} />),
-        action: input.data.nextTask === undefined && !loading ? undefined : defineLeafComponent("button", {}, () => <Button props={{ label: input.data.continueLabel, variant: "primary", size: "md", icon: "next", iconPlacement: "trailing" }} on={loading ? undefined : { press: () => input.data.nextTask === undefined ? undefined : input.on?.openTask?.(input.data.nextTask.id) }} isLoading={loading} />),
-        completed: input.data.nextTask !== undefined || loading ? undefined : defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: input.data.allCompleteLabel, size: "sm", tone: "muted" }} />),
-    })} isLoading={loading} />)
-    const completion = defineContractComponent("course-personal-project-completion-summary", {
-        label: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => <Text props={{ content: input.data.completionLabel, size: "sm", weight: "medium" }} isLoading={loading} />),
-        progress: defineLeafComponent("progress", {}, () => <Progress props={{ value: input.data.completionPercent, label: input.data.completionLabel }} isLoading={loading} />),
-        fact: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: input.data.completionFacts.join(" · "), size: "sm", tone: "muted" }} isLoading={loading} />),
-    })
-    const milestone = input.data.milestoneTitle === undefined && !loading ? undefined : defineContractComponent("course-personal-project-current-milestone", {
-        title: defineLeafComponent("heading", {}, () => <Heading props={{ content: input.data.milestoneTitle, level: 2 }} isLoading={loading} />),
-        tasks: defineContractComponent("course-personal-project-current-task-grid", { task: tasks.map((task) => defineContractProjection("course-personal-project-task-card", () => <SurfaceCard contract="course-personal-project-task-card" render={defineContractComponent("course-personal-project-task-card", {
-            heading: defineContractComponent("course-personal-project-task-heading", {
-                marker: defineLeafComponent("leading-number", {}, () => <LeadingNumber position={task.position} />),
-                title: defineLeafComponent("heading", {}, () => <Heading props={{ content: task.title, level: 3 }} isLoading={loading} />),
-            }),
-            status: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: task.status, size: "xs", tone: "muted" }} isLoading={loading} />),
-            action: defineLeafComponent("button", {}, () => <Button props={{ label: task.actionLabel, variant: "tertiary", size: "sm", icon: "next", iconPlacement: "trailing" }} on={loading ? undefined : { press: () => input.on?.openTask?.(task.id) }} isLoading={loading} />),
-        })} isLoading={loading} />)) }),
-    })
-    const notice = input.data.notice === undefined ? undefined : defineCompositeComponent("empty-notice", {}, () => <EmptyNotice props={{ message: input.data.notice ?? "", actionLabel: input.state === "failed" ? input.data.retryLabel : undefined }} on={{ act: input.on?.retry }} />)
-    return <Tree contract="course-personal-project-block" render={defineContractComponent("course-personal-project-block", { header, next, completion, milestone, notice })} />
+export const CoursePersonalProjectBase = (props: CoursePersonalProjectProps) => {
+    const loading = props.state === "pending"
+    const tasks = loading && props.data.tasks.length === 0
+        ? Array.from({ length: 4 }, (_, index): CoursePersonalProjectTaskRow => ({ id: `pending-${index}`, position: index + 1, title: "", status: "", actionLabel: props.data.continueLabel }))
+        : props.data.tasks
+    return <section className={coursePersonalProjectClassName}>
+        <div className={projectHeaderClassName}>
+            {props.data.courseTitle === undefined && !loading ? null : <Breadcrumbs props={{ label: props.data.breadcrumbLabel, steps: [{ id: "course", label: props.data.courseTitle ?? "" }, { id: "project", label: props.data.title }] }} on={loading ? undefined : { course: props.on?.openCourse }} isLoading={loading} />}
+            <Heading props={{ content: props.data.title, level: 1 }} isLoading={loading} />
+        </div>
+        {props.state === "empty" || props.state === "failed" ? null : <SurfaceCard isLoading={loading}>
+            <div className={projectNextTaskClassName}>
+                {props.data.nextTask === undefined ? null : <Text props={{ content: props.data.nextTask.position, size: "xs", tone: "muted" }} isLoading={loading} />}
+                {props.data.nextTask === undefined && !loading ? null : <Heading props={{ content: props.data.nextTask?.title, level: 2 }} isLoading={loading} />}
+                {props.data.nextTask === undefined && !loading ? null : <Button props={{ label: props.data.continueLabel, variant: "primary", size: "md", icon: "next", iconPlacement: "trailing" }} on={loading ? undefined : { press: () => props.data.nextTask === undefined ? undefined : props.on?.openTask?.(props.data.nextTask.id) }} isLoading={loading} />}
+                {props.data.nextTask !== undefined || loading ? null : <Text props={{ content: props.data.allCompleteLabel, size: "sm", tone: "muted" }} />}
+            </div>
+        </SurfaceCard>}
+        <div className={projectCompletionClassName}>
+            <Text props={{ content: props.data.completionLabel, size: "sm", weight: "medium" }} isLoading={loading} />
+            <Progress props={{ value: props.data.completionPercent, label: props.data.completionLabel }} isLoading={loading} />
+            <Text props={{ content: props.data.completionFacts.join(" · "), size: "sm", tone: "muted" }} isLoading={loading} />
+        </div>
+        {props.data.milestoneTitle === undefined && !loading ? null : <div className={projectMilestoneClassName}>
+            <Heading props={{ content: props.data.milestoneTitle, level: 2 }} isLoading={loading} />
+            <div className={projectTaskGridClassName}>{tasks.map((task) => <SurfaceCard key={task.id} isLoading={loading}>
+                <div className={projectTaskCardClassName}>
+                    <div className={projectTaskHeadingClassName}><LeadingNumber position={task.position} /><Heading props={{ content: task.title, level: 3 }} isLoading={loading} /></div>
+                    <Text props={{ content: task.status, size: "xs", tone: "muted" }} isLoading={loading} />
+                    <Button props={{ label: task.actionLabel, variant: "tertiary", size: "sm", icon: "next", iconPlacement: "trailing" }} on={loading ? undefined : { press: () => props.on?.openTask?.(task.id) }} isLoading={loading} />
+                </div>
+            </SurfaceCard>)}</div>
+        </div>}
+        {props.data.notice === undefined ? null : <EmptyNotice props={{ message: props.data.notice, actionLabel: props.state === "failed" ? props.data.retryLabel : undefined }} on={{ act: props.on?.retry }} />}
+    </section>
 }
-
-/** Source-level ownership marker for the pure project dashboard block. */
-export const meta = { world: "pure", domain: "learn" } as const

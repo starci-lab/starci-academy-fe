@@ -3,9 +3,9 @@ import { describe, expect, it, vi } from "vitest"
 import { CoursePlaygroundCatalogBase } from "@/components/blocks/learn/CoursePlaygroundCatalog/component"
 
 describe("CoursePlaygroundCatalogBase", () => {
-    it("renders the backend catalog through its canonical contract", () => {
+    it("renders the backend catalog through its canonical page", () => {
         const openSetup = vi.fn()
-        const { container } = render(
+        render(
             <CoursePlaygroundCatalogBase
                 state="ready"
                 props={{
@@ -23,7 +23,7 @@ describe("CoursePlaygroundCatalogBase", () => {
 
         fireEvent.click(screen.getByRole("link", { name: "Docker lab" }))
 
-        expect(container.querySelector("[data-node=\"course-playground-catalog\"]")).not.toBeNull()
+        expect(screen.getByRole("heading", { name: "Playground" })).toBeInTheDocument()
         expect(screen.getByText("3 guided steps")).toBeInTheDocument()
         expect(openSetup).toHaveBeenCalledWith("docker")
     })

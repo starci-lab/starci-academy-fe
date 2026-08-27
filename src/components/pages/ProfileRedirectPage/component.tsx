@@ -1,4 +1,4 @@
 /** Render no transient screen while the canonical route resolves. */
-export const ProfileRedirectPageBase = () => null
-/** Source-level tier marker. */
-export const meta = { world: "pure", domain: "profile" } as const
+export type ProfileRedirectPageProps = Record<never, never>
+/** Render the empty redirect shell. */
+export const ProfileRedirectPageBase = (props: ProfileRedirectPageProps) => { void props; return null }

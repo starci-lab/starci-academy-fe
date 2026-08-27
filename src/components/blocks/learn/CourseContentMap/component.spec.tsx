@@ -1,7 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { Tree } from "@/components/branches/Tree"
-import { CourseContentMapBase, courseContentMapPanel, type CourseContentMapLabels } from "./component"
+import { CourseContentMapBase, CourseContentMapPanel, type CourseContentMapLabels } from "./component"
 
 const labels: CourseContentMapLabels = {
     progress: "Course progress",
@@ -14,7 +13,7 @@ const labels: CourseContentMapLabels = {
 describe("CourseContentMapBase", () => {
     it("renders progress before searchable source-backed module rows", () => {
         const openLesson = vi.fn()
-        const { container } = render(
+        render(
             <CourseContentMapBase
                 state="ready"
                 props={{
@@ -41,18 +40,17 @@ describe("CourseContentMapBase", () => {
             />,
         )
 
-        const panel = container.querySelector("[data-node=content-map-panel]")
-        const moduleList = container.querySelector("[data-node=content-map-module-list]")
+        const panel = screen.getByRole("navigation", { name: "Course progress" })
+        const moduleList = panel.querySelector("[class*=overflow-y-auto]")
         const progress = screen.getByRole("progressbar", { name: "Course progress" })
         const search = screen.getByRole("searchbox", { name: "Search this course" })
         expect(panel).toHaveClass("h-full", "overflow-hidden", "px-3", "py-6")
-        expect(container.querySelector("[data-node=content-map-panel]")).not.toHaveClass("p-4")
+        expect(panel).not.toHaveClass("p-4")
         expect(moduleList).toHaveClass(
             "divide-y",
             "divide-separator",
             "overflow-y-auto",
-            "scroll-shadow--vertical",
-            "scroll-shadow--hide-scrollbar",
+            "overscroll-contain",
         )
         expect(moduleList).not.toHaveClass("scrollbar")
         expect(moduleList?.contains(progress)).toBe(false)
@@ -65,8 +63,7 @@ describe("CourseContentMapBase", () => {
 
     it("rests exactly four authored module shapes while the outline is pending", () => {
         const { container } = render(<CourseContentMapBase state="pending" props={{ labels }} />)
-        expect(container.querySelectorAll("[data-component=SurfaceAccordionCard]")).toHaveLength(4)
-        expect(container.querySelectorAll("[data-component=SurfaceAccordionCardItem]")).toHaveLength(4)
+        expect(container.querySelectorAll("[data-loading='true']").length).toBeGreaterThan(0)
     })
 
     it("keeps the panel and search available for an empty filtered result", () => {
@@ -77,14 +74,9 @@ describe("CourseContentMapBase", () => {
         expect(search).toHaveBeenCalledWith("queues")
     })
 
-    it("exports the same bound panel for sticky rails and narrow drawers", () => {
-        const { container } = render(
-            <Tree
-                contract="content-map-panel"
-                render={courseContentMapPanel({ state: "empty", props: { labels, modules: [] } })}
-            />,
-        )
-        expect(container.querySelectorAll("[data-node=content-map-panel]")).toHaveLength(1)
+    it("exports the same panel for sticky rails and narrow drawers", () => {
+        render(<CourseContentMapPanel state="empty" props={{ labels, modules: [] }} />)
+        expect(screen.getAllByRole("navigation", { name: "Course progress" })).toHaveLength(1)
         expect(screen.getByRole("searchbox", { name: "Search this course" })).toBeInTheDocument()
     })
 })

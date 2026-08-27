@@ -8,7 +8,7 @@ import type { MindMapLink, MindMapNode } from "@/modules/api/graphql/queries/que
 import { CourseMindMapBase, type CourseMindMapNodeView, type CourseMindMapBlockState } from "./component"
 
 /** Course route identity consumed by the connected concept map. */
-export type CourseMindMapBlockProps = { readonly displayId: string }
+export type CourseMindMapProps = { readonly displayId: string }
 
 type NavigableMindMapTarget = Pick<MindMapLink, "kind" | "entityId" | "moduleId">
 
@@ -33,7 +33,11 @@ const targetFor = (displayId: string, node: MindMapNode): string | null => {
 }
 
 /** Connect search and selection to the backend-computed graph without inventing nodes. */
-export const CourseMindMapBlock = ({ displayId }: CourseMindMapBlockProps) => {
+/** Route identity used to load the course mind map. */
+export type CourseMindMapBlockProps = CourseMindMapProps
+/** Connect the course mind-map graph to search, selection and navigation. */
+export const CourseMindMapBlock = (props: CourseMindMapBlockProps) => {
+    const { displayId } = props
     const t = useTranslations("learn.mindMap")
     const router = useRouter()
     const graph = useQueryCourseMindMapSwr(displayId)
@@ -94,6 +98,3 @@ export const CourseMindMapBlock = ({ displayId }: CourseMindMapBlockProps) => {
         />
     )
 }
-
-/** Source-level ownership marker. */
-export const meta = { world: "connected", domain: "learn" } as const

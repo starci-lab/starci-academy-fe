@@ -15,12 +15,6 @@ import {
     type SandpackPredefinedTemplate,
 } from "@codesandbox/sandpack-react"
 import { SourceFileTree } from "@/components/branches/SourceFileTree"
-import { Tree } from "@/components/branches/Tree"
-import {
-    defineContractComponent,
-    defineContractProjection,
-    defineLeafComponent,
-} from "@/components/contracts/props"
 import {
     normalizeSandboxPath,
     sandboxFileCode,
@@ -95,84 +89,70 @@ const SandpackRuntime = (input: SandpackWorkspaceProps) => {
     }
 
     return (
-        <Tree
-            contract="source-workspace-grid"
-            render={defineContractComponent("source-workspace-grid", {
-                files: defineContractProjection("source-file-navigation", () => (
-                    <SourceFileTree
-                        props={{
-                            label: data.filesLabel,
-                            files: Object.keys(data.files).map((path) => ({
-                                path,
-                                isEdited: data.editedPaths?.includes(path),
-                            })),
-                            activePath,
-                            editedLabel: data.editedLabel,
-                        }}
-                        on={{ activate: activateFile }}
-                    />
-                )),
-                editor: defineContractComponent("source-code-editor-frame", {
-                    editor: defineLeafComponent("code-editor", {}, () => (
-                        <CodeMirror
-                            aria-label={data.editorLabel}
-                            value={code}
-                            theme={vscodeDark}
-                            height="100%"
-                            extensions={extensions}
-                            onChange={(nextCode) => {
-                                sandpack.updateFile(activePath, nextCode, true)
-                                on?.updateFile?.(activePath, nextCode)
-                            }}
-                            onUpdate={(update) => {
-                                if (!update.selectionSet) return
-                                const range = update.state.selection.main
-                                if (range.empty) {
-                                    on?.selectionChange?.(undefined)
-                                    return
-                                }
-                                const startLine = update.state.doc.lineAt(range.from).number
-                                const endLine = update.state.doc.lineAt(range.to).number
-                                on?.selectionChange?.({
-                                    path: activePath,
-                                    startLine,
-                                    endLine,
-                                    text: update.state.sliceDoc(range.from, range.to),
-                                })
-                            }}
-                        />
-                    )),
-                }),
-                preview: defineLeafComponent("page", {}, () => (
-                    <SandpackPreview
-                        aria-label={data.previewLabel}
-                        showNavigator={false}
-                        showOpenInCodeSandbox={false}
-                        showSandpackErrorOverlay
-                        style={{ minHeight: 320, width: "100%" }}
-                    />
-                )),
-            })}
-        />
+        <div>
+            <SourceFileTree
+                props={{
+                    label: data.filesLabel,
+                    files: Object.keys(data.files).map((path) => ({
+                        path,
+                        isEdited: data.editedPaths?.includes(path),
+                    })),
+                    activePath,
+                    editedLabel: data.editedLabel,
+                }}
+                on={{ activate: activateFile }}
+            />
+            <CodeMirror
+                aria-label={data.editorLabel}
+                value={code}
+                theme={vscodeDark}
+                height="100%"
+                extensions={extensions}
+                onChange={(nextCode) => {
+                    sandpack.updateFile(activePath, nextCode, true)
+                    on?.updateFile?.(activePath, nextCode)
+                }}
+                onUpdate={(update) => {
+                    if (!update.selectionSet) return
+                    const range = update.state.selection.main
+                    if (range.empty) {
+                        on?.selectionChange?.(undefined)
+                        return
+                    }
+                    const startLine = update.state.doc.lineAt(range.from).number
+                    const endLine = update.state.doc.lineAt(range.to).number
+                    on?.selectionChange?.({
+                        path: activePath,
+                        startLine,
+                        endLine,
+                        text: update.state.sliceDoc(range.from, range.to),
+                    })
+                }}
+            />
+            <SandpackPreview
+                aria-label={data.previewLabel}
+                showNavigator={false}
+                showOpenInCodeSandbox={false}
+                showSandpackErrorOverlay
+                style={{ minHeight: 320, width: "100%" }}
+            />
+        </div>
     )
 }
 
 /** Sandpack provider with a custom controlled CodeMirror editor; no vendor DOM is inspected. */
-export const SandpackWorkspace = (input: SandpackWorkspaceProps) => (
+export const SandpackWorkspace = (props: SandpackWorkspaceProps) => (
     <SandpackProvider
-        template={input.props.template ?? "react-ts"}
-        files={input.props.files}
-        customSetup={{ dependencies: { ...input.props.dependencies } }}
+        template={props.props.template ?? "react-ts"}
+        files={props.props.files}
+        customSetup={{ dependencies: { ...props.props.dependencies } }}
         options={{
-            activeFile: normalizeSandboxPath(input.props.activePath),
+            activeFile: normalizeSandboxPath(props.props.activePath),
             recompileMode: "delayed",
             recompileDelay: 600,
             startRoute: "/?sandbox=1",
         }}
     >
-        <SandpackRuntime props={input.props} on={input.on} />
+        <SandpackRuntime props={props.props} on={props.on} />
     </SandpackProvider>
 )
-
-/** Source-level tier marker for vendor sandbox mechanics. */
-export const meta = { shape: "branch", world: "pure" } as const

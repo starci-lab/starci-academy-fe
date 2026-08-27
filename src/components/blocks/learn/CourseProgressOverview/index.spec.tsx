@@ -22,6 +22,6 @@ describe("CourseProgressOverview", () => {
 
     it("rests the accepted anatomy while evidence is pending", () => {
         const { container } = render(<CourseProgressOverview state="pending" props={{ label: "Your progress", completionLabel: "Course progress" }} />)
-        expect(container.querySelector("[data-component=Progress]")).toHaveAttribute("data-loading", "true")
+        expect(container.querySelector("[data-loading=true]")).toBeInTheDocument()
     })
 })

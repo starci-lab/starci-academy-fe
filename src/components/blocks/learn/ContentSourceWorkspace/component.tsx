@@ -1,11 +1,10 @@
 import { SandpackWorkspace, type SandpackWorkspaceData } from "@/components/branches/SandpackWorkspace"
 import { CodeReaderWorkspace } from "@/components/branches/CodeReaderWorkspace"
-import { Tree } from "@/components/branches/Tree"
 import { Button } from "@/components/leaves/Button"
 import { StatusDot } from "@/components/leaves/StatusDot"
 import { Text } from "@/components/leaves/Text"
-import { defineContractComponent, defineContractProjection, defineLeafComponent } from "@/components/contracts/props"
 import type { SandboxCodeSelection } from "@/modules/code/sandbox-repo"
+import { sourceWorkspaceClassName, sourceWorkspaceToolbarClassName } from "./classNames"
 
 /** Source workspace states owned independently from the article request. */
 export type ContentSourceWorkspaceState = "pending" | "ready" | "failed"
@@ -42,79 +41,73 @@ export type ContentSourceWorkspaceProps = {
     readonly on?: ContentSourceWorkspaceActions
 }
 
-const toolbar = (
-    state: ContentSourceWorkspaceState,
-    props: ContentSourceWorkspaceData,
-    on?: ContentSourceWorkspaceActions,
-) => {
-    const hasEdits = (props.editedPaths?.length ?? 0) > 0
-    const identity = state === "pending" ? props.loadingLabel : state === "failed" ? props.failedLabel : props.identity
-    const actions = state === "failed"
-        ? [defineLeafComponent("button", {}, () => (
-            <Button props={{ label: props.retryLabel, variant: "primary", size: "sm" }} on={{ press: on?.retry }} />
-        ))]
-        : state === "pending"
-            ? [defineLeafComponent("button", {}, () => (
-                <Button props={{ label: props.resetLabel, size: "sm" }} isLoading />
-            ))]
-            : props.mode === "reader" ? [] : [
-                defineLeafComponent("button", {}, () => (
-                    <Button props={{ label: props.resetLabel, size: "sm", disabled: !hasEdits }} on={{ press: on?.reset }} />
-                )),
-                ...(props.runtimeError === undefined ? [] : [defineLeafComponent("button", {}, () => (
-                    <Button props={{ label: props.askErrorLabel, size: "sm", variant: "primary" }} on={{ press: on?.askError }} />
-                ))]),
-            ]
+type SourceWorkspaceToolbarProps = ContentSourceWorkspaceProps
 
-    return defineContractComponent("source-workspace-toolbar", {
-        identity: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
-            <Text props={{ content: identity, size: "sm", weight: "semibold" }} isLoading={state === "pending"} />
-        )),
-        action: actions,
-        ...((state === "ready" && (hasEdits || props.runtimeError !== undefined)) ? {
-            status: defineLeafComponent("status-dot", {}, () => (
-                <StatusDot props={{
-                    tone: props.runtimeError === undefined ? "warning" : "danger",
-                    label: props.runtimeError === undefined ? props.localChangesLabel : props.runtimeErrorLabel,
-                }} />
-            )),
-        } : {}),
-    })
+/** Draw the source identity, actions, and local status as one toolbar. */
+const SourceWorkspaceToolbar = (props: SourceWorkspaceToolbarProps) => {
+    const hasEdits = (props.props.editedPaths?.length ?? 0) > 0
+    const identity = props.state === "pending"
+        ? props.props.loadingLabel
+        : props.state === "failed" ? props.props.failedLabel : props.props.identity
+
+    return <div className={sourceWorkspaceToolbarClassName}>
+        <Text
+            props={{ content: identity, size: "sm", weight: "semibold" }}
+            isLoading={props.state === "pending"}
+        />
+        {props.state === "failed" ? (
+            <Button
+                props={{ label: props.props.retryLabel, variant: "primary", size: "sm" }}
+                on={{ press: props.on?.retry }}
+            />
+        ) : props.state === "pending" ? (
+            <Button props={{ label: props.props.resetLabel, size: "sm" }} isLoading />
+        ) : props.props.mode === "reader" ? null : <>
+            <Button
+                props={{ label: props.props.resetLabel, size: "sm", disabled: !hasEdits }}
+                on={{ press: props.on?.reset }}
+            />
+            {props.props.runtimeError === undefined ? null : (
+                <Button
+                    props={{ label: props.props.askErrorLabel, size: "sm", variant: "primary" }}
+                    on={{ press: props.on?.askError }}
+                />
+            )}
+        </>}
+        {props.state === "ready" && (hasEdits || props.props.runtimeError !== undefined) ? (
+            <StatusDot props={{
+                tone: props.props.runtimeError === undefined ? "warning" : "danger",
+                label: props.props.runtimeError === undefined
+                    ? props.props.localChangesLabel
+                    : props.props.runtimeErrorLabel,
+            }} />
+        ) : null}
+    </div>
 }
 
 /** Render source loading/failure or the editable Sandpack workspace. */
-export const ContentSourceWorkspace = (input: ContentSourceWorkspaceProps) => (
-    <Tree
-        contract="source-workspace-root"
-        render={defineContractComponent("source-workspace-root", {
-            toolbar: toolbar(input.state, input.props, input.on),
-            ...(input.state !== "ready" ? {} : input.props.mode === "reader" ? {
-                workspace: defineContractProjection("source-code-reader-grid", () => (
-                    <CodeReaderWorkspace
-                        props={input.props}
-                        on={{
-                            activateFile: input.on?.activateFile,
-                            selectionChange: input.on?.selectCode,
-                        }}
-                    />
-                )),
-            } : {
-                workspace: defineContractProjection("source-workspace-grid", () => (
-                    <SandpackWorkspace
-                        props={input.props}
-                        on={{
-                            activateFile: input.on?.activateFile,
-                            updateFile: input.on?.updateFile,
-                            selectionChange: input.on?.selectCode,
-                            runtimeError: input.on?.runtimeError,
-                            reset: input.on?.reset,
-                        }}
-                    />
-                )),
-            }),
-        })}
-    />
+export const ContentSourceWorkspace = (props: ContentSourceWorkspaceProps) => (
+    <div className={sourceWorkspaceClassName}>
+        <SourceWorkspaceToolbar {...props} />
+        {props.state !== "ready" ? null : props.props.mode === "reader" ? (
+            <CodeReaderWorkspace
+                props={props.props}
+                on={{
+                    activateFile: props.on?.activateFile,
+                    selectionChange: props.on?.selectCode,
+                }}
+            />
+        ) : (
+            <SandpackWorkspace
+                props={props.props}
+                on={{
+                    activateFile: props.on?.activateFile,
+                    updateFile: props.on?.updateFile,
+                    selectionChange: props.on?.selectCode,
+                    runtimeError: props.on?.runtimeError,
+                    reset: props.on?.reset,
+                }}
+            />
+        )}
+    </div>
 )
-
-/** Source-level ownership marker. */
-export const meta = { world: "pure", domain: "learn" } as const

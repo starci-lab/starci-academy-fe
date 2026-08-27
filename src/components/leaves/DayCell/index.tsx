@@ -1,5 +1,4 @@
-import { skeletonVariants } from "@heroui/react"
-import type { LeafProps } from "@/components/contracts/props"
+import { dayCellClassName, dayCellDateClassName, dayCellWeekdayClassName, getDayDotClassName } from "./classNames"
 
 /**
  * LEAF - `DayCell`: one day of a streak, as a dot with its weekday letter.
@@ -24,45 +23,36 @@ export type DayCellData = {
     readonly active?: boolean
 }
 
-/** Props for {@link DayCell}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type DayCellProps = LeafProps<DayCellData>
+/** Props for {@link DayCell}. Three fixed slots, no fourth. */
+export type DayCellProps = { readonly props: DayCellData; readonly isLoading?: boolean }
 
 /** Stacks the plain circle over its letter. */
-const BASE_CLASSES = "flex flex-col items-center gap-1"
 
 /** The resting shape - same chip, glyphs out. */
-const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({
-    className: "select-none text-transparent",
-})
 
 /**
  * Draw one day.
  *
  * @param input - {@link DayCellProps}
  */
-export const DayCell = ({ props, isLoading = false }: DayCellProps) => (
-    <li
-        data-tier="leaf"
-        data-component="DayCell"
-        data-part="day"
-        data-active={props.active === true ? "true" : "false"}
-        data-loading={isLoading ? "true" : "false"}
-        className={BASE_CLASSES}
-    >
-        <span
-            aria-hidden="true"
-            className={isLoading
-                ? `size-6 shrink-0 rounded-full ${RESTING_CLASSES}`
-                : `size-6 shrink-0 rounded-full ${props.active === true ? "bg-accent/80" : "bg-muted/20"}`}
-        />
-        <span data-part="weekday" className="text-xs text-muted">
-            {props.weekday ?? ""}
-        </span>
-        <span data-part="date" className="sr-only">
-            {props.title ?? ""}
-        </span>
-    </li>
-)
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const
+export const DayCell = (props: DayCellProps) => {
+    const isLoading = props.isLoading === true
+    return (
+        <li
+            data-part="day"
+            data-active={props.props.active === true ? "true" : "false"}
+            data-loading={isLoading ? "true" : "false"}
+            className={dayCellClassName}
+        >
+            <span
+                aria-hidden="true"
+                className={getDayDotClassName(props.props.active === true, isLoading)}
+            />
+            <span data-part="weekday" className={dayCellWeekdayClassName}>
+                {props.props.weekday ?? ""}
+            </span>
+            <span data-part="date" className={dayCellDateClassName}>
+                {props.props.title ?? ""}
+            </span>
+        </li>)
+}

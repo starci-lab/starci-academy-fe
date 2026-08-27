@@ -72,9 +72,9 @@ export type PlaygroundSessionLayoutProps = {
 }
 
 /** Resolve the playground once and preserve its server session and relay socket across navigation. */
-export const PlaygroundSessionLayout = (input: PlaygroundSessionLayoutProps) => {
+export const PlaygroundSessionLayout = (props: PlaygroundSessionLayoutProps) => {
     const t = useTranslations("learn.playground")
-    const playground = useQueryPlaygroundSwr(input.slug)
+    const playground = useQueryPlaygroundSwr(props.slug)
     const startMutation = useMutateStartPlaygroundSessionSwr(playground.data?.id)
     const socket = usePlaygroundSocketIo()
     const [session, setSession] = useState<PlaygroundSession | null>(null)
@@ -82,7 +82,7 @@ export const PlaygroundSessionLayout = (input: PlaygroundSessionLayoutProps) => 
     const [hasPaired, setHasPaired] = useState(false)
     const [startFailed, setStartFailed] = useState(false)
     const subscribedSessionId = useRef<string | null>(null)
-    const storageKeys = useMemo(() => storageKeysFor(input.displayId, input.slug), [input.displayId, input.slug])
+    const storageKeys = useMemo(() => storageKeysFor(props.displayId, props.slug), [props.displayId, props.slug])
 
     useEffect(() => {
         setSession(storedSessionFrom(storageKeys.session))
@@ -136,8 +136,8 @@ export const PlaygroundSessionLayout = (input: PlaygroundSessionLayoutProps) => 
     }, [playground.mutate, session, socket])
 
     const value = useMemo<PlaygroundSessionContextValue>(() => ({
-        displayId: input.displayId,
-        slug: input.slug,
+        displayId: props.displayId,
+        slug: props.slug,
         playground: playground.data,
         session,
         isLoading: isRestoring || (playground.data === undefined && playground.error === undefined),
@@ -153,13 +153,13 @@ export const PlaygroundSessionLayout = (input: PlaygroundSessionLayoutProps) => 
         start,
         verify: socket.verify,
         retry,
-    }), [hasPaired, input.displayId, input.slug, isRestoring, playground.data, playground.error, retry, session, startFailed, startMutation.isMutating, socket, start])
+    }), [hasPaired, props.displayId, props.slug, isRestoring, playground.data, playground.error, retry, session, startFailed, startMutation.isMutating, socket, start])
 
     return (
         <PlaygroundSessionContext.Provider value={value}>
             <PlaygroundSessionLayoutBase
                 state={value.failed ? "failed" : value.isLoading ? "pending" : "ready"}
-                surface={input.surface}
+                surface={props.surface}
                 failedLabel={t("layoutFailed")}
                 retryLabel={t("retry")}
                 onRetry={value.retry}
@@ -167,6 +167,3 @@ export const PlaygroundSessionLayout = (input: PlaygroundSessionLayoutProps) => 
         </PlaygroundSessionContext.Provider>
     )
 }
-
-/** Source-level ownership marker. */
-export const meta = { world: "connected", domain: "learn" } as const

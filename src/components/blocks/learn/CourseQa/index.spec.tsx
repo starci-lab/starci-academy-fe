@@ -16,7 +16,7 @@ vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) })
 vi.mock("@/hooks/swr/useQueryCourseSwr", () => ({ useQueryCourseSwr: () => mocks.course }))
 vi.mock("@/hooks/swr/useQueryCourseQaCommentsSwr", () => ({ useQueryCourseQaCommentsSwr: ({ parentCommentId }: QaRequest) => parentCommentId ? mocks.replies : mocks.questions }))
 vi.mock("@/hooks/swr/useMutateCreateCourseQuestionSwr", () => ({ useMutateCreateCourseQuestionSwr: () => mocks.create }))
-vi.mock("./component", () => ({ CourseQaBase: (input: TestInput) => { mocks.input = input; return <output data-testid="qa" /> } }))
+vi.mock("./component", () => ({ CourseQaBase: (props: TestInput) => { mocks.input = props; return <output data-testid="qa" /> } }))
 
 import { CourseQa } from "./index"
 

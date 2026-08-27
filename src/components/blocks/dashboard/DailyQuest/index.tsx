@@ -39,7 +39,11 @@ const toRow = (task: MyDailyQuestTask, label: string): LabelledProgressRowData =
 /**
  * Fetch the day's quest and render it.
  */
-export const DailyQuest = () => {
+/** Props for the connected daily quest block. */
+export type DailyQuestProps = Record<string, never>
+/** Connect the DailyQuest block to its data source. */
+export const DailyQuest = (props: DailyQuestProps) => {
+    void props
     const t = useTranslations("quest")
     const quest = useQueryMyDailyQuestSwr()
     const label = t("heading")
@@ -50,20 +54,16 @@ export const DailyQuest = () => {
 
     if (quest.error !== undefined && quest.error !== null) {
         return (
-            <DailyQuestBase
-                state="failed"
-                props={{ label, message: t("failed"), retryLabel: t("retry") }}
-                on={{ retry }}
-            />
+            <DailyQuestBase {...{ state: "failed", props: { label, message: t("failed"), retryLabel: t("retry") }, on: { retry } }} />
         )
     }
 
     const data = quest.data
     if (data === undefined) {
-        return <DailyQuestBase state="pending" props={{ label }} />
+        return <DailyQuestBase {...{ state: "pending", props: { label } }} />
     }
     if (data === null || data.tasks.length === 0) {
-        return <DailyQuestBase state="empty" props={{ label, message: t("empty") }} />
+        return <DailyQuestBase {...{ state: "empty", props: { label, message: t("empty") } }} />
     }
 
     const body = {
@@ -72,13 +72,10 @@ export const DailyQuest = () => {
     }
 
     if (data.claimed) {
-        return <DailyQuestBase state="claimed" props={{ label, ...body, claimedLine: t("claimed") }} />
+        return <DailyQuestBase {...{ state: "claimed", props: { label, ...body, claimedLine: t("claimed") } }} />
     }
     if (data.allDone) {
-        return <DailyQuestBase state="claimable" props={{ label, ...body, claimLabel: t("claim") }} />
+        return <DailyQuestBase {...{ state: "claimable", props: { label, ...body, claimLabel: t("claim") } }} />
     }
-    return <DailyQuestBase state="open" props={{ label, ...body }} />
+    return <DailyQuestBase {...{ state: "open", props: { label, ...body } }} />
 }
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { world: "connected", domain: "quest" } as const

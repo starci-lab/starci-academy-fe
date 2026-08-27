@@ -1,5 +1,6 @@
 import { StateMark } from "../../StateMark.js"
 import { treatmentFor, type PresentationState } from "../../state.js"
+import { staticRowClassName, staticRowCopyClassName } from "../../classNames.js"
 
 export type StaticStateRowData = {
     readonly id: string
@@ -13,24 +14,23 @@ export type StaticStateRowProps = {
 }
 
 /** One non-interactive, product-neutral row in a Core-owned static collection. */
-export const StaticStateRow = ({ item }: StaticStateRowProps) => {
+export const StaticStateRow = (props: StaticStateRowProps) => {
+    const item = props.item
     const state = item.state ?? "neutral"
     const treatment = treatmentFor(state)
 
     return (
         <li
-            className="starci-core-static-row"
+            className={staticRowClassName}
             data-grammar-row="true"
             data-grammar-state={state}
             data-grammar-treatment={treatment.tone}
         >
             <StateMark state={state} />
-            <span className="starci-core-static-row-copy">
+            <span className={staticRowCopyClassName}>
                 <span>{item.label}</span>
                 {item.description === undefined ? null : <span>{item.description}</span>}
             </span>
         </li>
     )
 }
-
-export const meta = { shape: "composite", grammar: "core" } as const

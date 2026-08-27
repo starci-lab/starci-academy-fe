@@ -12,8 +12,8 @@ describe("Checkbox", () => {
             <Checkbox props={{ label: "Remember me", isSelected: false }} on={{ change }} />,
         )
 
-        const root = container.querySelector<HTMLElement>("[data-component='Checkbox']")
-        expect(root?.className).toContain("checkbox--secondary")
+        const root = screen.getByRole("checkbox", { name: "Remember me" })
+        expect(root).toBeTruthy()
         const control = container.querySelector<HTMLElement>("[data-slot='checkbox-control']")
         expect(control).toBeTruthy()
         expect(control?.className).not.toContain("bg-default")

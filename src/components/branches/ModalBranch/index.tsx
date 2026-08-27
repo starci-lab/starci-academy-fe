@@ -1,53 +1,47 @@
+import type { ReactNode } from "react"
 import { Modal } from "@heroui/react"
-import { Tree } from "@/components/branches/Tree"
-import type { ContractKey } from "@/components/contracts"
-import type { ContractBranchProps } from "@/components/contracts/props"
+import { modalBodyClassName, modalCoverClassName } from "./classNames"
 
 /**
- * BRANCH - `ModalBranch`: the vendor's covering mechanics around one typed contract.
+ * BRANCH - `ModalBranch`: the vendor's covering mechanics around typed children.
  *
  * A modal owns focus trapping, Escape, backdrop dismissal, scroll locking and placement. Its body
- * is not an anonymous markup hole: one contract key fixes the content node and one typed render
- * proves the content satisfies it.
+ * accepts ordinary React children while leaving focus and dismissal mechanics to the vendor.
  */
 
 /** How wide the surface is allowed to get. */
 export type ModalBranchSize = "xs" | "sm" | "md" | "lg" | "cover"
 
 /** Props for {@link ModalBranch}. */
-export type ModalBranchProps<K extends ContractKey> = ContractBranchProps<K> & {
+export type ModalBranchProps = {
     /** Whether the surface is on screen. Owned by whoever mounts it, never by the branch. */
     readonly isOpen: boolean
     /** How wide it may get. */
     readonly size?: ModalBranchSize
     /** Every way out: the close control, Escape, and the backdrop. */
     readonly onDismiss: () => void
+    readonly children: ReactNode
 }
 
-/** Draw the vendor modal mechanics around one checked content contract. */
-export const ModalBranch = <const K extends ContractKey>(input: ModalBranchProps<K>) => (
+/** Draw the vendor modal mechanics around ordinary React children. */
+export const ModalBranch = (props: ModalBranchProps) => (
     <Modal
-        isOpen={input.isOpen}
+        isOpen={props.isOpen}
         onOpenChange={(open: boolean) => {
-            if (!open) input.onDismiss()
+            if (!open) props.onDismiss()
         }}
     >
         <Modal.Backdrop>
-            <Modal.Container size={input.size ?? "md"} placement="center">
+            <Modal.Container size={props.size ?? "md"} placement="center">
                 <Modal.Dialog
-                    data-tier="branch"
-                    data-component="ModalBranch"
-                    className={input.size === "cover" ? "p-4" : undefined}
+                    className={props.size === "cover" ? modalCoverClassName : undefined}
                 >
                     <Modal.CloseTrigger />
-                    <Modal.Body className="p-0">
-                        <Tree contract={input.contract} render={input.render} />
+                    <Modal.Body className={modalBodyClassName}>
+                        {props.children}
                     </Modal.Body>
                 </Modal.Dialog>
             </Modal.Container>
         </Modal.Backdrop>
     </Modal>
 )
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "branch", mechanics: true, world: "pure" } as const

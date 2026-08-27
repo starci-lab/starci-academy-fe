@@ -1,6 +1,6 @@
-import { Link as HeroLink, skeletonVariants } from "@heroui/react"
+import { Link as HeroLink } from "@heroui/react"
 import { Icon } from "@/components/leaves/Icon"
-import type { LeafProps } from "@/components/contracts/props"
+import { seeMoreCaretClassName, seeMoreLinkClassName, seeMoreLoadingClassName } from "./classNames"
 
 /**
  * LEAF - `SeeMoreLink`: the way out of a section, drawn at the end of its label line.
@@ -30,34 +30,30 @@ export type SeeMoreLinkActions = {
     readonly press?: () => void
 }
 
-/** Props for {@link SeeMoreLink}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type SeeMoreLinkProps = LeafProps<SeeMoreLinkData, SeeMoreLinkActions>
+/** Props for {@link SeeMoreLink}. Three fixed slots, no fourth. */
+export type SeeMoreLinkProps = { readonly props: SeeMoreLinkData; readonly on?: SeeMoreLinkActions; readonly isLoading?: boolean }
 
 /** The line: never wraps, never grows, and carries the hover group the caret rides. */
-const LINE_CLASSES = "group inline-flex w-fit shrink-0 cursor-pointer items-center gap-1 text-sm font-semibold text-accent-soft-foreground no-underline"
 
 /** The hover movement belongs to the cluster; the glyph keeps the icon vocabulary's small step. */
-const CARET_CLASSES = "shrink-0 transition-[translate] group-hover:translate-x-1"
 
 /** The resting shape - the same line box with the glyphs out. */
-const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({
-    className: "inline-flex w-16 shrink-0 select-none text-sm text-transparent",
-})
 
 /**
  * Draw the way out.
  *
  * @param input - {@link SeeMoreLinkProps}
  */
-export const SeeMoreLink = ({ props, on, isLoading = false }: SeeMoreLinkProps) => {
+export const SeeMoreLink = (props: SeeMoreLinkProps) => {
+    const data = props.props
+    const on = props.on
+    const isLoading = props.isLoading ?? false
     if (isLoading) {
         return (
             <span
-                data-tier="leaf"
-                data-component="SeeMoreLink"
                 data-loading="true"
                 aria-hidden
-                className={RESTING_CLASSES}
+                className={seeMoreLoadingClassName}
             >
                 &nbsp;
             </span>
@@ -66,17 +62,14 @@ export const SeeMoreLink = ({ props, on, isLoading = false }: SeeMoreLinkProps) 
 
     const inside = (
         <>
-            {props.label ?? ""}
-            <span className={CARET_CLASSES}><Icon props={{ name: "next" }} /></span>
+            {data.label ?? ""}
+            <span className={seeMoreCaretClassName}><Icon props={{ name: "next" }} /></span>
         </>
     )
 
     return (
-        <HeroLink data-tier="leaf" data-component="SeeMoreLink" onPress={on?.press} className={LINE_CLASSES}>
+        <HeroLink onPress={on?.press} className={seeMoreLinkClassName}>
             {inside}
         </HeroLink>
     )
 }
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const

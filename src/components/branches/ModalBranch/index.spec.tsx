@@ -3,7 +3,6 @@ import type { PropsWithChildren } from "react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { ModalBranch } from "."
-import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
 const mocks = vi.hoisted(() => ({
     size: vi.fn(),
@@ -22,7 +21,7 @@ vi.mock("@heroui/react", () => {
         mocks.size(size)
         return <div>{children}</div>
     }
-    return { Modal: Object.assign(Root, {
+    return { cn: (...tokens: Array<string>) => tokens.join(" "), Modal: Object.assign(Root, {
         Backdrop: (props: PropsWithChildren) => {
             const { children } = props
             return <div>{children}</div>
@@ -44,9 +43,7 @@ vi.mock("@heroui/react", () => {
 
 afterEach(cleanup)
 
-const body = defineContractComponent("stacked-peer-controls", {
-    control: [defineLeafComponent("button", {}, () => <>Body</>)],
-})
+const body = <>Body</>
 
 describe("ModalBranch", () => {
     it("forwards the approved cover size to vendor mechanics", () => {
@@ -54,10 +51,8 @@ describe("ModalBranch", () => {
             <ModalBranch
                 isOpen
                 size="cover"
-                contract="stacked-peer-controls"
-                render={body}
                 onDismiss={() => undefined}
-            />,
+            >{body}</ModalBranch>,
         )
         expect(mocks.size).toHaveBeenCalledWith("cover")
         expect(mocks.dialogClassName).toHaveBeenCalledWith("p-4")
@@ -70,10 +65,8 @@ describe("ModalBranch", () => {
         render(
             <ModalBranch
                 isOpen
-                contract="stacked-peer-controls"
-                render={body}
                 onDismiss={dismiss}
-            />,
+            >{body}</ModalBranch>,
         )
         fireEvent.click(screen.getByRole("button", { name: "Close" }))
         expect(dismiss).toHaveBeenCalledOnce()
@@ -83,10 +76,8 @@ describe("ModalBranch", () => {
         render(
             <ModalBranch
                 isOpen
-                contract="stacked-peer-controls"
-                render={body}
                 onDismiss={() => undefined}
-            />,
+            >{body}</ModalBranch>,
         )
         expect(mocks.size).toHaveBeenCalledWith("md")
         expect(mocks.dialogClassName).toHaveBeenCalledWith(undefined)
@@ -97,10 +88,8 @@ describe("ModalBranch", () => {
         render(
             <ModalBranch
                 isOpen
-                contract="stacked-peer-controls"
-                render={body}
                 onDismiss={dismiss}
-            />,
+            >{body}</ModalBranch>,
         )
         mocks.openChange?.(true)
         expect(dismiss).not.toHaveBeenCalled()

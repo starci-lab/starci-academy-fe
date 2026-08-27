@@ -13,7 +13,7 @@ import {
 } from "./component"
 
 /** Route identity required to resolve one personal-project grading result. */
-export type PersonalProjectResultRouteProps = { readonly displayId: string; readonly taskId: string }
+export type PersonalProjectResultProps = { readonly displayId: string; readonly taskId: string }
 
 const COPY = {
     en: {
@@ -49,7 +49,8 @@ const COPY = {
 } as const
 
 /** Resolves selectable attempt history, structured feedback and the next course action. */
-export const PersonalProjectResult = ({ displayId, taskId }: PersonalProjectResultRouteProps) => {
+export const PersonalProjectResult = (props: PersonalProjectResultProps) => {
+    const { displayId, taskId } = props
     const locale = useLocale()
     const copy = locale === "vi" ? COPY.vi : COPY.en
     const router = useRouter()
@@ -136,6 +137,3 @@ export const PersonalProjectResult = ({ displayId, taskId }: PersonalProjectResu
         />
     </>
 }
-
-/** Source-level ownership marker for the connected learning page. */
-export const meta = { world: "connected", domain: "learn" } as const

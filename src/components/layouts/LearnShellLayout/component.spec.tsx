@@ -13,22 +13,22 @@ describe("LearnShellLayoutBase", () => {
         const { container } = render(<LearnShellLayoutBase displayId="course" isFullBleed={false} surface={<div>Reader surface</div>} />)
         expect(screen.getByText("Reader surface")).toBeInTheDocument()
         expect(screen.getByTestId("learn-spine")).toBeInTheDocument()
-        expect(container.querySelector("[data-node=learn-routed-body]")).not.toBeNull()
+        expect(container.querySelector("main")).not.toBeNull()
     })
 
     it("removes course furniture for a focused full-bleed session", () => {
         const { container } = render(<LearnShellLayoutBase displayId="course" isFullBleed surface={<div>Reader surface</div>} />)
         expect(screen.getByText("Reader surface")).toBeInTheDocument()
         expect(screen.queryByTestId("learn-spine")).toBeNull()
-        expect(container.querySelector("[data-node=learn-shell-frame]")).not.toBeNull()
+        expect(container.querySelector("main")).not.toBeNull()
     })
 
     it("opens the shared course navigation from a compact current-location row", () => {
         const openCourseNavigation = vi.fn()
         const closeCourseNavigation = vi.fn()
-        const { container, rerender } = render(<LearnShellLayoutBase displayId="course" isFullBleed={false} mobileCourseNavigation={{ label: "Course navigation", currentLabel: "Review", isOpen: false }} on={{ openCourseNavigation, closeCourseNavigation }} surface={<div>Review surface</div>} />)
+        const { rerender } = render(<LearnShellLayoutBase displayId="course" isFullBleed={false} mobileCourseNavigation={{ label: "Course navigation", currentLabel: "Review", isOpen: false }} on={{ openCourseNavigation, closeCourseNavigation }} surface={<div>Review surface</div>} />)
 
-        expect(container.querySelector("[data-node=learn-mobile-course-map-row]")).toBeTruthy()
+        expect(screen.getByRole("button", { name: "Course navigation" })).toBeTruthy()
         expect(screen.getByText("Review")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Course navigation" }))
         expect(openCourseNavigation).toHaveBeenCalledOnce()
@@ -47,7 +47,7 @@ describe("LearnShellLayoutBase", () => {
             surface={<div>Today surface</div>}
         />)
 
-        const mobileNavigation = container.querySelector("nav[data-node=learn-mobile-tab-bar]")
+        const mobileNavigation = container.querySelector("nav")
         expect(mobileNavigation).not.toBeNull()
         expect(mobileNavigation?.className).toContain("md:hidden")
     })

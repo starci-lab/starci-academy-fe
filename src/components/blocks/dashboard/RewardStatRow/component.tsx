@@ -10,17 +10,14 @@ export type RewardStatRowProps =
     }
 
 /** Render the reward row without reading request or locale state. */
-export const RewardStatRowBase = (input: RewardStatRowProps) => input.state === "empty" ? null : (
+export const RewardStatRowBase = (props: RewardStatRowProps) => props.state === "empty" ? null : (
     <IconLabelFactRow
         props={{
             icon: "reward",
-            label: input.props.label,
-            endText: input.state === "settled" ? input.props.value : undefined,
+            label: props.props.label,
+            endText: props.state === "settled" ? props.props.value : undefined,
             recipe: "peer",
         }}
-        isLoading={input.state === "pending"}
+        isLoading={props.state === "pending"}
     />
 )
-
-/** Source-level tier marker for the presentational block half. */
-export const meta = { world: "pure", domain: "identity" } as const

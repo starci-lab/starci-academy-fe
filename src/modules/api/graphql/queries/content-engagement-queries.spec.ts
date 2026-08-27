@@ -50,6 +50,7 @@ describe("queryContentChallengeAttempts", () => {
         expect(mocks.query).toHaveBeenCalledWith({
             query: queryContentChallengeAttemptsMap[QueryContentChallengeAttempts.Query1],
             variables: { request },
+            fetchPolicy: "network-only",
         })
     })
 

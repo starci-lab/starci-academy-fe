@@ -7,6 +7,3 @@ export type CourseFoundationResourcePageProps = { readonly displayId: string; re
 
 /** Compose the connected resource block for the route. */
 export const CourseFoundationResourcePage = (props: CourseFoundationResourcePageProps) => <CourseFoundationResourcePageBase {...props} />
-
-/** Source-level ownership marker for the connected route entry. */
-export const meta = { world: "connected", domain: "learn" } as const

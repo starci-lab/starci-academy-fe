@@ -128,7 +128,11 @@ const COPY = {
 } as const
 
 /** Resolve setup data, start or resume a durable mock-interview session, and navigate to its route. */
-export const CourseMockInterviewSetupBlock = ({ displayId }: CourseMockInterviewSetupPageProps) => {
+/** Route identity used to load mock interview setup. */
+export type CourseMockInterviewSetupBlockProps = CourseMockInterviewSetupPageProps
+/** Resolve setup state and start or resume a mock-interview session. */
+export const CourseMockInterviewSetupBlock = (props: CourseMockInterviewSetupBlockProps) => {
+    const { displayId } = props
     const locale = useLocale()
     const copy = locale === "vi" ? COPY.vi : COPY.en
     const router = useRouter()
@@ -251,6 +255,3 @@ export const CourseMockInterviewSetupBlock = ({ displayId }: CourseMockInterview
         />
     )
 }
-
-/** Source-level ownership marker for the connected setup twin. */
-export const meta = { world: "connected", domain: "learn" } as const

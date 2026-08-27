@@ -2,7 +2,7 @@
 
 import ReactStars from "react-rating-stars-component"
 import { Icon } from "@/components/leaves/Icon"
-import type { LeafProps } from "@/components/contracts/props"
+import { ratingHalfClipClassName, ratingHalfEmptyClassName, ratingHalfFilledClassName, ratingHalfRootClassName, ratingLoadingClassName, ratingStarsClassName } from "./classNames"
 
 /** The fixed rating scale used by course reviews. */
 const SCORE_SCALE = 5
@@ -18,12 +18,12 @@ const FILLED_STAR = <Icon props={{ name: "ratingStarFilled", role: "leading" }} 
  * clipping here so the visual still comes from the same Heroicons star in all three states.
  */
 const HALF_STAR = (
-    <span aria-hidden="true" className="relative block size-5">
-        <span className="absolute inset-0">
+    <span aria-hidden="true" className={ratingHalfRootClassName}>
+        <span className={ratingHalfEmptyClassName}>
             <Icon props={{ name: "ratingStarEmpty", role: "leading" }} />
         </span>
-        <span className="absolute inset-y-0 left-0 block w-1/2 overflow-hidden">
-            <span className="block size-5 max-w-none">
+        <span className={ratingHalfClipClassName}>
+            <span className={ratingHalfFilledClassName}>
                 <Icon props={{ name: "ratingStarFilled", role: "leading" }} />
             </span>
         </span>
@@ -39,7 +39,7 @@ export type RatingStarsData = {
 }
 
 /** Props for the read-only rating leaf. */
-export type RatingStarsProps = LeafProps<RatingStarsData>
+export type RatingStarsProps = { readonly props: RatingStarsData; readonly isLoading?: boolean }
 
 /**
  * LEAF - `RatingStars`: a compact, read-only five-star rating.
@@ -48,30 +48,27 @@ export type RatingStarsProps = LeafProps<RatingStarsData>
  * `var(--warning)` gives the active stars the product's theme-aware yellow in light and dark mode;
  * inactive stars use the separator token instead of a second hard-coded colour.
  */
-export const RatingStars = ({ props, isLoading = false }: RatingStarsProps) => {
+export const RatingStars = (props: RatingStarsProps) => {
+    const isLoading = props.isLoading === true
     if (isLoading) {
         return (
             <span
                 aria-hidden="true"
-                className="h-5 w-24 animate-pulse rounded-full bg-default"
-                data-component="RatingStars"
-                data-tier="leaf"
+                className={ratingLoadingClassName}
             />
         )
     }
 
     return (
         <span
-            aria-label={props.label}
-            data-component="RatingStars"
-            data-rating={props.value}
-            data-tier="leaf"
+            aria-label={props.props.label}
+            data-rating={props.props.value}
             role="img"
         >
             <ReactStars
                 a11y
                 activeColor="var(--warning)"
-                classNames="leading-none"
+                classNames={ratingStarsClassName}
                 color="var(--separator)"
                 count={SCORE_SCALE}
                 edit={false}
@@ -80,11 +77,8 @@ export const RatingStars = ({ props, isLoading = false }: RatingStarsProps) => {
                 halfIcon={HALF_STAR}
                 isHalf
                 size={20}
-                value={props.value}
+                value={props.props.value}
             />
         </span>
     )
 }
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const

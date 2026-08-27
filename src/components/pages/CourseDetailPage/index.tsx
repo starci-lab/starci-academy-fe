@@ -34,12 +34,8 @@ export interface CourseDetailPageProps {
     displayId: string
 }
 
-const sectionTargetOf = (section: CourseDetailSection, sections: NodeListOf<HTMLElement>) => {
-    if (section === "overview") return document.querySelector<HTMLElement>("[data-node=\"course-hero-heading\"]")
-    if (section === "curriculum") return sections.item(2)
-    if (section === "reviews") return sections.item(3)
-    return sections.item(4)
-}
+const sectionTargetOf = (section: CourseDetailSection) =>
+    document.getElementById(`course-detail-${section}`)
 
 /** Sum a number across every content of every module. */
 const sumContents = (modules: ReadonlyArray<CourseModule>, read: (content: { minutesRead: number, numChallenges: number }) => number): number =>
@@ -54,11 +50,11 @@ const byOrder = <T extends { orderIndex: number }>(rows: ReadonlyArray<T>) =>
  *
  * @param input - {@link CourseDetailPageProps}
  */
-export const CourseDetailPage = (input: CourseDetailPageProps) => {
+export const CourseDetailPage = (props: CourseDetailPageProps) => {
     const t = useTranslations("courses.detail")
     const router = useRouter()
     const [selectedSection, setSelectedSection] = useState<CourseDetailSection>("overview")
-    const query = useQueryCourseSwr({ displayId: input.displayId })
+    const query = useQueryCourseSwr({ displayId: props.displayId })
     // The rating is a second request on purpose: it is public, shared by every reader and
     // invalidated by a different event than the course itself, so folding it into the course
     // query would make one cache entry answer two questions that change at different times.
@@ -88,26 +84,25 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
             <CourseDetailPageBase
                 pageState="failed" props={{ labels, noticeMessage: t("failed"), noticeActionLabel: t("retry") }}
                 on={{ retry: () => { void query.mutate() } }}
-                displayId={input.displayId}
+                displayId={props.displayId}
             />
         )
     }
-    if (query.data === undefined) return <CourseDetailPageBase displayId={input.displayId} pageState="pending" props={{ labels }} />
-    if (query.data === null) return <CourseDetailPageBase displayId={input.displayId} pageState="not-found" props={{ labels, noticeMessage: t("notFound") }} />
+    if (query.data === undefined) return <CourseDetailPageBase displayId={props.displayId} pageState="pending" props={{ labels }} />
+    if (query.data === null) return <CourseDetailPageBase displayId={props.displayId} pageState="not-found" props={{ labels, noticeMessage: t("notFound") }} />
 
     const course: CourseDetail = query.data
     const modules = byOrder(course.modules ?? [])
     const selectSection = (section: CourseDetailSection) => {
         setSelectedSection(section)
-        const sections = document.querySelectorAll<HTMLElement>("[data-node=\"course-section\"]")
-        const target = sectionTargetOf(section, sections)
+        const target = sectionTargetOf(section)
         target?.scrollIntoView({ behavior: "smooth", block: "start" })
     }
 
     return (
         <>
             <CourseDetailPageBase
-                displayId={input.displayId}
+                displayId={props.displayId}
                 pageState="ready" props={{
                     labels,
                     selectedSection,
@@ -203,6 +198,3 @@ export const CourseDetailPage = (input: CourseDetailPageProps) => {
         </>
     )
 }
-
-/** Source-level ownership marker. */
-export const meta = { world: "connected", domain: "courses" } as const

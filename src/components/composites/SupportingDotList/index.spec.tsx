@@ -13,14 +13,14 @@ describe("SupportingDotList", () => {
             }} />,
         )
 
-        const list = container.querySelector("[data-node=\"supporting-dot-list\"]")
-        const rows = list?.querySelectorAll("[data-node=\"supporting-dot-list-entry\"]") ?? []
+        const list = container.querySelector("ul")
+        const rows = list?.querySelectorAll("li") ?? []
         expect(list?.tagName).toBe("UL")
         expect(rows).toHaveLength(2)
         expect(container.querySelector("svg")).toBeNull()
         expect(screen.getAllByText("•")).toHaveLength(2)
         for (const row of rows) {
-            const parts = row.querySelectorAll("[data-component=\"Text\"]")
+            const parts = row.querySelectorAll("[data-tone]")
             expect(parts).toHaveLength(2)
             expect(parts[0]).toHaveAttribute("data-tone", "muted")
             expect(parts[1]).toHaveAttribute("data-tone", "muted")

@@ -7,4 +7,3 @@ export type CourseLearnTodayPageProps = { readonly displayId: string }
 export const CourseLearnTodayPageBase = (props: CourseLearnTodayPageProps) => <CourseLearnTodayBlock {...props} />
 
 /** Ownership metadata for the route shell. */
-export const meta = { world: "pure", domain: "learn" } as const

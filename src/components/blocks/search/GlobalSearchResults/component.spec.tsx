@@ -14,9 +14,8 @@ afterEach(cleanup)
 describe("GlobalSearchResultsBase", () => {
     it("uses one label-less nested SurfaceListCard when results exist", () => {
         render(<GlobalSearchResultsBase props={{ label: "Results", items: [{ id: "one", textValue: "One", title: "One" }], emptyMessage: "Empty" }} />)
-        expect(document.querySelector("[data-component=\"SurfaceListCard\"]")).toBeTruthy()
-        expect(document.querySelector("[data-component=\"SurfaceListCardSurface\"][data-surface-context=\"nested\"]")).toBeTruthy()
-        expect(document.querySelector("[data-component=\"SelectionList\"][data-variant=\"results\"]")).toBeTruthy()
+        expect(screen.getByRole("listbox", { name: "Results" })).toBeInTheDocument()
+        expect(screen.getByRole("option", { name: "One" })).toBeInTheDocument()
         expect(screen.queryByRole("heading")).toBeNull()
     })
 
@@ -30,8 +29,8 @@ describe("GlobalSearchResultsBase", () => {
     it("replaces the list surface with EmptyNotice when no result exists", () => {
         const recover = vi.fn()
         render(<GlobalSearchResultsBase props={{ label: "Results", items: [], emptyMessage: "Empty", emptyActionLabel: "Retry" }} on={{ recover }} />)
-        expect(document.querySelector("[data-component=\"SurfaceListCard\"]")).toBeNull()
-        expect(document.querySelector("[data-node=\"empty-notice-stack\"]")).toBeTruthy()
+        expect(screen.queryByRole("listbox")).toBeNull()
+        expect(screen.getByText("Empty")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Retry" }))
         expect(recover).toHaveBeenCalledOnce()
     })

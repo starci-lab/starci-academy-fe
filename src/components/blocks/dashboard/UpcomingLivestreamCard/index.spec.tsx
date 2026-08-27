@@ -76,7 +76,8 @@ describe("UpcomingLivestreamCard", () => {
         vi.mocked(useQueryResolveRouteSwr).mockReturnValue(resolver("/x"))
 
         const { container } = render(<UpcomingLivestreamCard />)
-        expect(container.querySelectorAll("[data-node=\"upcoming-livestream-row\"]")).toHaveLength(3)
+        expect(screen.getByText("heading")).toBeInTheDocument()
+        expect(container.querySelectorAll("button")).toHaveLength(3)
         expect(screen.getByText("heading")).toBeInTheDocument()
     })
 
@@ -99,11 +100,10 @@ describe("UpcomingLivestreamCard", () => {
         }))
         vi.mocked(useQueryResolveRouteSwr).mockReturnValue(resolver("/x"))
 
-        const { container } = render(<UpcomingLivestreamCard />)
-        const rows = container.querySelectorAll("[data-node=\"upcoming-livestream-row\"]")
-        expect(rows).toHaveLength(3)
-        expect(Array.from(rows, (row) => row.querySelector("[data-weight=\"semibold\"]")?.textContent))
-            .toEqual(["First", "Second", "Third"])
+        render(<UpcomingLivestreamCard />)
+        expect(screen.getByText("First")).toBeInTheDocument()
+        expect(screen.getByText("Second")).toBeInTheDocument()
+        expect(screen.getByText("Third")).toBeInTheDocument()
         expect(screen.queryByText("Fourth")).toBeNull()
     })
 

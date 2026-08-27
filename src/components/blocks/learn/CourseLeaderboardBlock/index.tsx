@@ -18,7 +18,8 @@ const COPY = {
 } as const
 
 /** Resolve course leaderboard query data and map it into the pure board renderer. */
-export const CourseLeaderboardBlock = ({ displayId, category }: CourseLeaderboardBlockProps) => {
+export const CourseLeaderboardBlock = (props: CourseLeaderboardBlockProps) => {
+    const { displayId, category } = props
     const locale = useLocale() === "vi" ? "vi" : "en"
     const copy = COPY[locale]
     const router = useRouter()
@@ -64,5 +65,3 @@ export const CourseLeaderboardBlock = ({ displayId, category }: CourseLeaderboar
 
 export { CourseLeaderboardBlockBase } from "./component"
 export type { CourseLeaderboardBlockCategory, CourseLeaderboardBlockData, CourseLeaderboardBlockActions, CourseLeaderboardBlockProps as CourseLeaderboardBlockViewProps } from "./component"
-/** Source-level ownership marker for the connected course board. */
-export const meta = { world: "connected", domain: "learn" } as const

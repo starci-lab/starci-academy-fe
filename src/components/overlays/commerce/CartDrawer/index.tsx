@@ -32,7 +32,8 @@ export type CartDrawerProps = {
  *
  * @param input - {@link CartDrawerProps}
  */
-export const CartDrawer = ({ isOpen, onDismiss }: CartDrawerProps) => {
+export const CartDrawer = (props: CartDrawerProps) => {
+    const { isOpen, onDismiss } = props
     const t = useTranslations("cart")
     const locale = useLocale()
     const router = useRouter()
@@ -143,6 +144,3 @@ export const CartDrawer = ({ isOpen, onDismiss }: CartDrawerProps) => {
         />
     )
 }
-
-/** Source-level ownership marker. */
-export const meta = { world: "connected", domain: "commerce" } as const

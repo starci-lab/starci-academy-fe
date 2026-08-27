@@ -1,13 +1,6 @@
-import { Tree } from "@/components/branches/Tree"
 import { Heading } from "@/components/leaves/Heading"
 import { IconLabelFactRow } from "@/components/composites/IconLabelFactRow"
 import { Text } from "@/components/leaves/Text"
-import {
-    defineCompositeComponent,
-    defineContractComponent,
-    defineLeafComponent,
-    type BlockProps,
-} from "@/components/contracts/props"
 
 /**
  * BLOCK - `CoursePriceDetail`: why this course costs this learner this much.
@@ -55,7 +48,10 @@ export type CoursePriceDetailData = {
 }
 
 /** Props for {@link CoursePriceDetailBase}. */
-export type CoursePriceDetailProps = BlockProps<CoursePriceDetailState, CoursePriceDetailData>
+export type CoursePriceDetailProps = {
+    readonly state: CoursePriceDetailState
+    readonly props: CoursePriceDetailData
+}
 
 /** The mark each line wears. The last line is what is actually owed, so it reads as settled. */
 const LINE_ICONS: Readonly<Record<string, "cart" | "reward" | "complete">> = {
@@ -70,50 +66,16 @@ const LINE_ICONS: Readonly<Record<string, "cart" | "reward" | "complete">> = {
  *
  * @param input - {@link CoursePriceDetailProps}
  */
-export const CoursePriceDetailBase = (input: CoursePriceDetailProps) => {
-    const isLoading = input.state === "pending"
-    const lines = input.props.lines ?? []
+export const CoursePriceDetailBase = (props: CoursePriceDetailProps) => {
+    const isLoading = props.state === "pending"
+    const lines = props.props.lines ?? []
 
-    return (
-        <Tree
-            contract="course-price-detail-stack"
-            render={defineContractComponent("course-price-detail-stack", {
-                title: defineLeafComponent("heading", {}, () => (
-                    <Heading props={{ content: input.props.title, level: 2 }} isLoading={isLoading} />
-                )),
-                ...(input.state === "unavailable" ? {
-                    notice: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                        <Text props={{ content: input.props.unavailableMessage, size: "sm", tone: "muted" }} />
-                    )),
-                } : {
-                    reckoning: defineContractComponent("stacked-stat-rows", {
-                        stat: lines.map((line) => defineCompositeComponent("icon-label-fact-row", {}, () => (
-                            <IconLabelFactRow
-                                props={{
-                                    icon: LINE_ICONS[line.id] ?? "cart",
-                                    label: line.label,
-                                    endText: line.value,
-                                    recipe: "label-led",
-                                }}
-                                isLoading={isLoading}
-                            />
-                        ))),
-                    }),
-                }),
-                ...(input.props.reason === undefined ? {} : {
-                    reason: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                        <Text props={{ content: input.props.reason, size: "sm", tone: "muted" }} isLoading={isLoading} />
-                    )),
-                }),
-                ...(input.props.forwardLook === undefined ? {} : {
-                    forward: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                        <Text props={{ content: input.props.forwardLook, size: "sm", tone: "muted" }} isLoading={isLoading} />
-                    )),
-                }),
-            })}
-        />
-    )
+    return <div>
+        <Heading props={{ content: props.props.title, level: 2 }} isLoading={isLoading} />
+        {props.state === "unavailable" ? <Text props={{ content: props.props.unavailableMessage, size: "sm", tone: "muted" }} /> : (
+            <div>{lines.map((line) => <IconLabelFactRow key={line.id} props={{ icon: LINE_ICONS[line.id] ?? "cart", label: line.label, endText: line.value, recipe: "label-led" }} isLoading={isLoading} />)}</div>
+        )}
+        {props.props.reason === undefined ? null : <Text props={{ content: props.props.reason, size: "sm", tone: "muted" }} isLoading={isLoading} />}
+        {props.props.forwardLook === undefined ? null : <Text props={{ content: props.props.forwardLook, size: "sm", tone: "muted" }} isLoading={isLoading} />}
+    </div>
 }
-
-/** Source-level ownership marker. */
-export const meta = { world: "pure", domain: "courses" } as const

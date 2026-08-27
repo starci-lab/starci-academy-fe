@@ -16,7 +16,11 @@ const MAX_ITEMS = 3
 const MAX_CHALLENGES = 1
 
 /** Resolve the learner's latest work into the frameless resume-card section. */
-export const ContinueLearning = () => {
+/** Props for the connected continue-learning block. */
+export type ContinueLearningProps = Record<string, never>
+/** Connect the ContinueLearning block to its data source. */
+export const ContinueLearning = (props: ContinueLearningProps) => {
+    void props
     const t = useTranslations("dashboard")
     const locale = useLocale()
     const router = useRouter()
@@ -42,11 +46,7 @@ export const ContinueLearning = () => {
 
     if (lessons.error !== undefined || challenges.error !== undefined) {
         return (
-            <ContinueLearningBase
-                state="failed"
-                props={{ ...notice, message: t("continueLearning.failed") }}
-                on={{ act: onBrowse }}
-            />
+            <ContinueLearningBase state="failed" props={{ ...notice, message: t("continueLearning.failed") }} on={{ act: onBrowse }} />
         )
     }
 
@@ -76,11 +76,7 @@ export const ContinueLearning = () => {
 
     if (items.length > 0) {
         return (
-            <ContinueLearningBase
-                state="ready"
-                props={{ label, items, resumeLabel: t("continueLearning.resume") }}
-                on={{ resume: onResume }}
-            />
+            <ContinueLearningBase state="ready" props={{ label, items, resumeLabel: t("continueLearning.resume") }} on={{ resume: onResume }} />
         )
     }
 
@@ -90,16 +86,11 @@ export const ContinueLearning = () => {
 
     const hasNoCourses = courses.data !== undefined && courses.data !== null && courses.data.length === 0
     return (
-        <ContinueLearningBase
-            state={hasNoCourses ? "onboarding" : "empty"}
-            props={{
-                ...notice,
-                message: hasNoCourses ? t("continueLearning.onboarding") : t("continueLearning.empty"),
-            }}
-            on={{ act: onBrowse }}
-        />
+        <ContinueLearningBase state={hasNoCourses ? "onboarding" : "empty"} props={{
+            ...notice,
+            message: hasNoCourses ? t("continueLearning.onboarding") : t("continueLearning.empty"),
+        }} on={{ act: onBrowse }} />
     )
 }
 
 /** Source-level world marker for the connected dashboard block. */
-export const meta = { world: "connected", domain: "dashboard" } as const

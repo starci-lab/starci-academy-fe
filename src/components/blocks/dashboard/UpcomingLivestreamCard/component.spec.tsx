@@ -42,17 +42,18 @@ describe("UpcomingLivestreamCardBase", () => {
 
     it("holds three resting rows so the card keeps its height", () => {
         const { container } = render(<UpcomingLivestreamCardBase state="pending" props={{ ...frame, rows: [] }} />)
-        expect(container.querySelectorAll("[data-node=\"upcoming-livestream-row\"]")).toHaveLength(3)
+        expect(screen.getByText("Upcoming sessions")).toBeInTheDocument()
+        expect(container.querySelectorAll("button")).toHaveLength(3)
     })
 
     it("draws one pressable row per settled session", () => {
         const open = vi.fn()
-        const { container } = render(<UpcomingLivestreamCardBase
+        render(<UpcomingLivestreamCardBase
             state="ready"
             props={{ ...frame, rows: [{ id: "r1", title: "Kickoff", subtitle: "Rust basics", time: "Sep 1, 10:00" }] }}
             on={{ "open:r1": open }}
         />)
-        expect(container.querySelectorAll("[data-node=\"upcoming-livestream-row\"]")).toHaveLength(1)
+        expect(screen.getByRole("button", { name: "Kickoff" })).toBeInTheDocument()
         expect(screen.getByText("Sep 1, 10:00")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Kickoff" }))
         expect(open).toHaveBeenCalledOnce()

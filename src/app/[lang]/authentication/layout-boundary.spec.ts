@@ -22,7 +22,7 @@ describe("authentication layout boundary", () => {
         for (const family of ["dashboard", "league"]) {
             const layout = readAppFile(join(family, "layout.tsx"))
             expect(layout).toContain("from \"@/components/layouts/ShellNav\"")
-            expect(layout).toContain("<ShellNav />")
+            expect(layout).toContain("<ShellNav {...{}} />")
         }
     })
 })

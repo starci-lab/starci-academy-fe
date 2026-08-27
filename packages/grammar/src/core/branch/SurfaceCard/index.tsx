@@ -1,5 +1,6 @@
 import { useId, type ReactNode } from "react"
 import { assertPresentationState, treatmentFor, type PresentationState } from "../../state.js"
+import { getSurfaceFrameClassName, surfaceCardClassName, surfaceContentClassName, surfaceLabelClassName } from "./classNames.js"
 
 export type WholeCardAction =
     | {
@@ -37,18 +38,19 @@ export type SurfaceCardProps = (LabelledSurfaceCard | SelfNamedSurfaceCard) & {
     readonly scroll?: "page" | "contained"
 }
 
-export const SurfaceCard = ({
-    label,
-    ariaLabel,
-    children,
-    fact,
-    labelEnd,
-    depth = "top",
-    state = "neutral",
-    wholeAction,
-    frame = "bounded",
-    scroll = "page",
-}: SurfaceCardProps) => {
+export const SurfaceCard = (props: SurfaceCardProps) => {
+    const {
+        label,
+        ariaLabel,
+        children,
+        fact,
+        labelEnd,
+        depth = "top",
+        state = "neutral",
+        wholeAction,
+        frame = "bounded",
+        scroll = "page",
+    } = props
     assertPresentationState(state)
     const headingId = useId()
     const treatment = treatmentFor(state)
@@ -77,15 +79,14 @@ export const SurfaceCard = ({
         <div
             aria-label={label === undefined ? accessibleName : undefined}
             aria-labelledby={label === undefined ? undefined : headingId}
-            className={frame === "bounded" ? "starci-core-surface" : "starci-core-surface starci-core-frameless-surface"}
+            className={getSurfaceFrameClassName(frame)}
             data-grammar-frame={frame}
             data-grammar-scroll={scroll}
             data-grammar-state={state}
-            data-grammar-surface="true"
             data-grammar-surface-depth={depth}
             data-grammar-treatment={treatment.tone}
         >
-            <div className="starci-core-surface-content" data-grammar-surface-content="true">
+            <div className={surfaceContentClassName} data-grammar-surface-content="true">
                 {children}
             </div>
             {action}
@@ -94,13 +95,12 @@ export const SurfaceCard = ({
 
     return (
         <section
-            className="starci-core-surface-card"
-            data-grammar-contract="core.surface-card"
+            className={surfaceCardClassName}
             data-grammar-frame={frame}
             data-grammar-surface-card="true"
         >
             {label === undefined ? null : (
-                <div className="starci-core-surface-label" data-grammar-surface-label="true">
+                <div className={surfaceLabelClassName} data-grammar-surface-label="true">
                     <h3 id={headingId}>{label}</h3>
                     {labelEnd ?? (fact === undefined ? null : <span>{fact}</span>)}
                 </div>
@@ -109,5 +109,3 @@ export const SurfaceCard = ({
         </section>
     )
 }
-
-export const meta = { shape: "branch", grammar: "core", contract: "core.branch.surface-card" } as const

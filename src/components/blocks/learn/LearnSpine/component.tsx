@@ -2,17 +2,18 @@ import { LabelledProgressRow } from "@/components/composites/LabelledProgressRow
 import { CollapsibleRail } from "@/components/branches/CollapsibleRail"
 import { PressableSurface } from "@/components/branches/PressableSurface"
 import { ScrollViewport } from "@/components/branches/ScrollViewport"
-import { Tree } from "@/components/branches/Tree"
 import { IconButton } from "@/components/leaves/IconButton"
 import type { IconName } from "@/components/leaves/Icon"
 import { SelectionList, type SelectionListItem } from "@/components/leaves/SelectionList"
 import { Text } from "@/components/leaves/Text"
 import {
-    defineCompositeComponent,
-    defineContractComponent,
-    defineContractProjection,
-    defineLeafComponent,
-} from "@/components/contracts/props"
+    getLearnSpineNavigationClassName,
+    learnSpineGroupClassName,
+    learnSpineGroupsClassName,
+    learnSpineHomeClassName,
+    learnSpineResumeClassName,
+    getLearnSpineToggleClassName,
+} from "./classNames"
 
 /**
  * BLOCK - `LearnSpine`: everything a learner can do in this course, and where they left off.
@@ -102,7 +103,12 @@ export type LearnSpineProps = {
     readonly props: LearnSpineData
     readonly on?: LearnSpineActions
     readonly isLoading?: boolean
+    readonly isCollapsed?: boolean
+    readonly presentation?: "rail" | "drawer"
 }
+
+/** Props for the explicitly collapsed spine projection. */
+export type LearnSpineCollapsedProps = LearnSpineProps
 
 const selectionItemsOf = (
     rows: ReadonlyArray<LearnSpineRow>,
@@ -120,187 +126,44 @@ const selectionItemsOf = (
 /**
  * Build the spine as the frame's own child.
  *
- * It returns contract content rather than an element, because the frame renders it: a block that
+ * It returns content rather than an element, because the frame renders it: a block that
  * opened its own `Tree` would draw a second node around a node the frame already draws.
  *
  * @param input - {@link LearnSpineProps}
  */
-export const learnSpineCollapsed = ({ props, on }: LearnSpineProps) => (
-    defineContractComponent("learn-course-navigation-rail-collapsed", {
-        toggle: defineContractComponent("learn-course-rail-collapse-toggle-collapsed", {
-            control: defineLeafComponent("icon-button", {}, () => (
-                <IconButton
-                    props={{ icon: "collapseRail", label: props.expandLabel, isActive: true }}
-                    on={{ press: on?.toggleCollapse }}
-                />
-            )),
-        }),
-        home: defineContractComponent("learn-course-home-navigation-row", {
-            list: defineLeafComponent("selection-list", { variant: "navigation-collapsed" }, () => (
-                <SelectionList
-                    props={{
-                        label: props.home.label,
-                        items: selectionItemsOf([props.home], props.lockedLabel),
-                        selectedKey: props.home.isCurrent === true ? props.home.id : undefined,
-                        variant: "navigation-collapsed",
-                    }}
-                    on={{ activate: on?.openRow }}
-                />
-            )),
-        }),
-        groups: defineContractProjection("learn-course-navigation-groups-scroll", () => (
-            <ScrollViewport
-                boundary="learn-navigation-groups"
-                render={defineContractComponent("learn-course-navigation-groups-scroll", {
-                    group: props.groups.map((group) => defineContractComponent("learn-nav-group-collapsed", {
-                        list: defineLeafComponent("selection-list", { variant: "navigation-collapsed" }, () => (
-                            <SelectionList
-                                props={{
-                                    label: group.label,
-                                    items: selectionItemsOf(group.rows, props.lockedLabel),
-                                    selectedKey: group.rows.find((row) => row.isCurrent === true)?.id,
-                                    variant: "navigation-collapsed",
-                                }}
-                                on={{ activate: on?.openRow }}
-                            />
-                        )),
-                    })),
-                })}
-            />
-        )),
-    })
-)
+export const learnSpineCollapsed = (props: LearnSpineProps) => <nav className={getLearnSpineNavigationClassName(true, false)} aria-label={props.props.home.label}>
+    <div className={getLearnSpineToggleClassName(true)}><IconButton props={{ icon: "collapseRail", label: props.props.expandLabel, isActive: true }} on={{ press: props.on?.toggleCollapse }} /></div>
+    <div className={learnSpineHomeClassName}><SelectionList props={{ label: props.props.home.label, items: selectionItemsOf([props.props.home], props.props.lockedLabel), selectedKey: props.props.home.isCurrent === true ? props.props.home.id : undefined, variant: "navigation-collapsed" }} on={{ activate: props.on?.openRow }} /></div>
+    <ScrollViewport boundary="learn-navigation-groups"><div className={learnSpineGroupsClassName}>{props.props.groups.map((group) => <div key={group.id} className={learnSpineGroupClassName}><SelectionList props={{ label: group.label, items: selectionItemsOf(group.rows, props.props.lockedLabel), selectedKey: group.rows.find((row) => row.isCurrent === true)?.id, variant: "navigation-collapsed" }} on={{ activate: props.on?.openRow }} /></div>)}</div></ScrollViewport>
+</nav>
 
 /**
  * Build the labelled course spine as the frame's expanded child.
  *
  * @param input - {@link LearnSpineProps}
  */
-export const learnSpine = ({ props, on, isLoading = false }: LearnSpineProps) => {
-    const lockedLabel = props.lockedLabel
-    const resume = props.resume
-    return (
-        defineContractComponent("learn-course-navigation-rail", {
-            toggle: defineContractComponent("learn-course-rail-collapse-toggle", {
-                control: defineLeafComponent("icon-button", {}, () => (
-                    <IconButton
-                        props={{ icon: "collapseRail", label: props.collapseLabel }}
-                        on={{ press: on?.toggleCollapse }}
-                    />
-                )),
-            }),
-            ...(resume === undefined ? {} : {
-                resume: defineContractProjection("learn-resume-card", () => (
-                    <PressableSurface
-                        contract="learn-resume-card"
-                        label={resume.title}
-                        press={on?.resume}
-                        isRaised
-                        render={defineContractComponent("learn-resume-card", {
-                            label: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                                <Text props={{ content: resume.label, size: "xs" }} />
-                            )),
-                            progress: defineCompositeComponent("labelled-progress-row", {}, () => (
-                                <LabelledProgressRow
-                                    props={{
-                                        id: "resume",
-                                        title: resume.title,
-                                        percent: resume.percent,
-                                        percentText: resume.percentText,
-                                    }}
-                                    isLoading={isLoading}
-                                />
-                            )),
-                        })}
-                    />
-                )),
-            }),
-            home: defineContractComponent("learn-course-home-navigation-row", {
-                list: defineLeafComponent("selection-list", { variant: "navigation" }, () => (
-                    <SelectionList
-                        props={{
-                            label: props.home.label,
-                            items: selectionItemsOf([props.home], lockedLabel),
-                            selectedKey: props.home.isCurrent === true ? props.home.id : undefined,
-                            variant: "navigation",
-                        }}
-                        on={{ activate: on?.openRow }}
-                    />
-                )),
-            }),
-            groups: defineContractProjection("learn-course-navigation-groups-scroll", () => (
-                <ScrollViewport
-                    boundary="learn-navigation-groups"
-                    render={defineContractComponent("learn-course-navigation-groups-scroll", {
-                        group: props.groups.map((group) => defineContractComponent("learn-nav-group", {
-                            label: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                                <Text props={{ content: group.label, size: "xs" }} />
-                            )),
-                            list: defineLeafComponent("selection-list", { variant: "navigation" }, () => (
-                                <SelectionList
-                                    props={{
-                                        label: group.label,
-                                        items: selectionItemsOf(group.rows, lockedLabel),
-                                        selectedKey: group.rows.find((row) => row.isCurrent === true)?.id,
-                                        variant: "navigation",
-                                    }}
-                                    on={{ activate: on?.openRow }}
-                                />
-                            )),
-                        })),
-                    })}
-                />
-            )),
-        })
-    )
+export const learnSpine = (props: LearnSpineProps) => {
+    const resume = props.props.resume
+    return <nav className={getLearnSpineNavigationClassName(false, props.presentation === "drawer")} aria-label={props.props.home.label}>
+        {props.presentation === "drawer" ? null : <div className={getLearnSpineToggleClassName(false)}><IconButton props={{ icon: "collapseRail", label: props.props.collapseLabel }} on={{ press: props.on?.toggleCollapse }} /></div>}
+        {resume === undefined ? null : <PressableSurface label={resume.title} press={props.on?.resume} isRaised><div className={learnSpineResumeClassName}><Text props={{ content: resume.label, size: "xs" }} /><LabelledProgressRow props={{ id: "resume", title: resume.title, percent: resume.percent, percentText: resume.percentText }} isLoading={props.isLoading} /></div></PressableSurface>}
+        <div className={learnSpineHomeClassName}><SelectionList props={{ label: props.props.home.label, items: selectionItemsOf([props.props.home], props.props.lockedLabel), selectedKey: props.props.home.isCurrent === true ? props.props.home.id : undefined, variant: "navigation" }} on={{ activate: props.on?.openRow }} /></div>
+        <ScrollViewport boundary="learn-navigation-groups"><div className={learnSpineGroupsClassName}>{props.props.groups.map((group) => <div key={group.id} className={learnSpineGroupClassName}><Text props={{ content: group.label, size: "xs" }} /><SelectionList props={{ label: group.label, items: selectionItemsOf(group.rows, props.props.lockedLabel), selectedKey: group.rows.find((row) => row.isCurrent === true)?.id, variant: "navigation" }} on={{ activate: props.on?.openRow }} /></div>)}</div></ScrollViewport>
+    </nav>
 }
 
 /** Build the same labelled course destinations for the narrow left drawer, without rail controls. */
-export const learnSpineDrawer = ({ props, on, isLoading = false }: LearnSpineProps) => {
-    const resume = props.resume
-    return defineContractComponent("learn-course-navigation-drawer", {
-        ...(resume === undefined ? {} : {
-            resume: defineContractProjection("learn-resume-card", () => (
-                <PressableSurface
-                    contract="learn-resume-card"
-                    label={resume.title}
-                    press={on?.resume}
-                    isRaised
-                    render={defineContractComponent("learn-resume-card", {
-                        label: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: resume.label, size: "xs" }} />),
-                        progress: defineCompositeComponent("labelled-progress-row", {}, () => <LabelledProgressRow props={{ id: "resume", title: resume.title, percent: resume.percent, percentText: resume.percentText }} isLoading={isLoading} />),
-                    })}
-                />
-            )),
-        }),
-        home: defineContractComponent("learn-course-home-navigation-row", {
-            list: defineLeafComponent("selection-list", { variant: "navigation" }, () => <SelectionList props={{ label: props.home.label, items: selectionItemsOf([props.home], props.lockedLabel), selectedKey: props.home.isCurrent === true ? props.home.id : undefined, variant: "navigation" }} on={{ activate: on?.openRow }} />),
-        }),
-        groups: defineContractProjection("learn-course-navigation-groups-scroll", () => (
-            <ScrollViewport boundary="learn-navigation-groups" render={defineContractComponent("learn-course-navigation-groups-scroll", {
-                group: props.groups.map((group) => defineContractComponent("learn-nav-group", {
-                    label: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: group.label, size: "xs" }} />),
-                    list: defineLeafComponent("selection-list", { variant: "navigation" }, () => <SelectionList props={{ label: group.label, items: selectionItemsOf(group.rows, props.lockedLabel), selectedKey: group.rows.find((row) => row.isCurrent === true)?.id, variant: "navigation" }} on={{ activate: on?.openRow }} />),
-                })),
-            })} />
-        )),
-    })
-}
+export const learnSpineDrawer = (props: LearnSpineProps) => learnSpine({ ...props, presentation: "drawer" })
 
 /** Complete pure spine surface, including the persistent rail mechanics. */
-export type LearnSpineBaseProps = LearnSpineProps & { readonly isCollapsed: boolean; readonly presentation?: "rail" | "drawer" }
-
 /** Render the expanded/collapsed spine through one stable rail host. */
-export const LearnSpineBase = (input: LearnSpineBaseProps) => input.presentation === "drawer"
-    ? <Tree contract="learn-course-navigation-drawer" render={learnSpineDrawer(input)} />
+export const LearnSpineBase = (props: LearnSpineProps) => props.presentation === "drawer"
+    ? learnSpineDrawer(props)
     : <CollapsibleRail
-        isCollapsed={input.isCollapsed}
-        expanded={learnSpine({ props: input.props, on: input.on })}
-        collapsed={learnSpineCollapsed({ props: input.props, on: input.on })}
+        isCollapsed={props.isCollapsed ?? props.props.isCollapsed}
+        expanded={learnSpine(props)}
+        collapsed={learnSpineCollapsed(props)}
     />
 
-/** Pure collapsed spine renderer retained for direct contract fixtures. */
-export const LearnSpineCollapsedBase = (input: LearnSpineProps) => learnSpineCollapsed(input)
-
-/** Source-level ownership marker. */
-export const meta = { shape: "block", world: "pure", domain: "learn" } as const
+/** Pure collapsed spine renderer retained for direct fixtures. */
+export const LearnSpineCollapsedBase = (props: LearnSpineCollapsedProps) => learnSpineCollapsed(props)

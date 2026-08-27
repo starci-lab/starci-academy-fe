@@ -10,17 +10,14 @@ export type StreakStatRowProps =
     }
 
 /** Render the streak row without reading request or locale state. */
-export const StreakStatRowBase = (input: StreakStatRowProps) => input.state === "empty" ? null : (
+export const StreakStatRowBase = (props: StreakStatRowProps) => props.state === "empty" ? null : (
     <IconLabelFactRow
         props={{
             icon: "streak",
-            label: input.props.label,
-            endText: input.state === "settled" ? input.props.value : undefined,
+            label: props.props.label,
+            endText: props.state === "settled" ? props.props.value : undefined,
             recipe: "peer",
         }}
-        isLoading={input.state === "pending"}
+        isLoading={props.state === "pending"}
     />
 )
-
-/** Source-level tier marker for the presentational block half. */
-export const meta = { world: "pure", domain: "identity" } as const

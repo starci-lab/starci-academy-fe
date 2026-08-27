@@ -33,7 +33,11 @@ const ACTIONS: ReadonlyArray<{ id: string, path: string, icon: IconName }> = [
 /**
  * Draw the rail.
  */
-export const QuickActions = () => {
+/** Props for the connected quick actions block. */
+export type QuickActionsProps = Record<string, never>
+/** Connect the QuickActions block to its data source. */
+export const QuickActions = (props: QuickActionsProps) => {
+    void props
     const t = useTranslations("shell")
     const router = useRouter()
     return (
@@ -55,6 +59,3 @@ export const QuickActions = () => {
         />
     )
 }
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { world: "connected", domain: "shell" } as const

@@ -77,7 +77,11 @@ const toRemaining = (resetAt: string | null): { days: number, hours: number } | 
 /**
  * Fetch the week and render it.
  */
-export const WeeklyGoals = () => {
+/** Props for the connected weekly goals block. */
+export type WeeklyGoalsProps = Record<string, never>
+/** Connect the WeeklyGoals block to its data source. */
+export const WeeklyGoals = (props: WeeklyGoalsProps) => {
+    void props
     const t = useTranslations("kpi")
     const router = useRouter()
     const kpis = useQueryMyKpisSwr()
@@ -142,6 +146,3 @@ export const WeeklyGoals = () => {
         />
     )
 }
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { world: "connected", domain: "kpi" } as const

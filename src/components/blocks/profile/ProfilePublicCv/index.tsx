@@ -12,7 +12,10 @@ type PublicCvData = { readonly pdfUrl?: string | null; readonly label?: string |
 const stateOf = (error: unknown, data: PublicCvData | null | undefined) => error !== undefined ? "error" as const : data === undefined ? "pending" as const : data === null ? "empty" as const : data.pdfUrl === undefined ? "uncompiled" as const : "ready" as const
 
 /** Connected public-CV owner; the page shell does not proxy this block's query state. */
-export const ProfilePublicCvBlock = () => {
+export type ProfilePublicCvBlockProps = Record<never, never>
+/** Load and render the connected public CV block. */
+export const ProfilePublicCvBlock = (props: ProfilePublicCvBlockProps) => {
+    void props
     const t = useTranslations("profile.cv")
     const params = useParams<{ username?: string }>()
     const router = useRouter()
@@ -25,6 +28,3 @@ export const ProfilePublicCvBlock = () => {
     const message = state === "error" ? "The public CV couldn't be loaded." : state === "empty" ? t("empty") : state === "uncompiled" ? t("pending") : ""
     return <ProfilePublicCvBase state={state} label={t("label")} message={message} title={cv.data?.label ?? t("label")} pdfUrl={cv.data?.pdfUrl ?? undefined} editLabel={t("edit")} retryLabel="Try again" isSelf={isSelf} on={{ edit: () => router.push("/profile/cv"), retry: () => { void cv.mutate() } }} />
 }
-
-/** Source-level ownership marker. */
-export const meta = { world: "connected", domain: "profile" } as const

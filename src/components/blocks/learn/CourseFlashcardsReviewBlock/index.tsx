@@ -13,7 +13,7 @@ import { useQueryMyFlashcardReviewHistorySwr } from "@/hooks/swr/useQueryMyFlash
 import { useQueryMyFlashcardReviewStatsSwr } from "@/hooks/swr/useQueryMyFlashcardReviewStatsSwr"
 import { useQueryMyInProgressFlashcardSessionSwr } from "@/hooks/swr/useQueryMyInProgressFlashcardSessionSwr"
 import { useMutateStartFlashcardSessionSwr } from "@/hooks/swr/useMutateStartFlashcardSessionSwr"
-import { CourseFlashcardsReviewBlockBase, type FlashcardReviewLayout, type FlashcardReviewView } from "./component"
+import { CourseFlashcardsReviewBlockView, type FlashcardReviewLayout, type FlashcardReviewView } from "./component"
 
 /** Route identity required by the connected flashcard review overview. */
 export type CourseFlashcardsReviewBlockProps = { readonly displayId: string }
@@ -128,7 +128,8 @@ const labels = (locale: string) => locale === "vi" ? {
 }
 
 /** Resolves deck, due queue, regional evidence, and resumable sessions for the review workspace. */
-export const CourseFlashcardsReviewBlock = ({ displayId }: CourseFlashcardsReviewBlockProps) => {
+export const CourseFlashcardsReviewBlock = (props: CourseFlashcardsReviewBlockProps) => {
+    const { displayId } = props
     const locale = useLocale()
     const copy = labels(locale)
     const router = useRouter()
@@ -225,7 +226,7 @@ export const CourseFlashcardsReviewBlock = ({ displayId }: CourseFlashcardsRevie
         void Promise.all([course.mutate(), decks.mutate(), due.mutate(), stats.mutate()])
     }
 
-    return <CourseFlashcardsReviewBlockBase
+    return <CourseFlashcardsReviewBlockView
         pageState={activeView}
         blockState={blockState}
         props={{
@@ -278,4 +279,3 @@ export const CourseFlashcardsReviewBlock = ({ displayId }: CourseFlashcardsRevie
 }
 
 /** Canon metadata for the connected page half. */
-export const meta = { world: "connected", domain: "learn" } as const

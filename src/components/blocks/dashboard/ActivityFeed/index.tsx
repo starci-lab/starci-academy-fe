@@ -9,7 +9,7 @@ import type { ActivityDayData, ActivityFeedActions } from "./component"
 import { ActivityFeedBase } from "./component"
 
 /** Remote activity rows and state resolved by the feed controller. */
-export type ActivityFeedConnectedProps = {
+export type ActivityFeedProps = {
     readonly state: "pending" | "filteredEmpty" | "platformEmpty" | "failed" | "ready"
     readonly items: ReadonlyArray<QueryMyFeedItemData>
     readonly on?: ActivityFeedActions
@@ -58,13 +58,13 @@ const rollUpMilestones = (items: ReadonlyArray<QueryMyFeedItemData>): ReadonlyAr
 }
 
 /** Resolve activity copy, relative time and local-day grouping. */
-export const ActivityFeed = (input: ActivityFeedConnectedProps) => {
+export const ActivityFeed = (props: ActivityFeedProps) => {
     const t = useTranslations("dashboard.explore")
     const locale = useLocale()
     const days = useMemo(() => {
         const today = startOfDay(new Date())
         const groups = new Map<number, ActivityDayData>()
-        for (const { head: item, count } of rollUpMilestones(input.items)) {
+        for (const { head: item, count } of rollUpMilestones(props.items)) {
             const at = new Date(item.at)
             const key = startOfDay(at)
             const delta = Math.max(0, Math.floor((Date.now() - at.getTime()) / 60_000))
@@ -89,7 +89,7 @@ export const ActivityFeed = (input: ActivityFeedConnectedProps) => {
                     [ReactionType.Angry]: t("reactions.angry"),
                 },
                 isMine: item.isMine,
-                isReacting: item.id === input.reactingId,
+                isReacting: item.id === props.reactingId,
             }
             const existing = groups.get(key)
             if (existing !== undefined) groups.set(key, { ...existing, rows: [...existing.rows, row] })
@@ -100,13 +100,6 @@ export const ActivityFeed = (input: ActivityFeedConnectedProps) => {
             })
         }
         return [...groups.values()]
-    }, [input.items, input.reactingId, locale, t])
-    return <ActivityFeedBase state={input.state} props={{
-        days,
-        message: input.message,
-        description: input.description,
-        actionLabel: input.actionLabel,
-    }} on={input.on} />
+    }, [props.items, props.reactingId, locale, t])
+    return <ActivityFeedBase {...{ state: props.state, props: { days, message: props.message, description: props.description, actionLabel: props.actionLabel }, on: props.on }} />
 }
-/** Source-level ownership marker for the connected social block. */
-export const meta = { world: "connected", domain: "social" } as const

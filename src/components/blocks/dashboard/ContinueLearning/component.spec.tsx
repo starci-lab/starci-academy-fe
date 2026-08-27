@@ -18,9 +18,9 @@ describe("ContinueLearningBase", () => {
             />,
         )
 
-        const kind = screen.getByText("Lesson").closest("[data-component=\"Text\"]")
-        expect(kind).not.toBeNull()
-        expect(kind?.querySelector("[data-component=\"Icon\"]")).toBeNull()
+        const kind = screen.getByText("Lesson")
+        expect(kind).toHaveAttribute("data-size", "sm")
+        expect(kind.querySelector("svg")).toBeNull()
     })
 
     it("keeps long titles compact and their supporting content plain", () => {

@@ -9,7 +9,11 @@ import { ReactionType } from "@/modules/api/graphql/queries/types/reactions"
 import { FeedExplorerBase } from "./component"
 
 /** Own feed filters, cursor pages, reactions and resolved internal navigation. */
-export const FeedExplorer = () => {
+/** Props for the connected feed explorer block. */
+export type FeedExplorerProps = Record<string, never>
+/** Connect the FeedExplorer block to its data source. */
+export const FeedExplorer = (props: FeedExplorerProps) => {
+    void props
     const t = useTranslations("dashboard.explore")
     const router = useRouter()
     const [scope, setScope] = useState(MyFeedTab.ForYou)
@@ -102,6 +106,3 @@ export const FeedExplorer = () => {
         retryLoadMore: () => { void query.mutate() },
     }} />
 }
-
-/** Source-level ownership marker for the connected social block. */
-export const meta = { world: "connected", domain: "social" } as const

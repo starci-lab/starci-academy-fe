@@ -1,10 +1,9 @@
+import type { ReactNode } from "react"
 import { Drawer } from "@heroui/react"
-import { Tree } from "@/components/branches/Tree"
-import type { ContractKey } from "@/components/contracts"
-import type { ContractBranchProps } from "@/components/contracts/props"
+import { drawerBodyClassName } from "./classNames"
 
 /**
- * BRANCH - `DrawerBranch`: the vendor's edge-anchored mechanics around one typed contract.
+ * BRANCH - `DrawerBranch`: the vendor's edge-anchored mechanics around typed children.
  *
  * Target path: `src/components/branches/DrawerBranch/index.tsx`.
  *
@@ -20,14 +19,14 @@ import type { ContractBranchProps } from "@/components/contracts/props"
  * IT IMPLEMENTS NONE OF THOSE MECHANICS ITSELF, exactly as `ModalBranch` does not: no effect, no
  * ref, no scroll handling. All of it belongs to the vendor, which is what stops two overlays in
  * this product disagreeing about how a covering surface behaves. The interior still stays closed:
- * a contract key and its typed render replace the former anonymous children hole.
+ * children are passed directly so the branch remains a small vendor-mechanics wrapper.
  */
 
 /** Which edge the panel is anchored to. */
 export type DrawerBranchPlacement = "left" | "right" | "bottom"
 
 /** Props for {@link DrawerBranch}. */
-export type DrawerBranchProps<K extends ContractKey> = ContractBranchProps<K> & {
+export type DrawerBranchProps = {
     /** Whether the drawer is showing. Owned by whoever mounts it, never by the branch. */
     readonly isOpen: boolean
     /** The edge it opens from. Absent is `right`, which is where this product's basket lives. */
@@ -36,6 +35,7 @@ export type DrawerBranchProps<K extends ContractKey> = ContractBranchProps<K> & 
     readonly title: string
     /** Every way out: the close control, Escape, and the backdrop. */
     readonly onDismiss: () => void
+    readonly children: ReactNode
 }
 
 /**
@@ -43,18 +43,18 @@ export type DrawerBranchProps<K extends ContractKey> = ContractBranchProps<K> & 
  *
  * @param input - {@link DrawerBranchProps}
  */
-export const DrawerBranch = <const K extends ContractKey>(input: DrawerBranchProps<K>) => (
+export const DrawerBranch = (props: DrawerBranchProps) => (
     <Drawer
-        isOpen={input.isOpen}
+        isOpen={props.isOpen}
         onOpenChange={(open) => {
-            if (!open) input.onDismiss()
+            if (!open) props.onDismiss()
         }}
     >
         <Drawer.Backdrop>
-            <Drawer.Content placement={input.placement ?? "right"}>
-                <Drawer.Dialog data-tier="branch" data-component="DrawerBranch">
+            <Drawer.Content placement={props.placement ?? "right"}>
+                <Drawer.Dialog>
                     <Drawer.Header>
-                        <Drawer.Heading>{input.title}</Drawer.Heading>
+                        <Drawer.Heading>{props.title}</Drawer.Heading>
                     </Drawer.Header>
                     <Drawer.CloseTrigger />
                     {/*
@@ -62,14 +62,11 @@ export const DrawerBranch = <const K extends ContractKey>(input: DrawerBranchPro
                      * interior owns its own padding, so a branch that also padded would inset the
                      * same content twice and the two insets would drift apart.
                      */}
-                    <Drawer.Body className="p-0">
-                        <Tree contract={input.contract} render={input.render} />
+                    <Drawer.Body className={drawerBodyClassName}>
+                        {props.children}
                     </Drawer.Body>
                 </Drawer.Dialog>
             </Drawer.Content>
         </Drawer.Backdrop>
     </Drawer>
 )
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "branch", mechanics: true, world: "pure" } as const

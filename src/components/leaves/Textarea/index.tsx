@@ -1,5 +1,4 @@
 import { TextArea } from "@heroui/react"
-import type { LeafProps } from "@/components/contracts/props"
 
 /**
  * LEAF - `Textarea`: the box a reader writes prose into.
@@ -42,34 +41,33 @@ export type TextareaActions = {
     readonly change?: (value: string) => void
 }
 
-/** Props for {@link Textarea}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type TextareaProps = LeafProps<TextareaData, TextareaActions>
+/** Props for {@link Textarea}. */
+export type TextareaProps = { readonly props: TextareaData; readonly on?: TextareaActions; readonly isLoading?: boolean }
 
 /**
  * Draw the multi-line box.
  *
  * @param input - {@link TextareaProps}
  */
-export const Textarea = ({ props, on }: TextareaProps) => (
-    <TextArea
-        data-tier="leaf"
-        data-component="Textarea"
-        fullWidth
-        id={props.id}
-        name={props.name}
-        aria-label={props.label}
-        placeholder={props.placeholder}
-        defaultValue={props.defaultValue}
-        rows={props.rows ?? 4}
-        // `aria-invalid` and `disabled` rather than `isInvalid`/`isDisabled`: the vendor's textarea
-        // is React Aria's own `TextArea`, which takes native textarea props, while the vendor's
-        // Input is a HeroUI wrapper that takes the `is`-prefixed pair. They look like the same
-        // family and their prop names are not, so the compiler is the only thing that catches this.
-        aria-invalid={props.isInvalid}
-        disabled={props.disabled}
-        onChange={(event) => on?.change?.(event.target.value)}
-    />
-)
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const
+export const Textarea = (props: TextareaProps) => {
+    const data = props.props
+    const on = props.on
+    return (
+        <TextArea
+            fullWidth
+            id={data.id}
+            name={data.name}
+            aria-label={data.label}
+            placeholder={data.placeholder}
+            defaultValue={data.defaultValue}
+            rows={data.rows ?? 4}
+            // `aria-invalid` and `disabled` rather than `isInvalid`/`isDisabled`: the vendor's textarea
+            // is React Aria's own `TextArea`, which takes native textarea props, while the vendor's
+            // Input is a HeroUI wrapper that takes the `is`-prefixed pair. They look like the same
+            // family and their prop names are not, so the compiler is the only thing that catches this.
+            aria-invalid={data.isInvalid}
+            disabled={data.disabled}
+            onChange={(event) => on?.change?.(event.target.value)}
+        />
+    )
+}

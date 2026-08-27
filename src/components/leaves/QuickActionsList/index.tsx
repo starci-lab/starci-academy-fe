@@ -3,7 +3,7 @@
 import { ListBox } from "@heroui/react"
 import type { IconName } from "@/components/leaves/Icon"
 import { IconLabelFactRow } from "@/components/composites/IconLabelFactRow"
-import type { LeafProps } from "@/components/contracts/props"
+import { quickActionsListClassName, quickActionsListItemClassName } from "./classNames"
 
 /** One destination in the legacy quick-access ListBox. */
 export type QuickActionItem = {
@@ -24,30 +24,28 @@ export type QuickActionsListActions = {
 }
 
 /** Fixed data and action slots for the quick-access ListBox. */
-export type QuickActionsListProps = LeafProps<QuickActionsListData, QuickActionsListActions>
+export type QuickActionsListProps = {
+    readonly props: QuickActionsListData
+    readonly on?: QuickActionsListActions
+}
 
 /** Draw the original native HeroUI ListBox chrome used by the legacy dashboard rail. */
-export const QuickActionsList = ({ props, on }: QuickActionsListProps) => (
+export const QuickActionsList = (props: QuickActionsListProps) => (
     <ListBox
-        data-tier="leaf"
-        data-component="QuickActionsList"
-        aria-label={props.label}
+        aria-label={props.props.label}
         selectionMode="none"
-        onAction={(key) => on?.activate?.(String(key))}
-        className="gap-1 p-0"
+        onAction={(key) => props.on?.activate?.(String(key))}
+        className={quickActionsListClassName}
     >
-        {props.items.map((item) => (
+        {props.props.items.map((item) => (
             <ListBox.Item
                 key={item.id}
                 id={item.id}
                 textValue={item.label}
-                className="group flex cursor-pointer items-center gap-2 rounded-large px-2 py-2 text-foreground outline-none data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-accent data-[hovered=true]:bg-default"
+                className={quickActionsListItemClassName}
             >
                 <IconLabelFactRow props={{ icon: item.icon, label: item.label, recipe: "compact-action" }} />
             </ListBox.Item>
         ))}
     </ListBox>
 )
-
-/** Source-level tier marker for the closed quick-access list. */
-export const meta = { shape: "leaf", world: "pure" } as const

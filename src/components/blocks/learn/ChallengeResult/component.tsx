@@ -1,10 +1,19 @@
-import { Tree } from "@/components/branches/Tree"
-import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 import { Button } from "@/components/leaves/Button"
 import { Breadcrumbs } from "@/components/leaves/Breadcrumbs"
 import { Heading } from "@/components/leaves/Heading"
 import { Text } from "@/components/leaves/Text"
 import { ChallengeAttemptHistoryDrawer } from "@/components/overlays/learn/ChallengeAttemptHistoryDrawer"
+import {
+    challengeEvaluationClassName,
+    challengeFeedbackClassName,
+    challengeFeedbackItemClassName,
+    challengeResultActionsClassName,
+    challengeResultDocumentClassName,
+    challengeResultSummaryClassName,
+    challengeResultWorkspaceClassName,
+    stackedControlsClassName,
+    titlePairClassName,
+} from "./classNames"
 
 /** One backend-authored scorer finding shown without client interpretation. */
 export type CourseLearnChallengeFeedback = {
@@ -17,7 +26,7 @@ export type CourseLearnChallengeFeedback = {
 }
 
 /** Pure result facts, finite state and route actions. */
-export type ChallengeResultBlockProps = {
+export type ChallengeResultProps = {
     readonly blockState: "pending" | "ready" | "unavailable" | "failed"
     readonly props: {
         readonly title: string
@@ -62,188 +71,36 @@ export type ChallengeResultBlockProps = {
 }
 
 /** Draws pending, graded and failed challenge-result states without querying. */
-export const ChallengeResultBase = (input: ChallengeResultBlockProps) => {
-    const loading = input.blockState === "pending"
-    const breadcrumb = defineLeafComponent("breadcrumbs", {}, () => (
-        <Breadcrumbs
-            props={{
-                label: input.props.breadcrumbLabel ?? "Course challenge path",
-                showFullTrail: true,
-                steps: [
-                    { id: "course", label: input.props.courseTitle ?? "Course" },
-                    { id: "module", label: input.props.moduleTitle ?? "Module" },
-                    { id: "content", label: input.props.contentTitle ?? "Lesson" },
-                    { id: "challenge", label: input.props.title },
-                ],
-            }}
-            on={{ course: input.on?.openCourse, module: input.on?.openModule, content: input.on?.openContent }}
-        />
-    ))
-    if (input.blockState === "pending" || input.blockState === "unavailable") {
-        const unavailable = input.blockState === "unavailable"
-        return (
-            <Tree contract="challenge-result-page-document" render={defineContractComponent("challenge-result-page-document", {
-                breadcrumb,
-                evaluation: defineContractComponent("challenge-evaluation-status", {
-                    title: defineLeafComponent("text", { weight: "semibold" }, () => (
-                        <Text props={{ content: unavailable ? input.props.unavailableTitle : input.props.evaluationTitle, weight: "semibold", live: "polite" }} />
-                    )),
-                    detail: defineContractComponent("stacked-peer-controls", {
-                        control: [
-                            defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                                <Text props={{ content: unavailable ? input.props.unavailableDetail : input.props.evaluationDetail, size: "sm", tone: "muted" }} />
-                            )),
-                            ...(input.props.realtimeStatus === undefined ? [] : [
-                                defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                                    <Text props={{ content: input.props.realtimeStatus, size: "sm", tone: "muted", live: "polite" }} />
-                                )),
-                            ]),
-                        ],
-                    }),
-                    actions: defineContractComponent("challenge-submission-actions", {
-                        action: [defineLeafComponent("button", {}, () => (
-                            <Button
-                                props={{ label: input.props.reloadLabel, variant: unavailable ? "primary" : "outline", isPending: !unavailable }}
-                                on={{ press: input.on?.reload }}
-                            />
-                        ))],
-                    }),
-                }),
-            })} />
-        )
+export const ChallengeResultBase = (props: ChallengeResultProps) => {
+    const loading = props.blockState === "pending"
+    const breadcrumb = <Breadcrumbs props={{ label: props.props.breadcrumbLabel ?? "Course challenge path", showFullTrail: true, steps: [{ id: "course", label: props.props.courseTitle ?? "Course" }, { id: "module", label: props.props.moduleTitle ?? "Module" }, { id: "content", label: props.props.contentTitle ?? "Lesson" }, { id: "challenge", label: props.props.title }] }} on={{ course: props.on?.openCourse, module: props.on?.openModule, content: props.on?.openContent }} />
+    if (props.blockState === "pending" || props.blockState === "unavailable") {
+        const unavailable = props.blockState === "unavailable"
+        return <section className={challengeResultDocumentClassName}>{breadcrumb}<div className={challengeEvaluationClassName}>
+            <Text props={{ content: unavailable ? props.props.unavailableTitle : props.props.evaluationTitle, weight: "semibold", live: "polite" }} />
+            <div className={stackedControlsClassName}><Text props={{ content: unavailable ? props.props.unavailableDetail : props.props.evaluationDetail, size: "sm", tone: "muted" }} />{props.props.realtimeStatus === undefined ? null : <Text props={{ content: props.props.realtimeStatus, size: "sm", tone: "muted", live: "polite" }} />}</div>
+            <Button props={{ label: props.props.reloadLabel, variant: unavailable ? "primary" : "outline", isPending: !unavailable }} on={{ press: props.on?.reload }} />
+        </div></section>
     }
-    const summaryControls = input.blockState === "failed"
-        ? [
-            defineLeafComponent("text", {}, () => (
-                <Text props={{ content: input.props.notice, live: "assertive" }} />
-            )),
-        ]
-        : [
-            ...(input.props.shortFeedback === undefined ? [] : [
-                defineLeafComponent("text", {}, () => (
-                    <Text props={{ content: input.props.shortFeedback }} isLoading={loading} />
-                )),
-            ]),
-            ...(input.props.outcomeLabel === undefined ? [] : [
-                defineLeafComponent("text", { weight: "semibold" }, () => (
-                    <Text props={{ content: input.props.outcomeLabel, weight: "semibold" }} />
-                )),
-            ]),
-            ...(input.props.confidenceLine === undefined ? [] : [
-                defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                    <Text props={{ content: input.props.confidenceLine, size: "sm", tone: "muted" }} />
-                )),
-            ]),
-        ]
-
-    const feedbackGroups = input.blockState === "failed" ? [] : [
-        ...input.props.feedbacks.map((feedback) => defineContractComponent("stacked-peer-controls", {
-            control: [
-                defineLeafComponent("text", { weight: "semibold" }, () => (
-                    <Text props={{ content: feedback.message, weight: "semibold" }} />
-                )),
-                defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                    <Text props={{ content: feedback.severity, size: "sm", tone: "muted" }} />
-                )),
-                ...(feedback.detail === undefined ? [] : [
-                    defineLeafComponent("text", {}, () => <Text props={{ content: feedback.detail }} />),
-                ]),
-                ...(feedback.location === undefined ? [] : [
-                    defineLeafComponent("text", { size: "sm" }, () => (
-                        <Text props={{ content: feedback.location, size: "sm" }} />
-                    )),
-                ]),
-                ...(feedback.suggestion === undefined ? [] : [
-                    defineLeafComponent("text", {}, () => <Text props={{ content: feedback.suggestion }} />),
-                ]),
-            ],
-        })),
-        ...(
-            input.props.uncertainty === undefined && input.props.nextAction === undefined
-                ? []
-                : [defineContractComponent("stacked-peer-controls", {
-                    control: [
-                        ...(input.props.uncertainty === undefined ? [] : [
-                            defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                                <Text props={{ content: input.props.uncertainty, size: "sm", tone: "muted" }} />
-                            )),
-                        ]),
-                        ...(input.props.nextAction === undefined ? [] : [
-                            defineLeafComponent("text", { weight: "semibold" }, () => (
-                                <Text props={{ content: input.props.nextAction, weight: "semibold" }} />
-                            )),
-                        ]),
-                    ],
-                })]
-        ),
-    ]
-
-    const actions = input.blockState === "failed"
-        ? [defineLeafComponent("button", {}, () => (
-            <Button props={{ label: input.props.reloadLabel }} on={{ press: input.on?.reload }} />
-        ))]
-        : [
-            defineLeafComponent("button", {}, () => (
-                <Button
-                    props={{ label: input.props.historyLabel ?? "History", variant: "outline" }}
-                    on={{ press: input.on?.openHistory }}
-                    isLoading={loading}
-                />
-            )),
-            defineLeafComponent("button", {}, () => (
-                <Button props={{ label: input.props.retryLabel }} on={{ press: input.on?.retry }} isLoading={loading} />
-            )),
-            defineLeafComponent("button", {}, () => (
-                <Button
-                    props={{ label: input.props.nextLabel, variant: "primary" }}
-                    on={{ press: input.on?.next }}
-                    isLoading={loading}
-                />
-            )),
-        ]
-
     return (
         <>
-            <Tree
-                contract="challenge-result-page-document"
-                render={defineContractComponent("challenge-result-page-document", {
-                    breadcrumb,
-                    result: defineContractComponent("challenge-result-workspace", {
-                        summary: defineContractComponent("challenge-result-summary", {
-                            header: defineContractComponent("centred-title-pair", {
-                                title: defineLeafComponent("heading", {}, () => (
-                                    <Heading props={{ content: input.props.title, level: 1 }} isLoading={loading} />
-                                )),
-                                description: defineLeafComponent("text", { size: "sm" }, () => (
-                                    <Text props={{ content: input.props.description, size: "sm" }} isLoading={loading} />
-                                )),
-                            }),
-                            score: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                                <Text
-                                    props={{ content: input.props.scoreLine, size: "sm", tone: "muted" }}
-                                    isLoading={loading}
-                                />
-                            )),
-                            status: defineContractComponent("stacked-peer-controls", { control: summaryControls }),
-                        }),
-                        ...(feedbackGroups.length === 0 ? {} : {
-                            feedback: defineContractComponent("challenge-criterion-feedback-list", { feedback: feedbackGroups }),
-                        }),
-                        actions: defineContractComponent("challenge-result-actions", { action: actions }),
-                    }),
-                })}
-            />
-            {input.props.isHistoryOpen === true ? <ChallengeAttemptHistoryDrawer
+            <section className={challengeResultDocumentClassName}>{breadcrumb}<div className={challengeResultWorkspaceClassName}>
+                <section className={challengeResultSummaryClassName}>
+                    <div className={titlePairClassName}><Heading props={{ content: props.props.title, level: 1 }} isLoading={loading} /><Text props={{ content: props.props.description, size: "sm" }} isLoading={loading} /></div>
+                    <Text props={{ content: props.props.scoreLine, size: "sm", tone: "muted" }} isLoading={loading} />
+                    <div className={stackedControlsClassName}>{props.blockState === "failed" ? <Text props={{ content: props.props.notice, live: "assertive" }} /> : <>{props.props.shortFeedback === undefined ? null : <Text props={{ content: props.props.shortFeedback }} />}{props.props.outcomeLabel === undefined ? null : <Text props={{ content: props.props.outcomeLabel, weight: "semibold" }} />}{props.props.confidenceLine === undefined ? null : <Text props={{ content: props.props.confidenceLine, size: "sm", tone: "muted" }} />}</>}</div>
+                </section>
+                {props.blockState === "failed" ? null : <div className={challengeFeedbackClassName}>{props.props.feedbacks.map((feedback) => <div key={feedback.id} className={challengeFeedbackItemClassName}><Text props={{ content: feedback.message, weight: "semibold" }} /><Text props={{ content: feedback.severity, size: "sm", tone: "muted" }} />{feedback.detail === undefined ? null : <Text props={{ content: feedback.detail }} />}{feedback.location === undefined ? null : <Text props={{ content: feedback.location, size: "sm" }} />}{feedback.suggestion === undefined ? null : <Text props={{ content: feedback.suggestion }} />}</div>)}{props.props.uncertainty === undefined && props.props.nextAction === undefined ? null : <div className={challengeFeedbackItemClassName}>{props.props.uncertainty === undefined ? null : <Text props={{ content: props.props.uncertainty, size: "sm", tone: "muted" }} />}{props.props.nextAction === undefined ? null : <Text props={{ content: props.props.nextAction, weight: "semibold" }} />}</div>}</div>}
+                <div className={challengeResultActionsClassName}>{props.blockState === "failed" ? <Button props={{ label: props.props.reloadLabel }} on={{ press: props.on?.reload }} /> : <><Button props={{ label: props.props.historyLabel ?? "History", variant: "outline" }} on={{ press: props.on?.openHistory }} /><Button props={{ label: props.props.retryLabel }} on={{ press: props.on?.retry }} /><Button props={{ label: props.props.nextLabel, variant: "primary" }} on={{ press: props.on?.next }} /></>}</div>
+            </div></section>
+            {props.props.isHistoryOpen === true ? <ChallengeAttemptHistoryDrawer
                 isOpen
-                courseId={input.props.courseId}
-                submissionId={input.props.submissionId}
-                selectedAttemptId={input.props.selectedAttemptId}
-                onDismiss={() => input.on?.closeHistory?.()}
-                onSelect={(attempt) => input.on?.selectHistoryAttempt?.(attempt.id, attempt.attemptGroupId)}
+                courseId={props.props.courseId}
+                submissionId={props.props.submissionId}
+                selectedAttemptId={props.props.selectedAttemptId}
+                onDismiss={() => props.on?.closeHistory?.()}
+                onSelect={(attempt) => props.on?.selectHistoryAttempt?.(attempt.id, attempt.attemptGroupId)}
             /> : null}
         </>
     )
 }
-
-/** Architectural identity for the pure result twin. */
-export const meta = { world: "pure", domain: "learn" } as const

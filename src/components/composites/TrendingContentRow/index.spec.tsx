@@ -15,10 +15,9 @@ afterEach(cleanup)
 
 describe("TrendingContentRow", () => {
     it("accents the rank of a top-three result", () => {
-        const { container } = render(<TrendingContentRow props={{ id: "c1", rank: "2", title: "Ownership", isTopRank: true }} />)
+        render(<TrendingContentRow props={{ id: "c1", rank: "2", title: "Ownership", isTopRank: true }} />)
         expect(screen.getByText("2")).toHaveAttribute("data-tone", "accent")
         expect(screen.getByText("Ownership")).toBeInTheDocument()
-        expect(container.querySelector("[data-node=\"rank-title-row\"]")).toBeInTheDocument()
     })
 
     it("quiets the rank of everything below the cut", () => {
@@ -40,9 +39,9 @@ describe("TrendingContentRow", () => {
 
     it("rests without a title, and offers an empty word rather than the text undefined", () => {
         const { container } = render(<TrendingContentRow props={{ id: "resting-0" }} isLoading />)
-        expect(container.querySelector("[data-node=\"rank-title-row\"]")).toBeInTheDocument()
-        expect(container.querySelector("[data-component=\"Text\"][data-loading=\"true\"]")).toBeInTheDocument()
+        expect(container.querySelector("[data-loading=\"true\"]")).toBeInTheDocument()
         expect(screen.queryByText("undefined")).toBeNull()
-        expect(container.querySelector("[data-component=\"TextLink\"]")).toHaveTextContent("")
+        expect(container.firstElementChild?.children).toHaveLength(2)
+        expect(container.firstElementChild?.lastElementChild).toHaveTextContent("")
     })
 })

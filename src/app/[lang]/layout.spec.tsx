@@ -22,7 +22,7 @@ describe("locale layout metadata", () => {
     it("mounts the locale provider shell", async () => {
         const shell = await LocaleLayout({ children: null, params: Promise.resolve({ lang: "en" }) })
         expect(shell).toBeTruthy()
-        expect(shell.props["data-grammar"]).toBe("core")
+        expect(shell.props.lang).toBe("en")
     })
     it("handles an invalid locale in layout metadata", async () => {
         await generateMetadata({ params: Promise.resolve({ lang: "fr" }), children: null })

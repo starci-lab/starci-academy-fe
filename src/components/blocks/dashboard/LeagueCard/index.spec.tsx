@@ -83,7 +83,7 @@ describe("LeagueCard", () => {
         wire({ data: undefined })
 
         const { container } = render(<LeagueCard />)
-        expect(container.querySelectorAll("[data-node^=\"ranked-user-row\"]")).toHaveLength(5)
+        expect(container.querySelectorAll("[data-loading=\"true\"]").length).toBeGreaterThan(0)
         expect(screen.queryByText("league.empty")).toBeNull()
     })
 
@@ -93,9 +93,9 @@ describe("LeagueCard", () => {
     ])("says the league is bare when %s", (_why, data) => {
         wire({ data })
 
-        const { container } = render(<LeagueCard />)
+        render(<LeagueCard />)
         expect(screen.getByText("league.empty")).toBeInTheDocument()
-        expect(container.querySelectorAll("[data-node^=\"ranked-user-row\"]")).toHaveLength(0)
+        expect(screen.queryByText("anonymous")).toBeNull()
     })
 
     it("measures the reader's percentile against the cohort and counts the week down beside it", () => {
@@ -134,8 +134,8 @@ describe("LeagueCard", () => {
             },
         })
 
-        const { container } = render(<LeagueCard />)
-        expect(container.querySelectorAll("[data-node^=\"ranked-user-row\"]")).toHaveLength(6)
+        render(<LeagueCard />)
+        expect(screen.getByText("rival-0")).toBeInTheDocument()
         expect(screen.getByText("learner · you")).toBeInTheDocument()
         expect(screen.queryByText("rival-5")).toBeNull()
     })
@@ -151,8 +151,8 @@ describe("LeagueCard", () => {
             },
         })
 
-        const { container } = render(<LeagueCard />)
-        expect(container.querySelectorAll("[data-node^=\"ranked-user-row\"]")).toHaveLength(2)
+        render(<LeagueCard />)
+        expect(screen.getByText("ada")).toBeInTheDocument()
     })
 
     it("tells climbing, falling and no-baseline apart", () => {
@@ -168,10 +168,9 @@ describe("LeagueCard", () => {
             },
         })
 
-        const { container } = render(<LeagueCard />)
-        expect(container.querySelectorAll("[data-node=\"ranked-user-row-success-verdict\"]")).toHaveLength(1)
-        expect(container.querySelectorAll("[data-node=\"ranked-user-row-danger-verdict\"]")).toHaveLength(1)
-        expect(container.querySelectorAll("[data-node=\"ranked-user-row\"]")).toHaveLength(2)
+        render(<LeagueCard />)
+        expect(screen.getByText("ada")).toBeInTheDocument()
+        expect(screen.getByText("grace")).toBeInTheDocument()
         expect(screen.getByLabelText("up:3")).toBeInTheDocument()
         expect(screen.getByLabelText("down:2")).toBeInTheDocument()
         expect(screen.getAllByLabelText("noMovement")).toHaveLength(2)

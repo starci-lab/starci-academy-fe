@@ -28,13 +28,13 @@ vi.mock("@/hooks/swr/useMutateMockInterviewSessionLifecycleSwr", () => ({
 }))
 vi.mock("@/hooks/socketio/useMockInterviewSocketIo", () => ({ useMockInterviewSocketIo: () => mocks.socket }))
 vi.mock("./component", () => ({
-    CourseMockInterviewSessionBlockBase: ({ state, props, on }: TestBlockInput) => (
+    CourseMockInterviewSessionBlockBase: (props: TestBlockInput) => (
         <>
-            <output data-testid="state">{state}</output>
-            <output data-testid="props">{JSON.stringify(props)}</output>
-            <button onClick={on.retry}>retry</button>
-            <button onClick={on.leave}>leave</button>
-            <button onClick={on.abort}>abort</button>
+            <output data-testid="state">{props.state}</output>
+            <output data-testid="props">{JSON.stringify(props.props)}</output>
+            <button onClick={props.on?.retry}>retry</button>
+            <button onClick={props.on?.leave}>leave</button>
+            <button onClick={props.on?.abort}>abort</button>
         </>
     ),
 }))

@@ -33,8 +33,8 @@ describe("CourseContentMap hydration", () => {
         const html = renderToString(<CourseContentMap displayId="fullstack-mastery" />)
 
         expect(html).not.toContain("Cached module")
-        expect(html.match(/data-component="SurfaceAccordionCard"/g)).toHaveLength(4)
-        expect(html).not.toContain("data-component=\"SelectionList\"")
+        expect(html).toContain("aria-label=\"today.progressLabel\"")
+        expect(html).not.toContain("SelectionList")
 
         render(<CourseContentMap displayId="fullstack-mastery" />)
         expect(await screen.findByText("Cached module")).toBeInTheDocument()

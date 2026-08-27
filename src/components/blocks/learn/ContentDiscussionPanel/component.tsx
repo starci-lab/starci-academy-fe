@@ -1,15 +1,13 @@
-import { Tree } from "@/components/branches/Tree"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
-import {
-    defineCompositeComponent,
-    defineContractComponent,
-    defineLeafComponent,
-    type BlockProps,
-} from "@/components/contracts/props"
 import { Button } from "@/components/leaves/Button"
 import { Heading } from "@/components/leaves/Heading"
 import { Text } from "@/components/leaves/Text"
 import { Textarea } from "@/components/leaves/Textarea"
+import {
+    contentDiscussionCommentClassName,
+    contentDiscussionListClassName,
+    contentDiscussionPanelClassName,
+} from "./classNames"
 
 /** One resolved top-level lesson comment. */
 export type ContentDiscussionComment = {
@@ -50,7 +48,9 @@ export type ContentDiscussionPanelActions = {
 export type ContentDiscussionPanelState = "pending" | "ready" | "empty" | "failed" | "submitting"
 
 /** Props for the pure discussion block. */
-export type ContentDiscussionPanelProps = BlockProps<ContentDiscussionPanelState, ContentDiscussionPanelData> & {
+export type ContentDiscussionPanelProps = {
+    readonly state: ContentDiscussionPanelState
+    readonly props: ContentDiscussionPanelData
     readonly on?: ContentDiscussionPanelActions
 }
 
@@ -60,84 +60,60 @@ const PENDING_COMMENTS: ReadonlyArray<ContentDiscussionComment> = Array.from(
 )
 
 /** Draws top-level lesson comments and their composer without reading transport. */
-export const ContentDiscussionPanelBase = (input: ContentDiscussionPanelProps) => {
-    const isLoading = input.state === "pending"
-    const isSubmitting = input.state === "submitting"
-    const comments = isLoading ? PENDING_COMMENTS : input.props.comments
-    const canCompose = input.state === "ready" || input.state === "empty" || isSubmitting
-
-    const list = defineContractComponent("content-discussion-list", {
-        comment: comments.map((comment) => defineContractComponent("content-discussion-comment-row", {
-            author: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
-                <Text
-                    props={{ content: comment.author, size: "sm", weight: "semibold" }}
-                    isLoading={isLoading}
-                />
-            )),
-            meta: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                <Text props={{ content: comment.meta, size: "xs", tone: "muted" }} isLoading={isLoading} />
-            )),
-            body: defineLeafComponent("text", { size: "sm" }, () => (
-                <Text props={{ content: comment.body, size: "sm" }} isLoading={isLoading} />
-            )),
-        })),
-    })
+export const ContentDiscussionPanelBase = (props: ContentDiscussionPanelProps) => {
+    const isLoading = props.state === "pending"
+    const isSubmitting = props.state === "submitting"
+    const comments = isLoading ? PENDING_COMMENTS : props.props.comments
+    const canCompose = props.state === "ready" || props.state === "empty" || isSubmitting
 
     return (
-        <Tree
-            contract="content-discussion-panel"
-            render={defineContractComponent("content-discussion-panel", {
-                title: defineLeafComponent("heading", {}, () => (
-                    <Heading props={{ content: input.props.labels.title, level: 2 }} />
-                )),
-                ...(canCompose ? {
-                    composer: defineLeafComponent("textarea", {}, () => (
-                        <Textarea
-                            key={input.props.draftKey}
-                            props={{
-                                id: "content-discussion-comment",
-                                name: "content-discussion-comment",
-                                label: input.props.labels.composerLabel,
-                                placeholder: input.props.labels.placeholder,
-                                defaultValue: input.props.draft,
-                                rows: 3,
-                                disabled: isSubmitting,
-                            }}
-                            on={{ change: input.on?.changeDraft }}
-                        />
-                    )),
-                    submit: defineLeafComponent("button", {}, () => (
-                        <Button
-                            props={{
-                                label: isSubmitting ? input.props.labels.submitting : input.props.labels.submit,
-                                variant: "primary",
-                                icon: "send",
-                                disabled: input.props.draft.trim() === "",
-                                isPending: isSubmitting,
-                            }}
-                            on={{ press: input.on?.submit }}
-                        />
-                    )),
-                } : {}),
-                ...(input.state === "failed" || input.state === "empty" ? {
-                    notice: defineCompositeComponent("empty-notice", {}, () => (
-                        <EmptyNotice
-                            props={{
-                                icon: input.state === "failed" ? "retry" : "community",
-                                message: input.state === "failed"
-                                    ? input.props.labels.failed
-                                    : input.props.labels.empty,
-                                actionLabel: input.state === "failed" ? input.props.labels.retry : undefined,
-                            }}
-                            on={{ act: input.state === "failed" ? input.on?.retry : undefined }}
-                        />
-                    )),
-                } : {}),
-                ...(input.state === "failed" || input.state === "empty" ? {} : { list }),
-            })}
-        />
+        <section className={contentDiscussionPanelClassName} aria-label={props.props.labels.title}>
+            <Heading props={{ content: props.props.labels.title, level: 2 }} />
+            {canCompose ? <>
+                <Textarea
+                    key={props.props.draftKey}
+                    props={{
+                        id: "content-discussion-comment",
+                        name: "content-discussion-comment",
+                        label: props.props.labels.composerLabel,
+                        placeholder: props.props.labels.placeholder,
+                        defaultValue: props.props.draft,
+                        rows: 3,
+                        disabled: isSubmitting,
+                    }}
+                    on={{ change: props.on?.changeDraft }}
+                />
+                <Button
+                    props={{
+                        label: isSubmitting ? props.props.labels.submitting : props.props.labels.submit,
+                        variant: "primary",
+                        icon: "send",
+                        disabled: props.props.draft.trim() === "",
+                        isPending: isSubmitting,
+                    }}
+                    on={{ press: props.on?.submit }}
+                />
+            </> : null}
+            {props.state === "failed" || props.state === "empty" ? (
+                <EmptyNotice
+                    props={{
+                        icon: props.state === "failed" ? "retry" : "community",
+                        message: props.state === "failed" ? props.props.labels.failed : props.props.labels.empty,
+                        actionLabel: props.state === "failed" ? props.props.labels.retry : undefined,
+                    }}
+                    on={{ act: props.state === "failed" ? props.on?.retry : undefined }}
+                />
+            ) : (
+                <ul className={contentDiscussionListClassName}>
+                    {comments.map((comment) => (
+                        <li key={comment.id} className={contentDiscussionCommentClassName}>
+                            <Text props={{ content: comment.author, size: "sm", weight: "semibold" }} isLoading={isLoading} />
+                            <Text props={{ content: comment.meta, size: "xs", tone: "muted" }} isLoading={isLoading} />
+                            <Text props={{ content: comment.body, size: "sm" }} isLoading={isLoading} />
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </section>
     )
 }
-
-/** Architectural identity for the pure discussion block. */
-export const meta = { world: "pure", domain: "learn" } as const

@@ -14,7 +14,7 @@ import { LeagueTile } from "."
 describe("LeagueTile", () => {
     it("frames the rank artwork on its own plate", () => {
         const { container } = render(<LeagueTile props={{ rank: 1, accessibleLabel: "Rank #1" }} />)
-        const tile = container.querySelector("[data-component=\"LeagueTile\"]")
+        const tile = container.firstElementChild
         expect(tile).not.toBeNull()
         expect(tile?.className).toContain("size-12")
         expect(tile?.className).toContain("bg-default")
@@ -30,18 +30,18 @@ describe("LeagueTile", () => {
         // assertable is the ownership boundary this leaf exists to respect - the tile hands the
         // rank onward and never writes an artwork identity of its own.
         const { container } = render(<LeagueTile props={{ rank: 2, accessibleLabel: "Rank #2" }} />)
-        const tile = container.querySelector("[data-component=\"LeagueTile\"]")
+        const tile = container.firstElementChild
         expect(tile).not.toBeNull()
         expect(tile?.innerHTML).not.toContain("fluent-emoji-flat")
     })
 
     it("rests at the plate's real size so the row does not reflow when the rank arrives", () => {
         const { container } = render(<LeagueTile props={{}} isLoading />)
-        const tile = container.querySelector("[data-component=\"LeagueTile\"]")
+        const tile = container.firstElementChild
         expect(tile?.getAttribute("data-loading")).toBe("true")
         expect(tile?.className).toContain("size-12")
         // A resting plate is decoration, not a rank of nothing.
         expect(tile?.getAttribute("aria-hidden")).toBe("true")
-        expect(container.querySelector("[data-component=\"RankMark\"]")).toBeNull()
+        expect(tile?.querySelector("[aria-label]")).toBeNull()
     })
 })

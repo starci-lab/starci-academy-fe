@@ -3,11 +3,10 @@ import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { LabelledProgressRow } from "@/components/composites/LabelledProgressRow"
 import { Text } from "@/components/leaves/Text"
 import {
-    defineCompositeComponent,
-    defineContractComponent,
-    defineContractProjection,
-    defineLeafComponent,
-} from "@/components/contracts/props"
+    courseProgressOverviewClassName,
+    courseProgressSupportClassName,
+    supportFactClassName,
+} from "./classNames"
 
 /** Copy known before the course evidence settles. */
 export type CourseProgressOverviewFrame = {
@@ -26,7 +25,7 @@ export type CourseProgressOverviewEvidence = {
 }
 
 /** Props for the accepted coordinated progress-summary anatomy. */
-export type CourseProgressOverviewProps =
+type CourseProgressOverviewStateProps =
     | { readonly state: "pending"; readonly props: CourseProgressOverviewFrame }
     | { readonly state: "empty"; readonly props: CourseProgressOverviewFrame & { readonly message: string } }
     | { readonly state: "failed"; readonly props: CourseProgressOverviewFrame & { readonly message: string; readonly retryLabel: string } }
@@ -37,68 +36,55 @@ export type CourseProgressOverviewActions = {
     readonly retry?: () => void
 }
 
-type CourseProgressOverviewInput = CourseProgressOverviewProps & { readonly on?: CourseProgressOverviewActions }
+/** Complete progress-overview state and actions. */
+export type CourseProgressOverviewProps = CourseProgressOverviewStateProps & {
+    readonly on?: CourseProgressOverviewActions
+}
 
-const supportFact = (label: string | undefined, fact: string | undefined, isLoading: boolean) =>
-    defineContractComponent("label-with-muted-fact-row", {
-        label: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
-            <Text props={{ content: label, size: "sm", weight: "semibold" }} isLoading={isLoading} />
-        )),
-        fact: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-            <Text props={{ content: fact, size: "xs", tone: "muted" }} isLoading={isLoading} />
-        )),
-    })
+type SupportFactProps = { readonly label?: string; readonly fact?: string; readonly isLoading: boolean }
+
+/** Draw one supporting label and muted fact. */
+const SupportFact = (props: SupportFactProps) => <div className={supportFactClassName}>
+    <Text props={{ content: props.label, size: "sm", weight: "semibold" }} isLoading={props.isLoading} />
+    <Text props={{ content: props.fact, size: "xs", tone: "muted" }} isLoading={props.isLoading} />
+</div>
 
 /** Draw completion first, with continuity and standing as coordinated supporting evidence. */
-export const CourseProgressOverview = (input: CourseProgressOverviewInput) => {
-    if (input.state === "failed" || input.state === "empty") {
+export const CourseProgressOverview = (props: CourseProgressOverviewProps) => {
+    if (props.state === "failed" || props.state === "empty") {
         return (
-            <SurfaceCard
-                props={{ label: input.props.label }}
-                contract="empty-notice-card"
-                render={defineContractComponent("empty-notice-card", {
-                    notice: defineCompositeComponent("empty-notice", {}, () => (
-                        <EmptyNotice
-                            props={{
-                                icon: "course",
-                                message: input.props.message,
-                                ...(input.state === "failed" ? { actionLabel: input.props.retryLabel } : {}),
-                            }}
-                            on={{ act: input.on?.retry }}
-                        />
-                    )),
-                })}
-            />
+            <SurfaceCard props={{ label: props.props.label }}>
+                <EmptyNotice
+                    props={{
+                        icon: "course",
+                        message: props.props.message,
+                        ...(props.state === "failed" ? { actionLabel: props.props.retryLabel } : {}),
+                    }}
+                    on={{ act: props.on?.retry }}
+                />
+            </SurfaceCard>
         )
     }
 
-    const isLoading = input.state === "pending"
-    const evidence = input.state === "pending" ? undefined : input.props
+    const isLoading = props.state === "pending"
+    const evidence = props.state === "pending" ? undefined : props.props
     return (
-        <SurfaceCard
-            props={{ label: input.props.label }}
-            contract="course-progress-overview"
-            isLoading={isLoading}
-            render={defineContractComponent("course-progress-overview", {
-                completion: defineContractProjection("label-fact-over-progress", () => (
-                    <LabelledProgressRow
-                        props={{
-                            id: "course-completion",
-                            title: input.props.completionLabel,
-                            percent: evidence?.completionValue,
-                            percentText: evidence?.completionFact,
-                        }}
-                        isLoading={isLoading}
-                    />
-                )),
-                support: defineContractComponent("course-progress-support-facts", {
-                    continuity: supportFact(evidence?.continuityLabel, evidence?.continuityFact, isLoading),
-                    standing: supportFact(evidence?.standingLabel, evidence?.standingFact, isLoading),
-                }),
-            })}
-        />
+        <SurfaceCard props={{ label: props.props.label }} isLoading={isLoading}>
+            <div className={courseProgressOverviewClassName}>
+                <LabelledProgressRow
+                    props={{
+                        id: "course-completion",
+                        title: props.props.completionLabel,
+                        percent: evidence?.completionValue,
+                        percentText: evidence?.completionFact,
+                    }}
+                    isLoading={isLoading}
+                />
+                <div className={courseProgressSupportClassName}>
+                    <SupportFact label={evidence?.continuityLabel} fact={evidence?.continuityFact} isLoading={isLoading} />
+                    <SupportFact label={evidence?.standingLabel} fact={evidence?.standingFact} isLoading={isLoading} />
+                </div>
+            </div>
+        </SurfaceCard>
     )
 }
-
-/** Source-level ownership marker. */
-export const meta = { world: "pure", domain: "learn" } as const

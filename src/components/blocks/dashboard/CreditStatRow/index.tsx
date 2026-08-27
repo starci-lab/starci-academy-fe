@@ -10,7 +10,11 @@ import { CreditStatRowBase } from "./component"
  * ONE REQUEST, ONE SETTLING UNIT. See {@link StreakStatRow} for why the rail is three blocks and
  * not one, and why none of them carries a `state`.
  */
-export const CreditStatRow = () => {
+/** Props for the connected credit stat row. */
+export type CreditStatRowProps = Record<string, never>
+/** Connect the CreditStatRow block to its data source. */
+export const CreditStatRow = (props: CreditStatRowProps) => {
+    void props
     const t = useTranslations("identity")
     const quota = useQueryMyAiQuotaSwr()
 
@@ -22,6 +26,3 @@ export const CreditStatRow = () => {
 
     return <CreditStatRowBase state="settled" props={{ label: t("aiCredit"), value: t("creditOf", { remaining: credit.remainingWeek, limit: credit.limitWeek }) }} />
 }
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { world: "connected", domain: "identity" } as const

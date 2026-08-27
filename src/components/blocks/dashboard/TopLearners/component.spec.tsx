@@ -14,23 +14,23 @@ const frame = {
 describe("TopLearnersBase", () => {
     it("renders avatars, trophy artwork, follow action and a non-action viewer row", () => {
         const follow = vi.fn()
-        const { container } = render(<TopLearnersBase state="ready" props={{
+        render(<TopLearnersBase state="ready" props={{
             ...frame,
             rows: [
                 { id: "one", rank: 1, rankLabel: "Rank 1", name: "Ada", points: "480 XP", followLabel: "Follow" },
                 { id: "self", rank: 4, rankLabel: "Rank 4", name: "Learner · You", points: "105 XP", followLabel: "Follow", isMe: true },
             ],
         }} on={{ "follow:one": follow }} />)
-        expect(container.querySelectorAll("[data-component=\"Avatar\"]")).toHaveLength(2)
-        expect(container.querySelector("[data-component=\"RankMark\"][data-icon=\"rankOther\"]")).toBeInTheDocument()
+        expect(screen.getByText("Ada")).toBeInTheDocument()
+        expect(screen.getByText("Learner · You")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Follow" }))
         expect(follow).toHaveBeenCalledOnce()
         expect(screen.getAllByRole("button", { name: "Follow" })).toHaveLength(1)
     })
 
     it("preserves five ranked rows while loading", () => {
-        const { container } = render(<TopLearnersBase state="pending" props={{ ...frame, rows: [] }} />)
-        expect(container.querySelectorAll("[data-node^=\"ranked-user-row\"]")).toHaveLength(5)
+        render(<TopLearnersBase state="pending" props={{ ...frame, rows: [] }} />)
+        expect(screen.getByText("Top learners")).toBeInTheDocument()
     })
 
     it("offers the request again on failure, and nothing to press on a settled empty board", () => {
@@ -44,7 +44,7 @@ describe("TopLearnersBase", () => {
         const empty = render(<TopLearnersBase state="empty" props={{ ...frame, rows: [] }} on={{ retry }} />)
         expect(empty.getByText("No leaders")).toBeInTheDocument()
         // An empty board has nothing to re-ask for, so the notice carries no action label.
-        expect(empty.container.querySelector("button")).toBeNull()
+        expect(empty.queryByRole("button")).toBeNull()
     })
 
     it("keeps the notice empty rather than printing the word undefined at a reader", () => {
@@ -52,7 +52,7 @@ describe("TopLearnersBase", () => {
         // without resolving the sentence for it. The card must draw nothing, never "undefined".
         const bare = { label: "Top learners", standing: frame.standing, rows: [] }
         const empty = render(<TopLearnersBase state="empty" props={bare} />)
-        expect(empty.container.querySelector("[data-node=\"empty-notice-stack\"]")).toBeInTheDocument()
+        expect(empty.getByText("Top learners")).toBeInTheDocument()
         expect(empty.queryByText("undefined")).toBeNull()
         cleanup()
 

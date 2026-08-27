@@ -1,9 +1,7 @@
 import { Avatar } from "@/components/leaves/Avatar"
 import { Icon } from "@/components/leaves/Icon"
 import { Text } from "@/components/leaves/Text"
-import type { CompositeProps } from "@/components/contracts/props"
 import { PressableSurface } from "@/components/branches/PressableSurface"
-import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
 /** Resolved identity shown at the head of the dashboard rail. */
 export type ProfileRowData = {
@@ -18,21 +16,12 @@ export type ProfileRowActions = {
 }
 
 /** Props for the fixed dashboard profile cluster. */
-export type ProfileRowProps = CompositeProps<ProfileRowData, ProfileRowActions>
+export type ProfileRowProps = { readonly props: ProfileRowData; readonly on?: ProfileRowActions; readonly isLoading?: boolean }
 
 /** Fixed profile cluster copied from the legacy rail: avatar, name/handle, disclosure. */
-export const ProfileRow = ({ props, on, isLoading = false }: ProfileRowProps) => {
-    const identity = defineContractComponent("profile-name-over-handle", {
-        name: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => <Text props={{ content: props.displayName, size: "sm", weight: "semibold" }} isLoading={isLoading} />),
-        handle: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: props.username === undefined ? undefined : `@${props.username}`, size: "xs" }} isLoading={isLoading} />),
-    })
-    const content = defineContractComponent("profile-avatar-name-handle-disclosure-row", {
-        avatar: defineLeafComponent("avatar", {}, () => <Avatar props={{ name: props.displayName, src: props.avatar, size: "md" }} isLoading={isLoading} />),
-        identity,
-        disclosure: defineLeafComponent("icon", {}, () => <Icon props={{ name: "disclosure", role: "chip" }} />),
-    })
-    return <PressableSurface contract="profile-avatar-name-handle-disclosure-row" render={content} label={props.displayName ?? "Profile"} press={on?.press} />
+export const ProfileRow = (props: ProfileRowProps) => {
+    const data = props.props
+    const on = props.on
+    const isLoading = props.isLoading ?? false
+    return <PressableSurface label={data.displayName ?? "Profile"} press={on?.press}><Avatar props={{ name: data.displayName, src: data.avatar, size: "md" }} isLoading={isLoading} /><div><Text props={{ content: data.displayName, size: "sm", weight: "semibold" }} isLoading={isLoading} /><Text props={{ content: data.username === undefined ? undefined : `@${data.username}`, size: "xs" }} isLoading={isLoading} /></div><Icon props={{ name: "disclosure", role: "chip" }} /></PressableSurface>
 }
-
-/** Source-level tier marker for the fixed profile-row composition. */
-export const meta = { shape: "composite", world: "pure" } as const

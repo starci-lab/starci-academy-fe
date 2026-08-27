@@ -94,12 +94,11 @@ describe("CoursesTab", () => {
         wire()
 
         const { container } = render(<CoursesTab />)
-        const sections = Array.from(container.querySelectorAll("[data-node=\"dashboard-tab-main\"] > *"))
-        expect(sections).toHaveLength(3)
+        const content = container.textContent ?? ""
+        expect(content).toContain("Ownership in depth")
         // Progress first, then what to buy next, then what is happening live.
-        expect(sections[0]).toHaveTextContent("Ownership in depth")
-        expect(sections[1]).toHaveTextContent("Rust basics")
-        expect(sections[2]).toHaveTextContent("Kickoff")
+        expect(content.indexOf("Ownership in depth")).toBeLessThan(content.indexOf("Rust basics"))
+        expect(content.indexOf("Rust basics")).toBeLessThan(content.indexOf("Kickoff"))
     })
 
     it("mounts no price surface until a row asks about its price", () => {

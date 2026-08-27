@@ -15,7 +15,7 @@ vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) })
 vi.mock("@/hooks/swr/useQueryCourseSwr", () => ({ useQueryCourseSwr: () => mocks.course }))
 vi.mock("@/hooks/swr/useQueryHeadhuntingCompanySwr", () => ({ useQueryHeadhuntingCompanySwr: () => mocks.company }))
 vi.mock("@/hooks/swr/useQueryConsultantsSwr", () => ({ useQueryConsultantsSwr: () => mocks.consultants }))
-vi.mock("./component", () => ({ CourseHeadhuntingCompanyBlockBase: (input: TestInput) => { mocks.input = input; return <output data-testid="company" /> } }))
+vi.mock("./component", () => ({ CourseHeadhuntingCompanyBlockBase: (props: TestInput) => { mocks.input = props; return <output data-testid="company" /> } }))
 
 import { CourseHeadhuntingCompanyBlock } from "./index"
 

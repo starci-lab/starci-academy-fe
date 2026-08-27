@@ -10,13 +10,11 @@ const labels = {
     unavailable: "Price unavailable",
 }
 
-const rows = () =>
-    Array.from(
-        document.querySelectorAll("[data-node=\"label-with-muted-fact-row\"]"),
-        (row) => row.textContent,
-    )
+const rows = () => ["Subtotal", "Bundle saving", "Instalment fee (5%)"]
+    .filter((label) => screen.queryByText(label) !== null)
+    .map((label) => `${label}${screen.getByText(label).parentElement?.textContent?.slice(label.length) ?? ""}`)
 
-const totalRow = () => document.querySelector("[data-node=\"order-total-row\"]")
+const totalRow = () => screen.getByText("Total").parentElement
 
 describe("OrderSummaryBase", () => {
     it("names every component of the order above the figure the reader owes", () => {

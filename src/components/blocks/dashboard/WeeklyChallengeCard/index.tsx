@@ -15,7 +15,11 @@ const relativeLabel = (locale: string, iso: string) => {
 }
 
 /** Connected half: owns the featured challenge query, claim mutation and route. */
-export const WeeklyChallengeCard = () => {
+/** Props for the connected weekly challenge card. */
+export type WeeklyChallengeCardProps = Record<string, never>
+/** Connect the WeeklyChallengeCard block to its data source. */
+export const WeeklyChallengeCard = (props: WeeklyChallengeCardProps) => {
+    void props
     const t = useTranslations("weeklyChallenge")
     const locale = useLocale()
     const router = useRouter()
@@ -51,33 +55,26 @@ export const WeeklyChallengeCard = () => {
     }
 
     return (
-        <WeeklyChallengeCardBase
-            state={state}
-            props={{
-                label: t("title"),
-                emptyMessage: t("empty"),
-                errorMessage: t("failed"),
-                retryLabel: t("retry"),
-                title: data?.title,
-                endsInLabel: countdown === undefined ? undefined : t("endsIn", countdown),
-                passedCountLabel: data === null || data === undefined ? undefined : t("passedCount", { count: data.passedCount }),
-                claimedLabel: t("claimed"),
-                viewerPassed: data?.viewerPassed,
-                claimed: data?.claimed,
-                actionLabel: data?.viewerPassed && !data.claimed ? t("claim", { count: data.coinReward ?? 0 }) : t("tryNow"),
-                isClaiming,
-                finishers: data?.leaderboard.slice(0, 5).map((entry, index) => ({
-                    id: `${entry.username}-${index}`,
-                    label: entry.username,
-                    passedAtLabel: relativeLabel(locale, entry.passedAt),
-                })),
-            }}
-            on={{ retry: () => { void challenge.mutate() }, act: () => { void act() } }}
-        />
+        <WeeklyChallengeCardBase state={state} props={{
+            label: t("title"),
+            emptyMessage: t("empty"),
+            errorMessage: t("failed"),
+            retryLabel: t("retry"),
+            title: data?.title,
+            endsInLabel: countdown === undefined ? undefined : t("endsIn", countdown),
+            passedCountLabel: data === null || data === undefined ? undefined : t("passedCount", { count: data.passedCount }),
+            claimedLabel: t("claimed"),
+            viewerPassed: data?.viewerPassed,
+            claimed: data?.claimed,
+            actionLabel: data?.viewerPassed && !data.claimed ? t("claim", { count: data.coinReward ?? 0 }) : t("tryNow"),
+            isClaiming,
+            finishers: data?.leaderboard.slice(0, 5).map((entry, index) => ({
+                id: `${entry.username}-${index}`,
+                label: entry.username,
+                passedAtLabel: relativeLabel(locale, entry.passedAt),
+            })),
+        }} on={{ retry: () => { void challenge.mutate() }, act: () => { void act() } }} />
     )
 }
 
 export * from "./component"
-
-/** Source-level tier marker for the connected dashboard block. */
-export const meta = { world: "connected", domain: "dashboard" } as const

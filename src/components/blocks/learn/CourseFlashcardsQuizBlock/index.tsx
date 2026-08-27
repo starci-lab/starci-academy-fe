@@ -9,7 +9,7 @@ import { useQueryMyInProgressFlashcardSessionSwr } from "@/hooks/swr/useQueryMyI
 import { useMutateStartFlashcardSessionSwr } from "@/hooks/swr/useMutateStartFlashcardSessionSwr"
 import { useQueryMyFlashcardQuizHistorySwr } from "@/hooks/swr/useQueryMyFlashcardQuizHistorySwr"
 import { useQueryMyFlashcardQuizStatsSwr } from "@/hooks/swr/useQueryMyFlashcardQuizStatsSwr"
-import { CourseFlashcardsQuizBlockBase, type FlashcardQuizView } from "./component"
+import { CourseFlashcardsQuizBlockView, type FlashcardQuizView } from "./component"
 
 /** Route identity required by the connected flashcard quiz setup. */
 export type CourseFlashcardsQuizBlockProps = { readonly displayId: string, readonly deckId?: string }
@@ -101,7 +101,8 @@ const shuffle = <T,>(values: ReadonlyArray<T>): Array<T> => {
 }
 
 /** Resolves quiz configuration, card draw, and start/resume actions. */
-export const CourseFlashcardsQuizBlock = ({ displayId, deckId }: CourseFlashcardsQuizBlockProps) => {
+export const CourseFlashcardsQuizBlock = (props: CourseFlashcardsQuizBlockProps) => {
+    const { displayId, deckId } = props
     const copy = labels(useLocale())
     const router = useRouter()
     const [practiceMode, setPracticeMode] = useState<"quick" | "deep">("quick")
@@ -155,7 +156,7 @@ export const CourseFlashcardsQuizBlock = ({ displayId, deckId }: CourseFlashcard
         ]
 
     return (
-        <CourseFlashcardsQuizBlockBase
+        <CourseFlashcardsQuizBlockView
             pageState={activeView}
             blockState={blockState}
             props={{
@@ -213,6 +214,3 @@ export const CourseFlashcardsQuizBlock = ({ displayId, deckId }: CourseFlashcard
 }
 
 /** Canon metadata for the connected page half. */
-export const meta = { world: "connected", domain: "learn" } as const
-
-

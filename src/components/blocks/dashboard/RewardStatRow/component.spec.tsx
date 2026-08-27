@@ -12,6 +12,6 @@ describe("RewardStatRowBase", () => {
 
     it("turns the pending situation into a resting value leaf", () => {
         const { container } = render(<RewardStatRowBase state="pending" props={{ label: "Coins" }} />)
-        expect(container.querySelector("[data-component=\"Text\"][data-loading=\"true\"]")).toBeTruthy()
+        expect(container.querySelector("[data-loading=\"true\"]")).toBeTruthy()
     })
 })

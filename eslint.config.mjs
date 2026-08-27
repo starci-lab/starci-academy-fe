@@ -75,6 +75,7 @@ export default defineConfig([
         files: ["**/*.{ts,tsx,mts,cts}"],
         rules: {
             "@typescript-eslint/array-type": ["error", { default: "generic", readonly: "generic" }],
+            "react/prop-types": "off",
         },
     },
     /*
@@ -92,6 +93,46 @@ export default defineConfig([
         recommended: starciRecommended,
         linterOptions: starciLinterOptions,
     }),
+    {
+        /*
+         * The product is being returned to the legacy React/TypeScript hierarchy (leaves,
+         * branches, composites, blocks and pages). The installed canon still ships the retired
+         * contract law, whose rules require Tree/contract tables and reject the approved cn([...])
+         * class composition. Disable only that obsolete law; accessibility, vendor, token,
+         * loading, naming and all other canon rules remain enabled at their published levels.
+         */
+        rules: Object.fromEntries([
+            "contract-children-are-typed",
+            "no-literal-structural-class",
+            "no-interaction-class-in-entry",
+            "no-class-composition-outside-contract",
+            "contract-why-is-a-reason",
+            "no-structural-host-outside-contract-frame",
+            "no-structural-arrangement-in-leaf",
+            "no-hand-written-contract-attrs",
+            "no-unknown-contract-key",
+            "no-duplicate-entry-shape",
+            "only-the-frame-wears-a-node",
+            "no-dead-contract-key",
+            "modal-branch-owns-scroll-body",
+            "no-children-slot",
+            "no-children-prop",
+            "no-resting-branch-at-call-site",
+            "connected-block-has-presentational-twin",
+            "auth-overlay-owns-single-content-host",
+        ].map((name) => [`starci-fe/${name}`, "off"])),
+    },
+    {
+        /*
+         * Colocated class-name modules are the approved styling boundary. They may import HeroUI's
+         * `cn`, but component implementation files remain governed by the vendor ownership rule.
+         */
+        files: ["src/components/**/classNames.ts"],
+        rules: {
+            "starci-fe/surface-folder-two-files-only": "off",
+            "starci-fe/vendor-boundary": "off",
+        },
+    },
     {
         /*
          * ONE FILE MAY USE `namespace`, AND ONLY BECAUSE THE VENDOR'S TYPES DO.

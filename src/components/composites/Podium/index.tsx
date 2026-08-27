@@ -1,14 +1,7 @@
-import { Tree } from "@/components/branches/Tree"
 import { Avatar } from "@/components/leaves/Avatar"
 import { PodiumStep, type PodiumPlace } from "@/components/leaves/PodiumStep"
 import { RankMark } from "@/components/leaves/RankMark"
 import { Text } from "@/components/leaves/Text"
-import {
-    defineCompositeComponent,
-    defineContractComponent,
-    defineLeafComponent,
-    type CompositeProps,
-} from "@/components/contracts/props"
 
 /**
  * COMPOSITE - `Podium`: the top three, arranged so the ranking is the picture.
@@ -18,7 +11,7 @@ import {
  * rows with different numbers would be the wrong sentence in the right grammar.
  *
  * READING ORDER IS NOT VISUAL ORDER. Places are emitted best-first, so anyone reading in sequence
- * hears first, second, third. The 2-1-3 dais is produced by the `podium` contract's own nth-child
+ * hears first, second, third. The 2-1-3 dais is produced by the `podium` layout's own nth-child
  * ordering, because "champion in the middle" is a fact about the dais rather than about whoever
  * happens to be standing on it.
  */
@@ -47,58 +40,41 @@ export type PodiumData = {
 }
 
 /** Props for {@link Podium}. */
-export type PodiumProps = CompositeProps<PodiumData>
+export type PodiumProps = { readonly props: PodiumData; readonly isLoading?: boolean }
 
-/** Places are emitted best-first; the `podium` contract turns this into the 2-1-3 dais. */
+/** Places are emitted best-first; the `podium` layout turns this into the 2-1-3 dais. */
 const PLACES: ReadonlyArray<PodiumPlace> = [1, 2, 3]
 
 /** Draw the top three as a dais. */
-export const Podium = ({ props, isLoading = false }: PodiumProps) => {
-    const byRank = new Map(props.entries.map((entry) => [entry.rank, entry]))
+export const Podium = (props: PodiumProps) => {
+    const isLoading = props.isLoading ?? false
+    const byRank = new Map(props.props.entries.map((entry) => [entry.rank, entry]))
     const place = PLACES.flatMap((rank) => {
         const entry = byRank.get(rank)
         if (entry === undefined && !isLoading) return []
         const name = entry === undefined
             ? undefined
             : entry.isMe
-                ? `${entry.username ?? props.anonymousLabel} · ${props.meLabel}`
-                : entry.username ?? props.anonymousLabel
-        return [defineCompositeComponent("podium-place", {}, () => (
-            <Tree contract="podium-place" render={defineContractComponent("podium-place", {
-                mark: defineLeafComponent("rank-mark", { placement: "row" }, () => (
-                    <RankMark
-                        props={{ rank, placement: "row", accessibleLabel: entry?.rankLabel }}
-                        isLoading={isLoading}
-                    />
-                )),
-                avatar: defineLeafComponent("avatar", {}, () => (
-                    <Avatar
-                        props={{ name, src: entry?.avatar ?? undefined, size: rank === 1 ? "lg" : "md" }}
-                        isLoading={isLoading}
-                    />
-                )),
-                name: defineLeafComponent("text", {}, () => (
-                    <Text
-                        props={{
-                            content: name,
-                            size: "sm",
-                            weight: entry?.isMe === true ? "semibold" : undefined,
-                            tone: entry?.isMe === true ? "accent" : "default",
-                        }}
-                        isLoading={isLoading}
-                    />
-                )),
-                points: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                    <Text props={{ content: entry?.pointsLabel, size: "xs", tone: "muted" }} isLoading={isLoading} />
-                )),
-                step: defineLeafComponent("podium-step", {}, () => (
-                    <PodiumStep props={{ place: rank }} isLoading={isLoading} />
-                )),
-            })} />
-        ))]
+                ? `${entry.username ?? props.props.anonymousLabel} · ${props.props.meLabel}`
+                : entry.username ?? props.props.anonymousLabel
+        return [<div key={rank}><RankMark
+            props={{ rank, placement: "row", accessibleLabel: entry?.rankLabel }}
+            isLoading={isLoading}
+        />
+        <Avatar
+            props={{ name, src: entry?.avatar ?? undefined, size: rank === 1 ? "lg" : "md" }}
+            isLoading={isLoading}
+        />
+        <Text
+            props={{
+                content: name,
+                size: "sm",
+                weight: entry?.isMe === true ? "semibold" : undefined,
+                tone: entry?.isMe === true ? "accent" : "default",
+            }}
+            isLoading={isLoading}
+        />
+        <Text props={{ content: entry?.pointsLabel, size: "xs", tone: "muted" }} isLoading={isLoading} /><PodiumStep props={{ place: rank }} isLoading={isLoading} /></div>]
     })
-    return <Tree contract="podium" render={defineContractComponent("podium", { place })} />
+    return <div>{place}</div>
 }
-
-/** Source-level tier marker. */
-export const meta = { shape: "composite", world: "pure" } as const

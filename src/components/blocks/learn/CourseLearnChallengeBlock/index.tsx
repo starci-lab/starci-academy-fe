@@ -50,7 +50,8 @@ const selectChallengeLanguage = <T extends ChallengeLanguageRow>(
 }
 
 /** Resolves a Challenge, persists its complete draft and submits one logical whole-attempt group. */
-export const CourseLearnChallengeBlock = (input: CourseLearnChallengeBlockProps) => {
+export const CourseLearnChallengeBlock = (props: CourseLearnChallengeBlockProps) => {
+    const input = { ...props }
     const contentText = useTranslations("learn.content")
     const contentHomeText = useTranslations("learn.contentHome")
     const router = useRouter()
@@ -127,7 +128,7 @@ export const CourseLearnChallengeBlock = (input: CourseLearnChallengeBlockProps)
             }
             const container = selection.getRangeAt(0).commonAncestorContainer
             const element = container instanceof HTMLElement ? container : container.parentElement
-            const root = element?.closest("[data-node=challenge-page-document]")
+            const root = element?.closest("main")
             if (root === null || root === undefined) {
                 setActiveSelection(undefined)
                 return
@@ -612,4 +613,3 @@ export const CourseLearnChallengeBlock = (input: CourseLearnChallengeBlockProps)
 }
 
 /** Architectural identity for the connected challenge twin. */
-export const meta = { world: "connected", domain: "learn" } as const

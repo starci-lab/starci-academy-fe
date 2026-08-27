@@ -22,7 +22,7 @@ describe("SourceFileTree", () => {
         expect(screen.getByRole("list")).toBeInTheDocument()
         expect(screen.getByRole("button", { name: "Open /src/App.tsx" })).toHaveAttribute("data-active", "true")
         expect(screen.getAllByLabelText("Changed locally").length).toBeGreaterThan(0)
-        expect(container.querySelectorAll("[data-node=source-file-row]").length).toBe(5)
+        expect(container.querySelectorAll("li").length).toBe(5)
     })
 
     it("activates a file and collapses descendants without losing sibling files", () => {
@@ -64,8 +64,7 @@ describe("SourceFileTree", () => {
             />,
         )
 
-        const rows = Array.from(container.querySelectorAll("[data-node=source-file-row] button"))
-        const labels = rows.map((row) => row.getAttribute("aria-label"))
+        const labels = Array.from(container.querySelectorAll("button"), (row) => row.getAttribute("aria-label"))
         expect(labels.indexOf("Collapse /src/hooks")).toBeLessThan(labels.indexOf("Open /src/hooks"))
     })
 
@@ -85,7 +84,7 @@ describe("SourceFileTree", () => {
             <SourceFileTree props={{ label: "Source files", files }} isLoading />,
         )
 
-        expect(container.querySelectorAll("[data-component=Text][data-loading=true]").length).toBeGreaterThan(0)
-        expect(container.querySelectorAll("[data-node=source-file-row]").length).toBe(5)
+        expect(container.querySelectorAll("[data-loading=true]").length).toBeGreaterThan(0)
+        expect(container.querySelectorAll("li").length).toBe(5)
     })
 })

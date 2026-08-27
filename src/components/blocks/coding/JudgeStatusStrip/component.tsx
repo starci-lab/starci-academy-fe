@@ -1,12 +1,7 @@
 import { Button } from "@/components/leaves/Button"
 import { StatusDot, type StatusDotTone } from "@/components/leaves/StatusDot"
 import { Text } from "@/components/leaves/Text"
-import { Tree } from "@/components/branches/Tree"
-import {
-    defineContractComponent,
-    defineLeafComponent,
-    type BlockProps,
-} from "@/components/contracts/props"
+
 
 /**
  * BLOCK - `JudgeStatusStrip`: what the judge is saying, in one place that never moves.
@@ -83,53 +78,14 @@ export type JudgeStatusStripActions = {
 }
 
 /** Props for {@link JudgeStatusStripBase}. */
-export type JudgeStatusStripProps =
-    BlockProps<JudgeVerdictState, JudgeStatusStripData> & {
-        readonly on?: JudgeStatusStripActions
-    }
+export type JudgeStatusStripProps = { readonly state: JudgeVerdictState; readonly props: JudgeStatusStripData; readonly on?: JudgeStatusStripActions }
 
 /**
  * Draw the strip.
  *
  * @param input - {@link JudgeStatusStripProps}
  */
-export const JudgeStatusStripBase = (input: JudgeStatusStripProps) => {
-    const actionLabel = input.props.actionLabel
-    return (
-        <Tree
-            contract="judge-status-strip"
-            render={defineContractComponent("judge-status-strip", {
-                mark: defineLeafComponent("status-dot", {}, () => (
-                    <StatusDot
-                        props={{
-                            tone: VERDICT_TONE[input.state],
-                            label: input.props.verdictLabel,
-                        }}
-                    />
-                )),
-                verdict: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
-                    <Text props={{ content: input.props.verdictLabel, size: "sm", weight: "semibold" }} />
-                )),
-                detail: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                    <Text props={{ content: input.props.detailLabel, size: "xs", tone: "muted" }} />
-                )),
-                ...(actionLabel === undefined ? {} : {
-                    action: defineLeafComponent("button", {}, () => (
-                        <Button
-                            props={{
-                                label: actionLabel,
-                                size: "sm",
-                                variant: input.state === "accepted" ? "primary" : "outline",
-                                ...(input.state === "accepted" ? { icon: "next" as const, iconPlacement: "trailing" as const } : {}),
-                            }}
-                            on={{ press: input.on?.act }}
-                        />
-                    )),
-                }),
-            })}
-        />
-    )
+export const JudgeStatusStripBase = (props: JudgeStatusStripProps) => {
+    const actionLabel = props.props.actionLabel
+    return <div><StatusDot props={{ tone: VERDICT_TONE[props.state], label: props.props.verdictLabel }} /><Text props={{ content: props.props.verdictLabel, size: "sm", weight: "semibold" }} /><Text props={{ content: props.props.detailLabel, size: "xs", tone: "muted" }} />{actionLabel === undefined ? null : <Button props={{ label: actionLabel, size: "sm", variant: props.state === "accepted" ? "primary" : "outline", ...(props.state === "accepted" ? { icon: "next" as const, iconPlacement: "trailing" as const } : {}) }} on={{ press: props.on?.act }} />}</div>
 }
-
-/** Source-level ownership marker. */
-export const meta = { world: "pure", domain: "coding" } as const

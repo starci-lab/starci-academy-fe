@@ -1,139 +1,135 @@
-import { SurfaceListCard, type SurfaceListCardData } from "@/components/branches/SurfaceListCard"
-import { Tree } from "@/components/branches/Tree"
+import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
-import { Breadcrumbs, type BreadcrumbStep } from "@/components/leaves/Breadcrumbs"
+import {
+    Breadcrumbs,
+    type BreadcrumbStep,
+} from "@/components/leaves/Breadcrumbs"
 import { Heading } from "@/components/leaves/Heading"
 import { SearchBox } from "@/components/leaves/SearchBox"
 import { Text } from "@/components/leaves/Text"
 import { TextLink } from "@/components/leaves/TextLink"
-import {
-    defineCompositeComponent,
-    defineContractComponent,
-    defineContractProjection,
-    defineLeafComponent,
-    type LeafProps,
-} from "@/components/contracts/props"
-
-/** One company destination or consultant contact line in the directory. */
+/** One company or consultant directory row. */
 export type HeadhuntingDirectoryRow = {
-    readonly id: string
-    readonly label: string
-    readonly meta?: string
-    readonly actionLabel?: string
-    readonly isActionAvailable?: boolean
-}
-
-type CourseHeadhuntingsPageData = {
-    readonly companies: ReadonlyArray<HeadhuntingDirectoryRow>
-    readonly consultants: ReadonlyArray<HeadhuntingDirectoryRow>
-    readonly title: string
-    readonly trail: ReadonlyArray<BreadcrumbStep>
-    readonly searchPlaceholder: string
-    readonly searchLabel: string
-    readonly clearSearchLabel: string
-    readonly companiesLabel: string
-    readonly consultantsLabel: string
-    readonly emptyMessage: string
-    readonly errorMessage: string
-    readonly retryLabel: string
-}
-
-type CourseHeadhuntingsPageActions = {
-    readonly [key: string]: (() => void) | ((query: string) => void) | undefined
-    readonly course?: () => void
-    readonly search?: (query: string) => void
-    readonly retry?: () => void
-}
-
-/** Pure renderer input for the directory page surface. */
-export type CourseHeadhuntingsPageProps = { readonly blockState: "pending" | "ready" | "empty" | "failed"; readonly props: CourseHeadhuntingsPageData; readonly on?: CourseHeadhuntingsPageActions }
-
-type DirectoryListData = SurfaceListCardData & { readonly rows: ReadonlyArray<HeadhuntingDirectoryRow> }
-
-const PENDING_DIRECTORY_ROWS: ReadonlyArray<HeadhuntingDirectoryRow> = Array.from(
-    { length: 4 },
-    (_unused, index) => ({ id: `pending-${index}`, label: "" }),
-)
-
-const DirectoryList = ({ props, on, isLoading = false }: LeafProps<DirectoryListData, CourseHeadhuntingsPageActions>) => (
-    <Tree contract="next-action-list" render={defineContractComponent("next-action-list", {
-        step: (isLoading ? PENDING_DIRECTORY_ROWS : props.rows)
-            .map((row) => defineContractProjection("next-action-row", () => {
-                const label = [row.label, row.meta, row.actionLabel].filter((part) => part !== undefined).join(" · ")
-                const handler = row.actionLabel === undefined
-                    ? on?.[`open:${row.id}`]
-                    : row.isActionAvailable === true ? on?.[`contact:${row.id}`] : undefined
-                return handler === undefined ? (
-                    <Text props={{ content: label, size: "md" }} isLoading={isLoading} />
-                ) : (
-                    <TextLink props={{ label, size: "md" }} on={{ press: handler as (() => void) | undefined }} />
-                )
-            })),
-    })} />
-)
-
-const DirectoryListContent = defineContractComponent("next-action-list", DirectoryList)
-
-/** Pure company search plus consultant contact directory. */
-export const CourseHeadhuntingsBlockBase = (input: CourseHeadhuntingsPageProps) => {
-    const isLoading = input.blockState === "pending"
-    const header = defineContractComponent("page-header-stack", {
-        trail: defineLeafComponent("breadcrumbs", {}, () => (
-            <Breadcrumbs props={{ steps: input.props.trail, label: input.props.title }} on={{ course: input.on?.course as (() => void) | undefined }} />
-        )),
-        title: defineLeafComponent("heading", {}, () => <Heading props={{ content: input.props.title, level: 1 }} />),
-    })
-    const toolbar = defineContractProjection("catalog-search-count-view-row", () => (
-        <SearchBox
-            props={{
-                placeholder: input.props.searchPlaceholder,
-                label: input.props.searchLabel,
-                clearLabel: input.props.clearSearchLabel,
-            }}
-            on={{ search: input.on?.search as ((query: string) => void) | undefined }}
-        />
-    ))
-    const notice = input.blockState === "failed" || input.blockState === "empty"
-        ? defineCompositeComponent("empty-notice", {}, () => (
-            <EmptyNotice
-                props={{
-                    icon: input.blockState === "failed" ? "retry" : "talents",
-                    message: input.blockState === "failed" ? input.props.errorMessage : input.props.emptyMessage,
-                    actionLabel: input.blockState === "failed" ? input.props.retryLabel : undefined,
-                }}
-                on={{ act: input.blockState === "failed" ? input.on?.retry as (() => void) | undefined : undefined }}
-            />
-        ))
-        : undefined
+  readonly id: string;
+  readonly label: string;
+  readonly meta?: string;
+  readonly actionLabel?: string;
+  readonly isActionAvailable?: boolean;
+};
+type PageData = {
+  readonly companies: ReadonlyArray<HeadhuntingDirectoryRow>;
+  readonly consultants: ReadonlyArray<HeadhuntingDirectoryRow>;
+  readonly title: string;
+  readonly trail: ReadonlyArray<BreadcrumbStep>;
+  readonly searchPlaceholder: string;
+  readonly searchLabel: string;
+  readonly clearSearchLabel: string;
+  readonly companiesLabel: string;
+  readonly consultantsLabel: string;
+  readonly emptyMessage: string;
+  readonly errorMessage: string;
+  readonly retryLabel: string;
+};
+/** Headhunting page state, data and actions. */
+export type CourseHeadhuntingsPageProps = {
+  readonly blockState: "pending" | "ready" | "empty" | "failed";
+  readonly props: PageData;
+  readonly on?: {
+    readonly [key: string]:
+      (() => void) | ((query: string) => void) | undefined;
+  };
+};
+type DirectoryProps = {
+  readonly label: string;
+  readonly rows: ReadonlyArray<HeadhuntingDirectoryRow>;
+  readonly on?: CourseHeadhuntingsPageProps["on"];
+  readonly loading: boolean;
+};
+const Directory = (props: DirectoryProps) => {
+    const rows: ReadonlyArray<HeadhuntingDirectoryRow> = props.loading
+        ? Array.from({ length: 4 }, (_, index) => ({
+            id: `pending-${index}`,
+            label: "",
+        }))
+        : props.rows
 
     return (
-        <Tree contract={"course-headhuntings-page"} render={defineContractComponent("course-headhuntings-page", {
-            header,
-            search: toolbar,
-            ...(notice === undefined ? {
-                directories: defineContractProjection("catalog-section-group", () => (
-                    <>
-                        <SurfaceListCard
-                            contract="next-action-list"
-                            render={DirectoryListContent}
-                            props={{ label: input.props.companiesLabel, rows: input.props.companies }}
-                            on={input.on}
-                            isLoading={isLoading}
-                        />
-                        {input.props.consultants.length === 0 && !isLoading ? null : (
-                            <SurfaceListCard
-                                contract="next-action-list"
-                                render={DirectoryListContent}
-                                props={{ label: input.props.consultantsLabel, rows: input.props.consultants }}
-                                on={input.on}
-                                isLoading={isLoading}
-                            />
-                        )}
-                    </>
-                )),
-            } : { notice }),
-        })} />
+        <SurfaceListCard props={{ label: props.label }} isLoading={props.loading}>
+            {rows.map((row) => {
+                const label = [row.label, row.meta, row.actionLabel]
+                    .filter(Boolean)
+                    .join(" · ")
+                const handler =
+        row.actionLabel === undefined
+            ? props.on?.[`open:${row.id}`]
+            : row.isActionAvailable
+                ? props.on?.[`contact:${row.id}`]
+                : undefined
+                return handler === undefined ? (
+                    <Text
+                        key={row.id}
+                        props={{ content: label, size: "md" }}
+                        isLoading={props.loading}
+                    />
+                ) : (
+                    <TextLink
+                        key={row.id}
+                        props={{ label, size: "md" }}
+                        on={{ press: handler as () => void }}
+                    />
+                )
+            })}
+        </SurfaceListCard>
     )
 }
-
-
+/** Draw the company and consultant directory. */
+export const CourseHeadhuntingsBlockBase = (
+    props: CourseHeadhuntingsPageProps,
+) => {
+    const loading = props.blockState === "pending"
+    if (props.blockState === "empty" || props.blockState === "failed")
+        return (
+            <EmptyNotice
+                props={{
+                    message:
+            props.blockState === "failed"
+                ? props.props.errorMessage
+                : props.props.emptyMessage,
+                    actionLabel:
+            props.blockState === "failed" ? props.props.retryLabel : undefined,
+                }}
+                on={{ act: props.on?.retry as (() => void) | undefined }}
+            />
+        )
+    return (
+        <div>
+            <Breadcrumbs
+                props={{ steps: props.props.trail, label: props.props.title }}
+                on={{ course: props.on?.course as (() => void) | undefined }}
+            />
+            <Heading props={{ content: props.props.title, level: 1 }} />
+            <SearchBox
+                props={{
+                    placeholder: props.props.searchPlaceholder,
+                    label: props.props.searchLabel,
+                    clearLabel: props.props.clearSearchLabel,
+                }}
+                on={{ search: props.on?.search as (query: string) => void }}
+            />
+            <Directory
+                label={props.props.companiesLabel}
+                rows={props.props.companies}
+                on={props.on}
+                loading={loading}
+            />
+            {props.props.consultants.length === 0 && !loading ? null : (
+                <Directory
+                    label={props.props.consultantsLabel}
+                    rows={props.props.consultants}
+                    on={props.on}
+                    loading={loading}
+                />
+            )}
+        </div>
+    )
+}

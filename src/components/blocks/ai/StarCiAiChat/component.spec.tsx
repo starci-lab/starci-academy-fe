@@ -51,16 +51,16 @@ describe("StarCiAiChatBase", () => {
         expect(STARCI_AI_CHAT_STATES).toHaveLength(21)
         for (const state of STARCI_AI_CHAT_STATES) {
             const { unmount } = render(<StarCiAiChatBase state={state} props={props} />)
-            expect(document.querySelector("[data-node=starci-ai-drawer-column]")).toBeTruthy()
+            expect(document.body.firstElementChild).toBeTruthy()
             unmount()
         }
     })
 
     it("quotes selected code inside the user turn and keeps context to one row", () => {
-        const { container } = render(<StarCiAiChatBase state="ready" props={props} />)
+        render(<StarCiAiChatBase state="ready" props={props} />)
         expect(screen.queryByRole("button", { name: "Code coach" })).not.toBeInTheDocument()
         expect(screen.getAllByText("const controller = new AbortController()").length).toBeGreaterThan(0)
-        expect(container.querySelectorAll("[data-node=starci-ai-context-stack]")).toHaveLength(1)
+        expect(screen.getByText(props.contextSummary!)).toBeInTheDocument()
         expect(screen.getByText("content:lesson-1 · src/useTodos.ts · L14-21")).toBeInTheDocument()
     })
 
@@ -84,8 +84,8 @@ describe("StarCiAiChatBase", () => {
         const session = screen.getByRole("button", { name: "Async patterns · Just now" })
         fireEvent.click(session)
         expect(selectSession).toHaveBeenCalledWith("session-1")
-        expect(container.querySelector("[data-node=starci-ai-context-stack]")).toBeNull()
-        expect(container.querySelector("[data-node=starci-ai-composer]")).toBeNull()
+        expect(screen.queryByText(props.contextSummary!)).toBeNull()
+        expect(container.querySelector("textarea")).toBeNull()
         expect(screen.queryByText("controller.abort()")).not.toBeInTheDocument()
     })
 
@@ -117,12 +117,12 @@ describe("StarCiAiChatBase", () => {
     it("speaks the pending state rather than resting, and withholds the composer", () => {
         const { container } = render(<StarCiAiChatBase state="sessionsPending" props={{ ...props, turns: [] }} />)
         expect(screen.getByText("State sessionsPending")).toBeInTheDocument()
-        expect(container.querySelector("[data-node=starci-ai-composer]")).toBeNull()
+        expect(container.querySelector("textarea")).toBeNull()
     })
 
     it("withholds the composer while sessions are unavailable", () => {
         const { container } = render(<StarCiAiChatBase state="sessionsFailed" props={props} />)
-        expect(container.querySelector("[data-node=starci-ai-composer]")).toBeNull()
+        expect(container.querySelector("textarea")).toBeNull()
         expect(screen.getByText("State sessionsFailed")).toBeInTheDocument()
     })
 
@@ -133,11 +133,11 @@ describe("StarCiAiChatBase", () => {
     })
 
     it("offers no session controls until one session is actually chosen", () => {
-        const { container } = render(<StarCiAiChatBase
+        render(<StarCiAiChatBase
             state="historyReady"
             props={{ ...props, mode: "history", activeSessionId: undefined }}
         />)
-        expect(container.querySelector("[data-node=stacked-peer-controls]")).toBeNull()
+        expect(screen.queryByRole("button", { name: "Rename" })).toBeNull()
     })
 
     it("reports rename, archive and delete from the chosen session", () => {
@@ -218,17 +218,17 @@ describe("StarCiAiChatBase", () => {
     })
 
     it("drops the whole context row when nothing grounds the conversation", () => {
-        const { container } = render(<StarCiAiChatBase
+        render(<StarCiAiChatBase
             state="ready"
             props={{ ...props, contextSummary: undefined, selection: undefined }}
         />)
-        expect(container.querySelector("[data-node=starci-ai-context-stack]")).toBeNull()
+        expect(screen.queryByText(props.contextSummary!)).toBeNull()
         expect(screen.queryByRole("button", { name: "Clear context" })).not.toBeInTheDocument()
     })
 
     it("keeps a route summary without a clear control when no excerpt was picked", () => {
-        const { container } = render(<StarCiAiChatBase state="ready" props={{ ...props, selection: undefined }} />)
-        expect(container.querySelector("[data-node=starci-ai-context-stack]")).not.toBeNull()
+        render(<StarCiAiChatBase state="ready" props={{ ...props, selection: undefined }} />)
+        expect(screen.getByText(props.contextSummary!)).toBeInTheDocument()
         expect(screen.queryByRole("button", { name: "Clear context" })).not.toBeInTheDocument()
     })
 

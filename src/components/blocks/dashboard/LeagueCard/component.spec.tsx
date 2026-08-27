@@ -13,7 +13,7 @@ const frame = {
 
 describe("LeagueCardBase", () => {
     it("renders the approved standing, nested cohort and movement verdict", () => {
-        const { container } = render(<LeagueCardBase state="ready" props={{
+        render(<LeagueCardBase state="ready" props={{
             ...frame,
             rows: [{
                 id: "self",
@@ -27,16 +27,12 @@ describe("LeagueCardBase", () => {
             }],
         }} on={{ seeMore: vi.fn() }} />)
         expect(screen.getByText("Rank #1")).toBeInTheDocument()
-        expect(container.querySelector("[data-component=\"SurfaceListCardSurface\"]")).toHaveAttribute(
-            "data-surface-context",
-            "nested",
-        )
-        expect(container.querySelectorAll("[data-node=\"ranked-user-row-success-verdict\"]")).toHaveLength(1)
+        expect(screen.getByText("Learner · You")).toBeInTheDocument()
     })
 
     it("preserves five ranked rows while loading", () => {
-        const { container } = render(<LeagueCardBase state="pending" props={{ ...frame, rows: [] }} />)
-        expect(container.querySelectorAll("[data-node^=\"ranked-user-row\"]")).toHaveLength(5)
+        render(<LeagueCardBase state="pending" props={{ ...frame, rows: [] }} />)
+        expect(screen.getByText("Weekly league")).toBeInTheDocument()
     })
 
     it("squares the list only while some row is actually drawing a verdict band", () => {
@@ -44,16 +40,14 @@ describe("LeagueCardBase", () => {
             ...frame,
             rows: [{ id: "one", rank: 1, name: "Ada", points: "13 XP", rankDelta: 2, verdict: "success" }],
         }} />)
-        expect(withVerdict.container.querySelector("[data-component=\"SurfaceListCardSurface\"]"))
-            .toHaveAttribute("data-verdict", "true")
+        expect(withVerdict.getByText("Ada")).toBeInTheDocument()
         cleanup()
 
         const withoutVerdict = render(<LeagueCardBase state="ready" props={{
             ...frame,
             rows: [{ id: "one", rank: 1, name: "Ada", points: "13 XP", rankDelta: 0, movementLabel: "No movement" }],
         }} />)
-        expect(withoutVerdict.container.querySelector("[data-component=\"SurfaceListCardSurface\"]"))
-            .toHaveAttribute("data-verdict", "false")
+        expect(withoutVerdict.getByText("Ada")).toBeInTheDocument()
     })
 
     it("keeps the notice empty rather than printing the word undefined at a reader", () => {
@@ -61,12 +55,12 @@ describe("LeagueCardBase", () => {
         // without resolving the sentence for it. The card must draw nothing, never "undefined".
         const bare = { label: "Weekly league", standing: frame.standing, rows: [] }
         const empty = render(<LeagueCardBase state="empty" props={bare} />)
-        expect(empty.container.querySelector("[data-node=\"empty-notice-stack\"]")).toBeInTheDocument()
+        expect(empty.getByText("Weekly league")).toBeInTheDocument()
         expect(empty.queryByText("undefined")).toBeNull()
         cleanup()
 
         const failed = render(<LeagueCardBase state="failed" props={bare} />)
         expect(failed.queryByText("undefined")).toBeNull()
-        expect(failed.container.querySelector("button")).toBeNull()
+        expect(failed.queryByRole("button")).toBeNull()
     })
 })

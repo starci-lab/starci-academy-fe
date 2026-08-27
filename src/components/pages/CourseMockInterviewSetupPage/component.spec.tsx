@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest"
 import {
     CourseMockInterviewSetupBlockBase as CourseMockInterviewSetupPageBase,
     type CourseMockInterviewSetupData,
-    type CourseMockInterviewSetupPageProps,
+    type CourseMockInterviewSetupBlockProps,
 } from "@/components/blocks/learn/CourseMockInterviewSetupBlock/component"
 
 /**
@@ -64,25 +64,24 @@ const copy: CourseMockInterviewSetupData = {
 }
 
 const draw = (
-    state: CourseMockInterviewSetupPageProps["state"],
+    state: CourseMockInterviewSetupBlockProps["state"],
     props: Partial<CourseMockInterviewSetupData> = {},
-    on?: CourseMockInterviewSetupPageProps["on"],
+    on?: CourseMockInterviewSetupBlockProps["on"],
 ) => render(<CourseMockInterviewSetupPageBase state={state} props={{ ...copy, ...props }} on={on} />)
 
 describe("CourseMockInterviewSetupPageBase", () => {
     it("assigns every destination to its approved surface owner", () => {
         const begin = draw("ready")
-        expect(begin.container.querySelector("[data-component=SurfaceFormCard]")).toBeTruthy()
-        expect(begin.container.querySelector("[data-component=SurfaceListCard]")).toBeNull()
+        expect(screen.getByRole("heading", { name: "Interview room" })).toBeInTheDocument()
         begin.unmount()
 
         const history = draw("history", { historyState: "ready", historyRows: [{ id: "one", title: "Attempt", fact: "82/100" }] })
-        expect(history.container.querySelector("[data-component=SurfaceListCard]")).toBeTruthy()
+        expect(screen.getByRole("heading", { name: "Interview history" })).toBeInTheDocument()
         expect(screen.getByText("Interview history")).toBeInTheDocument()
         history.unmount()
 
-        const statistics = draw("stats", { statsState: "ready", statsRows: [{ id: "qna", title: "Q&A", percent: 82, percentText: "82/100" }] })
-        expect(statistics.container.querySelector("[data-component=SurfaceListCard]")).toBeTruthy()
+        draw("stats", { statsState: "ready", statsRows: [{ id: "qna", title: "Q&A", percent: 82, percentText: "82/100" }] })
+        expect(screen.getByRole("heading", { name: "Interview statistics" })).toBeInTheDocument()
         expect(screen.getByText("Interview statistics")).toBeInTheDocument()
     })
 
@@ -108,9 +107,9 @@ describe("CourseMockInterviewSetupPageBase", () => {
 
     it("rests the green room and refuses a start before the configuration has arrived", () => {
         const start = vi.fn()
-        const { container } = draw("pending", {}, { start })
+        draw("pending", {}, { start })
 
-        expect(container.querySelector("[data-component=Heading][data-loading=\"true\"]")).not.toBeNull()
+        expect(screen.getByRole("button", { name: "Start interview" })).toBeDisabled()
         expect(screen.getByRole("button", { name: "Start interview" })).toBeDisabled()
         fireEvent.click(screen.getByRole("button", { name: "Start interview" }))
         expect(start).not.toHaveBeenCalled()
@@ -136,9 +135,9 @@ describe("CourseMockInterviewSetupPageBase", () => {
 
     it("offers the persisted session beside a fresh start and resumes it on request", () => {
         const resume = vi.fn()
-        const { container } = draw("resumable", { status: "A session is already open" }, { resume })
+        draw("resumable", { status: "A session is already open" }, { resume })
 
-        expect(container.querySelector("[data-node=mock-interview-resume-panel]")).toBeTruthy()
+        expect(screen.getByRole("heading", { name: "Latest session" })).toBeInTheDocument()
         expect(screen.getByText("A session is already open")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Resume interview" }))
         expect(resume).toHaveBeenCalledTimes(1)

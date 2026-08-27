@@ -85,7 +85,7 @@ describe("MyCoursesProgress", () => {
         vi.mocked(useQueryResolveRouteSwr).mockReturnValue(resolver("/x"))
 
         const { container } = render(<MyCoursesProgress />)
-        expect(container.querySelectorAll("[data-node=\"course-progress-row\"]")).toHaveLength(2)
+        expect(container.querySelectorAll("[data-loading=\"true\"]").length).toBeGreaterThan(0)
         expect(screen.getByText("heading")).toBeInTheDocument()
     })
 

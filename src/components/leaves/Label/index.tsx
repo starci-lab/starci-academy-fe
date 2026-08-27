@@ -1,5 +1,5 @@
 import { Icon, type IconName } from "@/components/leaves/Icon"
-import type { LeafProps } from "@/components/contracts/props"
+import { labelClassName } from "./classNames"
 
 /**
  * LEAF - `Label`: the name of a box, tied to it.
@@ -19,23 +19,20 @@ export type LabelData = {
     readonly icon?: IconName
 }
 
-/** Props for {@link Label}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type LabelProps = LeafProps<LabelData>
-
-/** The glyph sits on the label's baseline without the label learning it is in a row. */
-const LABEL_CLASSES = "inline-flex items-center gap-2 text-sm font-medium"
+/** Props for {@link Label}. Three fixed slots, no fourth. */
+export type LabelProps = { readonly props: LabelData }
 
 /**
  * Draw a control's name.
  *
  * @param input - {@link LabelProps}
  */
-export const Label = ({ props }: LabelProps) => (
-    <label data-tier="leaf" data-component="Label" htmlFor={props.htmlFor} className={LABEL_CLASSES}>
-        {props.icon === undefined ? null : <Icon props={{ name: props.icon, role: "chip" }} />}
-        {props.content}
-    </label>
-)
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const
+export const Label = (props: LabelProps) => {
+    const data = props.props
+    return (
+        <label htmlFor={data.htmlFor} className={labelClassName}>
+            {data.icon === undefined ? null : <Icon props={{ name: data.icon, role: "chip" }} />}
+            {data.content}
+        </label>
+    )
+}

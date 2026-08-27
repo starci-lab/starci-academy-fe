@@ -1,11 +1,9 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { Tree } from "@/components/branches/Tree"
 import { IconButton } from "@/components/leaves/IconButton"
 import { StatusDot } from "@/components/leaves/StatusDot"
 import { Text } from "@/components/leaves/Text"
-import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 import { normalizeSandboxPath } from "@/modules/code/sandbox-repo"
 
 /** One supported text file in the synchronized source explorer. */
@@ -85,10 +83,10 @@ const sourceTreeNodes = (files: ReadonlyArray<SourceFileTreeFile>): ReadonlyArra
 }
 
 /** Draw a keyboard-traversable file explorer from stable snapshot paths. */
-export const SourceFileTree = (input: SourceFileTreeProps) => {
-    const data = input.props
-    const on = input.on
-    const isLoading = input.isLoading ?? false
+export const SourceFileTree = (props: SourceFileTreeProps) => {
+    const data = props.props
+    const on = props.on
+    const isLoading = props.isLoading ?? false
     const [closedFolders, setClosedFolders] = useState<ReadonlySet<string>>(() => new Set())
     const nodes = useMemo(() => sourceTreeNodes(data.files), [data.files])
     const visibleNodes = nodes.filter((node) => node.ancestors.every((path) => !closedFolders.has(path)))
@@ -101,61 +99,45 @@ export const SourceFileTree = (input: SourceFileTreeProps) => {
     })
 
     return (
-        <Tree
-            contract="source-file-navigation"
-            render={defineContractComponent("source-file-navigation", {
-                label: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
-                    <Text props={{ content: data.label, size: "sm", weight: "semibold" }} />
-                )),
-                files: defineContractComponent("source-file-list", {
-                    file: visibleNodes.map((node) => {
-                        const isFolderOpen = node.kind === "folder" && !closedFolders.has(node.path)
-                        const isActive = node.kind === "file" && normalizeSandboxPath(data.activePath ?? "") === node.path
-                        const controlLabel = node.kind === "folder"
-                            ? `${isFolderOpen ? "Collapse" : "Expand"} ${node.path}`
-                            : `Open ${node.path}`
-                        return defineContractComponent("source-file-row", {
-                            disclosure: defineLeafComponent("icon-button", {}, () => (
-                                <IconButton
-                                    props={{
-                                        icon: node.kind === "folder" ? "disclosure" : "code",
-                                        label: controlLabel,
-                                        isActive,
-                                    }}
-                                    on={{
-                                        press: node.kind === "folder"
-                                            ? () => toggleFolder(node.path)
-                                            : () => on?.activate?.(node.path),
-                                    }}
-                                    isLoading={isLoading}
-                                />
-                            )),
-                            name: defineLeafComponent("text", { size: "sm" }, () => (
-                                <Text
-                                    props={{
-                                        content: node.label,
-                                        size: "sm",
-                                        tone: isActive ? "accent" : "default",
-                                        weight: isActive ? "semibold" : "normal",
-                                    }}
-                                    isLoading={isLoading}
-                                />
-                            )),
-                            ...(node.isEdited ? {
-                                status: defineLeafComponent("status-dot", {}, () => (
-                                    <StatusDot
-                                        props={{ tone: "warning", label: data.editedLabel ?? "Locally edited" }}
-                                        isLoading={isLoading}
-                                    />
-                                )),
-                            } : {}),
-                        })
-                    }),
-                }),
-            })}
-        />
+        <nav aria-label={data.label}>
+            <Text props={{ content: data.label, size: "sm", weight: "semibold" }} />
+            <ul>
+                {visibleNodes.map((node) => {
+                    const isFolderOpen = node.kind === "folder" && !closedFolders.has(node.path)
+                    const isActive = node.kind === "file" && normalizeSandboxPath(data.activePath ?? "") === node.path
+                    const controlLabel = node.kind === "folder"
+                        ? `${isFolderOpen ? "Collapse" : "Expand"} ${node.path}`
+                        : `Open ${node.path}`
+                    return <li key={node.id}>
+                        <IconButton
+                            props={{
+                                icon: node.kind === "folder" ? "disclosure" : "code",
+                                label: controlLabel,
+                                isActive,
+                            }}
+                            on={{
+                                press: node.kind === "folder"
+                                    ? () => toggleFolder(node.path)
+                                    : () => on?.activate?.(node.path),
+                            }}
+                            isLoading={isLoading}
+                        />
+                        <Text
+                            props={{
+                                content: node.label,
+                                size: "sm",
+                                tone: isActive ? "accent" : "default",
+                                weight: isActive ? "semibold" : "normal",
+                            }}
+                            isLoading={isLoading}
+                        />
+                        {node.isEdited ? <StatusDot
+                            props={{ tone: "warning", label: data.editedLabel ?? "Locally edited" }}
+                            isLoading={isLoading}
+                        /> : null}
+                    </li>
+                })}
+            </ul>
+        </nav>
     )
 }
-
-/** Source-level tier marker for the source explorer branch. */
-export const meta = { shape: "branch", world: "pure" } as const

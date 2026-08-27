@@ -116,9 +116,8 @@ vi.mock("./component", () => {
                         {`select ${section}`}
                     </button>
                 ))}
-                <div data-node="course-hero-heading" />
-                {Array.from({ length: mocks.sectionCount }, (_unused, index) => (
-                    <div key={index} data-node="course-section" data-index={index} />
+                {sections.slice(0, mocks.sectionCount).map((section) => (
+                    <div key={section} id={`course-detail-${section}`} />
                 ))}
             </>
         ),
@@ -637,21 +636,19 @@ describe("CourseDetailPage navigation", () => {
 
     it("scrolls to the hero for overview and to the matching section for every other tab", () => {
         render(<CourseDetailPage displayId="system-design-mastery" />)
-        const sections = Array.from(document.querySelectorAll("[data-node=\"course-section\"]"))
-
         fireEvent.click(screen.getByRole("button", { name: "select overview" }))
         expect(scrollIntoView).toHaveBeenCalledTimes(1)
-        expect(scrollIntoView.mock.instances[0]).toBe(document.querySelector("[data-node=\"course-hero-heading\"]"))
+        expect(scrollIntoView.mock.instances[0]).toBe(document.getElementById("course-detail-overview"))
         expect(scrollIntoView).toHaveBeenCalledWith({ behavior: "smooth", block: "start" })
 
         fireEvent.click(screen.getByRole("button", { name: "select curriculum" }))
-        expect(scrollIntoView.mock.instances[1]).toBe(sections[2])
+        expect(scrollIntoView.mock.instances[1]).toBe(document.getElementById("course-detail-curriculum"))
 
         fireEvent.click(screen.getByRole("button", { name: "select reviews" }))
-        expect(scrollIntoView.mock.instances[2]).toBe(sections[3])
+        expect(scrollIntoView.mock.instances[2]).toBe(document.getElementById("course-detail-reviews"))
 
         fireEvent.click(screen.getByRole("button", { name: "select faq" }))
-        expect(scrollIntoView.mock.instances[3]).toBe(sections[4])
+        expect(scrollIntoView.mock.instances[3]).toBe(document.getElementById("course-detail-faq"))
         expect(resolved()).toMatchObject({ selectedSection: "faq" })
     })
 

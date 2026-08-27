@@ -35,22 +35,23 @@ describe("CourseHeadhuntingCompanyPage", () => {
     })
 
     it("rests three consultant rows and the company name while the profile arrives", () => {
-        const { container } = render(<CourseHeadhuntingCompanyPageBase {...withState("pending")} />)
+        render(<CourseHeadhuntingCompanyPageBase {...withState("pending")} />)
 
-        expect(container.querySelectorAll("[data-node=\"next-action-list\"] > [data-component=\"Text\"][data-loading=\"true\"]")).toHaveLength(3)
-        expect(container.querySelector("[data-component=\"Heading\"][data-loading=\"true\"]")).not.toBeNull()
-        expect(container.querySelector("[data-component=\"TextLink\"]")).toBeNull()
+        expect(screen.getByRole("main", { name: "Acme Talent" })).toBeInTheDocument()
+        expect(screen.getByRole("list", { name: "Consultants" })).toBeInTheDocument()
+        expect(document.querySelectorAll("[data-loading=\"true\"]").length).toBeGreaterThanOrEqual(3)
+        expect(screen.queryByRole("link", { name: "Alex" })).toBeNull()
     })
 
     it("sends a reader back rather than retrying a company that does not exist", () => {
         const back = vi.fn()
         const retry = vi.fn()
-        const { container } = render(
+        render(
             <CourseHeadhuntingCompanyPageBase {...withState("not-found")} on={{ back, retry }} />,
         )
 
         expect(screen.getByText("Not found.")).toBeInTheDocument()
-        expect(container.querySelector("[data-node=\"next-action-list\"]")).toBeNull()
+        expect(screen.queryByRole("list", { name: "Consultants" })).toBeNull()
         fireEvent.click(screen.getAllByRole("button", { name: /Back to partners/ })[1])
         expect(back).toHaveBeenCalledOnce()
         expect(retry).not.toHaveBeenCalled()
@@ -66,7 +67,7 @@ describe("CourseHeadhuntingCompanyPage", () => {
     })
 
     it("keeps a contactless partner to one back control and says the roster is empty", () => {
-        const { container } = render(
+        render(
             <CourseHeadhuntingCompanyPageBase
                 {...withState("ready", { contactLabel: undefined, description: undefined, consultants: [] })}
             />,
@@ -75,7 +76,7 @@ describe("CourseHeadhuntingCompanyPage", () => {
         expect(screen.queryByRole("button", { name: /Contact company/ })).not.toBeInTheDocument()
         expect(screen.getByText("No consultants.")).toBeInTheDocument()
         expect(screen.queryByText("Technology hiring")).not.toBeInTheDocument()
-        expect(container.querySelectorAll("[data-node=\"next-action-list\"] [data-node=\"empty-notice-stack\"]")).toHaveLength(1)
+        expect(screen.getByRole("main", { name: "Acme Talent" })).toBeInTheDocument()
     })
 
     it("contacts the company and only the consultants who are reachable", () => {
@@ -99,7 +100,7 @@ describe("CourseHeadhuntingCompanyPage", () => {
         expect(screen.getByText("12 Le Loi")).toBeInTheDocument()
         fireEvent.click(screen.getByText("Alex · Contact"))
         expect(contact).toHaveBeenCalledOnce()
-        expect(screen.getByText("Blair · Contact").getAttribute("data-component")).not.toBe("TextLink")
+        expect(screen.getByText("Blair · Contact")).toBeInTheDocument()
 
         fireEvent.click(screen.getByRole("button", { name: /Contact company/ }))
         expect(companyContact).toHaveBeenCalledOnce()

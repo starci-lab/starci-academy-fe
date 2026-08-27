@@ -42,9 +42,12 @@ const discountPercentOf = (personal: CoursePricePreview | undefined, payable: nu
     return payable >= list ? 0 : Math.round((1 - payable / list) * 100)
 }
 
-type PricingRailConnectedProps = { readonly displayId: string }
+/** Route identity for the desktop pricing rail. */
+export type CoursePricingRailProps = { readonly displayId: string }
+/** Route identity for the mobile pricing rail. */
+export type CoursePricingRailMobileProps = { readonly displayId: string }
 
-const usePricingRailModel = (input: PricingRailConnectedProps) => {
+const usePricingRailModel = (props: CoursePricingRailProps | CoursePricingRailMobileProps) => {
     const t = useTranslations("courses.detail")
     const tCourses = useTranslations("courses")
     const tCatalog = useTranslations("courses.catalog")
@@ -53,7 +56,7 @@ const usePricingRailModel = (input: PricingRailConnectedProps) => {
     const router = useRouter()
     const { mutate } = useSWRConfig()
     const sessionToken = useSessionToken()
-    const query = useQueryCourseSwr({ displayId: input.displayId })
+    const query = useQueryCourseSwr({ displayId: props.displayId })
     const cartQuery = useQueryMyCartSwr()
     const adding = useMutateAddToCartSwr(query.data?.id)
     const removing = useMutateRemoveFromCartSwr(query.data?.id)
@@ -127,8 +130,8 @@ const usePricingRailModel = (input: PricingRailConnectedProps) => {
 }
 
 /** Connected owner for the desktop pricing rail and its price overlay. */
-export const CoursePricingRail = (input: PricingRailConnectedProps) => {
-    const model = usePricingRailModel(input)
+export const CoursePricingRail = (props: CoursePricingRailProps) => {
+    const model = usePricingRailModel(props)
     return <CoursePricingRailBase
         state={model.state}
         props={model.data ?? { title: "", ctaLabel: "" }}
@@ -143,8 +146,8 @@ export const CoursePricingRail = (input: PricingRailConnectedProps) => {
 }
 
 /** Same connected commerce owner projected into the narrow-screen action bar. */
-export const CoursePricingRailMobile = (input: PricingRailConnectedProps) => {
-    const model = usePricingRailModel(input)
+export const CoursePricingRailMobile = (props: CoursePricingRailMobileProps) => {
+    const model = usePricingRailModel(props)
     return <CoursePricingRailBase
         surface="mobile"
         state={model.state}
@@ -152,8 +155,3 @@ export const CoursePricingRailMobile = (input: PricingRailConnectedProps) => {
         on={model.on}
     />
 }
-
-export * from "./component"
-
-/** Connected ownership marker for the commerce rail and its mobile projection. */
-export const meta = { world: "connected", domain: "courses" } as const

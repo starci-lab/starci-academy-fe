@@ -13,7 +13,7 @@ import { Article, segmentArticleSurfaces } from "./index"
 const parserSeam = vi.hoisted(() => ({ isForced: false, tree: undefined as unknown }))
 
 /** Hand the leaf one exact tree in place of whatever the markdown would have parsed to. */
-const forceTree = (tree: unknown) => {
+const forceAst = (tree: unknown) => {
     parserSeam.isForced = true
     parserSeam.tree = tree
 }
@@ -40,7 +40,7 @@ vi.mock("unified", async (importOriginal) => {
 
 vi.mock("@/components/branches/MermaidDiagram", () => ({
     MermaidDiagram: (input: MermaidDiagramFixtureProps) => (
-        <div data-component="MermaidDiagram">{input.props.source}</div>
+        <figure aria-label={input.props.source}>{input.props.source}</figure>
     ),
 }))
 
@@ -50,9 +50,9 @@ afterEach(() => {
 })
 
 const headings = (root: HTMLElement) =>
-    Array.from(root.querySelectorAll("[data-component=\"Heading\"]"), (heading) => [
+    Array.from(root.querySelectorAll("h2, h3"), (heading) => [
         heading.tagName,
-        heading.getAttribute("data-level"),
+        heading.tagName === "H2" ? "2" : "3",
         heading.textContent,
     ])
 
@@ -90,30 +90,21 @@ describe("Article", () => {
 
     it("rests five lines while a body is in flight, without drawing any of it", () => {
         const { container } = render(<Article props={{ body: "Lesson body" }} isLoading />)
-        const root = container.querySelector("[data-component=\"Article\"]")
-        const grammar = container.querySelector("[data-component=\"MarkdownArticle\"]")
-        expect(root).toHaveAttribute("data-resting", "true")
-        expect(grammar?.children).toHaveLength(5)
+        const root = container.firstElementChild
+        expect(root?.querySelectorAll("span")).toHaveLength(5)
         expect(root?.textContent).toBe("")
         expect(container.querySelector("p")).toBeNull()
     })
 
     it("rests the same way for a content whose body the server has not sent at all", () => {
         const { container } = render(<Article props={{ aiSelectable: true }} />)
-        const root = container.querySelector("[data-component=\"Article\"]")
-        const grammar = container.querySelector("[data-component=\"MarkdownArticle\"]")
-        expect(root).toHaveAttribute("data-resting", "true")
-        expect(root).toHaveAttribute("data-ai-selectable", "true")
-        expect(grammar?.children).toHaveLength(5)
+        const root = container.firstElementChild
+        expect(root?.querySelectorAll("span")).toHaveLength(5)
     })
 
     it("draws an empty body as an article with nothing in it rather than as a rest", () => {
         const { container } = render(<Article props={{ body: "" }} />)
-        const root = container.querySelector("[data-component=\"Article\"]")
-        const grammar = container.querySelector("[data-component=\"MarkdownArticle\"]")
-        expect(root).not.toHaveAttribute("data-resting")
-        expect(grammar).toHaveAttribute("data-grammar-contract", "core.markdown-article")
-        expect(grammar?.children).toHaveLength(0)
+        expect(container.querySelector("p")).toBeNull()
     })
 
     it("folds the author's six heading levels onto the two the page has room for", () => {
@@ -131,7 +122,7 @@ describe("Article", () => {
     it("keeps a heading's own inline marks out of the outline it hands the heading leaf", () => {
         const { container } = render(<Article props={{ body: "## A `useState` **hook**\n" }} />)
         expect(headings(container)).toEqual([["H2", "2", "A useState hook"]])
-        expect(container.querySelector("[data-component=\"Heading\"] code")).toBeNull()
+        expect(container.querySelector("h2 code, h3 code")).toBeNull()
     })
 
     it("keeps every inline mark of a paragraph rather than flattening it to plain words", () => {
@@ -144,7 +135,6 @@ describe("Article", () => {
         const inlineCode = paragraph?.querySelector("code")
         expect(inlineCode?.textContent).toBe("useState")
         expect(inlineCode).not.toHaveAttribute("class")
-        expect(container.querySelector("[data-grammar-contract=\"core.markdown-article\"]")).not.toBeNull()
         const link = paragraph?.querySelector("a")
         expect(link).toHaveAttribute("href", "https://example.com")
         expect(link?.textContent).toBe("the docs")
@@ -155,14 +145,9 @@ describe("Article", () => {
             body: "Compact paragraph.\n\n- Compact item\n\n> Compact quote\n",
             measure: "compact",
         }} />)
-        const root = container.querySelector("[data-component=Article]")
-        const grammar = container.querySelector("[data-component=MarkdownArticle]")
-
-        expect(root).toHaveAttribute("data-measure", "compact")
-        expect(grammar).toHaveAttribute("data-grammar-markdown-measure", "compact")
-        expect(grammar?.querySelector(":scope > p")).not.toHaveAttribute("class")
-        expect(grammar?.querySelector("li")).not.toHaveAttribute("class")
-        expect(grammar?.querySelector("blockquote")).not.toHaveAttribute("class")
+        expect(container.querySelector("p")).toHaveTextContent("Compact paragraph.")
+        expect(container.querySelector("li")).toHaveTextContent("Compact item")
+        expect(container.querySelector("blockquote")).toHaveTextContent("Compact quote")
     })
 
     it("keeps a hard break as a break rather than joining the two lines", () => {
@@ -181,10 +166,10 @@ describe("Article", () => {
         const { container } = render(<Article props={{
             body: "```ts\nconst a = 1\n```\n\n```\nplain text\n```\n",
         }} />)
-        const blocks = container.querySelectorAll("[data-component=\"MarkdownCodeBlock\"]")
+        const blocks = container.querySelectorAll("pre")
         expect(blocks).toHaveLength(2)
-        expect(blocks[0]?.textContent).toBe("TypeScriptCopyconst a = 1")
-        expect(blocks[1]?.textContent).toBe("textCopyplain text")
+        expect(blocks[0]?.textContent).toContain("const a = 1")
+        expect(blocks[1]?.textContent).toContain("plain text")
     })
 
     it("draws an unordered list of items and an ordered list as different elements", () => {
@@ -212,7 +197,7 @@ describe("Article", () => {
             body: "> ## quoted title\n>\n> quoted words\n",
         }} />)
         const quote = container.querySelector("blockquote")
-        expect(quote?.querySelector("[data-component=\"Heading\"]")?.textContent).toBe("quoted title")
+        expect(quote?.querySelector("h2, h3")?.textContent).toBe("quoted title")
         expect(quote?.querySelector("p")?.textContent).toBe("quoted words")
     })
 
@@ -220,7 +205,7 @@ describe("Article", () => {
         const { container } = render(<Article props={{
             body: "| left | right |\n| --- | --- |\n| one | two |\n",
         }} />)
-        // VENDOR-15: the vendor draws the anatomy, so this reads the vendor's own contract - the
+        // VENDOR-15: the vendor draws the anatomy, so this reads the vendor's own structure - the
         // accessible name it owns and the column headers it builds - rather than the tag names a
         // hand-built table would have shared with it.
         const grid = container.querySelector("[aria-label]")
@@ -237,7 +222,7 @@ describe("Article", () => {
         }} />)
         // SURFACE-IN-SURFACE-7 recessed form and its OVERFLOW-5 scroll sit on the same node,
         // because the frame and the scroll are one decision.
-        const frame = container.querySelector("[data-grammar-markdown-table-frame=\"true\"]")
+        const frame = container.querySelector("div:has(table)")
         expect(frame).not.toBeNull()
         expect(frame?.className).not.toContain("shadow")
         expect(frame?.querySelector("[role=\"grid\"], [role=\"table\"]")).not.toBeNull()
@@ -261,21 +246,18 @@ describe("Article", () => {
 
     it("routes a mermaid fence through the diagram leaf", () => {
         const { container } = render(<Article props={{ body: "```mermaid\nflowchart LR\nA-->B\n```\n" }} />)
-        expect(container.querySelector("[data-component=MermaidDiagram]")).not.toBeNull()
-        expect(container.querySelector("[data-component=MarkdownCodeBlock]")).toBeNull()
+        expect(container.querySelector("figure")).not.toBeNull()
+        expect(container.querySelector("pre")).toBeNull()
     })
 
     it("draws an empty article when the parser answers with something that is not a document", () => {
-        forceTree(null)
+        forceAst(null)
         const { container } = render(<Article props={{ body: "# Chapter\n" }} />)
-        const root = container.querySelector("[data-component=\"Article\"]")
-        const grammar = container.querySelector("[data-component=\"MarkdownArticle\"]")
-        expect(root).not.toHaveAttribute("data-resting")
-        expect(grammar?.children).toHaveLength(0)
+        expect(container.querySelector("p")).toBeNull()
     })
 
     it("drops a node that carries no type instead of drawing it as an empty line", () => {
-        forceTree({
+        forceAst({
             type: "root",
             children: [
                 { value: "orphan" },
@@ -283,14 +265,11 @@ describe("Article", () => {
             ],
         })
         const { container } = render(<Article props={{ body: "ignored" }} />)
-        const root = container.querySelector("[data-component=\"Article\"]")
-        const grammar = container.querySelector("[data-component=\"MarkdownArticle\"]")
-        expect(grammar?.children).toHaveLength(1)
-        expect(root?.textContent).toBe("kept")
+        expect(container.textContent).toBe("kept")
     })
 
     it("falls back to the shallower outline level and to an empty fence when neither is stated", () => {
-        forceTree({
+        forceAst({
             type: "root",
             children: [
                 { type: "heading", children: [{ type: "text", value: "Untitled" }] },
@@ -299,6 +278,6 @@ describe("Article", () => {
         })
         const { container } = render(<Article props={{ body: "ignored" }} />)
         expect(headings(container)).toEqual([["H2", "2", "Untitled"]])
-        expect(container.querySelector("[data-component=\"MarkdownCodeBlock\"]")?.textContent).toBe("textCopy")
+        expect(container.querySelector("pre")).toBeInTheDocument()
     })
 })

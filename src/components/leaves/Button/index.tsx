@@ -1,6 +1,6 @@
-import { Button as HeroButton, skeletonVariants, Spinner } from "@heroui/react"
+import { Button as HeroButton, Spinner } from "@heroui/react"
 import { Icon, type IconName } from "@/components/leaves/Icon"
-import type { LeafProps } from "@/components/contracts/props"
+import { buttonActiveClassName, buttonLoadingClassName, buttonPendingLabelClassName, buttonPendingSpinnerClassName, buttonTrailingGlyphClassName } from "./classNames"
 
 /**
  * LEAF - `Button`: the thing a reader presses.
@@ -67,8 +67,8 @@ export type ButtonActions = {
     readonly press?: () => void
 }
 
-/** Props for {@link Button}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type ButtonProps = LeafProps<ButtonData, ButtonActions>
+/** Props for {@link Button}. */
+export type ButtonProps = { readonly props: ButtonData; readonly on?: ButtonActions; readonly isLoading?: boolean }
 
 /** The four appearances, as the vendor names them, so fill and foreground travel together. */
 const VARIANTS = {
@@ -83,9 +83,6 @@ const VARIANTS = {
 const SIZES = { sm: "sm", md: "md" } as const
 
 /** Data-loading paint shared with the other leaves; action progress uses a spinner instead. */
-const LOADING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({
-    className: "select-none text-transparent",
-})
 
 /**
  * The glyph travels a step on hover, and only when it trails.
@@ -95,52 +92,49 @@ const LOADING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({
  * distance is one step of the scale and `motion-reduce` removes it outright - a reader who has
  * asked the system for less movement is not asking about this one control.
  */
-const TRAILING_GLYPH_CLASSES = "transition-transform duration-200 ease-out group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
 
 /**
  * Draw a press target.
  *
  * @param input - {@link ButtonProps}
  */
-export const Button = ({ props, on, isLoading = false }: ButtonProps) => {
-    const variant = props.variant ?? "secondary"
-    const size = props.size ?? "md"
-    const isPending = props.isPending === true
-    const placement = props.iconPlacement ?? "leading"
-    const glyph = isLoading || isPending || props.icon === undefined
+export const Button = (props: ButtonProps) => {
+    const data = props.props
+    const on = props.on
+    const isLoading = props.isLoading ?? false
+    const variant = data.variant ?? "secondary"
+    const size = data.size ?? "md"
+    const isPending = data.isPending === true
+    const placement = data.iconPlacement ?? "leading"
+    const glyph = isLoading || isPending || data.icon === undefined
         ? null
         : placement === "trailing"
             ? (
-                <span className={TRAILING_GLYPH_CLASSES}>
-                    <Icon props={{ name: props.icon, role: "chip" }} />
+                <span className={buttonTrailingGlyphClassName}>
+                    <Icon props={{ name: data.icon, role: "chip" }} />
                 </span>
             )
-            : <Icon props={{ name: props.icon, role: "chip" }} />
+            : <Icon props={{ name: data.icon, role: "chip" }} />
     return (
         <HeroButton
-            data-tier="leaf"
-            data-component="Button"
             data-variant={variant}
             data-size={size}
             data-icon-placement={placement}
             data-loading={isLoading ? "true" : "false"}
             data-action-pending={isPending ? "true" : "false"}
-            type={props.type ?? "button"}
+            type={data.type ?? "button"}
             variant={VARIANTS[variant]}
             size={SIZES[size]}
-            isDisabled={props.disabled === true || isLoading || isPending}
+            isDisabled={data.disabled === true || isLoading || isPending}
             onPress={on?.press}
             // `group` so the trailing glyph can answer a hover on the whole control rather than on
             // itself: a reader aiming at the words is hovering the button, not the arrow.
-            className={isLoading ? LOADING_CLASSES : "group relative"}
+            className={isLoading ? buttonLoadingClassName : buttonActiveClassName}
         >
-            {isPending ? <Spinner size="sm" className="absolute" aria-hidden="true" /> : null}
+            {isPending ? <Spinner size="sm" className={buttonPendingSpinnerClassName} aria-hidden="true" /> : null}
             {placement === "leading" ? glyph : null}
-            <span className={isPending ? "invisible" : undefined}>{props.label}</span>
+            <span className={isPending ? buttonPendingLabelClassName : undefined}>{data.label}</span>
             {placement === "trailing" ? glyph : null}
         </HeroButton>
     )
 }
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const

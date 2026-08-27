@@ -21,7 +21,7 @@ import { type QueryCourseRequest, type QueryCourseResponse } from "./types/cours
  * WHAT THE DISCLOSURE REVEALS. Curriculum is not a generic title/description pair. Its summary keeps
  * the authored level and preview count, while its panel keeps the derived content facts, module
  * description and ordered preview rows. Selecting those fields here prevents the connected page
- * from flattening a richer product contract before the surface can render it.
+ * from flattening a richer product response before the surface can render it.
  */
 const query1 = gql`
     query Course($request: CourseRequest!) {

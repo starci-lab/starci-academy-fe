@@ -4,7 +4,6 @@ import { CoursesCatalogBlock } from "@/components/blocks/courses/CoursesCatalogB
 export type CoursesCatalogPageProps = Record<never, never>
 
 /** Canonical route shell composed from the connected catalog block. */
-export const CoursesCatalogPageBase = () => <CoursesCatalogBlock />
+export const CoursesCatalogPageBase = (props: CoursesCatalogPageProps) => { void props; return <CoursesCatalogBlock /> }
 
 /** Ownership metadata for the route shell. */
-export const meta = { world: "pure", domain: "courses" } as const

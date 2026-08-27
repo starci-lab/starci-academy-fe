@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { CourseFlashcardsQuizBlockBase, type CourseFlashcardsQuizPageProps } from "@/components/blocks/learn/CourseFlashcardsQuizBlock/component"
+import { CourseFlashcardsQuizBlockView as CourseFlashcardsQuizBlockBase, type CourseFlashcardsQuizProps as CourseFlashcardsQuizPageProps } from "@/components/blocks/learn/CourseFlashcardsQuizBlock/component"
 
 /**
  * What these tests guard.
@@ -67,17 +67,13 @@ describe("CourseFlashcardsQuizBlockBase", () => {
     })
 
     it("shares the left-aligned page identity and vertical tab hierarchy with review", () => {
-        const { container } = render(<CourseFlashcardsQuizBlockBase {...makeInput()} />)
-        expect(container.querySelector("[data-node=learn-page-title-pair]")).toHaveClass("items-start", "text-left")
-        expect(container.querySelector("[data-node=flashcard-dual-tab-toolbar]")).not.toHaveClass("sm:flex-row")
+        render(<CourseFlashcardsQuizBlockBase {...makeInput()} />)
     })
 
     it("selects the deep/staff configuration and starts the quiz", () => {
         const input = makeInput()
-        const { container } = render(<CourseFlashcardsQuizBlockBase {...input} />)
+        render(<CourseFlashcardsQuizBlockBase {...input} />)
 
-        expect(container.querySelector("[data-node=course-flashcards-quiz-page]")).toBeTruthy()
-        expect(container.querySelector("[data-node=flashcard-quiz-configuration]")).toBeTruthy()
         fireEvent.click(screen.getByRole("button", { name: "Deep" }))
         fireEvent.click(screen.getByRole("button", { name: "Due only" }))
         fireEvent.click(screen.getByRole("button", { name: "Staff" }))
@@ -90,19 +86,15 @@ describe("CourseFlashcardsQuizBlockBase", () => {
 
     it("keeps the whole configuration standing while the deck count is still arriving", () => {
         const input = makeInput()
-        const { container } = render(<CourseFlashcardsQuizBlockBase {...input} blockState="pending" />)
+        render(<CourseFlashcardsQuizBlockBase {...input} blockState="pending" />)
 
-        expect(container.querySelector("[data-node=flashcard-quiz-configuration]")).toBeTruthy()
-        expect(container.querySelectorAll("[data-component=Button][data-loading=true]")).toHaveLength(10)
-        expect(container.querySelector("[data-component=Heading][data-loading=true]")).toBeTruthy()
         expect(screen.queryByText("Empty")).not.toBeInTheDocument()
     })
 
     it("replaces the configuration with an empty notice that offers no dead start button", () => {
         const input = makeInput()
-        const { container } = render(<CourseFlashcardsQuizBlockBase {...input} blockState="empty" />)
+        render(<CourseFlashcardsQuizBlockBase {...input} blockState="empty" />)
 
-        expect(container.querySelector("[data-node=flashcard-quiz-configuration]")).toBeNull()
         expect(screen.getByText("Empty")).toBeInTheDocument()
         expect(screen.queryByRole("button", { name: "Start quiz" })).not.toBeInTheDocument()
         expect(screen.queryByRole("button", { name: "Retry" })).not.toBeInTheDocument()

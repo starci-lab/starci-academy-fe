@@ -1,14 +1,13 @@
+import type { ReactNode } from "react"
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { Tree } from "@/components/branches/Tree"
-import type { ContractKey } from "@/components/contracts"
-import type { ContractComponent } from "@/components/contracts/props"
+import { pressableLabelHoverClassName, pressableSurfaceHoverClassName } from "./classNames"
 
 /**
  * BRANCH - `PressableSurface`: the control around a node that opens something.
  *
  * IT DRAWS ITS OWN CONTROL AND PUTS THE KEY'S NODE INSIDE IT. The branch it replaces rendered
  * somebody else's key ON a button host, which is a caller choosing the element for a key - the one
- * decision CONTRACT-4 refuses, because two call sites of one key would then disagree about what
+ * decision rule refuses, because two call sites of one key would then disagree about what
  * element it is. Here the button is this branch's own, and the arranged node underneath is
  * unchanged: the same key can be pressed on one screen and inert on the next.
  *
@@ -26,10 +25,9 @@ import type { ContractComponent } from "@/components/contracts/props"
 /** Which part of the surface answers a hover. */
 export type PressableSurfaceHover = "label" | "surface"
 
-/** Props for a contract-owned node wrapped in one native press target. */
-export type PressableSurfaceProps<K extends ContractKey> = {
-    readonly contract: K
-    readonly render: ContractComponent<NoInfer<K>>
+/** Props for one content node wrapped in a native press target. */
+export type PressableSurfaceProps = {
+    readonly children: ReactNode
     /** The accessible name of the destination. */
     readonly label: string
     readonly press?: () => void
@@ -56,43 +54,32 @@ export type PressableSurfaceProps<K extends ContractKey> = {
 }
 
 /** The control fills its place and reads left, and the press answers back in both modes. */
-const BASE_CLASSES = "w-full cursor-pointer text-left text-foreground active:opacity-70"
-
-/** The naming line inside answers the hover, so the surface itself does not move. */
-const LABEL_HOVER_CLASSES = `${BASE_CLASSES} group`
-
-/** Nothing inside names the destination, so the surface answers by dimming. */
-const SURFACE_HOVER_CLASSES = `${BASE_CLASSES} hover:opacity-80`
-
 /**
- * Wrap validated contract content in one press target.
+ * Wrap resolved content in one press target.
  *
  * @param input - {@link PressableSurfaceProps}
  */
-export const PressableSurface = <const K extends ContractKey>({
-    contract,
-    render,
-    label,
-    press,
-    disabled = false,
-    hover = "surface",
-    isRaised = false,
-}: PressableSurfaceProps<K>) => (
+export const PressableSurface = (props: PressableSurfaceProps) => {
+    const {
+        children,
+        label,
+        press,
+        disabled = false,
+        hover = "surface",
+        isRaised = false,
+    } = props
+    return (
         <button
             type="button"
-            data-component="PressableSurface"
-            data-hover={hover}
             aria-label={label}
             onClick={press}
             disabled={disabled}
             aria-busy={disabled || undefined}
-            className={hover === "label" ? LABEL_HOVER_CLASSES : SURFACE_HOVER_CLASSES}
+            className={hover === "label" ? pressableLabelHoverClassName : pressableSurfaceHoverClassName}
         >
             {isRaised
-                ? <SurfaceCard contract={contract} render={render} />
-                : <Tree contract={contract} render={render} />}
+                ? <SurfaceCard>{children}</SurfaceCard>
+                : children}
         </button>
     )
-
-/** Source-level tier marker for the press target that wraps a contract node. */
-export const meta = { shape: "branch", world: "pure" } as const
+}

@@ -1,34 +1,14 @@
-import { CONTRACTS } from "@/components/contracts"
-import { SurfaceListCard, type SurfaceListCardData } from "@/components/branches/SurfaceListCard"
-import { Tree } from "@/components/branches/Tree"
+import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
 import { SuggestedUserRow, type SuggestedUserRowData } from "@/components/composites/SuggestedUserRow"
-import { defineCompositeComponent, defineContractComponent, type LeafProps } from "@/components/contracts/props"
-
-/** Label and suggested identities drawn by the block. */
-export type WhoToFollowData = SurfaceListCardData & { readonly users: ReadonlyArray<SuggestedUserRowData> }
-/** Profile and follow journeys reported by suggested identities. */
+/** Resolved suggestion list data. */
+export type WhoToFollowData = { readonly label: string; readonly users: ReadonlyArray<SuggestedUserRowData> }
+/** Per-user suggestion actions. */
 export type WhoToFollowActions = { readonly [key: string]: (() => void) | undefined }
-/** Props for the pure follow-suggestion block. */
+/** State, data and actions for the suggestions block. */
 export type WhoToFollowProps = { readonly state: "pending" | "hidden" | "ready"; readonly props: WhoToFollowData; readonly on?: WhoToFollowActions }
-
-const COUNT = CONTRACTS["suggested-user-list"].children.user.restingCount
-const SuggestedListView = ({ props, on, isLoading = false }: LeafProps<WhoToFollowData, WhoToFollowActions>) => {
-    const users = isLoading ? Array.from({ length: COUNT }, (_, index) => ({
-        id: `resting-${index}`,
-        followLabel: "",
-        followingLabel: "",
-    })) : props.users
-    return <Tree contract="suggested-user-list" render={defineContractComponent("suggested-user-list", {
-        user: users.map((user) => defineCompositeComponent("suggested-user-row", {}, () => (
-            <SuggestedUserRow props={user} on={{ open: on?.[`open:${user.id}`], follow: on?.[`follow:${user.id}`] }} isLoading={isLoading} />
-        ))),
-    })} />
+/** Draw suggested profiles as a joined semantic list. */
+export const WhoToFollowBase = (props: WhoToFollowProps) => {
+    if (props.state === "hidden") return null
+    const users = props.state === "pending" ? Array.from({ length: 4 }, (_, index) => ({ id: `resting-${index}`, followLabel: "", followingLabel: "" })) : props.props.users
+    return <SurfaceListCard props={{ label: props.props.label }}>{users.map((user) => <SuggestedUserRow key={user.id} props={user} on={{ open: props.on?.[`open:${user.id}`], follow: props.on?.[`follow:${user.id}`] }} isLoading={props.state === "pending"} />)}</SurfaceListCard>
 }
-const SuggestedList = defineContractComponent("suggested-user-list", SuggestedListView)
-
-/** Draw the joined suggestion list while hiding settled absence. */
-export const WhoToFollowBase = (input: WhoToFollowProps) => input.state === "hidden" ? null : (
-    <SurfaceListCard contract="suggested-user-list" render={SuggestedList} props={input.props} on={input.on} isLoading={input.state === "pending"} />
-)
-/** Source-level ownership marker for the pure social block. */
-export const meta = { world: "pure", domain: "social" } as const

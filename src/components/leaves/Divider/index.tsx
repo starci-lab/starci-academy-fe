@@ -1,5 +1,5 @@
 import { Text } from "@/components/leaves/Text"
-import type { LeafProps } from "@/components/contracts/props"
+import { dividerClassName, dividerRuleClassName } from "./classNames"
 
 /**
  * LEAF - `Divider`: the line that says two things above and below it are alternatives.
@@ -18,27 +18,21 @@ export type DividerData = {
     readonly label: string
 }
 
-/** Props for {@link Divider}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type DividerProps = LeafProps<DividerData>
-
-/** A rule either side of the word, with the word holding them apart. */
-const DIVIDER_CLASSES = "flex flex-row items-center gap-3"
-
-/** Each rule takes the room the word leaves. */
-const RULE_CLASSES = "h-px grow bg-border"
+/** Props for {@link Divider}. Three fixed slots, no fourth. */
+export type DividerProps = { readonly props: DividerData }
 
 /**
  * Draw a labelled boundary.
  *
  * @param input - {@link DividerProps}
  */
-export const Divider = ({ props }: DividerProps) => (
-    <div data-tier="leaf" data-component="Divider" role="separator" aria-label={props.label} className={DIVIDER_CLASSES}>
-        <span aria-hidden="true" className={RULE_CLASSES} />
-        <Text props={{ content: props.label, size: "sm", tone: "muted" }} />
-        <span aria-hidden="true" className={RULE_CLASSES} />
-    </div>
-)
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const
+export const Divider = (props: DividerProps) => {
+    const data = props.props
+    return (
+        <div role="separator" aria-label={data.label} className={dividerClassName}>
+            <span aria-hidden="true" className={dividerRuleClassName} />
+            <Text props={{ content: data.label, size: "sm", tone: "muted" }} />
+            <span aria-hidden="true" className={dividerRuleClassName} />
+        </div>
+    )
+}

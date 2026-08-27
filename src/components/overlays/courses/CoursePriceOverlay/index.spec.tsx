@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { render, screen } from "@testing-library/react"
-import type { ContractComponent } from "@/components/contracts/props"
+import type { ReactNode } from "react"
 import type { CoursePricePreview } from "@/modules/api/graphql/queries/types/course-price-preview"
 import { CoursePriceOverlay } from "."
 
@@ -13,7 +13,7 @@ import { CoursePriceOverlay } from "."
 
 type OverlayMockInput = {
     readonly isOpen: boolean
-    readonly render: ContractComponent<"course-price-detail-stack">
+    readonly children: ReactNode
     readonly onDismiss: () => void
 }
 
@@ -26,9 +26,9 @@ vi.mock("next-intl", () => ({
         values === undefined ? key : `${key}(${Object.values(values).join(",")})`,
 }))
 vi.mock("./component", () => ({
-    CoursePriceOverlayBase: (input: OverlayMockInput) => (
-        <section data-testid="surface" data-open={String(input.isOpen)}>
-            {input.render.kind === "projection" ? input.render.project() : null}
+    CoursePriceOverlayView: (props: OverlayMockInput) => (
+        <section data-testid="surface" data-open={String(props.isOpen)}>
+            {props.children}
         </section>
     ),
 }))

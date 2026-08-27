@@ -1,8 +1,8 @@
 /**
  * Product-neutral layout vocabulary owned by Core.
  *
- * Product breakpoints, token names and selectors remain in the consuming application's contract
- * registry. This list intentionally contains no `app-*`, `data-node` or product component names.
+ * Product breakpoints, token names and selectors remain in the consuming application.
+ * This list intentionally contains no product component names.
  */
 export const CORE_LAYOUT_CLASS_NAMES = [
     "flex",

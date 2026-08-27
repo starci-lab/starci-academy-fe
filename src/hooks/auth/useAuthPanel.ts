@@ -46,8 +46,8 @@ import { setSessionToken } from "./useSessionToken"
  * verdict at all - and lets the connected component decide what a reader is told.
  *
  * WHY THE HANDLERS ARE STABLE. Each one reads the current state through a ref rather than closing
- * over it, so its identity never changes. That matters because the registry frame mounts slots as
- * COMPONENTS: a handler that changed identity between renders would either remount the control it
+ * over it, so its identity never changes. That matters because the navigation mounts controls as
+ * components: a handler that changed identity between renders would either remount the control it
  * sits on - throwing away what the reader had typed - or be captured stale by one that did not.
  */
 

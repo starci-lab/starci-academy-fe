@@ -11,7 +11,7 @@ import { ProfileOverviewPageBase } from "./component"
 
 describe("ProfileOverviewPageBase", () => {
     it("keeps the five legacy owners in order and pairs only the two skill summaries", () => {
-        const { container } = render(<ProfileOverviewPageBase />)
+        render(<ProfileOverviewPageBase />)
         const copy = screen.getAllByText(/owner$/).map((node) => node.textContent)
 
         expect(copy).toEqual([
@@ -21,7 +21,6 @@ describe("ProfileOverviewPageBase", () => {
             "Challenge skills owner",
             "Practice skills owner",
         ])
-        expect(container.querySelectorAll("[data-node='profile-overview-skill-grid']")).toHaveLength(1)
-        expect(container.querySelector("[data-component='ProfileEvidenceSection']")).toBeNull()
+        expect(screen.getByRole("region", { name: "Profile skills" })).toBeInTheDocument()
     })
 })

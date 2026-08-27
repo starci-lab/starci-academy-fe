@@ -3,7 +3,6 @@ import { Badge } from "@/components/leaves/Badge"
 import { IconTile } from "@/components/leaves/IconTile"
 import { Text } from "@/components/leaves/Text"
 import { TextLink } from "@/components/leaves/TextLink"
-import { defineContractComponent, defineLeafComponent, type CompositeProps } from "@/components/contracts/props"
 
 /**
  * COMPOSITE - `RecommendedCourseRow`: one suggested course, priced.
@@ -46,38 +45,32 @@ export type RecommendedCourseRowActions = {
  *
  * @param input - {@link CompositeProps}
  */
-export const RecommendedCourseRow = ({ props, on, isLoading = false }: CompositeProps<RecommendedCourseRowData, RecommendedCourseRowActions>) => {
-    const priceDetailLabel = props.priceDetailLabel
-    const price = defineContractComponent("price-discount-line", {
-        price: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => <Text props={{ content: props.price, size: "sm", weight: "semibold" }} isLoading={isLoading} />),
-        ...(props.originalPrice === undefined ? {} : { original: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: props.originalPrice, size: "xs", tone: "muted", isSuperseded: true }} isLoading={isLoading} />) }),
-        ...(props.discount === undefined ? {} : { discount: defineLeafComponent("badge", {}, () => <Badge props={{ content: props.discount, tone: "success" }} />) }),
-    })
-    const body = defineContractComponent("recommended-course-body", {
-        title: defineLeafComponent("text", { size: "md", weight: "semibold" }, () => (
-            <Text props={{ content: props.title, size: "md", weight: "semibold", isPressLabel: true }} isLoading={isLoading} />
-        )),
-        price,
-        ...(priceDetailLabel === undefined ? {} : {
-            note: defineContractComponent("price-note-row", {
-                ...(props.savings === undefined ? {} : {
-                    fact: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: props.savings, size: "xs", tone: "muted" }} isLoading={isLoading} />),
-                }),
-                action: defineLeafComponent("text-link", { size: "xs" }, () => (
-                    <TextLink props={{ label: priceDetailLabel, size: "xs" }} on={{ press: on?.openPriceDetail }} />
-                )),
-            }),
-        }),
-        ...(props.reason === undefined ? {} : { reason: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: props.reason, size: "xs", tone: "muted" }} />) }),
-    })
-    const content = defineContractComponent("recommended-course-row", {
-        mark: defineLeafComponent("icon-tile", {}, () => (
-            <IconTile props={{ icon: "course", image: props.cover, tone: "accent", size: "md" }} isLoading={isLoading} />
-        )),
-        body,
-    })
-    return <PressableSurface contract="recommended-course-row" hover="label" render={content} label={props.title ?? "Course"} press={on?.open} disabled={isLoading} />
+export type RecommendedCourseRowProps = {
+    readonly props: RecommendedCourseRowData
+    readonly on?: RecommendedCourseRowActions
+    readonly isLoading?: boolean
 }
 
-/** Source-level tier marker. */
-export const meta = { shape: "composite", world: "pure" } as const
+/** Draw one suggested course as a single accessible destination with pricing context. */
+export const RecommendedCourseRow = (props: RecommendedCourseRowProps) => {
+    const data = props.props
+    const on = props.on
+    const isLoading = props.isLoading ?? false
+    const priceDetailLabel = data.priceDetailLabel
+    return <PressableSurface hover="label" label={data.title ?? "Course"} press={on?.open} disabled={isLoading}>
+        <IconTile props={{ icon: "course", image: data.cover, tone: "accent", size: "md" }} isLoading={isLoading} />
+        <div>
+            <Text props={{ content: data.title, size: "md", weight: "semibold", isPressLabel: true }} isLoading={isLoading} />
+            <div>
+                <Text props={{ content: data.price, size: "sm", weight: "semibold" }} isLoading={isLoading} />
+                {data.originalPrice === undefined ? null : <Text props={{ content: data.originalPrice, size: "xs", tone: "muted", isSuperseded: true }} isLoading={isLoading} />}
+                {data.discount === undefined ? null : <Badge props={{ content: data.discount, tone: "success" }} />}
+            </div>
+            {priceDetailLabel === undefined ? null : <div>
+                {data.savings === undefined ? null : <Text props={{ content: data.savings, size: "xs", tone: "muted" }} isLoading={isLoading} />}
+                <TextLink props={{ label: priceDetailLabel, size: "xs" }} on={{ press: on?.openPriceDetail }} />
+            </div>}
+            {data.reason === undefined ? null : <Text props={{ content: data.reason, size: "xs", tone: "muted" }} />}
+        </div>
+    </PressableSurface>
+}

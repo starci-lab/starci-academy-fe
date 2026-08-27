@@ -20,6 +20,6 @@ describe("IconLabelFactRow", () => {
         const { container } = render(<IconLabelFactRow props={{ icon: "course", label: "Browse", recipe: "compact-action" }} />)
         expect(screen.getByText("Browse")).toHaveAttribute("data-size", "sm")
         expect(screen.getByText("Browse")).toHaveAttribute("data-parent-emphasis", "accent-soft")
-        expect(container.querySelectorAll("[data-component=Text]")).toHaveLength(1)
+        expect(container).toHaveTextContent("Browse")
     })
 })

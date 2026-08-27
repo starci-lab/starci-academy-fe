@@ -7,7 +7,11 @@ import { useGlobalAiChat } from "@/modules/ai/global-ai-chat-context"
 import { StarCiAiDrawerBase } from "./component"
 
 /** Resolve global owner state and responsive shell placement before drawing the pure overlay. */
-export const StarCiAiDrawer = () => {
+/** Props for the global AI drawer owner; the drawer is route-independent. */
+export type StarCiAiDrawerProps = Record<never, never>
+/** Render the connected global AI drawer. */
+export const StarCiAiDrawer = (props: StarCiAiDrawerProps) => {
+    void props
     const t = useTranslations("globalAi")
     const owner = useGlobalAiChat()
     const Chat = useCallback(() => <StarCiAiChat />, [])
@@ -27,5 +31,3 @@ export const StarCiAiDrawer = () => {
 }
 
 export * from "./component"
-/** Source-level ownership marker. */
-export const meta = { world: "connected", domain: "ai" } as const

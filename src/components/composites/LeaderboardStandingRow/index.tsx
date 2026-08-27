@@ -1,8 +1,6 @@
-import { Tree } from "@/components/branches/Tree"
 import { Badge } from "@/components/leaves/Badge"
 import { LeagueTile } from "@/components/leaves/LeagueTile"
 import { Text } from "@/components/leaves/Text"
-import { defineContractComponent, defineLeafComponent, type CompositeProps } from "@/components/contracts/props"
 
 /** Resolved viewer-standing summary. */
 export type LeaderboardStandingRowData = {
@@ -22,27 +20,9 @@ export type LeaderboardStandingRowData = {
  * drifted to the opposite margin from the rank it describes. The body now owns the spare width,
  * so the row reads the same whether or not a fact exists.
  */
-export const LeaderboardStandingRow = ({ props, isLoading = false }: CompositeProps<LeaderboardStandingRowData>) => (
-    <Tree contract="leaderboard-standing-row" render={defineContractComponent("leaderboard-standing-row", {
-        mark: defineLeafComponent("league-tile", {}, () => (
-            <LeagueTile
-                props={{ rank: props.rank, accessibleLabel: props.rankLabel }}
-                isLoading={isLoading}
-            />
-        )),
-        body: defineContractComponent("evidence-title-over-subtitle", {
-            title: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
-                <Text props={{ content: props.title, size: "sm", weight: "semibold" }} isLoading={isLoading} />
-            )),
-            subtitle: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                <Text props={{ content: props.subtitle, size: "xs", tone: "muted" }} isLoading={isLoading} />
-            )),
-        }),
-        ...(props.fact === undefined ? {} : {
-            fact: defineLeafComponent("badge", {}, () => <Badge props={{ content: props.fact, tone: "warning" }} />),
-        }),
-    })} />
-)
-
-/** Source-level tier marker. */
-export const meta = { shape: "composite", world: "pure" } as const
+export type LeaderboardStandingRowProps = { readonly props: LeaderboardStandingRowData; readonly isLoading?: boolean }
+/** Draw the viewer's standing summary above a ranked list. */
+export const LeaderboardStandingRow = (props: LeaderboardStandingRowProps) => {
+    const { props: data, isLoading = false } = props
+    return <div><LeagueTile props={{ rank: data.rank, accessibleLabel: data.rankLabel }} isLoading={isLoading} /><div><Text props={{ content: data.title, size: "sm", weight: "semibold" }} isLoading={isLoading} /><Text props={{ content: data.subtitle, size: "xs", tone: "muted" }} isLoading={isLoading} /></div>{data.fact === undefined ? null : <Badge props={{ content: data.fact, tone: "warning" }} />}</div>
+}

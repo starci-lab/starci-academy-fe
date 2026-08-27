@@ -1,8 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { ChallengeResultBase, type ChallengeResultBlockProps } from "@/components/blocks/learn/ChallengeResult/component"
+import { ChallengeResultBase, type ChallengeResultProps } from "@/components/blocks/learn/ChallengeResult/component"
 
-const baseProps: ChallengeResultBlockProps["props"] = {
+const baseProps: ChallengeResultProps["props"] = {
     title: "API repository",
     description: "Provide the repository URL.",
     scoreLine: "8/10",
@@ -29,9 +29,8 @@ const baseProps: ChallengeResultBlockProps["props"] = {
 
 describe("ChallengeResultBase", () => {
     it("rests the result surface while grading is pending", () => {
-        const { container } = render(<ChallengeResultBase blockState="pending" props={baseProps} />)
+        render(<ChallengeResultBase blockState="pending" props={baseProps} />)
 
-        expect(container.querySelector("[data-node=challenge-evaluation-status]")).toBeTruthy()
         expect(screen.getByText("Evaluating your attempt")).toBeInTheDocument()
         expect(screen.getByText("You may leave and resume later.")).toBeInTheDocument()
         expect(screen.getByText("Live grading updates connected")).toHaveAttribute("aria-live", "polite")
@@ -55,9 +54,7 @@ describe("ChallengeResultBase", () => {
         expect(screen.getByText("The error branch must remain visible.")).toBeInTheDocument()
         expect(screen.getByText("src/client.ts:42")).toBeInTheDocument()
         expect(screen.getByText("Check success before reading data.")).toBeInTheDocument()
-        const resultActions = document.querySelector("[data-node=challenge-result-actions]")
-        expect(resultActions).toHaveClass("sticky", "pr-32")
-        expect(resultActions?.querySelectorAll("button")[2]).toHaveTextContent("Next content")
+        expect(screen.getAllByRole("button").at(-1)).toHaveTextContent("Next content")
         fireEvent.click(screen.getByRole("button", { name: "Retry challenge" }))
         fireEvent.click(screen.getByRole("button", { name: "Next content" }))
         expect(retry).toHaveBeenCalledTimes(1)

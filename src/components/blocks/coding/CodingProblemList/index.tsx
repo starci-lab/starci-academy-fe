@@ -10,7 +10,8 @@ import { CodingProblemListBase, type CodingProblemRow, type CodingProblemListSta
 export type CodingProblemListProps = { readonly domain: string }
 
 /** Resolve topic problems, viewer completion and the list's own state and actions. */
-export const CodingProblemList = ({ domain }: CodingProblemListProps) => {
+export const CodingProblemList = (props: CodingProblemListProps) => {
+    const { domain } = props
     const t = useTranslations("practice")
     const router = useRouter()
     const problems = useQueryCodingProblemsSwr({ domain })
@@ -57,5 +58,3 @@ export const CodingProblemList = ({ domain }: CodingProblemListProps) => {
 
 export { CodingProblemListBase } from "./component"
 export type { CodingProblemRow, CodingProblemListData, CodingProblemListActions, CodingProblemListState } from "./component"
-/** Source-level ownership marker for the connected problem list. */
-export const meta = { world: "connected", domain: "coding" } as const

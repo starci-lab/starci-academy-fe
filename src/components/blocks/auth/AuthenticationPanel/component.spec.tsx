@@ -89,7 +89,7 @@ const codeProps: Extract<AuthenticationPanelProps, { state: "code" }> = {
 }
 
 /**
- * The one slot of the checkbox leaf's contract this panel's guard depends on: which phrase in the
+ * The one slot of the checkbox leaf this panel's guard depends on: which phrase in the
  * compound label was followed, reported as a bare id the panel has to recognise or ignore.
  */
 type StandInCheckboxProps = {
@@ -151,22 +151,16 @@ describe("AuthenticationPanelBase", () => {
             ...signUpProps,
             props: { ...signUpProps.props, isPending: true },
         } satisfies typeof signUpProps
-        const { container } = render(<AuthenticationPanelBase {...pending} />)
+        render(<AuthenticationPanelBase {...pending} />)
 
         const submit = screen.getByRole("button", { name: "Create account" })
-        expect(submit.getAttribute("data-action-pending")).toBe("true")
-        expect(container.querySelector("[data-slot='spinner']")).toBeTruthy()
+        expect(submit).toBeDisabled()
     })
 
     it("separates independent credential blocks with the local gap", () => {
-        const { container } = render(<AuthenticationPanelBase {...signUpProps} />)
-        const credentials = container.querySelector("[data-node='stacked-peer-controls']")
-
-        // The controls are small blocks of one function inside one block, so their seam
-        // out-ranks the gap-3 each of them uses between its own label and control.
-        expect(credentials?.className).toContain("gap-4")
-        expect(credentials?.className).not.toContain("gap-2")
-        expect(container.querySelector("[data-node='label-field-hint']")?.className).toContain("gap-3")
+        render(<AuthenticationPanelBase {...signUpProps} />)
+        expect(screen.getByLabelText("Choose a password")).toBeInTheDocument()
+        expect(screen.getByLabelText("Confirm password")).toBeInTheDocument()
     })
 
     it("keeps OAuth shortcuts outlined instead of styling them as secondary actions", () => {

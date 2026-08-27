@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { KeyboardEvent, PointerEvent } from "react"
-import type { LeafProps } from "@/components/contracts/props"
+import { railDividerClassName, railDividerHandleClassName } from "./classNames"
 
 /** Width policy and accessible identity for one adjustable rail separator. */
 export type RailDividerData = {
@@ -14,23 +14,21 @@ export type RailDividerData = {
 }
 
 /** Closed props for the pointer- and keyboard-adjustable separator. */
-export type RailDividerProps = LeafProps<RailDividerData>
+export type RailDividerProps = { readonly props: RailDividerData; readonly isLoading?: boolean }
 
 // The separator is a real eight-pixel rail rather than an invisible zero-width hit target. That
 // keeps the adjustable boundary discoverable while the hairline still sits on the shared edge.
-const DIVIDER_CLASSES = "group relative hidden w-2 shrink-0 cursor-col-resize self-stretch bg-background outline-none before:absolute before:left-0 before:top-0 before:h-full before:w-px before:bg-separator before:transition-colors hover:before:bg-accent focus-visible:before:bg-accent md:sticky md:top-16 md:block md:h-app-rail"
-const HANDLE_CLASSES = "pointer-events-none absolute left-1/2 top-1/2 h-10 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-muted/50 transition-colors group-hover:bg-accent group-focus-visible:bg-accent"
 
-/** Draw one separator that publishes its rail width to the containing contract frame. */
-export const RailDivider = ({ props }: RailDividerProps) => {
+/** Draw one separator that publishes its rail width to the containing frame. */
+export const RailDivider = (props: RailDividerProps) => {
     const dividerRef = useRef<HTMLDivElement>(null)
-    const widthRef = useRef(props.defaultWidth)
+    const widthRef = useRef(props.props.defaultWidth)
     const dragRef = useRef<{ readonly startX: number, readonly startWidth: number } | null>(null)
-    const [width, setWidth] = useState(props.defaultWidth)
+    const [width, setWidth] = useState(props.props.defaultWidth)
 
     const clamp = useCallback(
-        (value: number) => Math.min(Math.max(value, props.minWidth), props.maxWidth),
-        [props.maxWidth, props.minWidth],
+        (value: number) => Math.min(Math.max(value, props.props.minWidth), props.props.maxWidth),
+        [props.props.maxWidth, props.props.minWidth],
     )
 
     const applyWidth = useCallback((value: number) => {
@@ -42,14 +40,14 @@ export const RailDivider = ({ props }: RailDividerProps) => {
     }, [clamp])
 
     useEffect(() => {
-        const stored = window.localStorage.getItem(props.storageKey)
-        const parsed = stored === null ? props.defaultWidth : Number(stored)
-        applyWidth(Number.isFinite(parsed) ? parsed : props.defaultWidth)
+        const stored = window.localStorage.getItem(props.props.storageKey)
+        const parsed = stored === null ? props.props.defaultWidth : Number(stored)
+        applyWidth(Number.isFinite(parsed) ? parsed : props.props.defaultWidth)
         return () => {
             const rail = dividerRef.current?.previousElementSibling
             if (rail instanceof HTMLElement) rail.style.removeProperty("width")
         }
-    }, [applyWidth, props.defaultWidth, props.storageKey])
+    }, [applyWidth, props.props.defaultWidth, props.props.storageKey])
 
     const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
         event.preventDefault()
@@ -70,7 +68,7 @@ export const RailDivider = ({ props }: RailDividerProps) => {
         event.currentTarget.releasePointerCapture?.(event.pointerId)
         document.body.style.removeProperty("cursor")
         document.body.style.removeProperty("user-select")
-        window.localStorage.setItem(props.storageKey, String(Math.round(widthRef.current)))
+        window.localStorage.setItem(props.props.storageKey, String(Math.round(widthRef.current)))
     }
 
     const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -78,37 +76,32 @@ export const RailDivider = ({ props }: RailDividerProps) => {
         event.preventDefault()
         const step = event.shiftKey ? 32 : 16
         const next = event.key === "Home"
-            ? props.minWidth
+            ? props.props.minWidth
             : event.key === "End"
-                ? props.maxWidth
+                ? props.props.maxWidth
                 : widthRef.current + (event.key === "ArrowLeft" ? -step : step)
         applyWidth(next)
-        window.localStorage.setItem(props.storageKey, String(Math.round(widthRef.current)))
+        window.localStorage.setItem(props.props.storageKey, String(Math.round(widthRef.current)))
     }
 
     return (
         <div
             ref={dividerRef}
-            data-tier="leaf"
-            data-component="RailDivider"
             role="separator"
             aria-orientation="vertical"
-            aria-label={props.label}
-            aria-valuemin={props.minWidth}
-            aria-valuemax={props.maxWidth}
+            aria-label={props.props.label}
+            aria-valuemin={props.props.minWidth}
+            aria-valuemax={props.props.maxWidth}
             aria-valuenow={Math.round(width)}
             tabIndex={0}
-            className={DIVIDER_CLASSES}
+            className={railDividerClassName}
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
             onPointerCancel={onPointerUp}
             onKeyDown={onKeyDown}
         >
-            <span aria-hidden="true" data-component="RailDividerHandle" className={HANDLE_CLASSES} />
+            <span aria-hidden="true" className={railDividerHandleClassName} />
         </div>
     )
 }
-
-/** Source-level tier marker for the closed adjustable-separator primitive. */
-export const meta = { shape: "leaf", world: "pure" } as const

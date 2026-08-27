@@ -6,11 +6,10 @@ const Surface = () => <p>Routed playground surface</p>
 
 describe("PlaygroundSessionLayoutBase", () => {
     it("keeps the routed surface inside the persistent canonical frame", () => {
-        const { container } = render(
+        render(
             <PlaygroundSessionLayoutBase state="ready" surface={<Surface />} failedLabel="Failed" retryLabel="Try again" />,
         )
 
-        expect(container.querySelector("[data-node=\"playground-session-frame\"]")).not.toBeNull()
         expect(screen.getByText("Routed playground surface")).toBeInTheDocument()
     })
 

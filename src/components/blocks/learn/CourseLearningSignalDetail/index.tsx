@@ -3,11 +3,7 @@ import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { Heading } from "@/components/leaves/Heading"
 import { SeeMoreLink } from "@/components/leaves/SeeMoreLink"
 import { Text } from "@/components/leaves/Text"
-import {
-    defineCompositeComponent,
-    defineContractComponent,
-    defineLeafComponent,
-} from "@/components/contracts/props"
+import { courseLearningSignalDetailClassName } from "./classNames"
 
 /** The selected signal and the evidence explaining its consequence. */
 export type CourseLearningSignalDetailData = {
@@ -19,7 +15,7 @@ export type CourseLearningSignalDetailData = {
 }
 
 /** Props for the accepted contextual signal-detail anatomy. */
-export type CourseLearningSignalDetailProps =
+type CourseLearningSignalDetailStateProps =
     | { readonly state: "pending"; readonly props: { readonly label: string } }
     | { readonly state: "empty"; readonly props: { readonly label: string; readonly message: string } }
     | { readonly state: "failed"; readonly props: { readonly label: string; readonly message: string; readonly retryLabel: string } }
@@ -31,55 +27,40 @@ export type CourseLearningSignalDetailActions = {
     readonly retry?: () => void
 }
 
-type CourseLearningSignalDetailInput = CourseLearningSignalDetailProps & { readonly on?: CourseLearningSignalDetailActions }
+/** Complete signal-detail state and actions. */
+export type CourseLearningSignalDetailProps = CourseLearningSignalDetailStateProps & {
+    readonly on?: CourseLearningSignalDetailActions
+}
 
 /** Explain the selected signal without replacing the dashboard page owner. */
-export const CourseLearningSignalDetail = (input: CourseLearningSignalDetailInput) => {
-    if (input.state === "failed" || input.state === "empty") {
+export const CourseLearningSignalDetail = (props: CourseLearningSignalDetailProps) => {
+    if (props.state === "failed" || props.state === "empty") {
         return (
-            <SurfaceCard
-                props={{ label: input.props.label }}
-                contract="empty-notice-card"
-                render={defineContractComponent("empty-notice-card", {
-                    notice: defineCompositeComponent("empty-notice", {}, () => (
-                        <EmptyNotice
-                            props={{
-                                icon: "course",
-                                message: input.props.message,
-                                ...(input.state === "failed" ? { actionLabel: input.props.retryLabel } : {}),
-                            }}
-                            on={{ act: input.on?.retry }}
-                        />
-                    )),
-                })}
-            />
+            <SurfaceCard props={{ label: props.props.label }}>
+                <EmptyNotice
+                    props={{
+                        icon: "course",
+                        message: props.props.message,
+                        ...(props.state === "failed" ? { actionLabel: props.props.retryLabel } : {}),
+                    }}
+                    on={{ act: props.on?.retry }}
+                />
+            </SurfaceCard>
         )
     }
 
-    const isLoading = input.state === "pending"
-    const detail = input.state === "pending" ? undefined : input.props
+    const isLoading = props.state === "pending"
+    const detail = props.state === "pending" ? undefined : props.props
     return (
-        <SurfaceCard
-            props={{ label: input.props.label }}
-            contract="course-learning-signal-detail-stack"
-            isLoading={isLoading}
-            render={defineContractComponent("course-learning-signal-detail-stack", {
-                title: defineLeafComponent("heading", {}, () => (
-                    <Heading props={{ content: detail?.title, level: 3 }} isLoading={isLoading} />
-                )),
-                fact: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
-                    <Text props={{ content: detail?.fact, size: "sm", weight: "medium" }} isLoading={isLoading} />
-                )),
-                caption: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                    <Text props={{ content: detail?.caption, size: "sm", tone: "muted" }} isLoading={isLoading} />
-                )),
-                action: isLoading ? undefined : defineLeafComponent("see-more-link", {}, () => (
-                    <SeeMoreLink props={{ label: detail?.actionLabel ?? "" }} on={{ press: input.on?.open }} />
-                )),
-            })}
-        />
+        <SurfaceCard props={{ label: props.props.label }} isLoading={isLoading}>
+            <div className={courseLearningSignalDetailClassName}>
+                <Heading props={{ content: detail?.title, level: 3 }} isLoading={isLoading} />
+                <Text props={{ content: detail?.fact, size: "sm", weight: "medium" }} isLoading={isLoading} />
+                <Text props={{ content: detail?.caption, size: "sm", tone: "muted" }} isLoading={isLoading} />
+                {isLoading ? null : (
+                    <SeeMoreLink props={{ label: detail?.actionLabel ?? "" }} on={{ press: props.on?.open }} />
+                )}
+            </div>
+        </SurfaceCard>
     )
 }
-
-/** Source-level ownership marker. */
-export const meta = { world: "pure", domain: "learn" } as const

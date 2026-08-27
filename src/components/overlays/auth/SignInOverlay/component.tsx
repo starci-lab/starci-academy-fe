@@ -1,6 +1,5 @@
+import type { ReactNode } from "react"
 import { ModalBranch } from "@/components/branches/ModalBranch"
-import type { ContractKey } from "@/components/contracts"
-import type { ContractComponent } from "@/components/contracts/props"
 
 /**
  * OVERLAY - `SignInOverlay`, presentational half.
@@ -19,12 +18,12 @@ import type { ContractComponent } from "@/components/contracts/props"
  * about how a modal behaves.
  */
 
-/** Props for {@link SignInOverlayBase}. */
-export type SignInOverlayProps<K extends ContractKey> = {
+/** Props for the internal presentational overlay view. */
+export type SignInOverlayContentProps = {
     /** Whether the surface is on screen. Owned by whoever mounts it, never by the surface. */
     readonly isOpen: boolean
-    /** Typed contract mounted inside the modal mechanics branch. */
-    readonly render: ContractComponent<K>
+    /** Content mounted inside the modal mechanics branch. */
+    readonly children: ReactNode
     /** Every way out: the close control, Escape, the backdrop, and a successful sign-in. */
     readonly onDismiss: () => void
 }
@@ -32,17 +31,14 @@ export type SignInOverlayProps<K extends ContractKey> = {
 /**
  * Draw the covering surface.
  *
- * @param input - {@link SignInOverlayProps}
+ * @param props - {@link SignInOverlayContentProps}
  */
-export const SignInOverlayBase = <const K extends ContractKey>(input: SignInOverlayProps<K>) => (
+export const SignInOverlayView = (props: SignInOverlayContentProps) => (
     <ModalBranch
-        isOpen={input.isOpen}
+        isOpen={props.isOpen}
         size="xs"
-        contract={input.render.meta.contract}
-        render={input.render}
-        onDismiss={input.onDismiss}
-    />
+        onDismiss={props.onDismiss}
+    >
+        {props.children}
+    </ModalBranch>
 )
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "overlay", world: "pure", domain: "auth" } as const

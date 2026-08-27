@@ -11,6 +11,3 @@ export const CourseFoundationCategoryPage = (props: CourseFoundationCategoryPage
     const t = useTranslations("learn.foundations")
     return <CourseFoundationCategoryPageBase {...props} title={t("resourcesTitle")} />
 }
-
-/** Source-level ownership marker for the connected route entry. */
-export const meta = { world: "connected", domain: "learn" } as const

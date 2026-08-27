@@ -1,6 +1,6 @@
 import { Chip, skeletonVariants } from "@heroui/react"
 import { Icon, type IconName } from "@/components/leaves/Icon"
-import type { LeafProps } from "@/components/contracts/props"
+import { badgeLoadingClassName } from "./classNames"
 
 /**
  * LEAF - `Badge`: a short figure or word set apart from the line it sits on.
@@ -23,8 +23,8 @@ export type BadgeData = {
     readonly icon?: IconName
 }
 
-/** Props for {@link Badge}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type BadgeProps = LeafProps<BadgeData>
+/** Props for {@link Badge}. */
+export type BadgeProps = { readonly props: BadgeData; readonly isLoading?: boolean }
 
 /** The tone, said once, as the vendor's own token. */
 const TONE_COLORS = {
@@ -36,21 +36,19 @@ const TONE_COLORS = {
 } as const
 
 /** The resting shape - same chip, glyphs out. */
-const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({
-    className: "select-none text-transparent",
-})
+const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({ className: badgeLoadingClassName })
 
 /**
  * Draw a badge.
  *
  * @param input - {@link BadgeProps}
  */
-export const Badge = ({ props, isLoading = false }: BadgeProps) => {
-    const tone = props.tone ?? "neutral"
+export const Badge = (props: BadgeProps) => {
+    const data = props.props
+    const isLoading = props.isLoading ?? false
+    const tone = data.tone ?? "neutral"
     return (
         <Chip
-            data-tier="leaf"
-            data-component="Badge"
             data-tone={tone}
             data-loading={isLoading ? "true" : "false"}
             aria-hidden={isLoading ? true : undefined}
@@ -59,11 +57,8 @@ export const Badge = ({ props, isLoading = false }: BadgeProps) => {
             size="sm"
             className={isLoading ? RESTING_CLASSES : undefined}
         >
-            {props.icon === undefined ? null : <Icon props={{ name: props.icon, role: "chip" }} />}
-            {props.content ?? ""}
+            {data.icon === undefined ? null : <Icon props={{ name: data.icon, role: "chip" }} />}
+            {data.content ?? ""}
         </Chip>
     )
 }
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const

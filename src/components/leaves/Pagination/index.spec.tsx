@@ -11,7 +11,7 @@ const frame = {
 describe("Pagination", () => {
     it("shows first, last, the current page and one neighbour either side with gaps between", () => {
         const { container } = render(<Pagination props={{ ...frame, total: 10, page: 5 }} />)
-        const control = container.querySelector("[data-component=\"Pagination\"]")
+        const control = container.querySelector("[aria-label=\"Course pages\"]")
         expect(control).toHaveAttribute("data-page", "5")
         expect(control).toHaveAttribute("data-total", "10")
         expect(control).toHaveAttribute("aria-label", "Course pages")
@@ -61,14 +61,14 @@ describe("Pagination", () => {
 
     it("clamps a page past the end and a fractional page onto a real page", () => {
         const { container } = render(<Pagination props={{ ...frame, total: 3.7, page: 99 }} />)
-        expect(container.querySelector("[data-component=\"Pagination\"]")).toHaveAttribute("data-page", "3")
-        expect(container.querySelector("[data-component=\"Pagination\"]")).toHaveAttribute("data-total", "3")
+        expect(container.querySelector("[aria-label=\"Course pages\"]")).toHaveAttribute("data-page", "3")
+        expect(container.querySelector("[aria-label=\"Course pages\"]")).toHaveAttribute("data-total", "3")
     })
 
     it("keeps one page when the count is empty, with no way off it", () => {
         const change = vi.fn()
         const { container } = render(<Pagination props={{ ...frame, total: 0, page: 0 }} on={{ change }} />)
-        expect(container.querySelector("[data-component=\"Pagination\"]")).toHaveAttribute("data-total", "1")
+        expect(container.querySelector("[aria-label=\"Course pages\"]")).toHaveAttribute("data-total", "1")
         expect(Array.from(container.querySelectorAll("li"), (item) => item.textContent)).toEqual(["", "1", ""])
         fireEvent.click(screen.getByRole("button", { name: "1" }))
         expect(change).not.toHaveBeenCalled()

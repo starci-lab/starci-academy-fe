@@ -20,30 +20,28 @@ export type CourseLearnAiDrawerProps = {
 }
 
 /** Connect the course-owned conversation while the overlay owns only lifecycle and focus. */
-export const CourseLearnAiDrawer = (input: CourseLearnAiDrawerProps) => {
+export const CourseLearnAiDrawer = (props: CourseLearnAiDrawerProps) => {
     const t = useTranslations("learn.content")
     const Chat = useCallback(() => (
         <CourseLearnAiChat
-            displayId={input.displayId}
-            courseId={input.courseId}
-            challengeId={input.challengeId}
-            challengeTitle={input.challengeTitle}
-            selection={input.selection}
-            initialPrompt={input.initialPrompt}
-            onClearSelection={input.onClearSelection}
+            displayId={props.displayId}
+            courseId={props.courseId}
+            challengeId={props.challengeId}
+            challengeTitle={props.challengeTitle}
+            selection={props.selection}
+            initialPrompt={props.initialPrompt}
+            onClearSelection={props.onClearSelection}
         />
-    ), [input.challengeId, input.challengeTitle, input.courseId, input.displayId, input.initialPrompt, input.onClearSelection, input.selection])
+    ), [props.challengeId, props.challengeTitle, props.courseId, props.displayId, props.initialPrompt, props.onClearSelection, props.selection])
     return (
         <CourseLearnAiDrawerBase
-            isOpen={input.isOpen}
+            isOpen={props.isOpen}
             placement={typeof window !== "undefined" && window.matchMedia("(max-width: 639px)").matches ? "bottom" : "right"}
             title={t("challengeAiTitle")}
-            onDismiss={input.onDismiss}
+            onDismiss={props.onDismiss}
             chat={Chat}
         />
     )
 }
 
 export * from "./component"
-/** Connected overlay ownership marker. */
-export const meta = { shape: "overlay", world: "connected", domain: "learn" } as const

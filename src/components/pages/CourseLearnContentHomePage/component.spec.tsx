@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
 vi.mock("@/components/blocks/learn/CourseContentMap", () => ({ CourseContentMap: () => null }))
-import { CourseLearnContentHomeBlockBase } from "@/components/blocks/learn/CourseLearnContentHomeBlock/component"
+import { CourseLearnContentHomeBlockView as CourseLearnContentHomeBlockBase } from "@/components/blocks/learn/CourseLearnContentHomeBlock/component"
 
 const props = {
     title: "System Design Mastery",
@@ -38,16 +38,13 @@ const props = {
 describe("CourseLearnContentHomeBlockBase", () => {
     it("draws the complete identity, continuation and current-module hierarchy", () => {
         const lesson = vi.fn()
-        const { container } = render(<CourseLearnContentHomeBlockBase blockState="ready" props={props} on={{ lesson }} />)
+        render(<CourseLearnContentHomeBlockBase blockState="ready" props={props} on={{ lesson }} />)
 
         expect(screen.getByRole("heading", { level: 1, name: "System Design Mastery" })).toBeVisible()
         expect(screen.getByText("Design scalable systems through production trade-offs.")).toBeVisible()
         expect(screen.getByText("4 modules · 12 study hours · 320 learners")).toBeVisible()
-        expect(container.querySelectorAll("[data-component=Badge]")).toHaveLength(0)
-        const identity = container.querySelector("[data-node=course-content-identity-stack]")
-        expect(identity).toHaveClass("gap-2")
-        expect(identity?.querySelector("[data-node=status-metadata-line]")).not.toBeNull()
-        expect(container.querySelector("[data-component=SurfaceCardSurface] [data-node=course-content-lesson-list]")).not.toBeNull()
+        expect(screen.getByRole("main", { name: "System Design Mastery" })).toBeInTheDocument()
+        expect(screen.getByRole("list", { name: "Current module · Foundations" })).toBeInTheDocument()
         expect(screen.getByText("Preview mode")).toBeVisible()
         expect(screen.getByRole("heading", { level: 2, name: "Consistent hashing" })).toBeVisible()
         expect(screen.getByRole("heading", { level: 3, name: "Current module · Foundations" })).toBeVisible()

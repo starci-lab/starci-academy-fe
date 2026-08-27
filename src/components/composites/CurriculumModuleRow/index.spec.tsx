@@ -10,7 +10,7 @@ describe("CurriculumModuleRow", () => {
     ] as const)("maps %s to its own semantic badge tone", (level, label, tone) => {
         render(<CurriculumModuleRow props={{ title: "Module", level, levelLabel: label }} />)
 
-        expect(screen.getByText(label).closest("[data-component=\"Badge\"]")).toHaveAttribute("data-tone", tone)
+        expect(screen.getByText(label)).toHaveAttribute("data-tone", tone)
     })
 
     it("reveals authored contents as one ordered list", () => {
@@ -44,7 +44,7 @@ describe("CurriculumModuleRow", () => {
         )
 
         const title = screen.getByText("Architecture foundations")
-        const chevron = title.parentElement?.querySelector("[data-component=DisclosureIndicator]")
+        const chevron = title.closest("button")?.querySelector("span")
         expect(chevron).toHaveClass("text-foreground", "rotate-0")
         fireEvent.click(title)
         await waitFor(() => expect(chevron).toHaveClass("rotate-90"))

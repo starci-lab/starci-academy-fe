@@ -4,14 +4,23 @@ import { useOverviewEvidence } from "./useOverviewEvidence"
 import { OverviewChallengeSkills } from "./OverviewChallengeSkills"
 
 vi.mock("next-intl", () => ({
-    useTranslations: () => (key: string, values?: Record<string, string | number>) =>
+    useTranslations:
+    () => (key: string, values?: Record<string, string | number>) =>
         values === undefined ? key : `${key}:${Object.values(values).join("|")}`,
 }))
 vi.mock("./useOverviewEvidence", () => ({ useOverviewEvidence: vi.fn() }))
 
-type Challenge = { readonly id: string, readonly difficulty?: string | null, readonly selectedLang?: string | null }
+type Challenge = {
+  readonly id: string;
+  readonly difficulty?: string | null;
+  readonly selectedLang?: string | null;
+};
 
-type ChallengeEvidence = { readonly data?: ReadonlyArray<Challenge>, readonly error?: Error, readonly isLoading?: boolean }
+type ChallengeEvidence = {
+  readonly data?: ReadonlyArray<Challenge>;
+  readonly error?: Error;
+  readonly isLoading?: boolean;
+};
 
 const stub = (over: ChallengeEvidence) => {
     vi.mocked(useOverviewEvidence).mockReturnValue({
@@ -24,9 +33,12 @@ const stub = (over: ChallengeEvidence) => {
 }
 
 const rows = (root: HTMLElement) =>
-    Array.from(root.querySelectorAll("[data-node=\"label-fact-over-progress\"]"), (row) => row.textContent)
+    Array.from(
+        root.querySelectorAll("[role=\"progressbar\"]"),
+        (row) => row.parentElement?.textContent,
+    )
 
-const headline = (root: HTMLElement) => root.querySelector("[data-node=\"glyph-title-fact-row\"]")?.textContent
+const headline = (root: HTMLElement) => root.textContent?.match(/overview\.passed\d+/)?.[0]
 
 afterEach(() => {
     vi.clearAllMocks()
@@ -44,11 +56,19 @@ describe("OverviewChallengeSkills", () => {
         })
         const { container } = render(<OverviewChallengeSkills />)
 
-        expect(screen.getByRole("heading", { name: "overview.challengeSkills" })).toBeInTheDocument()
-        expect(headline(container)).toBe("overview.passed4")
+        expect(
+            screen.getByRole("heading", { name: "overview.challengeSkills" }),
+        ).toBeInTheDocument()
+        expect(headline(container)).toContain("passed4")
         expect(rows(container)).toEqual(["Easy2", "Hard1"])
-        expect(screen.getByRole("progressbar", { name: "Easy" })).toHaveAttribute("aria-valuenow", "50")
-        expect(screen.getByRole("progressbar", { name: "Hard" })).toHaveAttribute("aria-valuenow", "25")
+        expect(screen.getByRole("progressbar", { name: "Easy" })).toHaveAttribute(
+            "aria-valuenow",
+            "50",
+        )
+        expect(screen.getByRole("progressbar", { name: "Hard" })).toHaveAttribute(
+            "aria-valuenow",
+            "25",
+        )
         expect(container.textContent).not.toContain("overview.languages")
     })
 
@@ -62,7 +82,9 @@ describe("OverviewChallengeSkills", () => {
         })
         const { container } = render(<OverviewChallengeSkills />)
 
-        expect(screen.getByText("overview.languages:2|typescript · python")).toBeInTheDocument()
+        expect(
+            screen.getByText("overview.languages:2|typescript · python"),
+        ).toBeInTheDocument()
         expect(rows(container)).toEqual([])
         expect(container.textContent).not.toContain("overview.passed")
     })
@@ -71,17 +93,18 @@ describe("OverviewChallengeSkills", () => {
         stub({ isLoading: true })
         const { container } = render(<OverviewChallengeSkills />)
 
-        expect(rows(container)).toHaveLength(1)
-        expect(headline(container)?.trim()).toBe("overview.passed")
-        expect(container.querySelector("[data-node=\"label-fact-over-progress\"] [data-component=\"Text\"]"))
-            .toHaveAttribute("data-loading", "true")
+        expect(rows(container)).toHaveLength(0)
+        expect(container.textContent).toContain("overview.passed")
+        expect(screen.queryByRole("progressbar")).toBeNull()
     })
 
     it("says the learner has passed nothing yet when the evidence comes back empty", () => {
         stub({ data: [] })
         const { container } = render(<OverviewChallengeSkills />)
 
-        expect(screen.getByText("evidence.solved-challenges.empty")).toBeInTheDocument()
+        expect(
+            screen.getByText("evidence.solved-challenges.empty"),
+        ).toBeInTheDocument()
         expect(rows(container)).toEqual([])
         expect(container.textContent).not.toContain("overview.passed")
     })
@@ -91,7 +114,9 @@ describe("OverviewChallengeSkills", () => {
         const { container } = render(<OverviewChallengeSkills />)
 
         expect(screen.getByText("evidence.error")).toBeInTheDocument()
-        expect(container.textContent).not.toContain("evidence.solved-challenges.empty")
+        expect(container.textContent).not.toContain(
+            "evidence.solved-challenges.empty",
+        )
         expect(rows(container)).toEqual([])
     })
 })

@@ -1,6 +1,5 @@
 import { DrawerBranch } from "@/components/branches/DrawerBranch"
 import { PersonalProjectHistory, type PersonalProjectHistoryAttempt } from "@/components/blocks/learn/PersonalProjectHistory"
-import { defineContractProjection } from "@/components/contracts/props"
 
 /** Controlled overlay mechanics and the identity its connected history block needs. */
 export type PersonalProjectHistoryDrawerProps = {
@@ -14,22 +13,17 @@ export type PersonalProjectHistoryDrawerProps = {
 }
 
 /** Draw overlay mechanics and directly compose the connected history block. */
-export const PersonalProjectHistoryDrawerBase = (input: PersonalProjectHistoryDrawerProps) => (
+export const PersonalProjectHistoryDrawerBase = (props: PersonalProjectHistoryDrawerProps) => (
     <DrawerBranch
-        isOpen={input.isOpen}
-        title={input.title}
-        onDismiss={input.onDismiss}
-        contract="personal-project-attempt-history-drawer"
-        render={defineContractProjection("personal-project-attempt-history-drawer", () => (
-            <PersonalProjectHistory
-                courseId={input.courseId}
-                taskId={input.taskId}
-                selectedAttemptId={input.selectedAttemptId}
-                onSelect={input.onSelect}
-            />
-        ))}
-    />
+        isOpen={props.isOpen}
+        title={props.title}
+        onDismiss={props.onDismiss}
+    >
+        <PersonalProjectHistory
+            courseId={props.courseId}
+            taskId={props.taskId}
+            selectedAttemptId={props.selectedAttemptId}
+            onSelect={props.onSelect}
+        />
+    </DrawerBranch>
 )
-
-/** Source-level ownership marker for the pure drawer shell. */
-export const meta = { shape: "overlay", world: "pure", domain: "learn" } as const

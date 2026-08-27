@@ -19,24 +19,24 @@ const mocks = vi.hoisted(() => ({ signedIn: undefined as (() => void) | undefine
 type PanelStub = { readonly initialMode: string, readonly onSignedIn: () => void }
 
 vi.mock("@/components/blocks/auth/AuthenticationPanel", () => ({
-    AuthenticationPanel: (input: PanelStub) => {
+    AuthenticationPanel: (props: PanelStub) => {
         mocks.renders += 1
-        mocks.signedIn = input.onSignedIn
-        return <div data-testid="panel" data-mode={input.initialMode}>Authentication panel</div>
+        mocks.signedIn = props.onSignedIn
+        return <div data-testid="panel" data-mode={props.initialMode}>Authentication panel</div>
     },
 }))
 
 type OverlayStub = {
     readonly isOpen: boolean
     readonly onDismiss: () => void
-    readonly render: { readonly kind: string, readonly project?: () => React.ReactNode }
+    readonly children?: React.ReactNode
 }
 
 vi.mock("./component", () => ({
-    SignInOverlayBase: (input: OverlayStub) => (
-        <section data-testid="surface" data-open={String(input.isOpen)}>
-            <button type="button" onClick={input.onDismiss}>Close</button>
-            {input.render.project?.()}
+    SignInOverlayView: (props: OverlayStub) => (
+        <section data-testid="surface" data-open={String(props.isOpen)}>
+            <button type="button" onClick={props.onDismiss}>Close</button>
+            {props.children}
         </section>
     ),
 }))

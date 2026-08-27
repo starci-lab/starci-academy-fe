@@ -1,5 +1,5 @@
-import { Typography, skeletonVariants } from "@heroui/react"
-import type { LeafProps } from "@/components/contracts/props"
+import { Typography } from "@heroui/react"
+import { getHeadingClassName } from "./classNames"
 
 /**
  * LEAF - `Heading`: the name of a thing, at a level of the document outline.
@@ -20,8 +20,8 @@ export type HeadingData = {
     readonly level?: HeadingLevel
 }
 
-/** Props for {@link Heading}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type HeadingProps = LeafProps<HeadingData>
+/** Props for {@link Heading}. Three fixed slots, no fourth. */
+export type HeadingProps = { readonly props: HeadingData; readonly isLoading?: boolean }
 
 /**
  * The set per outline level - the tag comes from `level`, these are the type metrics.
@@ -32,47 +32,28 @@ export type HeadingProps = LeafProps<HeadingData>
  * medium is enough to rank them without making the words harder to read, which another size step
  * down would.
  */
-const LEVEL_CLASSES = {
-    1: "text-xl font-semibold tracking-tight",
-    2: "text-base font-semibold",
-    3: "text-sm font-medium",
-    4: "text-xs font-medium text-muted",
-} as const
 
 /** The resting shape - the same line box with the glyphs out. */
-const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({
-    className: "select-none text-transparent",
-})
 
 /** Resting keeps the level's own metrics, so the line box does not change when text lands. */
-const RESTING_LEVEL_CLASSES = {
-    1: `${LEVEL_CLASSES[1]} ${RESTING_CLASSES}`,
-    2: `${LEVEL_CLASSES[2]} ${RESTING_CLASSES}`,
-    3: `${LEVEL_CLASSES[3]} ${RESTING_CLASSES}`,
-    4: `${LEVEL_CLASSES[4]} ${RESTING_CLASSES}`,
-} as const
 
 /**
  * Draw a title.
  *
  * @param input - {@link HeadingProps}
  */
-export const Heading = ({ props, isLoading = false }: HeadingProps) => {
-    const level = props.level ?? 2
+export const Heading = (props: HeadingProps) => {
+    const level = props.props.level ?? 2
+    const isLoading = props.isLoading === true
     return (
         <Typography.Heading
-            data-tier="leaf"
-            data-component="Heading"
             data-level={level}
             data-loading={isLoading ? "true" : "false"}
             aria-hidden={isLoading ? true : undefined}
             level={level}
-            className={isLoading ? RESTING_LEVEL_CLASSES[level] : LEVEL_CLASSES[level]}
+            className={getHeadingClassName(level, isLoading)}
         >
-            {props.content ?? ""}
+            {props.props.content ?? ""}
         </Typography.Heading>
     )
 }
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const

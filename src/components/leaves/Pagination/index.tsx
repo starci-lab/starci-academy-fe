@@ -1,5 +1,4 @@
 import { Pagination as VendorPagination } from "@heroui/react"
-import type { LeafProps } from "@/components/contracts/props"
 
 /**
  * LEAF - `Pagination`: which page of a list is showing, and the way to another one.
@@ -44,8 +43,8 @@ export type PaginationActions = {
     readonly change?: (page: number) => void
 }
 
-/** Props for {@link Pagination}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type PaginationProps = LeafProps<PaginationData, PaginationActions>
+/** Props for {@link Pagination}. Three fixed slots, no fourth. */
+export type PaginationProps = { readonly props: PaginationData; readonly on?: PaginationActions; readonly isLoading?: boolean }
 
 /**
  * The visible window: first, last, the showing page and one neighbour either side.
@@ -69,17 +68,19 @@ const windowOf = (page: number, total: number): ReadonlyArray<number | null> => 
  * it was handed into the range it can actually show, and reports a 1-based page through
  * `on.change` - never a page it is already on, so a repeated press cannot refetch the same rows.
  */
-export const Pagination = ({ props, on }: PaginationProps) => {
-    const total = Math.max(1, Math.floor(props.total))
-    const page = Math.min(Math.max(1, Math.floor(props.page)), total)
+export const Pagination = (props: PaginationProps) => {
+    const data = props.props
+    const on = props.on
+    const total = Math.max(1, Math.floor(data.total))
+    const page = Math.min(Math.max(1, Math.floor(data.page)), total)
     const go = (next: number) => {
         if (next >= 1 && next <= total && next !== page) on?.change?.(next)
     }
     return (
-        <VendorPagination aria-label={props.label} data-tier="leaf" data-component="Pagination" data-page={page} data-total={total}>
+        <VendorPagination aria-label={data.label} data-page={page} data-total={total}>
             <VendorPagination.Content>
                 <VendorPagination.Item>
-                    <VendorPagination.Previous aria-label={props.previousLabel} isDisabled={page === 1} onPress={() => go(page - 1)}>
+                    <VendorPagination.Previous aria-label={data.previousLabel} isDisabled={page === 1} onPress={() => go(page - 1)}>
                         <VendorPagination.PreviousIcon />
                     </VendorPagination.Previous>
                 </VendorPagination.Item>
@@ -95,7 +96,7 @@ export const Pagination = ({ props, on }: PaginationProps) => {
                     </VendorPagination.Item>
                 ))}
                 <VendorPagination.Item>
-                    <VendorPagination.Next aria-label={props.nextLabel} isDisabled={page === total} onPress={() => go(page + 1)}>
+                    <VendorPagination.Next aria-label={data.nextLabel} isDisabled={page === total} onPress={() => go(page + 1)}>
                         <VendorPagination.NextIcon />
                     </VendorPagination.Next>
                 </VendorPagination.Item>
@@ -103,6 +104,3 @@ export const Pagination = ({ props, on }: PaginationProps) => {
         </VendorPagination>
     )
 }
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const

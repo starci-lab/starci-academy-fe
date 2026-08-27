@@ -1,14 +1,9 @@
 import type { ComponentType } from "react"
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { Tree } from "@/components/branches/Tree"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { ProfileHero } from "@/components/blocks/profile/ProfileHero"
 import { ProfileTabsBase, type ProfileTabsData } from "@/components/blocks/profile/ProfileTabs"
-import {
-    defineCompositeComponent,
-    defineContractComponent,
-    defineContractProjection,
-} from "@/components/contracts/props"
+import { profileInsetClassName, profileMeasureClassName, profileRailClassName, profileSplitClassName, profileTabsFrameClassName } from "./classNames"
 
 /** Screen-level situations settled by the persistent public-profile layout. */
 export type PublicProfileLayoutProps = {
@@ -33,91 +28,19 @@ export type PublicProfileLayoutProps = {
 }
 
 /** Draw persistent profile chrome and its screen-level alternatives. */
-export const PublicProfileLayoutBase = (input: PublicProfileLayoutProps) => {
-    const Body = input.body
-    if (input.state === "failed") {
-        return (
-            <SurfaceCard
-                contract="centred-empty-notice"
-                render={defineContractComponent("centred-empty-notice", {
-                    notice: defineCompositeComponent("empty-notice", {}, () => (
-                        <EmptyNotice
-                            props={{ icon: "retry", message: input.props.failedMessage, actionLabel: input.props.retryLabel }}
-                            on={{ act: input.on.retry }}
-                        />
-                    )),
-                })}
-            />
-        )
+export const PublicProfileLayoutBase = (props: PublicProfileLayoutProps) => {
+    const Body = props.body
+    if (props.state === "failed") {
+        return <SurfaceCard><EmptyNotice props={{ icon: "retry", message: props.props.failedMessage, actionLabel: props.props.retryLabel }} on={{ act: props.on.retry }} /></SurfaceCard>
     }
-
-    if (input.state === "not-found") {
-        return (
-            <SurfaceCard
-                contract="centred-empty-notice"
-                render={defineContractComponent("centred-empty-notice", {
-                    notice: defineCompositeComponent("empty-notice", {}, () => (
-                        <EmptyNotice
-                            props={{ icon: "account", message: input.props.notFoundMessage, actionLabel: input.props.homeLabel }}
-                            on={{ act: input.on.home }}
-                        />
-                    )),
-                })}
-            />
-        )
+    if (props.state === "not-found") {
+        return <SurfaceCard><EmptyNotice props={{ icon: "account", message: props.props.notFoundMessage, actionLabel: props.props.homeLabel }} on={{ act: props.on.home }} /></SurfaceCard>
     }
-
-    if (input.state === "locked") {
-        return (
-            <Tree contract="profile-page-measure" render={defineContractComponent("profile-page-measure", {
-                inset: defineContractComponent("profile-page-inset", {
-                    shell: defineContractComponent("profile-rail-container", {
-                        split: defineContractComponent("profile-rail-then-main", {
-                            rail: defineContractComponent("profile-identity-rail", {
-                                hero: defineContractProjection("profile-hero-rail", () => <ProfileHero />),
-                            }),
-                            main: defineContractProjection("centred-empty-notice", () => (
-                                <SurfaceCard contract="centred-empty-notice" render={defineContractComponent("centred-empty-notice", {
-                                    notice: defineCompositeComponent("empty-notice", {}, () => (
-                                        <EmptyNotice
-                                            props={{
-                                                icon: "password",
-                                                message: input.props.lockedMessage,
-                                                description: input.props.lockedDescription,
-                                                actionLabel: input.props.browseLabel,
-                                            }}
-                                            on={{ act: input.on.browse }}
-                                        />
-                                    )),
-                                })} />
-                            )),
-                        }),
-                    }),
-                }),
-            })} />
-        )
+    if (props.state === "locked") {
+        return <div className={profileMeasureClassName}><div className={profileInsetClassName}><div className={profileSplitClassName}><aside className={profileRailClassName}><ProfileHero /></aside><main><SurfaceCard><EmptyNotice props={{ icon: "password", message: props.props.lockedMessage, description: props.props.lockedDescription, actionLabel: props.props.browseLabel }} on={{ act: props.on.browse }} /></SurfaceCard></main></div></div></div>
     }
-
-    return (
-        <Tree contract="profile-tabs-over-body" render={defineContractComponent("profile-tabs-over-body", {
-            tabs: defineContractProjection("underlined-tab-strip", () => (
-                <ProfileTabsBase props={input.props.tabs} on={{ select: input.on.selectTab }} />
-            )),
-            body: defineContractComponent("profile-page-measure", {
-                inset: defineContractComponent("profile-page-inset", {
-                    shell: defineContractComponent("profile-rail-container", {
-                        split: defineContractComponent("profile-rail-then-main", {
-                            rail: defineContractComponent("profile-identity-rail", {
-                                hero: defineContractProjection("profile-hero-rail", () => <ProfileHero />),
-                            }),
-                            main: defineContractProjection("profile-main", () => <Body />),
-                        }),
-                    }),
-                }),
-            }),
-        })} />
-    )
+    return <div className={profileTabsFrameClassName}>
+        <ProfileTabsBase props={props.props.tabs} on={{ select: props.on.selectTab }} />
+        <div className={profileMeasureClassName}><div className={profileInsetClassName}><div className={profileSplitClassName}><aside className={profileRailClassName}><ProfileHero /></aside><main><Body /></main></div></div></div>
+    </div>
 }
-
-/** Source-level marker for the pure profile layout. */
-export const meta = { world: "pure", domain: "profile" } as const

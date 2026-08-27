@@ -7,6 +7,6 @@ import { DashboardPage } from "@/components/pages/DashboardPage"
  * is a mounting point, so every decision about what the dashboard IS lives one tier
  * down where it can be rendered, tested and changed without a router.
  */
-const DashboardRoute = () => <DashboardPage />
+const DashboardRoute = () => <DashboardPage {...{}} />
 
 export default DashboardRoute

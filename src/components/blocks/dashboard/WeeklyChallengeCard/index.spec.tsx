@@ -189,7 +189,7 @@ describe("WeeklyChallengeCard", () => {
         vi.mocked(useMutateClaimWeeklyChallengeRewardSwr).mockReturnValue({ trigger: vi.fn() } as never)
 
         const { container } = render(<WeeklyChallengeCard />)
-        expect(container.querySelectorAll("[data-node=\"weekly-challenge-finisher-row\"]")).toHaveLength(5)
+        expect(container.querySelectorAll("img[alt]")).toHaveLength(5)
         expect(screen.queryByText("linus")).toBeNull()
         // Under an hour is counted in minutes, under a day in hours, and beyond that in days.
         expect(screen.getByText("30 minutes ago")).toBeInTheDocument()

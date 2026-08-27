@@ -1,10 +1,17 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { Button as HeroButton, cn } from "@heroui/react"
+import { Button as HeroButton } from "@heroui/react"
 import { AnimatePresence, motion } from "framer-motion"
-import type { LeafProps } from "@/components/contracts/props"
 import { ReactionType } from "@/modules/api/graphql/queries/types/reactions"
+import {
+    getReactionChoiceClassName,
+    getReactionImageClassName,
+    reactionPickerClassName,
+    reactionPickerMenuClassName,
+    reactionSummaryClassName,
+    reactionTooltipClassName,
+} from "./classNames"
 
 /** Localized copy for the fixed StarCi reaction vocabulary. */
 export type ReactionLabels = Readonly<Record<ReactionType, string>>
@@ -29,13 +36,13 @@ type ReactionImageProps = {
 }
 
 /** Draw one reaction asset at the optical size owned by its placement. */
-const ReactionImage = ({ type, size }: ReactionImageProps) => (
+const ReactionImage = (props: ReactionImageProps) => (
     <img
-        src={reactionAsset(type)}
+        src={reactionAsset(props.type)}
         alt=""
         aria-hidden
         draggable={false}
-        className={cn("inline-block shrink-0 select-none", size === "picker" ? "size-7" : "size-4")}
+        className={getReactionImageClassName(props.size)}
     />
 )
 
@@ -51,7 +58,10 @@ export type ReactionPickerData = {
 /** A selected reaction, or `null` when the current reaction is removed. */
 export type ReactionPickerActions = { readonly select?: (type: ReactionType | null) => void }
 /** Props for the intrinsic six-reaction control. */
-export type ReactionPickerProps = LeafProps<ReactionPickerData, ReactionPickerActions>
+export type ReactionPickerProps = {
+    readonly props: ReactionPickerData
+    readonly on?: ReactionPickerActions
+}
 
 const PICKER_VARIANTS = {
     hidden: { opacity: 0, y: 8, scale: 0.8 },
@@ -64,12 +74,14 @@ const CHOICE_VARIANTS = {
 } as const
 
 /** Legacy-faithful controlled reaction trigger and six-choice picker. */
-export const ReactionPicker = ({ props, on }: ReactionPickerProps) => {
+export const ReactionPicker = (props: ReactionPickerProps) => {
+    const data = props.props
+    const on = props.on
     const [isOpen, setIsOpen] = useState(false)
     const rootRef = useRef<HTMLDivElement>(null)
-    const selectedLabel = props.selected === null || props.selected === undefined
+    const selectedLabel = data.selected === null || data.selected === undefined
         ? undefined
-        : props.labels[props.selected]
+        : data.labels[data.selected]
 
     useEffect(() => {
         if (!isOpen) return
@@ -88,33 +100,33 @@ export const ReactionPicker = ({ props, on }: ReactionPickerProps) => {
     }, [isOpen])
 
     if (on?.select === undefined) {
-        if (props.count <= 0) return null
-        return <div data-tier="leaf" data-component="ReactionPicker" className="flex items-center gap-1 text-xs text-muted">
-            {selectedLabel === undefined || props.selected === null || props.selected === undefined
+        if (data.count <= 0) return null
+        return <div className={reactionSummaryClassName}>
+            {selectedLabel === undefined || data.selected === null || data.selected === undefined
                 ? null
-                : <ReactionImage type={props.selected} size="summary" />}
-            <span>{props.count}</span>
+                : <ReactionImage type={data.selected} size="summary" />}
+            <span>{data.count}</span>
         </div>
     }
 
     const select = (type: ReactionType) => {
-        on.select?.(props.selected === type ? null : type)
+        on.select?.(data.selected === type ? null : type)
         setIsOpen(false)
     }
 
-    return <div ref={rootRef} data-tier="leaf" data-component="ReactionPicker" className="relative flex items-center">
+    return <div ref={rootRef} className={reactionPickerClassName}>
         <HeroButton
             variant="tertiary"
             size="sm"
-            aria-label={props.label}
+            aria-label={data.label}
             aria-expanded={isOpen}
-            isDisabled={props.isPending === true}
+            isDisabled={data.isPending === true}
             onPress={() => setIsOpen((current) => !current)}
         >
-            {selectedLabel === undefined || props.selected === null || props.selected === undefined
-                ? <span>{props.label}</span>
-                : <ReactionImage type={props.selected} size="summary" />}
-            {props.count > 0 ? <span>{props.count}</span> : null}
+            {selectedLabel === undefined || data.selected === null || data.selected === undefined
+                ? <span>{data.label}</span>
+                : <ReactionImage type={data.selected} size="summary" />}
+            {data.count > 0 ? <span>{data.count}</span> : null}
         </HeroButton>
         <AnimatePresence>
             {isOpen ? <motion.div
@@ -123,24 +135,21 @@ export const ReactionPicker = ({ props, on }: ReactionPickerProps) => {
                 animate="visible"
                 exit="exit"
                 style={{ transformOrigin: "bottom left" }}
-                className="absolute bottom-full left-0 z-10 mb-1 flex items-center gap-1 rounded-full bg-surface p-1 ring-1 ring-separator"
+                className={reactionPickerMenuClassName}
             >
                 {REACTION_TYPES.map((type) => <motion.button
                     key={type}
                     type="button"
-                    aria-label={props.labels[type]}
+                    aria-label={data.labels[type]}
                     variants={CHOICE_VARIANTS}
                     whileHover={{ scale: 1.4, y: -4 }}
                     whileTap={{ scale: 0.85 }}
                     transition={{ type: "spring", stiffness: 500, damping: 18 }}
                     onClick={() => select(type)}
-                    className={cn(
-                        "group/reaction relative flex items-center justify-center rounded-full p-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent",
-                        props.selected === type && "bg-accent-soft",
-                    )}
+                    className={getReactionChoiceClassName(data.selected === type)}
                 >
-                    <span className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-foreground px-2 text-[10px] font-medium text-background opacity-0 transition-opacity group-hover/reaction:opacity-100">
-                        {props.labels[type]}
+                    <span className={reactionTooltipClassName}>
+                        {data.labels[type]}
                     </span>
                     <ReactionImage type={type} size="picker" />
                 </motion.button>)}
@@ -148,6 +157,3 @@ export const ReactionPicker = ({ props, on }: ReactionPickerProps) => {
         </AnimatePresence>
     </div>
 }
-
-/** Source-level tier marker for the intrinsic reaction control. */
-export const meta = { shape: "leaf", world: "pure" } as const

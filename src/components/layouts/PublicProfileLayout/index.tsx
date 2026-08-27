@@ -11,7 +11,7 @@ import type { ExtendedTab } from "@/components/leaves/ExtendedTabs"
 import { PublicProfileLayoutBase } from "./component"
 
 /** Framework-layout boundary input. */
-export type PublicProfileLayoutBoundaryProps = { readonly content: ReactNode }
+export type PublicProfileLayoutProps = { readonly content: ReactNode }
 
 const PROFILE_TABS: ReadonlyArray<Omit<ExtendedTab, "label">> = [
     { id: "overview", icon: "home" },
@@ -30,7 +30,8 @@ const profileLayoutStateOf = (failed: boolean, loading: boolean, missing: boolea
 }
 
 /** Connected persistent profile layout: settles canonicalization and whole-screen visibility. */
-export const PublicProfileLayout = ({ content }: PublicProfileLayoutBoundaryProps) => {
+export const PublicProfileLayout = (props: PublicProfileLayoutProps) => {
+    const { content } = props
     const t = useTranslations("profile")
     const tabsT = useTranslations("profile.tabs")
     const params = useParams<{ username?: string }>()
@@ -86,4 +87,3 @@ export const PublicProfileLayout = ({ content }: PublicProfileLayoutBoundaryProp
 export * from "./component"
 
 /** Source-level marker for the connected profile layout. */
-export const meta = { world: "connected", domain: "profile" } as const

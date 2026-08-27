@@ -3,7 +3,6 @@ import { LabelledProgressRow } from "@/components/composites/LabelledProgressRow
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { Text } from "@/components/leaves/Text"
 import type { LabelledProgressRowData } from "@/components/composites/LabelledProgressRow"
-import { defineCompositeComponent, defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
 /**
  * BLOCK - `WeeklyGoals`, presentational half.
@@ -32,7 +31,7 @@ export type WeeklyGoalsExit = {
 }
 
 /** Props for {@link WeeklyGoalsBase}, discriminated by the situation. */
-export type WeeklyGoalsProps =
+export type WeeklyGoalsProps = (
     | { readonly state: "pending"; readonly props: WeeklyGoalsFrame }
     | {
         readonly state: "failed"
@@ -47,6 +46,7 @@ export type WeeklyGoalsProps =
             readonly summary: string
         }
     }
+) & { readonly on?: WeeklyGoalsActions }
 
 /** What the block reports. */
 export type WeeklyGoalsActions = {
@@ -62,60 +62,43 @@ const RESTING_ROWS: ReadonlyArray<LabelledProgressRowData> = Array.from(
     (_unused, index) => ({ id: `resting-${index + 1}` }),
 )
 
-/** The situation this surface is in, plus the actions it exposes. */
-type WeeklyGoalsInput = WeeklyGoalsProps & { readonly on?: WeeklyGoalsActions }
-
 /**
  * Render the week.
  *
- * @param input - {@link WeeklyGoalsInput}
+ * @param props - {@link WeeklyGoalsProps}
  */
-export const WeeklyGoalsBase = (input: WeeklyGoalsInput) => {
-    if (input.state === "failed") {
+export const WeeklyGoalsBase = (props: WeeklyGoalsProps) => {
+    if (props.state === "failed") {
         return (
-            <SurfaceCard props={{ label: input.props.label }} contract="empty-notice-card"
-                render={defineContractComponent("empty-notice-card", { notice: defineCompositeComponent("empty-notice", {}, () => <EmptyNotice
-                    props={{ icon: "league", message: input.props.message, actionLabel: input.props.retryLabel }}
-                    on={{ act: input.on?.retry }}
-                />) })} />
+            <SurfaceCard props={{ label: props.props.label }}><EmptyNotice
+                props={{ icon: "league", message: props.props.message, actionLabel: props.props.retryLabel }}
+                on={{ act: props.on?.retry }}
+            /></SurfaceCard>
         )
     }
 
-    const isLoading = input.state === "pending"
+    const isLoading = props.state === "pending"
 
     return (
         <SurfaceCard
             props={{
-                label: input.props.label,
+                label: props.props.label,
                 // While resting there is nothing to lead anywhere yet, so the way out is withheld
                 // rather than drawn dead - a control that does nothing is worse than one not there.
-                seeMoreLabel: input.state === "ready" ? input.props.editLabel : undefined,
+                seeMoreLabel: props.state === "ready" ? props.props.editLabel : undefined,
             }}
-            on={{ seeMore: input.on?.edit }}
+            on={{ seeMore: props.on?.edit }}
             isLoading={isLoading}
-            contract="weekly-goals-card"
-            render={defineContractComponent("weekly-goals-card", {
-                summary: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
-                    <Text
-                        props={{
-                            content: input.state === "ready" ? input.props.summary : undefined,
-                            size: "sm",
-                            weight: "medium",
-                        }}
-                        isLoading={isLoading}
-                    />
-                )),
-                goals: defineContractComponent("bordered-goal-grid", {
-                    goal: (input.state === "ready" ? input.props.rows : RESTING_ROWS).map((row) => (
-                        defineCompositeComponent("labelled-progress-row", {}, () => (
-                            <LabelledProgressRow props={row} isLoading={isLoading} />
-                        ))
-                    )),
-                }),
-            })}
-        />
+        >
+            <Text
+                props={{
+                    content: props.state === "ready" ? props.props.summary : undefined,
+                    size: "sm",
+                    weight: "medium",
+                }}
+                isLoading={isLoading}
+            />
+            {(props.state === "ready" ? props.props.rows : RESTING_ROWS).map((row) => <LabelledProgressRow key={row.id} props={row} isLoading={isLoading} />)}
+        </SurfaceCard>
     )
 }
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { world: "pure", domain: "kpi" } as const

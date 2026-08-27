@@ -1,6 +1,6 @@
 import { Checkbox as HeroCheckbox } from "@heroui/react"
 import { TextLink } from "@/components/leaves/TextLink"
-import type { LeafProps } from "@/components/contracts/props"
+import { checkboxClassName } from "./classNames"
 
 /**
  * LEAF - `Checkbox`: a choice the reader makes about the form around it.
@@ -38,51 +38,49 @@ export type CheckboxActions = {
     readonly follow?: (id: string) => void
 }
 
-/** Props for {@link Checkbox}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type CheckboxProps = LeafProps<CheckboxData, CheckboxActions>
+/** Props for {@link Checkbox}. */
+export type CheckboxProps = { readonly props: CheckboxData; readonly on?: CheckboxActions; readonly isLoading?: boolean }
 
 /** The tick and its words on one baseline, with the whole row pressable. */
-const ROOT_CLASSES = "flex flex-row items-center gap-2 text-sm"
 
 /**
  * Draw a choice.
  *
  * @param input - {@link CheckboxProps}
  */
-export const Checkbox = ({ props, on }: CheckboxProps) => (
-    <HeroCheckbox
-        data-tier="leaf"
-        data-component="Checkbox"
-        data-selected={props.isSelected ? "true" : "false"}
-        aria-label={props.label}
-        name={props.name}
-        isSelected={props.isSelected}
-        onChange={(isSelected: boolean) => on?.change?.(isSelected)}
-        variant="secondary"
-        className={ROOT_CLASSES}
-    >
-        <HeroCheckbox.Content>
-            <HeroCheckbox.Control>
-                <HeroCheckbox.Indicator />
-            </HeroCheckbox.Control>
-            {props.labelParts === undefined ? props.label : (
-                <span>
-                    {props.labelParts.map((part, index) => (
-                        part.kind === "text" ? (
-                            <span key={`${part.kind}-${index}`}>{part.content}</span>
-                        ) : (
-                            <TextLink
-                                key={`${part.kind}-${index}`}
-                                props={{ label: part.label, size: "sm" }}
-                                on={{ press: () => on?.follow?.(part.id) }}
-                            />
-                        )
-                    ))}
-                </span>
-            )}
-        </HeroCheckbox.Content>
-    </HeroCheckbox>
-)
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const
+export const Checkbox = (props: CheckboxProps) => {
+    const data = props.props
+    const on = props.on
+    return (
+        <HeroCheckbox
+            data-selected={data.isSelected ? "true" : "false"}
+            aria-label={data.label}
+            name={data.name}
+            isSelected={data.isSelected}
+            onChange={(isSelected: boolean) => on?.change?.(isSelected)}
+            variant="secondary"
+            className={checkboxClassName}
+        >
+            <HeroCheckbox.Content>
+                <HeroCheckbox.Control>
+                    <HeroCheckbox.Indicator />
+                </HeroCheckbox.Control>
+                {data.labelParts === undefined ? data.label : (
+                    <span>
+                        {data.labelParts.map((part, index) => (
+                            part.kind === "text" ? (
+                                <span key={`${part.kind}-${index}`}>{part.content}</span>
+                            ) : (
+                                <TextLink
+                                    key={`${part.kind}-${index}`}
+                                    props={{ label: part.label, size: "sm" }}
+                                    on={{ press: () => on?.follow?.(part.id) }}
+                                />
+                            )
+                        ))}
+                    </span>
+                )}
+            </HeroCheckbox.Content>
+        </HeroCheckbox>
+    )
+}

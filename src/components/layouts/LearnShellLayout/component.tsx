@@ -1,12 +1,11 @@
 import { DrawerBranch } from "@/components/branches/DrawerBranch"
-import { Tree } from "@/components/branches/Tree"
-import { defineContractComponent, defineContractProjection, defineLeafComponent } from "@/components/contracts/props"
 import { LearnSpine } from "@/components/blocks/learn/LearnSpine"
 import { Button } from "@/components/leaves/Button"
 import { NavLink } from "@/components/leaves/NavLink"
 import { Text } from "@/components/leaves/Text"
 import type { IconName } from "@/components/leaves/Icon"
 import type { ReactNode } from "react"
+import { learnShellBodyClassName, learnShellFrameClassName, learnShellMobileBarClassName, learnShellMobileNavigationClassName, learnShellRailClassName } from "./classNames"
 
 /**
  * LAYOUT - `LearnShellLayoutBase`: the frame every learn surface is read inside.
@@ -85,55 +84,31 @@ export type LearnShellLayoutProps = {
  *
  * @param input - {@link LearnShellLayoutProps}
  */
-export const LearnShellLayoutBase = (input: LearnShellLayoutProps) => {
-    const mobileTabs = input.mobileTabs ?? []
-    const mobileBar = mobileTabs.length === 0 ? {} : {
-        bar: defineContractComponent("learn-mobile-tab-bar", {
-            tab: mobileTabs.map((tab) => defineLeafComponent("nav-link", { kind: "tab" }, () => (
-                <NavLink
-                    props={{ label: tab.label, icon: tab.icon, kind: "tab", isCurrent: tab.isCurrent }}
-                    on={{ press: () => input.on?.openMobileTab?.(tab.id) }}
-                />
-            ))),
-        }),
-    }
-    const body = defineContractComponent("learn-routed-body", {
-        page: defineLeafComponent("page", {}, () => <>{input.surface}</>),
-    })
-    const mobileCourseNavigation = input.mobileCourseNavigation === undefined ? undefined : defineContractComponent("learn-mobile-course-map-row", {
-        action: defineLeafComponent("button", {}, () => (
-            <Button props={{ label: input.mobileCourseNavigation?.label ?? "", variant: "outline", size: "sm", icon: "course" }} on={{ press: input.on?.openCourseNavigation }} />
-        )),
-        fact: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-            <Text props={{ content: input.mobileCourseNavigation?.currentLabel ?? "", size: "xs", tone: "muted" }} />
-        )),
-    })
+export const LearnShellLayoutBase = (props: LearnShellLayoutProps) => {
+    const mobileTabs = props.mobileTabs ?? []
     return (
         <>
-            <Tree
-                contract="learn-shell-frame"
-                render={defineContractComponent("learn-shell-frame", {
-                    ...(input.isFullBleed ? {} : { spine: defineContractProjection("learn-course-navigation-rail", () => <LearnSpine displayId={input.displayId} />) }),
-                    mobileCourseNavigation,
-                    body,
-                    ...mobileBar,
-                })}
-            />
-            {input.mobileCourseNavigation === undefined ? null : (
+            <div className={learnShellFrameClassName}>
+                {props.isFullBleed ? null : <aside className={learnShellRailClassName}><LearnSpine displayId={props.displayId} /></aside>}
+                {props.mobileCourseNavigation === undefined ? null : <div className={learnShellMobileNavigationClassName}>
+                    <Button props={{ label: props.mobileCourseNavigation.label, variant: "outline", size: "sm", icon: "course" }} on={{ press: props.on?.openCourseNavigation }} />
+                    <Text props={{ content: props.mobileCourseNavigation.currentLabel, size: "xs", tone: "muted" }} />
+                </div>}
+                <main className={learnShellBodyClassName}>{props.surface}</main>
+                {mobileTabs.length === 0 ? null : <nav className={learnShellMobileBarClassName}>
+                    {mobileTabs.map((tab) => <NavLink key={tab.id} props={{ label: tab.label, icon: tab.icon, kind: "tab", isCurrent: tab.isCurrent }} on={{ press: () => props.on?.openMobileTab?.(tab.id) }} />)}
+                </nav>}
+            </div>
+            {props.mobileCourseNavigation === undefined ? null : (
                 <DrawerBranch
-                    isOpen={input.mobileCourseNavigation.isOpen}
+                    isOpen={props.mobileCourseNavigation.isOpen}
                     placement="left"
-                    title={input.mobileCourseNavigation.label}
-                    onDismiss={() => input.on?.closeCourseNavigation?.()}
-                    contract="learn-course-navigation-drawer-host"
-                    render={defineContractComponent("learn-course-navigation-drawer-host", {
-                        navigation: defineLeafComponent("page", {}, () => <LearnSpine displayId={input.displayId} presentation="drawer" onNavigate={input.on?.closeCourseNavigation} />),
-                    })}
-                />
+                    title={props.mobileCourseNavigation.label}
+                    onDismiss={() => props.on?.closeCourseNavigation?.()}
+                >
+                    <LearnSpine displayId={props.displayId} presentation="drawer" onNavigate={props.on?.closeCourseNavigation} />
+                </DrawerBranch>
             )}
         </>
     )
 }
-
-/** Source-level tier marker. */
-export const meta = { shape: "layout", world: "pure", domain: "learn" } as const

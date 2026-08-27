@@ -1,13 +1,7 @@
-import { Tree } from "@/components/branches/Tree"
 import { ChoiceTabs } from "@/components/leaves/ChoiceTabs"
 import { ContributionGrid } from "@/components/leaves/ContributionGrid"
 import { ContributionIntensityLegend } from "@/components/leaves/ContributionIntensityLegend"
 import { Text } from "@/components/leaves/Text"
-import {
-    defineContractComponent,
-    defineLeafComponent,
-    type CompositeProps,
-} from "@/components/contracts/props"
 
 /** One contribution day with an accessible, already-resolved description. */
 export type ContributionCalendarDay = {
@@ -35,55 +29,35 @@ export type ContributionCalendarActions = {
 }
 
 /** Props for the closed contribution-calendar composition. */
-export type ContributionCalendarProps = CompositeProps<ContributionCalendarData, ContributionCalendarActions>
+export type ContributionCalendarProps = { readonly props: ContributionCalendarData; readonly on?: ContributionCalendarActions; readonly isLoading?: boolean }
 
 /** Draw the fixed year summary, intrinsic plot and its reading key. */
-export const ContributionCalendar = ({ props, on, isLoading = false }: ContributionCalendarProps) => {
-    const heading = defineContractComponent("contribution-calendar-heading-row", {
-        total: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-            <Text props={{ content: props.totalLabel, size: "xs", tone: "muted" }} isLoading={isLoading} />
-        )),
-        years: defineLeafComponent("choice-tabs", {}, () => (
-            <ChoiceTabs
-                props={{
-                    label: props.totalLabel ?? "",
-                    selectedKey: String(props.year),
-                    variant: "primary",
-                    tabs: props.years.map((year) => ({ id: String(year), label: String(year) })),
-                }}
-                on={{ select: (key) => on?.selectYear?.(Number(key)) }}
-            />
-        )),
-    })
-    const footer = defineContractComponent("contribution-calendar-footer-row", {
-        streak: defineLeafComponent("text", { size: "sm" }, () => (
-            <Text props={{ content: props.streakLabel, size: "sm" }} isLoading={isLoading} />
-        )),
-        intensity: defineLeafComponent("contribution-intensity-legend", {}, () => (
-            <ContributionIntensityLegend
-                props={{ lessLabel: props.lessLabel, moreLabel: props.moreLabel }}
-                isLoading={isLoading}
-            />
-        )),
-    })
-    const content = defineContractComponent("contribution-calendar-stack", {
-        heading,
-        grid: defineLeafComponent("contribution-grid", {}, () => (
-            <ContributionGrid
-                props={{
-                    year: props.year,
-                    monthLabels: props.monthLabels ?? [],
-                    weekdayLabels: props.weekdayLabels ?? [],
-                    days: props.days ?? [],
-                }}
-                isLoading={isLoading}
-            />
-        )),
-        footer,
-    })
-
-    return <Tree contract="contribution-calendar-stack" render={content} />
+export const ContributionCalendar = (props: ContributionCalendarProps) => {
+    const data = props.props
+    const on = props.on
+    const isLoading = props.isLoading ?? false
+    return <div>
+        <div><Text props={{ content: data.totalLabel, size: "xs", tone: "muted" }} isLoading={isLoading} /><ChoiceTabs
+            props={{
+                label: data.totalLabel ?? "",
+                selectedKey: String(data.year),
+                variant: "primary",
+                tabs: data.years.map((year) => ({ id: String(year), label: String(year) })),
+            }}
+            on={{ select: (key) => on?.selectYear?.(Number(key)) }}
+        /></div>
+        <ContributionGrid
+            props={{
+                year: data.year,
+                monthLabels: data.monthLabels ?? [],
+                weekdayLabels: data.weekdayLabels ?? [],
+                days: data.days ?? [],
+            }}
+            isLoading={isLoading}
+        />
+        <div><Text props={{ content: data.streakLabel, size: "sm" }} isLoading={isLoading} /><ContributionIntensityLegend
+            props={{ lessLabel: data.lessLabel, moreLabel: data.moreLabel }}
+            isLoading={isLoading}
+        /></div>
+    </div>
 }
-
-/** Source-level tier marker for the fixed contribution calendar composition. */
-export const meta = { shape: "composite", world: "pure" } as const

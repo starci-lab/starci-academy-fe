@@ -8,7 +8,11 @@ import { fromGlobalId } from "@/modules/utils/global-id"
 import { TopLearnersBase } from "./component"
 
 /** Fetch global standing and own optimistic follow rollback. */
-export const TopLearners = () => {
+/** Props for the connected top learners block. */
+export type TopLearnersProps = Record<string, never>
+/** Connect the TopLearners block to its data source. */
+export const TopLearners = (props: TopLearnersProps) => {
+    void props
     const t = useTranslations("community")
     const router = useRouter()
     const query = useQueryGlobalLeaderboardSwr()
@@ -48,7 +52,7 @@ export const TopLearners = () => {
             // press targets turns a glance into a decision. Following belongs on the board itself.
         }
     })
-    const props = {
+    const viewProps = {
         label: t("top.heading"),
         seeMoreLabel: t("seeMore"),
         standing: {
@@ -63,10 +67,10 @@ export const TopLearners = () => {
         retryLabel: t("retry"),
     }
     if (query.error !== undefined && data === undefined) {
-        return <TopLearnersBase state="failed" props={props} on={{ retry: () => { void query.mutate() } }} />
+        return <TopLearnersBase state="failed" props={viewProps} on={{ retry: () => { void query.mutate() } }} />
     }
-    if (data === undefined) return <TopLearnersBase state="pending" props={props} />
-    if (data === null || data.entries.length === 0) return <TopLearnersBase state="empty" props={props} />
+    if (data === undefined) return <TopLearnersBase state="pending" props={viewProps} />
+    if (data === null || data.entries.length === 0) return <TopLearnersBase state="empty" props={viewProps} />
     const on = Object.fromEntries(rows.flatMap((row) => [
         [
             `open:${row.id}`,
@@ -98,11 +102,8 @@ export const TopLearners = () => {
     return (
         <TopLearnersBase
             state="ready"
-            props={props}
+            props={viewProps}
             on={{ seeMore: () => router.push("/league"), ...on }}
         />
     )
 }
-
-/** Source-level ownership marker. */
-export const meta = { world: "connected", domain: "community" } as const

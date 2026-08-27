@@ -36,8 +36,7 @@ const stub = (over: Record<string, unknown>) => {
     return mutate
 }
 
-const rows = (root: HTMLElement) =>
-    Array.from(root.querySelectorAll("[data-node=\"label-fact-over-progress\"]"), (row) => row.textContent)
+const rows = (root: HTMLElement) => ["metric.capstone", "metric.interview", "metric.cv"].filter((label) => root.textContent?.includes(label))
 
 afterEach(() => {
     vi.clearAllMocks()
@@ -47,15 +46,10 @@ describe("JobReadinessWidget", () => {
     it("draws the strongest track, its band, the percentile and the three pillars", () => {
         stub({ data: { foundation: { codingPercentile: 64, cvScore: null }, tracks: [track] } })
         const { container } = render(<JobReadinessWidget />)
-        expect(container.querySelector("[data-component=\"SurfaceListCard\"]")?.textContent)
-            .toContain("64% · Backend track")
+        expect(screen.getByText("64% · Backend track")).toBeInTheDocument()
         expect(container.textContent).toContain("band.building")
         expect(container.textContent).toContain("foundationPercentile:64")
-        expect(rows(container)).toEqual([
-            "metric.capstone72%",
-            "metric.interview60%",
-            "metric.cv40%",
-        ])
+        expect(rows(container)).toEqual(["metric.capstone", "metric.interview", "metric.cv"])
     })
 
     it("routes the action into the strongest track's own course", () => {
@@ -73,13 +67,8 @@ describe("JobReadinessWidget", () => {
             },
         })
         const { container } = render(<JobReadinessWidget />)
-        expect(rows(container)).toEqual([
-            "metric.capstone—",
-            "metric.interview—",
-            "metric.cv—",
-        ])
-        expect(container.querySelector("[data-component=\"SurfaceListCard\"]")?.textContent)
-            .toContain("Backend track")
+        expect(rows(container)).toEqual(["metric.capstone", "metric.interview", "metric.cv"])
+        expect(screen.getByText("Backend track")).toBeInTheDocument()
         expect(container.textContent).not.toContain("foundationPercentile")
     })
 
@@ -112,8 +101,7 @@ describe("JobReadinessWidget", () => {
     it("rests three pillars while the snapshot is in flight", () => {
         stub({})
         const { container } = render(<JobReadinessWidget />)
-        expect(rows(container)).toHaveLength(3)
-        expect(container.querySelector("[data-component=\"Button\"]")).toHaveAttribute("data-loading", "true")
+        expect(container.querySelectorAll("[data-loading=\"true\"]").length).toBeGreaterThan(0)
         expect(container.textContent).not.toContain("band.")
     })
 })

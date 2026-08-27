@@ -33,10 +33,10 @@ const resolveState = (
 }
 
 /** Own the bounded Challenge-attempt query without borrowing Personal Project ownership. */
-export const ChallengeAttemptHistory = (input: ChallengeAttemptHistoryProps) => {
+export const ChallengeAttemptHistory = (props: ChallengeAttemptHistoryProps) => {
     const locale = useLocale()
     const t = useTranslations("learn.content")
-    const query = useQueryContentChallengeAttemptsSwr(input.courseId, input.submissionId)
+    const query = useQueryContentChallengeAttemptsSwr(props.courseId, props.submissionId)
     const date = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" })
     const attempts: ReadonlyArray<ChallengeAttemptHistoryItem> = (query.data ?? []).map((attempt) => ({
         id: attempt.id,
@@ -53,7 +53,7 @@ export const ChallengeAttemptHistory = (input: ChallengeAttemptHistoryProps) => 
         <ChallengeAttemptHistoryBase
             state={state}
             attempts={attempts}
-            selectedAttemptId={input.selectedAttemptId}
+            selectedAttemptId={props.selectedAttemptId}
             labels={{
                 summary: (count) => t("challengeHistorySummary", { count }),
                 attempt: (number, score) => score === undefined
@@ -69,11 +69,10 @@ export const ChallengeAttemptHistory = (input: ChallengeAttemptHistoryProps) => 
                 empty: t("challengeHistoryEmpty"),
                 failed: t("challengeHistoryFailed"),
             }}
-            onSelect={input.onSelect}
+            onSelect={props.onSelect}
         />
     )
 }
 
 export * from "./component"
 /** Connected ownership marker for Challenge attempt history. */
-export const meta = { shape: "block", world: "connected", domain: "learn" } as const

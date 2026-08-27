@@ -25,12 +25,12 @@ describe("ContentDiscussionPanelBase", () => {
     it("renders typed ready comments and emits composer actions", () => {
         const changeDraft = vi.fn()
         const submit = vi.fn()
-        const { container } = render(
+        render(
             <ContentDiscussionPanelBase state="ready" props={props} on={{ changeDraft, submit }} />,
         )
 
-        expect(container.querySelector("[data-node=content-discussion-panel]")).toBeTruthy()
-        expect(container.querySelector("[data-node=content-discussion-list]")).toBeTruthy()
+        expect(screen.getByRole("region", { name: "Discussion" })).toBeInTheDocument()
+        expect(screen.getByRole("list")).toBeInTheDocument()
         expect(screen.getByText("How does this work?")).toBeInTheDocument()
         fireEvent.change(screen.getByLabelText("Comment"), { target: { value: "Next question" } })
         fireEvent.click(screen.getByRole("button", { name: "Post comment" }))
@@ -48,9 +48,9 @@ describe("ContentDiscussionPanelBase", () => {
     it("rests three comment rows and no composer while the discussion is in flight", () => {
         const { container } = render(<ContentDiscussionPanelBase state="pending" props={props} />)
 
-        expect(container.querySelectorAll("[data-node=content-discussion-comment-row]")).toHaveLength(3)
+        expect(screen.getAllByRole("listitem")).toHaveLength(3)
         expect(screen.queryByText("How does this work?")).not.toBeInTheDocument()
-        expect(container.querySelectorAll("[data-component=\"Text\"][data-loading=\"true\"]").length)
+        expect(container.querySelectorAll("[data-loading=\"true\"]").length)
             .toBeGreaterThan(0)
         expect(screen.queryByLabelText("Comment")).not.toBeInTheDocument()
     })

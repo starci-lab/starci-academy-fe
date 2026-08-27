@@ -1,10 +1,8 @@
 import { Avatar } from "@/components/leaves/Avatar"
-import { Tree } from "@/components/branches/Tree"
 import { Badge } from "@/components/leaves/Badge"
 import { Button } from "@/components/leaves/Button"
 import { Text } from "@/components/leaves/Text"
 import { TextLink } from "@/components/leaves/TextLink"
-import { defineContractComponent, defineLeafComponent, type CompositeProps } from "@/components/contracts/props"
 
 /** Resolved identity, qualification and follow state for one suggested person. */
 export type SuggestedUserRowData = {
@@ -22,45 +20,19 @@ export type SuggestedUserRowData = {
 /** Product journeys reported by a suggested-person row. */
 export type SuggestedUserRowActions = { readonly open?: () => void; readonly follow?: () => void }
 /** Props for the closed suggested-person composition. */
-export type SuggestedUserRowProps = CompositeProps<SuggestedUserRowData, SuggestedUserRowActions>
+export type SuggestedUserRowProps = { readonly props: SuggestedUserRowData; readonly on?: SuggestedUserRowActions; readonly isLoading?: boolean }
 
 /** Draw one suggested identity with its optional badge and follow action. */
-export const SuggestedUserRow = ({ props, on, isLoading = false }: SuggestedUserRowProps) => {
-    const identity = defineContractComponent("name-over-handle", {
-        name: defineLeafComponent("text-link", { size: "sm" }, () => (
-            <TextLink props={{ label: props.name ?? "", size: "sm" }} on={{ press: on?.open }} />
-        )),
-        handle: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-            <Text props={{ content: props.username, size: "xs", tone: "muted" }} isLoading={isLoading} />
-        )),
-    })
-
-    return (
-        <Tree contract="avatar-identity-badge-action-row" render={defineContractComponent("avatar-identity-badge-action-row", {
-            avatar: defineLeafComponent("avatar", {}, () => (
-                <Avatar props={{ name: props.name, src: props.avatar, size: "sm" }} isLoading={isLoading} />
-            )),
-            identity,
-            ...(props.openToWork === true ? {
-                badge: defineLeafComponent("badge", {}, () => (
-                    <Badge props={{ content: props.openToWorkLabel, tone: "success" }} />
-                )),
-            } : {}),
-            action: defineLeafComponent("button", {}, () => (
-                <Button
-                    props={{
-                        label: props.isFollowing === true ? props.followingLabel : props.followLabel,
-                        size: "sm",
-                        variant: "secondary",
-                        isPending: props.isPending,
-                    }}
-                    on={{ press: props.isFollowing === true ? undefined : on?.follow }}
-                    isLoading={isLoading}
-                />
-            )),
-        })} />
-    )
+export const SuggestedUserRow = (props: SuggestedUserRowProps) => {
+    const { props: data, on, isLoading = false } = props
+    return <div><Avatar props={{ name: data.name, src: data.avatar, size: "sm" }} isLoading={isLoading} /><div><TextLink props={{ label: data.name ?? "", size: "sm" }} on={{ press: on?.open }} /><Text props={{ content: data.username, size: "xs", tone: "muted" }} isLoading={isLoading} /></div>{data.openToWork === true ? <Badge props={{ content: data.openToWorkLabel, tone: "success" }} /> : null}<Button
+        props={{
+            label: data.isFollowing === true ? data.followingLabel : data.followLabel,
+            size: "sm",
+            variant: "secondary",
+            isPending: data.isPending,
+        }}
+        on={{ press: data.isFollowing === true ? undefined : on?.follow }}
+        isLoading={isLoading}
+    /></div>
 }
-
-/** Source-level tier marker for the pure suggested-person composition. */
-export const meta = { shape: "composite", world: "pure" } as const

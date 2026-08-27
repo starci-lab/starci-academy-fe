@@ -7,4 +7,3 @@ export type CourseLearnContentHomePageProps = { readonly displayId: string }
 export const CourseLearnContentHomePageBase = (props: CourseLearnContentHomePageProps) => <CourseLearnContentHomeBlock {...props} />
 
 /** Ownership metadata for the route shell. */
-export const meta = { world: "pure", domain: "learn" } as const

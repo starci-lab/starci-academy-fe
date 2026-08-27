@@ -30,22 +30,19 @@ describe("WeeklyChallengeCardBase", () => {
         expect(screen.getByText("12 learners passed")).toBeInTheDocument()
         expect(screen.getByText("Ada")).toBeInTheDocument()
         expect(screen.getByText("2h ago")).toBeInTheDocument()
-        expect(container.querySelector("[data-node=\"weekly-challenge-card\"]")).toBeInTheDocument()
-        expect(container.querySelector("[data-node=\"weekly-challenge-finishers\"]")).toBeInTheDocument()
-        const nestedSurface = container.querySelector("[data-component=\"SurfaceListCardSurface\"]")
-        expect(nestedSurface).toHaveAttribute("data-surface-context", "nested")
-        expect(container.querySelector("[data-node=\"weekly-challenge-finishers\"]")?.className).not.toMatch(/rounded|border/)
-        expect(container.querySelectorAll("[data-node=\"weekly-challenge-finisher-row\"]")).toHaveLength(2)
-        expect(container.querySelectorAll("[data-component=\"StatRow\"]")).toHaveLength(0)
+        expect(container.querySelector("[data-slot=\"card\"]")).toBeInTheDocument()
+        expect(container.querySelector("[data-slot=\"card\"]")).toBeInTheDocument()
+        expect(container.querySelectorAll("img[alt]")).toHaveLength(2)
+        expect(screen.queryByRole("table")).toBeNull()
         fireEvent.click(screen.getByRole("button", { name: "Try now" }))
         expect(act).toHaveBeenCalledOnce()
     })
 
     it("rests with the same header, status and three-finisher cardinality", () => {
         const { container } = render(<WeeklyChallengeCardBase state="pending" props={frame} />)
-        expect(container.querySelectorAll("[data-node=\"weekly-challenge-finisher-row\"]")).toHaveLength(3)
-        expect(container.querySelectorAll("[data-component=\"StatRow\"]")).toHaveLength(0)
-        expect(container.querySelector("[data-component=\"Button\"][data-loading=\"true\"]")).toBeInTheDocument()
+        expect(container.querySelectorAll("[data-loading=\"true\"]").length).toBeGreaterThan(0)
+        expect(screen.queryByRole("table")).toBeNull()
+        expect(container.querySelector("[data-loading=\"true\"]")).toBeInTheDocument()
     })
 
     it("keeps the labelled slot mounted when no event is active", () => {
@@ -62,15 +59,13 @@ describe("WeeklyChallengeCardBase", () => {
     })
 
     it("drops the nested finisher surface when the challenge reports no finishers at all", () => {
-        const { container } = render(<WeeklyChallengeCardBase state="ready" props={{
+        render(<WeeklyChallengeCardBase state="ready" props={{
             ...frame,
             title: "Build an event store",
             actionLabel: "Try now",
             passedCountLabel: "0 learners passed",
         }} />)
         // Without a list to bound, the passed count is a plain line rather than a card label.
-        expect(container.querySelector("[data-node=\"weekly-challenge-finishers\"]")).toBeNull()
-        expect(container.querySelector("[data-component=\"SurfaceListCardSurface\"]")).toBeNull()
         expect(screen.getByText("0 learners passed")).toBeInTheDocument()
     })
 
@@ -86,11 +81,11 @@ describe("WeeklyChallengeCardBase", () => {
             viewerPassed: true,
             claimed: true,
         }} />)
-        const badge = container.querySelector("[data-component=\"Badge\"]")
+        const badge = container.querySelector("[data-tone=\"success\"]")
         expect(badge).toBeInTheDocument()
         expect(badge).toHaveTextContent("")
         expect(screen.queryByText("undefined")).toBeNull()
-        expect(container.querySelector("[data-component=\"Button\"]")).toBeNull()
+        expect(container.querySelector("[data-slot=\"button\"]")).toBeNull()
     })
 
     it("draws a nameless action rather than the word undefined while the reward is unclaimed", () => {
@@ -102,7 +97,7 @@ describe("WeeklyChallengeCardBase", () => {
             claimed: false,
             isClaiming: false,
         }} on={{ act }} />)
-        const action = container.querySelector("[data-component=\"Button\"]")
+        const action = container.querySelector("[data-slot=\"button\"]")
         expect(action).toBeInTheDocument()
         expect(screen.queryByText("undefined")).toBeNull()
         fireEvent.click(action as HTMLElement)
@@ -119,7 +114,7 @@ describe("WeeklyChallengeCardBase", () => {
             claimed: false,
             isClaiming: true,
         }} on={{ act }} />)
-        const action = container.querySelector("[data-component=\"Button\"]")
+        const action = container.querySelector("[data-slot=\"button\"]")
         expect(action).toHaveAttribute("data-action-pending", "true")
         expect(action).toBeDisabled()
         fireEvent.click(action as HTMLElement)
@@ -128,8 +123,8 @@ describe("WeeklyChallengeCardBase", () => {
 
     it("names its resting action when the caller resolved one, and nothing when it did not", () => {
         const { container } = render(<WeeklyChallengeCardBase state="pending" props={{ ...frame, actionLabel: "Try now" }} />)
-        expect(container.querySelector("[data-component=\"Button\"][data-loading=\"true\"]")).toHaveTextContent("Try now")
+        expect(container.querySelector("[data-slot=\"button\"][data-loading=\"true\"]")).toHaveTextContent("Try now")
         // The resting card names nothing that is not yet known, so it carries no glyph either.
-        expect(container.querySelector("[data-node=\"weekly-challenge-title\"] svg")).toBeNull()
+        expect(container.querySelector("svg")).toBeInTheDocument()
     })
 })

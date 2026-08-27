@@ -3,9 +3,8 @@
 import { ProfilePublicCvPageBase } from "./component"
 
 /** Render the public profile CV page shell. */
-export const ProfilePublicCvPage = () => <ProfilePublicCvPageBase />
+export type ProfilePublicCvPageProps = Record<never, never>
+/** Render the connected profile CV route. */
+export const ProfilePublicCvPage = (props: ProfilePublicCvPageProps) => { void props; return <ProfilePublicCvPageBase {...{}} /> }
 
 export * from "./component"
-
-/** Source-level tier marker. */
-export const meta = { world: "connected", domain: "profile" } as const

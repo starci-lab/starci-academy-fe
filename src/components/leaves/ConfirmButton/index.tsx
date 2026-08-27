@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import { Button } from "@/components/leaves/Button"
-import type { LeafProps } from "@/components/contracts/props"
 
 /**
  * LEAF - `ConfirmButton`: a destructive act that will not fire on one stray press.
@@ -43,8 +42,8 @@ export type ConfirmButtonActions = {
     readonly confirm?: () => void
 }
 
-/** Props for {@link ConfirmButton}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type ConfirmButtonProps = LeafProps<ConfirmButtonData, ConfirmButtonActions>
+/** Props for {@link ConfirmButton}. Three fixed slots, no fourth. */
+export type ConfirmButtonProps = { readonly props: ConfirmButtonData; readonly on?: ConfirmButtonActions; readonly isLoading?: boolean }
 
 /** How long the armed state stays open, in milliseconds. */
 const ARMED_WINDOW_MS = 3000
@@ -54,7 +53,9 @@ const ARMED_WINDOW_MS = 3000
  *
  * @param input - {@link ConfirmButtonProps}
  */
-export const ConfirmButton = ({ props, on }: ConfirmButtonProps) => {
+export const ConfirmButton = (props: ConfirmButtonProps) => {
+    const data = props.props
+    const on = props.on
     const [isArmed, setIsArmed] = useState(false)
 
     useEffect(() => {
@@ -66,14 +67,14 @@ export const ConfirmButton = ({ props, on }: ConfirmButtonProps) => {
     return (
         <Button
             props={{
-                label: isArmed ? props.confirmLabel : props.label,
+                label: isArmed ? data.confirmLabel : data.label,
                 // The armed state is drawn by OUTLINE rather than by a filled danger colour. This
                 // product's `Button` has no danger variant, and adding one for a basket would put
                 // a red control in the vocabulary that every later screen may reach for. An
                 // outline is enough to say the control has changed: the label says what it will
                 // do, and the label is the part that has to be read anyway.
                 variant: isArmed ? "outline" : "secondary",
-                disabled: props.disabled,
+                disabled: data.disabled,
             }}
             on={{
                 press: () => {
@@ -88,6 +89,3 @@ export const ConfirmButton = ({ props, on }: ConfirmButtonProps) => {
         />
     )
 }
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const

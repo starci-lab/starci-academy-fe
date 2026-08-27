@@ -1,5 +1,4 @@
 import { ListBox, Select as HeroSelect } from "@heroui/react"
-import type { LeafProps } from "@/components/contracts/props"
 
 /**
  * LEAF - `Select`: one choice out of a short closed set.
@@ -49,8 +48,8 @@ export type SelectActions = {
     readonly select?: (id: string) => void
 }
 
-/** Props for {@link Select}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type SelectProps = LeafProps<SelectData, SelectActions>
+/** Props for {@link Select}. */
+export type SelectProps = { readonly props: SelectData; readonly on?: SelectActions; readonly isLoading?: boolean }
 
 /**
  * Draw the choice.
@@ -60,31 +59,31 @@ export type SelectProps = LeafProps<SelectData, SelectActions>
  *
  * @param input - {@link SelectProps}
  */
-export const Select = ({ props, on }: SelectProps) => {
-    const chosen = props.options.find((option) => option.id === props.selectedKey)
+export const Select = (props: SelectProps) => {
+    const data = props.props
+    const on = props.on
+    const chosen = data.options.find((option) => option.id === data.selectedKey)
 
     return (
         <HeroSelect.Root<SelectOption, "single">
-            data-tier="leaf"
-            data-component="Select"
             fullWidth
-            id={props.id}
-            name={props.name}
-            aria-label={props.label}
-            selectedKey={props.selectedKey ?? null}
-            isInvalid={props.isInvalid}
-            isDisabled={props.disabled}
+            id={data.id}
+            name={data.name}
+            aria-label={data.label}
+            selectedKey={data.selectedKey ?? null}
+            isInvalid={data.isInvalid}
+            isDisabled={data.disabled}
             onSelectionChange={(key) => {
                 if (key !== null) on?.select?.(String(key))
             }}
         >
-            <HeroSelect.Trigger aria-label={props.label}>
-                <HeroSelect.Value>{chosen?.label ?? props.placeholder ?? ""}</HeroSelect.Value>
+            <HeroSelect.Trigger aria-label={data.label}>
+                <HeroSelect.Value>{chosen?.label ?? data.placeholder ?? ""}</HeroSelect.Value>
                 <HeroSelect.Indicator />
             </HeroSelect.Trigger>
             <HeroSelect.Popover>
-                <ListBox.Root aria-label={props.label}>
-                    {props.options.map((option) => (
+                <ListBox.Root aria-label={data.label}>
+                    {data.options.map((option) => (
                         <ListBox.Item key={option.id} id={option.id} textValue={option.label}>
                             {option.label}
                         </ListBox.Item>
@@ -94,6 +93,3 @@ export const Select = ({ props, on }: SelectProps) => {
         </HeroSelect.Root>
     )
 }
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const

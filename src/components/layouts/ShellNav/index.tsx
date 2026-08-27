@@ -24,6 +24,8 @@ import type { AuthMode } from "@/components/blocks/auth/AuthenticationPanel/comp
  * and cannot hold state - and rather than in the dialog itself, because a surface that decided
  * whether it was open would leave the control that opens it with nothing to press.
  */
+/** Props for the connected shell navigation owner. */
+export type ShellNavProps = Record<never, never>
 
 /** The routes the bar offers, as ids the catalogue names. */
 const ROUTES: ReadonlyArray<{ id: string, path: string }> = [
@@ -43,7 +45,8 @@ const DASHBOARD_TABS: ReadonlyArray<{ id: string, icon: IconName }> = [
 /**
  * Resolve the route, the theme and the language, and draw the bar.
  */
-export const ShellNav = () => {
+export const ShellNav = (props: ShellNavProps) => {
+    void props
     useSessionRefresh()
     const t = useTranslations("shell")
     const pathname = usePathname()
@@ -169,6 +172,3 @@ export const ShellNav = () => {
         </>
     )
 }
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { world: "connected", domain: "shell" } as const

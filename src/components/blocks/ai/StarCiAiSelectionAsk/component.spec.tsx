@@ -39,8 +39,7 @@ describe("StarCiAiSelectionAskBase", () => {
                 }}
             />,
         )
-        expect(container.querySelector("[data-component=\"CodeBlock\"]")?.textContent)
-            .toBe("tscontroller.abort()")
+        expect(container.querySelector("pre")?.textContent).toBe("controller.abort()")
     })
 
     it("names no language for a code quote that came from no file", () => {
@@ -56,8 +55,7 @@ describe("StarCiAiSelectionAskBase", () => {
                 }}
             />,
         )
-        expect(container.querySelector("[data-component=\"CodeBlock\"]")?.textContent)
-            .toBe("controller.abort()")
+        expect(container.querySelector("pre")?.textContent).toBe("controller.abort()")
     })
 
     it("names no language for a prose quote, whatever file the reader was on", () => {
@@ -73,8 +71,7 @@ describe("StarCiAiSelectionAskBase", () => {
                 }}
             />,
         )
-        expect(container.querySelector("[data-component=\"CodeBlock\"]")?.textContent)
-            .toBe("A promise settles once.")
+        expect(container.querySelector("pre")?.textContent).toBe("A promise settles once.")
     })
 
     it("dismisses the surface without asking anything of the chat", () => {

@@ -71,7 +71,7 @@ vi.mock("@/hooks", () => ({
 }))
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
-vi.mock("./component", () => ({ GlobalSearchOverlayBase: (props: unknown) => { mocks.pure(props); return null } }))
+vi.mock("./component", () => ({ GlobalSearchOverlayView: (props: unknown) => { mocks.pure(props); return null } }))
 
 const empty: GlobalSearchData = { courses: [], modules: [], contents: [], challenges: [], flashcardDecks: [], milestones: [], milestoneTasks: [], foundations: [] }
 

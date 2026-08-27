@@ -19,8 +19,8 @@ vi.mock("@/hooks/swr/useQueryCoursePersonalProjectSwr", () => ({ useQueryCourseP
 vi.mock("@/hooks/swr/useQueryPersonalTaskAttemptsSwr", () => ({ useQueryPersonalTaskAttemptsSwr: vi.fn() }))
 vi.mock("@/hooks/swr/useQueryPersonalTaskAttemptFeedbacksSwr", () => ({ useQueryPersonalTaskAttemptFeedbacksSwr: vi.fn() }))
 vi.mock("@/components/overlays/learn/PersonalProjectHistoryDrawer", () => ({
-    PersonalProjectHistoryDrawer: (input: HistoryDrawerProps) => input.isOpen
-        ? <button type="button" onClick={() => input.onSelect?.(laterAttempt)}>Choose page 2 attempt</button>
+    PersonalProjectHistoryDrawer: (props: HistoryDrawerProps) => props.isOpen
+        ? <button type="button" onClick={() => props.onSelect?.(laterAttempt)}>Choose page 2 attempt</button>
         : null,
 }))
 

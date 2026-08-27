@@ -1,5 +1,4 @@
 import { useRef, useState, type FormEvent } from "react"
-import { Tree } from "@/components/branches/Tree"
 import { Button } from "@/components/leaves/Button"
 import { Checkbox } from "@/components/leaves/Checkbox"
 import { Divider } from "@/components/leaves/Divider"
@@ -8,432 +7,345 @@ import { Heading } from "@/components/leaves/Heading"
 import { Text } from "@/components/leaves/Text"
 import { TextLink } from "@/components/leaves/TextLink"
 import { KeycloakIdentityProvider } from "@/modules/api/graphql/mutations/types/auth"
-import { defineCompositeComponent, defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 
-/**
- * BLOCK - `AuthenticationPanel`, presentational half.
- *
- * THE STEP IS THE STATE, and the status is not. `details`, `code` and `done` each draw a different
- * tree - a form of two boxes, a form of one, a confirmation - so they are states. `sending`,
- * `verifying` and `resending` draw the SAME tree with a disabled control and a different sentence,
- * so they are props. If it selects a different tree it is a state; otherwise it is props.
- *
- * THE ORDER IS THE DESIGN, and it is not arbitrary. The shortcuts come FIRST because most readers
- * take one and never reach the form; the divider names the choice between them rather than merely
- * separating them; the form follows for the rest; and the way to the other journey is the last
- * line, phrased as a question and its answer rather than as a row of equal buttons - which is what
- * makes one of them read as the main action and the rest as alternatives.
- *
- * THE VALUES ARE UNCONTROLLED, held in a ref. A form that re-renders on every keystroke drops
- * characters on a slow phone, and nothing here needs to see a half-typed address.
- */
-
-/** Which journey the reader is on. */
-export type AuthMode = "signIn" | "signUp" | "forgotPassword"
-
-/** What the reader hands over at the first step. */
-export type AuthDetails = {
-    /** The address the code is sent to. */
-    readonly email: string
-    /** The secret, whichever journey names it. */
-    readonly password: string
-}
-
-/** What the reader hands over at the second step. */
-export type AuthCode = {
-    /** The one-time code from their inbox. */
-    readonly otp: string
-}
-
-/** Copy shared by every step of every journey. */
+/** Auth journey selected by the reader. */
+export type AuthMode = "signIn" | "signUp" | "forgotPassword";
+/** Credentials submitted at the first authentication step. */
+export type AuthDetails = { readonly email: string; readonly password: string };
+/** One-time code submitted from the reader's inbox. */
+export type AuthCode = { readonly otp: string };
+/** Shared title, status, and request state for the panel. */
 export type AuthPanelFrame = {
-    /** What the surface is called while this journey is on screen. */
-    readonly title: string
-    /** The line under the title, saying what the reader is here to do. */
-    readonly subtitle: string
-    /** The one sentence that goes with whatever is happening. Empty when nothing is. */
-    readonly statusMessage: string
-    /** Whether that sentence is a refusal, so it is announced rather than merely shown. */
-    readonly isError: boolean
-    /** Whether a request is already on its way, so the controls refuse a second press. */
-    readonly isPending: boolean
-}
-
-/** Copy for the first step. */
+  readonly title: string;
+  readonly subtitle: string;
+  readonly statusMessage: string;
+  readonly isError: boolean;
+  readonly isPending: boolean;
+};
+/** Localized labels for credential and account-creation controls. */
 export type AuthDetailsCopy = {
-    readonly emailLabel: string
-    readonly emailPlaceholder: string
-    readonly passwordLabel: string
-    readonly passwordPlaceholder: string
-    readonly passwordHint: string
-    readonly revealLabel: string
-    readonly hideLabel: string
-    readonly confirmPasswordLabel: string
-    readonly confirmPasswordPlaceholder: string
-    readonly confirmPasswordMismatch: string
-    readonly submitLabel: string
-    readonly orLabel: string
-    readonly oauthGoogle: string
-    readonly oauthGithub: string
-    readonly rememberMeLabel: string
-    readonly forgotPassword: string
-    readonly agreeToTerms: string
-    readonly agreeToTermsPrefix: string
-    readonly termsLabel: string
-    readonly andLabel: string
-    readonly privacyLabel: string
-    /** The last line: a question, and the answer that switches journey. */
-    readonly promptQuestion: string
-    readonly promptAction: string
-}
-
-/** Copy for the second step. */
+  readonly emailLabel: string;
+  readonly emailPlaceholder: string;
+  readonly passwordLabel: string;
+  readonly passwordPlaceholder: string;
+  readonly passwordHint: string;
+  readonly revealLabel: string;
+  readonly hideLabel: string;
+  readonly confirmPasswordLabel: string;
+  readonly confirmPasswordPlaceholder: string;
+  readonly confirmPasswordMismatch: string;
+  readonly submitLabel: string;
+  readonly orLabel: string;
+  readonly oauthGoogle: string;
+  readonly oauthGithub: string;
+  readonly rememberMeLabel: string;
+  readonly forgotPassword: string;
+  readonly agreeToTerms: string;
+  readonly agreeToTermsPrefix: string;
+  readonly termsLabel: string;
+  readonly andLabel: string;
+  readonly privacyLabel: string;
+  readonly promptQuestion: string;
+  readonly promptAction: string;
+};
+/** Localized labels for code verification controls. */
 export type AuthCodeCopy = {
-    readonly codeLabel: string
-    readonly codePlaceholder: string
-    readonly codeHint: string
-    readonly submitLabel: string
-    readonly resendLabel: string
-    readonly useAnotherEmailLabel: string
-}
-
-/** Copy for the confirmation. */
+  readonly codeLabel: string;
+  readonly codePlaceholder: string;
+  readonly codeHint: string;
+  readonly submitLabel: string;
+  readonly resendLabel: string;
+  readonly useAnotherEmailLabel: string;
+};
+/** Localized labels for the completion state. */
 export type AuthDoneCopy = {
-    readonly doneTitle: string
-    readonly doneHint: string
-}
-
-/** Props for {@link AuthenticationPanelBase}, discriminated by the step. */
-export type AuthenticationPanelProps =
-    | {
-        readonly state: "details"
-        readonly props: AuthPanelFrame & AuthDetailsCopy & {
-            readonly mode: AuthMode
-            readonly hasAgreedToTerms: boolean
-            readonly rememberMe: boolean
-        }
+  readonly doneTitle: string;
+  readonly doneHint: string;
+};
+/** Discriminated presentational state for the authentication panel. */
+export type AuthenticationPanelProps = (
+  | {
+      readonly state: "details";
+      readonly props: AuthPanelFrame &
+        AuthDetailsCopy & {
+          readonly mode: AuthMode;
+          readonly hasAgreedToTerms: boolean;
+          readonly rememberMe: boolean;
+        };
     }
-    | { readonly state: "code"; readonly props: AuthPanelFrame & AuthCodeCopy }
-    | { readonly state: "done"; readonly props: AuthPanelFrame & AuthDoneCopy }
-
-/** What the panel reports. */
+  | { readonly state: "code"; readonly props: AuthPanelFrame & AuthCodeCopy }
+  | { readonly state: "done"; readonly props: AuthPanelFrame & AuthDoneCopy }
+) & { readonly on?: AuthenticationPanelActions };
+/** User actions emitted by authentication controls. */
 export type AuthenticationPanelActions = {
-    readonly submitDetails?: (details: AuthDetails) => void
-    readonly submitCode?: (code: AuthCode) => void
-    readonly resend?: () => void
-    readonly changeMode?: (mode: AuthMode) => void
-    readonly changeAgreedToTerms?: (agreed: boolean) => void
-    readonly changeRememberMe?: (remember: boolean) => void
-    readonly openLegal?: (kind: "terms" | "privacy") => void
-    readonly oauthPress?: (provider: KeycloakIdentityProvider) => void
-}
-
-/** The id the dialog points its label at, so the surface is named by its own title. */
+  readonly submitDetails?: (details: AuthDetails) => void;
+  readonly submitCode?: (code: AuthCode) => void;
+  readonly resend?: () => void;
+  readonly changeMode?: (mode: AuthMode) => void;
+  readonly changeAgreedToTerms?: (agreed: boolean) => void;
+  readonly changeRememberMe?: (remember: boolean) => void;
+  readonly openLegal?: (kind: "terms" | "privacy") => void;
+  readonly oauthPress?: (provider: KeycloakIdentityProvider) => void;
+};
+/** Stable heading id used to name the authentication surface. */
 export const AUTHENTICATION_PANEL_TITLE_ID = "authentication-panel-title"
-
-/** Field ids, so every label reaches the box it names. */
-const EMAIL_ID = "authentication-email"
-const PASSWORD_ID = "authentication-password"
-const CONFIRM_PASSWORD_ID = "authentication-confirm-password"
-const CODE_ID = "authentication-code"
-
-/** What the form starts with. */
 const EMPTY_VALUES = { email: "", password: "", confirmPassword: "", otp: "" }
-
-/** The situation this panel is in, plus the actions it exposes. */
-type AuthenticationPanelInput = AuthenticationPanelProps & {
-    readonly on?: AuthenticationPanelActions
-}
-
-/**
- * Render the panel.
- *
- * @param input - {@link AuthenticationPanelInput}
- */
-export const AuthenticationPanelBase = (input: AuthenticationPanelInput) => {
+/** Render the authentication journey from resolved state and callbacks. */
+export const AuthenticationPanelBase = (props: AuthenticationPanelProps) => {
     const values = useRef({ ...EMPTY_VALUES })
-    const [hasConfirmationMismatch, setHasConfirmationMismatch] = useState(false)
-
-    /** The name of the surface, over the line that says what it is for. */
-    const header = defineContractComponent("centred-title-pair", {
-        title: defineLeafComponent("heading", {}, () => (
-            <span id={AUTHENTICATION_PANEL_TITLE_ID}>
-                <Heading props={{ content: input.props.title, level: 2 }} />
-            </span>
-        )),
-        description: defineLeafComponent("text", { size: "sm" }, () => (
-            <Text props={{ content: input.props.subtitle, size: "sm", tone: "muted" }} />
-        )),
-    })
-
-    /** The one sentence, announced when it is a refusal and merely shown when it is not. */
-    const status = input.props.statusMessage === "" ? undefined : defineLeafComponent("text", {}, () => (
+    const [mismatch, setMismatch] = useState(false)
+    const status =
+    props.props.statusMessage === "" ? null : (
         <Text
             props={{
-                content: input.props.statusMessage,
-                tone: input.props.isError ? "default" : "muted",
+                content: props.props.statusMessage,
+                tone: props.props.isError ? "default" : "muted",
                 size: "sm",
-                live: input.props.isError ? "assertive" : "polite",
+                live: props.props.isError ? "assertive" : "polite",
             }}
         />
-    ))
-
-    if (input.state === "done") {
-        return (
-            <Tree
-                contract="centred-page-column"
-                render={defineContractComponent("centred-page-column", {
-                    header,
-                    body: [
-                        defineContractComponent("centred-title-pair", {
-                            title: defineLeafComponent("heading", {}, () => (
-                                <Heading props={{ content: input.props.doneTitle, level: 3 }} />
-                            )),
-                            description: defineLeafComponent("text", { size: "sm" }, () => (
-                                <Text props={{ content: input.props.doneHint, tone: "muted", size: "sm" }} />
-                            )),
-                        }),
-                        ...(status === undefined ? [] : [defineContractComponent("stacked-peer-controls", {
-                            control: [status],
-                        })]),
-                    ],
-                })}
+    )
+    const header = (
+        <>
+            <span id={AUTHENTICATION_PANEL_TITLE_ID}>
+                <Heading props={{ content: props.props.title, level: 2 }} />
+            </span>
+            <Text
+                props={{ content: props.props.subtitle, size: "sm", tone: "muted" }}
             />
+        </>
+    )
+    if (props.state === "done")
+        return (
+            <div>
+                <header>{header}</header>
+                <Heading props={{ content: props.props.doneTitle, level: 3 }} />
+                <Text
+                    props={{ content: props.props.doneHint, tone: "muted", size: "sm" }}
+                />
+                {status}
+            </div>
         )
-    }
-
-    if (input.state === "code") {
+    if (props.state === "code") {
         const submit = (event: FormEvent<HTMLFormElement>) => {
             event.preventDefault()
-            input.on?.submitCode?.({ otp: values.current.otp })
+            props.on?.submitCode?.({ otp: values.current.otp })
         }
         return (
-            <Tree
-                contract="centred-page-column"
-                render={defineContractComponent("centred-page-column", {
-                    header,
-                    body: [
-                        defineLeafComponent("form", {}, () => (
-                            <form onSubmit={submit}>
-                                <Tree
-                                    contract="stacked-peer-controls"
-                                    render={defineContractComponent("stacked-peer-controls", {
-                                        control: [
-                                            defineCompositeComponent("field", {}, () => (
-                                                <Field
-                                                    props={{
-                                                        id: CODE_ID,
-                                                        name: "otp",
-                                                        kind: "code",
-                                                        label: input.props.codeLabel,
-                                                        placeholder: input.props.codePlaceholder,
-                                                        hint: input.props.codeHint,
-                                                        disabled: input.props.isPending,
-                                                    }}
-                                                    on={{ change: (value) => { values.current.otp = value } }}
-                                                />
-                                            )),
-                                            ...(status === undefined ? [] : [status]),
-                                            defineLeafComponent("button", {}, () => (
-                                                <Button
-                                                    props={{
-                                                        label: input.props.submitLabel,
-                                                        variant: "primary",
-                                                        type: "submit",
-                                                        disabled: input.props.isPending,
-                                                        isPending: input.props.isPending,
-                                                    }}
-                                                />
-                                            )),
-                                        ],
-                                    })}
-                                />
-                            </form>
-                        )),
-                        defineContractComponent("spread-choice-row", {
-                            choice: defineLeafComponent("text-link", { size: "sm" }, () => (
-                                <TextLink props={{ label: input.props.resendLabel, size: "sm" }} on={{ press: input.on?.resend }} />
-                            )),
-                            exit: defineLeafComponent("text-link", { size: "sm" }, () => (
-                                <TextLink
-                                    props={{ label: input.props.useAnotherEmailLabel, size: "sm" }}
-                                    on={{ press: () => input.on?.changeMode?.("signIn") }}
-                                />
-                            )),
-                        }),
-                    ],
-                })}
-            />
+            <div>
+                <header>{header}</header>
+                <form onSubmit={submit}>
+                    <Field
+                        props={{
+                            id: "authentication-code",
+                            name: "otp",
+                            kind: "code",
+                            label: props.props.codeLabel,
+                            placeholder: props.props.codePlaceholder,
+                            hint: props.props.codeHint,
+                            disabled: props.props.isPending,
+                        }}
+                        on={{
+                            change: (value: string) => {
+                                values.current.otp = value
+                            },
+                        }}
+                    />
+                    {status}
+                    <Button
+                        props={{
+                            label: props.props.submitLabel,
+                            variant: "primary",
+                            type: "submit",
+                            disabled: props.props.isPending,
+                            isPending: props.props.isPending,
+                        }}
+                    />
+                </form>
+                <TextLink
+                    props={{ label: props.props.resendLabel, size: "sm" }}
+                    on={{ press: props.on?.resend }}
+                />
+                <TextLink
+                    props={{ label: props.props.useAnotherEmailLabel, size: "sm" }}
+                    on={{ press: () => props.on?.changeMode?.("signIn") }}
+                />
+            </div>
         )
     }
-
-    // The terms are the ONE thing that can hold a submission back before it is attempted, and only
-    // when an account is being opened. Signing in and resetting a password agree to nothing new.
-    const isBlockedByTerms = input.props.mode === "signUp" && !input.props.hasAgreedToTerms
     const submit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
-        if (input.props.mode === "signUp" && values.current.password !== values.current.confirmPassword) {
-            setHasConfirmationMismatch(true)
+        if (
+            props.props.mode === "signUp" &&
+      values.current.password !== values.current.confirmPassword
+        ) {
+            setMismatch(true)
             return
         }
-        setHasConfirmationMismatch(false)
-        input.on?.submitDetails?.({ email: values.current.email, password: values.current.password })
+        setMismatch(false)
+        props.on?.submitDetails?.({
+            email: values.current.email,
+            password: values.current.password,
+        })
     }
-
+    const signUp = props.props.mode === "signUp"
+    const blocked = signUp && !props.props.hasAgreedToTerms
     return (
-        <Tree
-            contract="centred-page-column"
-            render={defineContractComponent("centred-page-column", {
-                header,
-                body: [
-                    defineContractComponent("auth-entry-stack", {
-                        shortcuts: defineContractComponent("auth-shortcuts-over-divider", {
-                            shortcut: [
-                                defineLeafComponent("button", {}, () => (
-                                    <Button
-                                        props={{ label: input.props.oauthGoogle, variant: "outline", icon: "google", disabled: input.props.isPending }}
-                                        on={{ press: () => input.on?.oauthPress?.(KeycloakIdentityProvider.Google) }}
-                                    />
-                                )),
-                                defineLeafComponent("button", {}, () => (
-                                    <Button
-                                        props={{ label: input.props.oauthGithub, variant: "outline", icon: "github", disabled: input.props.isPending }}
-                                        on={{ press: () => input.on?.oauthPress?.(KeycloakIdentityProvider.Github) }}
-                                    />
-                                )),
-                            ],
-                            divider: defineLeafComponent("divider", {}, () => (
-                                <Divider props={{ label: input.props.orLabel }} />
-                            )),
-                        }),
-                        credentials: defineLeafComponent("form", {}, () => (
-                            <form onSubmit={submit}>
-                                <Tree
-                                    contract="stacked-peer-controls"
-                                    render={defineContractComponent("stacked-peer-controls", {
-                                        control: [
-                                            defineCompositeComponent("field", {}, () => (
-                                                <Field
-                                                    props={{
-                                                        id: EMAIL_ID,
-                                                        name: "email",
-                                                        kind: "email",
-                                                        label: input.props.emailLabel,
-                                                        placeholder: input.props.emailPlaceholder,
-                                                        disabled: input.props.isPending,
-                                                    }}
-                                                    on={{ change: (value) => { values.current.email = value } }}
-                                                />
-                                            )),
-                                            defineCompositeComponent("field", {}, () => (
-                                                <Field
-                                                    props={{
-                                                        id: PASSWORD_ID,
-                                                        name: "password",
-                                                        kind: input.props.mode === "signIn" ? "password" : "newPassword",
-                                                        label: input.props.passwordLabel,
-                                                        placeholder: input.props.passwordPlaceholder,
-                                                        hint: input.props.passwordHint === "" ? undefined : input.props.passwordHint,
-                                                        revealLabel: input.props.revealLabel,
-                                                        hideLabel: input.props.hideLabel,
-                                                        disabled: input.props.isPending,
-                                                    }}
-                                                    on={{ change: (value) => { values.current.password = value } }}
-                                                />
-                                            )),
-                                            ...(input.props.mode !== "signUp" ? [] : [
-                                                defineCompositeComponent("field", {}, () => (
-                                                    <Field
-                                                        props={{
-                                                            id: CONFIRM_PASSWORD_ID,
-                                                            name: "confirmPassword",
-                                                            kind: "newPassword",
-                                                            label: input.props.confirmPasswordLabel,
-                                                            placeholder: input.props.confirmPasswordPlaceholder,
-                                                            hint: hasConfirmationMismatch ? input.props.confirmPasswordMismatch : undefined,
-                                                            isInvalid: hasConfirmationMismatch,
-                                                            revealLabel: input.props.revealLabel,
-                                                            hideLabel: input.props.hideLabel,
-                                                            disabled: input.props.isPending,
-                                                        }}
-                                                        on={{
-                                                            change: (value) => {
-                                                                values.current.confirmPassword = value
-                                                                if (hasConfirmationMismatch) setHasConfirmationMismatch(false)
-                                                            },
-                                                        }}
-                                                    />
-                                                )),
-                                            ]),
-                                            defineContractComponent("spread-choice-row", {
-                                                choice: defineLeafComponent("checkbox", {}, () => (
-                                                    input.props.mode === "signUp" ? (
-                                                        <Checkbox
-                                                            props={{
-                                                                label: input.props.agreeToTerms,
-                                                                labelParts: [
-                                                                    { kind: "text", content: `${input.props.agreeToTermsPrefix} ` },
-                                                                    { kind: "link", id: "terms", label: input.props.termsLabel },
-                                                                    { kind: "text", content: ` ${input.props.andLabel} ` },
-                                                                    { kind: "link", id: "privacy", label: input.props.privacyLabel },
-                                                                ],
-                                                                isSelected: input.props.hasAgreedToTerms,
-                                                            }}
-                                                            on={{
-                                                                change: (agreed) => input.on?.changeAgreedToTerms?.(agreed),
-                                                                follow: (kind) => {
-                                                                    if (kind === "terms" || kind === "privacy") input.on?.openLegal?.(kind)
-                                                                },
-                                                            }}
-                                                        />
-                                                    ) : (
-                                                        <Checkbox
-                                                            props={{ label: input.props.rememberMeLabel, isSelected: input.props.rememberMe }}
-                                                            on={{ change: (remember) => input.on?.changeRememberMe?.(remember) }}
-                                                        />
-                                                    )
-                                                )),
-                                                exit: input.props.mode !== "signIn" ? undefined : defineLeafComponent("text-link", { size: "sm" }, () => (
-                                                    <TextLink
-                                                        props={{ label: input.props.forgotPassword, size: "sm" }}
-                                                        on={{ press: () => input.on?.changeMode?.("forgotPassword") }}
-                                                    />
-                                                )),
-                                            }),
-                                            ...(status === undefined ? [] : [status]),
-                                            defineLeafComponent("button", {}, () => (
-                                                <Button
-                                                    props={{
-                                                        label: input.props.submitLabel,
-                                                        variant: "primary",
-                                                        type: "submit",
-                                                        disabled: input.props.isPending || isBlockedByTerms,
-                                                        isPending: input.props.isPending,
-                                                    }}
-                                                />
-                                            )),
-                                        ],
-                                    })}
-                                />
-                            </form>
-                        )),
-                    }),
-                ],
-                footer: defineContractComponent("centred-prompt-row", {
-                    prompt: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                        <Text props={{ content: input.props.promptQuestion, size: "sm", tone: "muted" }} />
-                    )),
-                    action: defineLeafComponent("text-link", { size: "sm" }, () => (
-                        <TextLink
-                            props={{ label: input.props.promptAction, size: "sm" }}
-                            on={{ press: () => input.on?.changeMode?.(input.props.mode === "signIn" ? "signUp" : "signIn") }}
+        <div>
+            <header>{header}</header>
+            <div>
+                <Button
+                    props={{
+                        label: props.props.oauthGoogle,
+                        variant: "outline",
+                        icon: "google",
+                        disabled: props.props.isPending,
+                    }}
+                    on={{
+                        press: () =>
+                            props.on?.oauthPress?.(KeycloakIdentityProvider.Google),
+                    }}
+                />
+                <Button
+                    props={{
+                        label: props.props.oauthGithub,
+                        variant: "outline",
+                        icon: "github",
+                        disabled: props.props.isPending,
+                    }}
+                    on={{
+                        press: () =>
+                            props.on?.oauthPress?.(KeycloakIdentityProvider.Github),
+                    }}
+                />
+                <Divider props={{ label: props.props.orLabel }} />
+            </div>
+            <form onSubmit={submit}>
+                <Field
+                    props={{
+                        id: "authentication-email",
+                        name: "email",
+                        kind: "email",
+                        label: props.props.emailLabel,
+                        placeholder: props.props.emailPlaceholder,
+                        disabled: props.props.isPending,
+                    }}
+                    on={{
+                        change: (value: string) => {
+                            values.current.email = value
+                        },
+                    }}
+                />
+                <Field
+                    props={{
+                        id: "authentication-password",
+                        name: "password",
+                        kind: signUp || props.props.mode === "forgotPassword" ? "newPassword" : "password",
+                        label: props.props.passwordLabel,
+                        placeholder: props.props.passwordPlaceholder,
+                        hint: props.props.passwordHint || undefined,
+                        revealLabel: props.props.revealLabel,
+                        hideLabel: props.props.hideLabel,
+                        disabled: props.props.isPending,
+                    }}
+                    on={{
+                        change: (value: string) => {
+                            values.current.password = value
+                        },
+                    }}
+                />
+                {signUp ? (
+                    <Field
+                        props={{
+                            id: "authentication-confirm-password",
+                            name: "confirmPassword",
+                            kind: "newPassword",
+                            label: props.props.confirmPasswordLabel,
+                            placeholder: props.props.confirmPasswordPlaceholder,
+                            hint: mismatch ? props.props.confirmPasswordMismatch : undefined,
+                            isInvalid: mismatch,
+                            revealLabel: props.props.revealLabel,
+                            hideLabel: props.props.hideLabel,
+                            disabled: props.props.isPending,
+                        }}
+                        on={{
+                            change: (value: string) => {
+                                values.current.confirmPassword = value
+                                if (mismatch) setMismatch(false)
+                            },
+                        }}
+                    />
+                ) : null}
+                <div>
+                    {signUp ? (
+                        <Checkbox
+                            props={{
+                                label: props.props.agreeToTerms,
+                                labelParts: [
+                                    {
+                                        kind: "text",
+                                        content: `${props.props.agreeToTermsPrefix} `,
+                                    },
+                                    { kind: "link", id: "terms", label: props.props.termsLabel },
+                                    { kind: "text", content: ` ${props.props.andLabel} ` },
+                                    {
+                                        kind: "link",
+                                        id: "privacy",
+                                        label: props.props.privacyLabel,
+                                    },
+                                ],
+                                isSelected: props.props.hasAgreedToTerms,
+                            }}
+                            on={{
+                                change: props.on?.changeAgreedToTerms,
+                                follow: (id: string) => {
+                                    if (id === "terms" || id === "privacy") props.on?.openLegal?.(id)
+                                },
+                            }}
                         />
-                    )),
-                }),
-            })}
-        />
+                    ) : (
+                        <Checkbox
+                            props={{
+                                label: props.props.rememberMeLabel,
+                                isSelected: props.props.rememberMe,
+                            }}
+                            on={{ change: props.on?.changeRememberMe }}
+                        />
+                    )}{" "}
+                    {!signUp && props.props.mode === "signIn" ? (
+                        <TextLink
+                            props={{ label: props.props.forgotPassword, size: "sm" }}
+                            on={{ press: () => props.on?.changeMode?.("forgotPassword") }}
+                        />
+                    ) : null}
+                </div>
+                {status}
+                <Button
+                    props={{
+                        label: props.props.submitLabel,
+                        variant: "primary",
+                        type: "submit",
+                        disabled: props.props.isPending || blocked,
+                        isPending: props.props.isPending,
+                    }}
+                />
+            </form>
+            <Text
+                props={{
+                    content: props.props.promptQuestion,
+                    size: "sm",
+                    tone: "muted",
+                }}
+            />
+            <TextLink
+                props={{ label: props.props.promptAction, size: "sm" }}
+                on={{
+                    press: () =>
+                        props.on?.changeMode?.(
+                            props.props.mode === "signIn" ? "signUp" : "signIn",
+                        ),
+                }}
+            />
+        </div>
     )
 }
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { world: "pure", domain: "auth" } as const

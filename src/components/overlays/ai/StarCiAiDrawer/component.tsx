@@ -1,6 +1,5 @@
 import type { ComponentType } from "react"
 import { DrawerBranch, type DrawerBranchPlacement } from "@/components/branches/DrawerBranch"
-import { defineContractProjection } from "@/components/contracts/props"
 
 /** Overlay lifecycle independent from chat transport state. */
 export type StarCiAiDrawerState = "closed" | "pending" | "ready" | "failed"
@@ -22,19 +21,14 @@ export type StarCiAiDrawerProps = {
 }
 
 /** Compose the global chat inside the shared focus/backdrop mechanics. */
-export const StarCiAiDrawerBase = (input: StarCiAiDrawerProps) => {
-    const Chat = input.chat
+export const StarCiAiDrawerBase = (props: StarCiAiDrawerProps) => {
+    const Chat = props.chat
     return (
         <DrawerBranch
-            isOpen={input.props.isOpen}
-            placement={input.props.placement}
-            title={input.props.title}
-            contract="starci-ai-chat-stack"
-            render={defineContractProjection("starci-ai-chat-stack", () => <Chat />)}
-            onDismiss={input.on?.dismiss ?? (() => undefined)}
-        />
+            isOpen={props.props.isOpen}
+            placement={props.props.placement}
+            title={props.props.title}
+            onDismiss={props.on?.dismiss ?? (() => undefined)}
+        ><Chat /></DrawerBranch>
     )
 }
-
-/** Source-level ownership marker. */
-export const meta = { shape: "overlay", world: "pure", domain: "ai" } as const

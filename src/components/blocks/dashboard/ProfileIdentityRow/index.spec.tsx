@@ -17,7 +17,7 @@ const stub = (over: Record<string, unknown>) => {
 }
 
 const row = (root: HTMLElement) =>
-    root.querySelector("[data-node=\"profile-avatar-name-handle-disclosure-row\"]")
+    root.querySelector("button")
 
 afterEach(() => {
     vi.clearAllMocks()
@@ -91,8 +91,7 @@ describe("ProfileIdentityRow", () => {
 
     it("draws the viewer's own portrait when the account has one", () => {
         stub({ data: { id: "1", username: "ada", displayName: "Ada Lovelace", avatar: "https://example.com/ada.png" } })
-        const { container } = render(<ProfileIdentityRow />)
-        expect(container.querySelectorAll("[data-component=\"Avatar\"] img[alt=\"Ada Lovelace\"]").length)
-            .toBeGreaterThan(0)
+        render(<ProfileIdentityRow />)
+        expect(screen.getByRole("img", { name: "Ada Lovelace" })).toBeInTheDocument()
     })
 })

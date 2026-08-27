@@ -12,7 +12,7 @@ describe("StreakStatRowBase", () => {
 
     it("turns the pending situation into a resting value leaf", () => {
         const { container } = render(<StreakStatRowBase state="pending" props={{ label: "Streak" }} />)
-        expect(container.querySelector("[data-component=\"Text\"][data-loading=\"true\"]")).toBeTruthy()
+        expect(container.querySelector("[data-loading=\"true\"]")).toBeTruthy()
     })
 
     it("hides a settled missing figure instead of calling a signed-in reader a guest", () => {

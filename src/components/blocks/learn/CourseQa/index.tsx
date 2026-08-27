@@ -9,7 +9,8 @@ import { useMutateCreateCourseQuestionSwr } from "@/hooks/swr/useMutateCreateCou
 import type { CourseQaComment } from "@/modules/api/graphql/queries/query-course-qa-comments"
 import { CourseQaBase, type CourseQaThreadRow } from "./component"
 
-interface CourseQaPageProps { readonly displayId: string }
+/** Course identity resolved by the connected Q&A owner. */
+export interface CourseQaProps { readonly displayId: string }
 
 const qaStateOf = (failed: boolean, pending: boolean, empty: boolean) => {
     if (failed) return "failed" as const
@@ -36,7 +37,8 @@ const COPY = {
 
 /** Connected course-general Q&A over contentComments/createComment course scope. */
 /** Connected Q&A block; owns question/thread queries and composer state. */
-export const CourseQa = ({ displayId }: CourseQaPageProps) => {
+export const CourseQa = (props: CourseQaProps) => {
+    const { displayId } = props
     const locale = useLocale() === "vi" ? "vi" : "en"
     const copy = COPY[locale]
     const router = useRouter()
@@ -114,6 +116,3 @@ export const CourseQa = ({ displayId }: CourseQaPageProps) => {
         />
     )
 }
-
-/** Source-level ownership marker. */
-export const meta = { world: "connected", domain: "learn" } as const

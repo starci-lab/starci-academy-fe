@@ -7,14 +7,14 @@ type DrawerBranchMockProps = {
     readonly placement: string
     readonly title: string
     readonly onDismiss: () => void
-    readonly render: { readonly kind: string; readonly project?: () => React.ReactNode }
+    readonly children?: React.ReactNode
 }
 
 vi.mock("@/components/branches/DrawerBranch", () => ({
     DrawerBranch: (input: DrawerBranchMockProps) => (
         <section data-open={input.isOpen} data-placement={input.placement} aria-label={input.title}>
             <button type="button" onClick={input.onDismiss}>Dismiss</button>
-            {input.render.project?.()}
+            {input.children}
         </section>
     ),
 }))

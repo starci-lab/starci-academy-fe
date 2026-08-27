@@ -1,12 +1,7 @@
-import { Tree } from "@/components/branches/Tree"
 import { Article } from "@/components/branches/Article"
 import { Button } from "@/components/leaves/Button"
 import { CodeBlock } from "@/components/leaves/CodeBlock"
 import { Text } from "@/components/leaves/Text"
-import {
-    defineContractComponent,
-    defineLeafComponent,
-} from "@/components/contracts/props"
 import type { ContentAiSelectionContext } from "@/modules/ai/content-ai-selection-context"
 
 /** Every settled state owned by sessions, history, mutations, realtime and quota. */
@@ -133,162 +128,116 @@ const turnMarkdown = (turn: StarCiAiTurn, partialLabel: string): string => {
 }
 
 /** Draw every AI-owner state from resolved fixture data; no transport or translation lives here. */
-export const StarCiAiChatBase = (input: StarCiAiChatProps) => {
-    const labels = input.props.labels
-    const selection = input.props.selection
-    const isHistory = input.props.mode === "history" || HISTORY_STATES.has(input.state)
-    const isLoading = input.state === "sessionsPending" || input.state === "historyPending"
-    const stateTurn: StarCiAiTurn | undefined = ["ready", "historyReady", "streaming"].includes(input.state)
+export const StarCiAiChatBase = (props: StarCiAiChatProps) => {
+    const labels = props.props.labels
+    const selection = props.props.selection
+    const isHistory = props.props.mode === "history" || HISTORY_STATES.has(props.state)
+    const isLoading = props.state === "sessionsPending" || props.state === "historyPending"
+    const stateTurn: StarCiAiTurn | undefined = ["ready", "historyReady", "streaming"].includes(props.state)
         ? undefined
-        : { id: `state-${input.state}`, role: "assistant", body: labels.states[input.state] }
-    const renderedTurns = stateTurn === undefined ? input.props.turns : [...input.props.turns, stateTurn]
-    const disablesComposer = input.state === "offline" || input.state === "reconnecting"
-    const showsComposer = !isHistory && input.state !== "sessionsPending" && input.state !== "sessionsFailed"
-    const showsSessionActions = isHistory && input.props.activeSessionId !== undefined
+        : { id: `state-${props.state}`, role: "assistant", body: labels.states[props.state] }
+    const renderedTurns = stateTurn === undefined ? props.props.turns : [...props.props.turns, stateTurn]
+    const disablesComposer = props.state === "offline" || props.state === "reconnecting"
+    const showsComposer = !isHistory && props.state !== "sessionsPending" && props.state !== "sessionsFailed"
+    const showsSessionActions = isHistory && props.props.activeSessionId !== undefined
     const contextNode = (() => {
-        if (isHistory || input.props.contextSummary === undefined) return undefined
-        const clear = selection === undefined
-            ? undefined
-            : defineLeafComponent("button", {}, () => (
-                <Button
-                    props={{ label: labels.clearContext, variant: "ghost", size: "sm" }}
-                    on={{ press: input.on?.clearContext }}
-                />
-            ))
-        return defineContractComponent("starci-ai-context-stack", {
-            context: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                <Text props={{ content: input.props.contextSummary, size: "xs" }} />
-            )),
-            clear,
-        })
+        if (isHistory || props.props.contextSummary === undefined) return undefined
+        const clear = selection === undefined ? null : (
+            <Button
+                props={{ label: labels.clearContext, variant: "ghost", size: "sm" }}
+                on={{ press: props.on?.clearContext }}
+            />
+        )
+        return <div><Text props={{ content: props.props.contextSummary, size: "xs" }} />{clear}</div>
     })()
     const turnNodes = (() => {
-        if (isHistory && input.props.sessions.length > 0) {
-            return input.props.sessions.map((session) => defineLeafComponent("button", {}, () => (
+        if (isHistory && props.props.sessions.length > 0) {
+            return props.props.sessions.map((session) => (
                 <Button
                     key={session.id}
                     props={{
                         label: `${session.title} · ${session.updatedLabel}`,
-                        variant: session.id === input.props.activeSessionId ? "secondary" : "ghost",
+                        variant: session.id === props.props.activeSessionId ? "secondary" : "ghost",
                     }}
-                    on={{ press: () => input.on?.selectSession?.(session.id) }}
+                    on={{ press: () => props.on?.selectSession?.(session.id) }}
                 />
-            )))
+            ))
         }
         if (renderedTurns.length === 0 && isLoading) {
-            return PENDING_TURN_IDS.map((id) => defineLeafComponent("article", {}, () => (
-                <Article key={id} props={{}} isLoading />
-            )))
+            return PENDING_TURN_IDS.map((id) => <Article key={id} props={{}} isLoading />)
         }
-        return renderedTurns.map((turn) => defineLeafComponent("article", {}, () => (
-            <Article key={turn.id} props={{ body: turnMarkdown(turn, labels.partial) }} />
-        )))
+        return renderedTurns.map((turn) => <Article key={turn.id} props={{ body: turnMarkdown(turn, labels.partial) }} />)
     })()
     const sendOrStop = (() => {
-        if (input.state === "streaming") return <Button props={{ label: labels.stop, variant: "primary" }} on={{ press: input.on?.stop }} />
-        if (stateNeedsRetry(input.state)) return <Button props={{ label: labels.retry, variant: "primary" }} on={{ press: input.on?.retry }} />
+        if (props.state === "streaming") return <Button props={{ label: labels.stop, variant: "primary" }} on={{ press: props.on?.stop }} />
+        if (stateNeedsRetry(props.state)) return <Button props={{ label: labels.retry, variant: "primary" }} on={{ press: props.on?.retry }} />
         return <Button
             props={{
                 label: labels.send,
                 variant: "primary",
                 icon: "send",
-                disabled: disablesComposer || input.props.draft.trim() === "",
+                disabled: disablesComposer || props.props.draft.trim() === "",
             }}
-            on={{ press: input.on?.send }}
+            on={{ press: props.on?.send }}
         />
     })()
 
     return (
         <>
-            <Tree
-                contract="starci-ai-drawer-column"
-                render={defineContractComponent("starci-ai-drawer-column", {
-                    mode: defineContractComponent("starci-ai-mode-row", {
-                        mode: [
-                            defineLeafComponent("button", {}, () => (
-                                <Button
-                                    props={{ label: labels.generalMode, variant: input.props.mode === "general" ? "primary" : "ghost", size: "sm" }}
-                                    on={{ press: () => input.on?.selectMode?.("general") }}
-                                />
-                            )),
-                            defineLeafComponent("button", {}, () => (
-                                <Button
-                                    props={{ label: labels.historyMode, variant: input.props.mode === "history" ? "primary" : "ghost", size: "sm" }}
-                                    on={{ press: () => input.on?.selectMode?.("history") }}
-                                />
-                            )),
-                        ],
-                    }),
-                    context: contextNode,
-                    chat: defineContractComponent("starci-ai-turn-list", {
-                        turn: turnNodes,
-                    }),
-                })}
-            />
+            <div>
+                <div>
+                    <Button
+                        props={{ label: labels.generalMode, variant: props.props.mode === "general" ? "primary" : "ghost", size: "sm" }}
+                        on={{ press: () => props.on?.selectMode?.("general") }}
+                    />
+                    <Button
+                        props={{ label: labels.historyMode, variant: props.props.mode === "history" ? "primary" : "ghost", size: "sm" }}
+                        on={{ press: () => props.on?.selectMode?.("history") }}
+                    />
+                </div>
+                {contextNode}
+                <div>{turnNodes}</div>
+            </div>
             {showsSessionActions ? (
-                <Tree
-                    contract="stacked-peer-controls"
-                    render={defineContractComponent("stacked-peer-controls", {
-                        control: input.state === "deleteConfirm"
-                            ? [
-                                defineLeafComponent("button", {}, () => (
-                                    <Button props={{ label: labels.confirmDelete, variant: "primary" }} on={{ press: input.on?.confirmDelete }} />
-                                )),
-                                defineLeafComponent("button", {}, () => (
-                                    <Button props={{ label: labels.cancel, variant: "ghost" }} on={{ press: input.on?.cancelDelete }} />
-                                )),
-                            ]
-                            : [
-                                defineLeafComponent("button", {}, () => (
-                                    <Button props={{ label: labels.rename, variant: "ghost", isPending: input.state === "renaming" }} on={{ press: input.on?.rename }} />
-                                )),
-                                defineLeafComponent("button", {}, () => (
-                                    <Button props={{ label: labels.archive, variant: "ghost", isPending: input.state === "archiving" }} on={{ press: input.on?.archive }} />
-                                )),
-                                defineLeafComponent("button", {}, () => (
-                                    <Button props={{ label: labels.delete, variant: "ghost" }} on={{ press: input.on?.delete }} />
-                                )),
-                            ],
-                    })}
-                />
+                <div>
+                    {props.state === "deleteConfirm" ? <>
+                        <Button props={{ label: labels.confirmDelete, variant: "primary" }} on={{ press: props.on?.confirmDelete }} />
+                        <Button props={{ label: labels.cancel, variant: "ghost" }} on={{ press: props.on?.cancelDelete }} />
+                    </> : <>
+                        <Button props={{ label: labels.rename, variant: "ghost", isPending: props.state === "renaming" }} on={{ press: props.on?.rename }} />
+                        <Button props={{ label: labels.archive, variant: "ghost", isPending: props.state === "archiving" }} on={{ press: props.on?.archive }} />
+                        <Button props={{ label: labels.delete, variant: "ghost" }} on={{ press: props.on?.delete }} />
+                    </>}
+                </div>
             ) : null}
             {showsComposer ? (
-                <Tree
-                    contract="starci-ai-composer"
-                    render={defineContractComponent("starci-ai-composer", {
-                        selection: selection === undefined
-                            ? undefined
-                            : defineLeafComponent("code-block", {}, () => (
-                                <CodeBlock
-                                    props={{
-                                        code: selection.quote,
-                                        language: selection.kind === "code"
-                                            ? selection.path?.split(".").pop()
-                                            : undefined,
-                                    }}
-                                />
-                            )),
-                        input: defineLeafComponent("textarea", {}, () => (
-                            <textarea
-                                key={input.props.draftKey}
-                                aria-label={labels.composer}
-                                placeholder={labels.placeholder}
-                                defaultValue={input.props.draft}
-                                disabled={disablesComposer}
-                                onChange={(event) => input.on?.changeDraft?.(event.target.value)}
-                            />
-                        )),
-                        sendOrStop: defineLeafComponent("button", {}, () => sendOrStop),
-                        quota: input.state === "quotaPending" || input.props.quotaLabel !== undefined
-                            ? defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                                <Text
-                                    props={{ content: input.props.quotaLabel, size: "xs", live: "polite" }}
-                                    isLoading={input.state === "quotaPending"}
-                                />
-                            ))
-                            : undefined,
-                    })}
-                />
+                <div>
+                    {selection === undefined ? null : (
+                        <CodeBlock
+                            props={{
+                                code: selection.quote,
+                                language: selection.kind === "code"
+                                    ? selection.path?.split(".").pop()
+                                    : undefined,
+                            }}
+                        />
+                    )}
+                    <textarea
+                        key={props.props.draftKey}
+                        aria-label={labels.composer}
+                        placeholder={labels.placeholder}
+                        defaultValue={props.props.draft}
+                        disabled={disablesComposer}
+                        onChange={(event) => props.on?.changeDraft?.(event.target.value)}
+                    />
+                    {sendOrStop}
+                    {props.state === "quotaPending" || props.props.quotaLabel !== undefined ? (
+                        <Text
+                            props={{ content: props.props.quotaLabel, size: "xs", live: "polite" }}
+                            isLoading={props.state === "quotaPending"}
+                        />
+                    ) : null}
+                </div>
             ) : null}
         </>
     )
@@ -301,6 +250,3 @@ export const STARCI_AI_CHAT_STATES: ReadonlyArray<StarCiAiChatState> = [
     "zeroPaidCredits", "quotaRejected", "offline", "reconnecting", "streamFailed", "aborted",
     "tangentReady", "contextCleared",
 ]
-
-/** Source-level ownership marker. */
-export const meta = { shape: "block", world: "pure", domain: "ai" } as const

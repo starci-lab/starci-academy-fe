@@ -10,17 +10,14 @@ export type CreditStatRowProps =
     }
 
 /** Render the credit row without reading request or locale state. */
-export const CreditStatRowBase = (input: CreditStatRowProps) => input.state === "empty" ? null : (
+export const CreditStatRowBase = (props: CreditStatRowProps) => props.state === "empty" ? null : (
     <IconLabelFactRow
         props={{
             icon: "credit",
-            label: input.props.label,
-            endText: input.state === "settled" ? input.props.value : undefined,
+            label: props.props.label,
+            endText: props.state === "settled" ? props.props.value : undefined,
             recipe: "peer",
         }}
-        isLoading={input.state === "pending"}
+        isLoading={props.state === "pending"}
     />
 )
-
-/** Source-level tier marker for the presentational block half. */
-export const meta = { world: "pure", domain: "identity" } as const

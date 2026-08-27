@@ -3,9 +3,9 @@ import { describe, expect, it } from "vitest"
 import { ProfilePublicCvBase } from "@/components/blocks/profile/ProfilePublicCv/component"
 
 describe("ProfilePublicCvPageBase", () => {
-    it("uses the same paper contract while resting and ready", () => {
+    it("keeps the document region stable while resting and ready", () => {
         const resting = render(<ProfilePublicCvBase state="pending" label="Public CV" message="" title="CV" editLabel="Edit CV" retryLabel="Retry" isSelf={false} />)
-        expect(resting.container.querySelector("[data-node='profile-cv-paper']")).toBeInTheDocument()
+        expect(resting.container.querySelector("iframe[title='CV']")).toHaveAttribute("aria-busy", "true")
         resting.unmount()
         const ready = render(<ProfilePublicCvBase state="ready" label="Public CV" message="" title="CV" pdfUrl="https://example.com/cv.pdf" editLabel="Edit CV" retryLabel="Retry" isSelf />)
         expect(ready.container.querySelector("iframe[src='https://example.com/cv.pdf']")).toBeInTheDocument()

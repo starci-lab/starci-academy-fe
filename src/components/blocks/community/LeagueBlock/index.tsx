@@ -18,7 +18,8 @@ const rankVerdict = (delta: number | null): RankedUserVerdict | undefined => del
 const movementLabel = (delta: number | null, t: (key: string, values?: Record<string, string | number | Date>) => string) => delta === null || delta === 0 ? t("noMovement") : delta > 0 ? t("up", { count: delta }) : t("down", { count: Math.abs(delta) })
 
 /** Resolve board query data, pending/empty/error state and follow actions. */
-export const LeagueBlock = ({ scope }: LeagueBlockProps) => {
+export const LeagueBlock = (props: LeagueBlockProps) => {
+    const { scope } = props
     const t = useTranslations("community")
     const router = useRouter()
     const me = useQueryMeSwr()
@@ -64,5 +65,3 @@ export const LeagueBlock = ({ scope }: LeagueBlockProps) => {
 
 export { LeagueBlockBase } from "./component"
 export type { LeagueBlockData, LeagueBlockActions, LeagueBlockProps as LeagueBlockViewProps } from "./component"
-/** Source-level ownership marker for the connected league board. */
-export const meta = { world: "connected", domain: "community" } as const

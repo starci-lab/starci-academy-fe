@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 import { act, cleanup, render, waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import type { CourseFlashcardsReviewBlockProps as ReviewBaseProps } from "./component"
+import type { CourseFlashcardsReviewProps as ReviewBaseProps } from "./component"
 
 const mocks = vi.hoisted(() => ({
     input: undefined as ReviewBaseProps | undefined,
@@ -39,7 +39,7 @@ vi.mock("@/hooks/swr/useQueryMyFlashcardReviewHistorySwr", () => ({ useQueryMyFl
 vi.mock("@/hooks/swr/useQueryMyFlashcardReviewStatsSwr", () => ({ useQueryMyFlashcardReviewStatsSwr: () => ({ data: { weakTags: [], deckRetention: [], leechFocus: [] }, error: undefined, mutate: mocks.mutateReviewStats }) }))
 vi.mock("@/hooks/swr/useQueryMyInProgressFlashcardSessionSwr", () => ({ useQueryMyInProgressFlashcardSessionSwr: () => ({ data: null }) }))
 vi.mock("@/hooks/swr/useMutateStartFlashcardSessionSwr", () => ({ useMutateStartFlashcardSessionSwr: () => ({ trigger: mocks.trigger, reset: mocks.reset, error: undefined, isMutating: false }) }))
-vi.mock("./component", () => ({ CourseFlashcardsReviewBlockBase: (input: ReviewBaseProps) => { mocks.input = input; return <output data-testid="review-base" /> } }))
+vi.mock("./component", () => ({ CourseFlashcardsReviewBlockView: (props: ReviewBaseProps) => { mocks.input = props; return <output data-testid="review-base" /> } }))
 
 import { CourseFlashcardsReviewBlock } from "./index"
 

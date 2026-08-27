@@ -1,6 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { Tree } from "@/components/branches/Tree"
 import { LearnSpineBase, learnSpine, learnSpineCollapsed, type LearnSpineActions, type LearnSpineData } from "./component"
 
 /**
@@ -12,8 +11,8 @@ import { LearnSpineBase, learnSpine, learnSpineCollapsed, type LearnSpineActions
 /** Draw the block the way the learn frame draws it - as the frame's own child. */
 const renderSpine = (props: LearnSpineData, on?: LearnSpineActions, isLoading?: boolean) => (
     props.isCollapsed
-        ? render(<Tree contract="learn-course-navigation-rail-collapsed" render={learnSpineCollapsed({ props, on, isLoading })} />)
-        : render(<Tree contract="learn-course-navigation-rail" render={learnSpine({ props, on, isLoading })} />)
+        ? render(learnSpineCollapsed({ props, on, isLoading }))
+        : render(learnSpine({ props, on, isLoading }))
 )
 
 const groups: LearnSpineData["groups"] = [{
@@ -54,22 +53,15 @@ describe("learnSpine", () => {
         expect(screen.getByRole("option", { name: "Home" })).toBeInTheDocument()
         expect(screen.getByText("Modules")).toBeInTheDocument()
         expect(screen.getByText("Leaderboard")).toBeInTheDocument()
-        expect(container.querySelector("[data-component=SelectionList][data-variant=navigation]")).toBeTruthy()
-        expect(container.querySelector("[data-node=learn-course-navigation-rail]")).toHaveClass(
+        const navigation = screen.getByRole("navigation", { name: "Home" })
+        expect(navigation).toHaveClass(
             "border-separator",
             "px-3",
             "py-6",
             "md:border-r",
         )
-        expect(container.querySelector("[data-node=learn-course-navigation-rail]")).not.toHaveClass("p-4")
-        expect(container.querySelector("[data-node=learn-course-navigation-groups-scroll]")).toHaveClass(
-            "overflow-y-auto",
-            "scroll-shadow--vertical",
-            "scroll-shadow--hide-scrollbar",
-        )
-        const groupsViewport = container.querySelector("[data-node=learn-course-navigation-groups-scroll]")
-        const home = container.querySelector("[data-node=learn-course-home-navigation-row]")
-        expect(groupsViewport?.contains(home)).toBe(false)
+        expect(navigation).not.toHaveClass("p-4")
+        expect(container.querySelectorAll("[role=option]")).toHaveLength(5)
     })
 
     it("reports the pressed destination by its own id", () => {
@@ -81,27 +73,22 @@ describe("learnSpine", () => {
 
     it("uses one icon control to collapse and restore the rail", () => {
         const toggleCollapse = vi.fn()
-        const { container, rerender } = renderSpine(base, { toggleCollapse })
+        const { rerender } = renderSpine(base, { toggleCollapse })
         fireEvent.click(screen.getByRole("button", { name: "Collapse" }))
         expect(toggleCollapse).toHaveBeenCalledTimes(1)
 
-        rerender(
-            <Tree
-                contract="learn-course-navigation-rail-collapsed"
-                render={learnSpineCollapsed({ props: { ...base, isCollapsed: true }, on: { toggleCollapse } })}
-            />,
-        )
+        rerender(learnSpineCollapsed({ props: { ...base, isCollapsed: true }, on: { toggleCollapse } }))
         expect(screen.getByRole("button", { name: "Expand" })).toBeInTheDocument()
         expect(screen.queryByText("Your path")).not.toBeInTheDocument()
         expect(screen.getByRole("option", { name: "Home" })).toBeInTheDocument()
         expect(screen.getByRole("option", { name: "Modules" })).toBeInTheDocument()
-        expect(container.querySelector("[data-node=learn-course-navigation-rail-collapsed]")).toHaveClass(
+        expect(screen.getByRole("navigation", { name: "Home" })).toHaveClass(
             "border-separator",
             "px-3",
             "py-6",
             "md:border-r",
         )
-        expect(container.querySelector("[data-node=learn-course-navigation-rail-collapsed]")).not.toHaveClass("p-2", "px-2")
+        expect(screen.getByRole("navigation", { name: "Home" })).not.toHaveClass("p-2", "px-2")
     })
 
     it("stays inert rather than throwing when the frame reported no handlers", () => {
@@ -127,7 +114,7 @@ describe("learnSpine", () => {
             home: { id: "home", label: "Home", icon: "home" },
             groups: [{ id: "path", label: "Your path", rows: [{ id: "leaderboard", label: "Leaderboard", icon: "community" }] }],
         })
-        expect(container.querySelectorAll("[data-component=SelectionList][data-variant=navigation] [role=option]")).toHaveLength(2)
+        expect(container.querySelectorAll("[role=option]")).toHaveLength(2)
         expect(screen.queryByText("Locked")).not.toBeInTheDocument()
     })
 
@@ -153,13 +140,13 @@ describe("learnSpine", () => {
             }],
         })
 
-        expect(screen.getByText("Locked").closest("[data-component=Badge]")).toHaveAttribute("data-tone", "warning")
-        expect(screen.getByText("#7").closest("[data-component=Badge]")).toHaveAttribute("data-tone", "accent")
+        expect(screen.getByText("Locked").closest("[data-tone]")).toHaveAttribute("data-tone", "warning")
+        expect(screen.getByText("#7").closest("[data-tone]")).toHaveAttribute("data-tone", "accent")
     })
 
     it("omits the resume card entirely when there is nowhere to go back to", () => {
-        const { container } = renderSpine(base)
-        expect(container.querySelector("[data-node=learn-resume-card]")).toBeNull()
+        renderSpine(base)
+        expect(screen.queryByText("Pick up where you left off")).not.toBeInTheDocument()
     })
 
     it("raises a resume card that reports where the learner left off", () => {
@@ -181,9 +168,9 @@ describe("learnSpine", () => {
 
     it("moves the same grouped destinations into the narrow drawer without rail controls", () => {
         const openRow = vi.fn()
-        const { container } = render(<LearnSpineBase isCollapsed={false} presentation="drawer" props={base} on={{ openRow }} />)
+        render(<LearnSpineBase isCollapsed={false} presentation="drawer" props={base} on={{ openRow }} />)
 
-        expect(container.querySelector("[data-node=learn-course-navigation-drawer]")).toBeTruthy()
+        expect(screen.getByRole("navigation", { name: "Home" })).toBeInTheDocument()
         expect(screen.getByText("Your path")).toBeInTheDocument()
         expect(screen.getByRole("option", { name: "Home" })).toBeInTheDocument()
         fireEvent.click(screen.getByText("Flashcards"))

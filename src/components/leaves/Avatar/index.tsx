@@ -1,7 +1,7 @@
 import { Avatar as DiceAvatar, Style } from "@dicebear/core"
 import lorelei from "@dicebear/styles/lorelei.json" with { type: "json" }
-import { Avatar as HeroAvatar, skeletonVariants } from "@heroui/react"
-import type { LeafProps } from "@/components/contracts/props"
+import { Avatar as HeroAvatar } from "@heroui/react"
+import { avatarFallbackClassName, getRestingAvatarClassName } from "./classNames"
 
 /**
  * LEAF - `Avatar`: the mark that says which person a row is about.
@@ -23,17 +23,13 @@ export type AvatarData = {
     readonly size?: AvatarSize
 }
 
-/** Props for {@link Avatar}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type AvatarProps = LeafProps<AvatarData>
+/** Props for {@link Avatar}. Three fixed slots, no fourth. */
+export type AvatarProps = { readonly props: AvatarData; readonly isLoading?: boolean }
 
 /** The size step, as the vendor names it. */
 const SIZES = { sm: "sm", md: "md", lg: "lg" } as const
 
 /** The resting shape - same circle, glyphs out. */
-const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({
-    className: "select-none text-transparent",
-})
-
 /** One local style definition serves every generated fallback. */
 const FALLBACK_STYLE = new Style(lorelei)
 
@@ -53,28 +49,25 @@ const fallbackAvatarOf = (name: string): string =>
  *
  * @param input - {@link AvatarProps}
  */
-export const Avatar = ({ props, isLoading = false }: AvatarProps) => {
-    const size = props.size ?? "md"
-    const name = props.name ?? ""
-    const showsImage = props.src !== undefined && props.src !== "" && !isLoading
+export const Avatar = (props: AvatarProps) => {
+    const data = props.props
+    const isLoading = props.isLoading ?? false
+    const size = data.size ?? "md"
+    const name = data.name ?? ""
+    const showsImage = data.src !== undefined && data.src !== "" && !isLoading
     const fallbackSrc = isLoading ? undefined : fallbackAvatarOf(name)
     return (
         <HeroAvatar
-            data-tier="leaf"
-            data-component="Avatar"
-            data-size={size}
-            data-loading={isLoading ? "true" : "false"}
             aria-hidden={isLoading ? true : undefined}
             size={SIZES[size]}
             color="accent"
-            className={isLoading ? RESTING_CLASSES : undefined}
+            className={isLoading ? getRestingAvatarClassName() : undefined}
         >
-            {!isLoading ? <HeroAvatar.Image src={showsImage ? props.src : fallbackSrc} alt={name} /> : null}
+            {!isLoading ? <HeroAvatar.Image src={showsImage ? data.src : fallbackSrc} alt={name} /> : null}
             <HeroAvatar.Fallback>
                 {fallbackSrc !== undefined ? (
                     <img
-                        data-avatar-fallback="dicebear-lorelei"
-                        className="size-full object-cover"
+                        className={avatarFallbackClassName}
                         src={fallbackSrc}
                         alt={name}
                     />
@@ -83,6 +76,3 @@ export const Avatar = ({ props, isLoading = false }: AvatarProps) => {
         </HeroAvatar>
     )
 }
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const

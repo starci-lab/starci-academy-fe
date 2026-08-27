@@ -29,13 +29,21 @@ const useBlock = () => {
 }
 
 /** Render the category search control in the page-owned search slot. */
-export const CourseFoundationCategoryBlockSearch = () => {
+/** Props for the search slot. */
+export type CourseFoundationCategoryBlockSearchProps = Record<never, never>
+/** Render the category search control in the page-owned search slot. */
+export const CourseFoundationCategoryBlockSearch = (props: CourseFoundationCategoryBlockSearchProps) => {
+    void props
     const input = useBlock()
     return <SearchBox props={{ label: input.data.search, placeholder: input.data.search, clearLabel: input.data.clearSearch }} on={{ search: input.on?.search }} />
 }
 
 /** Render category results or the block-owned empty/error notice in the page resource slot. */
-export const CourseFoundationCategoryBlockResults = () => {
+/** Props for the results slot. */
+export type CourseFoundationCategoryBlockResultsProps = Record<never, never>
+/** Render category results or the block-owned empty/error notice in the page resource slot. */
+export const CourseFoundationCategoryBlockResults = (props: CourseFoundationCategoryBlockResultsProps) => {
+    void props
     const input = useBlock()
     const loading = input.blockState === "pending"
     const rows: ReadonlyArray<FoundationRow> = loading && input.data.foundations.length === 0
@@ -48,7 +56,7 @@ export const CourseFoundationCategoryBlockResults = () => {
 }
 
 /** Provide resolved block state/data/actions to the page's legal inner slots. */
-export const CourseFoundationCategoryBlockBase = ({ render, ...input }: CourseFoundationCategoryBlockProps) => <BlockContext.Provider value={input}>{render?.()}</BlockContext.Provider>
-
-/** Source-level ownership marker for the pure block slots. */
-export const meta = { world: "pure", domain: "learn" } as const
+export const CourseFoundationCategoryBlockBase = (props: CourseFoundationCategoryBlockProps) => {
+    const { render, ...input } = props
+    return <BlockContext.Provider value={input}>{render?.()}</BlockContext.Provider>
+}

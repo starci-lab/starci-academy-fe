@@ -1,7 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { CourseLearnContentHomeBlockBase } from "./component"
+import { CourseLearnContentHomeBlockView } from "./component"
 import { useQueryCourseOutlineSwr } from "@/hooks/swr/useQueryCourseOutlineSwr"
 import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
 import { useRouter } from "@/i18n/navigation"
@@ -66,7 +66,8 @@ const lessonStatus = (
 }
 
 /** Load course identity and viewer outline, then seat the map beside the legacy overview hierarchy. */
-export const CourseLearnContentHomeBlock = ({ displayId }: CourseLearnContentHomeBlockProps) => {
+export const CourseLearnContentHomeBlock = (props: CourseLearnContentHomeBlockProps) => {
+    const { displayId } = props
     const t = useTranslations("learn.contentHome")
     const contentText = useTranslations("learn.content")
     const router = useRouter()
@@ -101,7 +102,7 @@ export const CourseLearnContentHomeBlock = ({ displayId }: CourseLearnContentHom
     }
 
     return (
-        <CourseLearnContentHomeBlockBase
+        <CourseLearnContentHomeBlockView
             displayId={displayId}
             currentLessonId={target?.lessonId}
             resizeLabel={contentText("resizeRail")}
@@ -160,7 +161,3 @@ export const CourseLearnContentHomeBlock = ({ displayId }: CourseLearnContentHom
 }
 
 /** Connected ownership metadata for the course content-home route. */
-export const meta = { world: "connected", domain: "learn" } as const
-
-
-

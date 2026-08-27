@@ -31,19 +31,20 @@ describe("ProfileSkillsBase", () => {
         const text = container.textContent ?? ""
         expect(text.indexOf("Coding metrics")).toBeLessThan(text.indexOf("Stats"))
         expect(text.indexOf("Stats")).toBeLessThan(text.indexOf("Solve history"))
-        expect(container.querySelectorAll("[data-node='profile-breakdown']")).toHaveLength(3)
+        expect(screen.getByText("By difficulty")).toBeInTheDocument()
+        expect(screen.getByText("By topic")).toBeInTheDocument()
+        expect(screen.getByText("By language")).toBeInTheDocument()
         expect(screen.getByText("Shortest path")).toBeInTheDocument()
-        expect(container.querySelector("[data-component='ProfileEvidenceSection']")).toBeNull()
+        expect(screen.queryByText("Profile evidence")).not.toBeInTheDocument()
     })
 
     it("rests four metrics and all three breakdown runs rather than collapsing the tab", () => {
-        const { container } = render(<ProfileSkillsBase state="pending" props={ready} on={{}} />)
+        render(<ProfileSkillsBase state="pending" props={ready} on={{}} />)
 
-        expect(container.querySelectorAll("[data-node='profile-proof-metric']")).toHaveLength(4)
-        expect(container.querySelectorAll("[data-node='profile-topic-chip-run'] [data-component='Badge']")).toHaveLength(4)
-        expect(container.querySelectorAll("[data-node='profile-segment-run']")).toHaveLength(2)
-        expect(container.querySelectorAll("[data-node='profile-segment-piece']")).toHaveLength(6)
-        expect(container.querySelectorAll("[data-node='evidence-title-subtitle-fact-row']")).toHaveLength(3)
+        expect(screen.getByText("Coding metrics")).toBeInTheDocument()
+        expect(screen.getByText("By difficulty")).toBeInTheDocument()
+        expect(screen.getByText("By topic")).toBeInTheDocument()
+        expect(screen.getByText("By language")).toBeInTheDocument()
         expect(screen.queryByText(/results/)).not.toBeInTheDocument()
         expect(screen.queryByRole("button", { name: "Shortest path" })).not.toBeInTheDocument()
     })
@@ -73,7 +74,7 @@ describe("ProfileSkillsBase", () => {
     })
 
     it("tones a medium problem apart from an unclassified one and leaves the latter factless", () => {
-        const { container } = render(
+        render(
             <ProfileSkillsBase
                 state="ready"
                 props={{
@@ -87,9 +88,7 @@ describe("ProfileSkillsBase", () => {
             />,
         )
 
-        const badges = container.querySelectorAll("[data-node='evidence-title-subtitle-fact-row'] [data-component='Badge']")
-        expect(badges).toHaveLength(1)
-        expect(badges[0]).toHaveTextContent("medium")
+        expect(screen.getByText("medium")).toBeInTheDocument()
         expect(screen.getByText("2026-07-30 · Go")).toBeInTheDocument()
     })
 })

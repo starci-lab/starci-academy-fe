@@ -65,13 +65,11 @@ describe("ShellNavBase", () => {
     })
 
     it("composes the language and account blocks with the original switch and tabs", () => {
-        const { container } = render(<ShellNavBase props={props} />)
+        render(<ShellNavBase props={props} />)
         expect(screen.getByRole("switch", { name: "Switch theme" })).toBeTruthy()
         expect(screen.getByRole("button", { name: "Language menu" })).toBeTruthy()
         expect(screen.getByRole("button", { name: "Account menu" })).toBeTruthy()
-        const navbar = container.querySelector("[data-node=\"double-navbar\"]")
-        expect(navbar?.querySelector("[data-node=\"underlined-tab-strip\"]")).toBeTruthy()
-        expect(navbar?.querySelector("[data-component=\"ExtendedTabs\"]")).toBeTruthy()
+        expect(screen.getByRole("tablist")).toBeTruthy()
     })
 
     it("forwards the guest authentication journey to the account block", () => {
@@ -83,8 +81,8 @@ describe("ShellNavBase", () => {
 
     it("sends the brand back to the dashboard", () => {
         const navigate = vi.fn()
-        const { container } = render(<ShellNavBase props={props} on={{ navigate }} />)
-        const brand = container.querySelector("[data-component=\"Link\"][data-emphasis=\"brand\"]")
+        render(<ShellNavBase props={props} on={{ navigate }} />)
+        const brand = screen.getAllByRole("link").find((link) => link.textContent?.includes("StarCi"))
         expect(brand).not.toBeNull()
         fireEvent.click(brand as Element)
         expect(navigate).toHaveBeenCalledWith("dashboard")
@@ -106,9 +104,8 @@ describe("ShellNavBase", () => {
     })
 
     it("drops the whole bottom layer for a page that owns no tabs", () => {
-        const { container } = render(<ShellNavBase props={{ ...props, tabs: undefined }} />)
-        expect(container.querySelector("[data-node=\"underlined-tab-strip\"]")).toBeNull()
-        expect(container.querySelector("[data-node=\"brand-links-then-tools-bar\"]")).toBeTruthy()
+        render(<ShellNavBase props={{ ...props, tabs: undefined }} />)
+        expect(screen.queryByRole("tablist")).toBeNull()
     })
 
     it("falls back to the overview tab when no page tab claims to be current", () => {

@@ -1,5 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
+import {
+    cleanup,
+    fireEvent,
+    render,
+    screen,
+    waitFor,
+} from "@testing-library/react"
 import { useMutateRemoveFromCartSwr } from "@/hooks"
 import { QUERY_MY_CART_SWR_KEY } from "@/hooks/swr/useQueryMyCartSwr"
 import { CartLine } from "./index"
@@ -7,7 +13,7 @@ import { CartLine } from "./index"
 const mutate = vi.fn()
 
 vi.mock("swr", async (importOriginal) => ({
-    ...await importOriginal<typeof import("swr")>(),
+    ...(await importOriginal<typeof import("swr")>()),
     useSWRConfig: () => ({ mutate }),
 }))
 
@@ -33,7 +39,9 @@ const stub = (answer?: unknown, over: Record<string, unknown> = {}) => {
 }
 
 const press = () =>
-    fireEvent.click(screen.getByRole("button", { name: "Remove Fullstack Mastery from cart" }))
+    fireEvent.click(
+        screen.getByRole("button", { name: "Remove Fullstack Mastery from cart" }),
+    )
 
 afterEach(() => {
     cleanup()
@@ -59,7 +67,9 @@ describe("CartLine", () => {
         press()
         await waitFor(() => expect(mutate).toHaveBeenCalledOnce())
 
-        const matches = vi.mocked(mutate).mock.calls[0]?.[0] as (key: unknown) => boolean
+        const matches = vi.mocked(mutate).mock.calls[0]?.[0] as (
+      key: unknown,
+    ) => boolean
         expect(matches([...QUERY_MY_CART_SWR_KEY, "viewer-7"])).toBe(true)
         expect(matches(["QUERY_MY_KPIS_SWR", "viewer-7"])).toBe(false)
         expect(matches(QUERY_MY_CART_SWR_KEY[0])).toBe(false)
@@ -70,19 +80,25 @@ describe("CartLine", () => {
         ["an empty removal payload", { data: { removeFromCart: null } }],
         ["an empty envelope", { data: null }],
         ["no answer at all", undefined],
-    ])("leaves the line on screen and the cart untouched on %s", async (_case, answer) => {
-        const trigger = stub(answer)
+    ])(
+        "leaves the line on screen and the cart untouched on %s",
+        async (_case, answer) => {
+            const trigger = stub(answer)
 
-        render(<CartLine line={line} />)
-        press()
+            render(<CartLine line={line} />)
+            press()
 
-        await waitFor(() => expect(trigger).toHaveBeenCalledOnce())
-        expect(mutate).not.toHaveBeenCalled()
-        expect(screen.getByText("Fullstack Mastery")).toBeInTheDocument()
-    })
+            await waitFor(() => expect(trigger).toHaveBeenCalledOnce())
+            expect(mutate).not.toHaveBeenCalled()
+            expect(screen.getByText("Fullstack Mastery")).toBeInTheDocument()
+        },
+    )
 
     it("refuses a second removal while this line's own request is still running", () => {
-        const trigger = stub({ data: { removeFromCart: { success: true } } }, { isMutating: true })
+        const trigger = stub(
+            { data: { removeFromCart: { success: true } } },
+            { isMutating: true },
+        )
 
         render(<CartLine line={line} />)
         press()
@@ -97,10 +113,6 @@ describe("CartLine", () => {
         render(<CartLine state="pending" line={line} />)
 
         expect(useMutateRemoveFromCartSwr).toHaveBeenCalledWith(undefined)
-        expect(document.querySelector("[data-component=\"CoverImage\"]")).toHaveAttribute(
-            "data-loading",
-            "true",
-        )
         expect(screen.queryByText("Fullstack Mastery")).toBeNull()
     })
 })

@@ -1,6 +1,5 @@
 import { Icon } from "@/components/leaves/Icon"
 import { DropdownBranch } from "@/components/branches/DropdownBranch"
-import { defineLeafComponent } from "@/components/contracts/props"
 import type { Locale } from "@/i18n/config"
 
 /** One locale choice already resolved to its display label. */
@@ -10,7 +9,7 @@ export type LanguageMenuOption = {
 }
 
 /** Resolved single-select locale state accepted by the pure language block. */
-export type LanguageMenuViewProps = {
+export type LanguageMenuProps = {
     readonly props: {
         readonly label: string
         readonly selectedLocale: Locale
@@ -22,22 +21,17 @@ export type LanguageMenuViewProps = {
 }
 
 /** Pure single-select locale ListBox matching the legacy navbar disclosure. */
-export const LanguageMenuBase = (input: LanguageMenuViewProps) => (
+export const LanguageMenuBase = (props: LanguageMenuProps) => (
     <DropdownBranch
         props={{
-            label: input.props.label,
+            label: props.props.label,
             selectionMode: "single",
-            selectedId: input.props.selectedLocale,
+            selectedId: props.props.selectedLocale,
             sections: [{
-                items: input.props.options.map((option) => ({ ...option, showsIndicator: true })),
+                items: props.props.options.map((option) => ({ ...option, showsIndicator: true })),
             }],
         }}
-        on={{ action: (id) => input.on?.select?.(id) }}
-        trigger={defineLeafComponent("icon", {}, () => (
-            <Icon props={{ name: "locale", role: "leading" }} />
-        ))}
+        on={{ action: (id) => props.on?.select?.(id) }}
+        trigger={<Icon props={{ name: "locale", role: "leading" }} />}
     />
 )
-
-/** Source-level tier marker for the pure language-menu block half. */
-export const meta = { shape: "block", world: "pure", domain: "locale" } as const

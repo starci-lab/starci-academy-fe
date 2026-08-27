@@ -6,6 +6,8 @@ import { useRouter } from "@/i18n/navigation"
 import { useQueryCoursesSwr, useQueryMyCoursesSwr } from "@/hooks"
 import { CoursesCatalogBlockBase, type CoursesCatalogBlockState } from "./component"
 
+/** Props for the connected catalog owner; catalog data is resolved from its queries. */
+type CoursesCatalogBlockProps = Record<never, never>
 /** Courses per page. Three columns times three rows on a desktop grid. */
 const PAGE_SIZE = 9
 
@@ -61,7 +63,9 @@ type PricedCourse = {
  * answer - and it matches the legacy catalog, which ordered courses client-side rather than asking
  * the server to.
  */
-export const CoursesCatalogBlock = () => {
+/** Resolve owned and discoverable courses, pricing and catalog navigation. */
+export const CoursesCatalogBlock = (props: CoursesCatalogBlockProps) => {
+    void props
     const t = useTranslations("courses.catalog")
     // `count` is the catalog-wide phrase and already lives one level up, beside the dashboard list
     // that also counts courses. Reaching for it here rather than copying it keeps one sentence for
@@ -267,7 +271,3 @@ export const CoursesCatalogBlock = () => {
         </>
     )
 }
-
-/** Source-level ownership marker. */
-export const meta = { world: "connected", domain: "courses" } as const
-

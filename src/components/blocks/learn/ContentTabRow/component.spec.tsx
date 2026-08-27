@@ -1,7 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { Tree } from "@/components/branches/Tree"
-import { contentTabRow, type ContentTabRowData } from "./component"
+import { ContentTabRow, type ContentTabRowData } from "./component"
 
 class TestResizeObserver implements ResizeObserver {
     observe = () => undefined
@@ -12,7 +11,7 @@ class TestResizeObserver implements ResizeObserver {
 globalThis.ResizeObserver = TestResizeObserver
 
 const renderRow = (props: ContentTabRowData, on = {}) => render(
-    <Tree contract="dual-tabs-toolbar" render={contentTabRow(props, on)} />,
+    <ContentTabRow props={props} on={on} />,
 )
 
 describe("ContentTabRow", () => {

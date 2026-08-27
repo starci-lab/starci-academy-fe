@@ -5,9 +5,11 @@ export type { HeadhuntingDirectoryRow } from "@/components/blocks/learn/CourseHe
 export type CourseHeadhuntingsPageProps = { readonly displayId: string }
 
 /** Route shell: the connected directory block owns its data and interaction state. */
-export const CourseHeadhuntingsPageBase = ({ displayId }: CourseHeadhuntingsPageProps) => (
-    <CourseHeadhuntingsBlock displayId={displayId} />
-)
+export const CourseHeadhuntingsPageBase = (props: CourseHeadhuntingsPageProps) => {
+    const { displayId } = props
+    return (
+        <CourseHeadhuntingsBlock displayId={displayId} />
+    )
+}
 
 /** Ownership metadata for the route shell. */
-export const meta = { world: "pure", domain: "learn" } as const

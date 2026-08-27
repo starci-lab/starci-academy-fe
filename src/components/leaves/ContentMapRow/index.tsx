@@ -1,7 +1,7 @@
 import { Link as HeroLink } from "@heroui/react"
 import { Icon } from "@/components/leaves/Icon"
 import { Text } from "@/components/leaves/Text"
-import type { LeafProps } from "@/components/contracts/props"
+import { getContentMapRowClassName } from "./classNames"
 
 /**
  * LEAF - `ContentMapRow`: one content in the course map, with its state and its length.
@@ -42,30 +42,22 @@ export type ContentMapRowActions = {
 }
 
 /** Props for {@link ContentMapRow}. */
-export type ContentMapRowProps = LeafProps<ContentMapRowData, ContentMapRowActions>
-
-const BASE_CLASSES = "flex w-full flex-row items-start gap-3 rounded-medium px-3 py-2 text-start [&>*:first-child]:shrink-0 [&>*:nth-child(2)]:min-w-0 [&>*:nth-child(2)]:grow [&>*:last-child]:shrink-0"
-const CURRENT_CLASSES = "bg-accent-soft text-accent-soft-foreground"
+export type ContentMapRowProps = { readonly props: ContentMapRowData; readonly on?: ContentMapRowActions; readonly isLoading?: boolean }
 
 /**
  * Draw one content in the map.
  *
  * @param input - {@link ContentMapRowProps}
  */
-export const ContentMapRow = ({ props, on, isLoading = false }: ContentMapRowProps) => (
+export const ContentMapRow = (props: ContentMapRowProps) => (
     <HeroLink
-        data-tier="leaf"
-        data-component="ContentMapRow"
-        data-current={props.isCurrent === true ? "true" : "false"}
-        aria-current={props.isCurrent === true ? "page" : undefined}
-        onPress={on?.press}
-        className={`${BASE_CLASSES} ${props.isCurrent === true ? CURRENT_CLASSES : ""}`}
+        data-current={props.props.isCurrent === true ? "true" : "false"}
+        aria-current={props.props.isCurrent === true ? "page" : undefined}
+        onPress={props.on?.press}
+        className={getContentMapRowClassName(props.props.isCurrent === true)}
     >
-        <Icon props={{ name: props.isComplete === true ? "complete" : "pending", role: "leading" }} />
-        <Text props={{ content: props.title, size: "sm" }} isLoading={isLoading} />
-        <Text props={{ content: props.meta, size: "xs", tone: "muted" }} isLoading={isLoading} />
+        <Icon props={{ name: props.props.isComplete === true ? "complete" : "pending", role: "leading" }} />
+        <Text props={{ content: props.props.title, size: "sm" }} isLoading={props.isLoading} />
+        <Text props={{ content: props.props.meta, size: "xs", tone: "muted" }} isLoading={props.isLoading} />
     </HeroLink>
 )
-
-/** Source-level tier marker. */
-export const meta = { shape: "leaf", world: "pure" } as const

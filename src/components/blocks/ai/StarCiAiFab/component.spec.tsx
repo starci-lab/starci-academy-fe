@@ -9,7 +9,7 @@ describe("StarCiAiFab", () => {
 
         const trigger = screen.getByRole("button", { name: "StarCi AI" })
         expect(trigger).toHaveAttribute("aria-expanded", "false")
-        expect(trigger.querySelector("[data-component=\"StarCiAiMark\"]")).toBeInTheDocument()
+        expect(trigger.querySelector("img")).toBeInTheDocument()
         expect(trigger.querySelector("img")?.getAttribute("src")).toContain("starci-ai-mark-v1.png")
         fireEvent.click(trigger)
         expect(press).toHaveBeenCalledTimes(1)
@@ -19,13 +19,13 @@ describe("StarCiAiFab", () => {
         const unread = render(<StarCiAiFab props={{ label: "StarCi AI", isOpen: false, hasUnread: true }} />)
         const flagged = screen.getByRole("button", { name: "StarCi AI" })
         expect(flagged).toHaveAttribute("data-unread", "true")
-        expect(flagged.querySelector("[data-component=\"Badge\"]")?.textContent).toBe("1")
+        expect(flagged.querySelector("[data-slot=\"chip\"]")?.textContent).toBe("1")
         unread.unmount()
 
         render(<StarCiAiFab props={{ label: "StarCi AI", isOpen: false, hasUnread: false }} />)
         const quiet = screen.getByRole("button", { name: "StarCi AI" })
         expect(quiet).toHaveAttribute("data-unread", "false")
-        expect(quiet.querySelector("[data-component=\"Badge\"]")).toBeNull()
+        expect(quiet.querySelector("[data-slot=\"chip\"]")).toBeNull()
     })
 
     it("reads the trigger as expanded while the chat it opens is on screen", () => {
@@ -38,7 +38,7 @@ describe("StarCiAiFab", () => {
     it("rests the mark and the name while the chat's own state is in flight", () => {
         render(<StarCiAiFab props={{ label: "StarCi AI", isOpen: false }} isLoading />)
         const trigger = screen.getByRole("button", { name: "StarCi AI" })
-        expect(trigger.querySelector("[data-component=\"Text\"]")).toHaveAttribute("data-loading", "true")
+        expect(trigger.querySelector("[data-loading=\"true\"]")).toBeInTheDocument()
         expect(trigger.textContent).not.toContain("StarCi AI")
     })
 })

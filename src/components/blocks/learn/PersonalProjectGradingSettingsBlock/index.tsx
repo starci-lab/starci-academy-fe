@@ -7,14 +7,16 @@ import { useQueryPersonalProjectTaskWorkspaceSwr } from "@/hooks/swr/useQueryPer
 import { PersonalProjectGradingSettingsBlockBase } from "./component"
 import type { PersonalProjectGradingSettingsLabels } from "./component"
 
-type Props = { readonly courseId: string; readonly taskId: string }
+/** Course and task identity required to load grading settings. */
+export type PersonalProjectGradingSettingsBlockProps = { readonly courseId: string; readonly taskId: string }
 const COPY: Record<"en" | "vi", PersonalProjectGradingSettingsLabels & { readonly auto: string; readonly tokenPlaceholder: string }> = {
     en: { language: "Language", model: "Grading model", branch: "Branch", branchPlaceholder: "main", token: "Private repository token", tokenPlaceholder: "Paste a new token", tokenStored: (last4) => `Stored token ending in ${last4}`, settingsSaved: "Grading settings saved.", saveSettings: "Save settings", auto: "Auto (recommended)" },
     vi: { language: "Ngôn ngữ", model: "Mô hình chấm", branch: "Branch", branchPlaceholder: "main", token: "Token repo riêng tư", tokenPlaceholder: "Dán token mới", tokenStored: (last4) => `Đã lưu token kết thúc bằng ${last4}`, settingsSaved: "Đã lưu cài đặt chấm bài.", saveSettings: "Lưu cài đặt", auto: "Tự động (khuyên dùng)" }, // vn-ok: localized settings copy.
 }
 
 /** Connected owner for grading choices and enrollment-owned repository settings. */
-export const PersonalProjectGradingSettingsBlock = ({ courseId, taskId }: Props) => {
+export const PersonalProjectGradingSettingsBlock = (props: PersonalProjectGradingSettingsBlockProps) => {
+    const { courseId, taskId } = props
     const locale = useLocale()
     const copy = COPY[locale === "vi" ? "vi" : "en"]
     const workspace = useQueryPersonalProjectTaskWorkspaceSwr(courseId, taskId)
@@ -48,4 +50,3 @@ export const PersonalProjectGradingSettingsBlock = ({ courseId, taskId }: Props)
 }
 
 /** Connected ownership marker for grading settings. */
-export const meta = { world: "connected", domain: "learn" } as const

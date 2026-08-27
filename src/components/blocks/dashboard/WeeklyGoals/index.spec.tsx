@@ -29,8 +29,7 @@ const stub = (over: Record<string, unknown>) => {
     return mutate
 }
 
-const rows = (root: HTMLElement) =>
-    Array.from(root.querySelectorAll("[data-node=\"label-fact-over-progress\"]"), (row) => row.textContent)
+const rows = (root: HTMLElement) => Array.from(root.querySelectorAll("[role=\"progressbar\"]"), (row) => row.parentElement?.textContent)
 
 beforeEach(() => {
     vi.useFakeTimers()
@@ -56,7 +55,7 @@ describe("WeeklyGoals", () => {
             "labels.flashcards0/20",
             "labels.milestones0/2",
         ])
-        expect(container.querySelector("[data-node=\"empty-notice-stack\"]")).toBeNull()
+        expect(screen.queryByText("empty")).toBeNull()
         expect(container.textContent).toContain("0% · 0/6")
     })
 

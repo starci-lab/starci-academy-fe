@@ -1,8 +1,7 @@
+import type { ReactNode } from "react"
 import { Dropdown, Header } from "@heroui/react"
-import { Tree } from "@/components/branches/Tree"
-import type { ContractKey, ContractPropValue } from "@/components/contracts"
-import type { BoundContractComponent, LeafComponent } from "@/components/contracts/props"
 import { Icon, type IconName } from "@/components/leaves/Icon"
+import { dropdownDangerItemClassName, dropdownHeaderClassName, dropdownTriggerClassName } from "./classNames"
 
 /** Placement choices exposed without leaking the vendor vocabulary beyond the branch. */
 export type DropdownBranchPlacement = "bottom left" | "bottom right" | "top left" | "top right"
@@ -41,45 +40,37 @@ export type DropdownBranchProps<I extends string> = {
     readonly props: DropdownBranchData<I>
     readonly on?: DropdownBranchActions<I>
     /** One closed atomic control rendered by the vendor trigger. */
-    readonly trigger: LeafComponent<string, Readonly<Record<string, ContractPropValue>>>
+    readonly trigger: ReactNode
     /** Optional checked content node rendered before the menu. */
-    readonly header?: LeafComponent<string, Readonly<Record<string, ContractPropValue>>> | BoundContractComponent<ContractKey>
-}
-
-/** Render one closed leaf or contract without accepting arbitrary markup. */
-const renderTypedContent = (
-    content: LeafComponent<string, Readonly<Record<string, ContractPropValue>>> | BoundContractComponent<ContractKey>,
-) => {
-    if (!("kind" in content)) return content()
-    return <Tree contract={content.meta.contract} render={content} />
+    readonly header?: ReactNode
 }
 
 /**
  * BRANCH - the vendor's trigger, popover, focus, keyboard, section and item mechanics.
  *
  * Callers decide item meaning and grouping as data. This branch alone expands that data into the
- * complete HeroUI compound structure, while every injected visual is a typed leaf or contract.
+ * complete HeroUI compound structure, while every injected visual is a typed child.
  */
-export const DropdownBranch = <const I extends string>(input: DropdownBranchProps<I>) => (
+export const DropdownBranch = <const I extends string>(props: DropdownBranchProps<I>) => (
     <Dropdown>
         <Dropdown.Trigger
-            aria-label={input.props.label}
-            className="button button--md button--tertiary button--icon-only rounded-full"
+            aria-label={props.props.label}
+            className={dropdownTriggerClassName}
         >
-            {input.trigger()}
+            {props.trigger}
         </Dropdown.Trigger>
-        <Dropdown.Popover placement={input.props.placement ?? "bottom right"}>
-            {input.header === undefined ? null : (
-                <Header className="border-b border-separator">
-                    {renderTypedContent(input.header)}
+        <Dropdown.Popover placement={props.props.placement ?? "bottom right"}>
+            {props.header === undefined ? null : (
+                <Header className={dropdownHeaderClassName}>
+                    {props.header}
                 </Header>
             )}
             <Dropdown.Menu
-                aria-label={input.props.label}
-                selectionMode={input.props.selectionMode}
-                selectedKeys={input.props.selectedId === undefined ? undefined : new Set([input.props.selectedId])}
+                aria-label={props.props.label}
+                selectionMode={props.props.selectionMode}
+                selectedKeys={props.props.selectedId === undefined ? undefined : new Set([props.props.selectedId])}
             >
-                {input.props.sections.map((section, sectionIndex) => (
+                {props.props.sections.map((section, sectionIndex) => (
                     <Dropdown.Section key={"section-" + sectionIndex}>
                         {section.items.map((item) => (
                             <Dropdown.Item
@@ -87,8 +78,8 @@ export const DropdownBranch = <const I extends string>(input: DropdownBranchProp
                                 id={item.id}
                                 textValue={item.label}
                                 isDisabled={item.isDisabled}
-                                className={item.tone === "danger" ? "text-danger-soft-foreground" : undefined}
-                                onAction={() => input.on?.action?.(item.id)}
+                                className={item.tone === "danger" ? dropdownDangerItemClassName : undefined}
+                                onAction={() => props.on?.action?.(item.id)}
                             >
                                 {item.showsIndicator === true ? <Dropdown.ItemIndicator /> : null}
                                 {item.icon === undefined ? null : <Icon props={{ name: item.icon, role: "leading" }} />}
@@ -101,6 +92,3 @@ export const DropdownBranch = <const I extends string>(input: DropdownBranchProp
         </Dropdown.Popover>
     </Dropdown>
 )
-
-/** Source-level tier marker for the content-agnostic dropdown mechanics. */
-export const meta = { shape: "branch", mechanics: true, world: "pure" } as const

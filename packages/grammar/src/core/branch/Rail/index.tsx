@@ -1,5 +1,6 @@
 import { useId, type ReactNode } from "react"
 import { assertPresentationState, treatmentFor, type PresentationState } from "../../state.js"
+import { railBodyClassName, railClassName, railFooterClassName, railFrameClassName } from "./classNames.js"
 
 type ComplementaryRailProps = {
     readonly label: string
@@ -24,35 +25,35 @@ export type RailProps = (ComplementaryRailProps | ContentNavigationRailProps) & 
     readonly motion?: "static" | "animated" | "reduced"
 }
 
-export const Rail = ({
-    label,
-    landmark = "complementary",
-    children,
-    footer,
-    height = "content",
-    mode = "flow",
-    width = "standard",
-    state = "neutral",
-    collapse = "expanded",
-    motion = "static",
-}: RailProps) => {
+export const Rail = (props: RailProps) => {
+    const {
+        label,
+        landmark = "complementary",
+        children,
+        footer,
+        height = "content",
+        mode = "flow",
+        width = "standard",
+        state = "neutral",
+        collapse = "expanded",
+        motion = "static",
+    } = props
     assertPresentationState(state)
     const headingId = useId()
     const treatment = treatmentFor(state)
 
     const frame = (
-        <div className="starci-core-rail-frame" data-grammar-rail-frame="true">
+        <div className={railFrameClassName} data-grammar-rail-frame="true">
             {landmark === "content-navigation" ? null : <h2 data-grammar-rail-heading="true" id={headingId}>{label}</h2>}
-            <div className="starci-core-rail-body" data-grammar-rail-body="true">{children}</div>
+            <div className={railBodyClassName} data-grammar-rail-body="true">{children}</div>
             {footer === undefined ? null : (
-                <div className="starci-core-rail-footer" data-grammar-rail-footer="true">{footer}</div>
+                <div className={railFooterClassName} data-grammar-rail-footer="true">{footer}</div>
             )}
         </div>
     )
     const shared = {
-        className: "starci-core-rail",
+        className: railClassName,
         "data-grammar-collapse": collapse,
-        "data-grammar-contract": "core.rail",
         "data-grammar-landmark": landmark,
         "data-grammar-rail-height": height,
         "data-grammar-motion": motion,
@@ -73,5 +74,3 @@ export const Rail = ({
         </aside>
     )
 }
-
-export const meta = { shape: "branch", grammar: "core", contract: "core.branch.rail" } as const

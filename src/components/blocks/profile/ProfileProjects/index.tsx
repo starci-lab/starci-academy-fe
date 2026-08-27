@@ -25,7 +25,10 @@ const stateOf = <T,>(
         data: query.data ?? [],
     })
 /** Connected projects block; owns profile evidence queries and navigation. */
-export const ProfileProjects = () => {
+export type ProfileProjectsProps = Record<never, never>
+/** Load and render the connected profile projects block. */
+export const ProfileProjects = (props: ProfileProjectsProps) => {
+    void props
     const params = useParams<{ username?: string }>()
     const router = useRouter()
     const username = String(params.username ?? "")
@@ -50,5 +53,3 @@ export const ProfileProjects = () => {
     )
 }
 export * from "./component"
-/** Source-level ownership marker. */
-export const meta = { world: "connected", domain: "profile" } as const

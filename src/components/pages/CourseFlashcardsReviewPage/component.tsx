@@ -7,4 +7,3 @@ export type CourseFlashcardsReviewPageProps = { readonly displayId: string }
 export const CourseFlashcardsReviewPageBase = (props: CourseFlashcardsReviewPageProps) => <CourseFlashcardsReviewBlock {...props} />
 
 /** Ownership metadata for the route shell. */
-export const meta = { world: "pure", domain: "learn" } as const

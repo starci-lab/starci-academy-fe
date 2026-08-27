@@ -35,11 +35,11 @@ type InterviewStateInputs = {
     grading: boolean
 }
 
-const resolveInterviewState = (input: InterviewStateInputs): CourseMockInterviewSessionState => {
-    if (input.loadFailed) return "failed"
-    if (input.pending || (input.session !== null && input.hydrated)) return "connecting"
-    if (input.expired || input.missing) return "expired"
-    if (input.syncing || input.grading) return "syncing"
+const resolveInterviewState = (props: InterviewStateInputs): CourseMockInterviewSessionState => {
+    if (props.loadFailed) return "failed"
+    if (props.pending || (props.session !== null && props.hydrated)) return "connecting"
+    if (props.expired || props.missing) return "expired"
+    if (props.syncing || props.grading) return "syncing"
     return "live"
 }
 
@@ -129,7 +129,11 @@ const COPY = {
 } as const
 
 /** Rehydrate, persist and grade one durable mock-interview session. */
-export const CourseMockInterviewSessionBlock = ({ displayId, sessionId }: CourseMockInterviewSessionPageProps) => {
+/** Route identity used to load a mock interview session. */
+export type CourseMockInterviewSessionBlockProps = CourseMockInterviewSessionPageProps
+/** Restore and operate the durable mock-interview session route. */
+export const CourseMockInterviewSessionBlock = (props: CourseMockInterviewSessionBlockProps) => {
+    const { displayId, sessionId } = props
     const locale = useLocale()
     const copy = locale === "vi" ? COPY.vi : COPY.en
     const router = useRouter()
@@ -454,6 +458,3 @@ export const CourseMockInterviewSessionBlock = ({ displayId, sessionId }: Course
         />
     )
 }
-
-/** Source-level ownership marker for the connected session twin. */
-export const meta = { world: "connected", domain: "learn" } as const

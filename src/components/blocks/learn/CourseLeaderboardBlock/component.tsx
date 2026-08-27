@@ -1,5 +1,4 @@
-import { SurfaceListCard, type SurfaceListCardData } from "@/components/branches/SurfaceListCard"
-import { Tree } from "@/components/branches/Tree"
+import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { Podium, type PodiumEntryData } from "@/components/composites/Podium"
 import { RankedUserRow, type RankedUserRowData } from "@/components/composites/RankedUserRow"
@@ -8,7 +7,13 @@ import { Text } from "@/components/leaves/Text"
 import { ChoiceTabs } from "@/components/leaves/ChoiceTabs"
 import { Breadcrumbs, type BreadcrumbStep } from "@/components/leaves/Breadcrumbs"
 import { Heading } from "@/components/leaves/Heading"
-import { defineContractComponent, defineContractProjection, defineLeafComponent, type LeafProps } from "@/components/contracts/props"
+import {
+    courseLeaderboardBoardClassName,
+    courseLeaderboardHeaderClassName,
+    courseLeaderboardPageClassName,
+    courseLeaderboardScopeClassName,
+    rankedUserEllipsisClassName,
+} from "./classNames"
 
 /** Course leaderboard categories selected by the page URL. */
 export type CourseLeaderboardBlockCategory = "total" | "challenge" | "reading" | "milestone"
@@ -21,26 +26,39 @@ export type CourseLeaderboardBlockData = { readonly board: Board; readonly listL
 export type CourseLeaderboardBlockActions = { readonly course?: () => void; readonly selectCategory?: (category: string) => void; readonly climb?: () => void; readonly retry?: () => void }
 /** Pure board input. */
 export type CourseLeaderboardBlockProps = { readonly state: CourseLeaderboardBlockState; readonly data: CourseLeaderboardBlockData; readonly on?: CourseLeaderboardBlockActions }
-type ListData = SurfaceListCardData & { readonly rows: ReadonlyArray<RankedUserRowData>; readonly selfRow?: RankedUserRowData; readonly ellipsisLabel?: string }
-const List = ({ props, isLoading = false }: LeafProps<ListData>) => <Tree contract="ranked-user-list" render={defineContractProjection("ranked-user-list", () => <>{props.rows.map((row) => <RankedUserRow key={row.id} props={row} isLoading={isLoading} />)}{props.ellipsisLabel === undefined ? null : <Tree contract="ranked-user-ellipsis-row" render={defineContractComponent("ranked-user-ellipsis-row", { label: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: props.ellipsisLabel ?? "", size: "xs", tone: "muted" }} />) })} />}{props.selfRow === undefined ? null : <RankedUserRow props={props.selfRow} />}</>)} />
-const ListContent = defineContractComponent("ranked-user-list", List)
-
-/** Render the course board subtree at the page's legal board contract. */
-export const CourseLeaderboardBlockBase = (input: CourseLeaderboardBlockProps) => {
-    const board = input.data.board
-    const boardContent = input.state === "empty" || input.state === "failed"
-        ? defineContractProjection("league-board-stack", () => <EmptyNotice props={{ icon: "league", message: input.state === "empty" ? input.data.emptyMessage : input.data.errorMessage, actionLabel: input.state === "failed" ? input.data.retryLabel : input.data.climbLabel }} on={{ act: input.state === "failed" ? input.on?.retry : input.on?.climb }} />)
-        : defineContractComponent("league-board-stack", {
-            hero: defineContractProjection("standing-hero-card", () => <StandingHeroCard props={{ standing: board.standing, ctaLabel: input.data.climbLabel, progressAccessibleLabel: input.data.title }} on={{ cta: input.on?.climb }} isLoading={input.state === "pending"} />),
-            podium: defineContractProjection("podium", () => <Podium props={{ entries: board.podium, meLabel: input.data.meLabel, anonymousLabel: input.data.anonymousLabel }} isLoading={input.state === "pending"} />),
-            list: defineContractProjection("ranked-user-followable-list", () => <SurfaceListCard contract="ranked-user-list" render={ListContent} props={{ label: input.data.listLabel, fact: input.data.updatedAtLabel, rows: board.rows, selfRow: board.selfRow, ellipsisLabel: board.ellipsisLabel }} isLoading={input.state === "pending"} />),
-        })
-    return <Tree contract="league-page-column" render={defineContractComponent("league-page-column", {
-        header: defineContractComponent("page-header-stack", { trail: defineLeafComponent("breadcrumbs", {}, () => <Breadcrumbs props={{ steps: input.data.trail, label: input.data.title }} on={{ course: input.on?.course }} />), title: defineLeafComponent("heading", {}, () => <Heading props={{ content: input.data.title, level: 1 }} />) }),
-        scope: defineContractComponent("scope-switch-row", { tabs: defineLeafComponent("choice-tabs", {}, () => <ChoiceTabs props={{ label: input.data.categoryLabel, selectedKey: input.data.selectedCategory, variant: "primary", tabs: input.data.categories }} on={{ select: input.on?.selectCategory }} />) }),
-        board: boardContent,
-    })} />
+/** Render the course board subtree in the page's board region. */
+export const CourseLeaderboardBlockBase = (props: CourseLeaderboardBlockProps) => {
+    const board = props.data.board
+    const isLoading = props.state === "pending"
+    return <main className={courseLeaderboardPageClassName}>
+        <div className={courseLeaderboardHeaderClassName}>
+            <Breadcrumbs props={{ steps: props.data.trail, label: props.data.title }} on={{ course: props.on?.course }} />
+            <Heading props={{ content: props.data.title, level: 1 }} />
+        </div>
+        <div className={courseLeaderboardScopeClassName}>
+            <ChoiceTabs props={{ label: props.data.categoryLabel, selectedKey: props.data.selectedCategory, variant: "primary", tabs: props.data.categories }} on={{ select: props.on?.selectCategory }} />
+        </div>
+        {props.state === "empty" || props.state === "failed" ? (
+            <EmptyNotice
+                props={{
+                    icon: "league",
+                    message: props.state === "empty" ? props.data.emptyMessage : props.data.errorMessage,
+                    actionLabel: props.state === "failed" ? props.data.retryLabel : props.data.climbLabel,
+                }}
+                on={{ act: props.state === "failed" ? props.on?.retry : props.on?.climb }}
+            />
+        ) : <div className={courseLeaderboardBoardClassName}>
+            <StandingHeroCard props={{ standing: board.standing, ctaLabel: props.data.climbLabel, progressAccessibleLabel: props.data.title }} on={{ cta: props.on?.climb }} isLoading={isLoading} />
+            <Podium props={{ entries: board.podium, meLabel: props.data.meLabel, anonymousLabel: props.data.anonymousLabel }} isLoading={isLoading} />
+            <SurfaceListCard props={{ label: props.data.listLabel, fact: props.data.updatedAtLabel }} isLoading={isLoading}>
+                {board.rows.map((row) => <RankedUserRow key={row.id} props={row} isLoading={isLoading} />)}
+                {board.ellipsisLabel === undefined ? null : (
+                    <div className={rankedUserEllipsisClassName}>
+                        <Text props={{ content: board.ellipsisLabel, size: "xs", tone: "muted" }} />
+                    </div>
+                )}
+                {board.selfRow === undefined ? null : <RankedUserRow props={board.selfRow} />}
+            </SurfaceListCard>
+        </div>}
+    </main>
 }
-
-/** Source-level ownership marker for the pure course board. */
-export const meta = { world: "pure", domain: "learn" } as const

@@ -34,6 +34,8 @@ type StarCiAiAttempt = {
     readonly userId: string
     readonly assistantId: string
 }
+/** Props for the connected chat owner; state is resolved from its hooks. */
+type StarCiAiChatProps = Record<never, never>
 
 type StarCiAiGeneralStateInput = {
     readonly hasAnchor: boolean
@@ -70,7 +72,9 @@ const resolveStreamErrorState = (error: string): StarCiAiChatState => {
 }
 
 /** Resolve persisted conversations, advisory credits and one authenticated stream into the pure chat. */
-export const StarCiAiChat = () => {
+/** Resolve persisted conversations, credits and streaming state for the authenticated AI chat. */
+export const StarCiAiChat = (props: StarCiAiChatProps) => {
+    void props
     const t = useTranslations("globalAi")
     const locale = useLocale()
     const owner = useGlobalAiChat()
@@ -318,5 +322,3 @@ export const StarCiAiChat = () => {
 }
 
 export * from "./component"
-/** Source-level ownership marker. */
-export const meta = { world: "connected", domain: "ai" } as const

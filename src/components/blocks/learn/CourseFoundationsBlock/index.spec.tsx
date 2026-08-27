@@ -1,10 +1,10 @@
 /** @vitest-environment jsdom */
 import { act, cleanup, render, waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import type { CourseFoundationsBlockProps } from "./component"
+import type { CourseFoundationsBlockProps as CourseFoundationsProps } from "./component"
 
 const mocks = vi.hoisted(() => ({
-    input: undefined as CourseFoundationsBlockProps | undefined,
+    input: undefined as CourseFoundationsProps | undefined,
     categoriesData: {
         data: [{ id: "category-1", title: "Containers", description: "Runtime basics", thumbnailUrl: null }],
         totalCount: 1,
@@ -37,8 +37,8 @@ vi.mock("@/hooks/swr/useQueryFoundationCategoriesSwr", () => ({
     },
 }))
 vi.mock("./component", () => ({
-    CourseFoundationsBlockBase: (input: CourseFoundationsBlockProps) => {
-        mocks.input = input
+    CourseFoundationsBlockBase: (props: CourseFoundationsProps) => {
+        mocks.input = props
         return <output data-testid="foundations-base" />
     },
 }))

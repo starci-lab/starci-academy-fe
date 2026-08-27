@@ -5,12 +5,15 @@ import { useRouter } from "@/i18n/navigation"
 import { useQueryFoundationCategoriesSwr } from "@/hooks/swr/useQueryFoundationCategoriesSwr"
 import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
 import { CourseFoundationsBlockBase, type FoundationCategoryLayout } from "./component"
-export type { CourseFoundationsBlockProps } from "./component"
-type CourseFoundationsBlockRouteProps = { readonly displayId: string }
+export type { CourseFoundationsBlockProps as CourseFoundationsProps } from "./component"
+type CourseFoundationsBlockRoute = { readonly displayId: string }
+/** Route props for the connected foundations catalog. */
+export type CourseFoundationsBlockProps = CourseFoundationsBlockRoute
 const VIEW_STORAGE_KEY = "starci.foundations.view"
 
 /** Connected foundations catalog owner. */
-export const CourseFoundationsBlock = ({ displayId }: CourseFoundationsBlockRouteProps) => {
+export const CourseFoundationsBlock = (props: CourseFoundationsBlockProps) => {
+    const { displayId } = props
     const t = useTranslations("learn.foundations")
     const router = useRouter()
     const course = useQueryCourseSwr({ displayId })

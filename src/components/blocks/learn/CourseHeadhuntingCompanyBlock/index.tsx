@@ -9,7 +9,7 @@ import type { Consultant } from "@/modules/api/graphql/queries/query-consultants
 import { CourseHeadhuntingCompanyBlockBase } from "./component"
 
 /** Route identity consumed by the connected company profile block. */
-export type CourseHeadhuntingCompanyBlockProps = { readonly displayId: string; readonly companyId: string }
+export type CourseHeadhuntingCompanyProps = { readonly displayId: string; readonly companyId: string }
 
 const COPY = {
     en: {
@@ -48,7 +48,11 @@ const companyStateOf = (failed: boolean, missing: boolean, pending: boolean) => 
 }
 
 /** Connected owner for company, consultant, transport and navigation state. */
-export const CourseHeadhuntingCompanyBlock = ({ displayId, companyId }: CourseHeadhuntingCompanyBlockProps) => {
+/** Route identity used to load one company block. */
+export type CourseHeadhuntingCompanyBlockProps = CourseHeadhuntingCompanyProps
+/** Render the connected company profile and consultant actions. */
+export const CourseHeadhuntingCompanyBlock = (props: CourseHeadhuntingCompanyBlockProps) => {
+    const { displayId, companyId } = props
     const locale = useLocale() === "vi" ? "vi" : "en"
     const copy = COPY[locale]
     const router = useRouter()

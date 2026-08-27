@@ -13,6 +13,8 @@ type ActiveSelection = {
     readonly context: ContentAiSelectionContext
     readonly position: { readonly x: number; readonly y: number }
 }
+/** Props for the connected selection observer; selection state is read from the document. */
+type StarCiAiSelectionAskProps = Record<never, never>
 
 const selectedRoot = (selection: Selection): HTMLElement | null => {
     if (selection.rangeCount === 0) return null
@@ -22,7 +24,9 @@ const selectedRoot = (selection: Selection): HTMLElement | null => {
 }
 
 /** Listen only inside opted-in reading/editor roots and hand validated evidence to the global owner. */
-export const StarCiAiSelectionAsk = () => {
+/** Observe validated text selections and expose actions for the global AI assistant. */
+export const StarCiAiSelectionAsk = (props: StarCiAiSelectionAskProps) => {
+    void props
     const t = useTranslations("globalAi.selection")
     const chat = useGlobalAiChat()
     const [active, setActive] = useState<ActiveSelection>()
@@ -78,5 +82,3 @@ export const StarCiAiSelectionAsk = () => {
 }
 
 export * from "./component"
-/** Source-level ownership marker. */
-export const meta = { world: "connected", domain: "ai" } as const

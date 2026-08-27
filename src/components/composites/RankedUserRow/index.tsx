@@ -1,17 +1,9 @@
-import { Tree } from "@/components/branches/Tree"
 import { Avatar } from "@/components/leaves/Avatar"
-import { Badge } from "@/components/leaves/Badge"
 import { Button } from "@/components/leaves/Button"
 import { RankDeltaCaret } from "@/components/leaves/RankDeltaCaret"
 import { RankMark } from "@/components/leaves/RankMark"
 import { Text } from "@/components/leaves/Text"
 import { TextLink } from "@/components/leaves/TextLink"
-import {
-    defineContractComponent,
-    defineLeafComponent,
-    type CompositeProps,
-} from "@/components/contracts/props"
-import type { ContractKey } from "@/components/contracts"
 
 /** Semantic movement verdict carried by leaderboard data. */
 export type RankedUserVerdict = "success" | "danger"
@@ -46,11 +38,16 @@ export type RankedUserRowActions = {
     readonly follow?: () => void
 }
 
-const contractFor = (verdict?: RankedUserVerdict): ContractKey => {
-    if (verdict === "success") return "ranked-user-row-success-verdict"
-    if (verdict === "danger") return "ranked-user-row-danger-verdict"
-    return "ranked-user-row"
-}
+/** Public inputs for a ranked identity row. */
+export type RankedUserRowProps = { readonly props: RankedUserRowData; readonly on?: RankedUserRowActions; readonly isLoading?: boolean }
+
+const RankedName = ({ props, on, isLoading }: RankedUserRowProps) => props.isMe === true
+    ? <Text props={{ content: props.name, size: "sm", weight: "semibold", tone: props.isMe === true ? "accent" : "default" }} isLoading={isLoading} />
+    : <TextLink props={{ label: props.name ?? "", size: "sm" }} on={{ press: on?.open }} isLoading={isLoading} />
+
+const RankedMovement = ({ props, isLoading }: RankedUserRowProps) => props.rankDelta !== undefined
+    ? <RankDeltaCaret props={{ delta: props.rankDelta, accessibleLabel: props.movementLabel }} isLoading={isLoading} />
+    : <Text props={{ content: undefined, size: "sm" }} isLoading={isLoading} />
 
 /**
  * Draw one ranked identity with one mutually exclusive movement or follow outcome.
@@ -60,36 +57,15 @@ const contractFor = (verdict?: RankedUserVerdict): ContractKey => {
  * beside it stopped lining up, and a column that does not line up is the one thing a leaderboard
  * cannot afford. The caret is fixed width and the sentence survives as the accessible label.
  */
-export const RankedUserRow = ({ props, on, isLoading = false }: CompositeProps<RankedUserRowData, RankedUserRowActions>) => {
-    const contract = contractFor(props.verdict)
-    const showsMovement = props.rankDelta !== undefined
+export const RankedUserRow = (props: RankedUserRowProps) => {
+    const data = props.props
+    const on = props.on
+    const isLoading = props.isLoading ?? false
     // Movement and follow are no longer rivals for one slot: the leaderboard page shows both, and
     // the dashboard preview shows neither a follow control nor the space one would take.
-    const followLabel = props.followLabel
-    const showsFollow = props.isMe !== true && followLabel !== undefined
-    const name = isLoading || props.isMe === true
-        ? defineLeafComponent("text", {}, () => (
-            <Text
-                props={{
-                    content: props.name,
-                    size: "sm",
-                    weight: "semibold",
-                    tone: props.isMe === true ? "accent" : "default",
-                }}
-                isLoading={isLoading}
-            />
-        ))
-        : defineLeafComponent("text-link", {}, () => (
-            <TextLink props={{ label: props.name ?? "", size: "sm" }} on={{ press: on?.open }} />
-        ))
-    const identity = defineContractComponent("ranked-user-name-over-subtitle", {
-        name,
-        ...((props.subtitle === undefined && !isLoading) ? {} : {
-            subtitle: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                <Text props={{ content: props.subtitle, size: "xs", tone: "muted" }} isLoading={isLoading} />
-            )),
-        }),
-    })
+    const followLabel = data.followLabel
+    const showsFollow = data.isMe !== true && followLabel !== undefined
+    const name = <RankedName props={data} on={on} isLoading={isLoading} />
     /*
      * MOVEMENT IS ALWAYS DRAWN, EVEN WHEN THERE IS NONE.
      *
@@ -98,54 +74,25 @@ export const RankedUserRow = ({ props, on, isLoading = false }: CompositeProps<R
      * which has no movement concept at all, would sit where the caret belongs on the weekly one.
      * An empty text holds the column open; it draws nothing and announces nothing.
      */
-    const movement = showsMovement
-        ? defineLeafComponent("rank-delta-caret", {}, () => (
-            <RankDeltaCaret
-                props={{ delta: props.rankDelta, accessibleLabel: props.movementLabel }}
-                isLoading={isLoading}
-            />
-        ))
-        : isLoading
-            ? defineLeafComponent("badge", {}, () => (
-                <Badge props={{ content: props.movementLabel, tone: "neutral" }} isLoading />
-            ))
-            : defineLeafComponent("text", {}, () => <Text props={{ content: undefined, size: "sm" }} />)
+    const movement = <RankedMovement props={data} isLoading={isLoading} />
     const follow = showsFollow
-        ? defineLeafComponent("button", {}, () => (
-            <Button
-                props={{
-                    label: props.isFollowing === true
-                        ? props.followingLabel ?? ""
-                        : followLabel,
-                    size: "sm",
-                    variant: props.isFollowing === true ? "secondary" : "primary",
-                    isPending: props.isPending,
-                }}
-                on={{ press: on?.follow }}
-                isLoading={isLoading}
-            />
-        ))
+        ? <Button
+            props={{
+                label: data.isFollowing === true
+                    ? data.followingLabel ?? ""
+                    : followLabel,
+                size: "sm",
+                variant: data.isFollowing === true ? "secondary" : "primary",
+                isPending: data.isPending,
+            }}
+            on={{ press: on?.follow }}
+            isLoading={isLoading}
+        />
         : undefined
     return (
-        <Tree contract={contract} render={defineContractComponent(contract, {
-            rank: defineLeafComponent("rank-mark", { placement: "row" }, () => (
-                <RankMark
-                    props={{ rank: props.rank, placement: "row", accessibleLabel: props.rankLabel }}
-                    isLoading={isLoading}
-                />
-            )),
-            avatar: defineLeafComponent("avatar", {}, () => (
-                <Avatar props={{ name: props.name, src: props.avatar ?? undefined, size: "sm" }} isLoading={isLoading} />
-            )),
-            identity,
-            points: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                <Text props={{ content: props.points, size: "xs", tone: "muted" }} isLoading={isLoading} />
-            )),
-            movement,
-            ...(follow === undefined ? {} : { follow }),
-        })} />
+        <div><RankMark
+            props={{ rank: data.rank, placement: "row", accessibleLabel: data.rankLabel }}
+            isLoading={isLoading}
+        /><Avatar props={{ name: data.name, src: data.avatar ?? undefined, size: "sm" }} isLoading={isLoading} /><div>{name}{data.subtitle === undefined && !isLoading ? null : <Text props={{ content: data.subtitle, size: "xs", tone: "muted" }} isLoading={isLoading} />}</div><Text props={{ content: data.points, size: "xs", tone: "muted" }} isLoading={isLoading} />{movement}{follow}</div>
     )
 }
-
-/** Source-level tier marker. */
-export const meta = { shape: "composite", world: "pure" } as const

@@ -6,10 +6,9 @@ import {
     type CoursePriceDetailState,
     type CoursePriceLine,
 } from "@/components/blocks/courses/CoursePriceDetail/component"
-import { defineContractProjection } from "@/components/contracts/props"
 import { useQueryCoursePricePreviewSwr } from "@/hooks"
 import { isPersonalPrice } from "@/modules/utils/course-price"
-import { CoursePriceOverlayBase } from "./component"
+import { CoursePriceOverlayView } from "./component"
 
 /**
  * OVERLAY - `CoursePriceOverlay`, connected half.
@@ -29,7 +28,7 @@ import { CoursePriceOverlayBase } from "./component"
  */
 
 /** Props for {@link CoursePriceOverlay}. */
-export type CoursePriceOverlayConnectedProps = {
+export type CoursePriceOverlayProps = {
     /** The course being priced. Absent while nothing is explaining itself. */
     readonly courseId?: string
     /** Its already-resolved title, so the surface names what it is pricing. */
@@ -50,15 +49,15 @@ const REASON_KEYS: Readonly<Record<string, "reasonEnrolled" | "reasonDiligent" |
 /**
  * Resolve the price story and mount it inside the covering surface.
  *
- * @param input - {@link CoursePriceOverlayConnectedProps}
+ * @param props - {@link CoursePriceOverlayProps}
  */
-export const CoursePriceOverlay = ({ courseId, title, isOpen, onDismiss }: CoursePriceOverlayConnectedProps) => {
+export const CoursePriceOverlay = (props: CoursePriceOverlayProps) => {
     const t = useTranslations("courses.catalog")
     const locale = useLocale()
     // Asked only while the surface is open. Where a card opened it, the card already asked and SWR
     // answers from that entry under the same viewer-scoped key, so opening costs nothing; where
     // nothing asked first, an unopened surface stays idle instead of pre-fetching a reckoning.
-    const preview = useQueryCoursePricePreviewSwr(isOpen ? courseId : undefined)
+    const preview = useQueryCoursePricePreviewSwr(props.isOpen ? props.courseId : undefined)
 
     const money = new Intl.NumberFormat(locale, {
         style: "currency",
@@ -105,24 +104,20 @@ export const CoursePriceOverlay = ({ courseId, title, isOpen, onDismiss }: Cours
             })
 
     return (
-        <CoursePriceOverlayBase
-            isOpen={isOpen}
-            onDismiss={onDismiss}
-            render={defineContractProjection("course-price-detail-stack", () => (
-                <CoursePriceDetailBase
-                    state={state}
-                    props={{
-                        title,
-                        unavailableMessage: t("priceDetailGuest"),
-                        lines,
-                        ...(reason === undefined ? {} : { reason }),
-                        ...(forwardLook === undefined ? {} : { forwardLook }),
-                    }}
-                />
-            ))}
-        />
+        <CoursePriceOverlayView
+            isOpen={props.isOpen}
+            onDismiss={props.onDismiss}
+        >
+            <CoursePriceDetailBase
+                state={state}
+                props={{
+                    title: props.title,
+                    unavailableMessage: t("priceDetailGuest"),
+                    lines,
+                    ...(reason === undefined ? {} : { reason }),
+                    ...(forwardLook === undefined ? {} : { forwardLook }),
+                }}
+            />
+        </CoursePriceOverlayView>
     )
 }
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { world: "connected", domain: "courses" } as const

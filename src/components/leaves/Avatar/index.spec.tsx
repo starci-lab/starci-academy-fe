@@ -8,7 +8,7 @@ afterEach(cleanup)
 describe("Avatar", () => {
     it("derives a local DiceBear fallback from the resolved name", () => {
         const { container } = render(<Avatar props={{ name: "Felix" }} />)
-        const fallback = container.querySelector<HTMLImageElement>("[data-avatar-fallback=\"dicebear-lorelei\"]")
+        const fallback = container.querySelector<HTMLImageElement>("img[alt=\"Felix\"]")
 
         expect(fallback?.src).toContain("data:image/svg+xml")
         expect(fallback?.alt).toBe("Felix")
@@ -18,17 +18,17 @@ describe("Avatar", () => {
     it("keeps the same fallback for the same identity and changes it for another", () => {
         const first = render(<Avatar props={{ name: "Felix" }} />)
         const firstSource = first.container
-            .querySelector<HTMLImageElement>("[data-avatar-fallback=\"dicebear-lorelei\"]")?.src
+            .querySelector<HTMLImageElement>("img[alt=\"Felix\"]")?.src
         first.unmount()
 
         const same = render(<Avatar props={{ name: "Felix" }} />)
         const sameSource = same.container
-            .querySelector<HTMLImageElement>("[data-avatar-fallback=\"dicebear-lorelei\"]")?.src
+            .querySelector<HTMLImageElement>("img[alt=\"Felix\"]")?.src
         same.unmount()
 
         const other = render(<Avatar props={{ name: "Maria" }} />)
         const otherSource = other.container
-            .querySelector<HTMLImageElement>("[data-avatar-fallback=\"dicebear-lorelei\"]")?.src
+            .querySelector<HTMLImageElement>("img[alt=\"Maria\"]")?.src
 
         expect(sameSource).toBe(firstSource)
         expect(otherSource).not.toBe(firstSource)
@@ -38,6 +38,6 @@ describe("Avatar", () => {
         const { container } = render(<Avatar props={{ name: "Felix" }} isLoading />)
 
         expect(container.querySelector("img")).toBeNull()
-        expect(container.querySelector("[data-loading=\"true\"]")).not.toBeNull()
+        expect(container.querySelector("[aria-hidden=\"true\"]")).not.toBeNull()
     })
 })

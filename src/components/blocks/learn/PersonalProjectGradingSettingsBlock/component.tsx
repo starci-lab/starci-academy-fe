@@ -1,9 +1,8 @@
-import { Tree } from "@/components/branches/Tree"
 import { Field } from "@/components/composites/Field"
-import { defineCompositeComponent, defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
 import { Button } from "@/components/leaves/Button"
 import { Select } from "@/components/leaves/Select"
 import { Text } from "@/components/leaves/Text"
+import { personalProjectGradingSettingsClassName } from "./classNames"
 
 /** One language or grading-model choice shown in the settings drawer. */
 export type PersonalProjectGradingSettingsOption = { readonly id: string; readonly label: string; readonly disabled?: boolean }
@@ -16,7 +15,7 @@ export type PersonalProjectGradingSettingsLabels = {
 /** Transport and mutation conditions owned by the settings block. */
 export type PersonalProjectGradingSettingsState = "ready" | "saving" | "saved" | "failed"
 /** Pure settings renderer input. */
-export type PersonalProjectGradingSettingsProps = {
+export type PersonalProjectGradingSettingsBlockProps = {
     readonly state: PersonalProjectGradingSettingsState
     readonly props: {
         readonly labels: PersonalProjectGradingSettingsLabels
@@ -38,18 +37,15 @@ export type PersonalProjectGradingSettingsProps = {
 }
 
 /** Pure settings drawer content; all values and actions arrive from the connected owner. */
-export const PersonalProjectGradingSettingsBlockBase = (input: PersonalProjectGradingSettingsProps) => {
-    const disabled = input.state === "saving"
-    return <Tree contract="personal-project-grading-settings-drawer" render={defineContractComponent("personal-project-grading-settings-drawer", {
-        language: defineLeafComponent("select", {}, () => <Select props={{ id: "personal-project-language", name: "personal-project-language", label: input.props.labels.language, options: input.props.languageOptions, selectedKey: input.props.selectedLanguage, disabled }} on={{ select: input.on?.selectLanguage }} />),
-        model: defineLeafComponent("select", {}, () => <Select props={{ id: "personal-project-model", name: "personal-project-model", label: input.props.labels.model, options: input.props.modelOptions.filter((option) => option.disabled !== true), selectedKey: input.props.selectedModel, disabled }} on={{ select: input.on?.selectModel }} />),
-        branch: defineCompositeComponent("field", {}, () => <Field props={{ id: "personal-project-branch", name: "personal-project-branch", label: input.props.labels.branch, placeholder: input.props.branch ?? input.props.labels.branchPlaceholder, disabled }} on={{ change: input.on?.changeBranch }} />),
-        token: defineCompositeComponent("field", {}, () => <Field props={{ id: "personal-project-token", name: "personal-project-token", label: input.props.labels.token, kind: "newPassword", placeholder: input.props.labels.tokenPlaceholder, disabled, revealLabel: input.props.labels.token, hideLabel: input.props.labels.token }} on={{ change: input.on?.changeToken }} />),
-        ...(input.props.tokenLast4 === undefined ? {} : { tokenFact: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: input.props.labels.tokenStored(input.props.tokenLast4 ?? ""), size: "xs", tone: "muted" }} />) }),
-        ...(input.state === "ready" ? {} : { status: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: input.state === "saved" ? input.props.labels.settingsSaved : input.props.notice, size: "sm", tone: "muted", live: input.state === "failed" ? "assertive" : "polite" }} />) }),
-        action: defineLeafComponent("button", {}, () => <Button props={{ label: input.props.labels.saveSettings, variant: "primary", isPending: disabled }} on={{ press: input.on?.saveSettings }} />),
-    })} />
+export const PersonalProjectGradingSettingsBlockBase = (props: PersonalProjectGradingSettingsBlockProps) => {
+    const disabled = props.state === "saving"
+    return <div className={personalProjectGradingSettingsClassName}>
+        <Select props={{ id: "personal-project-language", name: "personal-project-language", label: props.props.labels.language, options: props.props.languageOptions, selectedKey: props.props.selectedLanguage, disabled }} on={{ select: props.on?.selectLanguage }} />
+        <Select props={{ id: "personal-project-model", name: "personal-project-model", label: props.props.labels.model, options: props.props.modelOptions.filter((option) => option.disabled !== true), selectedKey: props.props.selectedModel, disabled }} on={{ select: props.on?.selectModel }} />
+        <Field props={{ id: "personal-project-branch", name: "personal-project-branch", label: props.props.labels.branch, placeholder: props.props.branch ?? props.props.labels.branchPlaceholder, disabled }} on={{ change: props.on?.changeBranch }} />
+        <Field props={{ id: "personal-project-token", name: "personal-project-token", label: props.props.labels.token, kind: "newPassword", placeholder: props.props.labels.tokenPlaceholder, disabled, revealLabel: props.props.labels.token, hideLabel: props.props.labels.token }} on={{ change: props.on?.changeToken }} />
+        {props.props.tokenLast4 === undefined ? null : <Text props={{ content: props.props.labels.tokenStored(props.props.tokenLast4), size: "xs", tone: "muted" }} />}
+        {props.state === "ready" ? null : <Text props={{ content: props.state === "saved" ? props.props.labels.settingsSaved : props.props.notice, size: "sm", tone: "muted", live: props.state === "failed" ? "assertive" : "polite" }} />}
+        <Button props={{ label: props.props.labels.saveSettings, variant: "primary", isPending: disabled }} on={{ press: props.on?.saveSettings }} />
+    </div>
 }
-
-/** Source-level ownership marker for the pure settings renderer. */
-export const meta = { world: "pure", domain: "learn" } as const

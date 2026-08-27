@@ -1,7 +1,5 @@
-import { Tree } from "@/components/branches/Tree"
 import { SurfaceFormCard } from "@/components/branches/SurfaceFormCard"
 import { AuthenticationPanel } from "@/components/blocks/auth/AuthenticationPanel"
-import { defineContractComponent, defineContractProjection } from "@/components/contracts/props"
 
 /** What the authentication page reports. */
 export type AuthenticationPageActions = {
@@ -19,24 +17,11 @@ export type AuthenticationPageProps = {
  *
  * @param input - {@link AuthenticationPageProps}
  */
-export const AuthenticationPageBase = ({ on }: AuthenticationPageProps) => {
-    const cardContent = defineContractComponent("authentication-panel-card", {
-        panel: defineContractProjection("centred-page-column", () => (
-            <AuthenticationPanel onSignedIn={on?.signedIn} />
-        )),
-    })
-
+export const AuthenticationPageBase = (props: AuthenticationPageProps) => {
+    const { on } = props
     return (
-        <Tree
-            contract="centred-authentication-page"
-            render={defineContractComponent("centred-authentication-page", {
-                surface: defineContractProjection("authentication-panel-card", () => (
-                    <SurfaceFormCard contract="authentication-panel-card" render={cardContent} />
-                )),
-            })}
-        />
+        <SurfaceFormCard>
+            <AuthenticationPanel onSignedIn={on?.signedIn} />
+        </SurfaceFormCard>
     )
 }
-
-/** Source-level tier marker for the authentication page. */
-export const meta = { world: "pure", domain: "auth" } as const

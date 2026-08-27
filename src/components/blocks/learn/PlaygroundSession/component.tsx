@@ -1,4 +1,3 @@
-import { Tree } from "@/components/branches/Tree"
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { Article } from "@/components/branches/Article"
@@ -8,14 +7,20 @@ import { Heading } from "@/components/leaves/Heading"
 import { NavLink } from "@/components/leaves/NavLink"
 import { Progress } from "@/components/leaves/Progress"
 import { Text } from "@/components/leaves/Text"
-import { defineCompositeComponent, defineContractComponent, defineContractProjection, defineLeafComponent } from "@/components/contracts/props"
 import type { PlaygroundStep } from "@/modules/api/graphql/queries/query-playground"
+import {
+    playgroundIdentityClassName,
+    playgroundSessionClassName,
+    playgroundSplitClassName,
+    playgroundStepRailClassName,
+    playgroundTaskClassName,
+} from "./classNames"
 
 /** Live relay states exposed by the pure playground workspace. */
 export type CoursePlaygroundSessionState = "connecting" | "live" | "reconnecting" | "completed" | "failed"
 
 /** Resolved session steps, progress and owner actions. */
-export type PlaygroundSessionBaseProps = {
+export type PlaygroundSessionProps = {
     readonly state: CoursePlaygroundSessionState
     readonly props: {
         readonly title: string
@@ -41,70 +46,33 @@ export type PlaygroundSessionBaseProps = {
 }
 
 /** Draw a live playground whose progress advances only from server `step:verified` events. */
-export const PlaygroundSessionBase = (input: PlaygroundSessionBaseProps) => {
-    const sessionState = input.state
-    const current = input.props.steps[input.props.selectedStepIndex]
+export const PlaygroundSessionBase = (props: PlaygroundSessionProps) => {
+    const sessionState = props.state
+    const current = props.props.steps[props.props.selectedStepIndex]
     const commandHint = current?.commandHint ?? undefined
     const actionHint = current?.actionHint ?? undefined
     const settled = sessionState === "failed" || sessionState === "completed"
-    const progressValue = input.props.steps.length === 0 ? 0 : Math.round((input.props.passedStepIndexes.length / input.props.steps.length) * 100)
-    const notice = settled
-        ? defineCompositeComponent("empty-notice", {}, () => (
-            <EmptyNotice
-                props={{
-                    message: sessionState === "completed" ? input.props.completedTitle : input.props.failedText,
-                    description: sessionState === "completed" ? input.props.completedText : undefined,
-                    actionLabel: sessionState === "failed" ? input.props.retryLabel : undefined,
-                }}
-                on={{ act: input.on.retry }}
-            />
-        ))
-        : undefined
-
-    const identity = defineContractProjection("playground-session-identity", () => (
-        <SurfaceCard
-            contract="playground-session-identity"
-            render={defineContractComponent("playground-session-identity", {
-                leave: defineLeafComponent("button", {}, () => <Button props={{ label: input.props.leaveLabel, variant: "ghost" }} on={{ press: input.on.leave }} />),
-                title: defineLeafComponent("heading", {}, () => <Heading props={{ content: current?.title ?? input.props.title, level: 1 }} />),
-                progress: defineLeafComponent("progress", {}, () => <Progress props={{ label: input.props.title, value: progressValue }} />),
-                connection: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: input.props.connectionText, size: "xs", tone: "muted", live: "polite" }} />),
-            })}
-        />
-    ))
-    const workspace = settled ? undefined : defineContractProjection("playground-session-guided-split", () => (
-        <Tree contract="playground-session-guided-split" render={defineContractComponent("playground-session-guided-split", {
-            steps: defineContractProjection("playground-session-step-rail", () => (
-                <SurfaceCard
-                    contract="playground-session-step-rail"
-                    render={defineContractComponent("playground-session-step-rail", {
-                        step: input.props.steps.map((step, index) => {
-                            const passed = input.props.passedStepIndexes.includes(index)
-                            const available = passed || index <= Math.max(0, input.props.passedStepIndexes.length)
-                            const status = passed ? `${input.props.passedLabel} · ` : ""
-                            return defineLeafComponent("nav-link", { kind: "section" }, () => (
-                                <NavLink props={{ label: `${input.props.stepLabel} ${index + 1} · ${status}${step.title}`, kind: "section", isCurrent: index === input.props.selectedStepIndex }} on={{ press: available ? () => input.on.step(index) : undefined }} />
-                            ))
-                        }),
-                    })}
-                />
-            )),
-            task: defineContractProjection("playground-session-task", () => (
-                <SurfaceCard
-                    contract="playground-session-task"
-                    render={defineContractComponent("playground-session-task", {
-                        body: defineLeafComponent("article", {}, () => <Article props={{ body: current?.body }} />),
-                        ...(commandHint === undefined ? {} : { command: defineLeafComponent("code-block", {}, () => <CodeBlock props={{ code: commandHint }} />) }),
-                        ...(actionHint === undefined ? {} : { hint: defineLeafComponent("text", { size: "sm" }, () => <Text props={{ content: actionHint, size: "sm" }} />) }),
-                        ...(sessionState !== "live" || current === undefined || input.props.passedStepIndexes.includes(input.props.selectedStepIndex) ? {} : { submit: defineLeafComponent("button", {}, () => <Button props={{ label: input.props.submitLabel, variant: "primary" }} on={{ press: input.on.submit }} />) }),
-                    })}
-                />
-            )),
-        })} />
-    ))
-
-    return <Tree contract="course-playground-session-workspace" render={defineContractComponent("course-playground-session-workspace", { identity, workspace, notice })} />
+    const progressValue = props.props.steps.length === 0 ? 0 : Math.round((props.props.passedStepIndexes.length / props.props.steps.length) * 100)
+    return <section className={playgroundSessionClassName}>
+        <SurfaceCard><header className={playgroundIdentityClassName}>
+            <Button props={{ label: props.props.leaveLabel, variant: "ghost" }} on={{ press: props.on.leave }} />
+            <Heading props={{ content: current?.title ?? props.props.title, level: 1 }} />
+            <Progress props={{ label: props.props.title, value: progressValue }} />
+            <Text props={{ content: props.props.connectionText, size: "xs", tone: "muted", live: "polite" }} />
+        </header></SurfaceCard>
+        {settled ? <EmptyNotice props={{ message: sessionState === "completed" ? props.props.completedTitle : props.props.failedText, description: sessionState === "completed" ? props.props.completedText : undefined, actionLabel: sessionState === "failed" ? props.props.retryLabel : undefined }} on={{ act: props.on.retry }} /> : <div className={playgroundSplitClassName}>
+            <SurfaceCard><aside className={playgroundStepRailClassName}>{props.props.steps.map((step, index) => {
+                const passed = props.props.passedStepIndexes.includes(index)
+                const available = passed || index <= Math.max(0, props.props.passedStepIndexes.length)
+                const status = passed ? `${props.props.passedLabel} · ` : ""
+                return <NavLink key={step.id} props={{ label: `${props.props.stepLabel} ${index + 1} · ${status}${step.title}`, kind: "section", isCurrent: index === props.props.selectedStepIndex }} on={{ press: available ? () => props.on.step(index) : undefined }} />
+            })}</aside></SurfaceCard>
+            <SurfaceCard><section className={playgroundTaskClassName}>
+                <Article props={{ body: current?.body }} />
+                {commandHint === undefined ? null : <CodeBlock props={{ code: commandHint }} />}
+                {actionHint === undefined ? null : <Text props={{ content: actionHint, size: "sm" }} />}
+                {sessionState !== "live" || current === undefined || props.props.passedStepIndexes.includes(props.props.selectedStepIndex) ? null : <Button props={{ label: props.props.submitLabel, variant: "primary" }} on={{ press: props.on.submit }} />}
+            </section></SurfaceCard>
+        </div>}
+    </section>
 }
-
-/** Source-level ownership marker. */
-export const meta = { world: "pure", domain: "learn" } as const

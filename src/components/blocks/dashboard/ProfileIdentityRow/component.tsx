@@ -15,18 +15,15 @@ export type ProfileIdentityRowProps =
     }
 
 /** Pure identity anchor; request and route ownership stay in the connected half. */
-export const ProfileIdentityRowBase = (input: ProfileIdentityRowProps) => {
-    if (input.state === "empty") return null
-    if (input.state === "pending") {
+export const ProfileIdentityRowBase = (props: ProfileIdentityRowProps) => {
+    if (props.state === "empty") return null
+    if (props.state === "pending") {
         return <ProfileRow props={{}} isLoading />
     }
     return (
         <ProfileRow
-            props={input.props}
-            on={{ press: input.on.openProfile }}
+            props={props.props}
+            on={{ press: props.on.openProfile }}
         />
     )
 }
-
-/** Source-level tier marker for the pure dashboard identity block. */
-export const meta = { world: "pure", domain: "identity" } as const

@@ -1,8 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { ChallengeAttemptHistoryBase, type ChallengeAttemptHistoryBaseProps } from "./component"
+import { ChallengeAttemptHistoryBase, type ChallengeAttemptHistoryProps } from "./component"
 
-const labels: ChallengeAttemptHistoryBaseProps["labels"] = {
+const labels: ChallengeAttemptHistoryProps["labels"] = {
     summary: (count) => `${count} attempts`,
     attempt: (number, score) => `Attempt ${number}: ${score ?? "pending"}`,
     outcome: { evaluating: "Evaluating", passed: "Passed", needsRevision: "Revise", unavailable: "Unavailable" },

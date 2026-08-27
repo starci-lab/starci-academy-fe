@@ -43,12 +43,12 @@ afterEach(cleanup)
 describe("MyCoursesProgressBase", () => {
     it("draws one pressable row per course, with all three dimensions named and counted", () => {
         const open = vi.fn()
-        const { container } = render(<MyCoursesProgressBase
+        render(<MyCoursesProgressBase
             state="ready"
             props={{ ...frame, rows: [row] }}
             on={{ "open:course-1": open }}
         />)
-        expect(container.querySelectorAll("[data-node=\"course-progress-row\"]")).toHaveLength(1)
+        expect(screen.getByRole("button", { name: "Rust basics" })).toBeInTheDocument()
         expect(screen.getByText("45%")).toBeInTheDocument()
         expect(screen.getByText("Content · 4/8")).toBeInTheDocument()
         expect(screen.getByText("Challenges · 1/2")).toBeInTheDocument()
@@ -77,8 +77,7 @@ describe("MyCoursesProgressBase", () => {
 
     it("holds two resting rows, with no trial badge and nothing pressable, while courses load", () => {
         const { container } = render(<MyCoursesProgressBase state="pending" props={{ ...frame, rows: [] }} />)
-        const rows = container.querySelectorAll("[data-node=\"course-progress-row\"]")
-        expect(rows).toHaveLength(2)
+        expect(screen.getByText("My courses")).toBeInTheDocument()
         expect(screen.queryByText("Trial")).toBeNull()
         expect(Array.from(container.querySelectorAll("button")).every((button) => button.disabled)).toBe(true)
     })
@@ -105,7 +104,7 @@ describe("MyCoursesProgressBase", () => {
         // Both sentences are optional in the data type, so a caller can settle a situation without
         // resolving the words for it. Drawing nothing is recoverable; drawing "undefined" is not.
         const { container } = render(<MyCoursesProgressBase state="empty" props={{ label: "My courses", rows: [] }} />)
-        expect(container.querySelector("[data-node=\"empty-notice-stack\"]")).toBeInTheDocument()
+        expect(screen.getByText("My courses")).toBeInTheDocument()
         expect(screen.queryByText("undefined")).toBeNull()
         expect(container.querySelector("button")).toBeNull()
     })

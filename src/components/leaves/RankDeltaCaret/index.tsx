@@ -1,5 +1,4 @@
-import { skeletonVariants } from "@heroui/react"
-import type { LeafProps } from "@/components/contracts/props"
+import { rankDeltaCaretClassNames, rankDeltaCaretLoadingClassName } from "./classNames"
 
 /**
  * TARGET PATH: src/components/leaves/RankDeltaCaret/index.tsx
@@ -26,7 +25,7 @@ export type RankDeltaCaretData = {
 }
 
 /** Props for {@link RankDeltaCaret}. */
-export type RankDeltaCaretProps = LeafProps<RankDeltaCaretData>
+export type RankDeltaCaretProps = { readonly props: RankDeltaCaretData; readonly isLoading?: boolean }
 
 /** The three movement readings this leaf can draw; internal, so the export surface is unchanged. */
 type RankDeltaDirection = "up" | "down" | "flat"
@@ -41,11 +40,6 @@ type RankDeltaDirection = "up" | "down" | "flat"
  * comparable row to row, and differs only in the tone that carries the sign. This mirrors
  * `PLACEMENT_CLASSES` in the locked `RankMark` leaf, where the same duplication is the point.
  */
-const DIRECTION_CLASSES = {
-    up: "w-9 shrink-0 text-right text-xs font-semibold tabular-nums text-success",
-    down: "w-9 shrink-0 text-right text-xs font-semibold tabular-nums text-danger",
-    flat: "w-9 shrink-0 text-right text-xs font-semibold tabular-nums text-muted",
-} as const
 
 /** The glyph that states the sign; magnitude follows it, and neutral movement carries none. */
 const DIRECTION_GLYPHS = {
@@ -54,8 +48,6 @@ const DIRECTION_GLYPHS = {
     flat: "—",
 } as const
 
-const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" })
-    .base({ className: "h-3 w-9 shrink-0 rounded-sm" })
 
 /**
  * Read one signed movement as a direction.
@@ -69,34 +61,28 @@ const directionOf = (delta: number): RankDeltaDirection => {
 }
 
 /** Draw one signed rank movement. */
-export const RankDeltaCaret = ({ props, isLoading = false }: RankDeltaCaretProps) => {
+export const RankDeltaCaret = (props: RankDeltaCaretProps) => {
+    const isLoading = props.isLoading === true
     if (isLoading) {
         return (
             <span
-                data-tier="leaf"
-                data-component="RankDeltaCaret"
                 data-loading="true"
                 aria-hidden="true"
-                className={RESTING_CLASSES}
+                className={rankDeltaCaretLoadingClassName}
             />
         )
     }
-    const delta = props.delta ?? 0
+    const delta = props.props.delta ?? 0
     const direction = directionOf(delta)
     const magnitude = delta === 0 ? "" : String(Math.abs(delta))
     return (
         <span
-            data-tier="leaf"
-            data-component="RankDeltaCaret"
             data-loading="false"
             data-direction={direction}
-            aria-label={props.accessibleLabel}
-            className={DIRECTION_CLASSES[direction]}
+            aria-label={props.props.accessibleLabel}
+            className={rankDeltaCaretClassNames[direction]}
         >
             {DIRECTION_GLYPHS[direction]}{magnitude}
         </span>
     )
 }
-
-/** Source-level tier marker. */
-export const meta = { shape: "leaf", world: "pure" } as const

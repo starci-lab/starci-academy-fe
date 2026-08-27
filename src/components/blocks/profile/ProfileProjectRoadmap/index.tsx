@@ -8,7 +8,10 @@ import type { ProfileCapstone } from "@/modules/api/graphql/queries/types/profil
 import { ProfileProjectRoadmapBase } from "./component"
 
 /** Resolve the route-selected public capstone and own its state. */
-export const ProfileProjectRoadmap = () => {
+export type ProfileProjectRoadmapProps = Record<never, never>
+/** Load and render the connected project roadmap block. */
+export const ProfileProjectRoadmap = (props: ProfileProjectRoadmapProps) => {
+    void props
     const params = useParams<{ username?: string; courseId?: string }>()
     const router = useRouter()
     const username = String(params.username ?? "")
@@ -19,5 +22,3 @@ export const ProfileProjectRoadmap = () => {
 }
 
 export { ProfileProjectRoadmapBase } from "./component"
-/** Source-level ownership marker for the connected roadmap block. */
-export const meta = { world: "connected", domain: "profile" } as const

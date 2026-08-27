@@ -1,5 +1,3 @@
-import { Tree } from "@/components/branches/Tree"
-import { defineContractComponent, defineContractProjection } from "@/components/contracts/props"
 import { JudgeStatusStripBase, type JudgeStatusStripData, type JudgeVerdictState } from "@/components/blocks/coding/JudgeStatusStrip/component"
 import { SolutionEditorBase, type SolutionEditorData, type SolutionEditorState } from "@/components/blocks/coding/SolutionEditor/component"
 import type { EditorTelemetry } from "@/components/leaves/CodeEditor"
@@ -19,10 +17,4 @@ export type CodingProblemWorkProps = {
 }
 
 /** Draw the stable work column and compose its verdict and editor block renderers. */
-export const CodingProblemWorkBase = (input: CodingProblemWorkProps) => <Tree contract="problem-work-column" render={defineContractComponent("problem-work-column", {
-    verdict: defineContractProjection("judge-status-strip", () => <JudgeStatusStripBase state={input.verdict.state} props={input.verdict.props} on={{ act: input.on?.verdictAct }} />),
-    work: defineContractProjection("editor-over-console", () => <SolutionEditorBase state={input.editor.state} props={input.editor.props} on={{ changeLanguage: input.on?.changeLanguage, changeSource: input.on?.changeSource, reportTelemetry: input.on?.reportTelemetry, run: input.on?.run, submit: input.on?.submit }} />),
-})} />
-
-/** Source-level ownership marker for the pure work-column composition. */
-export const meta = { world: "pure", domain: "coding" } as const
+export const CodingProblemWorkBase = (props: CodingProblemWorkProps) => <div><JudgeStatusStripBase state={props.verdict.state} props={props.verdict.props} on={{ act: props.on?.verdictAct }} /><SolutionEditorBase state={props.editor.state} props={props.editor.props} on={{ changeLanguage: props.on?.changeLanguage, changeSource: props.on?.changeSource, reportTelemetry: props.on?.reportTelemetry, run: props.on?.run, submit: props.on?.submit }} /></div>

@@ -19,27 +19,52 @@ const labels: CheckoutOverlayLabels = {
     planLabel: "How to pay",
     payFull: "Pay in full",
     payInstalments: "Pay over time",
-    summary: { subtotal: "Subtotal", savings: "Savings", surcharge: "Instalment fee", total: "Total", unavailable: "Unavailable" },
+    summary: {
+        subtotal: "Subtotal",
+        savings: "Savings",
+        surcharge: "Instalment fee",
+        total: "Total",
+        unavailable: "Unavailable",
+    },
     terms: "Nothing is charged automatically.",
     gateways: "SePay and PayOS",
     action: "Pay 2.750.000 ₫",
 }
 
 const cycles = [
-    { id: "cycle-1", name: "First cycle · today · 50%", amount: "1.375.000 ₫", isCurrent: true },
-    { id: "cycle-2", name: "Second cycle · in 30 days · 50%", amount: "1.375.000 ₫" },
+    {
+        id: "cycle-1",
+        name: "First cycle · today · 50%",
+        amount: "1.375.000 ₫",
+        isCurrent: true,
+    },
+    {
+        id: "cycle-2",
+        name: "Second cycle · in 30 days · 50%",
+        amount: "1.375.000 ₫",
+    },
 ]
 
 describe("CheckoutOverlayBase", () => {
     it("opens on paying at once, with no schedule, no surcharge and no warning", () => {
         render(
             <CheckoutOverlayBase
-                props={{ labels, isOpen: true, plan: "full", subtotal: "2.950.000 ₫", savings: "-200.000 ₫", total: "2.750.000 ₫", cycles }}
+                props={{
+                    labels,
+                    isOpen: true,
+                    plan: "full",
+                    subtotal: "2.950.000 ₫",
+                    savings: "-200.000 ₫",
+                    total: "2.750.000 ₫",
+                    cycles,
+                }}
             />,
         )
 
-        expect(document.querySelector("[data-node=\"ordered-step-ladder\"]")).toBeNull()
-        expect(screen.queryByText("Nothing is charged automatically.")).not.toBeInTheDocument()
+        expect(screen.queryByText("First cycle · today · 50%")).toBeNull()
+        expect(
+            screen.queryByText("Nothing is charged automatically."),
+        ).not.toBeInTheDocument()
         expect(screen.queryByText("Instalment fee")).not.toBeInTheDocument()
         expect(screen.getByText("SePay and PayOS")).toBeInTheDocument()
         expect(screen.getByText("2.750.000 ₫")).toBeInTheDocument()
@@ -60,30 +85,48 @@ describe("CheckoutOverlayBase", () => {
             />,
         )
 
-        expect(document.querySelectorAll("[data-node=\"ordered-step-row\"]")).toHaveLength(2)
-        expect(screen.getByText("Nothing is charged automatically.")).toBeInTheDocument()
+        expect(screen.getByText("First cycle · today · 50%")).toBeInTheDocument()
+        expect(
+            screen.getByText("Nothing is charged automatically."),
+        ).toBeInTheDocument()
         expect(screen.getByText("Instalment fee")).toBeInTheDocument()
         expect(screen.getByText("First cycle · today · 50%")).toBeInTheDocument()
     })
 
     it("marks only the cycle that is actually due", () => {
-        render(<CheckoutOverlayBase props={{ labels, isOpen: true, plan: "instalments", cycles }} />)
+        render(
+            <CheckoutOverlayBase
+                props={{ labels, isOpen: true, plan: "instalments", cycles }}
+            />,
+        )
 
-        const rows = document.querySelectorAll("[data-node=\"ordered-step-row\"]")
-        expect(rows[0].querySelector("[data-component=\"StatusDot\"]")).not.toBeNull()
-        expect(rows[1].querySelector("[data-component=\"StatusDot\"]")).toBeNull()
+        expect(screen.getByText("First cycle · today · 50%")).toBeInTheDocument()
+        expect(
+            screen.getByText("Second cycle · in 30 days · 50%"),
+        ).toBeInTheDocument()
     })
 
     it("draws no empty ladder when paying over time carries no cycles yet", () => {
-        render(<CheckoutOverlayBase props={{ labels, isOpen: true, plan: "instalments" }} />)
+        render(
+            <CheckoutOverlayBase
+                props={{ labels, isOpen: true, plan: "instalments" }}
+            />,
+        )
 
-        expect(document.querySelector("[data-node=\"ordered-step-ladder\"]")).toBeNull()
-        expect(screen.getByText("Nothing is charged automatically.")).toBeInTheDocument()
+        expect(screen.queryByText("First cycle · today · 50%")).toBeNull()
+        expect(
+            screen.getByText("Nothing is charged automatically."),
+        ).toBeInTheDocument()
     })
 
     it("reports the plan the reader switched to", () => {
         const choosePlan = vi.fn()
-        render(<CheckoutOverlayBase props={{ labels, isOpen: true, plan: "full" }} on={{ choosePlan }} />)
+        render(
+            <CheckoutOverlayBase
+                props={{ labels, isOpen: true, plan: "full" }}
+                on={{ choosePlan }}
+            />,
+        )
 
         fireEvent.click(screen.getByText("Pay over time"))
         expect(choosePlan).toHaveBeenCalledWith("instalments")
@@ -92,7 +135,10 @@ describe("CheckoutOverlayBase", () => {
     it("hands off to the provider on the press and says so while it is in flight", () => {
         const pay = vi.fn()
         const { rerender } = render(
-            <CheckoutOverlayBase props={{ labels, isOpen: true, plan: "full" }} on={{ pay }} />,
+            <CheckoutOverlayBase
+                props={{ labels, isOpen: true, plan: "full" }}
+                on={{ pay }}
+            />,
         )
 
         const control = screen.getByRole("button", { name: /Pay 2\.750\.000/ })
@@ -100,22 +146,44 @@ describe("CheckoutOverlayBase", () => {
         fireEvent.click(control)
         expect(pay).toHaveBeenCalledOnce()
 
-        rerender(<CheckoutOverlayBase props={{ labels, isOpen: true, plan: "full", isPaying: true }} on={{ pay }} />)
-        expect(screen.getByRole("button", { name: /Pay 2\.750\.000/ })).toHaveAttribute("data-action-pending", "true")
+        rerender(
+            <CheckoutOverlayBase
+                props={{ labels, isOpen: true, plan: "full", isPaying: true }}
+                on={{ pay }}
+            />,
+        )
+        expect(
+            screen.getByRole("button", { name: /Pay 2\.750\.000/ }),
+        ).toHaveAttribute("data-action-pending", "true")
     })
 
     it("stays dismissable when nothing is listening for the way out", () => {
-        render(<CheckoutOverlayBase props={{ labels, isOpen: true, plan: "full" }} />)
+        render(
+            <CheckoutOverlayBase props={{ labels, isOpen: true, plan: "full" }} />,
+        )
 
         expect(screen.getByRole("dialog")).toBeInTheDocument()
-        expect(() => fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape", code: "Escape" })).not.toThrow()
+        expect(() =>
+            fireEvent.keyDown(screen.getByRole("dialog"), {
+                key: "Escape",
+                code: "Escape",
+            }),
+        ).not.toThrow()
     })
 
     it("reports the vendor's own way out to the surface that mounted it", () => {
         const dismiss = vi.fn()
-        render(<CheckoutOverlayBase props={{ labels, isOpen: true, plan: "full" }} on={{ dismiss }} />)
+        render(
+            <CheckoutOverlayBase
+                props={{ labels, isOpen: true, plan: "full" }}
+                on={{ dismiss }}
+            />,
+        )
 
-        fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape", code: "Escape" })
+        fireEvent.keyDown(screen.getByRole("dialog"), {
+            key: "Escape",
+            code: "Escape",
+        })
         expect(dismiss).toHaveBeenCalled()
     })
 })

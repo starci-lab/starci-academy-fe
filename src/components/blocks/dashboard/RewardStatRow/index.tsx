@@ -10,7 +10,11 @@ import { RewardStatRowBase } from "./component"
  * ONE REQUEST, ONE SETTLING UNIT. See {@link StreakStatRow} for why the rail is three blocks and
  * not one, and why none of them carries a `state`.
  */
-export const RewardStatRow = () => {
+/** Props for the connected reward stat row. */
+export type RewardStatRowProps = Record<string, never>
+/** Connect the RewardStatRow block to its data source. */
+export const RewardStatRow = (props: RewardStatRowProps) => {
+    void props
     const t = useTranslations("identity")
     const wallet = useQueryMyRewardWalletSwr()
 
@@ -21,6 +25,3 @@ export const RewardStatRow = () => {
 
     return <RewardStatRowBase state="settled" props={{ label: t("rewardPoints"), value: t("points", { balance: wallet.data.balance ?? 0 }) }} />
 }
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { world: "connected", domain: "identity" } as const

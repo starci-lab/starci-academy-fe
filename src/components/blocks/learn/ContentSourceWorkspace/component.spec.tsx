@@ -37,7 +37,7 @@ const props: ContentSourceWorkspaceData = {
 describe("ContentSourceWorkspace", () => {
     it("keeps pending source separate from the article state", () => {
         const { container } = render(<ContentSourceWorkspace state="pending" props={props} />)
-        expect(container.querySelector("[data-node=source-workspace-root]")).toBeTruthy()
+        expect(container.querySelectorAll("[data-loading=\"true\"]").length).toBeGreaterThan(0)
         expect(screen.queryByRole("button", { name: "Editor" })).not.toBeInTheDocument()
     })
 

@@ -8,4 +8,3 @@ export const CourseHeadhuntingsPage = (props: CourseHeadhuntingsPageProps) => (
 )
 
 /** Ownership metadata for the route entry. */
-export const meta = { world: "connected", domain: "learn" } as const

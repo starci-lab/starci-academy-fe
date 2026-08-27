@@ -8,6 +8,6 @@ import { CartPage } from "@/components/pages/CartPage"
  */
 export const dynamic = "force-dynamic"
 
-const Route = () => <CartPage />
+const Route = () => <CartPage {...{}} />
 
 export default Route

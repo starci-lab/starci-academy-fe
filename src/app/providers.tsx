@@ -43,9 +43,9 @@ export interface AppProvidersProps {
  *
  * @param props - {@link AppProvidersProps}
  */
-export const AppProviders = ({ locale, messages, children }: AppProvidersProps) => (
-    <NextIntlClientProvider locale={locale} messages={messages}>
-        <I18nProvider locale={locale}>
+export const AppProviders = (props: AppProvidersProps) => (
+    <NextIntlClientProvider locale={props.locale} messages={props.messages}>
+        <I18nProvider locale={props.locale}>
             {/*
               * `class` rather than the `data-theme` attribute because the vendor's own stylesheet
               * keys off `.dark`; the token layer answers to both, so the narrower choice is the
@@ -53,7 +53,7 @@ export const AppProviders = ({ locale, messages, children }: AppProvidersProps) 
               * reader who has told their OS which they want has already answered the question.
               */}
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-                {children}
+                {props.children}
             </ThemeProvider>
         </I18nProvider>
     </NextIntlClientProvider>

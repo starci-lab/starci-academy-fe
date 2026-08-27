@@ -2,7 +2,7 @@
 
 import { Tabs } from "@heroui/react"
 import { Icon, type IconName } from "@/components/leaves/Icon"
-import type { LeafProps } from "@/components/contracts/props"
+import { choiceTabContentClassName, getChoiceTabClassName } from "./classNames"
 
 /** One peer choice, optionally led by a glyph naming the shape it selects. */
 export type ChoiceTabData = {
@@ -33,7 +33,7 @@ export type ChoiceTabsData = {
 /** Selection reported by the peer-choice control. */
 export type ChoiceTabsActions = { readonly select?: (key: string) => void }
 /** Props for the peer-choice control. */
-export type ChoiceTabsProps = LeafProps<ChoiceTabsData, ChoiceTabsActions>
+export type ChoiceTabsProps = { readonly props: ChoiceTabsData; readonly on?: ChoiceTabsActions; readonly isLoading?: boolean }
 
 /**
  * Why the segmented pill is PAINTED rather than animated.
@@ -52,36 +52,36 @@ export type ChoiceTabsProps = LeafProps<ChoiceTabsData, ChoiceTabsActions>
  * regions, as ShellNav does, and leaving it alone keeps one implementation rather than two that
  * can disagree.
  */
-const PRIMARY_TAB_CLASSES = "whitespace-nowrap rounded-full aria-selected:bg-surface aria-selected:shadow-surface"
 
 /** The underline variant keeps the vendor's mechanics, so its tab only refuses to wrap. */
-const SECONDARY_TAB_CLASSES = "whitespace-nowrap"
 
 /** Text-only peer choices, except where a glyph names the SHAPE being chosen. Business categories do not gain decorative glyphs. */
-export const ChoiceTabs = ({ props, on }: ChoiceTabsProps) => {
-    const variant = props.variant ?? "secondary"
+export const ChoiceTabs = (props: ChoiceTabsProps) => {
+    const data = props.props
+    const on = props.on
+    const variant = data.variant ?? "secondary"
     return (
         <Tabs
             variant={variant}
-            selectedKey={props.selectedKey}
+            selectedKey={data.selectedKey}
             onSelectionChange={(key) => on?.select?.(String(key))}
             data-variant={variant}
         >
             <Tabs.ListContainer>
-                <Tabs.List aria-label={props.label}>
-                    {props.tabs.map((tab) => (
+                <Tabs.List aria-label={data.label}>
+                    {data.tabs.map((tab) => (
                     // `whitespace-nowrap` because the vendor gives every segment an equal, fixed
                     // width and leaves wrapping on: a two-word label breaks onto a second line
                     // inside its own pill while the row around it still has hundreds of pixels
                     // spare. A label is one line; the leaf owns that, not its callers.
-                        <Tabs.Tab key={tab.id} id={tab.id} className={variant === "primary" ? PRIMARY_TAB_CLASSES : SECONDARY_TAB_CLASSES}>
+                        <Tabs.Tab key={tab.id} id={tab.id} className={getChoiceTabClassName(variant)}>
                             {/*
                           * The glyph and the words it belongs to are ONE line, held together by the
                           * one gap a leaf is allowed to keep. Left as siblings of the tab's own
                           * flex, the vendor spaced them by its own rules and the icon touched the
                           * first letter.
                           */}
-                            <span className="inline-flex items-center gap-2">
+                            <span className={choiceTabContentClassName}>
                                 {tab.icon === undefined ? null : <Icon props={{ name: tab.icon, role: "leading" }} />}
                                 {tab.label}
                             </span>
@@ -93,6 +93,3 @@ export const ChoiceTabs = ({ props, on }: ChoiceTabsProps) => {
         </Tabs>
     )
 }
-
-/** Source-level tier marker for the intrinsic peer-choice control. */
-export const meta = { shape: "leaf", world: "pure" } as const

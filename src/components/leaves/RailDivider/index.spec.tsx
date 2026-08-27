@@ -18,7 +18,7 @@ describe("RailDivider", () => {
         const separator = screen.getByRole("separator", { name: props.label })
 
         expect(separator).toHaveClass("w-2", "md:h-app-rail")
-        expect(separator.querySelector("[data-component=RailDividerHandle]")).toBeTruthy()
+        expect(separator.firstElementChild).toBeTruthy()
         fireEvent.keyDown(separator, { key: "ArrowRight" })
 
         expect(separator).toHaveAttribute("aria-valuenow", "336")

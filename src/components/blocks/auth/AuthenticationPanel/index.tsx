@@ -49,7 +49,7 @@ const toExpiry = (t: Translate, expiresInSeconds?: number): string => {
  * @param panel - What the machine reports.
  */
 /** What the authentication machine reports about the attempt in flight. */
-type AuthPanelStatusInput = {
+type AuthPanelStatusView = {
     readonly isResending: boolean
     readonly isPending: boolean
     readonly step: string
@@ -60,7 +60,7 @@ type AuthPanelStatusInput = {
 /** One sentence about the attempt, and whether that sentence is a refusal. */
 type AuthPanelStatus = { readonly message: string, readonly isError: boolean }
 
-const toStatus = (t: Translate, panel: AuthPanelStatusInput): AuthPanelStatus => {
+const toStatus = (t: Translate, panel: AuthPanelStatusView): AuthPanelStatus => {
     if (panel.failure) {
         // The transport case deliberately does NOT say the details or the code were wrong, because
         // nobody knows that - the request never got an answer.
@@ -79,7 +79,7 @@ const toStatus = (t: Translate, panel: AuthPanelStatusInput): AuthPanelStatus =>
 }
 
 /** Props for {@link AuthenticationPanel}. */
-export type AuthenticationPanelConnectedProps = {
+export type AuthenticationPanelProps = {
     /** Journey selected by the control that opened this panel. */
     readonly initialMode?: AuthMode
     /** Called once the access token is stored, so a surface can close or route away. */
@@ -89,9 +89,10 @@ export type AuthenticationPanelConnectedProps = {
 /**
  * Run the panel and render it.
  *
- * @param input - {@link AuthenticationPanelConnectedProps}
+ * @param props - {@link AuthenticationPanelProps}
  */
-export const AuthenticationPanel = ({ initialMode = "signIn", onSignedIn }: AuthenticationPanelConnectedProps = {}) => {
+export const AuthenticationPanel = (props: AuthenticationPanelProps = {}) => {
+    const { initialMode = "signIn", onSignedIn } = props
     const t = useTranslations("auth")
     const locale = useLocale()
     const router = useRouter()
@@ -189,6 +190,3 @@ export const AuthenticationPanel = ({ initialMode = "signIn", onSignedIn }: Auth
         />
     )
 }
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { world: "connected", domain: "auth" } as const

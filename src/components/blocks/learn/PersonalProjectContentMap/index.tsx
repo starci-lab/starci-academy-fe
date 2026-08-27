@@ -23,7 +23,11 @@ const filterProjectMilestones = (
 }
 
 /** Own the roadmap query, local filtering and task routing for the project rail. */
-export const PersonalProjectContentMap = () => {
+/** Props for the connected personal-project content map. */
+export type PersonalProjectContentMapProps = Record<never, never>
+/** Own the roadmap query, local filtering and task routing for the project rail. */
+export const PersonalProjectContentMap = (props: PersonalProjectContentMapProps) => {
+    void props
     const { displayId } = useParams<{ readonly displayId: string }>()
     const t = useTranslations("learn.project")
     const pathname = usePathname()
@@ -118,6 +122,3 @@ export const PersonalProjectContentMap = () => {
 }
 
 export * from "./component"
-
-/** Source-level ownership marker for the connected roadmap component. */
-export const meta = { world: "connected", domain: "learn" } as const

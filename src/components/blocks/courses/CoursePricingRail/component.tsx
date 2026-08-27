@@ -1,5 +1,4 @@
 "use client"
-
 import { useState } from "react"
 import { ScrollViewport } from "@/components/branches/ScrollViewport"
 import { Badge } from "@/components/leaves/Badge"
@@ -11,326 +10,44 @@ import { Text } from "@/components/leaves/Text"
 import { TextLink } from "@/components/leaves/TextLink"
 import { CoursePriceOverlay } from "@/components/overlays/courses/CoursePriceOverlay"
 import { CourseMobileEnrollBarBase } from "../CourseMobileEnrollBar/component"
-import {
-    defineCompositeComponent,
-    defineContractComponent,
-    defineContractProjection,
-    defineLeafComponent,
-} from "@/components/contracts/props"
 
-/**
- * BLOCK - `CoursePricingRail`: the one place this page asks for money.
- *
- * Target path: `src/components/blocks/courses/CoursePricingRail/component.tsx`.
- *
- * THE HERO CARRIES NO PRICE, and that is the selected direction's whole shape rather than an
- * oversight. The named render puts every commerce fact here - artwork, the payable price, one
- * discount, one scarcity line, the phase ladder, one action, and the enrolment proof - so a reader
- * never has to decide which of two buy boxes is authoritative.
- *
- * IT IS AN `aside`, WHICH IS THIS REVISION'S POINT. The entry says so, not this file. Complementary
- * to the narrative and announced as such, so a reader navigating by region can reach the price
- * without reading the curriculum and can skip it without losing their place in it.
- *
- * THE LADDER IS ONE CONTROL, NOT THREE FACTS. The open phase is the price; the phases below it are
- * what waiting costs. The entry makes it an `ol` for the same reason.
- *
- * THE PRICE RESTS ALONE WHILE IT IS PENDING. The legacy rail skeletons its headline rather than
- * showing the phase price and swapping it for the viewer's loyalty price a moment later, because
- * that swap is a number changing under a reader who was already deciding.
- *
- * WHY THE PRICE IS `sm` AND THE DISCOUNT IS A BADGE. `price-discount-line` is LOCKED, and it
- * declares exactly that: `price` at `size: "sm"` with `weight: "semibold"`, `original` at `xs` with
- * `tone: "muted"`, and `discount` as a **badge**. Revision 1.3 drew the price at `md` and the
- * discount as accent-toned text, which the candidate's own shim allowed because it never checked a
- * slot's declared props. Reusing a locked key means accepting what it already says - the alternative
- * is a new key, and a course page that quietly redefines the shared price line is how two pages stop
- * showing prices the same way.
- */
+/** One phase in the pricing ladder. */
+export type PricingPhase = { readonly id: string; readonly name: string; readonly value: string; readonly isActive?: boolean }
+/** Copy for switching between purchase and trial. */
+export type CoursePricingRailIntentCopy = { readonly intentTabsLabel: string; readonly purchaseModeLabel: string; readonly trialModeLabel: string; readonly purchaseTitle: string; readonly purchaseDescription: string; readonly trialTitle: string; readonly trialDescription: string; readonly phaseDisclosureLabel: string }
+/** Resolved pricing rail content. */
+export type CoursePricingRailData = { readonly intent?: CoursePricingRailIntentCopy; readonly coverUrl?: string | null; readonly title: string; readonly price?: string; readonly originalPrice?: string; readonly discountLabel?: string; readonly savingsLabel?: string; readonly priceDetailLabel?: string; readonly scarcityLabel?: string; readonly phases?: ReadonlyArray<PricingPhase>; readonly ctaLabel: string; readonly trialLabel?: string; readonly cartLabel?: string; readonly isInCart?: boolean; readonly enrolmentLabel?: string }
+/** Actions emitted by the pricing rail. */
+export type CoursePricingRailActions = { readonly act?: () => void; readonly trial?: () => void; readonly addToCart?: () => void; readonly openPriceDetail?: () => void }
+/** Traditional props for the pricing rail. */
+export type CoursePricingRailProps = { readonly state: "ready" | "price-pending" | "adding" | "trialing" | "checking-out"; readonly props: CoursePricingRailData; readonly on?: CoursePricingRailActions; readonly priceOverlay?: { readonly courseId: string; readonly title: string; readonly isOpen: boolean; readonly onDismiss: () => void }; readonly surface?: "rail" | "mobile" }
+/** State values used by the connected pricing rail. */
+export type CoursePricingRailState = CoursePricingRailProps["state"]
 
-/** One phase in the ladder. */
-export type PricingPhase = {
-    /** Stable identity. */
-    readonly id: string
-    /** The already-resolved phase name. */
-    readonly name: string
-    /** The already-resolved trailing value - a price, or the word for an open phase. */
-    readonly value: string
-    /** Whether this is the phase currently on sale. */
-    readonly isActive?: boolean
+/** Draw the responsive pricing and enrolment controls. */
+export const CoursePricingRailBase = (props: CoursePricingRailProps) => {
+    const [intent, setIntent] = useState<"purchase" | "trial">("purchase")
+    const pending = props.state === "price-pending"
+    const data = props.props
+    if (props.surface === "mobile") return <CourseMobileEnrollBarBase state={pending ? "price-pending" : "ready"} props={{ price: data.price, originalPrice: data.originalPrice, ctaLabel: data.ctaLabel }} on={{ act: props.on?.act }} />
+    const phases = data.phases ?? []
+    const canTrial = data.intent !== undefined && data.trialLabel !== undefined
+    const visible = canTrial ? intent : "purchase"
+    return <>
+        <ScrollViewport boundary="pricing-rail"><div>
+            <CoverImage props={{ src: data.coverUrl ?? null, alt: data.title, ratio: "wide" }} />
+            {phases.find((phase) => phase.isActive) && <Badge props={{ content: phases.find((phase) => phase.isActive)?.name, tone: "accent" }} />}
+            <div><Text props={{ content: data.price, size: "sm", weight: "semibold" }} isLoading={pending} />{data.originalPrice === undefined || pending ? null : <Text props={{ content: data.originalPrice, size: "xs", tone: "muted", isSuperseded: true }} />}{data.discountLabel === undefined || pending ? null : <Badge props={{ content: data.discountLabel, tone: "success" }} />}</div>
+            {data.priceDetailLabel === undefined || pending ? null : <div>{data.savingsLabel && <Text props={{ content: data.savingsLabel, size: "xs", tone: "muted" }} />}<TextLink props={{ label: data.priceDetailLabel, size: "xs" }} on={{ press: props.on?.openPriceDetail }} /></div>}
+            {canTrial && <ChoiceTabs props={{ label: data.intent.intentTabsLabel, selectedKey: visible, variant: "primary", tabs: [{ id: "purchase", label: data.intent.purchaseModeLabel }, { id: "trial", label: data.intent.trialModeLabel }] }} on={{ select: (key) => { if (key === "purchase" || key === "trial") setIntent(key) } }} />}
+            {visible === "purchase" ? <div>{data.intent && <><Text props={{ content: data.intent.purchaseTitle, size: "sm", weight: "medium" }} /><Text props={{ content: data.intent.purchaseDescription, size: "sm" }} /></>}<div><Button props={{ label: data.ctaLabel, variant: "primary", size: "md", icon: "next", iconPlacement: "trailing", isPending: props.state === "checking-out" }} on={{ press: props.on?.act }} />{data.cartLabel && <Button props={{ label: data.cartLabel, variant: "secondary", size: "md", isPending: props.state === "adding", disabled: data.isInCart }} on={{ press: props.on?.addToCart }} />}</div></div> : <div><Text props={{ content: data.intent?.trialTitle ?? data.trialLabel, size: "sm", weight: "medium" }} />{data.intent && <Text props={{ content: data.intent.trialDescription, size: "sm" }} />}<Button props={{ label: data.trialLabel!, variant: "tertiary", size: "md", isPending: props.state === "trialing" }} on={{ press: props.on?.trial }} /></div>}
+            {data.scarcityLabel && <Badge props={{ content: data.scarcityLabel, tone: "warning" }} />}
+            {phases.length > 0 && <PricingPhaseDisclosure props={{ label: data.intent?.phaseDisclosureLabel ?? data.title, phases }} />}
+            {data.enrolmentLabel && <Text props={{ content: data.enrolmentLabel, size: "xs" }} />}
+        </div></ScrollViewport>
+        {props.priceOverlay && <CoursePriceOverlay {...props.priceOverlay} />}
+    </>
 }
 
-/** Localized framing that separates buying from exploring. */
-export type CoursePricingRailIntentCopy = {
-    readonly intentTabsLabel: string
-    readonly purchaseModeLabel: string
-    readonly trialModeLabel: string
-    readonly purchaseTitle: string
-    readonly purchaseDescription: string
-    readonly trialTitle: string
-    readonly trialDescription: string
-    readonly phaseDisclosureLabel: string
-}
-
-/** What the rail draws. */
-export type CoursePricingRailData = {
-    /** Resolved copy for the two decision intents and phase disclosure. */
-    readonly intent?: CoursePricingRailIntentCopy
-    /** Artwork source; `null` draws the leaf's token fallback. */
-    readonly coverUrl?: string | null
-    /** The course title, used as the artwork's alternative text. */
-    readonly title: string
-    /** The already-formatted payable price. Absent while the viewer's price is still pending. */
-    readonly price?: string
-    /** The already-formatted list price. */
-    readonly originalPrice?: string
-    /** The already-formatted discount. */
-    readonly discountLabel?: string
-    /** The already-formatted savings sentence. */
-    readonly savingsLabel?: string
-    /** Opens the server-owned price breakdown. */
-    readonly priceDetailLabel?: string
-    /** One scarcity line, e.g. remaining slots in the open phase. */
-    readonly scarcityLabel?: string
-    /** The ladder. An empty run renders no ladder at all. */
-    readonly phases?: ReadonlyArray<PricingPhase>
-    /** The already-resolved action label. */
-    readonly ctaLabel: string
-    /** The already-resolved trial action label. Absent hides the trial action. */
-    readonly trialLabel?: string
-    /** The already-resolved cart action label. Absent hides the cart action. */
-    readonly cartLabel?: string
-    /** Whether this course is already in the viewer's cart. */
-    readonly isInCart?: boolean
-    /** The already-formatted enrolment proof sentence. */
-    readonly enrolmentLabel?: string
-}
-
-/** What the rail reports. */
-export type CoursePricingRailActions = {
-    /** Continue learning or enter checkout. */
-    readonly act?: () => void
-    /** Open the course's previewable learning path. */
-    readonly trial?: () => void
-    /** Add this course to, or remove it from, the cart. */
-    readonly addToCart?: () => void
-    /** Explain list, phase, loyalty and payable price in a modal. */
-    readonly openPriceDetail?: () => void
-}
-
-/** The situations the rail can be in. */
-export type CoursePricingRailState = "ready" | "price-pending" | "adding" | "trialing" | "checking-out"
-
-/** Props for {@link CoursePricingRailBase}. */
-export type CoursePricingRailProps = {
-    /** The business situation, which picks the tree. */
-    readonly state: CoursePricingRailState
-    /** What that tree says. */
-    readonly props: CoursePricingRailData
-    /** What the rail reports. */
-    readonly on?: CoursePricingRailActions
-    /** Optional connected price explanation projected beside the rail. */
-    readonly priceOverlay?: { readonly courseId: string; readonly title: string; readonly isOpen: boolean; readonly onDismiss: () => void }
-    /** Which responsive projection should be drawn by this commerce owner. */
-    readonly surface?: "rail" | "mobile"
-}
-
-/**
- * Draw the buy box.
- *
- * @param input - {@link CoursePricingRailProps}
- */
-export const CoursePricingRailBase = (input: CoursePricingRailProps) => {
-    const [selectedIntent, setSelectedIntent] = useState<"purchase" | "trial">("purchase")
-    const cartLabel = input.props.cartLabel
-    const trialLabel = input.props.trialLabel
-    const intent = input.props.intent
-    const priceDetailLabel = input.props.priceDetailLabel
-    const isPricePending = input.state === "price-pending"
-    const isAdding = input.state === "adding"
-    const isTrialing = input.state === "trialing"
-    const isCheckingOut = input.state === "checking-out"
-    const phases = input.props.phases ?? []
-    if (input.surface === "mobile") return <CourseMobileEnrollBarBase state={isPricePending ? "price-pending" : "ready"} props={{ price: input.props.price, originalPrice: input.props.originalPrice, ctaLabel: input.props.ctaLabel }} on={{ act: input.on?.act }} />
-    const activePhase = phases.find((phase) => phase.isActive === true)
-    const hasIntentSwitch = trialLabel !== undefined && intent !== undefined
-    const visibleIntent = hasIntentSwitch ? selectedIntent : "purchase"
-
-    const priceLine = defineContractComponent("price-discount-line", {
-        price: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
-            <Text props={{ content: input.props.price, size: "sm", weight: "semibold" }} isLoading={isPricePending} />
-        )),
-        original: input.props.originalPrice === undefined || isPricePending
-            ? undefined
-            : defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                <Text props={{ content: input.props.originalPrice, size: "xs", tone: "muted", isSuperseded: true }} />
-            )),
-        discount: input.props.discountLabel === undefined || isPricePending
-            ? undefined
-            : defineLeafComponent("badge", {}, () => (
-                <Badge props={{ content: input.props.discountLabel, tone: "success" }} />
-            )),
-    })
-
-    const pricePrimary = defineContractComponent("course-price-primary-group", {
-        line: priceLine,
-        note: priceDetailLabel === undefined || isPricePending
-            ? undefined
-            : defineContractComponent("price-note-row", {
-                fact: input.props.savingsLabel === undefined
-                    ? undefined
-                    : defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                        <Text props={{ content: input.props.savingsLabel, size: "xs", tone: "muted" }} />
-                    )),
-                action: defineLeafComponent("text-link", { size: "xs" }, () => (
-                    <TextLink
-                        props={{ label: priceDetailLabel, size: "xs" }}
-                        on={{ press: input.on?.openPriceDetail }}
-                    />
-                )),
-            }),
-    })
-
-    const priceBlock = defineContractComponent("course-price-block", {
-        primary: pricePrimary,
-        scarcity: input.props.scarcityLabel === undefined
-            ? undefined
-            : defineLeafComponent("badge", {}, () => (
-                <Badge props={{ content: input.props.scarcityLabel, tone: "warning" }} />
-            )),
-    })
-
-    return (
-        <>
-            <ScrollViewport
-                boundary="pricing-rail"
-                render={defineContractComponent("course-pricing-rail", {
-                    cover: defineLeafComponent("cover-image", {}, () => (
-                        <CoverImage props={{ src: input.props.coverUrl ?? null, alt: input.props.title, ratio: "wide" }} />
-                    )),
-                    phase: activePhase === undefined
-                        ? undefined
-                        : defineLeafComponent("badge", {}, () => (
-                            <Badge props={{ content: activePhase.name, tone: "accent" }} />
-                        )),
-                    price: priceBlock,
-                    selector: hasIntentSwitch
-                        ? defineLeafComponent("choice-tabs", {}, () => (
-                            <ChoiceTabs
-                                props={{
-                                    label: intent.intentTabsLabel,
-                                    selectedKey: visibleIntent,
-                                    variant: "primary",
-                                    tabs: [
-                                        { id: "purchase", label: intent.purchaseModeLabel },
-                                        { id: "trial", label: intent.trialModeLabel },
-                                    ],
-                                }}
-                                on={{
-                                    select: (key) => {
-                                        if (key === "purchase" || key === "trial") setSelectedIntent(key)
-                                    },
-                                }}
-                            />
-                        ))
-                        : undefined,
-                    purchase: visibleIntent === "purchase"
-                        ? defineContractComponent("course-pricing-purchase-intent", {
-                            copy: input.props.intent === undefined
-                                ? undefined
-                                : defineContractComponent("course-pricing-purchase-copy", {
-                                    heading: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
-                                        <Text props={{ content: input.props.intent?.purchaseTitle, size: "sm", weight: "medium" }} />
-                                    )),
-                                    description: defineLeafComponent("text", { size: "sm" }, () => (
-                                        <Text props={{ content: input.props.intent?.purchaseDescription, size: "sm" }} />
-                                    )),
-                                }),
-                            actions: defineContractComponent("course-pricing-purchase-actions", {
-                                primary: defineLeafComponent("button", {}, () => (
-                                    <Button
-                                        props={{
-                                            label: input.props.ctaLabel,
-                                            variant: "primary",
-                                            size: "md",
-                                            icon: "next",
-                                            iconPlacement: "trailing",
-                                            isPending: isCheckingOut,
-                                        }}
-                                        on={{ press: input.on?.act }}
-                                    />
-                                )),
-                                cart: cartLabel === undefined
-                                    ? undefined
-                                    : defineLeafComponent("button", {}, () => (
-                                        <Button
-                                            props={{
-                                                label: cartLabel,
-                                                variant: "secondary",
-                                                size: "md",
-                                                isPending: isAdding,
-                                            }}
-                                            on={{ press: input.on?.addToCart }}
-                                        />
-                                    )),
-                            }),
-                        })
-                        : undefined,
-                    exploration: visibleIntent !== "trial" || trialLabel === undefined
-                        ? undefined
-                        : defineContractComponent("course-pricing-exploration-intent", {
-                            heading: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
-                                <Text
-                                    props={{
-                                        content: input.props.intent?.trialTitle ?? trialLabel,
-                                        size: "sm",
-                                        weight: "medium",
-                                    }}
-                                />
-                            )),
-                            description: input.props.intent === undefined
-                                ? undefined
-                                : defineLeafComponent("text", { size: "sm" }, () => (
-                                    <Text props={{ content: input.props.intent?.trialDescription, size: "sm" }} />
-                                )),
-                            action: defineLeafComponent("button", {}, () => (
-                                <Button
-                                    props={{ label: trialLabel, variant: "tertiary", size: "md", isPending: isTrialing }}
-                                    on={{ press: input.on?.trial }}
-                                />
-                            )),
-                        }),
-                    ladder: phases.length === 0
-                        ? undefined
-                        : defineCompositeComponent("pricing-phase-disclosure", {}, () => (
-                            <PricingPhaseDisclosure
-                                props={{
-                                    label: input.props.intent?.phaseDisclosureLabel ?? input.props.title,
-                                    phases,
-                                }}
-                            />
-                        )),
-                    proof: input.props.enrolmentLabel === undefined
-                        ? undefined
-                        : defineLeafComponent("text", { size: "xs" }, () => (
-                            <Text props={{ content: input.props.enrolmentLabel, size: "xs" }} />
-                        )),
-                })}
-            />
-            {input.priceOverlay === undefined ? null : <CoursePriceOverlay {...input.priceOverlay} />}
-        </>
-    )
-}
-
-/**
- * The rail, branded for the slot that holds it.
- *
- * A projection rather than bound slots: `SurfaceCard` has already drawn the contract's `Tree`, and
- * `ContractContent` renders a projection without opening a second node around it. Binding slots
- * here instead would inset the rail twice.
- */
-export const CoursePricingRail = (input: CoursePricingRailProps) =>
-    defineContractProjection("course-pricing-rail", () => <CoursePricingRailBase {...input} />)
-
-/** Source-level ownership marker. */
-export const meta = { world: "pure", domain: "courses" } as const
+/** Public pricing rail component. */
+export const CoursePricingRail = (props: CoursePricingRailProps) => <CoursePricingRailBase {...props} />

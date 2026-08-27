@@ -75,7 +75,8 @@ describe("RecommendedCourses", () => {
         vi.mocked(useQueryRecommendedCoursesSwr).mockReturnValue(answer({ data: undefined }))
 
         const { container } = render(<RecommendedCourses />)
-        expect(container.querySelectorAll("[data-node=\"recommended-course-row\"]")).toHaveLength(3)
+        expect(screen.getByText("heading")).toBeInTheDocument()
+        expect(container.querySelectorAll("button")).toHaveLength(0)
         expect(screen.getByText("heading")).toBeInTheDocument()
     })
 

@@ -46,7 +46,11 @@ const toRow = (course: MyCourseRow, labels: CourseProgressLabels): CourseProgres
 }
 
 /** Fetch full course progress and own on-demand route resolution. */
-export const MyCoursesProgress = () => {
+/** Props for the connected course progress block. */
+export type MyCoursesProgressProps = Record<string, never>
+/** Connect the MyCoursesProgress block to its data source. */
+export const MyCoursesProgress = (props: MyCoursesProgressProps) => {
+    void props
     const t = useTranslations("courses")
     const locale = useLocale()
     const router = useRouter()
@@ -58,10 +62,10 @@ export const MyCoursesProgress = () => {
         ...toRow(course, { content: t("progress.content"), challenge: t("progress.challenge"), milestone: t("progress.milestone"), trial: t("trial") }),
         isPending: pendingId === course.globalId,
     }))
-    const props = { label: t("heading"), rows, emptyMessage: t("empty"), errorMessage: t("failed"), retryLabel: t("retry") }
-    if (query.error !== undefined && query.data === undefined) return <MyCoursesProgressBase state="failed" props={props} on={{ retry }} />
-    if (query.data === undefined) return <MyCoursesProgressBase state="pending" props={props} />
-    if (rows.length === 0) return <MyCoursesProgressBase state="empty" props={props} on={{ retry }} />
+    const viewProps = { label: t("heading"), rows, emptyMessage: t("empty"), errorMessage: t("failed"), retryLabel: t("retry") }
+    if (query.error !== undefined && query.data === undefined) return <MyCoursesProgressBase state="failed" props={viewProps} on={{ retry }} />
+    if (query.data === undefined) return <MyCoursesProgressBase state="pending" props={viewProps} />
+    if (rows.length === 0) return <MyCoursesProgressBase state="empty" props={viewProps} on={{ retry }} />
     const on = Object.fromEntries(rows.map((row) => [`open:${row.id}`, async () => {
         setPendingId(row.id)
         try {
@@ -70,8 +74,5 @@ export const MyCoursesProgress = () => {
             if (path !== null && path !== undefined) router.push(withoutLocale(path, locale))
         } finally { setPendingId(undefined) }
     }]))
-    return <MyCoursesProgressBase state="ready" props={props} on={on} />
+    return <MyCoursesProgressBase state="ready" props={viewProps} on={on} />
 }
-
-/** Source-level ownership marker. */
-export const meta = { world: "connected", domain: "courses" } as const

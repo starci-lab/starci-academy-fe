@@ -47,6 +47,6 @@ export const generateMetadata = async ({
  * point, so every decision about what the catalog IS lives one tier down where it can be
  * rendered, tested and changed without a router.
  */
-const CoursesRoute = () => <CoursesCatalogPage />
+const CoursesRoute = () => <CoursesCatalogPage {...{}} />
 
 export default CoursesRoute

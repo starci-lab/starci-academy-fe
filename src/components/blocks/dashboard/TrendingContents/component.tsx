@@ -1,30 +1,14 @@
-import { CONTRACTS } from "@/components/contracts"
-import { SurfaceListCard, type SurfaceListCardData } from "@/components/branches/SurfaceListCard"
-import { Tree } from "@/components/branches/Tree"
+import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
 import { TrendingContentRow, type TrendingContentRowData } from "@/components/composites/TrendingContentRow"
-import { defineCompositeComponent, defineContractComponent, type LeafProps } from "@/components/contracts/props"
-
-/** Label and ranked content rows drawn by the trending block. */
-export type TrendingContentsData = SurfaceListCardData & { readonly items: ReadonlyArray<TrendingContentRowData> }
-/** Per-content navigation reported by the trending block. */
+/** Trending list data. */
+export type TrendingContentsData = { readonly label: string; readonly items: ReadonlyArray<TrendingContentRowData> }
+/** Trending row actions. */
 export type TrendingContentsActions = { readonly [key: string]: (() => void) | undefined }
-/** Props for the pure trending-content block. */
+/** Trending state and data. */
 export type TrendingContentsProps = { readonly state: "pending" | "hidden" | "ready"; readonly props: TrendingContentsData; readonly on?: TrendingContentsActions }
-
-const COUNT = CONTRACTS["trending-content-list"].children.item.restingCount
-const TrendingListView = ({ props, on, isLoading = false }: LeafProps<TrendingContentsData, TrendingContentsActions>) => {
-    const items = isLoading ? Array.from({ length: COUNT }, (_, index) => ({ id: `resting-${index}` })) : props.items
-    return <Tree contract="trending-content-list" render={defineContractComponent("trending-content-list", {
-        item: items.map((item) => defineCompositeComponent("trending-content-row", {}, () => (
-            <TrendingContentRow props={item} on={{ open: on?.[item.id] }} isLoading={isLoading} />
-        ))),
-    })} />
+/** Draw trending content rows. */
+export const TrendingContentsBase = (props: TrendingContentsProps) => {
+    if (props.state === "hidden") return null
+    const items = props.state === "pending" ? Array.from({ length: 4 }, (_, index) => ({ id: `resting-${index}` })) : props.props.items
+    return <SurfaceListCard props={{ label: props.props.label }} isLoading={props.state === "pending"}>{items.map((item) => <TrendingContentRow key={item.id} props={item} on={{ open: props.on?.[item.id] }} isLoading={props.state === "pending"} />)}</SurfaceListCard>
 }
-const TrendingList = defineContractComponent("trending-content-list", TrendingListView)
-
-/** Draw the ranked joined list while hiding settled absence. */
-export const TrendingContentsBase = (input: TrendingContentsProps) => input.state === "hidden" ? null : (
-    <SurfaceListCard contract="trending-content-list" render={TrendingList} props={input.props} on={input.on} isLoading={input.state === "pending"} />
-)
-/** Source-level ownership marker for the pure discovery block. */
-export const meta = { world: "pure", domain: "discovery" } as const

@@ -6,7 +6,11 @@ import { useQueryMeSwr } from "@/hooks"
 import { ProfileIdentityRowBase } from "./component"
 
 /** Connected dashboard identity anchor backed by the authenticated `me` query. */
-export const ProfileIdentityRow = () => {
+/** Props for the connected profile identity row. */
+export type ProfileIdentityRowProps = Record<string, never>
+/** Connect the ProfileIdentityRow block to its data source. */
+export const ProfileIdentityRow = (props: ProfileIdentityRowProps) => {
+    void props
     const router = useRouter()
     const me = useQueryMeSwr()
     const hasFailed = me.error !== undefined && me.error !== null
@@ -35,6 +39,3 @@ export const ProfileIdentityRow = () => {
         />
     )
 }
-
-/** Source-level tier marker for the connected dashboard identity block. */
-export const meta = { world: "connected", domain: "identity" } as const

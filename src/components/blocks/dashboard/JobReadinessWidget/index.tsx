@@ -6,7 +6,11 @@ import { useQueryMyJobReadinessSwr } from "@/hooks"
 import { JobReadinessWidgetBase, type JobReadinessMetric } from "./component"
 
 /** Connected half: resolves the strongest readiness track and product navigation. */
-export const JobReadinessWidget = () => {
+/** Props for the connected job-readiness block. */
+export type JobReadinessWidgetProps = Record<string, never>
+/** Connect the JobReadinessWidget block to its data source. */
+export const JobReadinessWidget = (props: JobReadinessWidgetProps) => {
+    void props
     const t = useTranslations("jobReadiness")
     const router = useRouter()
     const readiness = useQueryMyJobReadinessSwr()
@@ -51,6 +55,3 @@ export const JobReadinessWidget = () => {
 }
 
 export * from "./component"
-
-/** Source-level tier marker for the connected dashboard block. */
-export const meta = { world: "connected", domain: "dashboard" } as const

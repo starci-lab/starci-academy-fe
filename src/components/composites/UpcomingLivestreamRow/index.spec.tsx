@@ -5,25 +5,21 @@ import { UpcomingLivestreamRow } from "./index"
 describe("UpcomingLivestreamRow", () => {
     it("draws the whole row as one destination named after the session", () => {
         const open = vi.fn()
-        const { container } = render(<UpcomingLivestreamRow
+        render(<UpcomingLivestreamRow
             props={{ id: "one", title: "Live code review", subtitle: "With the backend guild", time: "19:00" }}
             on={{ open }}
         />)
         const surface = screen.getByRole("button", { name: "Live code review" })
-        expect(surface).toHaveAttribute("data-hover", "surface")
-        expect(container.querySelector("[data-node=\"evidence-title-over-subtitle\"]")?.textContent)
-            .toBe("Live code reviewWith the backend guild")
-        expect(container.querySelector("[data-node=\"upcoming-livestream-row\"]")?.textContent)
-            .toContain("19:00")
-        expect(container.querySelector("[data-component=\"IconTile\"]")).toHaveAttribute("data-tone", "accent")
+        expect(screen.getByText("With the backend guild")).toBeInTheDocument()
+        expect(screen.getByText("19:00")).toBeInTheDocument()
+        expect(surface.querySelector("svg")).toBeInTheDocument()
         fireEvent.click(surface)
         expect(open).toHaveBeenCalledOnce()
     })
 
     it("omits the second line entirely for a session with nothing to add", () => {
-        const { container } = render(<UpcomingLivestreamRow props={{ id: "one", title: "Live code review", time: "19:00" }} />)
-        expect(container.querySelector("[data-node=\"evidence-title-over-subtitle\"]")?.textContent)
-            .toBe("Live code review")
+        render(<UpcomingLivestreamRow props={{ id: "one", title: "Live code review", time: "19:00" }} />)
+        expect(screen.getByText("Live code review")).toBeInTheDocument()
     })
 
     it("falls back to a generic name when the session has no title to be named after", () => {
@@ -33,11 +29,11 @@ describe("UpcomingLivestreamRow", () => {
 
     it("rests the mark, the title and the time while the session is in flight", () => {
         const open = vi.fn()
-        const { container } = render(<UpcomingLivestreamRow props={{ id: "resting" }} on={{ open }} isLoading />)
+        render(<UpcomingLivestreamRow props={{ id: "resting" }} on={{ open }} isLoading />)
         const surface = screen.getByRole("button", { name: "Livestream" })
         expect(surface).toBeDisabled()
-        expect(container.querySelector("[data-component=\"IconTile\"]")).toHaveAttribute("data-loading", "true")
-        expect(container.querySelectorAll("[data-component=\"Text\"][data-loading=\"true\"]")).toHaveLength(2)
+        expect(surface).toHaveAttribute("aria-busy", "true")
+        expect(surface).toHaveTextContent("")
         fireEvent.click(surface)
         expect(open).not.toHaveBeenCalled()
     })

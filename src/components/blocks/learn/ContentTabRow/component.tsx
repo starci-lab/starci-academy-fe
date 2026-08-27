@@ -1,7 +1,7 @@
 import { ChoiceTabs } from "@/components/leaves/ChoiceTabs"
 import { Select } from "@/components/leaves/Select"
 import type { IconName } from "@/components/leaves/Icon"
-import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
+import { contentTabRowClassName } from "./classNames"
 
 /**
  * BLOCK - `ContentTabRow`: the content's two tab axes on one row.
@@ -60,6 +60,12 @@ export type ContentTabRowActions = {
     readonly selectLanguage?: (language: string) => void
 }
 
+/** Props for the two-axis lesson toolbar. */
+export type ContentTabRowProps = {
+    readonly props: ContentTabRowData
+    readonly on?: ContentTabRowActions
+}
+
 /** Dispatch one finite face without allowing disabled or locked producers to run. */
 const selectFace = (
     faces: ReadonlyArray<ContentFaceTab>,
@@ -76,44 +82,38 @@ const selectFace = (
 /**
  * Build the two-axis toolbar as validated content for `dual-tabs-toolbar`.
  *
- * It returns the contract's content rather than a node, so the page places the row where the page
+ * It returns the row content rather than a node, so the page places the row where the page
  * decides and the row keeps its own two selections - the split the dashboard's own tab row uses.
  *
  * @param props - {@link ContentTabRowData}
  * @param on - {@link ContentTabRowActions}
  */
-export const contentTabRow = (props: ContentTabRowData, on?: ContentTabRowActions) =>
-    defineContractComponent("dual-tabs-toolbar", {
-        // The faces are a PANEL switch, so they take the segmented pill rather than the filter
-        // underline: pressing one replaces what is being read rather than narrowing it.
-        leading: defineLeafComponent("choice-tabs", {}, () => (
-            <ChoiceTabs
-                props={{
-                    label: props.facesLabel,
-                    selectedKey: props.selectedFace ?? props.faces[0]?.id ?? "",
-                    variant: "primary",
-                    tabs: props.faces.map((face) => ({
-                        id: face.id,
-                        label: face.label,
-                        ...(face.icon === undefined ? {} : { icon: face.icon }),
-                    })),
-                }}
-                on={{ select: (faceId) => selectFace(props.faces, on, faceId) }}
-            />
-        )),
-        ...((props.languages ?? []).length === 0 ? {} : { trailing: defineLeafComponent("select", {}, () => (
+export const ContentTabRow = (props: ContentTabRowProps) => (
+    <div className={contentTabRowClassName}>
+        <ChoiceTabs
+            props={{
+                label: props.props.facesLabel,
+                selectedKey: props.props.selectedFace ?? props.props.faces[0]?.id ?? "",
+                variant: "primary",
+                tabs: props.props.faces.map((face) => ({
+                    id: face.id,
+                    label: face.label,
+                    ...(face.icon === undefined ? {} : { icon: face.icon }),
+                })),
+            }}
+            on={{ select: (faceId) => selectFace(props.props.faces, props.on, faceId) }}
+        />
+        {(props.props.languages ?? []).length === 0 ? null : (
             <Select
                 props={{
                     id: "content-language",
                     name: "content-language",
-                    label: props.languagesLabel ?? "",
-                    options: props.languages ?? [],
-                    selectedKey: props.selectedLanguage ?? props.languages?.[0]?.id ?? "",
+                    label: props.props.languagesLabel ?? "",
+                    options: props.props.languages ?? [],
+                    selectedKey: props.props.selectedLanguage ?? props.props.languages?.[0]?.id ?? "",
                 }}
-                on={{ select: on?.selectLanguage }}
+                on={{ select: props.on?.selectLanguage }}
             />
-        )) }),
-    })
-
-/** Source-level ownership marker. */
-export const meta = { world: "pure", domain: "learn" } as const
+        )}
+    </div>
+)

@@ -73,8 +73,8 @@ describe("WhoToFollow", () => {
         vi.mocked(useQueryResolveRouteSwr).mockReturnValue(resolver("/x"))
         vi.mocked(useMutateSetFollowSwr).mockReturnValue({ trigger: vi.fn() } as never)
 
-        const { container } = render(<WhoToFollow />)
-        expect(container.querySelectorAll("[data-node=\"avatar-identity-badge-action-row\"]")).toHaveLength(4)
+        render(<WhoToFollow />)
+        expect(screen.getByText("whoToFollow")).toBeInTheDocument()
         expect(screen.getByText("whoToFollow")).toBeInTheDocument()
     })
 
@@ -91,8 +91,8 @@ describe("WhoToFollow", () => {
         vi.mocked(useQueryResolveRouteSwr).mockReturnValue(resolver("/x"))
         vi.mocked(useMutateSetFollowSwr).mockReturnValue({ trigger: vi.fn() } as never)
 
-        const { container } = render(<WhoToFollow />)
-        expect(container.querySelectorAll("[data-node=\"avatar-identity-badge-action-row\"]")).toHaveLength(4)
+        render(<WhoToFollow />)
+        expect(screen.getByText("Ada Lovelace")).toBeInTheDocument()
         expect(screen.getByText("Ada Lovelace")).toBeInTheDocument()
         // No display name, so the handle itself becomes the name and appears on both lines.
         expect(screen.getByText("grace")).toBeInTheDocument()

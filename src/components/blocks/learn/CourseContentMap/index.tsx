@@ -14,7 +14,8 @@ export type CourseContentMapProps = {
 }
 
 /** Load, filter and route one viewer-specific course map. */
-export const CourseContentMap = ({ displayId, currentLessonId }: CourseContentMapProps) => {
+export const CourseContentMap = (props: CourseContentMapProps) => {
+    const { displayId, currentLessonId } = props
     const t = useTranslations("learn")
     const router = useRouter()
     const outline = useQueryCourseOutlineSwr(displayId)
@@ -23,7 +24,7 @@ export const CourseContentMap = ({ displayId, currentLessonId }: CourseContentMa
     const [expandedModuleIds, setExpandedModuleIds] = useState<ReadonlySet<string>>(new Set())
     // SWR can already contain a browser-only cached outline while SSR necessarily
     // renders the pending map. Keep the first client render on the same pending
-    // contract, then adopt live data after hydration; otherwise HeroUI's empty
+    // pending shape, then adopt live data after hydration; otherwise HeroUI's empty
     // ListBox template is reconciled against populated rows and React replaces
     // the entire course-map tree.
     const hydratedOutline = isMounted ? outline.data : undefined
@@ -121,6 +122,3 @@ export const CourseContentMap = ({ displayId, currentLessonId }: CourseContentMa
 }
 
 export * from "./component"
-
-/** Source-level ownership marker. */
-export const meta = { world: "connected", domain: "learn" } as const

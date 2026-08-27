@@ -6,6 +6,7 @@ import { useQueryPersonalTaskAttemptsSwr } from "@/hooks/swr/useQueryPersonalTas
 import {
     PersonalProjectHistoryBase,
     type PersonalProjectHistoryAttempt,
+    type PersonalProjectHistoryLabels,
 } from "./component"
 
 const PAGE_SIZE = 20
@@ -19,7 +20,8 @@ export type PersonalProjectHistoryProps = {
 }
 
 /** Own the paged history query and pagination independently from the result workspace. */
-export const PersonalProjectHistory = ({ courseId, taskId, selectedAttemptId, onSelect }: PersonalProjectHistoryProps) => {
+export const PersonalProjectHistory = (props: PersonalProjectHistoryProps) => {
+    const { courseId, taskId, selectedAttemptId, onSelect } = props
     const locale = useLocale()
     const [page, setPage] = useState(0)
     const attempts = useQueryPersonalTaskAttemptsSwr(courseId, taskId, page)
@@ -34,7 +36,7 @@ export const PersonalProjectHistory = ({ courseId, taskId, selectedAttemptId, on
             ? undefined
             : dateFormat.format(new Date(attempt.processedAt)),
     }))
-    const labels = locale === "vi" // vn-ok: localized Vietnamese runtime copy.
+    const labels: PersonalProjectHistoryLabels = locale === "vi" // vn-ok: localized Vietnamese runtime copy.
         ? {
             summary: (count: number) => `${count} lần chấm, mới nhất trước`, // vn-ok: localized Vietnamese runtime copy.
             selectAttempt: (number: number, score: number) => `Lần ${number} · ${score} điểm`, // vn-ok: localized Vietnamese runtime copy.
@@ -68,5 +70,3 @@ export const PersonalProjectHistory = ({ courseId, taskId, selectedAttemptId, on
 }
 
 export * from "./component"
-/** Source-level ownership marker for the connected history block. */
-export const meta = { world: "connected", domain: "learn" } as const

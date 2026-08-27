@@ -25,7 +25,7 @@ describe("ReactionPicker", () => {
         const { container } = render(
             <ReactionPicker props={{ label: "React", count: 7, selected: ReactionType.Love, labels }} />,
         )
-        const summary = container.querySelector("[data-component=\"ReactionPicker\"]")
+        const summary = container.firstElementChild
         expect(summary?.textContent).toBe("7")
         expect(assets(container)).toEqual(["/reactions/love.svg"])
         expect(screen.queryByRole("button")).toBeNull()
@@ -33,7 +33,7 @@ describe("ReactionPicker", () => {
 
     it("summarises a tally with no reaction of the viewer's own as the number alone", () => {
         const { container } = render(<ReactionPicker props={{ label: "React", count: 3, selected: null, labels }} />)
-        expect(container.querySelector("[data-component=\"ReactionPicker\"]")?.textContent).toBe("3")
+        expect(container.firstElementChild?.textContent).toBe("3")
         expect(assets(container)).toEqual([])
     })
 
@@ -133,7 +133,7 @@ describe("ReactionPicker", () => {
         )
         const trigger = screen.getByRole("button", { name: "React" })
         fireEvent.click(trigger)
-        fireEvent.pointerDown(container.querySelector("[data-component=\"ReactionPicker\"]")!)
+        fireEvent.pointerDown(container.firstElementChild!)
         expect(trigger).toHaveAttribute("aria-expanded", "true")
         fireEvent.pointerDown(document.body)
         expect(trigger).toHaveAttribute("aria-expanded", "false")

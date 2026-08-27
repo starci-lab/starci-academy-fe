@@ -1,5 +1,5 @@
 import { Link as HeroLink } from "@heroui/react"
-import type { LeafProps } from "@/components/contracts/props"
+import { getTextLinkClassName } from "./classNames"
 
 /**
  * LEAF - `TextLink`: words that change what is on screen without going anywhere.
@@ -39,32 +39,28 @@ export type TextLinkActions = {
     readonly press?: () => void
 }
 
-/** Props for {@link TextLink}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type TextLinkProps = LeafProps<TextLinkData, TextLinkActions>
+/** Props for {@link TextLink}. Three fixed slots, no fourth. */
+export type TextLinkProps = { readonly props: TextLinkData; readonly on?: TextLinkActions; readonly isLoading?: boolean }
 
 /** HeroUI Link owns interaction styling; this leaf adds only the house reading step. */
-const SIZE_CLASSES = { xs: "text-xs", sm: "text-sm", md: "text-base" } as const
-const CHOICE_CLASSES = "rounded-full px-2 py-1"
-const SELECTED_CLASSES = "bg-accent-soft text-accent-soft-foreground"
 
 /**
  * Draw a word that acts.
  *
  * @param input - {@link TextLinkProps}
  */
-export const TextLink = ({ props, on }: TextLinkProps) => (
-    <HeroLink
-        data-tier="leaf"
-        data-component="TextLink"
-        data-size={props.size ?? "md"}
-        data-selected={props.isSelected}
-        aria-current={props.isSelected === true ? "true" : undefined}
-        onPress={on?.press}
-        className={`${SIZE_CLASSES[props.size ?? "md"]} ${props.isSelected === undefined ? "" : CHOICE_CLASSES} ${props.isSelected === true ? SELECTED_CLASSES : ""}`}
-    >
-        {props.label}
-    </HeroLink>
-)
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const
+export const TextLink = (props: TextLinkProps) => {
+    const data = props.props
+    const on = props.on
+    return (
+        <HeroLink
+            data-size={data.size ?? "md"}
+            data-selected={data.isSelected}
+            aria-current={data.isSelected === true ? "true" : undefined}
+            onPress={on?.press}
+            className={getTextLinkClassName(data.size ?? "md", data.isSelected)}
+        >
+            {data.label}
+        </HeroLink>
+    )
+}

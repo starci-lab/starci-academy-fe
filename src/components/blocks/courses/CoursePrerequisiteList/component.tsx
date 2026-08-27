@@ -1,11 +1,5 @@
-import { Tree } from "@/components/branches/Tree"
 import { Text } from "@/components/leaves/Text"
 import { LeadingNumber } from "@starci/grammar/core"
-import {
-    defineContractComponent,
-    defineLeafComponent,
-    type BlockProps,
-} from "@/components/contracts/props"
 
 /** One requirement a learner should already satisfy. */
 export type CoursePrerequisite = {
@@ -29,6 +23,11 @@ export type CoursePrerequisiteListData = {
     /** The requirements, in the order the backend stores them. */
     readonly prerequisites: ReadonlyArray<CoursePrerequisite>
 }
+/** Traditional state and data lanes for the prerequisite list. */
+export type CoursePrerequisiteListProps = {
+    readonly state: CoursePrerequisiteListState
+    readonly props: CoursePrerequisiteListData
+}
 
 /**
  * BLOCK - `CoursePrerequisiteList`: what a learner should already have before starting.
@@ -37,7 +36,7 @@ export type CoursePrerequisiteListData = {
  * prerequisites required before joining the course", so the sequence carries meaning: somebody who
  * lacks the first cannot judge the second. An `ol` says that to a reader who cannot see numbering.
  *
- * It is also why this is not `marked-row-list` with different copy. That contract describes peer
+ * It is also why this is not a marked-row list with different copy. That pattern describes peer
  * completion statements under a `ul`; prerequisites are ordered conditions and would lose both
  * their sequence and their unverified state if rendered as completed promise rows.
  *
@@ -47,27 +46,20 @@ export type CoursePrerequisiteListData = {
  * @param input - The requirements to draw.
  * @returns The ordered prerequisite list.
  */
-export const CoursePrerequisiteListBase = ({
-    props,
-    state,
-}: BlockProps<CoursePrerequisiteListState, CoursePrerequisiteListData>) => (
-    state === "none"
-        ? null
-        :
-        <Tree
-            contract="course-prerequisite-list"
-            render={defineContractComponent("course-prerequisite-list", {
-                prerequisite: props.prerequisites.map((prerequisite, index) => defineContractComponent("course-prerequisite-row", {
-                    mark: defineLeafComponent("leading-number", {}, () => (
+export const CoursePrerequisiteListBase = (props: CoursePrerequisiteListProps) => {
+    const data = props.props
+    const state = props.state
+    return (
+        state === "none"
+            ? null
+            :
+            <ol>
+                {data.prerequisites.map((prerequisite, index) => (
+                    <li key={prerequisite.id}>
                         <LeadingNumber position={index + 1} />
-                    )),
-                    requirement: defineLeafComponent("text", { size: "sm" }, () => (
                         <Text props={{ content: prerequisite.requirement, size: "sm" }} />
-                    )),
-                })),
-            })}
-        />
-)
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "block", world: "pure" } as const
+                    </li>
+                ))}
+            </ol>
+    )
+}

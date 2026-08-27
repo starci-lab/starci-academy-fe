@@ -36,7 +36,8 @@ export type CartLineProps = {
  *
  * @param input - {@link CartLineProps}
  */
-export const CartLine = ({ state = "ready", line }: CartLineProps) => {
+export const CartLine = (props: CartLineProps) => {
+    const { state = "ready", line } = props
     const { mutate } = useSWRConfig()
     const removal = useMutateRemoveFromCartSwr(state === "pending" ? undefined : line.courseId)
 
@@ -60,6 +61,3 @@ export const CartLine = ({ state = "ready", line }: CartLineProps) => {
         />
     )
 }
-
-/** Source-level ownership marker. */
-export const meta = { world: "connected", domain: "commerce" } as const

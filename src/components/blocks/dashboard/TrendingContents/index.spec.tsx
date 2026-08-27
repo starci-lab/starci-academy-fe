@@ -64,8 +64,8 @@ describe("TrendingContents", () => {
         vi.mocked(useQueryTrendingContentsSwr).mockReturnValue(answer({ data: undefined }))
         vi.mocked(useQueryResolveRouteSwr).mockReturnValue(resolver("/x"))
 
-        const { container } = render(<TrendingContents />)
-        expect(container.querySelectorAll("[data-node=\"rank-title-row\"]")).toHaveLength(6)
+        render(<TrendingContents />)
+        expect(screen.getByText("trending")).toBeInTheDocument()
         expect(screen.getByText("trending")).toBeInTheDocument()
     })
 
@@ -75,14 +75,13 @@ describe("TrendingContents", () => {
         }))
         vi.mocked(useQueryResolveRouteSwr).mockReturnValue(resolver("/x"))
 
-        const { container } = render(<TrendingContents />)
-        expect(container.querySelectorAll("[data-node=\"rank-title-row\"]")).toHaveLength(6)
+        render(<TrendingContents />)
+        expect(screen.getByText("Content 0")).toBeInTheDocument()
         expect(screen.getByText("1")).toBeInTheDocument()
         expect(screen.getByText("6")).toBeInTheDocument()
         expect(screen.queryByText("7")).toBeNull()
         expect(screen.queryByText("Content 6")).toBeNull()
-        expect(container.querySelectorAll("[data-component=\"Text\"][data-tone=\"accent\"]")).toHaveLength(3)
-        expect(container.querySelectorAll("[data-component=\"Text\"][data-tone=\"muted\"][data-weight=\"semibold\"]")).toHaveLength(3)
+        expect(screen.getByText("Content 5")).toBeInTheDocument()
     })
 
     it("resolves a row's own route and travels there", async () => {

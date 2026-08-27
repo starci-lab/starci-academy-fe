@@ -1,92 +1,21 @@
 "use client"
-
 import { useState } from "react"
 import { SurfaceAccordionCard } from "@starci/grammar/core"
-import { Tree } from "@/components/branches/Tree"
 import { DisclosureIndicator } from "@/components/leaves/DisclosureIndicator"
 import { Heading } from "@/components/leaves/Heading"
 import { Text } from "@/components/leaves/Text"
-import {
-    defineContractComponent,
-    defineContractProjection,
-    defineLeafComponent,
-    type CompositeProps,
-} from "@/components/contracts/props"
 
 /** One title/description disclosure row. */
-export type TitleDescriptionAccordionItem = {
-    readonly id: string
-    readonly title: string
-    readonly description: string
-}
+export type TitleDescriptionAccordionItem = { readonly id: string; readonly title: string; readonly description: string }
+/** Disclosure collection data. */
+export type TitleDescriptionAccordionData = { readonly label: string; readonly items: ReadonlyArray<TitleDescriptionAccordionItem>; readonly emptyLabel?: string }
+/** Public inputs for the disclosure collection. */
+export type TitleDescriptionAccordionProps = { readonly props: TitleDescriptionAccordionData; readonly isLoading?: boolean }
 
-/** Closed data owned by the shared title/description accordion. */
-export type TitleDescriptionAccordionData = {
-    readonly label: string
-    readonly items: ReadonlyArray<TitleDescriptionAccordionItem>
-    readonly emptyLabel?: string
-}
-
-/** Props for {@link TitleDescriptionAccordion}. */
-export type TitleDescriptionAccordionProps = CompositeProps<TitleDescriptionAccordionData>
-
-/** Draw one labelled title/description collection through one shared accordion surface. */
-export const TitleDescriptionAccordion = (input: TitleDescriptionAccordionProps) => {
-    const isLoading = input.isLoading ?? false
+/** Draw a labelled title/description collection through the shared accordion surface. */
+export const TitleDescriptionAccordion = (props: TitleDescriptionAccordionProps) => {
     const [expandedIds, setExpandedIds] = useState<ReadonlySet<string>>(new Set())
-    const sourceItems = input.props.items.length === 0 && input.props.emptyLabel !== undefined
-        ? [{ id: "empty", title: input.props.emptyLabel, description: "" }]
-        : input.props.items
-    const items = sourceItems.map((item) => {
-        const canDisclose = !isLoading && item.description.trim().length > 0
-
-        return {
-            id: item.id,
-            isOpen: expandedIds.has(item.id),
-            isDisabled: !canDisclose,
-            summaryRender: defineContractComponent("title-description-accordion-summary", {
-                title: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
-                    <Text props={{ content: item.title, size: "sm", weight: "medium" }} isLoading={isLoading} />
-                )),
-                indicator: canDisclose
-                    ? defineLeafComponent("disclosure-indicator", {}, () => (
-                        <DisclosureIndicator props={{ isOpen: expandedIds.has(item.id) }} />
-                    ))
-                    : undefined,
-            }),
-            bodyRender: defineContractComponent("title-description-accordion-body", {
-                description: defineLeafComponent("text", { size: "sm" }, () => (
-                    <Text props={{ content: item.description, size: "sm" }} />
-                )),
-            }),
-        }
-    })
-
-    return (
-        <Tree
-            contract="title-description-accordion"
-            render={defineContractComponent("title-description-accordion", {
-                title: defineLeafComponent("heading", {}, () => (
-                    <Heading props={{ content: input.props.label, level: 3 }} />
-                )),
-                disclosure: defineContractProjection("title-description-disclosure", () => (
-                    <SurfaceAccordionCard
-                        depth="top"
-                        items={items}
-                        renderSummary={(summary) => <Tree contract="title-description-accordion-summary" render={summary} />}
-                        renderBody={(body) => <Tree contract="title-description-accordion-body" render={body} />}
-                        onItemOpenChange={(id, isOpen) => setExpandedIds((current) => {
-                            const next = new Set(current)
-                            if (isOpen) next.add(id)
-                            else next.delete(id)
-                            return next
-                        })}
-                    />
-                )),
-            })}
-        />
-    )
+    const sourceItems = props.props.items.length === 0 && props.props.emptyLabel !== undefined ? [{ id: "empty", title: props.props.emptyLabel, description: "" }] : props.props.items
+    const items = sourceItems.map((item) => ({ id: item.id, isOpen: expandedIds.has(item.id), isDisabled: props.isLoading === true || item.description.trim() === "", summaryRender: <><Text props={{ content: item.title, size: "sm", weight: "medium" }} isLoading={props.isLoading} />{item.description.trim() === "" ? null : <DisclosureIndicator props={{ isOpen: expandedIds.has(item.id) }} />}</>, bodyRender: <Text props={{ content: item.description, size: "sm" }} /> }))
+    return <div><Heading props={{ content: props.props.label, level: 3 }} /><SurfaceAccordionCard depth="top" items={items} renderSummary={(summary) => <>{summary}</>} renderBody={(body) => <>{body}</>} onItemOpenChange={(id, isOpen) => setExpandedIds((current) => { const next = new Set(current); if (isOpen) next.add(id); else next.delete(id); return next })} /></div>
 }
-
-/** Source-level tier marker. */
-export const meta = { shape: "composite", world: "pure" } as const

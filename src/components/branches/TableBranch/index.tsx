@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react"
 import { Table } from "@heroui/react"
+import { tableStandInClassName } from "./classNames"
 
 /**
  * BRANCH - `TableBranch`: the one owner of HeroUI `Table` in the component tier.
@@ -48,24 +49,24 @@ export type TableBranchProps = {
  *
  * @param props - {@link TableBranchProps}
  */
-export const TableBranch = ({ ariaLabel, columns, rows }: TableBranchProps) => {
-    const widest = rows.reduce((count, row) => Math.max(count, row.cells.length), 0)
+export const TableBranch = (props: TableBranchProps) => {
+    const widest = props.rows.reduce((count, row) => Math.max(count, row.cells.length), 0)
     const standIns = Array.from({ length: Math.max(widest, 1) }, (_unused, index) => `stand-in-${index}`)
     return (
         <Table variant="primary">
             <Table.ScrollContainer>
-                <Table.Content aria-label={ariaLabel}>
+                <Table.Content aria-label={props.ariaLabel}>
                     <Table.Header>
-                        {columns.length === 0
+                        {props.columns.length === 0
                             ? standIns.map((id, index) => (
-                                <Table.Column key={id} isRowHeader={index === 0} className="sr-only">{" "}</Table.Column>
+                                <Table.Column key={id} isRowHeader={index === 0} className={tableStandInClassName}>{" "}</Table.Column>
                             ))
-                            : columns.map((column, index) => (
+                            : props.columns.map((column, index) => (
                                 <Table.Column key={column.id} isRowHeader={index === 0}>{column.content}</Table.Column>
                             ))}
                     </Table.Header>
                     <Table.Body>
-                        {rows.map((row) => (
+                        {props.rows.map((row) => (
                             <Table.Row key={row.id}>
                                 {row.cells.map((cell) => <Table.Cell key={cell.id}>{cell.content}</Table.Cell>)}
                             </Table.Row>
@@ -76,6 +77,3 @@ export const TableBranch = ({ ariaLabel, columns, rows }: TableBranchProps) => {
         </Table>
     )
 }
-
-/** Source-level tier marker. */
-export const meta = { shape: "branch", world: "pure" } as const

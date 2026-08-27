@@ -7,7 +7,10 @@ import { useQueryUserProfileSwr } from "@/hooks/swr/useQueryUserProfileSwr"
 import { ProfileCodingProblemBase, type CodingDetail } from "./component"
 
 /** Resolve the dedicated public coding-proof route and own its recovery state. */
-export const ProfileCodingProblem = () => {
+export type ProfileCodingProblemProps = Record<never, never>
+/** Load and render the connected coding-proof block. */
+export const ProfileCodingProblem = (props: ProfileCodingProblemProps) => {
+    void props
     const params = useParams<{ username?: string; slug?: string }>()
     const router = useRouter()
     const username = String(params.username ?? "")
@@ -17,5 +20,3 @@ export const ProfileCodingProblem = () => {
 }
 
 export { ProfileCodingProblemBase } from "./component"
-/** Source-level ownership marker for the connected coding-proof block. */
-export const meta = { world: "connected", domain: "profile" } as const

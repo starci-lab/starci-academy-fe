@@ -7,7 +7,10 @@ import { useQueryUserProfileSwr } from "@/hooks/swr/useQueryUserProfileSwr"
 import { ProfileChallengeSubmissionBase, type ChallengeDetail } from "./component"
 
 /** Resolve one public challenge submission and own its loading/error state. */
-export const ProfileChallengeSubmission = () => {
+export type ProfileChallengeSubmissionProps = Record<never, never>
+/** Load and render the connected challenge-submission block. */
+export const ProfileChallengeSubmission = (props: ProfileChallengeSubmissionProps) => {
+    void props
     const params = useParams<{ username?: string; courseId?: string; submissionId?: string }>()
     const router = useRouter()
     const username = String(params.username ?? "")
@@ -22,5 +25,3 @@ export const ProfileChallengeSubmission = () => {
 }
 
 export { ProfileChallengeSubmissionBase } from "./component"
-/** Source-level ownership marker for the connected submission block. */
-export const meta = { world: "connected", domain: "profile" } as const

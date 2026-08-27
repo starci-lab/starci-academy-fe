@@ -10,7 +10,8 @@ import { PlaygroundSessionBase, type CoursePlaygroundSessionState } from "./comp
 export type PlaygroundSessionProps = { readonly displayId: string; readonly slug: string }
 
 /** Consume the persistent session owner; only `step:verified` changes completed progress. */
-export const PlaygroundSession = ({ displayId, slug }: PlaygroundSessionProps) => {
+export const PlaygroundSession = (props: PlaygroundSessionProps) => {
+    const { displayId, slug } = props
     const t = useTranslations("learn.playground")
     const router = useRouter()
     const session = usePlaygroundSession()
@@ -67,6 +68,3 @@ export const PlaygroundSession = ({ displayId, slug }: PlaygroundSessionProps) =
         />
     )
 }
-
-/** Source-level ownership marker. */
-export const meta = { world: "connected", domain: "learn" } as const

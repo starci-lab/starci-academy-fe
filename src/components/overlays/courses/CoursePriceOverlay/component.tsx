@@ -1,6 +1,5 @@
+import type { ReactNode } from "react"
 import { ModalBranch } from "@/components/branches/ModalBranch"
-import type { ContractKey } from "@/components/contracts"
-import type { ContractComponent } from "@/components/contracts/props"
 
 /**
  * OVERLAY - `CoursePriceOverlay`, presentational half.
@@ -21,12 +20,12 @@ import type { ContractComponent } from "@/components/contracts/props"
  * being a column.
  */
 
-/** Props for {@link CoursePriceOverlayBase}. */
-export type CoursePriceOverlayProps<K extends ContractKey> = {
+/** Content accepted by the internal presentational view. */
+export type CoursePriceOverlayContent = {
     /** Whether the surface is on screen. Owned by whoever mounts it, never by the surface. */
     readonly isOpen: boolean
-    /** Typed contract mounted inside the modal mechanics branch. */
-    readonly render: ContractComponent<K>
+    /** Content mounted inside the modal mechanics branch. */
+    readonly children: ReactNode
     /** Every way out: the close control, Escape and the backdrop. */
     readonly onDismiss: () => void
 }
@@ -34,17 +33,14 @@ export type CoursePriceOverlayProps<K extends ContractKey> = {
 /**
  * Draw the covering surface.
  *
- * @param input - {@link CoursePriceOverlayProps}
+ * @param props - {@link CoursePriceOverlayContent}
  */
-export const CoursePriceOverlayBase = <const K extends ContractKey>(input: CoursePriceOverlayProps<K>) => (
+export const CoursePriceOverlayView = (props: CoursePriceOverlayContent) => (
     <ModalBranch
-        isOpen={input.isOpen}
+        isOpen={props.isOpen}
         size="sm"
-        contract={input.render.meta.contract}
-        render={input.render}
-        onDismiss={input.onDismiss}
-    />
+        onDismiss={props.onDismiss}
+    >
+        {props.children}
+    </ModalBranch>
 )
-
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "overlay", world: "pure", domain: "courses" } as const

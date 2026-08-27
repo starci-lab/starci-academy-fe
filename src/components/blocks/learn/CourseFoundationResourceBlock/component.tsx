@@ -23,20 +23,38 @@ const useBlock = () => {
 }
 
 /** Render the page-owned back control. */
-export const CourseFoundationResourceBlockBack = () => { const input = useBlock(); return <Button props={{ label: input.data.back, variant: "ghost" }} on={{ press: input.on?.back }} /> }
+/** Props for the resource back slot. */
+export type CourseFoundationResourceBlockBackProps = Record<never, never>
+/** Render the page-owned back control. */
+export const CourseFoundationResourceBlockBack = (props: CourseFoundationResourceBlockBackProps) => { void props; const input = useBlock(); return <Button props={{ label: input.data.back, variant: "ghost" }} on={{ press: input.on?.back }} /> }
 /** Render the page-owned resource heading. */
-export const CourseFoundationResourceBlockHeader = () => { const input = useBlock(); return input.blockState === "not-found" || input.blockState === "failed" ? null : <Heading props={{ content: input.data.resource?.title ?? input.data.titleFallback, level: 1 }} isLoading={input.blockState === "pending"} /> }
+/** Props for the resource header slot. */
+export type CourseFoundationResourceBlockHeaderProps = Record<never, never>
+/** Render the page-owned resource heading. */
+export const CourseFoundationResourceBlockHeader = (props: CourseFoundationResourceBlockHeaderProps) => { void props; const input = useBlock(); return input.blockState === "not-found" || input.blockState === "failed" ? null : <Heading props={{ content: input.data.resource?.title ?? input.data.titleFallback, level: 1 }} isLoading={input.blockState === "pending"} /> }
 /** Render the page-owned resource description. */
-export const CourseFoundationResourceBlockDescription = () => { const input = useBlock(); return input.blockState === "not-found" || input.blockState === "failed" ? null : <Text props={{ content: input.data.resource?.description ?? "", size: "sm", tone: "muted" }} isLoading={input.blockState === "pending"} /> }
+/** Props for the resource description slot. */
+export type CourseFoundationResourceBlockDescriptionProps = Record<never, never>
+/** Render the page-owned resource description. */
+export const CourseFoundationResourceBlockDescription = (props: CourseFoundationResourceBlockDescriptionProps) => { void props; const input = useBlock(); return input.blockState === "not-found" || input.blockState === "failed" ? null : <Text props={{ content: input.data.resource?.description ?? "", size: "sm", tone: "muted" }} isLoading={input.blockState === "pending"} /> }
 /** Render the page-owned resource article. */
-export const CourseFoundationResourceBlockBody = () => { const input = useBlock(); return input.blockState === "not-found" || input.blockState === "failed" ? null : <Article props={{ body: input.data.resource?.value ?? undefined }} isLoading={input.blockState === "pending"} /> }
+/** Props for the resource body slot. */
+export type CourseFoundationResourceBlockBodyProps = Record<never, never>
+/** Render the page-owned resource article. */
+export const CourseFoundationResourceBlockBody = (props: CourseFoundationResourceBlockBodyProps) => { void props; const input = useBlock(); return input.blockState === "not-found" || input.blockState === "failed" ? null : <Article props={{ body: input.data.resource?.value ?? undefined }} isLoading={input.blockState === "pending"} /> }
 /** Render the page-owned practice action. */
-export const CourseFoundationResourceBlockPractice = () => { const input = useBlock(); return input.blockState === "not-found" || input.blockState === "failed" ? null : <Button props={{ label: input.data.openPlayground, variant: "primary" }} on={{ press: input.on?.openPlayground }} isLoading={input.blockState === "pending"} /> }
+/** Props for the resource practice slot. */
+export type CourseFoundationResourceBlockPracticeProps = Record<never, never>
+/** Render the page-owned practice action. */
+export const CourseFoundationResourceBlockPractice = (props: CourseFoundationResourceBlockPracticeProps) => { void props; const input = useBlock(); return input.blockState === "not-found" || input.blockState === "failed" ? null : <Button props={{ label: input.data.openPlayground, variant: "primary" }} on={{ press: input.on?.openPlayground }} isLoading={input.blockState === "pending"} /> }
 /** Render the block-owned unavailable notice. */
-export const CourseFoundationResourceBlockNotice = () => { const input = useBlock(); return input.blockState === "not-found" || input.blockState === "failed" ? <EmptyNotice props={{ message: input.blockState === "failed" ? input.data.failed : input.data.notFound, actionLabel: input.blockState === "failed" ? input.data.retry : undefined }} on={{ act: input.on?.retry }} /> : null }
+/** Props for the resource notice slot. */
+export type CourseFoundationResourceBlockNoticeProps = Record<never, never>
+/** Render the block-owned unavailable notice. */
+export const CourseFoundationResourceBlockNotice = (props: CourseFoundationResourceBlockNoticeProps) => { void props; const input = useBlock(); return input.blockState === "not-found" || input.blockState === "failed" ? <EmptyNotice props={{ message: input.blockState === "failed" ? input.data.failed : input.data.notFound, actionLabel: input.blockState === "failed" ? input.data.retry : undefined }} on={{ act: input.on?.retry }} /> : null }
 
 /** Provide resolved resource state/data/actions to page-owned inner slots. */
-export const CourseFoundationResourceBlockBase = ({ render, ...input }: CourseFoundationResourceBlockProps) => <BlockContext.Provider value={input}>{render?.()}</BlockContext.Provider>
-
-/** Source-level ownership marker for the pure block slots. */
-export const meta = { world: "pure", domain: "learn" } as const
+export const CourseFoundationResourceBlockBase = (props: CourseFoundationResourceBlockProps) => {
+    const { render, ...input } = props
+    return <BlockContext.Provider value={input}>{render?.()}</BlockContext.Provider>
+}

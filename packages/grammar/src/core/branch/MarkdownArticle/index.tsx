@@ -1,4 +1,5 @@
 import type { ReactNode } from "react"
+import { fencedCodeBlockClassName, fencedCodeHeaderClassName, markdownArticleClassName, markdownTableFrameClassName } from "./classNames.js"
 
 export type MarkdownArticleProps = {
     readonly children: ReactNode
@@ -28,32 +29,27 @@ export type MarkdownTableFrameProps = {
 }
 
 /** Own the business-neutral reading rhythm for one semantic Markdown document. */
-export const MarkdownArticle = ({ children, ariaLabel, measure = "reading" }: MarkdownArticleProps) => (
+export const MarkdownArticle = (props: MarkdownArticleProps) => (
     <div
-        aria-label={ariaLabel}
-        className="starci-core-markdown-article"
-        data-component="MarkdownArticle"
-        data-grammar-contract="core.markdown-article"
-        data-grammar-markdown-article="true"
-        data-grammar-markdown-measure={measure}
+        aria-label={props.ariaLabel}
+        className={markdownArticleClassName}
+        data-grammar-markdown-measure={props.measure ?? "reading"}
     >
-        {children}
+        {props.children}
     </div>
 )
 
 /** Own bounded code overflow while allowing a caller-supplied neutral action such as Copy. */
-export const FencedCodeBlock = (input: FencedCodeBlockProps) => {
-    const body = "children" in input ? input.children : <pre><code>{input.code}</code></pre>
+export const FencedCodeBlock = (props: FencedCodeBlockProps) => {
+    const body = "children" in props ? props.children : <pre><code>{props.code}</code></pre>
     return (
         <div
-            className="starci-core-fenced-code-block"
-            data-component="FencedCodeBlock"
-            data-grammar-fenced-code-block="true"
+            className={fencedCodeBlockClassName}
         >
-            {input.language === undefined && input.action === undefined ? null : (
-                <div className="starci-core-fenced-code-header">
-                    {input.language === undefined ? <span /> : <span>{input.language}</span>}
-                    {input.action}
+            {props.language === undefined && props.action === undefined ? null : (
+                <div className={fencedCodeHeaderClassName}>
+                    {props.language === undefined ? <span /> : <span>{props.language}</span>}
+                    {props.action}
                 </div>
             )}
             {body}
@@ -62,14 +58,10 @@ export const FencedCodeBlock = (input: FencedCodeBlockProps) => {
 }
 
 /** Keep a vendor-rendered table inside the same bounded reading frame as semantic tables. */
-export const MarkdownTableFrame = ({ children }: MarkdownTableFrameProps) => (
+export const MarkdownTableFrame = (props: MarkdownTableFrameProps) => (
     <div
-        className="starci-core-markdown-table-frame"
-        data-component="MarkdownTableFrame"
-        data-grammar-markdown-table-frame="true"
+        className={markdownTableFrameClassName}
     >
-        {children}
+        {props.children}
     </div>
 )
-
-export const meta = { shape: "branch", grammar: "core", contract: "core.branch.markdown-article" } as const

@@ -1,6 +1,5 @@
 import { Switch } from "@heroui/react"
 import { Icon } from "@/components/leaves/Icon"
-import type { LeafProps } from "@/components/contracts/props"
 
 /** Current appearance and accessible copy for the navbar switch. */
 export type ThemeSwitchData = {
@@ -14,30 +13,29 @@ export type ThemeSwitchActions = {
 }
 
 /** Fixed props for the light/dark switch. */
-export type ThemeSwitchProps = LeafProps<ThemeSwitchData, ThemeSwitchActions>
+export type ThemeSwitchProps = { readonly props: ThemeSwitchData; readonly on?: ThemeSwitchActions; readonly isLoading?: boolean }
 
 /** Draw the same native HeroUI switch used by the legacy navbar. */
-export const ThemeSwitch = ({ props, on }: ThemeSwitchProps) => (
-    <Switch
-        data-tier="leaf"
-        data-component="ThemeSwitch"
-        isSelected={props.isDark}
-        onChange={on?.change}
-        aria-label={props.label}
-    >
-        {({ isSelected }) => (
-            <Switch.Content>
-                <Switch.Control>
-                    <Switch.Thumb>
-                        <Switch.Icon>
-                            <Icon props={{ name: isSelected ? "dark" : "light", role: "leading" }} />
-                        </Switch.Icon>
-                    </Switch.Thumb>
-                </Switch.Control>
-            </Switch.Content>
-        )}
-    </Switch>
-)
-
-/** Source-level tier marker for the theme switch. */
-export const meta = { shape: "leaf", world: "pure" } as const
+export const ThemeSwitch = (props: ThemeSwitchProps) => {
+    const data = props.props
+    const on = props.on
+    return (
+        <Switch
+            isSelected={data.isDark}
+            onChange={on?.change}
+            aria-label={data.label}
+        >
+            {({ isSelected }) => (
+                <Switch.Content>
+                    <Switch.Control>
+                        <Switch.Thumb>
+                            <Switch.Icon>
+                                <Icon props={{ name: isSelected ? "dark" : "light", role: "leading" }} />
+                            </Switch.Icon>
+                        </Switch.Thumb>
+                    </Switch.Control>
+                </Switch.Content>
+            )}
+        </Switch>
+    )
+}
