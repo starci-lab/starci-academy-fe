@@ -1,6 +1,17 @@
 import { DrawerBranch } from "@/components/branches/DrawerBranch"
 import { ModalBranch } from "@/components/branches/ModalBranch"
-import { SurfaceAccordionCard } from "@/components/branches/SurfaceAccordionCard"
+import {
+    SurfaceAccordionCard,
+    SurfaceListCard,
+    LeadingNumber,
+    defineCompositeComponent,
+    defineContractComponent,
+    defineContractProjection,
+    defineLeafComponent,
+    type DataValue,
+    type LeafProps,
+} from "@starci/grammar/core"
+import { Article } from "@/components/branches/Article"
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { Tree } from "@/components/branches/Tree"
 import { courseContentMapPanel, type CourseContentMapBaseProps } from "@/components/blocks/learn/CourseContentMap/component"
@@ -8,7 +19,6 @@ import { ChallengeGradingModelDrawer } from "@/components/overlays/learn/Challen
 import { CourseLearnAiDrawer } from "@/components/overlays/learn/CourseLearnAiDrawer"
 import { StarCiAiSelectionAskBase } from "@/components/blocks/ai/StarCiAiSelectionAsk/component"
 import { Field } from "@/components/composites/Field"
-import { defineCompositeComponent, defineContractComponent, defineContractProjection, defineLeafComponent } from "@/components/contracts/props"
 import { Badge } from "@/components/leaves/Badge"
 import { Breadcrumbs } from "@/components/leaves/Breadcrumbs"
 import { Button } from "@/components/leaves/Button"
@@ -22,6 +32,14 @@ import type { ContentAiSelectionContext } from "@/modules/ai/content-ai-selectio
 export type CourseLearnChallengeDeliverable = {
     readonly id: string; readonly title: string; readonly description?: string; readonly score: number
     readonly url?: string; readonly modelId?: string; readonly modelLabel?: string
+}
+/** One localized authored item used by prerequisites, guided steps and expected outputs. */
+export type CourseLearnChallengeGuidanceItem = {
+    readonly id: string; readonly title?: string; readonly body: string
+}
+/** One localized, scored requirement from the Challenge aggregate. */
+export type CourseLearnChallengeRequirement = {
+    readonly id: string; readonly title: string; readonly body?: string; readonly score: number
 }
 /** Every persisted or transient state rendered by the Challenge workspace. */
 export type CourseLearnChallengeBlockState = "pending" | "ready" | "saving" | "saveFailed" | "conflict" | "submitting" | "evaluating" | "evaluationUnavailable" | "passed" | "needsRevision" | "failed"
@@ -42,6 +60,8 @@ export type CourseLearnChallengeLabels = {
     readonly conflict?: string; readonly submit?: string; readonly submitting?: string
     readonly scoreValue?: (score: number, maximum: number) => string; readonly passing?: (score: number) => string
     readonly scoreCaption?: string
+    readonly prerequisites?: string; readonly requirements?: string; readonly steps?: string
+    readonly expectedOutputs?: string; readonly hintLabel?: string; readonly evidenceLabel?: string
 }
 /** Closed pure-render contract for the full Challenge workspace branch. */
 export type CourseLearnChallengeBlockProps = {
@@ -50,8 +70,13 @@ export type CourseLearnChallengeBlockProps = {
         readonly displayId?: string; readonly courseId?: string; readonly challengeId?: string
         readonly title: string; readonly courseTitle: string; readonly moduleTitle: string; readonly contentTitle: string
         readonly description: string; readonly difficultyLabel: string; readonly statusLabel: string; readonly hint?: string
+        readonly prerequisites?: ReadonlyArray<CourseLearnChallengeGuidanceItem>
+        readonly requirements?: ReadonlyArray<CourseLearnChallengeRequirement>
+        readonly steps?: ReadonlyArray<CourseLearnChallengeGuidanceItem>
+        readonly outputs?: ReadonlyArray<CourseLearnChallengeGuidanceItem>
         readonly maximumScore: number; readonly deliverables: ReadonlyArray<CourseLearnChallengeDeliverable>
-        readonly expandedRequirementIds: ReadonlyArray<string>; readonly failedSubmissionId?: string; readonly notice?: string
+        readonly expandedRequirementIds: ReadonlyArray<string>; readonly expandedStepIds: ReadonlyArray<string>
+        readonly failedSubmissionId?: string; readonly notice?: string
         readonly draftStatus?: string; readonly isConfirmOpen: boolean; readonly isExitConfirmOpen?: boolean
         readonly isReviewing?: boolean; readonly isModelDrawerOpen?: boolean; readonly isAiDrawerOpen?: boolean
         readonly allDraftsComplete: boolean; readonly isCourseMapOpen: boolean; readonly courseMap: CourseContentMapBaseProps
@@ -65,7 +90,8 @@ export type CourseLearnChallengeBlockProps = {
         readonly requestExit?: () => void; readonly cancelExit?: () => void; readonly confirmExit?: () => void
         readonly openCourseMap?: () => void; readonly closeCourseMap?: () => void; readonly searchCourseMap?: (query: string) => void
         readonly toggleCourseMapModule?: (id: string, isOpen: boolean) => void; readonly openCourseMapItem?: (id: string) => void
-        readonly toggleRequirement?: (id: string, isOpen: boolean) => void; readonly changeUrl?: (id: string, value: string) => void
+        readonly toggleRequirement?: (id: string, isOpen: boolean) => void; readonly toggleStep?: (id: string, isOpen: boolean) => void
+        readonly changeUrl?: (id: string, value: string) => void
         readonly retry?: (id?: string) => void; readonly openResult?: (id: string) => void; readonly saveDraft?: () => void
         readonly reviewAttempt?: () => void; readonly returnToEdit?: () => void; readonly submitAttempt?: () => void
         readonly confirmSubmit?: () => void; readonly cancelSubmit?: () => void
@@ -82,28 +108,93 @@ export type CourseLearnChallengePageProps = CourseLearnChallengeBlockProps
 const restingDeliverables: ReadonlyArray<CourseLearnChallengeDeliverable> = [0, 1].map((index) => ({ id: `resting-${index}`, title: "", score: 0, modelId: "auto", modelLabel: "" }))
 
 type ChallengeRequirementInput = {
-    readonly item: CourseLearnChallengeDeliverable
+    readonly item: CourseLearnChallengeRequirement
     readonly isLoading: boolean
     readonly isOpen: boolean
     readonly points: (score: number) => string
-    readonly onToggle: (isOpen: boolean) => void
 }
 
-const buildChallengeRequirement = (input: ChallengeRequirementInput) => defineContractProjection("challenge-requirement-disclosure", () => (
-    <SurfaceAccordionCard
-        isOpen={input.isOpen}
-        summaryContract="challenge-requirement-summary"
-        summaryRender={defineContractComponent("challenge-requirement-summary", {
-            title: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => <Text props={{ content: input.item.title, size: "sm", weight: "semibold" }} isLoading={input.isLoading} />),
-            score: defineLeafComponent("badge", {}, () => <Badge props={{ content: input.points(input.item.score) }} isLoading={input.isLoading} />),
-        })}
-        bodyContract="challenge-requirement-body"
-        bodyRender={defineContractComponent("challenge-requirement-body", {
-            description: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: input.item.description, size: "sm", tone: "muted" }} isLoading={input.isLoading} />),
-        })}
-        onOpenChange={input.onToggle}
-    />
-))
+type ChallengeGuidanceGroupInput = {
+    readonly label: string
+    readonly items: ReadonlyArray<CourseLearnChallengeGuidanceItem>
+    readonly isLoading: boolean
+}
+
+type ChallengeGuidanceAccordionInput = ChallengeGuidanceGroupInput & {
+    readonly expandedIds: ReadonlyArray<string>
+    readonly onToggle: (id: string, isOpen: boolean) => void
+}
+
+type ChallengeGuidanceListData = {
+    readonly [key: string]: DataValue
+    readonly label: string
+    readonly items: ReadonlyArray<CourseLearnChallengeGuidanceItem>
+}
+
+const ChallengeGuidanceListView = ({ props, isLoading = false }: LeafProps<ChallengeGuidanceListData>) => (
+    <Tree contract="challenge-guidance-list" render={defineContractComponent("challenge-guidance-list", {
+        item: props.items.map((item, index) => defineContractComponent("challenge-guidance-item", {
+            marker: defineLeafComponent("leading-number", {}, () => <LeadingNumber position={index + 1} />),
+            copy: defineContractComponent("challenge-guidance-copy", {
+                ...(item.title === undefined ? {} : {
+                    title: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => <Text props={{ content: item.title, size: "sm", weight: "semibold" }} isLoading={isLoading} />),
+                }),
+                body: defineLeafComponent("article", {}, () => <Article props={{ body: item.body, measure: "compact" }} isLoading={isLoading} />),
+            }),
+        })),
+    })} />
+)
+
+const ChallengeGuidanceList = defineContractComponent("challenge-guidance-list", ChallengeGuidanceListView)
+
+const buildChallengeGuidanceGroup = (input: ChallengeGuidanceGroupInput) => defineContractComponent("challenge-brief-group", {
+    title: defineLeafComponent("heading", {}, () => <Heading props={{ content: input.label, level: 2 }} />),
+    list: defineContractProjection("challenge-guidance-list", () => (
+        <SurfaceListCard
+            ariaLabel={input.label}
+            labelHidden
+            depth="nested"
+            render={ChallengeGuidanceList}
+            props={{ props: { label: input.label, items: input.items }, isLoading: input.isLoading }}
+        />
+    )),
+})
+
+const buildChallengeGuidanceAccordion = (input: ChallengeGuidanceAccordionInput) => defineContractComponent("challenge-brief-group", {
+    title: defineLeafComponent("heading", {}, () => <Heading props={{ content: input.label, level: 2 }} />),
+    guidance: defineContractProjection("challenge-guidance-disclosure", () => (
+        <SurfaceAccordionCard
+            depth="nested"
+            items={input.items.map((item, index) => ({
+                id: item.id,
+                isOpen: input.expandedIds.includes(item.id),
+                summaryRender: defineContractComponent("challenge-guidance-summary", {
+                    marker: defineLeafComponent("leading-number", {}, () => <LeadingNumber position={index + 1} />),
+                    title: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => <Text props={{ content: item.title ?? `${input.label} ${index + 1}`, size: "sm", weight: "semibold" }} isLoading={input.isLoading} />),
+                }),
+                bodyRender: defineContractComponent("challenge-accordion-body", {
+                    description: defineLeafComponent("article", {}, () => <Article props={{ body: item.body, measure: "compact" }} isLoading={input.isLoading} />),
+                }),
+            }))}
+            renderSummary={(summary) => <Tree contract="challenge-guidance-summary" render={summary} />}
+            renderBody={(body) => <Tree contract="challenge-accordion-body" render={body} />}
+            onItemOpenChange={input.onToggle}
+        />
+    )),
+})
+
+const buildChallengeRequirement = (input: ChallengeRequirementInput) => ({
+    id: input.item.id,
+    isOpen: input.isOpen,
+    isDisabled: input.item.body === undefined,
+    summaryRender: defineContractComponent("challenge-requirement-summary", {
+        title: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => <Text props={{ content: input.item.title, size: "sm", weight: "semibold" }} isLoading={input.isLoading} />),
+        score: defineLeafComponent("badge", {}, () => <Badge props={{ content: input.points(input.item.score) }} isLoading={input.isLoading} />),
+    }),
+    bodyRender: defineContractComponent("challenge-accordion-body", {
+        description: defineLeafComponent("article", {}, () => <Article props={{ body: input.item.body, measure: "compact" }} isLoading={input.isLoading} />),
+    }),
+})
 
 /** Draw the complete Challenge workspace, review and support overlays without fetching. */
 export const CourseLearnChallengeBlockBase = (input: CourseLearnChallengeBlockProps) => {
@@ -134,21 +225,50 @@ export const CourseLearnChallengeBlockBase = (input: CourseLearnChallengeBlockPr
         explainSelection: input.props.labels.explainSelection ?? "Explain selection",
         translateSelection: input.props.labels.translateSelection ?? "Translate selection",
         dismissSelection: input.props.labels.dismissSelection ?? input.props.labels.cancel,
+        prerequisites: input.props.labels.prerequisites ?? "Prerequisites",
+        requirements: input.props.labels.requirements ?? "Requirements",
+        steps: input.props.labels.steps ?? "Steps",
+        expectedOutputs: input.props.labels.expectedOutputs ?? "Expected outputs",
+        hintLabel: input.props.labels.hintLabel ?? "Hint",
+        evidenceLabel: input.props.labels.evidenceLabel ?? input.props.labels.deliverables,
     }
     const courseMap = courseContentMapPanel({ ...input.props.courseMap, on: { search: input.on?.searchCourseMap, toggleModule: input.on?.toggleCourseMapModule, openLesson: input.on?.openCourseMapItem } })
-    const requirements = deliverables
-        .filter((item) => item.description !== undefined || isLoading)
+    const authoredRequirements = input.props.requirements ?? []
+    const requirements = authoredRequirements
         .map((item) => buildChallengeRequirement({
             item,
             isLoading,
             isOpen: input.props.expandedRequirementIds.includes(item.id),
             points: input.props.labels.points,
-            onToggle: (isOpen) => input.on?.toggleRequirement?.(item.id, isOpen),
         }))
+    const requirementGroup = requirements.length === 0 ? undefined : defineContractComponent("challenge-brief-group", {
+        title: defineLeafComponent("heading", {}, () => <Heading props={{ content: labels.requirements, level: 2 }} />),
+        requirement: defineContractProjection("challenge-requirement-disclosure", () => (
+            <SurfaceAccordionCard
+                depth="nested"
+                items={requirements}
+                renderSummary={(summary) => <Tree contract="challenge-requirement-summary" render={summary} />}
+                renderBody={(body) => <Tree contract="challenge-accordion-body" render={body} />}
+                onItemOpenChange={(id, isOpen) => input.on?.toggleRequirement?.(id, isOpen)}
+            />
+        )),
+    })
     const brief = defineContractComponent("challenge-brief", {
-        overview: defineLeafComponent("text", {}, () => <Text props={{ content: input.props.description }} isLoading={isLoading} />),
-        ...(requirements.length === 0 ? {} : { requirement: requirements }),
-        ...(input.props.hint === undefined ? {} : { hint: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: input.props.hint, size: "sm", tone: "muted", icon: "review" }} />) }),
+        overview: defineLeafComponent("article", {}, () => <Article props={{ body: input.props.description, measure: "compact" }} isLoading={isLoading} />),
+        ...((input.props.prerequisites?.length ?? 0) === 0 ? {} : { prerequisites: buildChallengeGuidanceGroup({ label: labels.prerequisites, items: input.props.prerequisites ?? [], isLoading }) }),
+        ...(requirementGroup === undefined ? {} : { requirements: requirementGroup }),
+        ...((input.props.steps?.length ?? 0) === 0 ? {} : { steps: buildChallengeGuidanceAccordion({
+            label: labels.steps,
+            items: input.props.steps ?? [],
+            isLoading,
+            expandedIds: input.props.expandedStepIds,
+            onToggle: (id, isOpen) => input.on?.toggleStep?.(id, isOpen),
+        }) }),
+        ...((input.props.outputs?.length ?? 0) === 0 ? {} : { outputs: buildChallengeGuidanceGroup({ label: labels.expectedOutputs, items: input.props.outputs ?? [], isLoading }) }),
+        ...(input.props.hint === undefined ? {} : { hint: defineContractComponent("challenge-brief-hint", {
+            title: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => <Text props={{ content: labels.hintLabel, size: "sm", weight: "semibold", icon: "review" }} />),
+            body: defineLeafComponent("article", {}, () => <Article props={{ body: input.props.hint, measure: "compact" }} />),
+        }) }),
     })
     const rows = deliverables.map((item) => {
         const failed = input.props.failedSubmissionId === item.id
@@ -164,11 +284,10 @@ export const CourseLearnChallengeBlockBase = (input: CourseLearnChallengeBlockPr
             ...(item.description === undefined ? {} : { description: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: item.description, size: "sm", tone: "muted" }} />) }),
             ...(isPassed ? {} : { field: defineCompositeComponent("field", {}, () => (
                 <Field
-                    props={{ id: `challenge-${item.id}`, name: `challenge-${item.id}`, label: item.title, placeholder: input.props.labels.repositoryPlaceholder, kind: "text", disabled: isBusy, hint, isInvalid: failed }}
+                    props={{ id: `challenge-${item.id}`, name: `challenge-${item.id}`, label: labels.evidenceLabel, placeholder: input.props.labels.repositoryPlaceholder, kind: "text", disabled: isBusy, hint, isInvalid: failed }}
                     on={{ change: (value) => input.on?.changeUrl?.(item.id, value) }} isLoading={isLoading}
                 />
             )) }),
-            status: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: hint, size: "xs", tone: "muted", live: failed ? "assertive" : "polite" }} />),
             model: defineContractComponent("challenge-deliverable-model", {
                 value: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: `${labels.gradingModel}: ${item.modelLabel ?? item.modelId ?? defaultModelId}`, size: "xs", tone: "muted" }} />),
                 action: defineLeafComponent("button", {}, () => <Button props={{ label: labels.changeModel, variant: "ghost", size: "sm" }} on={{ press: input.on?.openModelDrawer }} />),
@@ -187,14 +306,15 @@ export const CourseLearnChallengeBlockBase = (input: CourseLearnChallengeBlockPr
         title: defineLeafComponent("text", { weight: "semibold" }, () => <Text props={{ content: labels.readinessTitle, weight: "semibold" }} />),
         status: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: input.props.allDraftsComplete ? labels.readinessReady : labels.readinessIncomplete(completedCount, deliverables.length), size: "sm", tone: "muted", live: "polite" }} />),
         progress: defineLeafComponent("progress", {}, () => <Progress props={{ value: deliverables.length === 0 ? 0 : Math.round(completedCount / deliverables.length * 100), label: labels.readinessTitle }} isLoading={isLoading} />),
-        model: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: `${labels.gradingModel}: ${deliverables[0]?.modelLabel ?? ""}`, size: "xs", tone: "muted" }} />),
         draftStatus,
-        actions: defineContractComponent("challenge-submission-actions", { action: isPassed
-            ? [defineLeafComponent("button", {}, () => <Button props={{ label: input.props.labels.result, variant: "primary" }} on={{ press: () => input.on?.openResult?.(deliverables[0]?.id ?? "") }} />)]
-            : [
-                defineLeafComponent("button", {}, () => <Button props={{ label: input.props.labels.saveDraft, variant: "outline", disabled: isLoading || isBusy, isPending: input.blockState === "saving" }} on={{ press: input.on?.saveDraft }} />),
-                defineLeafComponent("button", {}, () => <Button props={{ label: labels.reviewAttempt, variant: "primary", disabled: isLoading || isBusy || !input.props.allDraftsComplete }} on={{ press: input.on?.reviewAttempt ?? input.on?.submitAttempt }} />),
-            ] }),
+        ...(input.props.isReviewing ? {} : {
+            actions: defineContractComponent("challenge-submission-actions", { action: isPassed
+                ? [defineLeafComponent("button", {}, () => <Button props={{ label: input.props.labels.result, variant: "primary" }} on={{ press: () => input.on?.openResult?.(deliverables[0]?.id ?? "") }} />)]
+                : [
+                    defineLeafComponent("button", {}, () => <Button props={{ label: input.props.labels.saveDraft, variant: "outline", disabled: isLoading || isBusy, isPending: input.blockState === "saving" }} on={{ press: input.on?.saveDraft }} />),
+                    defineLeafComponent("button", {}, () => <Button props={{ label: labels.reviewAttempt, variant: "primary", disabled: isLoading || isBusy || !input.props.allDraftsComplete }} on={{ press: input.on?.reviewAttempt ?? input.on?.submitAttempt }} />),
+                ] }),
+        }),
     })
     const review = input.props.isReviewing ? defineContractComponent("challenge-attempt-review", {
         title: defineLeafComponent("heading", {}, () => <Heading props={{ content: labels.reviewTitle, level: 2 }} />),
@@ -209,21 +329,20 @@ export const CourseLearnChallengeBlockBase = (input: CourseLearnChallengeBlockPr
             defineLeafComponent("button", {}, () => <Button props={{ label: input.props.labels.submitAttempt, variant: "primary" }} on={{ press: input.on?.submitAttempt }} />),
         ] }),
     }) : undefined
-    const main = defineContractComponent("challenge-workspace-main", {
-        brief: defineContractProjection("challenge-brief", () => <SurfaceCard props={{ label: input.props.labels.brief }} contract="challenge-brief" render={brief} />),
-        deliverables: defineContractProjection("challenge-deliverable-list", () => <SurfaceCard props={{ label: input.props.labels.deliverables }} contract="challenge-deliverable-list" render={deliverableList} />),
-        review,
-    })
+    const main = input.props.isReviewing
+        ? defineContractComponent("challenge-workspace-main", { review })
+        : defineContractComponent("challenge-workspace-main", {
+            brief: defineContractProjection("challenge-brief", () => <SurfaceCard props={{ label: input.props.labels.brief }} contract="challenge-brief" render={brief} />),
+            deliverables: defineContractProjection("challenge-deliverable-list", () => <SurfaceCard props={{ label: input.props.labels.deliverables }} contract="challenge-deliverable-list" render={deliverableList} />),
+        })
     const page = defineContractComponent("challenge-page-document", {
-        breadcrumb: defineLeafComponent("breadcrumbs", {}, () => <Breadcrumbs props={{ label: input.props.labels.breadcrumb, steps: [{ id: "course", label: input.props.courseTitle }, { id: "module", label: input.props.moduleTitle }, { id: "content", label: input.props.contentTitle }, { id: "challenge", label: input.props.title }] }} on={{ course: input.on?.openCourse, module: input.on?.openModule, content: input.on?.openContent }} />),
+        breadcrumb: defineLeafComponent("breadcrumbs", {}, () => <Breadcrumbs props={{ label: input.props.labels.breadcrumb, showFullTrail: true, steps: [{ id: "course", label: input.props.courseTitle }, { id: "module", label: input.props.moduleTitle }, { id: "content", label: input.props.contentTitle }, { id: "challenge", label: input.props.title }] }} on={{ course: input.on?.openCourse, module: input.on?.openModule, content: input.on?.openContent }} />),
         mobileMap: defineContractComponent("learn-mobile-course-map-row", {
             action: defineLeafComponent("button", {}, () => <Button props={{ label: input.props.labels.openCourseMap, variant: "outline", size: "sm", icon: "course" }} on={{ press: input.on?.openCourseMap }} />),
             fact: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: input.props.courseMap.props.progressFact, size: "xs", tone: "muted" }} />),
         }),
-        back: defineLeafComponent("button", {}, () => <Button props={{ label: input.props.labels.backToLesson, variant: "ghost", size: "sm" }} on={{ press: input.on?.requestExit }} />),
         header: defineContractComponent("challenge-header", {
             title: defineLeafComponent("heading", {}, () => <Heading props={{ content: input.props.title, level: 1 }} isLoading={isLoading} />),
-            description: defineLeafComponent("text", {}, () => <Text props={{ content: input.props.description, tone: "muted" }} isLoading={isLoading} />),
             meta: defineContractComponent("profile-fact-run", { fact: [
                 defineLeafComponent("badge", {}, () => <Badge props={{ content: input.props.difficultyLabel, tone: "warning" }} isLoading={isLoading} />),
                 defineLeafComponent("badge", {}, () => <Badge props={{ content: input.props.labels.points(input.props.maximumScore) }} isLoading={isLoading} />),
@@ -231,7 +350,6 @@ export const CourseLearnChallengeBlockBase = (input: CourseLearnChallengeBlockPr
             ] }),
             actions: defineContractComponent("challenge-header-actions", {
                 language: defineLeafComponent("select", {}, () => <Select props={{ id: "challenge-language", name: "challenge-language", label: labels.language, options: input.props.languageOptions ?? [{ id: "agnostic", label: labels.language }], selectedKey: input.props.selectedLanguage }} on={{ select: input.on?.selectLanguage }} />),
-                model: defineLeafComponent("button", {}, () => <Button props={{ label: labels.changeModel, variant: "outline", size: "sm" }} on={{ press: input.on?.openModelDrawer }} />),
             }),
         }),
         body: defineContractComponent("challenge-workspace", {

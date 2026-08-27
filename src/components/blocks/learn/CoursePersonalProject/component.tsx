@@ -7,9 +7,10 @@ import { Heading } from "@/components/leaves/Heading"
 import { Progress } from "@/components/leaves/Progress"
 import { Text } from "@/components/leaves/Text"
 import { defineCompositeComponent, defineContractComponent, defineContractProjection, defineLeafComponent } from "@/components/contracts/props"
+import { LeadingNumber } from "@starci/grammar/core"
 
 /** One task destination in the current milestone. */
-export type CoursePersonalProjectTaskRow = { readonly id: string; readonly title: string; readonly status: string; readonly actionLabel: string; readonly isCurrent?: boolean }
+export type CoursePersonalProjectTaskRow = { readonly id: string; readonly position: number; readonly title: string; readonly status: string; readonly actionLabel: string; readonly isCurrent?: boolean }
 /** The next executable task shown before project completion evidence. */
 export type CoursePersonalProjectNextTask = { readonly id: string; readonly position: string; readonly title: string }
 /** Genuine whole-block states; only these alter the block's notices and resting geometry. */
@@ -38,7 +39,7 @@ export type CoursePersonalProjectBlockProps = {
 /** Render the legacy-shaped capstone dashboard without owning transport or routing. */
 export const CoursePersonalProjectBase = (input: CoursePersonalProjectBlockProps) => {
     const loading = input.state === "pending"
-    const tasks = loading && input.data.tasks.length === 0 ? Array.from({ length: 4 }, (_, index): CoursePersonalProjectTaskRow => ({ id: `pending-${index}`, title: "", status: "", actionLabel: input.data.continueLabel })) : input.data.tasks
+    const tasks = loading && input.data.tasks.length === 0 ? Array.from({ length: 4 }, (_, index): CoursePersonalProjectTaskRow => ({ id: `pending-${index}`, position: index + 1, title: "", status: "", actionLabel: input.data.continueLabel })) : input.data.tasks
     const header = defineContractComponent("page-header-stack", {
         trail: input.data.courseTitle === undefined && !loading ? undefined : defineLeafComponent("breadcrumbs", {}, () => <Breadcrumbs props={{ label: input.data.breadcrumbLabel, steps: [{ id: "course", label: input.data.courseTitle ?? "" }, { id: "project", label: input.data.title }] }} on={loading ? undefined : { course: input.on?.openCourse }} isLoading={loading} />),
         title: defineLeafComponent("heading", {}, () => <Heading props={{ content: input.data.title, level: 1 }} isLoading={loading} />),
@@ -57,7 +58,10 @@ export const CoursePersonalProjectBase = (input: CoursePersonalProjectBlockProps
     const milestone = input.data.milestoneTitle === undefined && !loading ? undefined : defineContractComponent("course-personal-project-current-milestone", {
         title: defineLeafComponent("heading", {}, () => <Heading props={{ content: input.data.milestoneTitle, level: 2 }} isLoading={loading} />),
         tasks: defineContractComponent("course-personal-project-current-task-grid", { task: tasks.map((task) => defineContractProjection("course-personal-project-task-card", () => <SurfaceCard contract="course-personal-project-task-card" render={defineContractComponent("course-personal-project-task-card", {
-            title: defineLeafComponent("heading", {}, () => <Heading props={{ content: task.title, level: 3 }} isLoading={loading} />),
+            heading: defineContractComponent("course-personal-project-task-heading", {
+                marker: defineLeafComponent("leading-number", {}, () => <LeadingNumber position={task.position} />),
+                title: defineLeafComponent("heading", {}, () => <Heading props={{ content: task.title, level: 3 }} isLoading={loading} />),
+            }),
             status: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: task.status, size: "xs", tone: "muted" }} isLoading={loading} />),
             action: defineLeafComponent("button", {}, () => <Button props={{ label: task.actionLabel, variant: "tertiary", size: "sm", icon: "next", iconPlacement: "trailing" }} on={loading ? undefined : { press: () => input.on?.openTask?.(task.id) }} isLoading={loading} />),
         })} isLoading={loading} />)) }),

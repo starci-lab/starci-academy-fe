@@ -1,5 +1,5 @@
 import type { ComponentType } from "react"
-import { SurfaceAccordionCard } from "@/components/branches/SurfaceAccordionCard"
+import { SurfaceAccordionCard } from "@starci/grammar/core"
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { SurfaceFormCard } from "@/components/branches/SurfaceFormCard"
 import { SurfaceListCard, type SurfaceListCardData } from "@/components/branches/SurfaceListCard"
@@ -197,10 +197,10 @@ export const PersonalProjectTaskBase = (input: PersonalProjectTaskBaseProps) => 
                     )),
                     disclosure: defineContractProjection("personal-project-guidance-disclosure", () => (
                         <SurfaceAccordionCard
-                            variant="surface"
+                            depth="top"
                             items={accordionItems}
-                            summaryContract="personal-project-guidance-disclosure-summary"
-                            bodyContract="personal-project-guidance-disclosure-body"
+                            renderSummary={(summary) => <Tree contract="personal-project-guidance-disclosure-summary" render={summary} />}
+                            renderBody={(body) => <Tree contract="personal-project-guidance-disclosure-body" render={body} />}
                             onItemOpenChange={(id, isOpen) => input.on?.toggleBriefSection?.(id, isOpen)}
                         />
                     )),

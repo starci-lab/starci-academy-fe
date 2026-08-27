@@ -49,7 +49,7 @@ describe("CourseCurriculumAccordion", () => {
         expect(section?.querySelectorAll("[data-component=\"SurfaceAccordionCardItem\"]")).toHaveLength(2)
         expect(screen.getByText("Foundation")).toBeInTheDocument()
         expect(screen.getByText("2 previews")).toBeInTheDocument()
-        expect(screen.getByText("4 contents · 96 min")).not.toBeVisible()
+        expect(screen.queryByText("4 contents · 96 min")).not.toBeInTheDocument()
 
         fireEvent.click(screen.getByText("Linux foundations"))
 

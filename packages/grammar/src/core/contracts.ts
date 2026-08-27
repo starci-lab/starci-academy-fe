@@ -48,7 +48,7 @@ const surfaceCardSpec = {
 } as const satisfies GrammarContractSpec
 
 const surfaceListCardSpec = {
-    version: "1.1.0",
+    version: "1.2.0",
     layer: "branch",
     slots: ["external-label", "single-list-shell", "single-collection-shell", "static-row", "interactive-row", "footer"],
     stateInputs: PRESENTATION_STATES,
@@ -75,13 +75,84 @@ const surfaceListCardSpec = {
     closedInvariants: [
         "one-list-one-shell",
         "one-collection-one-shell",
-        "rows-separated-by-dividers",
+        "fills-content-owner",
+        "row-separators-full-bleed",
+        "row-content-owns-inset",
         "affirmative-row-uses-one-check",
         "nested-border-xor-shadow",
         "static-rows-have-no-action",
+        "static-row-hover-invariant",
         "interactive-rows-own-their-actions",
         "hidden-label-retains-accessible-name",
         "footer-follows-collection",
+        "neutral-state-only",
+    ],
+} as const satisfies GrammarContractSpec
+
+const markdownArticleSpec = {
+    version: "1.0.0",
+    layer: "branch",
+    slots: [
+        "semantic-content",
+        "heading",
+        "paragraph",
+        "ordered-list",
+        "unordered-list",
+        "inline-code-chip",
+        "fenced-code-block",
+        "blockquote",
+        "table",
+        "link",
+        "code-action",
+    ],
+    stateInputs: PRESENTATION_STATES,
+    variableAxes: ["content-measure", "container-response"],
+    extensionPolicy: {
+        allowedAxes: ["content-measure", "container-response"],
+        forbiddenChanges: CLOSED_EXTENSION_BOUNDARIES,
+    },
+    closedInvariants: [
+        "semantic-markdown-retained",
+        "body-copy-fourteen-pixels",
+        "inline-code-uses-neutral-chip-treatment",
+        "fenced-code-has-bounded-overflow",
+        "table-has-bounded-overflow",
+        "blockquote-remains-distinct",
+        "links-retain-destination-semantics",
+        "business-content-is-not-transformed",
+        "neutral-state-only",
+    ],
+} as const satisfies GrammarContractSpec
+
+const surfaceAccordionCardSpec = {
+    version: "1.0.0",
+    layer: "branch",
+    slots: ["single-disclosure-shell", "disclosure-row", "summary-trigger", "body-panel"],
+    stateInputs: PRESENTATION_STATES,
+    variableAxes: [
+        "surface-depth",
+        "row-count",
+        "disclosure-state",
+        "container-response",
+    ],
+    extensionPolicy: {
+        allowedAxes: [
+            "surface-depth",
+            "row-count",
+            "disclosure-state",
+            "container-response",
+        ],
+        forbiddenChanges: CLOSED_EXTENSION_BOUNDARIES,
+    },
+    closedInvariants: [
+        "one-disclosure-one-shell",
+        "fills-content-owner",
+        "row-separators-full-bleed",
+        "row-content-owns-inset",
+        "nested-border-xor-shadow",
+        "neutral-trigger-hover-invariant",
+        "open-closed-only-presentation-state",
+        "keyboard-operable-trigger",
         "neutral-state-only",
     ],
 } as const satisfies GrammarContractSpec
@@ -144,12 +215,16 @@ const visualTreatmentSpec = {
 
 export const surfaceCardContract = defineGrammarContract("core.surface-card", surfaceCardSpec)
 export const surfaceListCardContract = defineGrammarContract("core.surface-list-card", surfaceListCardSpec)
+export const surfaceAccordionCardContract = defineGrammarContract("core.surface-accordion-card", surfaceAccordionCardSpec)
+export const markdownArticleContract = defineGrammarContract("core.markdown-article", markdownArticleSpec)
 export const railContract = defineGrammarContract("core.rail", railSpec)
 export const visualTreatmentContract = defineGrammarContract("core.visual-treatment", visualTreatmentSpec)
 
 export const CORE_COMPONENT_CONTRACTS = Object.freeze({
     "core.surface-card": surfaceCardContract,
     "core.surface-list-card": surfaceListCardContract,
+    "core.surface-accordion-card": surfaceAccordionCardContract,
+    "core.markdown-article": markdownArticleContract,
     "core.rail": railContract,
     "core.visual-treatment": visualTreatmentContract,
 })

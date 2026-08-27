@@ -1,3 +1,9 @@
+/*
+ * Freeze the cross-package cascade before any import registers its own layer.
+ * Tailwind's reset must run before Grammar anatomy; app utilities remain the final explicit override.
+ */
+@layer theme, base, starci-grammar-common, starci-grammar-core, starci-grammar-extension, components, utilities;
+
 @import "@starci/grammar/common/styles.css";
 @import "@starci/grammar/core/styles.css";
 @import "tailwindcss";

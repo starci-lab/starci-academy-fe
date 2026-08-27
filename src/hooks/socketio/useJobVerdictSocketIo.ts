@@ -30,13 +30,32 @@ export interface JobVerdict {
     totalTestcases?: number
     /** Compiler stderr, present only for a compile error. */
     compileMessage?: string
+    /** Generic async-job status published by the job-notifications gateway. */
+    status?: string
+    /** Product bucket for the owning job. */
+    category?: string
+    /** Challenge deliverable associated with this job, when applicable. */
+    challengeSubmissionId?: string
+    /** Terminal failure detail, when the worker exposes one. */
+    error?: string
+    /** Sanitized terminal failure detail emitted by the generic job gateway. */
+    failureReason?: string | null
+}
+
+/** Connection lifecycle exposed to product surfaces. */
+export type JobNotificationConnectionState = "idle" | "connecting" | "connected" | "disconnected"
+
+/** Server envelope emitted by the job-notifications namespace. */
+interface JobStatusEnvelope {
+    readonly data?: JobVerdict
 }
 
 /** The namespace the API publishes job status on. */
 const JOB_NOTIFICATIONS_NAMESPACE = "/job_notifications"
 
 /** The event a job status arrives as. */
-const JOB_STATUS_EVENT = "job.status.updated"
+const SUBSCRIBE_JOB_EVENT = "job_notifications.subscribe_job_notification.publication"
+const JOB_STATUS_EVENT = "job_notifications.job_status_updated.subscription"
 
 /**
  * Subscribe to one judging job.
@@ -48,11 +67,13 @@ export const useJobVerdictSocketIo = (jobId?: string) => {
     const token = useSessionToken()
     const [verdict, setVerdict] = useState<JobVerdict | undefined>(undefined)
     const [isConnected, setIsConnected] = useState(false)
+    const [connectionState, setConnectionState] = useState<JobNotificationConnectionState>("idle")
     const socketRef = useRef<Socket | undefined>(undefined)
 
     useEffect(() => {
         if (jobId === undefined || token === undefined) return undefined
 
+        setConnectionState("connecting")
         const url = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001"
         const socket = io(`${url}${JOB_NOTIFICATIONS_NAMESPACE}`, {
             auth: { token },
@@ -60,21 +81,40 @@ export const useJobVerdictSocketIo = (jobId?: string) => {
         })
         socketRef.current = socket
 
-        socket.on("connect", () => setIsConnected(true))
-        socket.on("disconnect", () => setIsConnected(false))
-        socket.on(JOB_STATUS_EVENT, (message: JobVerdict) => {
+        const subscribe = () => {
+            setIsConnected(true)
+            setConnectionState("connected")
+            socket.emit(SUBSCRIBE_JOB_EVENT, {
+                data: { jobId },
+                locale: document.documentElement.lang || "en",
+            })
+        }
+        const disconnect = () => {
+            setIsConnected(false)
+            setConnectionState("disconnected")
+        }
+        const receive = (message: JobStatusEnvelope) => {
+            const update = message.data
             // one socket may carry every job this viewer owns, so a message for somebody else's
             // submission must not overwrite the verdict this page is waiting on
-            if (message.jobId === jobId) setVerdict(message)
-        })
+            if (update?.jobId === jobId) setVerdict(update)
+        }
+        socket.on("connect", subscribe)
+        socket.on("disconnect", disconnect)
+        socket.on("connect_error", disconnect)
+        socket.on(JOB_STATUS_EVENT, receive)
 
         return () => {
-            socket.off(JOB_STATUS_EVENT)
+            socket.off("connect", subscribe)
+            socket.off("disconnect", disconnect)
+            socket.off("connect_error", disconnect)
+            socket.off(JOB_STATUS_EVENT, receive)
             socket.disconnect()
             socketRef.current = undefined
             setIsConnected(false)
+            setConnectionState("idle")
         }
     }, [jobId, token])
 
-    return { verdict, isConnected }
+    return { verdict, isConnected, connectionState }
 }

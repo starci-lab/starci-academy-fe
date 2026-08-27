@@ -118,6 +118,10 @@ const setReady = () => {
         challenges: [{
             id: "challenge", displayId: "challenge", orderIndex: 1, title: "Challenge", description: "Brief",
             difficulty: "medium", score: 100, hint: "Hint",
+            prerequisites: [{ id: "prerequisite-1", orderIndex: 1, sortIndex: 1, langs: [{ lang: "en", orderIndex: 1, sortIndex: 1, text: "Know dependency inversion" }] }],
+            requirements: [{ id: "requirement-1", orderIndex: 1, sortIndex: 1, langs: [{ lang: "en", orderIndex: 1, sortIndex: 1, score: 60, title: "Stable port", body: "Keep the contract stable" }] }],
+            steps: [{ id: "step-1", orderIndex: 1, sortIndex: 1, langs: [{ lang: "en", orderIndex: 1, sortIndex: 1, title: "Extract interface", body: "Invert the dependency" }] }],
+            outputs: [{ id: "output-1", orderIndex: 1, sortIndex: 1, langs: [{ lang: "en", orderIndex: 1, sortIndex: 1, text: "Repository and smoke-test evidence" }] }],
             submissions: [{ id: "submission-1", sortIndex: 1, title: "API", description: "Repository", score: 100 }],
         }],
     }
@@ -171,6 +175,20 @@ describe("CourseLearnChallengeBlock", () => {
 
         await waitFor(() => expect(mocks.submission.trigger).toHaveBeenCalled())
         await waitFor(() => expect(mocks.push).toHaveBeenCalledWith(expect.stringContaining("attempt=attempt-1")))
+    })
+
+    it("maps the complete authored Challenge taxonomy without deriving it from deliverables", () => {
+        setReady()
+        render(<CourseLearnChallengeBlock displayId="course" contentId="content" moduleId="module" challengeId="challenge" />)
+        const props = screen.getByTestId("props")
+
+        expect(props).toHaveTextContent("Know dependency inversion")
+        expect(props).toHaveTextContent("Stable port")
+        expect(props).toHaveTextContent("Extract interface")
+        expect(props).toHaveTextContent("Repository and smoke-test evidence")
+        expect(props).toHaveTextContent("\"expandedRequirementIds\":[\"requirement-1\"]")
+        expect(props).toHaveTextContent("\"expandedStepIds\":[\"step-1\"]")
+        expect(props).toHaveTextContent("\"deliverables\":[{\"id\":\"submission-1\"")
     })
 
     it("owns map, exit, model, AI and retry interaction state", async () => {

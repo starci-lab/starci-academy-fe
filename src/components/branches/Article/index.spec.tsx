@@ -91,8 +91,9 @@ describe("Article", () => {
     it("rests five lines while a body is in flight, without drawing any of it", () => {
         const { container } = render(<Article props={{ body: "Lesson body" }} isLoading />)
         const root = container.querySelector("[data-component=\"Article\"]")
+        const grammar = container.querySelector("[data-component=\"MarkdownArticle\"]")
         expect(root).toHaveAttribute("data-resting", "true")
-        expect(root?.children).toHaveLength(5)
+        expect(grammar?.children).toHaveLength(5)
         expect(root?.textContent).toBe("")
         expect(container.querySelector("p")).toBeNull()
     })
@@ -100,16 +101,19 @@ describe("Article", () => {
     it("rests the same way for a content whose body the server has not sent at all", () => {
         const { container } = render(<Article props={{ aiSelectable: true }} />)
         const root = container.querySelector("[data-component=\"Article\"]")
+        const grammar = container.querySelector("[data-component=\"MarkdownArticle\"]")
         expect(root).toHaveAttribute("data-resting", "true")
         expect(root).toHaveAttribute("data-ai-selectable", "true")
-        expect(root?.children).toHaveLength(5)
+        expect(grammar?.children).toHaveLength(5)
     })
 
     it("draws an empty body as an article with nothing in it rather than as a rest", () => {
         const { container } = render(<Article props={{ body: "" }} />)
         const root = container.querySelector("[data-component=\"Article\"]")
+        const grammar = container.querySelector("[data-component=\"MarkdownArticle\"]")
         expect(root).not.toHaveAttribute("data-resting")
-        expect(root?.children).toHaveLength(0)
+        expect(grammar).toHaveAttribute("data-grammar-contract", "core.markdown-article")
+        expect(grammar?.children).toHaveLength(0)
     })
 
     it("folds the author's six heading levels onto the two the page has room for", () => {
@@ -137,10 +141,28 @@ describe("Article", () => {
         const paragraph = container.querySelector("p")
         expect(paragraph?.querySelector("strong")?.textContent).toBe("rule")
         expect(paragraph?.querySelector("em")?.textContent).toBe("note")
-        expect(paragraph?.querySelector("code")?.textContent).toBe("useState")
+        const inlineCode = paragraph?.querySelector("code")
+        expect(inlineCode?.textContent).toBe("useState")
+        expect(inlineCode).not.toHaveAttribute("class")
+        expect(container.querySelector("[data-grammar-contract=\"core.markdown-article\"]")).not.toBeNull()
         const link = paragraph?.querySelector("a")
         expect(link).toHaveAttribute("href", "https://example.com")
         expect(link?.textContent).toBe("the docs")
+    })
+
+    it("uses the compact 14px measure when Markdown is embedded in another surface", () => {
+        const { container } = render(<Article props={{
+            body: "Compact paragraph.\n\n- Compact item\n\n> Compact quote\n",
+            measure: "compact",
+        }} />)
+        const root = container.querySelector("[data-component=Article]")
+        const grammar = container.querySelector("[data-component=MarkdownArticle]")
+
+        expect(root).toHaveAttribute("data-measure", "compact")
+        expect(grammar).toHaveAttribute("data-grammar-markdown-measure", "compact")
+        expect(grammar?.querySelector(":scope > p")).not.toHaveAttribute("class")
+        expect(grammar?.querySelector("li")).not.toHaveAttribute("class")
+        expect(grammar?.querySelector("blockquote")).not.toHaveAttribute("class")
     })
 
     it("keeps a hard break as a break rather than joining the two lines", () => {
@@ -215,9 +237,10 @@ describe("Article", () => {
         }} />)
         // SURFACE-IN-SURFACE-7 recessed form and its OVERFLOW-5 scroll sit on the same node,
         // because the frame and the scroll are one decision.
-        const well = container.querySelector("[role=\"grid\"], [role=\"table\"]")?.closest("div.overflow-x-auto")
-        expect(well).not.toBeNull()
-        expect(well).toHaveClass("rounded-xl", "border", "border-border", "bg-background", "shadow-none", "min-w-0")
+        const frame = container.querySelector("[data-grammar-markdown-table-frame=\"true\"]")
+        expect(frame).not.toBeNull()
+        expect(frame?.className).not.toContain("shadow")
+        expect(frame?.querySelector("[role=\"grid\"], [role=\"table\"]")).not.toBeNull()
     })
 
     it("renders authored accordion panels instead of flattening directive markers", () => {
@@ -246,8 +269,9 @@ describe("Article", () => {
         forceTree(null)
         const { container } = render(<Article props={{ body: "# Chapter\n" }} />)
         const root = container.querySelector("[data-component=\"Article\"]")
+        const grammar = container.querySelector("[data-component=\"MarkdownArticle\"]")
         expect(root).not.toHaveAttribute("data-resting")
-        expect(root?.children).toHaveLength(0)
+        expect(grammar?.children).toHaveLength(0)
     })
 
     it("drops a node that carries no type instead of drawing it as an empty line", () => {
@@ -260,7 +284,8 @@ describe("Article", () => {
         })
         const { container } = render(<Article props={{ body: "ignored" }} />)
         const root = container.querySelector("[data-component=\"Article\"]")
-        expect(root?.children).toHaveLength(1)
+        const grammar = container.querySelector("[data-component=\"MarkdownArticle\"]")
+        expect(grammar?.children).toHaveLength(1)
         expect(root?.textContent).toBe("kept")
     })
 

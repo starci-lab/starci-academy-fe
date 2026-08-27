@@ -15,6 +15,8 @@ type ContentNavigationRailProps = {
 export type RailProps = (ComplementaryRailProps | ContentNavigationRailProps) & {
     readonly children: ReactNode
     readonly footer?: ReactNode
+    /** Whether the rail sizes to authored content or fills a height supplied by its layout host. */
+    readonly height?: "content" | "fill"
     readonly mode?: "flow" | "sticky"
     readonly width?: "compact" | "standard" | "wide"
     readonly state?: PresentationState
@@ -27,6 +29,7 @@ export const Rail = ({
     landmark = "complementary",
     children,
     footer,
+    height = "content",
     mode = "flow",
     width = "standard",
     state = "neutral",
@@ -51,6 +54,7 @@ export const Rail = ({
         "data-grammar-collapse": collapse,
         "data-grammar-contract": "core.rail",
         "data-grammar-landmark": landmark,
+        "data-grammar-rail-height": height,
         "data-grammar-motion": motion,
         "data-grammar-rail": "true",
         "data-grammar-rail-mode": mode,

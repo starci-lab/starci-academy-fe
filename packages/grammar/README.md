@@ -36,7 +36,7 @@ Core owners expose additive, business-neutral capabilities without opening their
 - `StateMark` is a Core leaf for neutral presentation-state marks.
 - `StaticStateRow` is a Core composite for one non-interactive row in a Core-owned collection.
 - `SurfaceCard` supports bounded/frameless frames, page/contained scrolling and one label-end slot.
-- `SurfaceListCard` supports Core-owned static rows or a content-owned interactive collection, an accessible hidden label and one footer.
+- `SurfaceListCard` hosts one existing typed contract component with structured runtime props, an accessible hidden label and one footer; the contract registry remains the sole row/cell authority.
 - `Rail` supports a Core-owned complementary landmark or one content-owned navigation landmark, plus expanded/collapsed and motion/reduced-motion declarations.
 
 `CORE_LAYOUT_CLASS_NAMES` is the closed product-neutral layout vocabulary. Product breakpoints,

@@ -63,9 +63,13 @@ describe("learnSpine", () => {
         )
         expect(container.querySelector("[data-node=learn-course-navigation-rail]")).not.toHaveClass("p-4")
         expect(container.querySelector("[data-node=learn-course-navigation-groups-scroll]")).toHaveClass(
+            "overflow-y-auto",
             "scroll-shadow--vertical",
             "scroll-shadow--hide-scrollbar",
         )
+        const groupsViewport = container.querySelector("[data-node=learn-course-navigation-groups-scroll]")
+        const home = container.querySelector("[data-node=learn-course-home-navigation-row]")
+        expect(groupsViewport?.contains(home)).toBe(false)
     })
 
     it("reports the pressed destination by its own id", () => {

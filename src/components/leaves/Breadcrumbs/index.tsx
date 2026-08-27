@@ -90,18 +90,29 @@ export const Breadcrumbs = ({ props, on, isLoading = false }: BreadcrumbsProps) 
             data-component="Breadcrumbs"
             data-loading="false"
             aria-label={props.label}
+            className="scroll-shadow--hide-scrollbar w-full min-w-0 overflow-x-auto"
         >
-            {props.steps.map((step, index) => (
-                // The vendor marks the LAST item as the current page itself, so the only thing
-                // left to decide is that it carries no handler: a control returning you to the
-                // page you are on is one readers learn to distrust everywhere.
-                <HeroBreadcrumbs.Item
-                    key={step.id}
-                    onPress={index === last ? undefined : on?.[step.id]}
-                >
-                    {step.label}
-                </HeroBreadcrumbs.Item>
-            ))}
+            {props.steps.map((step, index) => {
+                // Do not pass an `onPress` prop at all for the current page. React
+                // Aria treats an explicitly present-but-undefined press handler as
+                // a changing interactive registration, which can loop during a
+                // full four-step Challenge trail in the real browser.
+                if (index === last) {
+                    return (
+                        <HeroBreadcrumbs.Item key={step.id}>
+                            {step.label}
+                        </HeroBreadcrumbs.Item>
+                    )
+                }
+                return (
+                    <HeroBreadcrumbs.Item
+                        key={step.id}
+                        onPress={on?.[step.id]}
+                    >
+                        {step.label}
+                    </HeroBreadcrumbs.Item>
+                )
+            })}
         </HeroBreadcrumbs>
     )
 }

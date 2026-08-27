@@ -41,17 +41,23 @@ describe("CourseContentMapBase", () => {
             />,
         )
 
-        expect(container.querySelector("[data-node=content-map-panel]")).toHaveClass("px-3")
-        expect(container.querySelector("[data-node=content-map-panel]")).toHaveClass("py-6")
+        const panel = container.querySelector("[data-node=content-map-panel]")
+        const moduleList = container.querySelector("[data-node=content-map-module-list]")
+        const progress = screen.getByRole("progressbar", { name: "Course progress" })
+        const search = screen.getByRole("searchbox", { name: "Search this course" })
+        expect(panel).toHaveClass("h-full", "overflow-hidden", "px-3", "py-6")
         expect(container.querySelector("[data-node=content-map-panel]")).not.toHaveClass("p-4")
-        expect(container.querySelector("[data-node=content-map-module-list]")).toHaveClass(
+        expect(moduleList).toHaveClass(
             "divide-y",
             "divide-separator",
+            "overflow-y-auto",
             "scroll-shadow--vertical",
             "scroll-shadow--hide-scrollbar",
         )
-        expect(container.querySelector("[data-node=content-map-module-list]")).not.toHaveClass("scrollbar")
-        expect(screen.getByRole("progressbar", { name: "Course progress" })).toHaveAttribute("aria-valuenow", "50")
+        expect(moduleList).not.toHaveClass("scrollbar")
+        expect(moduleList?.contains(progress)).toBe(false)
+        expect(moduleList?.contains(search)).toBe(false)
+        expect(progress).toHaveAttribute("aria-valuenow", "50")
         fireEvent.click(screen.getByText("Latency budgets"))
         expect(openLesson).toHaveBeenCalledWith("lesson-1")
     })

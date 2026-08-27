@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { SurfaceAccordionCard } from "@/components/branches/SurfaceAccordionCard"
+import { SurfaceAccordionCard } from "@starci/grammar/core"
+import { Tree } from "@/components/branches/Tree"
 import { DisclosureIndicator } from "@/components/leaves/DisclosureIndicator"
 import { Text } from "@/components/leaves/Text"
 import {
@@ -40,7 +41,7 @@ export const PricingPhaseDisclosure = (input: PricingPhaseDisclosureProps) => {
     return (
         <SurfaceAccordionCard
             isOpen={isOpen}
-            summaryContract="pricing-phase-disclosure-summary"
+            renderSummary={(summary) => <Tree contract="pricing-phase-disclosure-summary" render={summary} />}
             summaryRender={defineContractComponent("pricing-phase-disclosure-summary", {
                 label: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
                     <Text
@@ -52,7 +53,7 @@ export const PricingPhaseDisclosure = (input: PricingPhaseDisclosureProps) => {
                     <DisclosureIndicator props={{ isOpen }} />
                 )),
             })}
-            bodyContract="pricing-phase-list"
+            renderBody={(body) => <Tree contract="pricing-phase-list" render={body} />}
             bodyRender={defineContractComponent("pricing-phase-list", {
                 phase: input.props.phases.map((phase) => defineContractComponent("pricing-phase-row", {
                     name: defineLeafComponent("text", { size: "sm" }, () => (

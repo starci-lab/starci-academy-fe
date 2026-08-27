@@ -9,7 +9,11 @@ import {
 export const QUERY_CONTENT_CHALLENGE_SUBMISSIONS_SWR_KEY = "QUERY_CONTENT_CHALLENGE_SUBMISSIONS_SWR"
 
 /** Reads authored deliverables together with the caller's recoverable draft and latest attempt. */
-export const useQueryContentChallengeSubmissionsSwr = (courseId?: string, challengeId?: string) => {
+export const useQueryContentChallengeSubmissionsSwr = (
+    courseId?: string,
+    challengeId?: string,
+    realtimeConnected = false,
+) => {
     const viewer = useViewerKey()
     return useSWR<ReadonlyArray<ContentChallengeDraftSubmission> | null>(
         courseId === undefined || challengeId === undefined || viewer === undefined
@@ -24,7 +28,7 @@ export const useQueryContentChallengeSubmissionsSwr = (courseId?: string, challe
             return response.data?.challengeSubmissions.data?.data ?? null
         },
         {
-            refreshInterval: (data) => data?.some(
+            refreshInterval: (data) => !realtimeConnected && data?.some(
                 (item) => item.userSubmission?.lastAttempt?.status === "evaluating",
             ) ? 3_000 : 0,
         },

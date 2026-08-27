@@ -1,6 +1,6 @@
 import { Tree } from "@/components/branches/Tree"
 import { ScrollViewport } from "@/components/branches/ScrollViewport"
-import { SurfaceAccordionCard } from "@/components/branches/SurfaceAccordionCard"
+import { SurfaceAccordionCard } from "@starci/grammar/core"
 import { LabelledProgressRow } from "@/components/composites/LabelledProgressRow"
 import { DisclosureIndicator } from "@/components/leaves/DisclosureIndicator"
 import { Progress } from "@/components/leaves/Progress"
@@ -110,7 +110,7 @@ export const courseContentMapPanel = (input: CourseContentMapBaseProps) => {
                     module: modules.map((module) => defineContractProjection("content-map-module", () => (
                         <SurfaceAccordionCard
                             isOpen={module.isOpen}
-                            summaryContract="content-map-module-summary"
+                            renderSummary={(summary) => <Tree contract="content-map-module-summary" render={summary} />}
                             summaryRender={defineContractComponent("content-map-module-summary", {
                                 copy: defineContractComponent("content-map-module-summary-copy", {
                                     title: defineLeafComponent("text", { size: "md", weight: "medium" }, () => (
@@ -136,7 +136,7 @@ export const courseContentMapPanel = (input: CourseContentMapBaseProps) => {
                                     <DisclosureIndicator props={{ isOpen: module.isOpen }} />
                                 )),
                             })}
-                            bodyContract="content-map-module-body"
+                            renderBody={(body) => <Tree contract="content-map-module-body" render={body} />}
                             bodyRender={defineContractComponent("content-map-module-body", {
                                 list: defineLeafComponent("selection-list", { variant: "outline" }, () => (
                                     <SelectionList

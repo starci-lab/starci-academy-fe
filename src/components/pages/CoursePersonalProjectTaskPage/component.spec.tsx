@@ -54,7 +54,7 @@ describe("CoursePersonalProjectTaskBase", () => {
         for (const summary of container.querySelectorAll("[data-node=\"personal-project-guidance-disclosure-summary\"]")) {
             expect(summary).not.toHaveClass("px-6", "py-3")
         }
-        expect(container.querySelector("[data-node=\"personal-project-guidance-disclosure-body\"]")).toHaveClass("px-6", "py-3")
+        expect(container.querySelector("[data-node=\"personal-project-guidance-disclosure-body\"]")).not.toHaveClass("px-6", "py-3")
         expect(container.querySelector("[data-node=\"personal-project-guidance-disclosure-body\"]")).not.toHaveClass("border-t", "border-separator")
         expect(container.querySelectorAll("[data-component=\"DisclosureIndicator\"]")).toHaveLength(2)
         expect(container.querySelectorAll("[data-component=\"SurfaceFormCard\"]")).toHaveLength(1)

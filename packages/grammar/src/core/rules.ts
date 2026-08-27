@@ -8,6 +8,13 @@ export type CoreRule = {
 
 export const CORE_RULES = [
     {
+        id: "core.anatomy.leading-number",
+        concern: "anatomy",
+        when: ["one ordered peer needs a visible ordinal before its authored copy"],
+        decide: ["render one muted tabular `N.` prefix through LeadingNumber", "keep the ordinal separate from business copy"],
+        refuse: ["badge or chip treatment", "circle or decorative container", "concatenating the ordinal into authored copy", "page-local ordinal styling"],
+    },
+    {
         id: "core.anatomy.label-outside-surface",
         concern: "anatomy",
         when: ["one optional label names one bounded surface"],
@@ -25,8 +32,37 @@ export const CORE_RULES = [
         id: "core.anatomy.static-list",
         concern: "anatomy",
         when: ["zero, one or many static peer statements share one boundary"],
-        decide: ["render one list shell", "separate adjacent rows", "show one check for an affirmative row"],
-        refuse: ["one shell per row", "interactive row behavior", "more than one state mark per row"],
+        decide: [
+            "render one full-width list shell",
+            "keep adjacent row separators full-bleed",
+            "put inset on row content",
+            "show one check for an affirmative row",
+        ],
+        refuse: [
+            "one shell per row",
+            "interactive row behavior",
+            "inset row dividers",
+            "hover decoration on static rows",
+            "more than one state mark per row",
+        ],
+    },
+    {
+        id: "core.anatomy.markdown-reading",
+        concern: "anatomy",
+        when: ["semantic Markdown is presented as a readable document"],
+        decide: [
+            "retain native document semantics",
+            "use fourteen-pixel body copy",
+            "render inline code with a neutral chip treatment",
+            "contain fenced code and table overflow",
+            "keep headings, lists and blockquotes visibly distinct",
+        ],
+        refuse: [
+            "flattening semantic nodes into equal-weight text",
+            "product-specific Markdown dialects",
+            "page-local reading typography",
+            "unbounded horizontal overflow",
+        ],
     },
     {
         id: "core.anatomy.interactive-collection",
@@ -34,6 +70,23 @@ export const CORE_RULES = [
         when: ["peer rows share one boundary and one or more rows own an action"],
         decide: ["render one collection shell", "keep every row action inside its row owner", "place a collection outcome after the shell"],
         refuse: ["claiming the static-row capability", "one surface per row", "moving row actions into the surface owner"],
+    },
+    {
+        id: "core.interaction.disclosure-surface",
+        concern: "interaction",
+        when: ["one or more disclosure rows share one neutral surface boundary"],
+        decide: [
+            "fill the content owner",
+            "keep row separators full-bleed",
+            "put inset on row content",
+            "change presentation only for open or closed state",
+        ],
+        refuse: [
+            "inset row dividers",
+            "hover decoration",
+            "nested elevation",
+            "caller-authored geometry",
+        ],
     },
     {
         id: "core.anatomy.frameless-surface",

@@ -32,9 +32,15 @@ export const ChallengeGradingModelDrawer = (input: ChallengeGradingModelDrawerPr
             return result.data?.aiModels?.data?.gradableModels ?? []
         },
     )
+    const gradingCatalogue = (catalogue.data ?? []).filter((model) => {
+        const isEmbeddingModel = model.model.toLowerCase().includes("embedding")
+        const supportsGrading = model.supportedTasks?.length === 0
+            || model.supportedTasks?.includes("grading")
+        return !isEmbeddingModel && supportsGrading
+    })
     const models: ReadonlyArray<ChallengeGradingModelOption> = [
         { id: "auto", label: t("challengeModelAuto"), detail: t("challengeModelAutoDetail") },
-        ...(catalogue.data ?? []).map((model) => ({
+        ...gradingCatalogue.map((model) => ({
             id: `${model.provider}:${model.model}`,
             label: model.model,
             detail: `${model.provider} · ${model.category}`,

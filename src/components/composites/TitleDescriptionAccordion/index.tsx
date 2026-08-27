@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { SurfaceAccordionCard } from "@/components/branches/SurfaceAccordionCard"
+import { SurfaceAccordionCard } from "@starci/grammar/core"
 import { Tree } from "@/components/branches/Tree"
 import { DisclosureIndicator } from "@/components/leaves/DisclosureIndicator"
 import { Heading } from "@/components/leaves/Heading"
@@ -71,10 +71,10 @@ export const TitleDescriptionAccordion = (input: TitleDescriptionAccordionProps)
                 )),
                 disclosure: defineContractProjection("title-description-disclosure", () => (
                     <SurfaceAccordionCard
-                        variant="surface"
+                        depth="top"
                         items={items}
-                        summaryContract="title-description-accordion-summary"
-                        bodyContract="title-description-accordion-body"
+                        renderSummary={(summary) => <Tree contract="title-description-accordion-summary" render={summary} />}
+                        renderBody={(body) => <Tree contract="title-description-accordion-body" render={body} />}
                         onItemOpenChange={(id, isOpen) => setExpandedIds((current) => {
                             const next = new Set(current)
                             if (isOpen) next.add(id)

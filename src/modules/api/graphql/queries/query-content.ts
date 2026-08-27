@@ -56,6 +56,53 @@ const query1 = gql`
                     difficulty
                     orderIndex
                     hint
+                    requirements {
+                        id
+                        orderIndex
+                        sortIndex
+                        langs {
+                            lang
+                            orderIndex
+                            sortIndex
+                            score
+                            title
+                            body
+                        }
+                    }
+                    steps {
+                        id
+                        orderIndex
+                        sortIndex
+                        langs {
+                            lang
+                            orderIndex
+                            sortIndex
+                            title
+                            body
+                        }
+                    }
+                    outputs {
+                        id
+                        orderIndex
+                        sortIndex
+                        langs {
+                            lang
+                            orderIndex
+                            sortIndex
+                            text
+                        }
+                    }
+                    prerequisites {
+                        id
+                        orderIndex
+                        sortIndex
+                        langs {
+                            lang
+                            orderIndex
+                            sortIndex
+                            text
+                        }
+                    }
                     submissions {
                         id
                         title

@@ -42,6 +42,7 @@ export const CollapsibleRail = ({ isCollapsed, expanded, collapsed }: Collapsibl
         >
             <Rail
                 collapse={isCollapsed ? "collapsed" : "expanded"}
+                height="fill"
                 landmark="content-navigation"
                 motion={reduceMotion ? "reduced" : "animated"}
                 width={isCollapsed ? "compact" : "standard"}

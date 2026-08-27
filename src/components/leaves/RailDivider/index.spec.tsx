@@ -17,8 +17,8 @@ describe("RailDivider", () => {
         const { container } = render(<div><aside /><RailDivider props={props} /></div>)
         const separator = screen.getByRole("separator", { name: props.label })
 
-        expect(separator).toHaveClass("w-0")
-        expect(separator).not.toHaveClass("w-3")
+        expect(separator).toHaveClass("w-2", "md:h-app-rail")
+        expect(separator.querySelector("[data-component=RailDividerHandle]")).toBeTruthy()
         fireEvent.keyDown(separator, { key: "ArrowRight" })
 
         expect(separator).toHaveAttribute("aria-valuenow", "336")
@@ -32,6 +32,17 @@ describe("RailDivider", () => {
 
         fireEvent.keyDown(separator, { key: "ArrowLeft", shiftKey: true })
 
+        expect(separator).toHaveAttribute("aria-valuenow", "256")
+    })
+
+    it("jumps to the declared bounds with Home and End", () => {
+        render(<div><aside /><RailDivider props={props} /></div>)
+        const separator = screen.getByRole("separator", { name: props.label })
+
+        fireEvent.keyDown(separator, { key: "End" })
+        expect(separator).toHaveAttribute("aria-valuenow", "560")
+
+        fireEvent.keyDown(separator, { key: "Home" })
         expect(separator).toHaveAttribute("aria-valuenow", "256")
     })
 })

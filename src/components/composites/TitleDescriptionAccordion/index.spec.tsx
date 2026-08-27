@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 import { TitleDescriptionAccordion } from "."
 
 describe("TitleDescriptionAccordion", () => {
-    it("keeps every title/description item inside one shadowed accordion surface", () => {
+    it("keeps every title/description item inside one Grammar-owned accordion surface", () => {
         const { container } = render(
             <TitleDescriptionAccordion
                 props={{
@@ -18,15 +18,14 @@ describe("TitleDescriptionAccordion", () => {
         )
 
         const surface = container.querySelector("[data-component=SurfaceAccordionCard]")
-        expect(surface).toHaveClass("shadow-surface")
+        expect(surface).toHaveAttribute("data-grammar-surface-depth", "top")
+        expect(surface).toHaveClass("starci-core-surface", "starci-core-accordion-shell")
         expect(container.querySelectorAll("[data-component=SurfaceAccordionCardItem]")).toHaveLength(3)
         expect(container.querySelector("[data-component=SurfaceListCard]")).toBeNull()
         expect(container.querySelector("[data-component=SurfaceAccordionCardSurface]")).toBeNull()
         expect(container.querySelector("[data-node=title-description-accordion-summary]")).not.toHaveClass("px-6", "py-3")
         const triggers = screen.getAllByRole("button")
-        expect(triggers[0]).toHaveClass("p-4", "pb-3")
-        expect(triggers[1]).toHaveClass("px-4", "py-3")
-        expect(triggers[2]).toHaveClass("p-4", "pt-3")
+        for (const trigger of triggers) expect(trigger).toHaveClass("starci-core-accordion-trigger")
 
         fireEvent.click(screen.getByText("Architecture"))
         fireEvent.click(screen.getByText("Operations"))
@@ -37,7 +36,7 @@ describe("TitleDescriptionAccordion", () => {
         const bodies = container.querySelectorAll("[data-node=title-description-accordion-body]")
         expect(bodies).toHaveLength(3)
         for (const body of bodies) {
-            expect(body).toHaveClass("px-6", "py-3")
+            expect(body).not.toHaveClass("px-6", "py-3")
             expect(body).not.toHaveClass("border-t", "border-separator")
         }
     })

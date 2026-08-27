@@ -32,6 +32,7 @@ describe("MarkdownCodeBlock", () => {
 
     it("keeps raw code visible, then replaces it with lazy Shiki output", async () => {
         const { container } = render(<MarkdownCodeBlock props={{ code: "const answer = 42", language: "ts" }} />)
+        expect(container.querySelector("[data-component=FencedCodeBlock]")).toHaveAttribute("data-grammar-fenced-code-block", "true")
         expect(container.querySelector("code")?.textContent).toContain("const answer = 42")
         await act(async () => undefined)
         await waitFor(() => expect(container.querySelector("pre.shiki span[style]")).not.toBeNull())

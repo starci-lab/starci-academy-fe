@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { SurfaceAccordionCard } from "@/components/branches/SurfaceAccordionCard"
+import { SurfaceAccordionCard } from "@starci/grammar/core"
 import { Tree } from "@/components/branches/Tree"
 import { SupportingDotList } from "@/components/composites/SupportingDotList"
 import { Badge } from "@/components/leaves/Badge"
@@ -118,10 +118,10 @@ export const CourseCurriculumAccordion = (input: CourseCurriculumAccordionProps)
                 )),
                 disclosure: defineContractProjection("course-curriculum-disclosure", () => (
                     <SurfaceAccordionCard
-                        variant="surface"
+                        depth="top"
                         items={items}
-                        summaryContract="curriculum-module-summary-row"
-                        bodyContract="course-curriculum-module-body"
+                        renderSummary={(summary) => <Tree contract="curriculum-module-summary-row" render={summary} />}
+                        renderBody={(body) => <Tree contract="course-curriculum-module-body" render={body} />}
                         onItemOpenChange={(id, isOpen) => setExpandedIds((current) => {
                             const next = new Set(current)
                             if (isOpen) next.add(id)

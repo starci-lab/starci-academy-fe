@@ -10,7 +10,11 @@ import {
 export const QUERY_CONTENT_CHALLENGE_ATTEMPTS_SWR_KEY = "QUERY_CONTENT_CHALLENGE_ATTEMPTS_SWR"
 
 /** Reads newest attempts and polls while the grading result has not settled. */
-export const useQueryContentChallengeAttemptsSwr = (courseId?: string, submissionId?: string) => {
+export const useQueryContentChallengeAttemptsSwr = (
+    courseId?: string,
+    submissionId?: string,
+    realtimeConnected = false,
+) => {
     const viewer = useViewerKey()
     return useSWR<ReadonlyArray<ContentChallengeAttempt> | null>(
         courseId === undefined || submissionId === undefined || viewer === undefined
@@ -34,12 +38,16 @@ export const useQueryContentChallengeAttemptsSwr = (courseId?: string, submissio
             return result.data?.userChallengeSubmissionAttempts?.data?.data ?? null
         },
         {
-            refreshInterval: (attempts) => attempts === null
-                || attempts === undefined
-                || attempts.length === 0
-                || attempts.some((attempt) => attempt.status === "evaluating" || attempt.processedAt === null)
-                ? 2_000
-                : 0,
+            refreshInterval: (attempts) => realtimeConnected
+                ? 0
+                : (
+                    attempts === null
+                    || attempts === undefined
+                    || attempts.length === 0
+                    || attempts.some((attempt) => attempt.status === "evaluating" || attempt.processedAt === null)
+                )
+                    ? 2_000
+                    : 0,
         },
     )
 }

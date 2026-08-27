@@ -6,6 +6,7 @@ import remarkDirective from "remark-directive"
 import remarkGfm from "remark-gfm"
 import remarkParse from "remark-parse"
 import { unified } from "unified"
+import { MarkdownArticle, MarkdownTableFrame } from "@starci/grammar/core"
 import { Heading } from "@/components/leaves/Heading"
 import { MarkdownCodeBlock } from "@/components/branches/MarkdownCodeBlock"
 import { TableBranch } from "@/components/branches/TableBranch"
@@ -51,30 +52,12 @@ export type ArticleData = {
     readonly body?: string
     /** Whether this exact article is an allowed prose-grounding root for StarCi AI selection. */
     readonly aiSelectable?: boolean
+    /** Reading-page rhythm, or compact 14px prose when Markdown is embedded in another surface. */
+    readonly measure?: "reading" | "compact"
 }
 
 /** Props for {@link Article}. */
 export type ArticleProps = LeafProps<ArticleData>
-
-/** The house type scale, one entry per node this admits. */
-const NODE_CLASSES = {
-    root: "flex w-full min-w-0 flex-col gap-4",
-    paragraph: "text-base leading-6 text-foreground",
-    list: "flex w-full min-w-0 flex-col gap-2 pl-5",
-    item: "list-disc text-base leading-6 text-foreground",
-    strong: "font-semibold",
-    emphasis: "italic",
-    inlineCode: "rounded bg-surface px-1 font-mono text-sm text-foreground",
-    link: "text-accent-soft-foreground underline underline-offset-4",
-    quote: "border-l-2 border-separator pl-4 text-base leading-6 text-muted",
-    // SURFACE-IN-SURFACE-7, recessed form: the host is the reading surface, so the well RECEDES
-    // (`bg-background` under a surface reads as an inset) and carries one border edge. It is
-    // `border` and not `separator` because this line is the outline of ONE block, not a hairline
-    // between two - the distinction globals.css states where both tokens are defined. The sideways
-    // scroll is OVERFLOW-5 on the same node - a frame without its scroll is a border claiming a
-    // membership it does not have. `min-w-0` is what lets the reading column shrink.
-    wideBlockWell: "w-full min-w-0 overflow-x-auto rounded-xl border border-border bg-background shadow-none",
-} as const
 
 /** How many lines rest while the body is in flight, and how wide each one is. */
 const RESTING_WIDTHS = [
@@ -184,13 +167,13 @@ const inline = (nodes: ReadonlyArray<MarkdownNode>): ReactNode =>
         const key = node.id
         switch (node.type) {
         case "strong":
-            return <strong key={key} className={NODE_CLASSES.strong}>{inline(node.parts)}</strong>
+            return <strong key={key}>{inline(node.parts)}</strong>
         case "emphasis":
-            return <em key={key} className={NODE_CLASSES.emphasis}>{inline(node.parts)}</em>
+            return <em key={key}>{inline(node.parts)}</em>
         case "inlineCode":
-            return <code key={key} className={NODE_CLASSES.inlineCode}>{node.value}</code>
+            return <code key={key}>{node.value}</code>
         case "link":
-            return <a key={key} className={NODE_CLASSES.link} href={node.url} target={node.url?.startsWith("/") || node.url?.startsWith("#") ? undefined : "_blank"} rel={node.url?.startsWith("/") || node.url?.startsWith("#") ? undefined : "noopener noreferrer"}>{inline(node.parts)}</a>
+            return <a key={key} href={node.url} target={node.url?.startsWith("/") || node.url?.startsWith("#") ? undefined : "_blank"} rel={node.url?.startsWith("/") || node.url?.startsWith("#") ? undefined : "noopener noreferrer"}>{inline(node.parts)}</a>
         case "break":
             return <br key={key} />
         default:
@@ -235,7 +218,9 @@ const tableLabel = (header: MarkdownNode | undefined, bodyRows: ReadonlyArray<Ma
     return columns.join(", ")
 }
 
-type BlockContext = { readonly mermaidCaptions: Readonly<Record<string, string>> }
+type BlockContext = {
+    readonly mermaidCaptions: Readonly<Record<string, string>>
+}
 
 /** Draw one block of the document. */
 const block = (node: MarkdownNode, key: string, context: BlockContext): ReactNode => {
@@ -267,20 +252,20 @@ const block = (node: MarkdownNode, key: string, context: BlockContext): ReactNod
         )
     }
     case "paragraph":
-        return <p key={key} className={NODE_CLASSES.paragraph}>{inline(node.parts)}</p>
+        return <p key={key}>{inline(node.parts)}</p>
     case "code":
         return node.lang?.toLowerCase() === "mermaid"
             ? <MermaidDiagram key={key} props={{ source: node.value ?? "", caption: context.mermaidCaptions[(node.value ?? "").trim()] }} />
             : <MarkdownCodeBlock key={key} props={{ code: node.value ?? "", language: node.lang }} />
     case "blockquote":
         return (
-            <blockquote key={key} className={NODE_CLASSES.quote}>
+            <blockquote key={key}>
                 {(node.parts).map((child) => block(child, `${key}-${child.id}`, context))}
             </blockquote>
         )
     case "list": {
         const items = (node.parts).map((item) => (
-            <li key={`${key}-${item.id}`} className={`${NODE_CLASSES.item} ${node.ordered === true ? "list-decimal" : "list-disc"}`}>
+            <li key={`${key}-${item.id}`}>
                 {(item.parts).map((child) => (
                     child.type === "paragraph"
                         ? <Fragment key={`${key}-${item.id}-${child.id}`}>{inline(child.parts)}</Fragment>
@@ -289,21 +274,15 @@ const block = (node: MarkdownNode, key: string, context: BlockContext): ReactNod
             </li>
         ))
         return node.ordered === true
-            ? <ol key={key} className={NODE_CLASSES.list}>{items}</ol>
-            : <ul key={key} className={NODE_CLASSES.list}>{items}</ul>
+            ? <ol key={key}>{items}</ol>
+            : <ul key={key}>{items}</ul>
     }
     case "table": {
         const rows = node.parts.filter((part) => part.type === "tableRow")
         const header = rows[0]
         const bodyRows = rows.slice(1)
-        // SURFACE-IN-SURFACE-7: the well this table scrolls inside. The host is the reading
-        // surface, so the frame RECEDES - `bg-background` under a surface reads as an inset - and
-        // the sideways scroll is OVERFLOW-5 on the same node, because a scroll with no edge hides
-        // its own mechanism. The scroll sits on a PLAIN BLOCK rather than on the vendor's own
-        // container: the HeroUI table root is a grid whose inner scroll container does not
-        // propagate `min-width`, so without this the reading column stops shrinking.
         return (
-            <div key={key} className={NODE_CLASSES.wideBlockWell}>
+            <MarkdownTableFrame key={key}>
                 <TableBranch
                     ariaLabel={tableLabel(header, bodyRows)}
                     columns={header === undefined ? [] : header.parts.map((cell) => ({ id: cell.id, content: inline(cell.parts) }))}
@@ -312,11 +291,11 @@ const block = (node: MarkdownNode, key: string, context: BlockContext): ReactNod
                         cells: row.parts.map((cell) => ({ id: cell.id, content: inline(cell.parts) })),
                     }))}
                 />
-            </div>
+            </MarkdownTableFrame>
         )
     }
     case "thematicBreak":
-        return <hr key={key} className="my-8 border-separator" />
+        return <hr key={key} />
     case "image":
         return node.alt === undefined || node.alt === ""
             ? <Image key={key} src={node.url ?? "/starci.svg"} alt="" width={1200} height={675} unoptimized className="h-auto w-full rounded-2xl" />
@@ -361,7 +340,7 @@ const block = (node: MarkdownNode, key: string, context: BlockContext): ReactNod
     default:
         // A node this leaf has no shape for keeps its words rather than disappearing: losing a
         // paragraph silently is worse than drawing it plainly.
-        return <p key={key} className={NODE_CLASSES.paragraph}>{plainText(node)}</p>
+        return <p key={key}>{plainText(node)}</p>
     }
 }
 
@@ -476,20 +455,25 @@ export const segmentArticleSurfaces = (markdown?: string): ReadonlyArray<Article
  */
 export const Article = ({ props, isLoading = false }: ArticleProps) => {
     const selectable = props.aiSelectable === true ? { "data-ai-selectable": "true" } : {}
+    const measure = props.measure ?? "reading"
     if (isLoading || props.body === undefined) {
         return (
-            <div {...selectable} data-tier="branch" data-component="Article" data-resting="true" className={NODE_CLASSES.root}>
-                {RESTING_WIDTHS.map((line) => (
-                    <span key={line.id} className={`${RESTING_LINE} ${line.width}`} />
-                ))}
+            <div {...selectable} data-tier="branch" data-component="Article" data-measure={measure} data-resting="true">
+                <MarkdownArticle measure={measure}>
+                    {RESTING_WIDTHS.map((line) => (
+                        <span key={line.id} className={`${RESTING_LINE} ${line.width}`} />
+                    ))}
+                </MarkdownArticle>
             </div>
         )
     }
     const prepared = prepareMarkdown(props.body)
     const root = toNode(parser.parse(prepared.source))
     return (
-        <div {...selectable} data-tier="branch" data-component="Article" className={NODE_CLASSES.root}>
-            {(root?.parts ?? []).map((node) => block(node, node.id, { mermaidCaptions: prepared.captions }))}
+        <div {...selectable} data-tier="branch" data-component="Article" data-measure={measure}>
+            <MarkdownArticle measure={measure}>
+                {(root?.parts ?? []).map((node) => block(node, node.id, { mermaidCaptions: prepared.captions }))}
+            </MarkdownArticle>
         </div>
     )
 }

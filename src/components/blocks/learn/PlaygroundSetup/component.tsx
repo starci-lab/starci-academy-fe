@@ -5,6 +5,7 @@ import { Button } from "@/components/leaves/Button"
 import { Heading } from "@/components/leaves/Heading"
 import { Text } from "@/components/leaves/Text"
 import { defineCompositeComponent, defineContractComponent, defineContractProjection, defineLeafComponent } from "@/components/contracts/props"
+import { LeadingNumber } from "@starci/grammar/core"
 import type { Playground } from "@/modules/api/graphql/queries/query-playground"
 
 /** Setup and agent-pairing states exposed by the pure setup page. */
@@ -87,9 +88,10 @@ export const PlaygroundSetupBase = (input: PlaygroundSetupBaseProps) => {
                     contract="playground-setup-preparation"
                     render={defineContractComponent("playground-setup-preparation", {
                         title: defineLeafComponent("heading", {}, () => <Heading props={{ content: input.props.preparationTitle, level: 2 }} isLoading={loading} />),
-                        step: input.props.preparationSteps.map((step, index) => defineLeafComponent("text", { size: "sm" }, () => (
-                            <Text props={{ content: `${index + 1}. ${step}`, size: "sm" }} isLoading={loading} />
-                        ))),
+                        step: input.props.preparationSteps.map((step, index) => defineContractComponent("playground-setup-step", {
+                            marker: defineLeafComponent("leading-number", {}, () => <LeadingNumber position={index + 1} />),
+                            copy: defineLeafComponent("text", { size: "sm" }, () => <Text props={{ content: step, size: "sm" }} isLoading={loading} />),
+                        })),
                     })}
                     isLoading={loading}
                 />

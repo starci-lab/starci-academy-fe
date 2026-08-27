@@ -104,6 +104,12 @@ describe("useQueryContentChallengeAttemptsSwr", () => {
         expect(intervalFor([judged])).toBe(0)
     })
 
+    it("disables polling while the realtime job channel is connected", () => {
+        renderHook(() => useQueryContentChallengeAttemptsSwr("course-1", "submission-1", true))
+        expect(intervalFor(undefined)).toBe(0)
+        expect(intervalFor([pending])).toBe(0)
+    })
+
     it("resolves to null when the server answered without a page", async () => {
         mocks.queryContentChallengeAttempts.mockResolvedValue({
             data: { userChallengeSubmissionAttempts: { success: false, message: "denied" } },

@@ -20,6 +20,11 @@ const baseProps: ChallengeResultBlockProps["props"] = {
     nextLabel: "Next content",
     evaluationTitle: "Evaluating your attempt",
     evaluationDetail: "You may leave and resume later.",
+    realtimeStatus: "Live grading updates connected",
+    breadcrumbLabel: "Course challenge path",
+    courseTitle: "Fullstack Mastery",
+    moduleTitle: "Backend foundations",
+    contentTitle: "Dependency injection",
 }
 
 describe("ChallengeResultBase", () => {
@@ -29,7 +34,9 @@ describe("ChallengeResultBase", () => {
         expect(container.querySelector("[data-node=challenge-evaluation-status]")).toBeTruthy()
         expect(screen.getByText("Evaluating your attempt")).toBeInTheDocument()
         expect(screen.getByText("You may leave and resume later.")).toBeInTheDocument()
+        expect(screen.getByText("Live grading updates connected")).toHaveAttribute("aria-live", "polite")
         expect(screen.getByRole("button", { name: "Reload" })).toBeDisabled()
+        expect(screen.getByLabelText("Course challenge path")).toHaveTextContent("Fullstack MasteryBackend foundationsDependency injectionAPI repository")
     })
 
     it("renders backend score and every visible feedback body in the ready state", () => {
@@ -48,6 +55,9 @@ describe("ChallengeResultBase", () => {
         expect(screen.getByText("The error branch must remain visible.")).toBeInTheDocument()
         expect(screen.getByText("src/client.ts:42")).toBeInTheDocument()
         expect(screen.getByText("Check success before reading data.")).toBeInTheDocument()
+        const resultActions = document.querySelector("[data-node=challenge-result-actions]")
+        expect(resultActions).toHaveClass("sticky", "pr-32")
+        expect(resultActions?.querySelectorAll("button")[2]).toHaveTextContent("Next content")
         fireEvent.click(screen.getByRole("button", { name: "Retry challenge" }))
         fireEvent.click(screen.getByRole("button", { name: "Next content" }))
         expect(retry).toHaveBeenCalledTimes(1)

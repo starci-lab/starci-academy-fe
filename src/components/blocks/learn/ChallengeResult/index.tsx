@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
@@ -11,6 +11,7 @@ import { useQueryContentChallengeFeedbacksSwr } from "@/hooks/swr/useQueryConten
 import { useQueryContentSwr } from "@/hooks/swr/useQueryContentSwr"
 import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
 import { useQueryModuleSwr } from "@/hooks/swr/useQueryModuleSwr"
+import { useJobVerdictSocketIo } from "@/hooks/socketio/useJobVerdictSocketIo"
 import { ChallengeResultBase } from "./component"
 
 /** Route identity required to resolve one deliverable's grading result. */
@@ -37,6 +38,7 @@ export const ChallengeResultBlock = (input: ChallengeResultRouteProps) => {
     const attemptId = searchParams.get("attempt") ?? undefined
     const attemptGroupId = searchParams.get("attemptGroup") ?? undefined
     const routeJobId = searchParams.get("jobs")?.split(",")[0] || undefined
+    const jobNotifications = useJobVerdictSocketIo(routeJobId)
     const [isHistoryOpen, setIsHistoryOpen] = useState(false)
     const content = useQueryContentSwr({ id: input.contentId })
     const course = useQueryCourseSwr({ displayId: input.displayId })
@@ -45,8 +47,16 @@ export const ChallengeResultBlock = (input: ChallengeResultRouteProps) => {
     const challenge = content.data?.challenges?.find((candidate) => (
         candidate.id === input.challengeId || candidate.displayId === input.challengeId
     ))
-    const attempts = useQueryContentChallengeAttemptsSwr(course.data?.id, submissionId)
-    const submissions = useQueryContentChallengeSubmissionsSwr(course.data?.id, challenge?.id)
+    const attempts = useQueryContentChallengeAttemptsSwr(
+        course.data?.id,
+        submissionId,
+        jobNotifications.isConnected,
+    )
+    const submissions = useQueryContentChallengeSubmissionsSwr(
+        course.data?.id,
+        challenge?.id,
+        jobNotifications.isConnected,
+    )
     const selectedAttempt = attemptId === undefined
         ? attempts.data?.[0]
         : attempts.data?.find((candidate) => candidate.id === attemptId)
@@ -57,6 +67,33 @@ export const ChallengeResultBlock = (input: ChallengeResultRouteProps) => {
             return candidate?.attemptGroupId === attemptGroupId ? [candidate] : []
         })
     const feedbacks = useQueryContentChallengeFeedbacksSwr(course.data?.id, selectedAttempt?.id)
+    useEffect(() => {
+        const verdict = jobNotifications.verdict
+        if (verdict === undefined || verdict.jobId !== routeJobId) return
+        const revalidateResultOwners = () => Promise.all([
+            attempts.mutate(),
+            submissions.mutate(),
+            feedbacks.mutate(),
+        ])
+        void revalidateResultOwners()
+        const isTerminal = verdict.status === "completed"
+            || verdict.status === "failed"
+        // The socket event is emitted by the worker transaction. Give that
+        // transaction one bounded turn to commit, then reconcile the durable
+        // projections once more. This is event-driven recovery, not polling.
+        const timer = isTerminal
+            ? window.setTimeout(() => void revalidateResultOwners(), 250)
+            : undefined
+        return () => {
+            if (timer !== undefined) window.clearTimeout(timer)
+        }
+    }, [
+        attempts.mutate,
+        feedbacks.mutate,
+        jobNotifications.verdict,
+        routeJobId,
+        submissions.mutate,
+    ])
     const deliverable = challenge?.submissions?.find((candidate) => candidate.id === submissionId)
         ?? submissions.data?.find((candidate) => candidate.id === submissionId)
     const orderedContents = useMemo(
@@ -92,9 +129,19 @@ export const ChallengeResultBlock = (input: ChallengeResultRouteProps) => {
     const staleAttemptIds = new Set(
         (attempts.data ?? []).filter(isStaleEvaluation).map((attempt) => attempt.id),
     )
-    const unavailable = !failed && groupedAttempts.some((attempt) => (
-        attempt.status === "evaluation_unavailable" || staleAttemptIds.has(attempt.id)
-    ))
+    // The job gateway is the fastest authoritative source for an async terminal
+    // failure. The attempt projection is persisted by a separate completion path
+    // and can trail the socket event briefly; waiting for a refetch here leaves
+    // the learner stuck on "grading" until a manual reload even though the job
+    // has already failed.
+    const socketReportedFailure = jobNotifications.verdict?.jobId === routeJobId
+        && jobNotifications.verdict?.status === "failed"
+    const unavailable = !failed && (
+        socketReportedFailure
+        || groupedAttempts.some((attempt) => (
+            attempt.status === "evaluation_unavailable" || staleAttemptIds.has(attempt.id)
+        ))
+    )
     const pending = !failed && (
         content.data === undefined
         || course.data === undefined
@@ -103,7 +150,9 @@ export const ChallengeResultBlock = (input: ChallengeResultRouteProps) => {
         || selectedAttempt === undefined
         || submissions.data === undefined
         || groupedAttempts.length === 0
-        || groupedAttempts.some((attempt) => attempt.status === "evaluating" && !staleAttemptIds.has(attempt.id))
+        || (!socketReportedFailure && groupedAttempts.some((attempt) => (
+            attempt.status === "evaluating" && !staleAttemptIds.has(attempt.id)
+        )))
         || feedbacks.data === undefined
     )
     const readerPath = nextContent === undefined
@@ -181,7 +230,18 @@ export const ChallengeResultBlock = (input: ChallengeResultRouteProps) => {
                     : `${totalScore}/${maxScore ?? totalScore}`,
                 shortFeedback: groupedAttempts.map((attempt) => attempt.shortFeedback).filter(Boolean).join(" ") || undefined,
                 evaluationTitle: contentText("challengeEvaluationTitle"),
-                evaluationDetail: contentText("challengeEvaluationDetail"),
+                evaluationDetail: routeJobId === undefined || jobNotifications.connectionState === "connected"
+                    ? contentText("challengeEvaluationDetail")
+                    : jobNotifications.connectionState === "connecting"
+                        ? contentText("challengeEvaluationConnectingDetail")
+                        : contentText("challengeEvaluationDisconnectedDetail"),
+                realtimeStatus: routeJobId === undefined
+                    ? undefined
+                    : jobNotifications.connectionState === "connected"
+                        ? contentText("challengeRealtimeConnected")
+                        : jobNotifications.connectionState === "connecting"
+                            ? contentText("challengeRealtimeConnecting")
+                            : contentText("challengeRealtimeFallback"),
                 unavailableTitle: contentText("challengeEvaluationUnavailableTitle"),
                 unavailableDetail: contentText("challengeEvaluationUnavailableDetail"),
                 outcomeLabel: aggregateDecision === "passed"
@@ -213,6 +273,10 @@ export const ChallengeResultBlock = (input: ChallengeResultRouteProps) => {
                 submissionId,
                 selectedAttemptId: selectedAttempt?.id,
                 isHistoryOpen,
+                breadcrumbLabel: contentText("challengeBreadcrumb"),
+                courseTitle: course.data?.title ?? input.displayId,
+                moduleTitle: module.data?.title ?? input.moduleId,
+                contentTitle: content.data?.title ?? input.contentId,
             }}
             on={{
                 reload: () => {
@@ -231,6 +295,9 @@ export const ChallengeResultBlock = (input: ChallengeResultRouteProps) => {
                 },
                 retry: () => router.push(challengePath),
                 next: () => router.push(readerPath),
+                openCourse: () => router.push(`/courses/${input.displayId}/learn`),
+                openModule: () => router.push(`/courses/${input.displayId}/learn/content/modules/${input.moduleId}/contents/${input.contentId}`),
+                openContent: () => router.push(`/courses/${input.displayId}/learn/content/modules/${input.moduleId}/contents/${input.contentId}`),
                 openHistory: () => setIsHistoryOpen(true),
                 closeHistory: () => setIsHistoryOpen(false),
                 selectHistoryAttempt: (selectedId, selectedGroupId) => {

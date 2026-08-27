@@ -60,8 +60,10 @@ describe("CoursePlaygroundSetupPageBase", () => {
         expect(container.querySelector("[data-node=\"course-playground-setup-workspace\"]")).not.toBeNull()
         expect(screen.getByRole("heading", { name: "Docker basics" })).toBeInTheDocument()
         expect(screen.getByText("Run your first container.")).toBeInTheDocument()
-        expect(screen.getByText("1. Install the CLI")).toBeInTheDocument()
-        expect(screen.getByText("3. Pair your machine")).toBeInTheDocument()
+        expect(screen.getByText("Install the CLI")).toBeInTheDocument()
+        expect(screen.getByText("Pair your machine")).toBeInTheDocument()
+        expect(screen.getByText("1.")).toHaveAttribute("data-grammar-leading-number", "true")
+        expect(screen.getByText("3.")).toHaveAttribute("data-grammar-leading-number", "true")
     })
 
     it("creates the session on the server rather than starting anything locally", () => {
@@ -123,7 +125,7 @@ describe("CoursePlaygroundSetupPageBase", () => {
 
         expect(screen.getByText("Setup failed")).toBeInTheDocument()
         expect(screen.queryByText("Before you start")).not.toBeInTheDocument()
-        expect(screen.queryByText("1. Install the CLI")).not.toBeInTheDocument()
+        expect(screen.queryByText("Install the CLI")).not.toBeInTheDocument()
         expect(screen.queryByText("PAIR-123")).not.toBeInTheDocument()
         expect(screen.queryByRole("button", { name: "Create session" })).not.toBeInTheDocument()
         expect(screen.queryByRole("button", { name: "Enter workspace" })).not.toBeInTheDocument()

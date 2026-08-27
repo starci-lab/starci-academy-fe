@@ -34,6 +34,57 @@ export interface ContentChallengeSubmission {
     readonly sortIndex: number
 }
 
+/** Localized, programming-language-specific copy for one scored requirement. */
+export interface ContentChallengeRequirementLang {
+    readonly lang: string
+    readonly orderIndex: number
+    readonly sortIndex: number
+    readonly score: number
+    readonly title: string | null
+    readonly body: string | null
+}
+
+/** One authored and scored requirement in the challenge brief. */
+export interface ContentChallengeRequirement {
+    readonly id: string
+    readonly orderIndex: number
+    readonly sortIndex: number
+    readonly langs: ReadonlyArray<ContentChallengeRequirementLang>
+}
+
+/** Localized, programming-language-specific copy for one guided step. */
+export interface ContentChallengeStepLang {
+    readonly lang: string
+    readonly orderIndex: number
+    readonly sortIndex: number
+    readonly title: string | null
+    readonly body: string | null
+}
+
+/** One authored guided step. */
+export interface ContentChallengeStep {
+    readonly id: string
+    readonly orderIndex: number
+    readonly sortIndex: number
+    readonly langs: ReadonlyArray<ContentChallengeStepLang>
+}
+
+/** Localized text for one expected output or prerequisite. */
+export interface ContentChallengeTextLang {
+    readonly lang: string
+    readonly orderIndex: number
+    readonly sortIndex: number
+    readonly text: string | null
+}
+
+/** One authored expected output or prerequisite. */
+export interface ContentChallengeTextItem {
+    readonly id: string
+    readonly orderIndex: number
+    readonly sortIndex: number
+    readonly langs: ReadonlyArray<ContentChallengeTextLang>
+}
+
 /** One challenge face attached to the content returned by the reader query. */
 export interface ContentChallenge {
     readonly id: string
@@ -44,6 +95,10 @@ export interface ContentChallenge {
     readonly difficulty: "easy" | "medium" | "hard" | "insane" | "expert"
     readonly orderIndex: number
     readonly hint: string | null
+    readonly requirements: ReadonlyArray<ContentChallengeRequirement>
+    readonly steps: ReadonlyArray<ContentChallengeStep>
+    readonly outputs: ReadonlyArray<ContentChallengeTextItem>
+    readonly prerequisites: ReadonlyArray<ContentChallengeTextItem>
     readonly submissions: ReadonlyArray<ContentChallengeSubmission>
 }
 

@@ -90,7 +90,7 @@ describe("CourseDetailPageBase", () => {
         expect(document.querySelector("[data-node=\"course-review-list\"]")).not.toBeNull()
         expect(screen.getByRole("tab", { name: "FAQ" })).toBeInTheDocument()
         expect(screen.getByText("Can I learn with another backend stack?")).toBeInTheDocument()
-        expect(screen.getByText("Yes. The course teaches transferable system thinking.")).not.toBeVisible()
+        expect(screen.queryByText("Yes. The course teaches transferable system thinking.")).not.toBeInTheDocument()
         expect(screen.getByRole("heading", { name: "What you will learn" }).closest("[data-component=\"SurfaceListCard\"]")).not.toBeNull()
         expect(screen.getByRole("heading", { name: "What you will learn" }).closest("[data-component=\"SurfaceListCard\"]")?.querySelector("[data-node=\"marked-row-list\"]")).not.toBeNull()
         expect(screen.getByRole("heading", { name: "What you need first" }).closest("[data-component=\"SurfaceListCard\"]")).not.toBeNull()

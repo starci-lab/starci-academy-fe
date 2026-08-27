@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { SurfaceAccordionCard } from "@/components/branches/SurfaceAccordionCard"
+import { SurfaceAccordionCard } from "@starci/grammar/core"
 import { PressableSurface } from "@/components/branches/PressableSurface"
 import { Tree } from "@/components/branches/Tree"
 import { Badge } from "@/components/leaves/Badge"
@@ -117,9 +117,9 @@ export const CurriculumModuleRow = (input: CurriculumModuleRowProps) => {
     return (
         <SurfaceAccordionCard
             isOpen={isOpen}
-            summaryContract="curriculum-module-summary-row"
+            renderSummary={(summaryRender) => <Tree contract="curriculum-module-summary-row" render={summaryRender} />}
             summaryRender={summary}
-            bodyContract="curriculum-lesson-list"
+            renderBody={(bodyRender) => <Tree contract="curriculum-lesson-list" render={bodyRender} />}
             bodyRender={defineContractComponent("curriculum-lesson-list", {
                 lesson: lessons.map((lesson) => defineContractComponent("curriculum-lesson-row", {
                     title: input.on?.pressLesson === undefined

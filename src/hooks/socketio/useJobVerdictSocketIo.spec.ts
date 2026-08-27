@@ -27,6 +27,7 @@ const socketHarness = vi.hoisted(() => {
             handlers.delete(event)
             return socket
         }),
+        emit: vi.fn(),
         disconnect: vi.fn(),
     }
     return { handlers, socket, io: vi.fn(() => socket) }
@@ -57,6 +58,7 @@ beforeEach(() => {
     socketHarness.handlers.clear()
     socketHarness.socket.on.mockClear()
     socketHarness.socket.off.mockClear()
+    socketHarness.socket.emit.mockClear()
     socketHarness.socket.disconnect.mockClear()
     socketHarness.io.mockClear()
     vi.stubEnv("NEXT_PUBLIC_API_URL", "https://api.example.com")
@@ -102,24 +104,36 @@ describe("useJobVerdictSocketIo", () => {
         const { result } = renderHook(() => useJobVerdictSocketIo("job-1"))
         act(() => socketHarness.handlers.get("connect")?.())
         expect(result.current.isConnected).toBe(true)
+        expect(result.current.connectionState).toBe("connected")
+        expect(socketHarness.socket.emit).toHaveBeenCalledWith(
+            "job_notifications.subscribe_job_notification.publication",
+            { data: { jobId: "job-1" }, locale: "en" },
+        )
 
-        act(() => socketHarness.handlers.get("job.status.updated")?.(verdictFor("job-1")))
+        act(() => socketHarness.handlers.get("job_notifications.job_status_updated.subscription")?.({
+            data: verdictFor("job-1"),
+        }))
         expect(result.current.verdict).toEqual(verdictFor("job-1"))
     })
 
     it("drops a verdict belonging to another submission on the same socket", () => {
         const { result } = renderHook(() => useJobVerdictSocketIo("job-1"))
-        act(() => socketHarness.handlers.get("job.status.updated")?.(verdictFor("job-2")))
+        act(() => socketHarness.handlers.get("job_notifications.job_status_updated.subscription")?.({
+            data: verdictFor("job-2"),
+        }))
         expect(result.current.verdict).toBeUndefined()
     })
 
     it("treats a lost connection as a state, keeping the verdict already received", () => {
         const { result } = renderHook(() => useJobVerdictSocketIo("job-1"))
         act(() => socketHarness.handlers.get("connect")?.())
-        act(() => socketHarness.handlers.get("job.status.updated")?.(verdictFor("job-1")))
+        act(() => socketHarness.handlers.get("job_notifications.job_status_updated.subscription")?.({
+            data: verdictFor("job-1"),
+        }))
 
         act(() => socketHarness.handlers.get("disconnect")?.())
         expect(result.current.isConnected).toBe(false)
+        expect(result.current.connectionState).toBe("disconnected")
         // Judging carries on server-side while the client is deaf, so what was heard stands.
         expect(result.current.verdict).toEqual(verdictFor("job-1"))
     })
@@ -141,7 +155,23 @@ describe("useJobVerdictSocketIo", () => {
     it("stops listening and closes the socket when the page goes away", () => {
         const { unmount } = renderHook(() => useJobVerdictSocketIo("job-1"))
         unmount()
-        expect(socketHarness.socket.off).toHaveBeenCalledWith("job.status.updated")
+        expect(socketHarness.socket.off).toHaveBeenCalledWith(
+            "job_notifications.job_status_updated.subscription",
+            expect.any(Function),
+        )
         expect(socketHarness.socket.disconnect).toHaveBeenCalledTimes(1)
+    })
+
+    it("rejoins the same job room after reconnecting", () => {
+        renderHook(() => useJobVerdictSocketIo("job-1"))
+        act(() => socketHarness.handlers.get("connect")?.())
+        act(() => socketHarness.handlers.get("disconnect")?.())
+        act(() => socketHarness.handlers.get("connect")?.())
+
+        expect(socketHarness.socket.emit).toHaveBeenCalledTimes(2)
+        expect(socketHarness.socket.emit).toHaveBeenLastCalledWith(
+            "job_notifications.subscribe_job_notification.publication",
+            { data: { jobId: "job-1" }, locale: "en" },
+        )
     })
 })

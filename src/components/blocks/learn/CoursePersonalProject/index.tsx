@@ -33,7 +33,7 @@ export const CoursePersonalProject = ({ displayId }: CoursePersonalProjectProps)
     const currentMilestone = findCurrentMilestone(milestones, currentTaskId)
     const currentTask = allTasks.find((task) => task.id === currentTaskId)
     const pageState: CoursePersonalProjectState = project.error !== undefined ? "failed" : project.data === undefined ? "pending" : allTasks.length === 0 ? "empty" : "ready"
-    const tasks = (currentMilestone?.tasks ?? []).map((task, index, milestoneTasks) => ({ id: task.id, title: `${index + 1}. ${task.title}`, status: taskStatusOf(task, index, milestoneTasks.findIndex((candidate) => candidate.id === currentTaskId), currentTaskId, copy), actionLabel: copy.openTask, isCurrent: task.id === currentTaskId }))
+    const tasks = (currentMilestone?.tasks ?? []).map((task, index, milestoneTasks) => ({ id: task.id, position: index + 1, title: task.title, status: taskStatusOf(task, index, milestoneTasks.findIndex((candidate) => candidate.id === currentTaskId), currentTaskId, copy), actionLabel: copy.openTask, isCurrent: task.id === currentTaskId }))
     const attempts = allTasks.reduce((sum, task) => sum + task.numAttempts, 0)
     return <CoursePersonalProjectBase
         state={pageState}

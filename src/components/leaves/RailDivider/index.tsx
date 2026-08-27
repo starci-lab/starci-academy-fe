@@ -16,9 +16,10 @@ export type RailDividerData = {
 /** Closed props for the pointer- and keyboard-adjustable separator. */
 export type RailDividerProps = LeafProps<RailDividerData>
 
-// The separator owns no layout width. Its interaction strip overlaps both neighbours so the
-// visible rule stays on their shared edge instead of opening a false gutter between rail and body.
-const DIVIDER_CLASSES = "group relative hidden w-0 shrink-0 cursor-col-resize self-stretch outline-none before:absolute before:left-0 before:top-0 before:h-full before:w-px before:rounded-full before:bg-separator before:transition-colors after:absolute after:-left-1 after:top-0 after:h-full after:w-2 after:content-[''] hover:before:bg-accent focus-visible:before:bg-accent md:sticky md:top-16 md:block md:h-app-rail"
+// The separator is a real eight-pixel rail rather than an invisible zero-width hit target. That
+// keeps the adjustable boundary discoverable while the hairline still sits on the shared edge.
+const DIVIDER_CLASSES = "group relative hidden w-2 shrink-0 cursor-col-resize self-stretch bg-background outline-none before:absolute before:left-0 before:top-0 before:h-full before:w-px before:bg-separator before:transition-colors hover:before:bg-accent focus-visible:before:bg-accent md:sticky md:top-16 md:block md:h-app-rail"
+const HANDLE_CLASSES = "pointer-events-none absolute left-1/2 top-1/2 h-10 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-muted/50 transition-colors group-hover:bg-accent group-focus-visible:bg-accent"
 
 /** Draw one separator that publishes its rail width to the containing contract frame. */
 export const RailDivider = ({ props }: RailDividerProps) => {
@@ -73,10 +74,15 @@ export const RailDivider = ({ props }: RailDividerProps) => {
     }
 
     const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-        if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return
+        if (event.key !== "ArrowLeft" && event.key !== "ArrowRight" && event.key !== "Home" && event.key !== "End") return
         event.preventDefault()
         const step = event.shiftKey ? 32 : 16
-        applyWidth(widthRef.current + (event.key === "ArrowLeft" ? -step : step))
+        const next = event.key === "Home"
+            ? props.minWidth
+            : event.key === "End"
+                ? props.maxWidth
+                : widthRef.current + (event.key === "ArrowLeft" ? -step : step)
+        applyWidth(next)
         window.localStorage.setItem(props.storageKey, String(Math.round(widthRef.current)))
     }
 
@@ -98,7 +104,9 @@ export const RailDivider = ({ props }: RailDividerProps) => {
             onPointerUp={onPointerUp}
             onPointerCancel={onPointerUp}
             onKeyDown={onKeyDown}
-        />
+        >
+            <span aria-hidden="true" data-component="RailDividerHandle" className={HANDLE_CLASSES} />
+        </div>
     )
 }
 

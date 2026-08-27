@@ -30,8 +30,13 @@ export type LayoutClassName = CoreLayoutClassName
     | "scrollbar"
     | "items-baseline"
     | "grid-cols-1" | "grid-cols-2" | "grid-cols-5" | "sm:grid-cols-2" | "sm:grid-cols-3" | "sm:grid-cols-4" | "lg:grid-cols-3"
-    | "sm:flex-row" | "sm:items-start" | "sm:justify-between"
-    | "md:flex" | "md:flex-row" | "md:items-start" | "md:gap-8"
+    | "sm:flex-row" | "sm:flex-wrap" | "sm:items-start" | "sm:items-center" | "sm:justify-between" | "sm:justify-end"
+    | "md:flex" | "md:flex-row" | "md:items-start" | "md:gap-8" | "md:[&>*:first-child]:flex"
+    | "2xl:flex-row" | "2xl:items-start" | "2xl:gap-8"
+    | "2xl:[&>*:first-child]:order-1" | "2xl:[&>*:last-child]:order-2"
+    | "2xl:[&>*:first-child]:min-w-0" | "2xl:[&>*:first-child]:grow"
+    | "2xl:[&>*:last-child]:w-80" | "2xl:[&>*:last-child]:shrink-0"
+    | "2xl:[&>*:last-child]:sticky" | "2xl:[&>*:last-child]:top-rail" | "2xl:[&>*:last-child]:self-start"
     // A PROPORTIONAL split, which the union could not previously express. Every existing two-column
     // token is a FIXED rail (`md:[&>*:first-child]:w-72`), and 288px is a sidebar measure: a problem
     // statement read at that width wraps every second word. `md:shrink-0` comes with it because a
@@ -45,7 +50,7 @@ export type LayoutClassName = CoreLayoutClassName
     | "md:sticky" | "md:top-16" | "md:self-start" | "md:h-app-rail"
     | "border" | "border-b" | "border-separator" | "divide-y" | "divide-separator" | "bg-background"
     | "px-3" | "px-4" | "px-6" | "py-2" | "py-3" | "py-6" | "p-0" | "p-2" | "p-4" | "p-6" | "-mt-px"
-    | "px-2" | "pl-4" | "cursor-pointer" | "text-left" | "text-foreground" | "hover:opacity-80"
+    | "px-2" | "pl-4" | "pr-32" | "cursor-pointer" | "text-left" | "text-foreground" | "hover:opacity-80"
     | "group" | "active:opacity-70"
     | "rounded-xl" | "rounded-2xl" | "rounded-3xl"
     | "bg-surface" | "bg-accent-soft" | "bg-success-soft" | "bg-warning-soft"
@@ -91,6 +96,7 @@ export type LayoutClassName = CoreLayoutClassName
     | "md:[&>*:first-child]:order-1" | "md:[&>*:last-child]:order-2"
     | "md:[&>*:first-child]:overflow-y-auto"
     | "md:[&>*:nth-child(2)]:min-w-0" | "md:[&>*:nth-child(2)]:grow"
+    | "md:[&>*:nth-child(3)]:min-w-0" | "md:[&>*:nth-child(3)]:grow"
     | "[&>*]:min-w-0" | "[&>*]:grow" | "[&>*]:whitespace-nowrap"
     | "md:[&>[data-component=CollapsibleRail]]:w-64"
     | "md:[&>[data-component=CollapsibleRail]]:w-16"
@@ -204,6 +210,22 @@ type ChildProps<S> = S extends { readonly props?: infer P }
 type CallerContent = "$content"
 
 /**
+ * The opaque identity a parent consumes after a child has validated its own
+ * slots. Keeping only metadata here is intentional: expanding
+ * `ContractComponent<C>` re-enters `ChildrenOf<C>` for every edge in the
+ * registry and eventually collapses the whole vocabulary to `never` as the
+ * registry grows. Slots, projections and component-backed contracts all carry
+ * this same identity metadata, so they remain assignable without recursively
+ * reopening their implementation.
+ */
+type ClosedContractIdentity<C extends ContractKey> = {
+    readonly meta: {
+        readonly shape: "contract"
+        readonly contract: C
+    }
+}
+
+/**
  * The identity a parent contract needs from one already-validated child contract.
  *
  * The child builder has already checked its own slots. Re-expanding those slots while validating
@@ -212,9 +234,9 @@ type CallerContent = "$content"
  */
 type ContractChild<S> = S extends { readonly contract: infer K }
     ? [K extends ReadonlyArray<infer A> ? A : K] extends [CallerContent]
-        ? import("@/components/contracts/props").ContractComponent<ContractKey>
+        ? ClosedContractIdentity<ContractKey>
         : (K extends ReadonlyArray<infer A> ? A : K) extends infer C extends ContractKey
-            ? import("@/components/contracts/props").ContractComponent<C>
+            ? ClosedContractIdentity<C>
             : never
     : never
 
@@ -405,6 +427,7 @@ export const CONTRACTS = buildContracts({
         classes: [
             "flex", "w-full", "min-w-0", "flex-col", "items-start",
             "md:flex-row", "md:items-start",
+            "[&>*:first-child]:hidden", "md:[&>*:first-child]:flex",
             "md:[&>*:first-child]:w-80", "md:[&>*:first-child]:shrink-0",
             "md:[&>*:first-child]:sticky", "md:[&>*:first-child]:top-16",
             "md:[&>*:first-child]:self-start", "md:[&>*:first-child]:h-app-rail",
@@ -602,7 +625,7 @@ export const CONTRACTS = buildContracts({
         why: "if the compact course rail keeps its collapse control on the same centreline as every icon-only destination below it.",
     },
     "learn-course-navigation-groups-scroll": {
-        classes: ["scroll-shadow", "scroll-shadow--vertical", "scroll-shadow--hide-scrollbar", "flex", "min-h-0", "w-full", "min-w-0", "flex-1", "flex-col", "gap-4", "overscroll-contain"],
+        classes: ["scroll-shadow", "scroll-shadow--vertical", "scroll-shadow--hide-scrollbar", "flex", "min-h-0", "w-full", "min-w-0", "flex-1", "flex-col", "gap-4", "overflow-y-auto", "overscroll-contain"],
         children: {
             group: { contract: ["learn-nav-group", "learn-nav-group-collapsed"], repeats: true, restingCount: 3 },
         },
@@ -766,9 +789,9 @@ export const CONTRACTS = buildContracts({
         why: "if removing the authored step title from its keyboard-operable disclosure trigger would leave the panel unnamed and impossible to choose; the bounded accordion trigger owns the positional row inset without a nested summary inset.",
     },
     "personal-project-guidance-disclosure-body": {
-        classes: ["flex", "w-full", "min-w-0", "flex-col", "px-6", "py-3"],
+        classes: ["flex", "w-full", "min-w-0", "flex-col"],
         children: { body: { leaf: "article" } },
-        why: "if one expanded project step preserves its typed authored Markdown or React render immediately below its trigger with the px-6 py-3 panel-content inset and no internal divider.",
+        why: "if one expanded project step preserves its typed authored Markdown or React render immediately below its trigger while Core Grammar owns the panel inset and no internal divider.",
     },
     "personal-project-criteria-list": {
         classes: ["flex", "w-full", "min-w-0", "flex-col", "divide-y", "divide-separator", "overflow-hidden", "p-0"],
@@ -963,11 +986,19 @@ export const CONTRACTS = buildContracts({
     "course-personal-project-task-card": {
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "p-4"],
         children: {
-            title: { leaf: "heading" },
+            heading: { contract: "course-personal-project-task-heading" },
             status: { leaf: "text", props: { size: "xs", tone: "muted" } },
             action: { leaf: "button" },
         },
         why: "if each current-milestone task keeps its title, state and destination as one bounded comparable card.",
+    },
+    "course-personal-project-task-heading": {
+        classes: ["flex", "w-full", "min-w-0", "items-start", "gap-3"],
+        children: {
+            marker: { leaf: "leading-number" },
+            title: { leaf: "heading" },
+        },
+        why: "if one project task title needs the shared quiet ordinal prefix without mutating authored task copy.",
     },
     "course-foundations-page": {
         classes: ["flex", "w-full", "max-w-app-md", "flex-col", "gap-6", "px-6", "py-6"],
@@ -1137,8 +1168,13 @@ export const CONTRACTS = buildContracts({
     "playground-setup-preparation": {
         host: "section",
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-4", "p-6"],
-        children: { title: { leaf: "heading" }, step: { leaf: "text", props: { size: "sm" }, repeats: true, restingCount: 3 } },
+        children: { title: { leaf: "heading" }, step: { contract: "playground-setup-step", repeats: true, restingCount: 3 } },
         why: "if machine preparation is one ordered instructional surface whose steps remain readable without mixing in pairing state.",
+    },
+    "playground-setup-step": {
+        classes: ["flex", "w-full", "min-w-0", "items-start", "gap-3"],
+        children: { marker: { leaf: "leading-number" }, copy: { leaf: "text", props: { size: "sm" } } },
+        why: "if one machine-preparation step needs the shared quiet ordinal prefix without mutating authored copy.",
     },
     "playground-setup-readiness": {
         host: "aside",
@@ -1629,22 +1665,18 @@ export const CONTRACTS = buildContracts({
             "flex", "w-full", "min-w-0", "flex-col", "items-start",
             "md:flex-row", "md:items-start",
             "[&>*:first-child]:hidden",
-            "md:[&>*:first-child]:block",
+            "md:[&>*:first-child]:flex",
             "md:[&>[data-node=learn-route-context-rail]]:w-80",
             "md:[&>[data-node=learn-route-context-rail]]:shrink-0",
-            "md:[&>[data-node=learn-route-context-rail]]:sticky",
-            "md:[&>[data-node=learn-route-context-rail]]:top-rail",
-            "md:[&>[data-node=learn-route-context-rail]]:self-start",
-            "md:[&>[data-node=learn-route-context-rail]]:max-h-rail",
-            "md:[&>[data-node=learn-route-context-rail]]:overflow-y-auto",
-            "md:[&>*:nth-child(2)]:min-w-0",
-            "md:[&>*:nth-child(2)]:grow",
+            "md:[&>*:nth-child(3)]:min-w-0",
+            "md:[&>*:nth-child(3)]:grow",
         ],
         children: {
             contents: { contract: "learn-route-context-rail" },
+            divider: { leaf: "rail-divider" },
             page: { contract: "challenge-page-document" },
         },
-        why: "if you need the complete challenge route with the existing course map beside one flexible challenge document, preserving the accepted full-page composition rather than mounting an isolated form.",
+        why: "if you need the complete challenge route with the shared full-height adjustable course map beside one flexible challenge document, preserving the accepted full-page composition rather than mounting an isolated form.",
     },
     "challenge-page-document": {
         host: "section",
@@ -1652,7 +1684,6 @@ export const CONTRACTS = buildContracts({
         children: {
             breadcrumb: { leaf: "breadcrumbs", optional: true },
             mobileMap: { contract: "learn-mobile-course-map-row", optional: true },
-            back: { leaf: "button" },
             header: { contract: "challenge-header" },
             body: { contract: "challenge-workspace" },
             actionBar: { contract: "challenge-workspace-action-bar", optional: true },
@@ -1665,7 +1696,7 @@ export const CONTRACTS = buildContracts({
         classes: ["flex", "min-w-0", "flex-col", "gap-3"],
         children: {
             title: { leaf: "heading" },
-            description: { leaf: "text" },
+            description: { leaf: "text", optional: true },
             meta: { contract: "profile-fact-run" },
             actions: { contract: "challenge-header-actions", optional: true },
         },
@@ -1674,12 +1705,12 @@ export const CONTRACTS = buildContracts({
     "challenge-workspace": {
         classes: [
             "flex", "w-full", "min-w-0", "flex-col", "items-start", "gap-6",
-            "md:flex-row", "md:items-start", "md:gap-8",
+            "2xl:flex-row", "2xl:items-start", "2xl:gap-8",
             "[&>*:first-child]:order-2", "[&>*:last-child]:order-1",
-            "md:[&>*:first-child]:order-1", "md:[&>*:last-child]:order-2",
-            "md:[&>*:first-child]:min-w-0", "md:[&>*:first-child]:grow",
-            "md:[&>*:last-child]:w-80", "md:[&>*:last-child]:shrink-0",
-            "md:[&>*:last-child]:sticky", "md:[&>*:last-child]:top-rail", "md:[&>*:last-child]:self-start",
+            "2xl:[&>*:first-child]:order-1", "2xl:[&>*:last-child]:order-2",
+            "2xl:[&>*:first-child]:min-w-0", "2xl:[&>*:first-child]:grow",
+            "2xl:[&>*:last-child]:w-80", "2xl:[&>*:last-child]:shrink-0",
+            "2xl:[&>*:last-child]:sticky", "2xl:[&>*:last-child]:top-rail", "2xl:[&>*:last-child]:self-start",
         ],
         children: {
             main: { contract: "challenge-workspace-main" },
@@ -1689,36 +1720,99 @@ export const CONTRACTS = buildContracts({
     },
     "challenge-brief": {
         host: "section",
-        classes: ["flex", "min-w-0", "flex-col", "gap-3", "p-4"],
+        classes: ["flex", "min-w-0", "flex-col", "gap-6", "p-4"],
         children: {
-            overview: { leaf: "text" },
-            requirement: { contract: "challenge-requirement-disclosure", repeats: true, restingCount: 2, optional: true },
-            hint: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+            overview: { leaf: "article" },
+            prerequisites: { contract: "challenge-brief-group", optional: true },
+            requirements: { contract: "challenge-brief-group", optional: true },
+            steps: { contract: "challenge-brief-group", optional: true },
+            outputs: { contract: "challenge-brief-group", optional: true },
+            hint: { contract: "challenge-brief-hint", optional: true },
         },
-        why: "if a learner needs the source-authored challenge overview, scored requirement disclosures and optional hint in one readable brief.",
+        why: "if a learner needs one non-duplicated source-authored overview followed by the optional prerequisite, requirement, step, output and hint groups that actually exist.",
+    },
+    "challenge-brief-group": {
+        host: "section",
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3"],
+        children: {
+            title: { leaf: "heading" },
+            list: { contract: "challenge-guidance-list", optional: true },
+            guidance: { contract: "challenge-guidance-disclosure", optional: true },
+            requirement: { contract: "challenge-requirement-disclosure", optional: true },
+        },
+        why: "if one authored Challenge taxonomy group must keep its own heading above exactly one shared list or accordion surface.",
+    },
+    "challenge-guidance-list": {
+        host: "ol",
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "divide-y", "divide-separator", "overflow-hidden", "p-0"],
+        children: {
+            item: { contract: "challenge-guidance-item", repeats: true, restingCount: 2 },
+        },
+        why: "if authored prerequisite or expected-output peers need one compact ordered SurfaceListCard with joined rows and no disclosure behavior.",
+    },
+    "challenge-guidance-item": {
+        host: "li",
+        classes: ["flex", "w-full", "min-w-0", "items-start", "gap-3", "p-4"],
+        children: {
+            marker: { leaf: "leading-number" },
+            copy: { contract: "challenge-guidance-copy" },
+        },
+        why: "if one authored guidance item needs an ordinal marker and readable copy as a joined row inside its owning list surface.",
+    },
+    "challenge-guidance-copy": {
+        classes: ["flex", "min-w-0", "grow", "flex-col", "gap-1"],
+        children: {
+            title: { leaf: "text", props: { size: "sm", weight: "semibold" }, optional: true },
+            body: { leaf: "article" },
+        },
+        why: "if one authored guidance item may have a title but must always retain its explanatory body.",
+    },
+    "challenge-guidance-disclosure": {
+        classes: ["w-full", "min-w-0"],
+        children: {
+            summary: { contract: "challenge-guidance-summary" },
+            body: { contract: "challenge-accordion-body" },
+        },
+        why: "if one shared SurfaceAccordionCard must own every authored implementation step as joined keyboard-operable disclosure rows.",
+    },
+    "challenge-guidance-summary": {
+        classes: ["flex", "w-full", "min-w-0", "items-center", "gap-3", "text-left"],
+        children: {
+            marker: { leaf: "leading-number" },
+            title: { leaf: "text", props: { size: "sm", weight: "semibold" } },
+        },
+        why: "if one implementation step needs its ordinal and authored title on the accordion trigger without owning trigger padding.",
+    },
+    "challenge-accordion-body": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col"],
+        children: {
+            description: { leaf: "article" },
+        },
+        why: "if one expanded Challenge step or scored requirement preserves its compact Markdown inside the same continuous accordion row.",
+    },
+    "challenge-brief-hint": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-2", "rounded-xl", "bg-accent-soft", "p-4"],
+        children: {
+            title: { leaf: "text", props: { size: "sm", weight: "semibold" } },
+            body: { leaf: "article" },
+        },
+        why: "if an optional hint must remain visually secondary and distinct from required instructions.",
     },
     "challenge-requirement-disclosure": {
         classes: ["w-full", "min-w-0"],
         children: {
             summary: { contract: "challenge-requirement-summary" },
-            body: { contract: "challenge-requirement-body" },
+            body: { contract: "challenge-accordion-body" },
         },
-        why: "if one source-authored deliverable must also explain its scored requirement through keyboard-operable disclosure mechanics.",
+        why: "if one shared SurfaceAccordionCard must own every source-authored scored requirement as joined keyboard-operable disclosure rows.",
     },
     "challenge-requirement-summary": {
-        classes: ["flex", "w-full", "min-w-0", "flex-row", "items-center", "justify-between", "gap-3", "py-3", "text-left"],
+        classes: ["flex", "w-full", "min-w-0", "flex-row", "items-center", "justify-between", "gap-3", "text-left"],
         children: {
             title: { leaf: "text", props: { size: "sm", weight: "semibold" } },
             score: { leaf: "badge" },
         },
         why: "if a scored challenge requirement needs its name and point value on one disclosure trigger line.",
-    },
-    "challenge-requirement-body": {
-        classes: ["border-t", "border-separator", "py-3"],
-        children: {
-            description: { leaf: "text", props: { size: "sm", tone: "muted" } },
-        },
-        why: "if an expanded challenge requirement needs its authored explanation attached directly below the trigger.",
     },
     "challenge-deliverable-list": {
         classes: ["flex", "w-full", "min-w-0", "flex-col", "divide-y", "divide-separator", "p-0"],
@@ -1784,15 +1878,14 @@ export const CONTRACTS = buildContracts({
         classes: ["flex", "w-full", "min-w-0", "flex-row", "flex-wrap", "items-center", "gap-2"],
         children: {
             language: { leaf: "select" },
-            model: { leaf: "button" },
         },
-        why: "if challenge language and model context need explicit learner-owned controls beside the authored identity.",
+        why: "if the challenge language needs one explicit learner-owned control while grading-model ownership stays with each deliverable.",
     },
     "challenge-workspace-main": {
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-6"],
         children: {
-            brief: { contract: "challenge-brief" },
-            deliverables: { contract: "challenge-deliverable-list" },
+            brief: { contract: "challenge-brief", optional: true },
+            deliverables: { contract: "challenge-deliverable-list", optional: true },
             review: { contract: "challenge-attempt-review", optional: true },
         },
         why: "if authored guidance, editable evidence and the immutable review must read as one primary challenge document.",
@@ -1804,9 +1897,8 @@ export const CONTRACTS = buildContracts({
             title: { leaf: "text", props: { weight: "semibold" } },
             status: { leaf: "text", props: { size: "sm", tone: "muted" } },
             progress: { leaf: "progress" },
-            model: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
             draftStatus: { contract: "challenge-draft-status" },
-            actions: { contract: "challenge-submission-actions" },
+            actions: { contract: "challenge-submission-actions", optional: true },
         },
         why: "if readiness, saved revision, grading model and the next legal action must stay continuously visible before submission.",
     },
@@ -1838,7 +1930,7 @@ export const CONTRACTS = buildContracts({
         why: "if every evidence row must expose the grading model that will be frozen into its attempt snapshot.",
     },
     "challenge-workspace-action-bar": {
-        classes: ["sticky", "bottom-0", "z-40", "flex", "w-full", "min-w-0", "flex-row", "items-center", "justify-between", "gap-3", "border-t", "border-separator", "bg-background", "px-4", "py-3"],
+        classes: ["sticky", "bottom-0", "z-40", "flex", "w-full", "min-w-0", "flex-row", "items-center", "justify-between", "gap-3", "border-t", "border-separator", "bg-background", "pl-4", "pr-32", "py-3"],
         children: {
             ai: { leaf: "button" },
             exit: { leaf: "button" },
@@ -1902,10 +1994,10 @@ export const CONTRACTS = buildContracts({
         classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "rounded-xl", "border", "border-separator", "p-4"],
         children: {
             title: { leaf: "text", props: { weight: "semibold" } },
-            detail: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            detail: { contract: "stacked-peer-controls" },
             actions: { contract: "challenge-submission-actions", optional: true },
         },
-        why: "if evaluating and evaluation-unavailable must preserve one attempt identity and expose safe recovery.",
+        why: "if evaluating and evaluation-unavailable must preserve one attempt identity, expose live transport status and retain safe recovery.",
     },
     "challenge-criterion-feedback-list": {
         classes: ["flex", "w-full", "min-w-0", "flex-col", "divide-y", "divide-separator"],
@@ -1913,7 +2005,7 @@ export const CONTRACTS = buildContracts({
         why: "if platform feedback repeats by criterion as evidence, gap, uncertainty and next action without card-per-row decoration.",
     },
     "challenge-result-actions": {
-        classes: ["flex", "w-full", "flex-col", "gap-2", "sm:flex-row", "flex-wrap"],
+        classes: ["sticky", "bottom-0", "z-40", "flex", "w-full", "min-w-0", "flex-col", "gap-2", "border-t", "border-separator", "bg-background", "py-3", "pl-4", "pr-32", "sm:flex-row", "sm:flex-wrap", "sm:items-center", "sm:justify-end"],
         children: { action: { leaf: "button", repeats: true, restingCount: 2 } },
         why: "if a settled result needs retry, continue and history actions without changing the result evidence order.",
     },
@@ -1928,9 +2020,32 @@ export const CONTRACTS = buildContracts({
     },
     "course-learn-challenge-result-page": {
         host: "main",
-        classes: ["mx-auto", "flex", "w-full", "max-w-app-md", "flex-col", "gap-6", "px-6", "py-6"],
-        children: { workspace: { contract: "challenge-result-workspace" } },
-        why: "if you need a persisted challenge result joining score, scorer findings and one retry-or-continue decision, with loading and recovery replacing only its evidence body.",
+        classes: [
+            "flex", "w-full", "min-w-0", "flex-col",
+            "md:flex-row", "md:items-start",
+            "[&>*:first-child]:hidden",
+            "md:[&>*:first-child]:flex",
+            "md:[&>[data-node=learn-route-context-rail]]:w-80",
+            "md:[&>[data-node=learn-route-context-rail]]:shrink-0",
+            "md:[&>*:nth-child(3)]:min-w-0",
+            "md:[&>*:nth-child(3)]:grow",
+        ],
+        children: {
+            contents: { contract: "learn-route-context-rail" },
+            divider: { leaf: "rail-divider" },
+            page: { contract: "challenge-result-page-document" },
+        },
+        why: "if grading progress and immutable results must remain inside the same full-height adjustable course map and route context as the Challenge workspace.",
+    },
+    "challenge-result-page-document": {
+        host: "section",
+        classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "min-w-0", "flex-col", "gap-6", "px-4", "py-6"],
+        children: {
+            breadcrumb: { leaf: "breadcrumbs" },
+            evaluation: { contract: "challenge-evaluation-status", optional: true },
+            result: { contract: "challenge-result-workspace", optional: true },
+        },
+        why: "if one Challenge result route must preserve the full course path while swapping only evaluation, recovery and settled evidence states.",
     },
     "flashcard-mode-tabs": {
         host: "nav",
@@ -3649,7 +3764,7 @@ export const CONTRACTS = buildContracts({
     },
     "content-map-panel": {
         host: "nav",
-        classes: ["flex", "w-full", "min-w-0", "min-h-0", "flex-col", "gap-4", "px-3", "py-6"],
+        classes: ["flex", "h-full", "w-full", "min-w-0", "min-h-0", "flex-col", "gap-4", "overflow-hidden", "px-3", "py-6"],
         children: {
             progress: { composite: "labelled-progress-row" },
             search: { leaf: "search-box" },
@@ -3665,7 +3780,7 @@ export const CONTRACTS = buildContracts({
         why: "if you need a long module tree to scroll without moving the controls above it while full-width separators keep peer modules visually distinct.",
     },
     "content-map-module-summary": {
-        classes: ["flex", "w-full", "min-w-0", "flex-row", "items-center", "gap-3", "px-3", "py-2", "[&>*:first-child]:min-w-0", "[&>*:first-child]:grow", "[&>*:last-child]:shrink-0"],
+        classes: ["flex", "w-full", "min-w-0", "flex-row", "items-center", "gap-3", "[&>*:first-child]:min-w-0", "[&>*:first-child]:grow", "[&>*:last-child]:shrink-0"],
         children: {
             copy: { contract: "content-map-module-summary-copy" },
             caret: { leaf: "disclosure-indicator" },
@@ -4036,7 +4151,7 @@ export const CONTRACTS = buildContracts({
         host: "li",
         classes: ["flex", "flex-row", "items-start", "gap-3", "[&>*:last-child]:min-w-0", "[&>*:last-child]:grow"],
         children: {
-            mark: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            mark: { leaf: "leading-number" },
             requirement: { leaf: "text", props: { size: "sm" } },
         },
         why: "if you need one ordered prerequisite item with a muted (unverified) marker beside its requirement text.",
@@ -4109,11 +4224,11 @@ export const CONTRACTS = buildContracts({
         why: "if a summary inside a bounded title/description accordion needs its title and disclosure state while the accordion trigger remains the single positional inset owner.",
     },
     "title-description-accordion-body": {
-        classes: ["flex", "w-full", "min-w-0", "flex-col", "px-6", "py-3"],
+        classes: ["flex", "w-full", "min-w-0", "flex-col"],
         children: {
             description: { leaf: "text", props: { size: "sm" } },
         },
-        why: "if one expanded description remains inside the same continuous bounded accordion item beneath its summary with the approved px-6 py-3 inset and no internal divider.",
+        why: "if one expanded description remains inside the same continuous bounded accordion item beneath its summary while Core Grammar owns the panel inset and no internal divider.",
     },
     "course-curriculum-accordion": {
         host: "section",
@@ -4133,7 +4248,7 @@ export const CONTRACTS = buildContracts({
         why: "if one shared SurfaceAccordionCard owns the complete summary metadata and expanded curriculum anatomy for every module.",
     },
     "course-curriculum-module-body": {
-        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3", "px-6", "py-3"],
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "gap-3"],
         children: {
             fact: { leaf: "text", props: { size: "xs", tone: "muted" } },
             description: { leaf: "text", props: { size: "sm" }, optional: true },
@@ -4554,7 +4669,7 @@ export const CONTRACTS = buildContracts({
         why: "if you need one lesson title in a list row, whether informative or opening that lesson's route.",
     },
     "pricing-phase-disclosure-summary": {
-        classes: ["flex", "w-full", "items-center", "justify-between", "gap-2", "p-0"],
+        classes: ["flex", "w-full", "items-center", "justify-between", "gap-2"],
         children: {
             label: { leaf: "text", props: { size: "sm", weight: "medium" } },
             indicator: { leaf: "disclosure-indicator" },
@@ -4563,7 +4678,7 @@ export const CONTRACTS = buildContracts({
     },
     "pricing-phase-list": {
         host: "ul",
-        classes: ["flex", "flex-col", "gap-2", "px-4"],
+        classes: ["flex", "flex-col", "gap-2"],
         children: {
             phase: { contract: "pricing-phase-row", repeats: true, restingCount: 3 },
         },

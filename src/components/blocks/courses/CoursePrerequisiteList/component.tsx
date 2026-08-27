@@ -1,5 +1,6 @@
 import { Tree } from "@/components/branches/Tree"
 import { Text } from "@/components/leaves/Text"
+import { LeadingNumber } from "@starci/grammar/core"
 import {
     defineContractComponent,
     defineLeafComponent,
@@ -40,8 +41,8 @@ export type CoursePrerequisiteListData = {
  * completion statements under a `ul`; prerequisites are ordered conditions and would lose both
  * their sequence and their unverified state if rendered as completed promise rows.
  *
- * THE ORDINAL IS TEXT, not the browser's own marker. The list carries `p-0` and its rows own the
- * inset, so a native marker hangs outside that inset and sits against the card's edge.
+ * THE ORDINAL IS A GRAMMAR LEAF, not the browser's own marker. The list carries `p-0` and its rows
+ * own the inset, so a native marker hangs outside that inset and sits against the card's edge.
  *
  * @param input - The requirements to draw.
  * @returns The ordered prerequisite list.
@@ -57,8 +58,8 @@ export const CoursePrerequisiteListBase = ({
             contract="course-prerequisite-list"
             render={defineContractComponent("course-prerequisite-list", {
                 prerequisite: props.prerequisites.map((prerequisite, index) => defineContractComponent("course-prerequisite-row", {
-                    mark: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                        <Text props={{ content: `${index + 1}.`, size: "sm", tone: "muted" }} />
+                    mark: defineLeafComponent("leading-number", {}, () => (
+                        <LeadingNumber position={index + 1} />
                     )),
                     requirement: defineLeafComponent("text", { size: "sm" }, () => (
                         <Text props={{ content: prerequisite.requirement, size: "sm" }} />

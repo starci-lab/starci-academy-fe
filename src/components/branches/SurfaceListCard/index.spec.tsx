@@ -53,7 +53,8 @@ describe("SurfaceListCard", () => {
         const surface = container.querySelector("[data-grammar-surface=\"true\"]")
         const collection = container.querySelector("[data-grammar-list=\"true\"]")
         expect(owner).toHaveAttribute("data-grammar-contract", "core.surface-list-card")
-        expect(collection).toHaveAttribute("data-grammar-list-mode", "interactive")
+        expect(collection).toHaveAttribute("data-grammar-list-mode", "contract")
+        expect(collection).toHaveAttribute("data-grammar-list-contract", "next-action-list")
         expect(owner).not.toBe(surface)
         expect(surface).not.toBe(collection)
         expect(owner?.contains(surface)).toBe(true)
@@ -74,8 +75,8 @@ describe("SurfaceListCard", () => {
             />,
         )
 
-        expect(container.querySelector("[data-node=\"label-with-muted-fact-row\"]")).not.toBeNull()
-        expect(screen.queryByRole("heading", { name: "Course standings" })).not.toBeInTheDocument()
+        expect(container.querySelector("[data-node=\"label-with-muted-fact-row\"]")).toBeNull()
+        expect(screen.getByRole("heading", { name: "Course standings" })).toBeInTheDocument()
         expect(screen.getByText("Updated 2 minutes ago")).toBeInTheDocument()
         expect(screen.getByText("Course standings")).toBeInTheDocument()
     })
@@ -104,19 +105,21 @@ describe("SurfaceListCard", () => {
         )
 
         const surface = container.querySelector("[data-component=\"SurfaceListCardSurface\"]")
-        expect(surface).toHaveAttribute("data-surface-context", "nested")
+        const body = container.querySelector("[data-component=\"SurfaceListCardBody\"]")
         expect(surface).toHaveAttribute("data-grammar-surface-depth", "nested")
+        expect(surface).toHaveAttribute("data-surface-context", "nested")
         expect(surface).toHaveAttribute("data-verdict", "true")
-        expect(container.querySelector("[data-component=\"SurfaceListCardBody\"]")?.className).toContain("rounded-none")
+        expect(body?.className).toContain("rounded-none")
     })
 
     it("defaults to a page-level, non-verdict surface with its own inset zeroed", () => {
         const { container } = render(<SurfaceListCard contract="next-action-list" render={Rows} props={base} />)
 
         const surface = container.querySelector("[data-component=\"SurfaceListCardSurface\"]")
+        const body = container.querySelector("[data-component=\"SurfaceListCardBody\"]")
         expect(surface).toHaveAttribute("data-surface-context", "page")
         expect(surface).toHaveAttribute("data-verdict", "false")
-        expect(container.querySelector("[data-component=\"SurfaceListCardBody\"]")?.className).not.toContain("rounded-none")
+        expect(body?.className).not.toContain("rounded-none")
     })
 
     it("closes the list with the whole-list action when there is somewhere for it to go", () => {

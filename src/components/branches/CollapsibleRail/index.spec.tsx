@@ -36,6 +36,7 @@ describe("CollapsibleRail", () => {
 
         expect(rail).toHaveAttribute("data-grammar-contract", "core.rail")
         expect(rail).toHaveAttribute("data-grammar-landmark", "content-navigation")
+        expect(rail).toHaveAttribute("data-grammar-rail-height", "fill")
         expect(rail).toHaveAttribute("data-grammar-collapse", "expanded")
         expect(rail).toHaveAttribute("data-grammar-motion", "animated")
         expect(rail?.tagName).toBe("DIV")

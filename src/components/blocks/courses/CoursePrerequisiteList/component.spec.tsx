@@ -20,7 +20,7 @@ describe("CoursePrerequisiteListBase", () => {
             "2.Can clone and push a Git branch",
             "3.Knows what an HTTP request is",
         ])
-        expect(screen.getByText("2.")).toHaveAttribute("data-tone", "muted")
+        expect(screen.getByText("2.")).toHaveAttribute("data-grammar-leading-number", "true")
         expect(screen.getByText("Can clone and push a Git branch")).toHaveAttribute("data-size", "sm")
     })
 

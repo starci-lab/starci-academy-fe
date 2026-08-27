@@ -1,6 +1,6 @@
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { SurfaceAccordionCard } from "@/components/branches/SurfaceAccordionCard"
+import { SurfaceAccordionCard } from "@starci/grammar/core"
 import { SurfaceListCard, type SurfaceListCardData } from "@/components/branches/SurfaceListCard"
 import { ScrollViewport } from "@/components/branches/ScrollViewport"
 import { LabelledProgressRow } from "@/components/composites/LabelledProgressRow"
@@ -472,7 +472,7 @@ export const CourseLearnContentBlockBase = (input: CourseLearnContentBlockProps)
                 return defineContractProjection("content-map-module", () => (
                     <SurfaceAccordionCard
                         isOpen={isOpen}
-                        summaryContract="content-map-module-summary"
+                        renderSummary={(summary) => <Tree contract="content-map-module-summary" render={summary} />}
                         summaryRender={defineContractComponent("content-map-module-summary", {
                             copy: defineContractComponent("content-map-module-summary-copy", {
                                 title: defineLeafComponent("text", { size: "md", weight: "medium" }, () => (
@@ -495,7 +495,7 @@ export const CourseLearnContentBlockBase = (input: CourseLearnContentBlockProps)
                                 <DisclosureIndicator props={{ isOpen }} />
                             )),
                         })}
-                        bodyContract="content-map-module-body"
+                        renderBody={(body) => <Tree contract="content-map-module-body" render={body} />}
                         bodyRender={defineContractComponent("content-map-module-body", {
                             list: defineLeafComponent("selection-list", { variant: "outline" }, () => (
                                 <SelectionList
@@ -632,4 +632,3 @@ export const CourseLearnContentBlockBase = (input: CourseLearnContentBlockProps)
 
 /** Source-level ownership marker. */
 export const meta = { world: "pure", domain: "learn" } as const
-

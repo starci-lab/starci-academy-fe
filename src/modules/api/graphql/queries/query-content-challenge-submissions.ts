@@ -82,5 +82,6 @@ export const queryContentChallengeSubmissions = async ({
     return apollo.query<QueryContentChallengeSubmissionsResponse>({
         query: queryContentChallengeSubmissionsMap[query],
         variables: { request },
+        fetchPolicy: "network-only",
     })
 }

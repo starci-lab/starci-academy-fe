@@ -7,8 +7,8 @@ import {
 } from "@/components/blocks/learn/CoursePersonalProject/component"
 
 const tasks: ReadonlyArray<CoursePersonalProjectTaskRow> = [
-    { id: "task-1", title: "1. Plan", status: "Completed", actionLabel: "Continue" },
-    { id: "task-2", title: "2. Build", status: "Next task", actionLabel: "Continue", isCurrent: true },
+    { id: "task-1", position: 1, title: "Plan", status: "Completed", actionLabel: "Continue" },
+    { id: "task-2", position: 2, title: "Build", status: "Next task", actionLabel: "Continue", isCurrent: true },
 ]
 
 const baseProps: CoursePersonalProjectBlockProps["data"] = {
@@ -38,8 +38,9 @@ describe("CoursePersonalProjectPageBase", () => {
         const text = container.textContent ?? ""
 
         expect(text.indexOf("Build the service")).toBeLessThan(text.indexOf("1/2 tasks completed"))
-        expect(text.indexOf("1/2 tasks completed")).toBeLessThan(text.indexOf("1. Plan"))
+        expect(text.indexOf("1/2 tasks completed")).toBeLessThan(text.indexOf("1.Plan"))
         expect(screen.getByText("1/2 tasks completed · 3 submissions · Average score 18/20")).toBeInTheDocument()
+        expect(screen.getByText("1.")).toHaveAttribute("data-grammar-leading-number", "true")
         expect(container.querySelectorAll("[data-component=SurfaceCardSurface]")).toHaveLength(3)
     })
 

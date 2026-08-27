@@ -1,5 +1,7 @@
 import {
+    markdownArticleContract,
     railContract,
+    surfaceAccordionCardContract,
     surfaceCardContract,
     surfaceListCardContract,
     visualTreatmentContract,
@@ -13,7 +15,9 @@ import {
  * Empty product-prefixed extensions are deliberately refused because a new key is not conformance.
  */
 export const STARCI_ACADEMY_GRAMMAR_CONTRACTS = Object.freeze({
+    markdownArticle: markdownArticleContract,
     surfaceCard: surfaceCardContract,
+    surfaceAccordionCard: surfaceAccordionCardContract,
     surfaceListCard: surfaceListCardContract,
     rail: railContract,
     visualTreatment: visualTreatmentContract,

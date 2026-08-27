@@ -1,60 +1,61 @@
-/** @vitest-environment jsdom */
-import { fireEvent, render, screen } from "@testing-library/react"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { act, render, screen } from "@testing-library/react"
+import { hydrateRoot } from "react-dom/client"
+import { renderToString } from "react-dom/server"
+import { describe, expect, it, vi } from "vitest"
 import { CourseContentMap } from "."
 
-const mocks = vi.hoisted(() => ({
-    push: vi.fn(),
-    useQueryCourseOutlineSwr: vi.fn(),
-}))
-
-type TranslationValues = { readonly total?: number; readonly minutes?: number }
+const push = vi.fn()
 
 vi.mock("next-intl", () => ({
-    useTranslations: () => (key: string, values?: TranslationValues) =>
-        values?.total === undefined
-            ? values?.minutes === undefined ? key : `${values.minutes} min`
-            : `${values.total} contents`,
-}))
-vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
-vi.mock("@/hooks/swr/useQueryCourseOutlineSwr", () => ({
-    useQueryCourseOutlineSwr: mocks.useQueryCourseOutlineSwr,
+    useTranslations: () => (key: string) => key,
 }))
 
-beforeEach(() => {
-    mocks.push.mockReset()
-    mocks.useQueryCourseOutlineSwr.mockReset().mockReturnValue({
+vi.mock("@/i18n/navigation", () => ({
+    useRouter: () => ({ push }),
+}))
+
+vi.mock("@/hooks/swr/useQueryCourseOutlineSwr", () => ({
+    useQueryCourseOutlineSwr: () => ({
         data: {
-            progress: { completionPercent: 25, lessonsRead: 1, lessonsTotal: 4 },
+            progress: { completionPercent: 50, lessonsRead: 1, lessonsTotal: 2 },
             modules: [{
                 id: "module-1",
-                title: "Foundations",
-                lessons: [{
-                    id: "lesson-1",
-                    title: "Latency",
-                    minutesRead: 8,
-                    isRead: false,
-                }],
+                title: "Cached module",
+                lessons: [{ id: "lesson-1", title: "Cached lesson", minutesRead: 5, isRead: true }],
             }],
         },
         error: undefined,
-    })
-})
+    }),
+}))
 
-describe("CourseContentMap", () => {
-    it("routes a selected source lesson through its owning module", () => {
-        render(<CourseContentMap displayId="system-design" currentLessonId="lesson-1" />)
-        fireEvent.click(screen.getByText("Latency"))
-        expect(mocks.push).toHaveBeenCalledWith(
-            "/courses/system-design/learn/content/modules/module-1/contents/lesson-1",
-        )
+describe("CourseContentMap hydration", () => {
+    it("keeps cached browser data out of SSR and adopts it after mount", async () => {
+        const html = renderToString(<CourseContentMap displayId="fullstack-mastery" />)
+
+        expect(html).not.toContain("Cached module")
+        expect(html.match(/data-component="SurfaceAccordionCard"/g)).toHaveLength(4)
+        expect(html).not.toContain("data-component=\"SelectionList\"")
+
+        render(<CourseContentMap displayId="fullstack-mastery" />)
+        expect(await screen.findByText("Cached module")).toBeInTheDocument()
     })
 
-    it("filters the source-backed tree from the submitted course search", () => {
-        render(<CourseContentMap displayId="system-design" />)
-        const search = screen.getByRole("searchbox", { name: "content.searchLabel" })
-        fireEvent.change(search, { target: { value: "missing" } })
-        fireEvent.submit(screen.getByRole("search"))
-        expect(screen.queryByText("Foundations")).toBeNull()
+    it("hydrates the deterministic pending outline without replacing the server tree", async () => {
+        const container = document.createElement("div")
+        container.innerHTML = renderToString(<CourseContentMap displayId="fullstack-mastery" />)
+        document.body.append(container)
+        const errors: Array<Array<unknown>> = []
+        const error = vi.spyOn(console, "error").mockImplementation((...args) => {
+            errors.push(args)
+        })
+
+        await act(async () => {
+            hydrateRoot(container, <CourseContentMap displayId="fullstack-mastery" />)
+        })
+
+        expect(errors.flat().join(" ")).not.toContain("Hydration failed")
+        expect(await screen.findByText("Cached module")).toBeInTheDocument()
+        error.mockRestore()
+        container.remove()
     })
 })

@@ -16,6 +16,11 @@ const mocks = vi.hoisted(() => ({
     submissions: { data: undefined as unknown, error: undefined as unknown, mutate: vi.fn() },
     feedbacks: { data: undefined as unknown, error: undefined as unknown, mutate: vi.fn() },
     submit: { trigger: vi.fn() },
+    jobSocket: {
+        verdict: undefined as { jobId: string; status?: string } | undefined,
+        isConnected: false,
+        connectionState: "idle" as "idle" | "connecting" | "connected" | "disconnected",
+    },
     router: { push: vi.fn() },
 }))
 
@@ -34,6 +39,9 @@ vi.mock("@/hooks/swr/useQueryContentChallengeAttemptsSwr", () => ({ useQueryCont
 vi.mock("@/hooks/swr/useQueryContentChallengeSubmissionsSwr", () => ({ useQueryContentChallengeSubmissionsSwr: () => mocks.submissions }))
 vi.mock("@/hooks/swr/useQueryContentChallengeFeedbacksSwr", () => ({ useQueryContentChallengeFeedbacksSwr: () => mocks.feedbacks }))
 vi.mock("@/hooks/swr/useMutateSubmitContentChallengeSwr", () => ({ useMutateSubmitContentChallengeSwr: () => mocks.submit }))
+vi.mock("@/hooks/socketio/useJobVerdictSocketIo", () => ({
+    useJobVerdictSocketIo: () => mocks.jobSocket,
+}))
 vi.mock("./component", () => ({
     ChallengeResultBase: ({ blockState, props, on }: ResultInput) => (
         <>
@@ -42,6 +50,8 @@ vi.mock("./component", () => ({
             <button onClick={() => on.reload?.()}>reload</button>
             <button onClick={() => on.retry?.()}>retry</button>
             <button onClick={() => on.next?.()}>next</button>
+            <button onClick={() => on.openCourse?.()}>open-course</button>
+            <button onClick={() => on.openContent?.()}>open-content</button>
             <button onClick={() => on.openHistory?.()}>open-history</button>
             <button onClick={() => on.closeHistory?.()}>close-history</button>
             <button onClick={() => on.selectHistoryAttempt?.("attempt-2", "group-2")}>select-group</button>
@@ -62,11 +72,11 @@ const readyAttempt = {
 beforeEach(() => {
     vi.clearAllMocks()
     mocks.params = new Map([["submission", "submission-1"]])
-    mocks.content.data = { challenges: [{ id: "challenge", displayId: "challenge-display", title: "Challenge", description: "Brief", score: 100, submissions: [{ id: "submission-1", title: "Deliverable", score: 100 }] }] }
+    mocks.content.data = { title: "Dependency injection", challenges: [{ id: "challenge", displayId: "challenge-display", title: "Challenge", description: "Brief", score: 100, submissions: [{ id: "submission-1", title: "Deliverable", score: 100 }] }] }
     mocks.content.error = undefined
-    mocks.course.data = { id: "course-1" }
+    mocks.course.data = { id: "course-1", title: "Fullstack Mastery" }
     mocks.course.error = undefined
-    mocks.module.data = { contents: [{ id: "content", orderIndex: 1 }, { id: "next", orderIndex: 2 }] }
+    mocks.module.data = { title: "Backend foundations", contents: [{ id: "content", orderIndex: 1 }, { id: "next", orderIndex: 2 }] }
     mocks.module.error = undefined
     mocks.attempts.data = [readyAttempt]
     mocks.attempts.error = undefined
@@ -75,6 +85,9 @@ beforeEach(() => {
     mocks.feedbacks.data = [{ id: "feedback", message: "Improve tests", detail: null, severity: "warning", location: null, suggestion: "Add cases", sortIndex: 1 }]
     mocks.feedbacks.error = undefined
     mocks.submit.trigger.mockResolvedValue({})
+    mocks.jobSocket.verdict = undefined
+    mocks.jobSocket.isConnected = false
+    mocks.jobSocket.connectionState = "idle"
 })
 
 describe("ChallengeResultBlock", () => {
@@ -84,9 +97,13 @@ describe("ChallengeResultBlock", () => {
         expect(screen.getByTestId("props")).toHaveTextContent("80/100")
         expect(screen.getByTestId("props")).toHaveTextContent("challengePassed")
         expect(screen.getByTestId("props")).toHaveTextContent("Improve tests")
+        expect(screen.getByTestId("props")).toHaveTextContent("Fullstack Mastery")
+        expect(screen.getByTestId("props")).toHaveTextContent("Backend foundations")
 
         fireEvent.click(screen.getByText("next"))
         fireEvent.click(screen.getByText("retry"))
+        fireEvent.click(screen.getByText("open-course"))
+        fireEvent.click(screen.getByText("open-content"))
         fireEvent.click(screen.getByText("open-history"))
         expect(screen.getByTestId("props")).toHaveTextContent("\"isHistoryOpen\":true")
         fireEvent.click(screen.getByText("close-history"))
@@ -95,6 +112,8 @@ describe("ChallengeResultBlock", () => {
 
         expect(mocks.router.push).toHaveBeenCalledWith(expect.stringContaining("/contents/next"))
         expect(mocks.router.push).toHaveBeenCalledWith(expect.stringContaining("/challenges/challenge"))
+        expect(mocks.router.push).toHaveBeenCalledWith("/courses/course/learn")
+        expect(mocks.router.push).toHaveBeenCalledWith("/courses/course/learn/content/modules/module/contents/content")
         expect(mocks.router.push).toHaveBeenCalledWith(expect.stringContaining("attempt=attempt-2"))
         expect(mocks.router.push).toHaveBeenCalledWith(expect.stringContaining("attempt=attempt-3"))
     })
@@ -139,5 +158,45 @@ describe("ChallengeResultBlock", () => {
         await waitFor(() => expect(mocks.content.mutate).toHaveBeenCalled())
         expect(mocks.course.mutate).toHaveBeenCalled()
         expect(mocks.module.mutate).toHaveBeenCalled()
+    })
+
+    it("revalidates authoritative result owners when the subscribed job publishes", async () => {
+        mocks.params.set("jobs", "job-1")
+        mocks.jobSocket.verdict = { jobId: "job-1", status: "completed" }
+        mocks.jobSocket.isConnected = true
+        mocks.jobSocket.connectionState = "connected"
+
+        render(<ChallengeResultBlock {...route} />)
+
+        await waitFor(() => expect(mocks.attempts.mutate).toHaveBeenCalled())
+        expect(mocks.submissions.mutate).toHaveBeenCalled()
+        expect(mocks.feedbacks.mutate).toHaveBeenCalled()
+        await waitFor(() => expect(mocks.attempts.mutate).toHaveBeenCalledTimes(2))
+    })
+
+    it("leaves pending immediately when the socket reports a terminal job failure", async () => {
+        const evaluatingAttempt = {
+            ...readyAttempt,
+            status: "evaluating",
+            platformDecision: null,
+            score: null,
+        }
+        mocks.params.set("jobs", "job-1")
+        mocks.attempts.data = [evaluatingAttempt]
+        mocks.submissions.data = [{
+            id: "submission-1",
+            score: 100,
+            userSubmission: { submissionUrl: evaluatingAttempt.submissionUrl, lastAttempt: evaluatingAttempt },
+        }]
+        mocks.jobSocket.verdict = { jobId: "job-1", status: "failed" }
+        mocks.jobSocket.isConnected = true
+        mocks.jobSocket.connectionState = "connected"
+
+        render(<ChallengeResultBlock {...route} />)
+
+        expect(screen.getByTestId("state")).toHaveTextContent("unavailable")
+        await waitFor(() => expect(mocks.attempts.mutate).toHaveBeenCalled())
+        expect(mocks.submissions.mutate).toHaveBeenCalled()
+        expect(mocks.feedbacks.mutate).toHaveBeenCalled()
     })
 })

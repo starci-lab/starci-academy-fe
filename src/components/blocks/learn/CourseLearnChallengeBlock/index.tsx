@@ -12,6 +12,11 @@ import { useQueryCourseOutlineSwr } from "@/hooks/swr/useQueryCourseOutlineSwr"
 import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
 import { filterCourseOutlineModules } from "@/modules/learn/course-outline"
 import { useGlobalAiChat } from "@/modules/ai/global-ai-chat-context"
+import type {
+    ContentChallengeRequirementLang,
+    ContentChallengeStepLang,
+    ContentChallengeTextLang,
+} from "@/modules/api/graphql/queries/types/content"
 import {
     normalizeContentAiSelection,
     type ContentAiSelectionContext,
@@ -27,6 +32,21 @@ export type CourseLearnChallengeBlockProps = {
     readonly moduleId: string
     readonly contentId: string
     readonly challengeId: string
+}
+
+type AuthoredOrder = { readonly orderIndex: number; readonly sortIndex: number }
+type ChallengeLanguageRow = AuthoredOrder & { readonly lang: string }
+const byAuthoredOrder = (first: AuthoredOrder, second: AuthoredOrder) => (
+    first.sortIndex - second.sortIndex || first.orderIndex - second.orderIndex
+)
+const selectChallengeLanguage = <T extends ChallengeLanguageRow>(
+    rows: ReadonlyArray<T>,
+    language: string | undefined,
+): T | undefined => {
+    const ordered = [...rows].sort(byAuthoredOrder)
+    return ordered.find((row) => row.lang === language)
+        ?? ordered.find((row) => row.lang === "agnostic")
+        ?? ordered[0]
 }
 
 /** Resolves a Challenge, persists its complete draft and submits one logical whole-attempt group. */
@@ -46,6 +66,7 @@ export const CourseLearnChallengeBlock = (input: CourseLearnChallengeBlockProps)
     const [expandedModuleIds, setExpandedModuleIds] = useState<ReadonlySet<string>>(new Set([input.moduleId]))
     const [isCourseMapOpen, setIsCourseMapOpen] = useState(false)
     const [expandedRequirementIds, setExpandedRequirementIds] = useState<ReadonlyArray<string>>([])
+    const [expandedStepIds, setExpandedStepIds] = useState<ReadonlyArray<string>>([])
     const [activeSubmissionId, setActiveSubmissionId] = useState<string>()
     const [failedSubmissionId, setFailedSubmissionId] = useState<string>()
     const [submitError, setSubmitError] = useState<string>()
@@ -71,14 +92,24 @@ export const CourseLearnChallengeBlock = (input: CourseLearnChallengeBlockProps)
     const challenge = challenges.find((candidate) => (
         candidate.id === input.challengeId || candidate.displayId === input.challengeId
     ))
+    const challengeLanguages = useMemo(() => [...new Set([
+        ...(content.data?.bodies?.map((body) => body.lang) ?? []),
+        ...(challenge?.requirements?.flatMap((item) => item.langs.map((row) => row.lang)) ?? []),
+        ...(challenge?.steps?.flatMap((item) => item.langs.map((row) => row.lang)) ?? []),
+        ...(challenge?.outputs?.flatMap((item) => item.langs.map((row) => row.lang)) ?? []),
+        ...(challenge?.prerequisites?.flatMap((item) => item.langs.map((row) => row.lang)) ?? []),
+    ])], [challenge, content.data?.bodies])
     const persistedSubmissions = useQueryContentChallengeSubmissionsSwr(course.data?.id, challenge?.id)
     const challengeSubmissions = persistedSubmissions.data ?? challenge?.submissions ?? []
     const challengeProgress = progress.data?.find((candidate) => candidate.id === challenge?.id)
 
     useEffect(() => {
-        const languages = content.data?.bodies?.map((body) => body.lang) ?? []
-        setSelectedLanguage((current) => current ?? languages[0] ?? "agnostic")
-    }, [content.data?.bodies])
+        setSelectedLanguage((current) => (
+            current !== undefined && challengeLanguages.includes(current)
+                ? current
+                : challengeLanguages[0] ?? "agnostic"
+        ))
+    }, [challengeLanguages])
 
     useEffect(() => {
         if (!globalAi.isOpen) return
@@ -114,8 +145,9 @@ export const CourseLearnChallengeBlock = (input: CourseLearnChallengeBlockProps)
     }, [])
 
     useEffect(() => {
-        setExpandedRequirementIds(challengeSubmissions[0] === undefined ? [] : [challengeSubmissions[0].id])
-    }, [challenge?.id])
+        const firstRequirement = [...(challenge?.requirements ?? [])].sort(byAuthoredOrder)[0]
+        setExpandedRequirementIds(firstRequirement === undefined ? [] : [firstRequirement.id])
+    }, [challenge?.id, challenge?.requirements])
 
     useEffect(() => {
         if (persistedSubmissions.data === undefined || persistedSubmissions.data === null) return
@@ -199,7 +231,10 @@ export const CourseLearnChallengeBlock = (input: CourseLearnChallengeBlockProps)
         setSubmitError(undefined)
         setFailedSubmissionId(undefined)
         const saved = await saveDraft()
-        if (!saved) return
+        if (!saved) {
+            setIsReviewing(false)
+            return
+        }
         setActiveSubmissionId(challengeSubmissions[0]?.id)
         try {
             const attemptGroupId = crypto.randomUUID()
@@ -248,6 +283,7 @@ export const CourseLearnChallengeBlock = (input: CourseLearnChallengeBlockProps)
         } catch (error) {
             setSubmitError(error instanceof Error ? error.message : contentText("failedMessage"))
             setFailedSubmissionId(challengeSubmissions[0]?.id)
+            setIsReviewing(false)
         } finally {
             setActiveSubmissionId(undefined)
         }
@@ -309,6 +345,37 @@ export const CourseLearnChallengeBlock = (input: CourseLearnChallengeBlockProps)
             : draftState === "conflict"
                 ? contentText("challengeDraftConflict")
                 : contentText("challengeDraftSaved")
+    const prerequisites = [...(challenge?.prerequisites ?? [])].sort(byAuthoredOrder).flatMap((item) => {
+        const row = selectChallengeLanguage<ContentChallengeTextLang>(item.langs, selectedLanguage)
+        return row?.text === null || row?.text === undefined || row.text.trim() === ""
+            ? []
+            : [{ id: item.id, body: row.text }]
+    })
+    const requirements = [...(challenge?.requirements ?? [])].sort(byAuthoredOrder).flatMap((item) => {
+        const row = selectChallengeLanguage<ContentChallengeRequirementLang>(item.langs, selectedLanguage)
+        if (row === undefined || row.title === null || row.title.trim() === "") return []
+        return [{ id: item.id, title: row.title, body: row.body ?? undefined, score: row.score }]
+    })
+    const steps = useMemo(() => [...(challenge?.steps ?? [])].sort(byAuthoredOrder).flatMap((item) => {
+        const row = selectChallengeLanguage<ContentChallengeStepLang>(item.langs, selectedLanguage)
+        if (row === undefined || ((row.title?.trim().length ?? 0) === 0 && (row.body?.trim().length ?? 0) === 0)) return []
+        return [{ id: item.id, title: row.title ?? undefined, body: row.body ?? row.title ?? "" }]
+    }), [challenge?.steps, selectedLanguage])
+    const outputs = [...(challenge?.outputs ?? [])].sort(byAuthoredOrder).flatMap((item) => {
+        const row = selectChallengeLanguage<ContentChallengeTextLang>(item.langs, selectedLanguage)
+        return row?.text === null || row?.text === undefined || row.text.trim() === ""
+            ? []
+            : [{ id: item.id, body: row.text }]
+    })
+
+    useEffect(() => {
+        setExpandedStepIds((current) => {
+            const validIds = new Set(steps.map((step) => step.id))
+            const retained = current.filter((id) => validIds.has(id))
+            if (retained.length > 0 || steps[0] === undefined) return retained
+            return [steps[0].id]
+        })
+    }, [steps])
 
     return (
         <CourseLearnChallengeBlockBase
@@ -329,8 +396,13 @@ export const CourseLearnChallengeBlock = (input: CourseLearnChallengeBlockProps)
                     ? contentText("challengePassed")
                     : contentText("challengeNotSubmitted"),
                 hint: challenge?.hint ?? undefined,
+                prerequisites,
+                requirements,
+                steps,
+                outputs,
                 maximumScore,
                 expandedRequirementIds,
+                expandedStepIds,
                 failedSubmissionId,
                 notice: submitError ?? contentText("failedMessage"),
                 draftStatus,
@@ -341,7 +413,9 @@ export const CourseLearnChallengeBlock = (input: CourseLearnChallengeBlockProps)
                 isAiDrawerOpen,
                 allDraftsComplete,
                 isCourseMapOpen,
-                languageOptions: (content.data?.bodies?.map((body) => ({ id: body.lang, label: body.lang })) ?? [{ id: "agnostic", label: contentText("challengeLanguageAgnostic") }]),
+                languageOptions: challengeLanguages.length === 0
+                    ? [{ id: "agnostic", label: contentText("challengeLanguageAgnostic") }]
+                    : challengeLanguages.map((language) => ({ id: language, label: language })),
                 selectedLanguage,
                 defaultModelId,
                 aiSelection: activeSelection?.context,
@@ -409,6 +483,12 @@ export const CourseLearnChallengeBlock = (input: CourseLearnChallengeBlockProps)
                     openCourseMap: contentText("challengeCourseMap"),
                     brief: contentText("challengeBrief"),
                     deliverables: contentText("challengeDeliverables"),
+                    prerequisites: contentText("challengePrerequisites"),
+                    requirements: contentText("challengeRequirements"),
+                    steps: contentText("challengeSteps"),
+                    expectedOutputs: contentText("challengeExpectedOutputs"),
+                    hintLabel: contentText("challengeHint"),
+                    evidenceLabel: contentText("challengeEvidenceLabel"),
                     repositoryPlaceholder: contentText("challengeRepositoryPlaceholder"),
                     saved: contentText("challengeSaved"),
                     required: contentText("challengeEvidenceRequired"),
@@ -467,6 +547,11 @@ export const CourseLearnChallengeBlock = (input: CourseLearnChallengeBlockProps)
                     setIsCourseMapOpen(false)
                 },
                 toggleRequirement: (id, isOpen) => setExpandedRequirementIds((current) => (
+                    isOpen
+                        ? [...new Set([...current, id])]
+                        : current.filter((candidate) => candidate !== id)
+                )),
+                toggleStep: (id, isOpen) => setExpandedStepIds((current) => (
                     isOpen
                         ? [...new Set([...current, id])]
                         : current.filter((candidate) => candidate !== id)

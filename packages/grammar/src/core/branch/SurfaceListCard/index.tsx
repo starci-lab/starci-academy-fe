@@ -1,8 +1,5 @@
 import { useId, type ReactNode } from "react"
-import { StaticStateRow, type StaticStateRowData } from "../../composite/StaticStateRow/index.js"
-import { assertPresentationState } from "../../state.js"
-
-export type SurfaceListItem = StaticStateRowData
+import type { ContractRenderComponent } from "../../component-contracts.js"
 
 type LabelledSurfaceList = {
     readonly label: string
@@ -20,58 +17,42 @@ type SurfaceListFrameProps = (LabelledSurfaceList | SelfNamedSurfaceList) & {
     readonly labelHidden?: boolean
     readonly footer?: ReactNode
     readonly depth?: "top" | "nested"
+    readonly isLoading?: boolean
+    readonly isVerdict?: boolean
 }
 
-type StaticSurfaceListProps = {
-    readonly items: ReadonlyArray<SurfaceListItem>
-    readonly emptyLabel?: string
-    readonly children?: never
-    readonly rowMode?: "static"
+type ContractOwnedSurfaceListProps<K extends string, P extends object> = {
+    /** The existing contract component is the sole authority for row and cell structure. */
+    readonly render: ContractRenderComponent<K, P>
+    /** Structured runtime input for that component; never caller-authored row markup. */
+    readonly props: P
 }
 
-type ContentOwnedSurfaceListProps = {
-    readonly children: ReactNode
-    readonly rowMode: "interactive"
-    readonly items?: never
-    readonly emptyLabel?: never
-}
+export type SurfaceListCardProps<K extends string, P extends object> = SurfaceListFrameProps & ContractOwnedSurfaceListProps<K, P>
 
-export type SurfaceListCardProps = SurfaceListFrameProps & (StaticSurfaceListProps | ContentOwnedSurfaceListProps)
-
-export const SurfaceListCard = ({
+export const SurfaceListCard = <const K extends string, P extends object>({
     label,
     ariaLabel,
-    items,
-    children,
+    render: Content,
+    props,
     fact,
     labelEnd,
     labelHidden = false,
     footer,
     depth = "top",
-    emptyLabel = "No items",
-    rowMode = "static",
-}: SurfaceListCardProps) => {
+    isLoading = false,
+    isVerdict = false,
+}: SurfaceListCardProps<K, P>) => {
     const headingId = useId()
-    for (const item of items ?? []) assertPresentationState(item.state ?? "neutral")
     const accessibleName = ariaLabel ?? label
-    const collection = rowMode === "interactive" ? (
-        <div className="starci-core-owned-collection" data-grammar-list="true" data-grammar-list-mode="interactive">
-            {children}
-        </div>
-    ) : items?.length === 0 ? (
-        <p className="starci-core-empty-row" data-grammar-state="neutral">{emptyLabel}</p>
-    ) : (
-        <ul className="starci-core-static-list" data-grammar-list="true" data-grammar-list-mode="static">
-            {(items ?? []).map((item) => <StaticStateRow key={item.id} item={item} />)}
-        </ul>
-    )
 
     return (
         <section
             className="starci-core-surface-list"
+            data-component="SurfaceListCard"
             data-grammar-contract="core.surface-list-card"
             data-grammar-label-visibility={labelHidden ? "hidden" : "visible"}
-            data-grammar-list-mode={rowMode}
+            data-grammar-list-mode="contract"
             data-grammar-surface-list="true"
         >
             {label === undefined || labelHidden ? null : (
@@ -84,10 +65,22 @@ export const SurfaceListCard = ({
                 aria-label={labelHidden || label === undefined ? accessibleName : undefined}
                 aria-labelledby={!labelHidden && label !== undefined ? headingId : undefined}
                 className="starci-core-surface starci-core-list-shell"
+                data-component="SurfaceListCardSurface"
                 data-grammar-surface="true"
                 data-grammar-surface-depth={depth}
+                data-surface-context={depth === "nested" ? "nested" : "page"}
+                data-verdict={String(isVerdict)}
             >
-                {collection}
+                <div
+                    className={isVerdict ? "starci-core-owned-collection rounded-none" : "starci-core-owned-collection"}
+                    data-component="SurfaceListCardBody"
+                    data-grammar-list="true"
+                    data-grammar-list-contract={Content.meta.contract}
+                    data-grammar-list-mode="contract"
+                    data-loading={String(isLoading)}
+                >
+                    <Content {...props} />
+                </div>
             </div>
             {footer === undefined ? null : (
                 <div className="starci-core-surface-footer" data-grammar-surface-footer="true">{footer}</div>

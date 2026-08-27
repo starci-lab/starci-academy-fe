@@ -25,7 +25,11 @@ import { ChallengeGradingModelDrawer } from "./index"
 beforeEach(() => {
     vi.clearAllMocks()
     mocks.quota.data = { credit: { remainingWeek: 3 } }
-    mocks.catalogue.mockResolvedValue({ data: { aiModels: { data: { gradableModels: [{ provider: "openai", model: "gpt", category: "reasoning", available: false }] } } } })
+    mocks.catalogue.mockResolvedValue({ data: { aiModels: { data: { gradableModels: [
+        { provider: "openai", model: "gpt", category: "reasoning", available: false, supportedTasks: ["grading"] },
+        { provider: "openai", model: "embedding", category: "low", available: true, supportedTasks: ["embedding"] },
+        { provider: "local", model: "legacy-embedding", category: "low", available: true, supportedTasks: [] },
+    ] } } } })
 })
 
 describe("ChallengeGradingModelDrawer", () => {
@@ -34,6 +38,8 @@ describe("ChallengeGradingModelDrawer", () => {
         expect(screen.getByText(/challengeModelQuota/)).toBeInTheDocument()
         expect(await screen.findByText(/openai:gpt/)).toBeInTheDocument()
         expect(screen.getByText(/"disabled":true/)).toBeInTheDocument()
+        expect(screen.queryByText(/openai:embedding/)).not.toBeInTheDocument()
+        expect(screen.queryByText(/local:legacy-embedding/)).not.toBeInTheDocument()
     })
 
     it("omits quota copy when quota is unresolved", () => {

@@ -18,26 +18,35 @@ export const CourseContentMap = ({ displayId, currentLessonId }: CourseContentMa
     const t = useTranslations("learn")
     const router = useRouter()
     const outline = useQueryCourseOutlineSwr(displayId)
+    const [isMounted, setIsMounted] = useState(false)
     const [query, setQuery] = useState("")
     const [expandedModuleIds, setExpandedModuleIds] = useState<ReadonlySet<string>>(new Set())
-    const modules = outline.data === undefined || outline.data === null
+    // SWR can already contain a browser-only cached outline while SSR necessarily
+    // renders the pending map. Keep the first client render on the same pending
+    // contract, then adopt live data after hydration; otherwise HeroUI's empty
+    // ListBox template is reconciled against populated rows and React replaces
+    // the entire course-map tree.
+    const hydratedOutline = isMounted ? outline.data : undefined
+    const modules = hydratedOutline === undefined || hydratedOutline === null
         ? []
-        : filterCourseOutlineModules(outline.data.modules, query)
+        : filterCourseOutlineModules(hydratedOutline.modules, query)
     const lessonRoutes = new Map(
         modules.flatMap((module) => module.lessons.map((lesson) => [lesson.id, {
             moduleId: module.id,
             lessonId: lesson.id,
         }] as const)),
     )
-    const hasFailure = outline.error !== undefined
-    const state = outline.data === undefined
+    const hasFailure = isMounted && outline.error !== undefined
+    const state = hydratedOutline === undefined
         ? hasFailure ? "failed" : "pending"
-        : outline.data === null || modules.length === 0
+        : hydratedOutline === null || modules.length === 0
             ? "empty"
             : hasFailure ? "partial" : "ready"
-    const activeModuleId = outline.data?.modules.find((module) => (
+    const activeModuleId = hydratedOutline?.modules.find((module) => (
         module.lessons.some((lesson) => lesson.id === currentLessonId)
     ))?.id
+
+    useEffect(() => setIsMounted(true), [])
 
     useEffect(() => {
         if (activeModuleId === undefined) return
@@ -73,12 +82,12 @@ export const CourseContentMap = ({ displayId, currentLessonId }: CourseContentMa
                     searchClearLabel: t("content.searchClearLabel"),
                     failed: t("content.failedMessage"),
                 },
-                completionPercent: outline.data?.progress.completionPercent,
-                progressFact: outline.data === undefined || outline.data === null
+                completionPercent: hydratedOutline?.progress.completionPercent,
+                progressFact: hydratedOutline === undefined || hydratedOutline === null
                     ? undefined
-                    : `${outline.data.progress.lessonsRead}/${outline.data.progress.lessonsTotal}`,
+                    : `${hydratedOutline.progress.lessonsRead}/${hydratedOutline.progress.lessonsTotal}`,
                 modules: modules.map((module) => {
-                    const sourceModule = outline.data?.modules.find((candidate) => candidate.id === module.id) ?? module
+                    const sourceModule = hydratedOutline?.modules.find((candidate) => candidate.id === module.id) ?? module
                     const completed = sourceModule.lessons.filter((lesson) => lesson.isRead).length
                     const total = sourceModule.lessons.length
                     return {

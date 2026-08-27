@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { codeToHtml } from "shiki"
+import { FencedCodeBlock } from "@starci/grammar/core"
 import type { LeafProps } from "@/components/contracts/props"
 
 /**
@@ -44,12 +45,6 @@ export type CodeBlockData = {
 
 /** Props for {@link CodeBlock}. */
 export type CodeBlockProps = LeafProps<CodeBlockData>
-
-const FRAME_CLASSES = "w-full min-w-0 overflow-hidden rounded-xl border border-border bg-background shadow-none"
-const HEADER_CLASSES = "flex items-center justify-between border-b border-separator px-3 py-2"
-const LANGUAGE_CLASSES = "text-xs leading-4 text-muted"
-const CODE_CLASSES = "w-full min-w-0 overflow-x-auto p-3 font-mono text-sm leading-5 text-foreground [&_pre]:!bg-transparent [&_pre]:!p-0"
-const CODE_SCROLL = "[&_code]:!whitespace-pre [&_pre]:!whitespace-pre"
 
 const LANGUAGE_LABELS: Readonly<Record<string, string>> = {
     bash: "Bash", csharp: "C#", cs: "C#", css: "CSS", dockerfile: "Dockerfile",
@@ -101,14 +96,15 @@ export const MarkdownCodeBlock = (input: CodeBlockProps) => {
     const copy = () => { void navigator.clipboard?.writeText(input.props.code) }
 
     return (
-        <div ref={hostRef} data-tier="branch" data-component="MarkdownCodeBlock" className={FRAME_CLASSES}>
-            <div className={HEADER_CLASSES}>
-                <span className={LANGUAGE_CLASSES}>{LANGUAGE_LABELS[language.toLowerCase()] ?? language}</span>
-                <button type="button" className="text-xs text-muted hover:text-foreground" onClick={copy}>{input.props.copyLabel ?? "Copy"}</button>
-            </div>
-            {html === undefined
-                ? <pre className={`${CODE_CLASSES} whitespace-pre`}><code>{input.props.code}</code></pre>
-                : <div className={`${CODE_CLASSES} ${CODE_SCROLL}`} dangerouslySetInnerHTML={{ __html: html }} />}
+        <div ref={hostRef} data-tier="branch" data-component="MarkdownCodeBlock">
+            <FencedCodeBlock
+                language={LANGUAGE_LABELS[language.toLowerCase()] ?? language}
+                action={<button type="button" onClick={copy}>{input.props.copyLabel ?? "Copy"}</button>}
+            >
+                {html === undefined
+                    ? <pre><code>{input.props.code}</code></pre>
+                    : <div data-grammar-fenced-code-highlight="true" dangerouslySetInnerHTML={{ __html: html }} />}
+            </FencedCodeBlock>
         </div>
     )
 }

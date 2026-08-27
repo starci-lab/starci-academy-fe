@@ -1,12 +1,7 @@
-import { Card } from "@heroui/react"
-import { Tree } from "@/components/branches/Tree"
-import { Heading } from "@/components/leaves/Heading"
 import { Text } from "@/components/leaves/Text"
 import { Button } from "@/components/leaves/Button"
 import type { JoinedListContractKey } from "@/components/contracts"
-import { STARCI_ACADEMY_GRAMMAR_CONTRACTS } from "@/components/contracts/grammar"
-import { treatmentFor, type PresentationState } from "@starci/grammar/core"
-import { defineContractComponent, defineLeafComponent } from "@/components/contracts/props"
+import { SurfaceListCard as GrammarSurfaceListCard } from "@starci/grammar/core"
 import type {
     ContractRenderComponent,
     DataValue,
@@ -66,67 +61,25 @@ export const SurfaceListCard = <
     D extends SurfaceListCardData,
     A extends SurfaceListCardActions = SurfaceListCardActions,
 >(input: SurfaceListCardProps<K, D, A>) => {
-    const { props: surfaceProps, on, render: Content, isLoading = false } = input
-    const grammarState: PresentationState = isLoading ? "pending" : "neutral"
-    const treatment = treatmentFor(grammarState)
-    const label = surfaceProps.fact === undefined ? (
-        <Heading props={{ content: surfaceProps.label, level: 3 }} />
-    ) : (
-        <Tree
-            contract="label-with-muted-fact-row"
-            render={defineContractComponent("label-with-muted-fact-row", {
-                label: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
-                    <Text props={{ content: surfaceProps.label, size: "sm", weight: "semibold" }} isLoading={isLoading} />
-                )),
-                fact: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                    <Text props={{ content: surfaceProps.fact, size: "xs", tone: "muted" }} isLoading={isLoading} />
-                )),
-            })}
-        />
+    const { props: surfaceProps, on, render, isLoading = false } = input
+    const footer = surfaceProps.actionLabel !== undefined && (isLoading || on?.act !== undefined) ? (
+        <Button props={{ label: surfaceProps.actionLabel, size: "sm", variant: "primary" }} on={{ press: on?.act }} isLoading={isLoading} />
+    ) : surfaceProps.description === undefined ? undefined : (
+        <Text props={{ content: surfaceProps.description, size: "xs", tone: "muted" }} isLoading={isLoading} />
     )
 
     return (
-        <div
-            className="starci-core-surface-list flex flex-col gap-3"
-            data-component="SurfaceListCard"
-            data-grammar-contract={STARCI_ACADEMY_GRAMMAR_CONTRACTS.surfaceListCard.key}
-            data-grammar-label-visibility={surfaceProps.isLabelHidden === true ? "hidden" : "visible"}
-            data-grammar-list-mode="interactive"
-            data-grammar-surface-list="true"
-        >
-            {surfaceProps.isLabelHidden === true ? null : (
-                <div className="starci-core-surface-label" data-grammar-surface-label="true">{label}</div>
-            )}
-            <Card
-                aria-label={surfaceProps.isLabelHidden === true ? surfaceProps.label : undefined}
-                className="starci-core-list-shell starci-core-surface p-0"
-                data-component="SurfaceListCardSurface"
-                data-grammar-state={grammarState}
-                data-grammar-surface="true"
-                data-grammar-surface-depth={surfaceProps.isNested === true ? "nested" : "top"}
-                data-grammar-treatment={treatment.tone}
-                data-surface-context={surfaceProps.isNested === true ? "nested" : "page"}
-                data-verdict={surfaceProps.isVerdict === true ? "true" : "false"}
-            >
-                <Card.Content
-                    className={surfaceProps.isVerdict === true ? "starci-core-owned-collection rounded-none p-0" : "starci-core-owned-collection p-0"}
-                    data-component="SurfaceListCardBody"
-                    data-grammar-list="true"
-                    data-grammar-list-mode="interactive"
-                >
-                    <Content props={surfaceProps} on={on} isLoading={isLoading} />
-                </Card.Content>
-            </Card>
-            {surfaceProps.actionLabel !== undefined && (isLoading || on?.act !== undefined) ? (
-                <div className="starci-core-surface-footer" data-grammar-surface-footer="true">
-                    <Button props={{ label: surfaceProps.actionLabel, size: "sm", variant: "primary" }} on={{ press: on?.act }} isLoading={isLoading} />
-                </div>
-            ) : surfaceProps.description === undefined ? null : (
-                <div className="starci-core-surface-footer" data-grammar-surface-footer="true">
-                    <Text props={{ content: surfaceProps.description, size: "xs", tone: "muted" }} isLoading={isLoading} />
-                </div>
-            )}
-        </div>
+        <GrammarSurfaceListCard
+            label={surfaceProps.label}
+            fact={surfaceProps.fact}
+            labelHidden={surfaceProps.isLabelHidden === true}
+            footer={footer}
+            depth={surfaceProps.isNested === true ? "nested" : "top"}
+            isLoading={isLoading}
+            isVerdict={surfaceProps.isVerdict === true}
+            render={render}
+            props={{ props: surfaceProps, on, isLoading }}
+        />
     )
 }
 
