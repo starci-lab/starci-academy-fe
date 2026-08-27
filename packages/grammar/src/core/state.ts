@@ -4,14 +4,10 @@ import {
     type PresentationState,
 } from "../common/index.js"
 
-export {
-    PRESENTATION_STATES,
-    assertPresentationState,
-    isPresentationState,
-    type PresentationState,
-} from "../common/index.js"
+export type { PresentationState } from "../common/index.js"
+export { assertPresentationState }
 
-export type NeutralTreatment = {
+type NeutralTreatment = {
     readonly state: PresentationState
     readonly tone: "quiet" | "positive" | "information" | "warning" | "danger" | "inactive" | "pending"
     readonly mark: "none" | "check"
@@ -28,11 +24,11 @@ const neutralTreatment = (state: PresentationState): NeutralTreatment => {
     return { state, tone: "quiet", mark: "none" }
 }
 
-export const CORE_NEUTRAL_TREATMENTS = Object.freeze(Object.fromEntries(
+const coreNeutralTreatments = Object.freeze(Object.fromEntries(
     PRESENTATION_STATES.map((state) => [state, Object.freeze(neutralTreatment(state))]),
 )) as Readonly<Record<PresentationState, NeutralTreatment>>
 
 export const treatmentFor = (state: PresentationState): NeutralTreatment => {
     assertPresentationState(state)
-    return CORE_NEUTRAL_TREATMENTS[state]
+    return coreNeutralTreatments[state]
 }

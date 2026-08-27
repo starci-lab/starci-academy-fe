@@ -9,7 +9,6 @@ visual layer. It contains no application routes, data fetching, domain entities,
 - `@starci/grammar/common` — presentation-state helpers and shared CSS.
 - `@starci/grammar/core` — `StateMark`, `LeadingNumber`, `StaticStateRow`, `SurfaceCard`,
   `SurfaceListCard`, `MarkdownArticle`, `SurfaceAccordionCard`, and `Rail`.
-- `@starci/grammar/offset-pop` — the Offset Pop visual vocabulary and its documented complex cases.
 - `@starci/grammar/common/styles.css`, `@starci/grammar/core/styles.css`, and
   `@starci/grammar/offset-pop/styles.css` — package stylesheets. Short `.css` export aliases are
   also available.
@@ -30,6 +29,8 @@ import "@starci/grammar/core/styles.css"
 Core components accept ordinary typed React props and keep their own semantic DOM and accessibility
 behavior. The consuming application remains responsible for translating business data into those
 props. Offset Pop adds visual treatment only; it does not change ownership or business behavior.
+The package deliberately exposes no rule registry, contract metadata, Tree DSL, projection, or
+runtime visual-vocabulary object.
 
 ## Package checks
 

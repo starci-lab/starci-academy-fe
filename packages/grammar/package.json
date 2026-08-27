@@ -38,10 +38,6 @@
     },
     "./core.css": "./dist/core/styles.css",
     "./core/styles.css": "./dist/core/styles.css",
-    "./offset-pop": {
-      "types": "./dist/offset-pop/index.d.ts",
-      "import": "./dist/offset-pop/index.js"
-    },
     "./offset-pop.css": "./dist/offset-pop/styles.css",
     "./offset-pop/styles.css": "./dist/offset-pop/styles.css",
     "./package.json": "./package.json"
@@ -49,7 +45,7 @@
   "scripts": {
     "build": "node scripts/clean.mjs && tsc -p tsconfig.build.json && node scripts/copy-css.mjs",
     "typecheck": "tsc -p tsconfig.build.json --noEmit",
-    "test": "npm run build && node --test src/common/index.test.mjs src/core/index.test.mjs src/offset-pop/index.test.mjs && vitest run --config vitest.config.ts src/core/styles.spec.ts src/offset-pop/styles.spec.ts",
+    "test": "npm run build && node --test src/common/index.test.mjs src/core/index.test.mjs src/package-boundary.test.mjs && vitest run --config vitest.config.ts src/core/styles.spec.ts src/offset-pop/styles.spec.ts",
     "prepack": "npm run typecheck && npm test"
   },
   "engines": {

@@ -1,7 +1,4 @@
-export { coreGrammar, type CoreGrammar } from "./grammar.js"
-export { CORE_RULES, type CoreRule } from "./rules.js"
-export { CORE_NEUTRAL_TREATMENTS, PRESENTATION_STATES, assertPresentationState, isPresentationState, treatmentFor, type NeutralTreatment, type PresentationState } from "./state.js"
-export { CORE_LAYOUT_CLASS_NAMES, type CoreLayoutClassName } from "./layout.js"
+export type { PresentationState } from "./state.js"
 export { StateMark, type StateMarkProps } from "./StateMark.js"
 export { LeadingNumber, type LeadingNumberProps } from "./LeadingNumber.js"
 export { StaticStateRow, type StaticStateRowData, type StaticStateRowProps } from "./composite/StaticStateRow/index.js"

@@ -1,10 +1,12 @@
 import type { PresentationState } from "./state.js"
 import { treatmentFor } from "./state.js"
 
+/** Props for the neutral state mark. */
 export type StateMarkProps = {
     readonly state: PresentationState
 }
 
+/** Draw the check mark used by successful neutral states. */
 export const StateMark = (props: StateMarkProps) => {
     const treatment = treatmentFor(props.state)
     if (treatment.mark !== "check") return null
