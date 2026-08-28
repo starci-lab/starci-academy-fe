@@ -149,8 +149,8 @@ html {
 .default,
 [data-theme="light"],
 [data-theme="default"] {
-    /* Brand. One accent - hue 354, the product's rose - so that being the accent still means something. */
-    --accent: oklch(70.03% 0.2092 354.13);
+    /* Brand. One purple accent, matched to the StarCi Harness identity. */
+    --accent: #7547ff;
     --accent-foreground: oklch(100% 0 0);
 
     /* Backgrounds: the page itself, then the surfaces laid on it. */
@@ -186,7 +186,7 @@ html {
     /* Borders: a separator for hairlines between things, a border for the outline of one. */
     --border: oklch(90% 0.0015 354.13);
     --separator: oklch(92% 0.0015 354.13);
-    --focus: oklch(70.03% 0.2092 354.13);
+    --focus: #7248ff;
     --scrollbar: oklch(87.1% 0.0015 354.13);
 
     /* Form fields move independently of cards, so they carry their own family. */
@@ -223,7 +223,7 @@ html {
 [data-theme="dark"] {
     color-scheme: dark;
 
-    --accent: oklch(70.03% 0.2092 354.13);
+    --accent: #7547ff;
     --accent-foreground: oklch(100% 0 0);
 
     --background: oklch(12% 0.0015 354.13);
@@ -254,7 +254,7 @@ html {
 
     --border: oklch(28% 0.0015 354.13);
     --separator: oklch(25% 0.0015 354.13);
-    --focus: oklch(70.03% 0.2092 354.13);
+    --focus: #7248ff;
     --scrollbar: oklch(70.5% 0.0015 354.13);
 
     --field-background: oklch(21.03% 0.003 354.13);

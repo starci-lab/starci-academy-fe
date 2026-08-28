@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react"
+import { CombinedGraphQLErrors, ServerError } from "@apollo/client/errors"
 import { KeycloakIdentityProvider } from "@/modules/api/graphql/mutations/types/auth"
 import { useAuthPanel } from "./useAuthPanel"
 import { getSessionToken, setSessionToken } from "./useSessionToken"
@@ -173,6 +174,60 @@ describe("useAuthPanel", () => {
         expect(result.current.failure).toBeUndefined()
     })
 
+    it("writes the OTP state to the URL and persists only safe challenge metadata", async () => {
+        const replaceState = vi.spyOn(window.history, "replaceState")
+        mocks.signInInit.mockResolvedValue(challenge("signInInit", "challenge-refresh", 600))
+        const { result } = renderHook(() => useAuthPanel())
+
+        act(() => {
+            result.current.onSubmitDetails(details)
+        })
+
+        await waitFor(() => expect(result.current.step).toBe("code"))
+        await waitFor(() => {
+            expect(String(replaceState.mock.calls.at(-1)?.[2])).toContain("authState=sign-in-otp")
+        })
+        const stored = window.sessionStorage.getItem("starci.auth.flow") ?? ""
+        expect(stored).toContain("challenge-refresh")
+        expect(stored).toContain("learner@example.com")
+        expect(stored).not.toContain(details.password)
+        expect(stored).not.toContain("otp")
+        expect(stored).not.toContain("token")
+    })
+
+    it("hydrates the same OTP challenge after refresh when URL state and session record agree", () => {
+        window.sessionStorage.setItem("starci.auth.flow", JSON.stringify({
+            mode: "signIn",
+            step: "code",
+            email: "learner@example.com",
+            challengeId: "challenge-refresh",
+            expiresAt: Date.now() + 300_000,
+            sentCount: 1,
+            hasAgreedToTerms: false,
+            rememberMe: true,
+        }))
+        stubLocation({ search: "?authState=sign-in-otp" })
+
+        const { result } = renderHook(() => useAuthPanel())
+
+        expect(result.current.mode).toBe("signIn")
+        expect(result.current.step).toBe("code")
+        expect(result.current.email).toBe("learner@example.com")
+        expect(result.current.challengeId).toBe("challenge-refresh")
+        expect(result.current.expiresInSeconds).toBeGreaterThan(0)
+        expect(result.current.rememberMe).toBe(true)
+    })
+
+    it("falls back safely when an OTP URL has no matching challenge record", () => {
+        stubLocation({ search: "?authState=sign-up-otp" })
+
+        const { result } = renderHook(() => useAuthPanel())
+
+        expect(result.current.mode).toBe("signUp")
+        expect(result.current.step).toBe("details")
+        expect(result.current.challengeId).toBeUndefined()
+    })
+
     it("holds the details step open while the request is in flight", async () => {
         const pending = defer()
         mocks.signInInit.mockReturnValue(pending.promise)
@@ -196,6 +251,23 @@ describe("useAuthPanel", () => {
         expect(result.current.sentCount).toBe(1)
     })
 
+    it("ignores duplicate details submissions while the first request is pending", async () => {
+        const pending = defer()
+        mocks.signInInit.mockReturnValue(pending.promise)
+        const { result } = renderHook(() => useAuthPanel())
+
+        act(() => {
+            result.current.onSubmitDetails(details)
+            result.current.onSubmitDetails(details)
+        })
+
+        expect(mocks.signInInit).toHaveBeenCalledTimes(1)
+        await act(async () => {
+            pending.resolve(challenge("signInInit", "challenge-duplicate", 300))
+            await pending.promise
+        })
+    })
+
     it("reports a refusal the server described, message and code intact", async () => {
         mocks.signInInit.mockResolvedValue(refusal("signInInit", "Those details do not match.", "BAD_CREDENTIALS"))
         const { result } = renderHook(() => useAuthPanel())
@@ -210,6 +282,20 @@ describe("useAuthPanel", () => {
         expect(result.current.step).toBe("details")
     })
 
+    it("does not expose raw HTTP client text for a reached 401 refusal", async () => {
+        mocks.signInInit.mockResolvedValue(refusal("signInInit", "Request failed with status code 401", "UNAUTHORIZED"))
+        const { result } = renderHook(() => useAuthPanel())
+
+        await act(async () => {
+            result.current.onSubmitDetails(details)
+        })
+
+        await waitFor(() => expect(result.current.failure).toBeDefined())
+        expect(result.current.failure?.isTransport).toBe(false)
+        expect(result.current.failure?.message).toBeUndefined()
+        expect(result.current.failure?.code).toBe("UNAUTHORIZED")
+    })
+
     it("tells a request that never arrived apart from one the server refused", async () => {
         mocks.signInInit.mockRejectedValue(new Error("network"))
         const { result } = renderHook(() => useAuthPanel())
@@ -222,6 +308,49 @@ describe("useAuthPanel", () => {
         expect(result.current.failure?.message).toBeUndefined()
     })
 
+    it("preserves an HTTP 429 as a rate-limit verdict with its cooldown", async () => {
+        mocks.signInInit.mockRejectedValue(new ServerError("Too Many Requests", {
+            response: new Response("", {
+                status: 429,
+                headers: { "retry-after-short": "17" },
+            }),
+            bodyText: "",
+        }))
+        const { result } = renderHook(() => useAuthPanel())
+
+        act(() => result.current.onSubmitDetails(details))
+
+        await waitFor(() => expect(result.current.failure).toBeDefined())
+        expect(result.current.failure).toMatchObject({
+            code: "RATE_LIMITED",
+            isTransport: false,
+            retryAfterSeconds: 17,
+        })
+    })
+
+    it("preserves a GraphQL rate-limit verdict when the transport remains successful", async () => {
+        mocks.signInInit.mockRejectedValue(new CombinedGraphQLErrors({
+            data: null,
+            errors: [{
+                message: "Too many requests.",
+                extensions: {
+                    code: "RATE_LIMIT_EXCEEDED_EXCEPTION",
+                    retryAfterSeconds: 23,
+                },
+            }],
+        }))
+        const { result } = renderHook(() => useAuthPanel())
+
+        act(() => result.current.onSubmitDetails(details))
+
+        await waitFor(() => expect(result.current.failure).toBeDefined())
+        expect(result.current.failure).toMatchObject({
+            code: "RATE_LIMITED",
+            isTransport: false,
+            retryAfterSeconds: 23,
+        })
+    })
+
     it("refuses a code when no challenge is open", () => {
         const { result } = renderHook(() => useAuthPanel())
         act(() => {
@@ -230,7 +359,7 @@ describe("useAuthPanel", () => {
         expect(mocks.signInVerify).not.toHaveBeenCalled()
     })
 
-    it("stores the token and reports the journey over", async () => {
+    it("stores the token and hands sign-in straight to its destination without a done screen", async () => {
         mocks.signInInit.mockResolvedValue(challenge("signInInit", "challenge-1", 300))
         mocks.signInVerify.mockResolvedValue(session("signInVerifyOtp", "token-1"))
         const onSignedIn = vi.fn()
@@ -244,10 +373,11 @@ describe("useAuthPanel", () => {
         await act(async () => {
             result.current.onSubmitCode({ otp: "123456" })
         })
-        await waitFor(() => expect(result.current.step).toBe("done"))
+        await waitFor(() => expect(onSignedIn).toHaveBeenCalledTimes(1))
+        expect(result.current.step).toBe("code")
+        expect(result.current.isPending).toBe(true)
         expect(mocks.signInVerify).toHaveBeenCalledWith({ request: { challengeId: "challenge-1", otp: "123456" } })
         expect(getSessionToken()).toBe("token-1")
-        expect(onSignedIn).toHaveBeenCalledTimes(1)
     })
 
     it("counts a resend, and reads the reissued challenge back rather than assuming it", async () => {
@@ -267,6 +397,31 @@ describe("useAuthPanel", () => {
         expect(result.current.challengeId).toBe("challenge-2")
         expect(result.current.expiresInSeconds).toBe(120)
         expect(result.current.isResending).toBe(false)
+    })
+
+    it("prevents duplicate resend and verify requests while resend is pending", async () => {
+        mocks.signInInit.mockResolvedValue(challenge("signInInit", "challenge-1", 300))
+        const pending = defer()
+        mocks.signInResend.mockReturnValue(pending.promise)
+        const { result } = renderHook(() => useAuthPanel())
+
+        await act(async () => {
+            result.current.onSubmitDetails(details)
+        })
+        await waitFor(() => expect(result.current.step).toBe("code"))
+
+        act(() => {
+            result.current.onResend()
+            result.current.onResend()
+            result.current.onSubmitCode({ otp: "123456" })
+        })
+        expect(mocks.signInResend).toHaveBeenCalledTimes(1)
+        expect(mocks.signInVerify).not.toHaveBeenCalled()
+
+        await act(async () => {
+            pending.resolve(challenge("signInResendOtp", "challenge-2", 300))
+            await pending.promise
+        })
     })
 
     it("routes the sign-up journey to its own operations", async () => {
@@ -369,7 +524,9 @@ describe("useAuthPanel", () => {
                 })
             })
 
-            await waitFor(() => expect(result.current.step).toBe("done"))
+            await waitFor(() => expect(onSignedIn).toHaveBeenCalledTimes(1))
+            expect(result.current.step).toBe("details")
+            expect(result.current.isPending).toBe(true)
             expect(result.current.challengeId).toBeUndefined()
             expect(result.current.sentCount).toBe(0)
             expect(getSessionToken()).toBe("token-local")
@@ -407,12 +564,13 @@ describe("useAuthPanel", () => {
         const onSignedIn = vi.fn()
         const { result } = renderHook(() => useAuthPanel({ onSignedIn }))
 
-        await waitFor(() => expect(result.current.step).toBe("done"))
+        await waitFor(() => expect(onSignedIn).toHaveBeenCalledTimes(1))
+        expect(result.current.step).toBe("details")
+        expect(result.current.isPending).toBe(true)
         expect(mocks.exchange).toHaveBeenCalledWith({
             request: { code: "abc", provider: "github", state: "xyz" },
         })
         expect(getSessionToken()).toBe("token-oauth")
-        expect(onSignedIn).toHaveBeenCalledTimes(1)
         // The hint is spent, not left behind for the next visit to this address to act on.
         expect(window.sessionStorage.getItem("starci.auth.oauth-provider")).toBeNull()
     })
@@ -452,6 +610,29 @@ describe("useAuthPanel", () => {
         expect(result.current.step).toBe("code")
         expect(result.current.isPending).toBe(false)
         expect(getSessionToken()).toBeUndefined()
+    })
+
+    it("returns an expired OTP challenge to details with an actionable refusal", async () => {
+        const replaceState = vi.spyOn(window.history, "replaceState")
+        mocks.signInInit.mockResolvedValue(challenge("signInInit", "challenge-expired", 1))
+        mocks.signInVerify.mockResolvedValue(refusal(
+            "signInVerifyOtp",
+            "Challenge not found",
+            "CHALLENGE_OTP_NOT_FOUND_EXCEPTION",
+        ))
+        const { result } = renderHook(() => useAuthPanel())
+
+        act(() => result.current.onSubmitDetails(details))
+        await waitFor(() => expect(result.current.step).toBe("code"))
+        act(() => result.current.onSubmitCode({ otp: "000000" }))
+
+        await waitFor(() => expect(result.current.step).toBe("details"))
+        expect(result.current.challengeId).toBeUndefined()
+        expect(result.current.sentCount).toBe(0)
+        expect(result.current.failure?.code).toBe("CHALLENGE_OTP_NOT_FOUND_EXCEPTION")
+        await waitFor(() => {
+            expect(String(replaceState.mock.calls.at(-1)?.[2])).toContain("authState=sign-in")
+        })
     })
 
     it("does not call a code wrong when the request never reached a verdict", async () => {
@@ -501,6 +682,25 @@ describe("useAuthPanel", () => {
         expect(result.current.isResending).toBe(false)
         expect(result.current.sentCount).toBe(1)
         expect(result.current.challengeId).toBe("challenge-1")
+    })
+
+    it("returns to details when resend discovers that the OTP challenge is gone", async () => {
+        mocks.signInInit.mockResolvedValue(challenge("signInInit", "challenge-expired", 1))
+        mocks.signInResend.mockResolvedValue(refusal(
+            "signInResendOtp",
+            "Challenge not found",
+            "CHALLENGE_OTP_NOT_FOUND_EXCEPTION",
+        ))
+        const { result } = renderHook(() => useAuthPanel())
+
+        act(() => result.current.onSubmitDetails(details))
+        await waitFor(() => expect(result.current.step).toBe("code"))
+        act(() => result.current.onResend())
+
+        await waitFor(() => expect(result.current.step).toBe("details"))
+        expect(result.current.challengeId).toBeUndefined()
+        expect(result.current.sentCount).toBe(0)
+        expect(result.current.failure?.code).toBe("CHALLENGE_OTP_NOT_FOUND_EXCEPTION")
     })
 
     it("keeps the challenge when a resend never reached a verdict", async () => {

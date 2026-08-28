@@ -21,6 +21,17 @@ import type {
  * stays the gate it is meant to be.
  */
 const nextConfig: NextConfig = {
+    devIndicators: false,
+    // Parallel local UAT uses one loopback hostname per browser case so HttpOnly cookies do not
+    // collide. Keep the allowlist exact: these origins exist only in the local test topology.
+    allowedDevOrigins: [
+        "expired-otp.lvh.me",
+        "missing-challenge.lvh.me",
+        "duplicate-submit.lvh.me",
+        "server-unavailable.lvh.me",
+        "rate-limited.lvh.me",
+        "not-receive-otp.lvh.me",
+    ],
 }
 
 const configuredNext = createNextIntlPlugin()(nextConfig)

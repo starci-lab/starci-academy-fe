@@ -1,5 +1,6 @@
 import { useId, type ReactNode } from "react"
-import { accordionCardClassName, accordionHeadingClassName, accordionPanelClassName, accordionRowClassName, getAccordionShellClassName, accordionTriggerClassName } from "./classNames.js"
+import { VerticalScrollRegion } from "../../composite/VerticalScrollRegion/index.js"
+import { accordionCardClassName, accordionHeadingClassName, accordionPanelClassName, accordionRowClassName, accordionScrollRegionClassName, getAccordionShellClassName, accordionTriggerClassName } from "./classNames.js"
 
 export type SurfaceAccordionCardItem<Summary, Body> = {
     readonly id: string
@@ -14,6 +15,8 @@ type SurfaceAccordionCardCommonProps<Summary, Body> = {
     readonly depth?: "top" | "nested"
     readonly renderSummary: (summary: Summary) => ReactNode
     readonly renderBody: (body: Body) => ReactNode
+    /** Convenience capability: make the row region a HeroUI Vertical ScrollShadow. */
+    readonly isScrollable?: boolean
 }
 
 export type SurfaceAccordionCardProps<Summary, Body> = SurfaceAccordionCardCommonProps<Summary, Body> & ({
@@ -45,6 +48,7 @@ const SurfaceAccordionRows = <Summary, Body>({
     renderSummary,
     renderBody,
     onItemOpenChange,
+    isScrollable = false,
 }: SurfaceAccordionRowsProps<Summary, Body>) => {
     const ownerId = useId()
     const bounded = depth !== undefined
@@ -57,46 +61,49 @@ const SurfaceAccordionRows = <Summary, Body>({
             <div
                 className={getAccordionShellClassName(bounded)}
                 data-grammar-accordion-shell="true"
+                data-grammar-scroll={isScrollable ? "contained" : "page"}
                 data-grammar-surface={bounded ? "true" : undefined}
                 data-grammar-surface-depth={depth}
                 data-surface-context={depth === "nested" ? "nested" : depth === "top" ? "page" : undefined}
             >
-                {items.map((item, index) => {
-                    const triggerId = `${ownerId}-trigger-${index}`
-                    const panelId = `${ownerId}-panel-${index}`
-                    return (
-                        <div
-                            className={accordionRowClassName}
-                            data-grammar-accordion-row="true"
-                            data-grammar-disclosure-state={item.isOpen ? "open" : "closed"}
-                            key={item.id}
-                        >
-                            <h3 className={accordionHeadingClassName}>
-                                <button
-                                    aria-controls={panelId}
-                                    aria-expanded={item.isOpen}
-                                    className={accordionTriggerClassName}
-                                    disabled={item.isDisabled}
-                                    id={triggerId}
-                                    onClick={() => onItemOpenChange(item.id, !item.isOpen)}
-                                    type="button"
-                                >
-                                    {renderSummary(item.summaryRender)}
-                                </button>
-                            </h3>
-                            {item.isOpen ? (
-                                <div
-                                    aria-labelledby={triggerId}
-                                    className={accordionPanelClassName}
-                                    id={panelId}
-                                    role="region"
-                                >
-                                    {renderBody(item.bodyRender)}
-                                </div>
-                            ) : null}
-                        </div>
-                    )
-                })}
+                <VerticalScrollRegion className={accordionScrollRegionClassName} isScrollable={isScrollable}>
+                    {items.map((item, index) => {
+                        const triggerId = `${ownerId}-trigger-${index}`
+                        const panelId = `${ownerId}-panel-${index}`
+                        return (
+                            <div
+                                className={accordionRowClassName}
+                                data-grammar-accordion-row="true"
+                                data-grammar-disclosure-state={item.isOpen ? "open" : "closed"}
+                                key={item.id}
+                            >
+                                <h3 className={accordionHeadingClassName}>
+                                    <button
+                                        aria-controls={panelId}
+                                        aria-expanded={item.isOpen}
+                                        className={accordionTriggerClassName}
+                                        disabled={item.isDisabled}
+                                        id={triggerId}
+                                        onClick={() => onItemOpenChange(item.id, !item.isOpen)}
+                                        type="button"
+                                    >
+                                        {renderSummary(item.summaryRender)}
+                                    </button>
+                                </h3>
+                                {item.isOpen ? (
+                                    <div
+                                        aria-labelledby={triggerId}
+                                        className={accordionPanelClassName}
+                                        id={panelId}
+                                        role="region"
+                                    >
+                                        {renderBody(item.bodyRender)}
+                                    </div>
+                                ) : null}
+                            </div>
+                        )
+                    })}
+                </VerticalScrollRegion>
             </div>
         </div>
     )

@@ -42,6 +42,36 @@ export interface ApiEnv {
     debug: boolean
 }
 
+const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "::1"])
+
+/**
+ * `*.lvh.me` resolves to 127.0.0.1 and gives parallel UAT browser cases distinct cookie hosts.
+ * Keep this deliberately narrow: no other suffix is considered local or eligible for rewriting.
+ */
+const isLoopbackHost = (hostname?: string): boolean =>
+    typeof hostname === "string"
+    && (LOOPBACK_HOSTS.has(hostname) || hostname === "lvh.me" || hostname.endsWith(".lvh.me"))
+
+/**
+ * Keep local API cookies on the same loopback host spelling as the page.
+ *
+ * Browsers deliberately treat `localhost` and `127.0.0.1` as different cookie hosts. A local page
+ * opened through one while GraphQL uses the other can complete sign-in in memory, then lose the
+ * HttpOnly refresh + readable CSRF pair on reload. Only loopback-to-loopback URLs are normalized;
+ * deployed hosts and non-URL configuration are returned verbatim.
+ */
+const alignLoopbackHost = (configured: string): string => {
+    if (typeof window === "undefined" || !isLoopbackHost(window.location.hostname)) return configured
+    try {
+        const url = new URL(configured)
+        if (!isLoopbackHost(url.hostname) || url.hostname === window.location.hostname) return configured
+        url.hostname = window.location.hostname
+        return url.toString()
+    } catch {
+        return configured
+    }
+}
+
 /**
  * Reads the API layer's environment, applying a working local default to every value
  * except the token, which has no sensible default and stays `undefined` when unset.
@@ -50,7 +80,9 @@ export const apiEnv = (): ApiEnv => {
     const bearerToken = process.env.NEXT_PUBLIC_API_BEARER_TOKEN
     return {
         graphql: {
-            url: process.env.NEXT_PUBLIC_API_GRAPHQL_BASE_URL || "http://localhost:3001/graphql",
+            url: alignLoopbackHost(
+                process.env.NEXT_PUBLIC_API_GRAPHQL_BASE_URL || "http://localhost:3001/graphql",
+            ),
             maxRetry: Number(process.env.NEXT_PUBLIC_GRAPHQL_MAX_RETRY || 3),
             maxRetryDelay: Number(process.env.NEXT_PUBLIC_GRAPHQL_MAX_RETRY_DELAY || 1000),
             initialRetryDelay: Number(process.env.NEXT_PUBLIC_GRAPHQL_INITIAL_RETRY_DELAY || 300),

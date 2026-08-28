@@ -18,4 +18,16 @@ describe("SurfaceCard", () => {
         render(<SurfaceCard props={{ isFrameless: true }}><p>Body</p></SurfaceCard>)
         expect(screen.getByText("Body").closest(".card")).toBeNull()
     })
+    it("uses HeroUI's direct Card > ScrollShadow structure for scrollable form surfaces", () => {
+        const label = ["Scrollable", "form"].join(" ")
+        const { container } = render(<SurfaceCard props={{ inset: "compact", isScrollable: true, measure: "form" }}><form aria-label={label} /></SurfaceCard>)
+        const card = container.querySelector("[data-slot='card']")
+        const scrollShadow = card?.querySelector(":scope > .scroll-shadow--vertical")
+
+        expect(container.firstElementChild).toHaveClass("starci-core-form-surface")
+        expect(card).toHaveClass("p-0")
+        expect(scrollShadow).toHaveClass("p-4", "scroll-shadow", "scroll-shadow--vertical", "starci-core-form-scroll-viewport")
+        expect(scrollShadow?.firstElementChild).toBe(screen.getByRole("form", { name: label }))
+        expect(card?.querySelector("[data-slot='card-content']")).not.toBeInTheDocument()
+    })
 })

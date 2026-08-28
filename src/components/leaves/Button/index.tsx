@@ -1,6 +1,6 @@
 import { Button as HeroButton, Spinner } from "@heroui/react"
 import { Icon, type IconName } from "@/components/leaves/Icon"
-import { buttonActiveClassName, buttonLoadingClassName, buttonPendingLabelClassName, buttonPendingSpinnerClassName, buttonTrailingGlyphClassName } from "./classNames"
+import { buttonActiveClassName, buttonLoadingClassName, buttonTrailingGlyphClassName } from "./classNames"
 
 /**
  * LEAF - `Button`: the thing a reader presses.
@@ -126,14 +126,15 @@ export const Button = (props: ButtonProps) => {
             variant={VARIANTS[variant]}
             size={SIZES[size]}
             isDisabled={data.disabled === true || isLoading || isPending}
+            isPending={isPending}
             onPress={on?.press}
             // `group` so the trailing glyph can answer a hover on the whole control rather than on
             // itself: a reader aiming at the words is hovering the button, not the arrow.
             className={isLoading ? buttonLoadingClassName : buttonActiveClassName}
         >
-            {isPending ? <Spinner size="sm" className={buttonPendingSpinnerClassName} aria-hidden="true" /> : null}
+            {isPending ? <Spinner size="sm" color="current" aria-hidden="true" /> : null}
             {placement === "leading" ? glyph : null}
-            <span className={isPending ? buttonPendingLabelClassName : undefined}>{data.label}</span>
+            <span>{data.label}</span>
             {placement === "trailing" ? glyph : null}
         </HeroButton>
     )

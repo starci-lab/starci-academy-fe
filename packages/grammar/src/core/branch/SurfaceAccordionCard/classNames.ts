@@ -14,3 +14,5 @@ export const accordionHeadingClassName = cn("m-0")
 export const accordionTriggerClassName = cn("w-full", "text-left")
 /** Identifies the expanded disclosure region. */
 export const accordionPanelClassName = cn("w-full", "min-w-0")
+/** Scroll owner around the joined disclosure rows. */
+export const accordionScrollRegionClassName = cn("w-full", "min-w-0")

@@ -9,6 +9,7 @@ import { apiEnv } from "./env"
 
 afterEach(() => {
     vi.unstubAllEnvs()
+    vi.unstubAllGlobals()
 })
 
 describe("apiEnv", () => {
@@ -19,6 +20,34 @@ describe("apiEnv", () => {
 
     it("reads the endpoint from NEXT_PUBLIC_API_GRAPHQL_BASE_URL", () => {
         vi.stubEnv("NEXT_PUBLIC_API_GRAPHQL_BASE_URL", "https://api.example.com/graphql")
+        expect(apiEnv().graphql.url).toBe("https://api.example.com/graphql")
+    })
+
+    it("aligns loopback API cookies with the host spelling used by the browser", () => {
+        vi.stubEnv("NEXT_PUBLIC_API_GRAPHQL_BASE_URL", "http://localhost:3001/graphql")
+        vi.stubGlobal("window", { location: { hostname: "127.0.0.1" } })
+
+        expect(apiEnv().graphql.url).toBe("http://127.0.0.1:3001/graphql")
+    })
+
+    it("aligns each lvh.me UAT case to its own cookie host", () => {
+        vi.stubEnv("NEXT_PUBLIC_API_GRAPHQL_BASE_URL", "http://localhost:3001/graphql")
+        vi.stubGlobal("window", { location: { hostname: "expired-otp.lvh.me" } })
+
+        expect(apiEnv().graphql.url).toBe("http://expired-otp.lvh.me:3001/graphql")
+    })
+
+    it("does not treat a lookalike lvh.me suffix as loopback", () => {
+        vi.stubEnv("NEXT_PUBLIC_API_GRAPHQL_BASE_URL", "http://localhost:3001/graphql")
+        vi.stubGlobal("window", { location: { hostname: "expired-otp.lvh.me.example.com" } })
+
+        expect(apiEnv().graphql.url).toBe("http://localhost:3001/graphql")
+    })
+
+    it("never rewrites a deployed API host from a loopback page", () => {
+        vi.stubEnv("NEXT_PUBLIC_API_GRAPHQL_BASE_URL", "https://api.example.com/graphql")
+        vi.stubGlobal("window", { location: { hostname: "127.0.0.1" } })
+
         expect(apiEnv().graphql.url).toBe("https://api.example.com/graphql")
     })
 

@@ -390,6 +390,8 @@
         "shared": {
             "emailLabel": "Email",
             "emailHint": "",
+            "codeTitle": "Enter OTP",
+            "codeDescription": "We sent a code to your email. Enter it below.",
             "codeLabel": "OTP code",
             "resend": "Resend code",
             "useAnotherEmail": "Use a different email",
@@ -413,17 +415,21 @@
             "hidePassword": "Hide password",
             "rememberMe": "Remember me",
             "forgotPassword": "Forgot Password?",
-            "codePlaceholder": "Enter 6-digit OTP",
             "dismiss": "Close"
         },
         "status": {
             "sending": "Checking your details",
-            "sent": "We sent a code to your email. Enter it below.",
             "verifying": "Checking your code",
             "resending": "Sending a new code",
             "resent": "A new code is on its way. The one before it no longer works.",
             "signedIn": "Signed in",
             "transport": "We could not reach the server. Check your connection and try again.",
+    "credentialsRefused": "The email or password does not match. Check it and try again.",
+    "accountExists": "This email already has an account. Sign in to continue.",
+    "otpRefused": "The OTP does not match. Check it and try again.",
+            "otpExpired": "The OTP has expired. Sign in again to receive a new code.",
+            "rateLimited": "You are trying too quickly. Wait a moment and try again.",
+            "rateLimitedWithWait": "You are trying too quickly. Try again in {count, plural, one {# second} other {# seconds}}.",
             "refused": "That did not work. Please try again."
         },
         "expiry": {

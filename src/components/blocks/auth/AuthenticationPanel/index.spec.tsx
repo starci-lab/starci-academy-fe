@@ -4,8 +4,6 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { useAuthPanel } from "@/hooks/auth/useAuthPanel"
 import { AuthenticationPanel } from "./index"
 
-const push = vi.fn()
-
 vi.mock("next-intl", () => ({
     useLocale: () => "vi",
     useTranslations: () => (key: string, values?: Record<string, string | number>) => {
@@ -16,7 +14,6 @@ vi.mock("next-intl", () => ({
     },
 }))
 
-vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push }) }))
 vi.mock("@/hooks/auth/useAuthPanel", () => ({ useAuthPanel: vi.fn() }))
 
 /** Put the machine in one situation and hand back the callbacks it exposes. */
@@ -58,7 +55,7 @@ describe("AuthenticationPanel", () => {
 
         render(<AuthenticationPanel />)
 
-        expect(useAuthPanel).toHaveBeenCalledExactlyOnceWith({ initialMode: "signIn", onSignedIn: undefined })
+        expect(useAuthPanel).toHaveBeenCalledExactlyOnceWith({ initialMode: "signIn", initialStep: "details", onSignedIn: undefined })
         expect(screen.getByRole("heading", { name: "signIn.title" })).toBeInTheDocument()
         expect(screen.getByText("signIn.subtitle")).toBeInTheDocument()
         expect(screen.queryByRole("status")).toBeNull()
@@ -70,7 +67,7 @@ describe("AuthenticationPanel", () => {
 
         render(<BareAuthenticationPanel />)
 
-        expect(useAuthPanel).toHaveBeenCalledExactlyOnceWith({ initialMode: "signIn", onSignedIn: undefined })
+        expect(useAuthPanel).toHaveBeenCalledExactlyOnceWith({ initialMode: "signIn", initialStep: "details", onSignedIn: undefined })
         expect(screen.getByRole("heading", { name: "signIn.title" })).toBeInTheDocument()
     })
 
@@ -80,43 +77,53 @@ describe("AuthenticationPanel", () => {
 
         render(<AuthenticationPanel initialMode="signUp" onSignedIn={onSignedIn} />)
 
-        expect(useAuthPanel).toHaveBeenCalledExactlyOnceWith({ initialMode: "signUp", onSignedIn })
+        expect(useAuthPanel).toHaveBeenCalledExactlyOnceWith({ initialMode: "signUp", initialStep: "details", onSignedIn })
         expect(screen.getByRole("heading", { name: "signUp.title" })).toBeInTheDocument()
         expect(screen.getByLabelText("signUp.confirmPasswordLabel")).toBeInTheDocument()
         expect(screen.getByRole("checkbox", { name: "shared.agreeToTerms" })).toBeInTheDocument()
     })
 
-    it("says a request is on its way while the details are in flight", () => {
+    it("keeps details pending feedback inside the action instead of repeating a status line", () => {
         stub({ isPending: true })
 
         render(<AuthenticationPanel />)
 
-        expect(screen.getByRole("status")).toHaveTextContent("status.sending")
-        expect(screen.getByRole("button", { name: "signIn.submitDetails" })).toBeDisabled()
+        expect(screen.queryByText("status.sending")).toBeNull()
+        expect(screen.getByRole("button", { name: "signIn.submitDetails" })).toHaveAttribute("data-pending", "true")
     })
 
-    it("says the code is being checked rather than sent once there is one to check", () => {
+    it("keeps verification pending feedback inside the action instead of repeating a status line", () => {
         stub({ step: "code", isPending: true, sentCount: 1, email: "reader@example.com" })
 
         render(<AuthenticationPanel />)
 
-        expect(screen.getByRole("status")).toHaveTextContent("status.verifying")
+        expect(screen.queryByText("status.verifying")).toBeNull()
+        expect(screen.getByRole("button", { name: "signIn.submitCode" })).toHaveAttribute("data-pending", "true")
     })
 
-    it("speaks for the resend itself rather than for the code already sent", () => {
+    it("keeps resend pending feedback inside the action instead of a second status line", () => {
         stub({ step: "code", isResending: true, sentCount: 1, email: "reader@example.com" })
 
         render(<AuthenticationPanel />)
 
-        expect(screen.getByRole("status")).toHaveTextContent("status.resending")
+        expect(screen.queryByText("status.resending")).toBeNull()
+        expect(screen.getByRole("link", { name: "shared.resend" })).toHaveAttribute(
+            "data-action-pending",
+            "true",
+        )
     })
 
-    it("tells a reader their code is waiting, and where it went", () => {
+    it("makes the current OTP task the heading and its stable guidance the description", () => {
         stub({ step: "code", sentCount: 1, email: "reader@example.com" })
 
         render(<AuthenticationPanel />)
 
-        expect(screen.getByRole("status")).toHaveTextContent("status.sent")
+        const title = screen.getByRole("heading", { name: "shared.codeTitle" })
+        const description = screen.getByText("shared.codeDescription")
+        expect(title.compareDocumentPosition(description) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+        expect(screen.queryByRole("status")).toBeNull()
+        expect(screen.queryByText("signIn.title")).toBeNull()
+        expect(screen.queryByText("signIn.subtitle")).toBeNull()
         expect(screen.getByText("sent to reader@example.com")).toBeInTheDocument()
     })
 
@@ -183,6 +190,87 @@ describe("AuthenticationPanel", () => {
         render(<AuthenticationPanel />)
 
         expect(screen.getByRole("alert")).toHaveTextContent("That password is not right.")
+    })
+
+    it("localizes the stable credential refusal instead of leaking the Keycloak boundary copy", () => {
+        stub({
+            failure: {
+                isTransport: false,
+                code: "KEYCLOAK_LOGIN_FAILED_EXCEPTION",
+                message: "Invalid email or password.",
+            },
+        })
+
+        render(<AuthenticationPanel />)
+
+        expect(screen.getByRole("alert")).toHaveTextContent("status.credentialsRefused")
+        expect(screen.queryByText("Invalid email or password.")).toBeNull()
+    })
+
+    it("localizes an existing verified email and points to the visible sign-in recovery", () => {
+        stub({
+            mode: "signUp",
+            failure: {
+                isTransport: false,
+                code: "USER_EMAIL_ALREADY_VERIFIED_EXCEPTION",
+                message: "User email is already verified",
+            },
+        })
+
+        render(<AuthenticationPanel />)
+
+        expect(screen.getByRole("alert")).toHaveTextContent("status.accountExists")
+        expect(screen.getByRole("link", { name: "signUp.promptAction" })).toBeInTheDocument()
+        expect(screen.queryByText("User email is already verified")).toBeNull()
+    })
+
+    it("localizes a stable OTP refusal instead of leaking the domain boundary copy", () => {
+        stub({
+            step: "code",
+            sentCount: 1,
+            failure: {
+                isTransport: false,
+                code: "CHALLENGE_OTP_MISMATCH_EXCEPTION",
+                message: "Challenge OTP mismatch",
+            },
+        })
+
+        render(<AuthenticationPanel />)
+
+        expect(screen.getByRole("alert")).toHaveTextContent("status.otpRefused")
+        expect(screen.queryByText("Challenge OTP mismatch")).toBeNull()
+    })
+
+    it("localizes a missing OTP challenge as an expired-code restart", () => {
+        stub({
+            step: "details",
+            sentCount: 0,
+            failure: {
+                isTransport: false,
+                code: "CHALLENGE_OTP_NOT_FOUND_EXCEPTION",
+                message: "Challenge not found",
+            },
+        })
+
+        render(<AuthenticationPanel />)
+
+        expect(screen.getByRole("alert")).toHaveTextContent("status.otpExpired")
+        expect(screen.queryByText("Challenge not found")).toBeNull()
+    })
+
+    it("renders a rate-limit cooldown instead of a transport outage", () => {
+        stub({
+            failure: {
+                isTransport: false,
+                code: "RATE_LIMITED",
+                retryAfterSeconds: 17,
+            },
+        })
+
+        render(<AuthenticationPanel />)
+
+        expect(screen.getByRole("alert")).toHaveTextContent("status.rateLimitedWithWait")
+        expect(screen.queryByText("status.transport")).toBeNull()
     })
 
     it("still says the attempt was refused when the server refused without saying why", () => {
@@ -266,15 +354,19 @@ describe("AuthenticationPanel", () => {
         expect(on.onOauthPress).toHaveBeenLastCalledWith("github")
     })
 
-    it("sends a reader to the legal documents in the language they are reading in", () => {
+    it("gives legal documents real localized destinations that preserve the form", () => {
         stub({ mode: "signUp" })
 
         render(<AuthenticationPanel />)
 
-        fireEvent.click(screen.getByRole("link", { name: "shared.termsLabel" }))
-        expect(push).toHaveBeenCalledExactlyOnceWith("https://academy.starci.org/vi/terms")
-
-        fireEvent.click(screen.getByRole("link", { name: "shared.privacyLabel" }))
-        expect(push).toHaveBeenLastCalledWith("https://academy.starci.org/vi/privacy")
+        expect(screen.getByRole("link", { name: "shared.termsLabel" })).toHaveAttribute(
+            "href",
+            "https://academy.starci.org/vi/terms",
+        )
+        expect(screen.getByRole("link", { name: "shared.termsLabel" })).toHaveAttribute("target", "_blank")
+        expect(screen.getByRole("link", { name: "shared.privacyLabel" })).toHaveAttribute(
+            "href",
+            "https://academy.starci.org/vi/privacy",
+        )
     })
 })

@@ -84,6 +84,7 @@ describe("ShellNavBase", () => {
         render(<ShellNavBase props={props} on={{ navigate }} />)
         const brand = screen.getAllByRole("link").find((link) => link.textContent?.includes("StarCi"))
         expect(brand).not.toBeNull()
+        expect(brand?.querySelector("img")?.getAttribute("src")).toContain("starci-logo.png")
         fireEvent.click(brand as Element)
         expect(navigate).toHaveBeenCalledWith("dashboard")
     })

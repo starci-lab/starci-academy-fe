@@ -1,0 +1,168 @@
+{
+  "version": 1,
+  "password_binding": {
+    "encrypted_ref": "backend:.stacks/dev/runtime/files/uat-account-password.key.enc",
+    "runtime_ref": "backend:.stacks/dev/runtime/files/uat-account-password.key",
+    "handling": "plaintext-memory-only"
+  },
+  "accounts": [
+    {
+      "case_id": "authentication.sign-in.happy",
+      "email": "uat-auth-sign-in-happy@starci.local",
+      "is_uat": true,
+      "initial_state": "present"
+    },
+    {
+      "case_id": "authentication.sign-in.unhappy",
+      "email": "uat-auth-sign-in-unhappy@starci.local",
+      "is_uat": true,
+      "initial_state": "present",
+      "status": "retired",
+      "replaced_by": [
+        "authentication.sign-in.password-failed",
+        "authentication.sign-in.not-receive-otp",
+        "authentication.sign-in.invalid-otp",
+        "authentication.sign-in.expired-otp",
+        "authentication.sign-in.missing-challenge",
+        "authentication.sign-in.server-unavailable",
+        "authentication.sign-in.rate-limited",
+        "authentication.sign-in.duplicate-submission"
+      ]
+    },
+    {
+      "case_id": "authentication.sign-in.password-failed",
+      "email": "uat-auth-sign-in-password-failed@starci.local",
+      "is_uat": true,
+      "initial_state": "present",
+      "status": "active"
+    },
+    {
+      "case_id": "authentication.sign-in.not-receive-otp",
+      "email": "uat-auth-sign-in-not-receive-otp@starci.local",
+      "is_uat": true,
+      "initial_state": "present",
+      "status": "active"
+    },
+    {
+      "case_id": "authentication.sign-in.invalid-otp",
+      "email": "uat-auth-sign-in-invalid-otp@starci.local",
+      "is_uat": true,
+      "initial_state": "present",
+      "status": "active"
+    },
+    {
+      "case_id": "authentication.sign-in.expired-otp",
+      "email": "uat-auth-sign-in-expired-otp@starci.local",
+      "is_uat": true,
+      "initial_state": "present",
+      "status": "active"
+    },
+    {
+      "case_id": "authentication.sign-in.missing-challenge",
+      "email": "uat-auth-sign-in-missing-challenge@starci.local",
+      "is_uat": true,
+      "initial_state": "present",
+      "status": "active"
+    },
+    {
+      "case_id": "authentication.sign-in.server-unavailable",
+      "email": "uat-auth-sign-in-server-unavailable@starci.local",
+      "is_uat": true,
+      "initial_state": "present",
+      "status": "active"
+    },
+    {
+      "case_id": "authentication.sign-in.rate-limited",
+      "email": "uat-auth-sign-in-rate-limited@starci.local",
+      "is_uat": true,
+      "initial_state": "present",
+      "status": "active"
+    },
+    {
+      "case_id": "authentication.sign-in.duplicate-submission",
+      "email": "uat-auth-sign-in-duplicate-submit@starci.local",
+      "is_uat": true,
+      "initial_state": "present",
+      "status": "active"
+    },
+    {
+      "case_id": "authentication.sign-up.happy",
+      "email": "uat-auth-sign-up-happy@starci.local",
+      "is_uat": true,
+      "initial_state": "absent",
+      "expected_final_state": "present"
+    },
+    {
+      "case_id": "authentication.sign-up.unhappy",
+      "email": "uat-auth-sign-up-unhappy@starci.local",
+      "is_uat": true,
+      "initial_state": "absent",
+      "expected_final_state": "absent",
+      "status": "retired",
+      "replaced_by": [
+        "authentication.sign-up.existing-email",
+        "authentication.sign-up.password-mismatch",
+        "authentication.sign-up.terms-required"
+      ]
+    },
+    {
+      "case_id": "authentication.sign-up.existing-email",
+      "email": "uat-auth-sign-up-existing-email@starci.local",
+      "is_uat": true,
+      "initial_state": "present",
+      "status": "active"
+    },
+    {
+      "case_id": "authentication.sign-up.password-mismatch",
+      "email": "uat-auth-sign-up-password-mismatch@starci.local",
+      "is_uat": true,
+      "initial_state": "absent",
+      "expected_final_state": "present",
+      "status": "active"
+    },
+    {
+      "case_id": "authentication.sign-up.terms-required",
+      "email": "uat-auth-sign-up-terms-required@starci.local",
+      "is_uat": true,
+      "initial_state": "absent",
+      "expected_final_state": "present",
+      "status": "active"
+    },
+    {
+      "case_id": "authentication.forgot-password.happy",
+      "email": "uat-auth-forgot-password-happy@starci.local",
+      "is_uat": true,
+      "initial_state": "present"
+    },
+    {
+      "case_id": "authentication.forgot-password.unhappy",
+      "email": "uat-auth-forgot-password-unhappy@starci.local",
+      "is_uat": true,
+      "initial_state": "present"
+    },
+    {
+      "case_id": "profile.public-view.happy",
+      "email": "uat-profile-public-happy-20260828@starci.local",
+      "is_uat": true,
+      "initial_state": "present"
+    },
+    {
+      "case_id": "profile.public-view.unhappy",
+      "email": "uat-profile-private-unhappy-20260828@starci.local",
+      "is_uat": true,
+      "initial_state": "present"
+    },
+    {
+      "case_id": "dashboard.landing-and-tabs.happy",
+      "email": "uat-dashboard-landing-happy@starci.local",
+      "is_uat": true,
+      "initial_state": "present"
+    },
+    {
+      "case_id": "dashboard.landing-and-tabs.unhappy",
+      "email": "uat-dashboard-landing-unhappy@starci.local",
+      "is_uat": true,
+      "initial_state": "present"
+    }
+  ]
+}

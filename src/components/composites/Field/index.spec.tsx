@@ -7,7 +7,7 @@ afterEach(cleanup)
 
 describe("Field", () => {
     it("places stable guidance before the input and exposes all descriptive copy", () => {
-        render(
+        const { container } = render(
             <Field
                 props={{
                     id: "repository",
@@ -22,6 +22,7 @@ describe("Field", () => {
         const input = screen.getByLabelText("Repository")
         const description = screen.getByText("Paste the repository that contains your implementation.")
         const hint = screen.getByText("Use an HTTPS GitHub URL.")
+        expect(container.firstElementChild).toHaveClass("starci-core-form-field")
         expect(description.compareDocumentPosition(input) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
         expect(input).toHaveAttribute("aria-describedby", "repository-description repository-hint")
         expect(description).toBeInTheDocument()
@@ -51,5 +52,22 @@ describe("Field", () => {
         fireEvent.click(reveal)
         expect(input.getAttribute("type")).toBe("text")
         expect(screen.getByRole("button", { name: "Hide password" }).querySelector("svg")).toBeTruthy()
+    })
+
+    it("can remove repeated visible label copy without removing the accessible name", () => {
+        render(
+            <Field
+                props={{
+                    id: "otp",
+                    name: "otp",
+                    kind: "code",
+                    label: "OTP code",
+                    labelVisibility: "screenReader",
+                }}
+            />,
+        )
+
+        expect(screen.getByLabelText("OTP code")).toBeInTheDocument()
+        expect(screen.getByText("OTP code")).toHaveClass("starci-core-form-label--screen-reader")
     })
 })

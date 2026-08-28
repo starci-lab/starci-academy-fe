@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react"
+import { CombinedGraphQLErrors, ServerError } from "@apollo/client/errors"
 import { apiEnv } from "@/modules/api/env"
 import { mutationExchangeCodeForToken } from "@/modules/api/graphql/mutations/mutation-exchange-code-for-token"
 import { mutationForgotPasswordInit } from "@/modules/api/graphql/mutations/mutation-forgot-password-init"
@@ -88,12 +89,16 @@ export interface AuthFailure {
     code?: string
     /** True when the request never reached a verdict - network, timeout or abort. */
     isTransport: boolean
+    /** Server-advised cooldown for a rate-limited request, in seconds. */
+    retryAfterSeconds?: number
 }
 
 /** What a caller may vary about the panel. */
 export interface UseAuthPanelParams {
     /** Journey selected before the panel mounts. */
     initialMode?: AuthMode
+    /** URL-owned step rendered identically by the server and the browser before hydration. */
+    initialStep?: "details" | "code"
     /** Called once, after the access token has been stored, so a surface can close itself. */
     onSignedIn?: () => void
 }
@@ -150,6 +155,8 @@ interface AuthPanelRecord {
     challengeId?: string
     /** Validity of the most recently sent code, in seconds. */
     expiresInSeconds?: number
+    /** Absolute expiry retained across a refresh without resetting the server's countdown. */
+    expiresAt?: number
     /** How many codes have been sent for the current challenge. */
     sentCount: number
     /** Whether the reader has accepted the terms. */
@@ -181,6 +188,29 @@ type SessionEnvelope = GraphQLResponse<SignInSessionData> | undefined
  * here is a sign-in that fails with nothing to say.
  */
 const OAUTH_PROVIDER_KEY = "starci.auth.oauth-provider"
+/** Safe challenge metadata used only to rebuild an OTP step after refresh. */
+const AUTH_FLOW_KEY = "starci.auth.flow"
+/** Query key reserved for this panel; OAuth already owns the generic `state` key. */
+const AUTH_STATE_PARAM = "authState"
+
+type AuthUrlState = "sign-in" | "sign-in-otp" | "sign-up" | "sign-up-otp" | "forgot-password" | "forgot-password-otp"
+
+const URL_STATE_BY_MODE: Record<AuthMode, { readonly details: AuthUrlState; readonly code: AuthUrlState }> = {
+    signIn: { details: "sign-in", code: "sign-in-otp" },
+    signUp: { details: "sign-up", code: "sign-up-otp" },
+    forgotPassword: { details: "forgot-password", code: "forgot-password-otp" },
+}
+
+type StoredAuthFlow = {
+    readonly mode: AuthMode
+    readonly step: "code"
+    readonly email: string
+    readonly challengeId: string
+    readonly expiresAt?: number
+    readonly sentCount: number
+    readonly hasAgreedToTerms: boolean
+    readonly rememberMe: boolean
+}
 
 /** Nothing attempted yet: the reader is signing in, at the first step. */
 const INITIAL: AuthPanelRecord = {
@@ -193,8 +223,119 @@ const INITIAL: AuthPanelRecord = {
     isResending: false,
 }
 
+const modeFromUrlState = (value: string | null): { readonly mode: AuthMode; readonly step: "details" | "code" } | undefined => {
+    for (const [mode, states] of Object.entries(URL_STATE_BY_MODE) as Array<[AuthMode, { readonly details: AuthUrlState; readonly code: AuthUrlState }]>) {
+        if (value === states.details) return { mode, step: "details" }
+        if (value === states.code) return { mode, step: "code" }
+    }
+    return undefined
+}
+
+const readStoredFlow = (): StoredAuthFlow | undefined => {
+    try {
+        const raw = window.sessionStorage.getItem(AUTH_FLOW_KEY)
+        if (!raw) return undefined
+        const value = JSON.parse(raw) as Partial<StoredAuthFlow>
+        if (value.step !== "code" || !value.mode || !value.email || !value.challengeId) return undefined
+        if (!(value.mode in URL_STATE_BY_MODE)) return undefined
+        return {
+            mode: value.mode,
+            step: "code",
+            email: value.email,
+            challengeId: value.challengeId,
+            expiresAt: value.expiresAt,
+            sentCount: typeof value.sentCount === "number" ? value.sentCount : 1,
+            hasAgreedToTerms: value.hasAgreedToTerms === true,
+            rememberMe: value.rememberMe === true,
+        }
+    } catch {
+        return undefined
+    }
+}
+
+const initialRecord = (initialMode: AuthMode): AuthPanelRecord => {
+    if (typeof window === "undefined") return { ...INITIAL, mode: initialMode }
+    const requested = modeFromUrlState(new URLSearchParams(window.location.search).get(AUTH_STATE_PARAM))
+    if (!requested) return { ...INITIAL, mode: initialMode }
+    if (requested.step === "details") return { ...INITIAL, mode: requested.mode }
+    const stored = readStoredFlow()
+    if (!stored || stored.mode !== requested.mode) return { ...INITIAL, mode: requested.mode }
+    const expiresInSeconds = stored.expiresAt === undefined
+        ? undefined
+        : Math.max(0, Math.ceil((stored.expiresAt - Date.now()) / 1000))
+    return {
+        ...INITIAL,
+        ...stored,
+        expiresAt: stored.expiresAt,
+        expiresInSeconds,
+    }
+}
+
+const persistUrlState = (record: AuthPanelRecord): void => {
+    if (typeof window === "undefined") return
+    try {
+        if (record.step === "code" && record.email && record.challengeId) {
+            const stored: StoredAuthFlow = {
+                mode: record.mode,
+                step: "code",
+                email: record.email,
+                challengeId: record.challengeId,
+                expiresAt: record.expiresAt,
+                sentCount: record.sentCount,
+                hasAgreedToTerms: record.hasAgreedToTerms,
+                rememberMe: record.rememberMe,
+            }
+            window.sessionStorage.setItem(AUTH_FLOW_KEY, JSON.stringify(stored))
+        } else {
+            window.sessionStorage.removeItem(AUTH_FLOW_KEY)
+        }
+    } catch {
+        // URL still identifies the step. If storage is unavailable, refresh safely falls back to
+        // details instead of exposing the challenge, password, OTP or token in the address bar.
+    }
+
+    const nextStep = record.step === "code" ? "code" : "details"
+    const url = new URL(window.location.href)
+    url.searchParams.set(AUTH_STATE_PARAM, URL_STATE_BY_MODE[record.mode][nextStep])
+    window.history.replaceState(window.history.state, "", url.toString())
+}
+
 /** The failure a request that never reached the server produces. */
 const TRANSPORT_FAILURE: AuthFailure = { isTransport: true }
+
+/** Preserve an HTTP throttle verdict instead of misreporting it as a network outage. */
+const toRequestFailure = (error: unknown): AuthFailure => {
+    if (CombinedGraphQLErrors.is(error)) {
+        const throttled = error.errors.find(
+            (candidate) => candidate.extensions?.code === "RATE_LIMIT_EXCEEDED_EXCEPTION",
+        )
+        if (throttled) {
+            const rawRetryAfter = throttled.extensions?.retryAfterSeconds
+            return {
+                code: "RATE_LIMITED",
+                isTransport: false,
+                retryAfterSeconds: typeof rawRetryAfter === "number"
+                    && Number.isFinite(rawRetryAfter)
+                    && rawRetryAfter > 0
+                    ? Math.ceil(rawRetryAfter)
+                    : undefined,
+            }
+        }
+    }
+    if (ServerError.is(error) && error.statusCode === 429) {
+        const rawRetryAfter = error.response.headers.get("retry-after-short")
+            ?? error.response.headers.get("retry-after")
+        const retryAfter = Number(rawRetryAfter)
+        return {
+            code: "RATE_LIMITED",
+            isTransport: false,
+            retryAfterSeconds: Number.isFinite(retryAfter) && retryAfter > 0
+                ? Math.ceil(retryAfter)
+                : undefined,
+        }
+    }
+    return TRANSPORT_FAILURE
+}
 
 /**
  * Turn a server envelope into a failure. Called only when `success` is false, so the absence of a
@@ -205,9 +346,31 @@ const TRANSPORT_FAILURE: AuthFailure = { isTransport: true }
  * @param code - The envelope's machine-readable error code.
  */
 const toFailure = (message?: string, code?: string): AuthFailure => ({
-    message,
+    // HTTP failures can be surfaced by the API envelope with an Axios implementation detail
+    // instead of the server's reader-facing message (notably 401 for bad credentials). Treat the
+    // request as a reached refusal, but discard that raw transport copy so the connected panel
+    // can use its localized generic recovery guidance.
+    message: message && /^Request failed with status code \d+$/i.test(message) ? undefined : message,
     code,
     isTransport: false,
+})
+
+/** A missing OTP challenge is terminal for that proof: retrying or resending the dead id cannot recover. */
+const isMissingOtpChallenge = (failure: AuthFailure): boolean =>
+    failure.code === "CHALLENGE_OTP_NOT_FOUND_EXCEPTION"
+    || failure.message === "Challenge not found"
+
+/** Return a dead OTP journey to details while retaining the refusal that explains the restart. */
+const expiredChallengeRecord = (failure: AuthFailure): Partial<AuthPanelRecord> => ({
+    step: "details",
+    email: undefined,
+    challengeId: undefined,
+    expiresInSeconds: undefined,
+    expiresAt: undefined,
+    sentCount: 0,
+    isPending: false,
+    isResending: false,
+    failure,
 })
 
 /**
@@ -322,8 +485,9 @@ const writeStoredProvider = (provider?: KeycloakIdentityProvider): void => {
  *
  * @param params - {@link UseAuthPanelParams}
  */
-export const useAuthPanel = ({ initialMode = "signIn", onSignedIn }: UseAuthPanelParams = {}): AuthPanelState => {
-    const [record, setRecord] = useState<AuthPanelRecord>(() => ({ ...INITIAL, mode: initialMode }))
+export const useAuthPanel = ({ initialMode = "signIn", initialStep = "details", onSignedIn }: UseAuthPanelParams = {}): AuthPanelState => {
+    const [record, setRecord] = useState<AuthPanelRecord>(() => ({ ...INITIAL, mode: initialMode, step: initialStep }))
+    const [isFlowHydrated, setIsFlowHydrated] = useState(false)
 
     // The handlers read the flow through these refs rather than closing over it, so their
     // identity is stable for the whole life of the surface. See the file header.
@@ -345,6 +509,16 @@ export const useAuthPanel = ({ initialMode = "signIn", onSignedIn }: UseAuthPane
         }
     }, [])
 
+    useEffect(() => {
+        setRecord(initialRecord(initialMode))
+        setIsFlowHydrated(true)
+    }, [initialMode, initialStep])
+
+    useEffect(() => {
+        if (!isFlowHydrated) return
+        persistUrlState(record)
+    }, [isFlowHydrated, record.mode, record.step, record.email, record.challengeId, record.expiresAt, record.sentCount, record.hasAgreedToTerms, record.rememberMe])
+
     /**
      * Apply a settled result, unless it belongs to a superseded attempt or the surface has gone
      * away.
@@ -358,16 +532,25 @@ export const useAuthPanel = ({ initialMode = "signIn", onSignedIn }: UseAuthPane
     }, [])
 
     /**
-     * Store the token and move to the last step. The token is stored BEFORE the step moves, so
-     * anything that renders on the way already reads as signed in rather than briefly as a guest.
+     * Store the token and hand a completed sign-in straight to its destination.
+     *
+     * A routed sign-in has no useful terminal screen: rendering "signed in" only to replace it
+     * with the destination duplicates a fact and introduces a visible interstitial. Other modes,
+     * or an unowned sign-in with no completion callback, retain the explicit done step because
+     * their caller has not supplied somewhere else for the reader to go.
      *
      * @param runId - The attempt this token belongs to.
      * @param accessToken - The bearer token the server issued.
      */
     const onSession = useCallback((runId: number, accessToken: string) => {
         setSessionToken(accessToken)
+        const signedIn = signedInRef.current
+        if (recordRef.current.mode === "signIn" && signedIn) {
+            signedIn()
+            return
+        }
         settle(runId, { step: "done", isPending: false, failure: undefined })
-        signedInRef.current?.()
+        signedIn?.()
     }, [settle])
 
     // The last leg of an OAuth sign-in. The provider brings the reader back to this surface with
@@ -398,15 +581,21 @@ export const useAuthPanel = ({ initialMode = "signIn", onSignedIn }: UseAuthPane
                 }
                 onSession(runId, envelope.data.accessToken)
             })
-            .catch(() => {
-                settle(runId, { isPending: false, failure: TRANSPORT_FAILURE })
+            .catch((error: unknown) => {
+                settle(runId, { isPending: false, failure: toRequestFailure(error) })
             })
     }, [settle, onSession])
 
     const onSubmitDetails = useCallback(({ email, password }: AuthDetails) => {
-        const { mode } = recordRef.current
+        const { mode, isPending, isResending } = recordRef.current
+        // The button is disabled in the normal DOM path, but the machine must also be safe when
+        // an already captured handler is invoked twice (or by an integration). One details
+        // request may open one challenge; a duplicate can strand the first code and make recovery
+        // impossible to reason about.
+        if (isPending || isResending) return
         const runId = runRef.current + 1
         runRef.current = runId
+        recordRef.current = { ...recordRef.current, isPending: true, failure: undefined }
         setRecord((previous) => ({ ...previous, isPending: true, failure: undefined }))
         void INIT_BY_MODE[mode]({ email, password })
             .then((envelope) => {
@@ -423,51 +612,61 @@ export const useAuthPanel = ({ initialMode = "signIn", onSignedIn }: UseAuthPane
                     email,
                     challengeId: envelope.data.challengeId,
                     expiresInSeconds: envelope.data.expiresInSeconds,
+                    expiresAt: envelope.data.expiresInSeconds === undefined ? undefined : Date.now() + envelope.data.expiresInSeconds * 1000,
                     sentCount: 1,
                     isPending: false,
                     failure: undefined,
                 })
             })
-            .catch(() => {
-                settle(runId, { isPending: false, failure: TRANSPORT_FAILURE })
+            .catch((error: unknown) => {
+                settle(runId, { isPending: false, failure: toRequestFailure(error) })
             })
     }, [settle, onSession])
 
     const onSubmitCode = useCallback(({ otp }: AuthCode) => {
-        const { mode, challengeId } = recordRef.current
+        const { mode, challengeId, isPending, isResending } = recordRef.current
         // No challenge means no question this code could be an answer to. Refusing here is what
         // makes the step ordering a property of the machine rather than of a caller.
-        if (!challengeId) return
+        if (!challengeId || isPending || isResending) return
         const runId = runRef.current + 1
         runRef.current = runId
+        recordRef.current = { ...recordRef.current, isPending: true, failure: undefined }
         setRecord((previous) => ({ ...previous, isPending: true, failure: undefined }))
         void VERIFY_BY_MODE[mode](challengeId, otp)
             .then((envelope) => {
                 if (!envelope?.success || !envelope.data) {
-                    settle(runId, { isPending: false, failure: toFailure(envelope?.message, envelope?.error) })
+                    const failure = toFailure(envelope?.message, envelope?.error)
+                    settle(runId, isMissingOtpChallenge(failure)
+                        ? expiredChallengeRecord(failure)
+                        : { isPending: false, failure })
                     return
                 }
                 onSession(runId, envelope.data.accessToken)
             })
-            .catch(() => {
-                settle(runId, { isPending: false, failure: TRANSPORT_FAILURE })
+            .catch((error: unknown) => {
+                settle(runId, { isPending: false, failure: toRequestFailure(error) })
             })
     }, [settle, onSession])
 
     const onResend = useCallback(() => {
-        const { mode, challengeId } = recordRef.current
-        if (!challengeId) return
+        const { mode, challengeId, isPending, isResending } = recordRef.current
+        if (!challengeId || isPending || isResending) return
         const runId = runRef.current + 1
         runRef.current = runId
+        recordRef.current = { ...recordRef.current, isResending: true, failure: undefined }
         setRecord((previous) => ({ ...previous, isResending: true, failure: undefined }))
         void RESEND_BY_MODE[mode](challengeId)
             .then((envelope) => {
                 if (!envelope?.success || !envelope.data) {
-                    settle(runId, { isResending: false, failure: toFailure(envelope?.message, envelope?.error) })
+                    const failure = toFailure(envelope?.message, envelope?.error)
+                    settle(runId, isMissingOtpChallenge(failure)
+                        ? expiredChallengeRecord(failure)
+                        : { isResending: false, failure })
                     return
                 }
                 settle(runId, {
                     expiresInSeconds: envelope.data.expiresInSeconds,
+                    expiresAt: envelope.data.expiresInSeconds === undefined ? undefined : Date.now() + envelope.data.expiresInSeconds * 1000,
                     // The challenge id can be reissued by a resend, so it is read back rather than
                     // assumed unchanged - quoting a dead id is a refusal nobody can explain.
                     challengeId: envelope.data.challengeId,
@@ -476,8 +675,8 @@ export const useAuthPanel = ({ initialMode = "signIn", onSignedIn }: UseAuthPane
                     failure: undefined,
                 })
             })
-            .catch(() => {
-                settle(runId, { isResending: false, failure: TRANSPORT_FAILURE })
+            .catch((error: unknown) => {
+                settle(runId, { isResending: false, failure: toRequestFailure(error) })
             })
     }, [settle])
 

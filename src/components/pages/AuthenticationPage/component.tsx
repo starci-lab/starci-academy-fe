@@ -1,5 +1,7 @@
-import { SurfaceFormCard } from "@/components/branches/SurfaceFormCard"
+import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { AuthenticationPanel } from "@/components/blocks/auth/AuthenticationPanel"
+import type { AuthMode } from "@/hooks/auth/useAuthPanel"
+import { authenticationPageClassName } from "./classNames"
 
 /** What the authentication page reports. */
 export type AuthenticationPageActions = {
@@ -9,6 +11,12 @@ export type AuthenticationPageActions = {
 
 /** Props for {@link AuthenticationPageBase}. */
 export type AuthenticationPageProps = {
+    /** Content-aware form measure selected from the URL-owned journey state. */
+    readonly measure?: "form" | "formCompact"
+    /** URL-owned journey rendered before the browser hydrates stored challenge metadata. */
+    readonly initialMode?: AuthMode
+    /** URL-owned step rendered before the browser hydrates stored challenge metadata. */
+    readonly initialStep?: "details" | "code"
     readonly on?: AuthenticationPageActions
 }
 
@@ -20,8 +28,10 @@ export type AuthenticationPageProps = {
 export const AuthenticationPageBase = (props: AuthenticationPageProps) => {
     const { on } = props
     return (
-        <SurfaceFormCard>
-            <AuthenticationPanel onSignedIn={on?.signedIn} />
-        </SurfaceFormCard>
+        <main className={authenticationPageClassName}>
+            <SurfaceCard props={{ inset: "compact", isScrollable: true, measure: props.measure ?? "form" }}>
+                <AuthenticationPanel initialMode={props.initialMode} initialStep={props.initialStep} onSignedIn={on?.signedIn} />
+            </SurfaceCard>
+        </main>
     )
 }

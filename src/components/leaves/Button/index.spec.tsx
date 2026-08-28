@@ -12,15 +12,17 @@ describe("Button", () => {
         expect(screen.getByRole("button", { name: "Trial" })).toHaveAttribute("data-variant", "tertiary")
     })
 
-    it("draws action progress without replacing the resting label width", () => {
+    it("draws action progress beside the unchanged action label", () => {
         const { container } = render(
             <Button props={{ label: "Sign In", variant: "primary", isPending: true }} />,
         )
 
         const button = screen.getByRole("button", { name: "Sign In" })
         expect(button.getAttribute("data-action-pending")).toBe("true")
+        expect(button).toHaveAttribute("data-pending", "true")
         expect(button).toBeDisabled()
-        expect(container.querySelector("[data-slot='spinner']")).toBeTruthy()
-        expect(screen.getByText("Sign In").className).toContain("invisible")
+        expect(container.querySelector("[data-slot='spinner']")).toHaveClass("spinner--current")
+        expect(screen.getByText("Sign In")).toBeVisible()
+        expect(screen.getByText("Sign In").className).not.toContain("invisible")
     })
 })

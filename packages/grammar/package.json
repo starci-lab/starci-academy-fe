@@ -45,7 +45,7 @@
   "scripts": {
     "build": "node scripts/clean.mjs && tsc -p tsconfig.build.json && node scripts/copy-css.mjs",
     "typecheck": "tsc -p tsconfig.build.json --noEmit",
-    "test": "npm run build && node --test src/common/index.test.mjs src/core/index.test.mjs src/package-boundary.test.mjs && vitest run --config vitest.config.ts src/core/styles.spec.ts src/offset-pop/styles.spec.ts",
+    "test": "npm run build && node --test src/common/index.test.mjs src/core/index.test.mjs src/package-boundary.test.mjs && vitest run --config vitest.config.ts src/core/styles.spec.ts src/core/scrollable-surfaces.spec.tsx src/offset-pop/styles.spec.ts",
     "prepack": "npm run typecheck && npm test"
   },
   "engines": {

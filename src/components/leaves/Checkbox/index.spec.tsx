@@ -26,8 +26,9 @@ describe("Checkbox", () => {
         expect(change).toHaveBeenCalledWith(true)
     })
 
-    it("keeps legal destinations as links inside the clickable label sentence", () => {
+    it("keeps real legal destinations as isolated anchors inside the clickable label sentence", () => {
         const follow = vi.fn()
+        const change = vi.fn()
         render(
             <Checkbox
                 props={{
@@ -35,19 +36,32 @@ describe("Checkbox", () => {
                     isSelected: false,
                     labelParts: [
                         { kind: "text", content: "I agree to the " },
-                        { kind: "link", id: "terms", label: "Terms" },
+                        {
+                            kind: "link",
+                            id: "terms",
+                            label: "Terms",
+                            href: "https://academy.starci.org/en/terms",
+                            target: "_blank",
+                            rel: "noopener noreferrer",
+                        },
                         { kind: "text", content: " and " },
                         { kind: "link", id: "privacy", label: "Privacy Policy" },
                     ],
                 }}
-                on={{ follow }}
+                on={{ follow, change }}
             />,
         )
 
         const terms = screen.getByRole("link", { name: "Terms" })
-        expect(terms.getAttribute("href")).toBeNull()
+        expect(terms).toHaveAttribute("href", "https://academy.starci.org/en/terms")
+        expect(terms).toHaveAttribute("target", "_blank")
+        expect(terms).toHaveAttribute("rel", "noopener noreferrer")
         expect(screen.getByRole("link", { name: "Privacy Policy" }).getAttribute("href")).toBeNull()
         fireEvent.click(terms)
-        expect(follow).toHaveBeenCalledWith("terms")
+        expect(follow).not.toHaveBeenCalled()
+        expect(change).not.toHaveBeenCalled()
+
+        fireEvent.click(screen.getByRole("link", { name: "Privacy Policy" }))
+        expect(follow).toHaveBeenCalledWith("privacy")
     })
 })

@@ -390,6 +390,8 @@
         "shared": {
             "emailLabel": "Email",
             "emailHint": "",
+            "codeTitle": "Nhập OTP",
+            "codeDescription": "Chúng tôi đã gửi mã tới email của bạn. Nhập mã bên dưới.",
             "codeLabel": "Mã OTP",
             "resend": "Gửi lại mã",
             "useAnotherEmail": "Dùng email khác",
@@ -413,17 +415,21 @@
             "hidePassword": "Ẩn mật khẩu",
             "rememberMe": "Ghi nhớ đăng nhập",
             "forgotPassword": "Quên mật khẩu?",
-            "codePlaceholder": "Nhập mã OTP 6 số",
             "dismiss": "Đóng"
         },
         "status": {
             "sending": "Đang kiểm tra thông tin của bạn",
-            "sent": "Chúng tôi đã gửi mã tới email của bạn. Nhập mã bên dưới.",
             "verifying": "Đang kiểm tra mã của bạn",
             "resending": "Đang gửi mã mới",
             "resent": "Mã mới đang trên đường tới. Mã trước đó không còn dùng được.",
             "signedIn": "Đã đăng nhập",
             "transport": "Chúng tôi không kết nối được tới máy chủ. Kiểm tra đường truyền rồi thử lại.",
+    "credentialsRefused": "Email hoặc mật khẩu chưa đúng. Kiểm tra lại rồi thử tiếp.",
+    "accountExists": "Email này đã có tài khoản. Hãy đăng nhập để tiếp tục.",
+    "otpRefused": "Mã OTP chưa đúng. Kiểm tra lại rồi thử tiếp.",
+            "otpExpired": "Mã OTP đã hết hạn. Đăng nhập lại để nhận mã mới.",
+            "rateLimited": "Bạn thao tác quá nhanh. Vui lòng chờ một chút rồi thử lại.",
+            "rateLimitedWithWait": "Bạn thao tác quá nhanh. Thử lại sau {count} giây.",
             "refused": "Chưa được. Vui lòng thử lại."
         },
         "expiry": {

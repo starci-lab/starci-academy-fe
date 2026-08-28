@@ -4,6 +4,19 @@ import { describe, expect, it } from "vitest"
 const css = readFileSync(new URL("./styles.css", import.meta.url), "utf8")
 
 describe("Core capability styles", () => {
+    it("owns compact form measure, bounded branch scrolling and field rhythm", () => {
+        expect(css).toMatch(/\.starci-core-form-page\s*\{[\s\S]*?align-items: center;[\s\S]*?justify-content: center;[\s\S]*?overflow: hidden;/)
+        expect(css).toMatch(/\.starci-core-form-scroll-viewport\s*\{[\s\S]*?width: 100%;[\s\S]*?max-height: calc\(100dvh - 3rem\);/)
+        expect(css.match(/\.starci-core-form-scroll-viewport\s*\{[\s\S]*?\}/)?.[0]).not.toContain("overflow-y")
+        expect(css).toMatch(/\.starci-core-form-surface\s*\{[\s\S]*?width: min\(100%, var\(--starci-core-form-measure, 30rem\)\);/)
+        expect(css).toMatch(/\.starci-core-form-surface--compact\s*\{[\s\S]*?width: min\(100%, var\(--starci-core-form-compact-measure, 28rem\)\);/)
+        expect(css).toMatch(/\.starci-core-form-surface > \.card\s*\{[\s\S]*?max-height: calc\(100dvh - 3rem\);[\s\S]*?overflow: hidden !important;[\s\S]*?padding: 0 !important;/)
+        expect(css).toMatch(/\.starci-core-form-field\s*\{[\s\S]*?flex-direction: column;[\s\S]*?gap: var\(--starci-core-field-gap, 0\.5rem\);/)
+        expect(css).toMatch(/\.starci-core-form-label--screen-reader\s*\{[\s\S]*?position: absolute;[\s\S]*?clip: rect\(0, 0, 0, 0\);/)
+        expect(css).toMatch(/\.starci-core-horizontal-scroll-region\s*\{[\s\S]*?overscroll-behavior-inline: contain;/)
+        expect(css).toMatch(/\.starci-core-horizontal-scroll-region > \*\s*\{[\s\S]*?min-width: max-content;/)
+    })
+
     it("keeps canonical surface, collection and rail selectors", () => {
         expect(css).toContain("[data-grammar-scroll=\"contained\"]")
         expect(css).toContain(".starci-core-surface.starci-core-frameless-surface")

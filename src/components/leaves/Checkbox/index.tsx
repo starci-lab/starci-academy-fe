@@ -1,6 +1,6 @@
-import { Checkbox as HeroCheckbox } from "@heroui/react"
+import { Checkbox as HeroCheckbox, Link as HeroLink } from "@heroui/react"
 import { TextLink } from "@/components/leaves/TextLink"
-import { checkboxClassName } from "./classNames"
+import { checkboxClassName, checkboxLinkClassName } from "./classNames"
 
 /**
  * LEAF - `Checkbox`: a choice the reader makes about the form around it.
@@ -16,7 +16,17 @@ import { checkboxClassName } from "./classNames"
 /** One textual or navigable fragment inside a compound checkbox label. */
 export type CheckboxLabelPart =
     | { readonly kind: "text", readonly content: string }
-    | { readonly kind: "link", readonly id: string, readonly label: string }
+    | {
+        readonly kind: "link"
+        readonly id: string
+        readonly label: string
+        /** Real destination when this phrase leaves the current surface. */
+        readonly href?: string
+        /** Browsing context for a real destination. */
+        readonly target?: "_blank" | "_self"
+        /** Isolation policy for a real destination. */
+        readonly rel?: string
+    }
 
 /** What this leaf draws. A `type`, not an `interface` - only an alias satisfies the data fence. */
 export type CheckboxData = {
@@ -70,12 +80,23 @@ export const Checkbox = (props: CheckboxProps) => {
                         {data.labelParts.map((part, index) => (
                             part.kind === "text" ? (
                                 <span key={`${part.kind}-${index}`}>{part.content}</span>
-                            ) : (
+                            ) : part.href === undefined ? (
                                 <TextLink
                                     key={`${part.kind}-${index}`}
                                     props={{ label: part.label, size: "sm" }}
                                     on={{ press: () => on?.follow?.(part.id) }}
                                 />
+                            ) : (
+                                <HeroLink
+                                    key={`${part.kind}-${index}`}
+                                    href={part.href}
+                                    target={part.target}
+                                    rel={part.rel}
+                                    onClick={(event) => event.stopPropagation()}
+                                    className={checkboxLinkClassName}
+                                >
+                                    {part.label}
+                                </HeroLink>
                             )
                         ))}
                     </span>

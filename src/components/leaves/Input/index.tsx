@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Input as HeroInput } from "@heroui/react"
+import { OtpInput } from "@starci/grammar/core"
 import { Icon } from "@/components/leaves/Icon"
 import { inputBoxClassName, inputLoadingClassName, inputRevealClassName } from "./classNames"
 
@@ -81,6 +82,9 @@ export const Input = (props: InputProps) => {
     const kind = KINDS[data.kind ?? "text"]
     const isSecret = (data.kind ?? "text") === "password" || data.kind === "newPassword"
     const revealLabel = isRevealed ? data.hideLabel : data.revealLabel
+    if (data.kind === "code") {
+        return <OtpInput id={data.id} name={data.name} defaultValue={data.defaultValue} disabled={data.disabled === true || isLoading} invalid={data.isInvalid} describedBy={data.describedBy} onChange={on?.change} />
+    }
     return (
         <span className={inputBoxClassName}>
             <HeroInput

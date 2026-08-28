@@ -1,6 +1,7 @@
 /** @vitest-environment jsdom */
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import { renderToString } from "react-dom/server"
 import { AuthenticationPanelBase, type AuthenticationPanelProps } from "./component"
 
 afterEach(cleanup)
@@ -35,8 +36,10 @@ const signUpProps: Extract<AuthenticationPanelProps, { state: "details" }> = {
         agreeToTerms: "I agree to the terms",
         agreeToTermsPrefix: "I have read and agree to the",
         termsLabel: "Terms of Service",
+        termsHref: "https://academy.starci.org/en/terms",
         andLabel: "and",
         privacyLabel: "Privacy Policy",
+        privacyHref: "https://academy.starci.org/en/privacy",
         promptQuestion: "Already have an account?",
         promptAction: "Sign In",
     },
@@ -80,7 +83,6 @@ const codeProps: Extract<AuthenticationPanelProps, { state: "code" }> = {
         isError: false,
         isPending: false,
         codeLabel: "One-time code",
-        codePlaceholder: "123456",
         codeHint: "Six digits",
         submitLabel: "Verify",
         resendLabel: "Send another code",
@@ -88,17 +90,14 @@ const codeProps: Extract<AuthenticationPanelProps, { state: "code" }> = {
     },
 }
 
-/**
- * The one slot of the checkbox leaf this panel's guard depends on: which phrase in the
- * compound label was followed, reported as a bare id the panel has to recognise or ignore.
- */
-type StandInCheckboxProps = {
-    /** What following a phrase does. */
-    readonly on?: {
-        /** Reports which navigable phrase was followed. */
-        readonly follow?: (id: string) => void
-    }
-}
+it("keeps secret-bearing server-rendered controls disabled until hydration", () => {
+    const host = document.createElement("div")
+    host.innerHTML = renderToString(<AuthenticationPanelBase {...signInProps} />)
+
+    expect(host.querySelector("input[name=\"email\"]")).toBeDisabled()
+    expect(host.querySelector("input[name=\"password\"]")).toBeDisabled()
+    expect(host.querySelector("button[type=\"submit\"]")).toBeDisabled()
+})
 
 /** The confirmation. */
 const doneProps: Extract<AuthenticationPanelProps, { state: "done" }> = {
@@ -116,17 +115,25 @@ const doneProps: Extract<AuthenticationPanelProps, { state: "done" }> = {
 
 describe("AuthenticationPanelBase", () => {
     it("ports the legacy sign-up anatomy: two password fields and a real checkbox", () => {
-        const openLegal = vi.fn()
-        const { container } = render(<AuthenticationPanelBase {...signUpProps} on={{ openLegal }} />)
+        const { container } = render(<AuthenticationPanelBase {...signUpProps} />)
 
         expect(screen.getByLabelText("Choose a password").getAttribute("autocomplete")).toBe("new-password")
         expect(screen.getByLabelText("Confirm password").getAttribute("autocomplete")).toBe("new-password")
         expect(screen.getByRole("checkbox", { name: "I agree to the terms" })).toBeTruthy()
         expect(container.querySelector("[data-slot='checkbox-control']")).toBeTruthy()
-        expect(screen.getByRole("link", { name: "Terms of Service" }).getAttribute("href")).toBeNull()
-        expect(screen.getByRole("link", { name: "Privacy Policy" }).getAttribute("href")).toBeNull()
-        fireEvent.click(screen.getByRole("link", { name: "Terms of Service" }))
-        expect(openLegal).toHaveBeenCalledWith("terms")
+        expect(screen.getByRole("link", { name: "Terms of Service" })).toHaveAttribute(
+            "href",
+            "https://academy.starci.org/en/terms",
+        )
+        expect(screen.getByRole("link", { name: "Terms of Service" })).toHaveAttribute("target", "_blank")
+        expect(screen.getByRole("link", { name: "Terms of Service" })).toHaveAttribute(
+            "rel",
+            "noopener noreferrer",
+        )
+        expect(screen.getByRole("link", { name: "Privacy Policy" })).toHaveAttribute(
+            "href",
+            "https://academy.starci.org/en/privacy",
+        )
     })
 
     it("does not submit sign-up until the confirmation matches", () => {
@@ -179,14 +186,6 @@ describe("AuthenticationPanelBase", () => {
 
         fireEvent.click(screen.getByRole("button", { name: "Sign In With GitHub" }))
         expect(oauthPress).toHaveBeenLastCalledWith("github")
-    })
-
-    it("reports the privacy link separately from the terms one", () => {
-        const openLegal = vi.fn()
-        render(<AuthenticationPanelBase {...signUpProps} on={{ openLegal }} />)
-
-        fireEvent.click(screen.getByRole("link", { name: "Privacy Policy" }))
-        expect(openLegal).toHaveBeenCalledWith("privacy")
     })
 
     it("records the agreement rather than holding it locally", () => {
@@ -249,6 +248,47 @@ describe("AuthenticationPanelBase", () => {
         expect(changeMode).toHaveBeenLastCalledWith("signUp")
     })
 
+    it("keeps the sign-in happy states inside the owned flex composition", () => {
+        const details = render(<AuthenticationPanelBase {...signInProps} />)
+        const detailsRoot = details.container.firstElementChild
+        expect(detailsRoot).toHaveClass("mx-auto", "flex", "w-full", "max-w-md", "flex-col", "gap-6")
+        expect(detailsRoot?.querySelector("header")).toHaveClass(
+            "flex",
+            "flex-col",
+            "items-center",
+            "gap-3",
+            "text-center",
+        )
+        expect(detailsRoot?.querySelector("form")).toHaveClass("flex", "flex-col", "gap-4")
+        expect(screen.getByRole("link", { name: "Forgot Password?" }).parentElement).toHaveClass(
+            "flex",
+            "flex-row",
+            "items-center",
+            "justify-between",
+            "gap-3",
+        )
+        expect(screen.getByRole("link", { name: "Create an account" }).parentElement).toHaveClass(
+            "flex",
+            "flex-row",
+            "items-center",
+            "justify-center",
+            "gap-2",
+        )
+        details.unmount()
+
+        const code = render(<AuthenticationPanelBase {...codeProps} />)
+        const codeRoot = code.container.firstElementChild
+        expect(codeRoot).toHaveClass("mx-auto", "flex", "w-full", "max-w-md", "flex-col", "gap-6")
+        expect(codeRoot?.querySelector("form")).toHaveClass("flex", "flex-col", "gap-4")
+        expect(screen.getByRole("link", { name: "Send another code" }).parentElement).toHaveClass(
+            "flex",
+            "flex-row",
+            "items-center",
+            "justify-center",
+            "gap-2",
+        )
+    })
+
     it("omits the hint entirely when the journey has nothing to say about the password", () => {
         render(<AuthenticationPanelBase {...signInProps} />)
         expect(screen.getByLabelText("Password").getAttribute("aria-describedby")).toBeNull()
@@ -284,6 +324,7 @@ describe("AuthenticationPanelBase", () => {
         } satisfies typeof signInProps
         const { unmount } = render(<AuthenticationPanelBase {...refused} />)
         expect(screen.getByRole("alert")).toHaveTextContent("Those details do not match.")
+        expect(screen.getByRole("alert")).toHaveAttribute("slot", "errorMessage")
         unmount()
 
         const informing = {
@@ -305,6 +346,7 @@ describe("AuthenticationPanelBase", () => {
         expect(screen.getByLabelText("Email")).toBeDisabled()
         expect(screen.getByLabelText("Password")).toBeDisabled()
         expect(screen.getByRole("button", { name: "Sign in" })).toBeDisabled()
+        expect(screen.getByRole("button", { name: "Sign in" })).toHaveTextContent("Sign in")
         expect(screen.getByRole("button", { name: "Sign In With Google" })).toBeDisabled()
     })
 
@@ -318,12 +360,15 @@ describe("AuthenticationPanelBase", () => {
         expect(screen.getByRole("button", { name: "Sign in" })).toBeEnabled()
     })
 
-    it("draws the code step as one box, and sends what was typed in it", () => {
+    it("draws the code step with the standard segmented OTP control, and sends what was typed in it", () => {
         const submitCode = vi.fn()
-        render(<AuthenticationPanelBase {...codeProps} on={{ submitCode }} />)
+        const { container } = render(<AuthenticationPanelBase {...codeProps} on={{ submitCode }} />)
 
         const box = screen.getByLabelText("One-time code")
         expect(box.getAttribute("autocomplete")).toBe("one-time-code")
+        expect(box).toHaveAttribute("maxlength", "6")
+        expect(box).toHaveAttribute("pattern", "^\\d+$")
+        expect(container.querySelectorAll("[data-slot='input-otp-slot']")).toHaveLength(6)
         expect(screen.queryByLabelText("Email")).toBeNull()
 
         fireEvent.change(box, { target: { value: "123456" } })
@@ -350,6 +395,7 @@ describe("AuthenticationPanelBase", () => {
         } satisfies typeof codeProps
         render(<AuthenticationPanelBase {...refused} />)
         expect(screen.getByRole("alert")).toHaveTextContent("That code is wrong.")
+        expect(screen.getByRole("alert")).toHaveAttribute("slot", "errorMessage")
     })
 
     it("puts pending feedback on the verify action and blocks the box behind it", () => {
@@ -364,6 +410,26 @@ describe("AuthenticationPanelBase", () => {
         expect(submit).toBeDisabled()
         expect(submit.getAttribute("data-action-pending")).toBe("true")
         expect(container.querySelector("[data-slot='spinner']")).toBeTruthy()
+    })
+
+    it("puts resend pending feedback on the resend action and disables both secondary choices", () => {
+        const resend = vi.fn()
+        const pending = {
+            ...codeProps,
+            props: { ...codeProps.props, isResending: true },
+        } satisfies typeof codeProps
+        const { container } = render(<AuthenticationPanelBase {...pending} on={{ resend }} />)
+
+        const action = screen.getByRole("link", { name: "Send another code" })
+        expect(action).toHaveAttribute("data-action-pending", "true")
+        expect(action).toHaveAttribute("aria-disabled", "true")
+        expect(screen.getByRole("link", { name: "Use another email" })).toHaveAttribute(
+            "aria-disabled",
+            "true",
+        )
+        expect(container.querySelector("[data-slot='spinner']")).toBeTruthy()
+        fireEvent.click(action)
+        expect(resend).not.toHaveBeenCalled()
     })
 
     it("submits nothing and throws nothing on the code step with no one wired up", () => {
@@ -381,29 +447,6 @@ describe("AuthenticationPanelBase", () => {
         expect(screen.getByText("Taking you back to where you were")).toBeTruthy()
         expect(screen.queryByRole("button")).toBeNull()
         expect(screen.queryByRole("status")).toBeNull()
-    })
-
-    it("ignores a followed phrase that names nothing this panel owns", async () => {
-        // The checkbox leaf types `follow` as `(id: string) => void`, so the panel has to decide
-        // what an id it did not put in the label means. It means nothing: the reader is not sent
-        // to a legal document chosen by whatever the leaf happened to report. The leaf is stood in
-        // for here because its own label parts cannot produce a third id, and the guard is exactly
-        // the code that would let one through if it were dropped.
-        const openLegal = vi.fn()
-        vi.resetModules()
-        vi.doMock("@/components/leaves/Checkbox", () => ({
-            Checkbox: ({ on }: StandInCheckboxProps) => (
-                <button type="button" onClick={() => on?.follow?.("newsletter")}>Third phrase</button>
-            ),
-        }))
-        const { AuthenticationPanelBase: Panel } = await import("./component")
-
-        render(<Panel {...signUpProps} on={{ openLegal }} />)
-        fireEvent.click(screen.getByRole("button", { name: "Third phrase" }))
-        expect(openLegal).not.toHaveBeenCalled()
-
-        vi.doUnmock("@/components/leaves/Checkbox")
-        vi.resetModules()
     })
 
     it("still carries a closing sentence on the confirmation when there is one", () => {

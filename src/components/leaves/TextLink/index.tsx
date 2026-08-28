@@ -1,4 +1,5 @@
-import { Link as HeroLink } from "@heroui/react"
+import { Link as HeroLink, Spinner } from "@heroui/react"
+import { useRef } from "react"
 import { getTextLinkClassName } from "./classNames"
 
 /**
@@ -31,6 +32,10 @@ export type TextLinkData = {
     readonly size?: TextLinkSize
     /** Whether this peer choice is selected. Omit outside a fixed choice set. */
     readonly isSelected?: boolean
+    /** The action is already running; retain its words, add progress, and refuse another press. */
+    readonly isPending?: boolean
+    /** The action is unavailable because another owner is currently running. */
+    readonly disabled?: boolean
 }
 
 /** What pressing it does. */
@@ -52,15 +57,37 @@ export type TextLinkProps = { readonly props: TextLinkData; readonly on?: TextLi
 export const TextLink = (props: TextLinkProps) => {
     const data = props.props
     const on = props.on
+    const isPending = data.isPending === true
+    const isDisabled = data.disabled === true || isPending
+    // React Aria can still finish a press sequence that began before the parent rendered pending.
+    // A live ref makes that stale gesture consult the CURRENT state instead of the old closure.
+    const disabledRef = useRef(isDisabled)
+    // `isPending` arrives from the owner on the next render. Two browser presses can finish before
+    // that commit, so the leaf also owns a short synchronous lock at the interaction boundary.
+    // This is not another loading state: the owner still renders pending and decides when the
+    // request settles. It only prevents the same text action from dispatching twice in one gesture.
+    const pressLockRef = useRef(false)
+    disabledRef.current = isDisabled
+    const press = () => {
+        if (disabledRef.current || pressLockRef.current) return
+        pressLockRef.current = true
+        on?.press?.()
+        window.setTimeout(() => {
+            pressLockRef.current = false
+        }, 300)
+    }
     return (
         <HeroLink
             data-size={data.size ?? "md"}
             data-selected={data.isSelected}
+            data-action-pending={isPending ? "true" : "false"}
             aria-current={data.isSelected === true ? "true" : undefined}
-            onPress={on?.press}
+            isDisabled={isDisabled}
+            onPress={on?.press === undefined ? undefined : press}
             className={getTextLinkClassName(data.size ?? "md", data.isSelected)}
         >
-            {data.label}
+            {isPending ? <Spinner size="sm" color="current" aria-hidden="true" /> : null}
+            <span>{data.label}</span>
         </HeroLink>
     )
 }

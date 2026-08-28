@@ -1,5 +1,5 @@
 import { Icon, type IconName } from "@/components/leaves/Icon"
-import { labelClassName } from "./classNames"
+import { labelClassName, labelScreenReaderClassName } from "./classNames"
 
 /**
  * LEAF - `Label`: the name of a box, tied to it.
@@ -17,6 +17,8 @@ export type LabelData = {
     readonly content: string
     /** The meaning drawn before the words. It inherits the label's colour, never its own. */
     readonly icon?: IconName
+    /** Keep the accessible name while removing repeated visible copy. */
+    readonly visibility?: "visible" | "screenReader"
 }
 
 /** Props for {@link Label}. Three fixed slots, no fourth. */
@@ -30,7 +32,7 @@ export type LabelProps = { readonly props: LabelData }
 export const Label = (props: LabelProps) => {
     const data = props.props
     return (
-        <label htmlFor={data.htmlFor} className={labelClassName}>
+        <label htmlFor={data.htmlFor} className={data.visibility === "screenReader" ? labelScreenReaderClassName : labelClassName}>
             {data.icon === undefined ? null : <Icon props={{ name: data.icon, role: "chip" }} />}
             {data.content}
         </label>

@@ -1,4 +1,5 @@
 import { useId, type ReactNode } from "react"
+import { VerticalScrollRegion } from "../../composite/VerticalScrollRegion/index.js"
 import { getCollectionClassName, listShellClassName, surfaceFooterClassName, surfaceLabelClassName, surfaceListClassName } from "./classNames.js"
 
 type LabelledSurfaceList = {
@@ -19,6 +20,7 @@ type SurfaceListFrameProps = (LabelledSurfaceList | SelfNamedSurfaceList) & {
     readonly depth?: "top" | "nested"
     readonly isLoading?: boolean
     readonly isVerdict?: boolean
+    readonly isScrollable?: boolean
 }
 
 export type SurfaceListCardProps = SurfaceListFrameProps & {
@@ -37,6 +39,7 @@ export const SurfaceListCard = (props: SurfaceListCardProps) => {
         depth = "top",
         isLoading = false,
         isVerdict = false,
+        isScrollable = false,
     } = props
     const headingId = useId()
     const accessibleName = ariaLabel ?? label
@@ -58,17 +61,19 @@ export const SurfaceListCard = (props: SurfaceListCardProps) => {
                 aria-labelledby={!labelHidden && label !== undefined ? headingId : undefined}
                 className={listShellClassName}
                 data-grammar-surface="true"
+                data-grammar-scroll={isScrollable ? "contained" : "page"}
                 data-grammar-surface-depth={depth}
                 data-surface-context={depth === "nested" ? "nested" : "page"}
                 data-verdict={String(isVerdict)}
             >
-                <div
+                <VerticalScrollRegion
                     className={getCollectionClassName(isVerdict)}
                     data-grammar-list="true"
                     data-loading={String(isLoading)}
+                    isScrollable={isScrollable}
                 >
                     {children}
-                </div>
+                </VerticalScrollRegion>
             </div>
             {footer === undefined ? null : (
                 <div className={surfaceFooterClassName} data-grammar-surface-footer="true">{footer}</div>

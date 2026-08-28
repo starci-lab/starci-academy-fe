@@ -1,12 +1,14 @@
-import { useRef, useState, type FormEvent } from "react"
+import { useEffect, useRef, useState, type FormEvent } from "react"
 import { Button } from "@/components/leaves/Button"
 import { Checkbox } from "@/components/leaves/Checkbox"
 import { Divider } from "@/components/leaves/Divider"
+import { ErrorMessage } from "@/components/leaves/ErrorMessage"
 import { Field } from "@/components/composites/Field"
 import { Heading } from "@/components/leaves/Heading"
 import { Text } from "@/components/leaves/Text"
 import { TextLink } from "@/components/leaves/TextLink"
 import { KeycloakIdentityProvider } from "@/modules/api/graphql/mutations/types/auth"
+import { authenticationDoneClassName, authenticationFormClassName, authenticationHeaderClassName, authenticationOauthClassName, authenticationOptionsClassName, authenticationPanelClassName, authenticationSecondaryClassName } from "./classNames"
 
 /** Auth journey selected by the reader. */
 export type AuthMode = "signIn" | "signUp" | "forgotPassword";
@@ -21,6 +23,8 @@ export type AuthPanelFrame = {
   readonly statusMessage: string;
   readonly isError: boolean;
   readonly isPending: boolean;
+  /** Whether the code resend action is in flight. */
+  readonly isResending?: boolean;
 };
 /** Localized labels for credential and account-creation controls. */
 export type AuthDetailsCopy = {
@@ -43,15 +47,16 @@ export type AuthDetailsCopy = {
   readonly agreeToTerms: string;
   readonly agreeToTermsPrefix: string;
   readonly termsLabel: string;
+  readonly termsHref: string;
   readonly andLabel: string;
   readonly privacyLabel: string;
+  readonly privacyHref: string;
   readonly promptQuestion: string;
   readonly promptAction: string;
 };
 /** Localized labels for code verification controls. */
 export type AuthCodeCopy = {
   readonly codeLabel: string;
-  readonly codePlaceholder: string;
   readonly codeHint: string;
   readonly submitLabel: string;
   readonly resendLabel: string;
@@ -84,7 +89,6 @@ export type AuthenticationPanelActions = {
   readonly changeMode?: (mode: AuthMode) => void;
   readonly changeAgreedToTerms?: (agreed: boolean) => void;
   readonly changeRememberMe?: (remember: boolean) => void;
-  readonly openLegal?: (kind: "terms" | "privacy") => void;
   readonly oauthPress?: (provider: KeycloakIdentityProvider) => void;
 };
 /** Stable heading id used to name the authentication surface. */
@@ -94,17 +98,26 @@ const EMPTY_VALUES = { email: "", password: "", confirmPassword: "", otp: "" }
 export const AuthenticationPanelBase = (props: AuthenticationPanelProps) => {
     const values = useRef({ ...EMPTY_VALUES })
     const [mismatch, setMismatch] = useState(false)
-    const status =
-    props.props.statusMessage === "" ? null : (
-        <Text
-            props={{
-                content: props.props.statusMessage,
-                tone: props.props.isError ? "default" : "muted",
-                size: "sm",
-                live: props.props.isError ? "assertive" : "polite",
-            }}
-        />
-    )
+    // A server-rendered form has no React submit handler yet. Keeping its secret-bearing controls
+    // disabled until hydration prevents the browser's native GET fallback from placing an email,
+    // password or OTP in the URL when a reader acts before JavaScript attaches.
+    const [isHydrated, setIsHydrated] = useState(false)
+    useEffect(() => setIsHydrated(true), [])
+    const status = props.props.statusMessage === ""
+        || ((props.props.isPending || props.props.isResending === true) && !props.props.isError)
+        ? null
+        : props.props.isError
+            ? <ErrorMessage props={{ content: props.props.statusMessage }} />
+            : (
+                <Text
+                    props={{
+                        content: props.props.statusMessage,
+                        tone: "muted",
+                        size: "sm",
+                        live: "polite",
+                    }}
+                />
+            )
     const header = (
         <>
             <span id={AUTHENTICATION_PANEL_TITLE_ID}>
@@ -117,33 +130,36 @@ export const AuthenticationPanelBase = (props: AuthenticationPanelProps) => {
     )
     if (props.state === "done")
         return (
-            <div>
-                <header>{header}</header>
-                <Heading props={{ content: props.props.doneTitle, level: 3 }} />
-                <Text
-                    props={{ content: props.props.doneHint, tone: "muted", size: "sm" }}
-                />
-                {status}
+            <div className={authenticationPanelClassName}>
+                <header className={authenticationHeaderClassName}>{header}</header>
+                <div className={authenticationDoneClassName}>
+                    <Heading props={{ content: props.props.doneTitle, level: 3 }} />
+                    <Text
+                        props={{ content: props.props.doneHint, tone: "muted", size: "sm" }}
+                    />
+                    {status}
+                </div>
             </div>
         )
     if (props.state === "code") {
+        const isBusy = !isHydrated || props.props.isPending || props.props.isResending === true
         const submit = (event: FormEvent<HTMLFormElement>) => {
             event.preventDefault()
             props.on?.submitCode?.({ otp: values.current.otp })
         }
         return (
-            <div>
-                <header>{header}</header>
-                <form onSubmit={submit}>
+            <div className={authenticationPanelClassName}>
+                <header className={authenticationHeaderClassName}>{header}</header>
+                <form className={authenticationFormClassName} onSubmit={submit}>
                     <Field
                         props={{
                             id: "authentication-code",
                             name: "otp",
                             kind: "code",
                             label: props.props.codeLabel,
-                            placeholder: props.props.codePlaceholder,
+                            labelVisibility: "screenReader",
                             hint: props.props.codeHint,
-                            disabled: props.props.isPending,
+                            disabled: isBusy,
                         }}
                         on={{
                             change: (value: string) => {
@@ -157,19 +173,26 @@ export const AuthenticationPanelBase = (props: AuthenticationPanelProps) => {
                             label: props.props.submitLabel,
                             variant: "primary",
                             type: "submit",
-                            disabled: props.props.isPending,
+                            disabled: isBusy,
                             isPending: props.props.isPending,
                         }}
                     />
                 </form>
-                <TextLink
-                    props={{ label: props.props.resendLabel, size: "sm" }}
-                    on={{ press: props.on?.resend }}
-                />
-                <TextLink
-                    props={{ label: props.props.useAnotherEmailLabel, size: "sm" }}
-                    on={{ press: () => props.on?.changeMode?.("signIn") }}
-                />
+                <div className={authenticationSecondaryClassName}>
+                    <TextLink
+                        props={{
+                            label: props.props.resendLabel,
+                            size: "sm",
+                            disabled: isBusy,
+                            isPending: props.props.isResending,
+                        }}
+                        on={{ press: props.on?.resend }}
+                    />
+                    <TextLink
+                        props={{ label: props.props.useAnotherEmailLabel, size: "sm", disabled: isBusy }}
+                        on={{ press: () => props.on?.changeMode?.("signIn") }}
+                    />
+                </div>
             </div>
         )
     }
@@ -189,17 +212,19 @@ export const AuthenticationPanelBase = (props: AuthenticationPanelProps) => {
         })
     }
     const signUp = props.props.mode === "signUp"
+    const signIn = props.props.mode === "signIn"
     const blocked = signUp && !props.props.hasAgreedToTerms
+    const isBusy = !isHydrated || props.props.isPending
     return (
-        <div>
-            <header>{header}</header>
-            <div>
+        <div className={authenticationPanelClassName}>
+            <header className={authenticationHeaderClassName}>{header}</header>
+            <div className={authenticationOauthClassName}>
                 <Button
                     props={{
                         label: props.props.oauthGoogle,
                         variant: "outline",
                         icon: "google",
-                        disabled: props.props.isPending,
+                        disabled: isBusy,
                     }}
                     on={{
                         press: () =>
@@ -211,7 +236,7 @@ export const AuthenticationPanelBase = (props: AuthenticationPanelProps) => {
                         label: props.props.oauthGithub,
                         variant: "outline",
                         icon: "github",
-                        disabled: props.props.isPending,
+                        disabled: isBusy,
                     }}
                     on={{
                         press: () =>
@@ -220,7 +245,7 @@ export const AuthenticationPanelBase = (props: AuthenticationPanelProps) => {
                 />
                 <Divider props={{ label: props.props.orLabel }} />
             </div>
-            <form onSubmit={submit}>
+            <form className={authenticationFormClassName} onSubmit={submit}>
                 <Field
                     props={{
                         id: "authentication-email",
@@ -228,7 +253,7 @@ export const AuthenticationPanelBase = (props: AuthenticationPanelProps) => {
                         kind: "email",
                         label: props.props.emailLabel,
                         placeholder: props.props.emailPlaceholder,
-                        disabled: props.props.isPending,
+                        disabled: isBusy,
                     }}
                     on={{
                         change: (value: string) => {
@@ -246,7 +271,7 @@ export const AuthenticationPanelBase = (props: AuthenticationPanelProps) => {
                         hint: props.props.passwordHint || undefined,
                         revealLabel: props.props.revealLabel,
                         hideLabel: props.props.hideLabel,
-                        disabled: props.props.isPending,
+                        disabled: isBusy,
                     }}
                     on={{
                         change: (value: string) => {
@@ -266,7 +291,7 @@ export const AuthenticationPanelBase = (props: AuthenticationPanelProps) => {
                             isInvalid: mismatch,
                             revealLabel: props.props.revealLabel,
                             hideLabel: props.props.hideLabel,
-                            disabled: props.props.isPending,
+                            disabled: isBusy,
                         }}
                         on={{
                             change: (value: string) => {
@@ -276,7 +301,7 @@ export const AuthenticationPanelBase = (props: AuthenticationPanelProps) => {
                         }}
                     />
                 ) : null}
-                <div>
+                <div className={authenticationOptionsClassName}>
                     {signUp ? (
                         <Checkbox
                             props={{
@@ -286,21 +311,28 @@ export const AuthenticationPanelBase = (props: AuthenticationPanelProps) => {
                                         kind: "text",
                                         content: `${props.props.agreeToTermsPrefix} `,
                                     },
-                                    { kind: "link", id: "terms", label: props.props.termsLabel },
+                                    {
+                                        kind: "link",
+                                        id: "terms",
+                                        label: props.props.termsLabel,
+                                        href: props.props.termsHref,
+                                        target: "_blank",
+                                        rel: "noopener noreferrer",
+                                    },
                                     { kind: "text", content: ` ${props.props.andLabel} ` },
                                     {
                                         kind: "link",
                                         id: "privacy",
                                         label: props.props.privacyLabel,
+                                        href: props.props.privacyHref,
+                                        target: "_blank",
+                                        rel: "noopener noreferrer",
                                     },
                                 ],
                                 isSelected: props.props.hasAgreedToTerms,
                             }}
                             on={{
                                 change: props.on?.changeAgreedToTerms,
-                                follow: (id: string) => {
-                                    if (id === "terms" || id === "privacy") props.on?.openLegal?.(id)
-                                },
                             }}
                         />
                     ) : (
@@ -311,8 +343,8 @@ export const AuthenticationPanelBase = (props: AuthenticationPanelProps) => {
                             }}
                             on={{ change: props.on?.changeRememberMe }}
                         />
-                    )}{" "}
-                    {!signUp && props.props.mode === "signIn" ? (
+                    )}
+                    {signIn ? (
                         <TextLink
                             props={{ label: props.props.forgotPassword, size: "sm" }}
                             on={{ press: () => props.on?.changeMode?.("forgotPassword") }}
@@ -325,27 +357,29 @@ export const AuthenticationPanelBase = (props: AuthenticationPanelProps) => {
                         label: props.props.submitLabel,
                         variant: "primary",
                         type: "submit",
-                        disabled: props.props.isPending || blocked,
+                        disabled: isBusy || blocked,
                         isPending: props.props.isPending,
                     }}
                 />
             </form>
-            <Text
-                props={{
-                    content: props.props.promptQuestion,
-                    size: "sm",
-                    tone: "muted",
-                }}
-            />
-            <TextLink
-                props={{ label: props.props.promptAction, size: "sm" }}
-                on={{
-                    press: () =>
-                        props.on?.changeMode?.(
-                            props.props.mode === "signIn" ? "signUp" : "signIn",
-                        ),
-                }}
-            />
+            <div className={authenticationSecondaryClassName}>
+                <Text
+                    props={{
+                        content: props.props.promptQuestion,
+                        size: "sm",
+                        tone: "muted",
+                    }}
+                />
+                <TextLink
+                    props={{ label: props.props.promptAction, size: "sm" }}
+                    on={{
+                        press: () =>
+                            props.on?.changeMode?.(
+                                props.props.mode === "signIn" ? "signUp" : "signIn",
+                            ),
+                    }}
+                />
+            </div>
         </div>
     )
 }

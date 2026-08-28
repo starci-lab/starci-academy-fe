@@ -1,5 +1,6 @@
 import { useId, type ReactNode } from "react"
 import { assertPresentationState, treatmentFor, type PresentationState } from "../../state.js"
+import { VerticalScrollRegion } from "../../composite/VerticalScrollRegion/index.js"
 import { getSurfaceFrameClassName, surfaceCardClassName, surfaceContentClassName, surfaceLabelClassName } from "./classNames.js"
 
 export type WholeCardAction =
@@ -36,6 +37,8 @@ export type SurfaceCardProps = (LabelledSurfaceCard | SelfNamedSurfaceCard) & {
     readonly frame?: "bounded" | "frameless"
     /** Contained content has exactly one internal scroll owner. */
     readonly scroll?: "page" | "contained"
+    /** Convenience capability: make the content region a HeroUI Vertical ScrollShadow. */
+    readonly isScrollable?: boolean
 }
 
 export const SurfaceCard = (props: SurfaceCardProps) => {
@@ -50,12 +53,14 @@ export const SurfaceCard = (props: SurfaceCardProps) => {
         wholeAction,
         frame = "bounded",
         scroll = "page",
+        isScrollable = false,
     } = props
     assertPresentationState(state)
     const headingId = useId()
     const treatment = treatmentFor(state)
     const disabled = state === "unavailable" || state === "pending"
     const accessibleName = ariaLabel ?? label
+    const contained = isScrollable || scroll === "contained"
 
     const action = wholeAction?.kind === "link" ? (
         <a
@@ -81,14 +86,14 @@ export const SurfaceCard = (props: SurfaceCardProps) => {
             aria-labelledby={label === undefined ? undefined : headingId}
             className={getSurfaceFrameClassName(frame)}
             data-grammar-frame={frame}
-            data-grammar-scroll={scroll}
+            data-grammar-scroll={contained ? "contained" : "page"}
             data-grammar-state={state}
             data-grammar-surface-depth={depth}
             data-grammar-treatment={treatment.tone}
         >
-            <div className={surfaceContentClassName} data-grammar-surface-content="true">
+            <VerticalScrollRegion className={surfaceContentClassName} data-grammar-surface-content="true" isScrollable={contained}>
                 {children}
-            </div>
+            </VerticalScrollRegion>
             {action}
         </div>
     )
