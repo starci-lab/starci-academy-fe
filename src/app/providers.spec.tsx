@@ -6,8 +6,8 @@ import { AppProviders } from "@/app/providers"
 
 /**
  * What this test guards: that the three contexts are mounted and add no node of their own. A
- * provider that rendered a wrapper would put an element in the tree that no registry key
- * describes, directly under `<body>` - the one place nothing is allowed to appear by accident.
+ * provider that rendered a wrapper would put an extra element around the page, directly under
+ * `<body>` - the one place nothing is allowed to appear by accident.
  *
  * The second thing it guards is that the message catalogue actually reaches a component. A
  * provider that mounted but resolved nothing would leave every screen rendering its own keys,

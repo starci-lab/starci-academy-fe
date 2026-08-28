@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
 vi.mock("@/components/blocks/learn/CourseContentMap", () => ({ CourseContentMap: () => null }))
-import { CourseLearnContentHomeBlockView as CourseLearnContentHomeBlockBase } from "@/components/blocks/learn/CourseLearnContentHomeBlock/component"
+import { CourseLearnContentHomeBlockBase } from "@/components/blocks/learn/CourseLearnContentHomeBlock/component"
 
 const props = {
     title: "System Design Mastery",

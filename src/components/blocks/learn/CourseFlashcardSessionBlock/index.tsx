@@ -13,7 +13,7 @@ import type {
     FlashcardReviewKind,
     FlashcardSessionMode,
 } from "@/modules/api/graphql/queries/query-my-in-progress-flashcard-session"
-import { CourseFlashcardSessionBlockView, type CourseFlashcardSessionBlockState } from "./component"
+import { CourseFlashcardSessionBlockBase, type CourseFlashcardSessionBlockState } from "./component"
 
 /** Route identity required to resume one persisted flashcard session. */
 export type CourseFlashcardSessionBlockProps = {
@@ -383,7 +383,7 @@ export const CourseFlashcardSessionBlock = (props: CourseFlashcardSessionBlockPr
     )
 
     return (
-        <CourseFlashcardSessionBlockView
+        <CourseFlashcardSessionBlockBase
             blockState={state}
             data={{
                 mode,

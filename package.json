@@ -76,7 +76,7 @@
   "devDependencies": {
     "@eslint/js": "^9",
     "@sonar/scan": "^5.0.0",
-    "@starci/eslint-canon-fe": "^1.4.5",
+    "@starci/eslint-canon-fe": "^3.0.1",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6",
     "@testing-library/react": "^16",

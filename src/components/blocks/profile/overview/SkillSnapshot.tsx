@@ -16,35 +16,39 @@ export type SkillSnapshotProps = {
 };
 
 /** Shared anatomy only: one headline fact followed by difficulty/language progress peers. */
-export const SkillSnapshot = (props: SkillSnapshotProps) => (
-    <SurfaceCard props={{ label: props.label }}>
-        {props.stateMessage && !props.isLoading ? (
-            <IconLabelFactRow
-                props={{
-                    icon: "practice",
-                    label: props.stateMessage,
-                    recipe: "label-led",
-                }}
-            />
-        ) : (
-            <>
+export const SkillSnapshot = (props: SkillSnapshotProps) => {
+    const settledStateMessage = props.isLoading ? undefined : props.stateMessage
+
+    return (
+        <SurfaceCard props={{ label: props.label }}>
+            {settledStateMessage ? (
                 <IconLabelFactRow
-                    isLoading={props.isLoading}
                     props={{
                         icon: "practice",
-                        label: props.totalLabel,
-                        endText: props.totalValue,
+                        label: settledStateMessage,
                         recipe: "label-led",
                     }}
                 />
-                {props.rows.map((row) => (
-                    <LabelledProgressRow
-                        key={row.id}
+            ) : (
+                <>
+                    <IconLabelFactRow
                         isLoading={props.isLoading}
-                        props={row}
+                        props={{
+                            icon: "practice",
+                            label: props.totalLabel,
+                            endText: props.totalValue,
+                            recipe: "label-led",
+                        }}
                     />
-                ))}
-            </>
-        )}
-    </SurfaceCard>
-)
+                    {props.rows.map((row) => (
+                        <LabelledProgressRow
+                            key={row.id}
+                            isLoading={props.isLoading}
+                            props={row}
+                        />
+                    ))}
+                </>
+            )}
+        </SurfaceCard>
+    )
+}

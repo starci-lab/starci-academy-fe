@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { CourseLearnTodayBlockView as RawCourseLearnTodayPageBase, type CourseLearnTodayData } from "@/components/blocks/learn/CourseLearnTodayBlock/component"
+import { CourseLearnTodayBlockBase as RawCourseLearnTodayPageBase, type CourseLearnTodayData } from "@/components/blocks/learn/CourseLearnTodayBlock/component"
 type TestTodayProps = { readonly state: string; readonly mobileView: "today" | "course" | "progress"; readonly props: Record<string, unknown>; readonly on?: Record<string, (...args: Array<never>) => void> }
 const CourseLearnTodayPageBase = ({ state, mobileView, props, on }: TestTodayProps) => <RawCourseLearnTodayPageBase blockState={state as never} mobileView={mobileView} props={props as never} on={on} />
 

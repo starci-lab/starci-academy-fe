@@ -1,5 +1,5 @@
 "use client"
-import { CourseMindMapPageBase } from "./component"
+import { CourseMindMapPageBase, type CourseMindMapPageProps } from "./component"
 /** Render the course mind-map route shell. */
-export const CourseMindMapPage = (props: Parameters<typeof CourseMindMapPageBase>[0]) => <CourseMindMapPageBase {...props} />
+export const CourseMindMapPage = (props: CourseMindMapPageProps) => <CourseMindMapPageBase {...props} />
 export * from "./component"

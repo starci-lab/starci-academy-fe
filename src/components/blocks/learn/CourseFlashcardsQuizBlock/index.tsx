@@ -9,7 +9,7 @@ import { useQueryMyInProgressFlashcardSessionSwr } from "@/hooks/swr/useQueryMyI
 import { useMutateStartFlashcardSessionSwr } from "@/hooks/swr/useMutateStartFlashcardSessionSwr"
 import { useQueryMyFlashcardQuizHistorySwr } from "@/hooks/swr/useQueryMyFlashcardQuizHistorySwr"
 import { useQueryMyFlashcardQuizStatsSwr } from "@/hooks/swr/useQueryMyFlashcardQuizStatsSwr"
-import { CourseFlashcardsQuizBlockView, type FlashcardQuizView } from "./component"
+import { CourseFlashcardsQuizBlockBase, type FlashcardQuizView } from "./component"
 
 /** Route identity required by the connected flashcard quiz setup. */
 export type CourseFlashcardsQuizBlockProps = { readonly displayId: string, readonly deckId?: string }
@@ -156,7 +156,7 @@ export const CourseFlashcardsQuizBlock = (props: CourseFlashcardsQuizBlockProps)
         ]
 
     return (
-        <CourseFlashcardsQuizBlockView
+        <CourseFlashcardsQuizBlockBase
             pageState={activeView}
             blockState={blockState}
             props={{

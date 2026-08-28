@@ -76,7 +76,10 @@ const restingModules = Array.from({ length: 4 }, (_, index) => ({
  * desktop rail and, for the challenge, a narrow-screen drawer. Returning the bound panel keeps
  * both surfaces on one renderer instead of copying the map tree into each page owner.
  */
-export const CourseContentMapPanel = (props: CourseContentMapProps) => {
+/** Public panel presentation shared by sticky and drawer contexts. */
+export type CourseContentMapPanelProps = CourseContentMapProps
+/** Render the course outline panel used by both rail and drawer layouts. */
+export const CourseContentMapPanel = (props: CourseContentMapPanelProps) => {
     const isLoading = props.state === "pending"
     const modules = isLoading ? restingModules : props.props.modules ?? []
     const progressTitle = props.state === "failed" ? props.props.labels.failed : props.props.labels.progress

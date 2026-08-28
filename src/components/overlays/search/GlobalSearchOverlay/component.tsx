@@ -96,7 +96,7 @@ export type GlobalSearchOverlayActions = {
 }
 
 /** Pure data, copy and actions accepted by the workspace twin. */
-export type GlobalSearchOverlayContent = {
+export type GlobalSearchOverlayViewProps = {
     readonly isOpen: boolean
     readonly state: GlobalSearchOverlayRenderState
     readonly copy: GlobalSearchOverlayCopy
@@ -104,7 +104,7 @@ export type GlobalSearchOverlayContent = {
 }
 
 /** Pure rendering half for the large, keyboard-operated search workspace. */
-export const GlobalSearchOverlayView = (props: GlobalSearchOverlayContent) => {
+export const GlobalSearchOverlayView = (props: GlobalSearchOverlayViewProps) => {
     const scopeList = (
         <SelectionList
             props={{

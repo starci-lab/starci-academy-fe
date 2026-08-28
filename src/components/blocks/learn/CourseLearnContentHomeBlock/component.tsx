@@ -21,9 +21,11 @@ export type CourseLearnContentHomeData = { readonly title: string; readonly desc
 export type CourseLearnContentHomeActions = { readonly course?: () => void; readonly resume?: () => void; readonly lesson?: (moduleId: string, lessonId: string) => void; readonly retry?: () => void }
 /** Complete source-backed state and props for the overview. */
 export type CourseLearnContentHomeProps = { readonly blockState: "pending" | "ready" | "empty" | "failed" | "partial"; readonly props: CourseLearnContentHomeData; readonly on?: CourseLearnContentHomeActions; readonly displayId?: string; readonly currentLessonId?: string; readonly resizeLabel?: string }
+/** Public props consumed by the course content home block presentation. */
+export type CourseLearnContentHomeBlockProps = CourseLearnContentHomeProps
 
 /** Draw course identity, continuation evidence and the current module path. */
-export const CourseLearnContentHomeBlockView = (props: CourseLearnContentHomeProps) => {
+export const CourseLearnContentHomeBlockBase = (props: CourseLearnContentHomeBlockProps) => {
     const loading = props.blockState === "pending"
     const lessons: ReadonlyArray<CourseContentHomeLesson> = loading && props.props.currentModule === undefined ? Array.from({ length: 10 }, (_unused, index) => ({ id: `resting-${index + 1}`, moduleId: "", title: "" })) : props.props.currentModule?.lessons ?? []
     const notice = props.blockState === "failed" || props.blockState === "empty"
@@ -33,9 +35,9 @@ export const CourseLearnContentHomeBlockView = (props: CourseLearnContentHomePro
         <section aria-label={props.props.resumeTarget}><Text props={{ content: props.props.resumeEyebrow, size: "xs", tone: "muted" }} isLoading={loading} /><Heading props={{ content: props.props.resumeTarget, level: 2 }} isLoading={loading} />{props.props.resumeAction === undefined ? null : <Button props={{ label: props.props.resumeAction, variant: "primary", size: "md", icon: "next", iconPlacement: "trailing" }} on={loading ? undefined : { press: props.on?.resume }} isLoading={loading} />}<Progress props={{ value: props.props.completionPercent, label: props.props.progressLabel }} isLoading={loading} /><Text props={{ content: props.props.progressFact, size: "sm", tone: "muted" }} isLoading={loading} /></section>
         {notice ? <EmptyNotice props={{ icon: "course", message: props.blockState === "failed" ? props.props.failedMessage : props.props.emptyMessage, actionLabel: props.blockState === "failed" ? props.props.retryLabel : undefined }} on={{ act: props.on?.retry }} /> : lessons.length === 0 ? null : <SurfaceCard props={{ label: props.props.currentModule?.title ?? "" }} isLoading={loading}><ul aria-label={props.props.currentModule?.title}>{lessons.map((lesson) => <li key={lesson.id}><NavLink props={{ label: lesson.title, kind: "section", isCurrent: lesson.isCurrent }} on={loading ? undefined : { press: () => props.on?.lesson?.(lesson.moduleId, lesson.id) }} isLoading={loading} />{lesson.fact === undefined ? null : <Text props={{ content: lesson.fact, size: "xs", tone: "muted" }} />}</li>)}</ul></SurfaceCard>}
     </main>
-    return props.displayId === undefined || props.resizeLabel === undefined ? overview : <CourseLearnContentHomeFrameView displayId={props.displayId} currentLessonId={props.currentLessonId} resizeLabel={props.resizeLabel} overview={overview} />
+    return props.displayId === undefined || props.resizeLabel === undefined ? overview : <CourseLearnContentHomeFrame displayId={props.displayId} currentLessonId={props.currentLessonId} resizeLabel={props.resizeLabel} overview={overview} />
 }
 
 type CourseLearnContentHomeFrameProps = { readonly displayId: string; readonly currentLessonId?: string; readonly resizeLabel: string; readonly overview: ReactNode }
 /** Place the overview beside the learn-context map. */
-export const CourseLearnContentHomeFrameView = (props: CourseLearnContentHomeFrameProps) => <div><CourseContentMap displayId={props.displayId} currentLessonId={props.currentLessonId} /><RailDivider props={{ label: props.resizeLabel, storageKey: "starci.learn.contentMap.width", defaultWidth: 320, minWidth: 256, maxWidth: 560 }} />{props.overview}</div>
+const CourseLearnContentHomeFrame = (props: CourseLearnContentHomeFrameProps) => <div><CourseContentMap displayId={props.displayId} currentLessonId={props.currentLessonId} /><RailDivider props={{ label: props.resizeLabel, storageKey: "starci.learn.contentMap.width", defaultWidth: 320, minWidth: 256, maxWidth: 560 }} />{props.overview}</div>

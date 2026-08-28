@@ -12,7 +12,7 @@ export type StarCiAiDrawerData = {
     readonly description: string
 }
 
-/** Pure drawer input with the connected chat supplied as its typed content projection. */
+/** Pure drawer input with the connected chat supplied as its typed content. */
 export type StarCiAiDrawerProps = {
     readonly state: StarCiAiDrawerState
     readonly props: StarCiAiDrawerData

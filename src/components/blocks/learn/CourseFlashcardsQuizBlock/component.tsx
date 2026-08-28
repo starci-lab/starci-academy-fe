@@ -14,10 +14,12 @@ export type CourseFlashcardsQuizBlockState = "pending" | "ready" | "empty" | "fa
 export type FlashcardQuizEvidenceRow = { readonly id: string; readonly title: string; readonly description: string; readonly fact: string }
 /** Pure quiz setup data and actions. */
 export type CourseFlashcardsQuizProps = { readonly pageState: FlashcardQuizView; readonly blockState: CourseFlashcardsQuizBlockState; readonly props: { readonly title: string; readonly subtitle: string; readonly reviewLabel: string; readonly quizLabel: string; readonly setupLabel: string; readonly historyLabel: string; readonly statsLabel: string; readonly activeView: FlashcardQuizView; readonly evidenceTitle: string; readonly evidenceRows: ReadonlyArray<FlashcardQuizEvidenceRow>; readonly configurationTitle: string; readonly sessionNameLabel: string; readonly sessionNamePlaceholder: string; readonly sessionName: string; readonly scopeLabel: string; readonly allScopeLabel: string; readonly dueScopeLabel: string; readonly selectedScope: "all" | "due"; readonly modeLabel: string; readonly quickLabel: string; readonly deepLabel: string; readonly levelLabel: string; readonly allLevelsLabel: string; readonly juniorLabel: string; readonly middleLabel: string; readonly seniorLabel: string; readonly staffLabel: string; readonly startLabel: string; readonly resumeLabel: string; readonly retryLabel: string; readonly emptyText: string; readonly failedText: string; readonly selectedMode: "quick" | "deep"; readonly selectedLevel: string | null; readonly cardCount: number; readonly cardsLabel: string; readonly resumeSessionId?: string }; readonly on: { readonly openReview: () => void; readonly selectView: (view: FlashcardQuizView) => void; readonly selectMode: (mode: "quick" | "deep") => void; readonly changeSessionName: (value: string) => void; readonly selectScope: (scope: "all" | "due") => void; readonly selectLevel: (level: string | null) => void; readonly start: () => void; readonly resume: (sessionId: string) => void; readonly retry: () => void } }
+/** Public props for the quiz block presentation. */
+export type CourseFlashcardsQuizBlockProps = CourseFlashcardsQuizProps
 /** Compatibility export for existing imports. */
 
 /** Draw guided setup, evidence views and resume path without fetching. */
-export const CourseFlashcardsQuizBlockView = (props: CourseFlashcardsQuizProps) => {
+export const CourseFlashcardsQuizBlockBase = (props: CourseFlashcardsQuizBlockProps) => {
     const data = props.props
     const loading = props.blockState === "pending"
     const levels = [[null, data.allLevelsLabel], ["junior", data.juniorLabel], ["middle", data.middleLabel], ["senior", data.seniorLabel], ["staff", data.staffLabel]] as const

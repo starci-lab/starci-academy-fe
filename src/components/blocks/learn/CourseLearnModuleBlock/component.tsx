@@ -13,7 +13,7 @@ export type CourseLearnModuleBlockProps = {
 }
 
 /** Draw one selected module and its authored content run. */
-export const CourseLearnModuleBlockView = (props: CourseLearnModuleBlockProps) => (
+export const CourseLearnModuleBlockBase = (props: CourseLearnModuleBlockProps) => (
     <main className={courseLearnModulePageClassName}>
         <Heading props={{ content: props.title, level: 1 }} isLoading={props.blockState === "pending"} />
         <CurriculumModuleRow

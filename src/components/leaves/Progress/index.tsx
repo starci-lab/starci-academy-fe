@@ -1,5 +1,5 @@
-import { ProgressBar, skeletonVariants } from "@heroui/react"
-import { progressClassName, progressLoadingClassName } from "./classNames"
+import { ProgressBar } from "@heroui/react"
+import { progressClassName, progressRestingClassName } from "./classNames"
 
 /**
  * LEAF - `Progress`: how far along something is, as a bar.
@@ -24,11 +24,6 @@ export type ProgressProps = { readonly props: ProgressData; readonly isLoading?:
 
 /** The bar takes the width it is given. */
 
-/** The resting shape - a bar of the same height, no fill. */
-const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({
-    className: progressLoadingClassName,
-})
-
 /**
  * Draw a progress bar.
  *
@@ -45,7 +40,7 @@ export const Progress = (props: ProgressProps) => {
             <span
                 data-loading="true"
                 aria-hidden
-                className={RESTING_CLASSES}
+                className={progressRestingClassName}
             />
         )
     }

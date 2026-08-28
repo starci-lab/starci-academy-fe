@@ -18,7 +18,7 @@ import type { CourseLearningSignal, CourseLearningSignalsProps } from "@/compone
 import type { CourseNextAction, CourseNextActionsProps } from "@/components/blocks/learn/CourseNextActions"
 import type { CourseProgressOverviewProps } from "@/components/blocks/learn/CourseProgressOverview"
 import type { CourseLearningSignalDetailProps } from "@/components/blocks/learn/CourseLearningSignalDetail"
-import { CourseLearnTodayBlockView, type CourseLearnTodayItem, type CourseLearnTodayState } from "./component"
+import { CourseLearnTodayBlockBase, type CourseLearnTodayItem, type CourseLearnTodayState } from "./component"
 
 /** Route identity required by the connected course dashboard. */
 export type CourseLearnTodayBlockProps = { readonly displayId: string }
@@ -259,7 +259,7 @@ export const CourseLearnTodayBlock = (props: CourseLearnTodayBlockProps) => {
     const signalDetailBlock = signalDetailBlockOf(signalsState, t, selectedSignal)
 
     return (
-        <CourseLearnTodayBlockView
+        <CourseLearnTodayBlockBase
             blockState={state}
             mobileView={view}
             props={{

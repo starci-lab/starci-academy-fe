@@ -1,7 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { CourseLearnContentHomeBlockView } from "./component"
+import { CourseLearnContentHomeBlockBase } from "./component"
 import { useQueryCourseOutlineSwr } from "@/hooks/swr/useQueryCourseOutlineSwr"
 import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
 import { useRouter } from "@/i18n/navigation"
@@ -102,7 +102,7 @@ export const CourseLearnContentHomeBlock = (props: CourseLearnContentHomeBlockPr
     }
 
     return (
-        <CourseLearnContentHomeBlockView
+        <CourseLearnContentHomeBlockBase
             displayId={displayId}
             currentLessonId={target?.lessonId}
             resizeLabel={contentText("resizeRail")}

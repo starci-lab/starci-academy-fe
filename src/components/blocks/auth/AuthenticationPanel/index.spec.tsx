@@ -44,8 +44,8 @@ const stub = (over: Record<string, unknown>) => {
     return on
 }
 
-/** The panel mounted by a surface that hands it nothing at all. */
-const BareAuthenticationPanel = () => AuthenticationPanel()
+/** The panel mounted by a surface that hands it an empty props object. */
+const BareAuthenticationPanel = () => AuthenticationPanel({})
 
 afterEach(() => {
     cleanup()

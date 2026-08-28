@@ -21,7 +21,7 @@ import { ModalBranch } from "@/components/branches/ModalBranch"
  */
 
 /** Content accepted by the internal presentational view. */
-export type CoursePriceOverlayContent = {
+export type CoursePriceOverlayViewProps = {
     /** Whether the surface is on screen. Owned by whoever mounts it, never by the surface. */
     readonly isOpen: boolean
     /** Content mounted inside the modal mechanics branch. */
@@ -33,9 +33,9 @@ export type CoursePriceOverlayContent = {
 /**
  * Draw the covering surface.
  *
- * @param props - {@link CoursePriceOverlayContent}
+ * @param props - {@link CoursePriceOverlayViewProps}
  */
-export const CoursePriceOverlayView = (props: CoursePriceOverlayContent) => (
+export const CoursePriceOverlayView = (props: CoursePriceOverlayViewProps) => (
     <ModalBranch
         isOpen={props.isOpen}
         size="sm"

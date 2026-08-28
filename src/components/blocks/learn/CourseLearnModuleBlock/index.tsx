@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryModuleSwr } from "@/hooks/swr/useQueryModuleSwr"
-import { CourseLearnModuleBlockView } from "./component"
+import { CourseLearnModuleBlockBase } from "./component"
 
 /** Route identity required to load one enrolled module. */
 export interface CourseLearnModuleBlockProps { readonly displayId: string; readonly moduleId: string }
@@ -14,7 +14,7 @@ export const CourseLearnModuleBlock = (props: CourseLearnModuleBlockProps) => {
     const router = useRouter()
     const module = useQueryModuleSwr({ id: props.moduleId })
     return (
-        <CourseLearnModuleBlockView
+        <CourseLearnModuleBlockBase
             blockState={module.error ? "failed" : module.data === undefined ? "pending" : "ready"}
             title={module.data?.title}
             module={module.data ?? undefined}

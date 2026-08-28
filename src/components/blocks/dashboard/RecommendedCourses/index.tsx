@@ -5,7 +5,7 @@ import { useQueryRecommendedCoursesSwr } from "@/hooks"
 import { RecommendedCoursesBase } from "./component"
 
 /** What the surrounding tab owns: which course is currently explaining its price. */
-export type RecommendedCoursesRouteProps = {
+export type RecommendedCoursesProps = {
     /**
      * Called when a reader asks why a suggested course costs what it costs.
      *
@@ -19,9 +19,9 @@ export type RecommendedCoursesRouteProps = {
 /**
  * Fetch and resolve recommended courses for the dashboard.
  *
- * @param props - {@link RecommendedCoursesRouteProps}
+ * @param props - {@link RecommendedCoursesProps}
  */
-export const RecommendedCourses = (props: RecommendedCoursesRouteProps = {}) => {
+export const RecommendedCourses = (props: RecommendedCoursesProps) => {
     const { onOpenPriceDetail } = props
     const t = useTranslations("courses.recommended")
     // The question beside a price is the same sentence the catalog asks, so it is read from the one

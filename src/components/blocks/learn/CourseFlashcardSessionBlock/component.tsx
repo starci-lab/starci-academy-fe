@@ -17,14 +17,14 @@ export type CourseFlashcardSessionBlockData = { readonly mode: FlashcardSessionM
 /** User actions supported by the live session. */
 export type CourseFlashcardSessionBlockActions = { readonly reveal: () => void; readonly selectTerm: (term: string) => void; readonly checkQuiz: () => void; readonly showSolution: () => void; readonly rate: (grade: 0 | 1 | 2 | 3) => void; readonly selectQuestion: (position: number) => void; readonly previous: () => void; readonly next: () => void; readonly openCourse: () => void; readonly openMode: () => void; readonly retry: () => void; readonly leave: () => void }
 /** Pure session renderer input. */
-export type CourseFlashcardSessionProps = { readonly blockState: CourseFlashcardSessionBlockState; readonly data: CourseFlashcardSessionBlockData; readonly on: CourseFlashcardSessionBlockActions }
+export type CourseFlashcardSessionBlockProps = { readonly blockState: CourseFlashcardSessionBlockState; readonly data: CourseFlashcardSessionBlockData; readonly on: CourseFlashcardSessionBlockActions }
 /** Legacy-named alias for page-level session props. */
 /** Legacy-named alias for session presentation data. */
 export type CourseFlashcardSessionPageData = CourseFlashcardSessionBlockData
 /** Legacy-named alias for session actions. */
 export type CourseFlashcardSessionPageActions = CourseFlashcardSessionBlockActions
 /** Draw one focused review or quiz session with phase-legal controls. */
-export const CourseFlashcardSessionBlockView = (props: CourseFlashcardSessionProps) => {
+export const CourseFlashcardSessionBlockBase = (props: CourseFlashcardSessionBlockProps) => {
     const data = props.data
     const loading = props.blockState === "pending"
     if (props.blockState === "failed" || props.blockState === "expired") return <EmptyNotice props={{ message: props.blockState === "failed" ? data.failedText : data.expiredText, actionLabel: data.retryLabel }} on={{ act: props.on.retry }} />

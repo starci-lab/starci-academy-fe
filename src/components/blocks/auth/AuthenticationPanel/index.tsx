@@ -91,7 +91,7 @@ export type AuthenticationPanelProps = {
  *
  * @param props - {@link AuthenticationPanelProps}
  */
-export const AuthenticationPanel = (props: AuthenticationPanelProps = {}) => {
+export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
     const { initialMode = "signIn", onSignedIn } = props
     const t = useTranslations("auth")
     const locale = useLocale()

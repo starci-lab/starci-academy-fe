@@ -31,7 +31,7 @@ type PageData = {
   readonly retryLabel: string;
 };
 /** Headhunting page state, data and actions. */
-export type CourseHeadhuntingsPageProps = {
+export type CourseHeadhuntingsBlockProps = {
   readonly blockState: "pending" | "ready" | "empty" | "failed";
   readonly props: PageData;
   readonly on?: {
@@ -42,7 +42,7 @@ export type CourseHeadhuntingsPageProps = {
 type DirectoryProps = {
   readonly label: string;
   readonly rows: ReadonlyArray<HeadhuntingDirectoryRow>;
-  readonly on?: CourseHeadhuntingsPageProps["on"];
+  readonly on?: CourseHeadhuntingsBlockProps["on"];
   readonly loading: boolean;
 };
 const Directory = (props: DirectoryProps) => {
@@ -84,7 +84,7 @@ const Directory = (props: DirectoryProps) => {
 }
 /** Draw the company and consultant directory. */
 export const CourseHeadhuntingsBlockBase = (
-    props: CourseHeadhuntingsPageProps,
+    props: CourseHeadhuntingsBlockProps,
 ) => {
     const loading = props.blockState === "pending"
     if (props.blockState === "empty" || props.blockState === "failed")

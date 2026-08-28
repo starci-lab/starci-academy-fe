@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { CourseFlashcardsReviewBlockView as CourseFlashcardsReviewBlockBase, type CourseFlashcardsReviewProps as CourseFlashcardsReviewPageProps } from "@/components/blocks/learn/CourseFlashcardsReviewBlock/component"
+import { CourseFlashcardsReviewBlockBase, type CourseFlashcardsReviewBlockProps as CourseFlashcardsReviewPageProps } from "@/components/blocks/learn/CourseFlashcardsReviewBlock/component"
 
 /**
  * What these tests guard.

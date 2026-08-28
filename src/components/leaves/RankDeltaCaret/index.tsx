@@ -33,7 +33,7 @@ type RankDeltaDirection = "up" | "down" | "flat"
 /**
  * One complete class string per direction, written out rather than assembled.
  *
- * A shared base plus an interpolated tone reads shorter, and it is exactly what the registry rule
+ * A shared base plus an interpolated tone reads shorter, and it is exactly what the layout rule
  * refuses: the string a direction actually renders would then exist only while this component runs,
  * so nothing - no reader, no test, no tool that parses this file as text - can read it back. Each
  * entry therefore restates the fixed width, alignment and numerals that keep the column to its left

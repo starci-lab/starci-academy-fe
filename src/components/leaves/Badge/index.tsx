@@ -1,6 +1,6 @@
-import { Chip, skeletonVariants } from "@heroui/react"
+import { Chip } from "@heroui/react"
 import { Icon, type IconName } from "@/components/leaves/Icon"
-import { badgeLoadingClassName } from "./classNames"
+import { badgeRestingClassName } from "./classNames"
 
 /**
  * LEAF - `Badge`: a short figure or word set apart from the line it sits on.
@@ -35,9 +35,6 @@ const TONE_COLORS = {
     danger: "danger",
 } as const
 
-/** The resting shape - same chip, glyphs out. */
-const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({ className: badgeLoadingClassName })
-
 /**
  * Draw a badge.
  *
@@ -55,7 +52,7 @@ export const Badge = (props: BadgeProps) => {
             color={TONE_COLORS[tone]}
             variant="soft"
             size="sm"
-            className={isLoading ? RESTING_CLASSES : undefined}
+            className={isLoading ? badgeRestingClassName : undefined}
         >
             {data.icon === undefined ? null : <Icon props={{ name: data.icon, role: "chip" }} />}
             {data.content ?? ""}

@@ -1,9 +1,6 @@
 /*
- * The rules are authored in the trust tree and published as @starci/eslint-canon-fe. Do not add a
- * rule here: a rule with no law in the tree is unaccountable, and a copy that lives in this
- * repository enforces whatever the law was on the day it was copied.
- *
- * What this repository does own is the config below - which globs the rules apply to.
+ * StarCi's React/TypeScript canon is published from the shared lint repository. This project owns
+ * only the repository layout; rule definitions and severities stay in the package.
  */
 import starciFe, {
     recommended as starciRecommended,
@@ -70,69 +67,20 @@ export default defineConfig([
         // convention - nothing corrects the second spelling, so a file written on a Tuesday
         // reads differently from its neighbour and every diff carries the noise. The generic
         // form is the one that stays readable when the element type is itself generic
-        // (`Array<ContractSlots<K>>` against `ContractSlots<K>[]`), and it is already what the query
-        // types and the hooks use, so this fixes the minority rather than the majority.
+        // (`Array<ReadonlyMap<K, V>>` against `ReadonlyMap<K, V>[]`), and it is already what the
+        // query types and the hooks use, so this fixes the minority rather than the majority.
         files: ["**/*.{ts,tsx,mts,cts}"],
         rules: {
             "@typescript-eslint/array-type": ["error", { default: "generic", readonly: "generic" }],
             "react/prop-types": "off",
         },
     },
-    /*
-     * THE CANON BLOCK, built rather than written.
-     *
-     * This repository states one thing about the law - which shape it has - and the trust tree
-     * decides the rest: which globs that shape implies, which rules are on, at what severity,
-     * and that an inline comment may not switch one off. A block written out here would be a
-     * second opinion about all four, and the previous one had already drifted to a different
-     * rule count from its sibling and from canon.
-     */
     starciFeConfig({
         layout: "single-app",
         plugin: starciFe,
         recommended: starciRecommended,
         linterOptions: starciLinterOptions,
     }),
-    {
-        /*
-         * The product is being returned to the legacy React/TypeScript hierarchy (leaves,
-         * branches, composites, blocks and pages). The installed canon still ships the retired
-         * contract law, whose rules require Tree/contract tables and reject the approved cn([...])
-         * class composition. Disable only that obsolete law; accessibility, vendor, token,
-         * loading, naming and all other canon rules remain enabled at their published levels.
-         */
-        rules: Object.fromEntries([
-            "contract-children-are-typed",
-            "no-literal-structural-class",
-            "no-interaction-class-in-entry",
-            "no-class-composition-outside-contract",
-            "contract-why-is-a-reason",
-            "no-structural-host-outside-contract-frame",
-            "no-structural-arrangement-in-leaf",
-            "no-hand-written-contract-attrs",
-            "no-unknown-contract-key",
-            "no-duplicate-entry-shape",
-            "only-the-frame-wears-a-node",
-            "no-dead-contract-key",
-            "modal-branch-owns-scroll-body",
-            "no-children-slot",
-            "no-children-prop",
-            "no-resting-branch-at-call-site",
-            "connected-block-has-presentational-twin",
-            "auth-overlay-owns-single-content-host",
-        ].map((name) => [`starci-fe/${name}`, "off"])),
-    },
-    {
-        /*
-         * Colocated class-name modules are the approved styling boundary. They may import HeroUI's
-         * `cn`, but component implementation files remain governed by the vendor ownership rule.
-         */
-        files: ["src/components/**/classNames.ts"],
-        rules: {
-            "starci-fe/surface-folder-two-files-only": "off",
-            "starci-fe/vendor-boundary": "off",
-        },
-    },
     {
         /*
          * ONE FILE MAY USE `namespace`, AND ONLY BECAUSE THE VENDOR'S TYPES DO.

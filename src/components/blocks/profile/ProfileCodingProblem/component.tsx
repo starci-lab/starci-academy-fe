@@ -22,14 +22,14 @@ export type CodingDetail = {
   } | null;
 };
 /** Traditional coding proof props and actions. */
-export type ProfileCodingProblemBlockProps = {
+export type ProfileCodingProblemProps = {
   readonly state: "pending" | "ready" | "error";
   readonly detail?: CodingDetail | null;
   readonly on: { readonly back: () => void; readonly retry: () => void };
 };
 /** Draw coding statement and submission evidence. */
 export const ProfileCodingProblemBase = (
-    props: ProfileCodingProblemBlockProps,
+    props: ProfileCodingProblemProps,
 ) => {
     const problem = props.detail?.problem
     const submission = props.detail?.submission

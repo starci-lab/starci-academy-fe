@@ -28,7 +28,7 @@ type ResumeCardProps = { readonly item: CourseLearnTodayItem; readonly label: st
 const ResumeCard = (props: ResumeCardProps) => <SurfaceCard props={{ label: props.label }} isLoading={props.isLoading}><Text props={{ content: props.item.title, size: "sm", weight: "medium" }} isLoading={props.isLoading} /><Text props={{ content: props.item.kind, size: "sm", tone: "muted" }} isLoading={props.isLoading} />{props.isLoading ? null : <SeeMoreLink props={{ label: props.item.actionLabel }} on={{ press: () => props.open?.(props.item.id) }} />}</SurfaceCard>
 
 /** Draw mobile alternatives and the desktop command-center dashboard. */
-export const CourseLearnTodayBlockView = (props: CourseLearnTodayBlockProps) => {
+export const CourseLearnTodayBlockBase = (props: CourseLearnTodayBlockProps) => {
     const loading = props.blockState === "pending"
     const placeholder = { id: "pending", title: "", kind: "", actionLabel: props.props.course.actionLabel }
     const item = props.props.primary ?? placeholder

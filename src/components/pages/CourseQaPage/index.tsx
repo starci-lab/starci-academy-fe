@@ -1,5 +1,5 @@
 "use client"
-import { CourseQaPageBase } from "./component"
+import { CourseQaPageBase, type CourseQaPageProps } from "./component"
 /** Render the course Q&A route shell. */
-export const CourseQaPage = (props: Parameters<typeof CourseQaPageBase>[0]) => <CourseQaPageBase {...props} />
+export const CourseQaPage = (props: CourseQaPageProps) => <CourseQaPageBase {...props} />
 export * from "./component"

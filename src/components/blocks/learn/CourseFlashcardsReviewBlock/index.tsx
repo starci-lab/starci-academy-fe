@@ -13,7 +13,7 @@ import { useQueryMyFlashcardReviewHistorySwr } from "@/hooks/swr/useQueryMyFlash
 import { useQueryMyFlashcardReviewStatsSwr } from "@/hooks/swr/useQueryMyFlashcardReviewStatsSwr"
 import { useQueryMyInProgressFlashcardSessionSwr } from "@/hooks/swr/useQueryMyInProgressFlashcardSessionSwr"
 import { useMutateStartFlashcardSessionSwr } from "@/hooks/swr/useMutateStartFlashcardSessionSwr"
-import { CourseFlashcardsReviewBlockView, type FlashcardReviewLayout, type FlashcardReviewView } from "./component"
+import { CourseFlashcardsReviewBlockBase, type FlashcardReviewLayout, type FlashcardReviewView } from "./component"
 
 /** Route identity required by the connected flashcard review overview. */
 export type CourseFlashcardsReviewBlockProps = { readonly displayId: string }
@@ -226,7 +226,7 @@ export const CourseFlashcardsReviewBlock = (props: CourseFlashcardsReviewBlockPr
         void Promise.all([course.mutate(), decks.mutate(), due.mutate(), stats.mutate()])
     }
 
-    return <CourseFlashcardsReviewBlockView
+    return <CourseFlashcardsReviewBlockBase
         pageState={activeView}
         blockState={blockState}
         props={{

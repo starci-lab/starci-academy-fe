@@ -1,10 +1,10 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import {
-    CourseFlashcardSessionBlockView as CourseFlashcardSessionBlockBase,
+    CourseFlashcardSessionBlockBase,
     type CourseFlashcardSessionPageActions,
     type CourseFlashcardSessionPageData,
-    type CourseFlashcardSessionProps as CourseFlashcardSessionPageProps,
+    type CourseFlashcardSessionBlockProps as CourseFlashcardSessionPageProps,
 } from "@/components/blocks/learn/CourseFlashcardSessionBlock/component"
 
 /**

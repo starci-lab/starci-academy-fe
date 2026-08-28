@@ -19,7 +19,7 @@ import { ModalBranch } from "@/components/branches/ModalBranch"
  */
 
 /** Props for the internal presentational overlay view. */
-export type SignInOverlayContentProps = {
+export type SignInOverlayViewProps = {
     /** Whether the surface is on screen. Owned by whoever mounts it, never by the surface. */
     readonly isOpen: boolean
     /** Content mounted inside the modal mechanics branch. */
@@ -31,9 +31,9 @@ export type SignInOverlayContentProps = {
 /**
  * Draw the covering surface.
  *
- * @param props - {@link SignInOverlayContentProps}
+ * @param props - {@link SignInOverlayViewProps}
  */
-export const SignInOverlayView = (props: SignInOverlayContentProps) => (
+export const SignInOverlayView = (props: SignInOverlayViewProps) => (
     <ModalBranch
         isOpen={props.isOpen}
         size="xs"
