@@ -12,7 +12,7 @@ const frame = {
 describe("JobReadinessWidgetBase", () => {
     it("draws the strongest-track headline, percentile, pillars and targeted CTA", () => {
         const act = vi.fn()
-        render(<JobReadinessWidgetBase state="ready" props={{
+        const { container } = render(<JobReadinessWidgetBase state="ready" props={{
             ...frame,
             courseTitle: "Backend track",
             depthScore: 72,
@@ -31,6 +31,10 @@ describe("JobReadinessWidgetBase", () => {
         expect(screen.getByText("Ahead of 64% of learners")).toHaveAttribute("data-size", "xs")
         expect(screen.getByText("Capstone")).toBeInTheDocument()
         expect(screen.getByText("Mock interview")).toBeInTheDocument()
+        expect(container.querySelector("[data-part=\"readiness-headline\"]")).toHaveClass("flex", "sm:justify-between")
+        expect(container.querySelector("[data-part=\"readiness-metrics\"]")).toHaveClass("grid", "sm:grid-cols-3")
+        expect(container.querySelector(".starci-core-surface")).toBeInTheDocument()
+        expect(container.querySelector(".starci-core-list-shell")).toBeNull()
         fireEvent.click(screen.getByRole("button", { name: "Complete CV review" }))
         expect(act).toHaveBeenCalledOnce()
     })

@@ -8,7 +8,7 @@ export type ProfileEvidenceKind =
     | "achievements" | "activity" | "challenge-detail" | "coding-detail"
 
 /** One joined course and its public completion dimensions. */
-export type ProfileCourse = { readonly globalId: string, readonly label: string, readonly thumbnailUrl?: string | null, readonly contentCompleted: number, readonly contentTotal: number, readonly challengeCompleted: number, readonly challengeTotal: number, readonly completed: number, readonly total: number, readonly isEnrolled: boolean }
+export type ProfileCourse = { readonly globalId: string, readonly path: string, readonly label: string, readonly thumbnailUrl?: string | null, readonly contentCompleted: number, readonly contentTotal: number, readonly challengeCompleted: number, readonly challengeTotal: number, readonly completed: number, readonly total: number, readonly completionPercent: number, readonly isEnrolled: boolean }
 /** One public contribution-calendar day. */
 export type ProfileContribution = { readonly date: string, readonly contents: number, readonly challenges: number, readonly milestones: number, readonly total: number }
 /** One owner-selected portfolio project. */

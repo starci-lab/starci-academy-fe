@@ -4,7 +4,7 @@ import type { ProfileEvidenceKind, ProfileEvidenceResponse } from "./types/profi
 
 const documents: Record<ProfileEvidenceKind, DocumentNode> = {
     "job-readiness": gql`query ProfileJobReadiness($userId: ID!) { userJobReadiness(userId: $userId) { success message error data { foundation { codingPercentile cvScore } tracks { courseId courseTitle courseSlug capstoneScore interviewScore cvScore depthScore band isQualified } } } }`,
-    courses: gql`query ProfileCourses($userId: ID!) { userCourses(userId: $userId) { success message error data { globalId label thumbnailUrl contentCompleted contentTotal challengeCompleted challengeTotal completed total isEnrolled } } }`,
+    courses: gql`query ProfileCourses($userId: ID!) { userCourses(userId: $userId) { success message error data { globalId path label thumbnailUrl contentCompleted contentTotal challengeCompleted challengeTotal completed total completionPercent isEnrolled } } }`,
     contributions: gql`query ProfileContributions($userId: ID!, $year: Int) { userContributionCalendar(userId: $userId, year: $year) { success message error data { date contents challenges milestones total } } }`,
     "pinned-projects": gql`query ProfilePinnedProjects($userId: ID!) { userPinnedProjects(userId: $userId) { success message error data { id type title description url techStack orderIndex isVerified } } }`,
     capstones: gql`query ProfileCapstones($userId: ID!) { userCapstoneProgress(userId: $userId) { success message error data { courseGlobalId courseTitle totalMilestones completedMilestones totalTasks completedTasks milestones { milestoneGlobalId title position totalTasks passedTasks tasks { taskGlobalId title passed score passedAt } } } } }`,

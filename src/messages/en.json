@@ -479,6 +479,7 @@
         "empty": "You don't have job-readiness data yet.",
         "retry": "Try again",
         "foundationPercentile": "Top {percent}% for coding activity",
+        "evidencePending": "Not enough evidence to assess yet.",
         "action": "Build readiness",
         "band": {
             "needsWork": "Needs significant work",
@@ -653,6 +654,11 @@
             "codeSkills": "Skills from practice",
             "passed": "Passed",
             "solved": "Solved",
+            "evidenceSummary": "Evidence highlights",
+            "challengeEvidence": "{count} challenges",
+            "practiceEvidence": "{count} practice problems",
+            "courseEvidence": "Learning {course}",
+            "courseEvidenceEmpty": "No course yet",
             "languages": "{count} languages · {list}",
             "languageBreakdown": "Languages · {list}",
             "streak": "{current}-day current streak · {longest}-day longest streak"

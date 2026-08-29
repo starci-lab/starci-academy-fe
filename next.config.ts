@@ -25,6 +25,7 @@ const nextConfig: NextConfig = {
     // Parallel local UAT uses one loopback hostname per browser case so HttpOnly cookies do not
     // collide. Keep the allowlist exact: these origins exist only in the local test topology.
     allowedDevOrigins: [
+        "127.0.0.1",
         "expired-otp.lvh.me",
         "missing-challenge.lvh.me",
         "duplicate-submit.lvh.me",

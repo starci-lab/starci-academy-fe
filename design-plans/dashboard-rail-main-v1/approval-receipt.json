@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "receiptType": "human-approval",
+  "receiptId": "dashboard-rail-main-v1",
+  "approvedAt": "2026-08-29",
+  "approvalCommand": "USER APPROVE DASHBOARD UI AUTHORITY dashboard-rail-main-v1",
+  "authorityRef": "design-plans/dashboard-rail-main-v1/authority.json",
+  "authoritySha256": "sha256:66d375ff2a599c460d978611cbe18d98fc90ac1ac79edb8d056e20d5abe76783",
+  "uiDetailRef": "design-plans/dashboard-rail-main-v1/ui-detail-output.json",
+  "uiDetailSha256": "sha256:208b1e0b2e6957a3cb97744351a50f770152da9c0c79c6c49d2e57b2a4d54507",
+  "structureHash": "sha256:c01924fbff50c367cabd18a5f79b335f7d83c78f64b54ee99deedaa8050f9675",
+  "approvedFacts": [
+    "ui-direction-approved",
+    "ux-flow-approved",
+    "interaction-containers-approved",
+    "ui-detail-frozen",
+    "ui-detail-approved"
+  ],
+  "boundary": "Dashboard shared rail/main frame only; no block behavior, navigation behavior, backend, or .claude mutation."
+}

@@ -1,4 +1,4 @@
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
+import { DashboardSurfaceCard as SurfaceCard } from "@/components/blocks/dashboard/DashboardSurfaceCard"
 import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { LeaderboardStandingRow, type LeaderboardStandingRowData } from "@/components/composites/LeaderboardStandingRow"

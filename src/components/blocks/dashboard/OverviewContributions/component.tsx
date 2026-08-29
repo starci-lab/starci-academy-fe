@@ -1,4 +1,4 @@
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
+import { DashboardSurfaceCard as SurfaceCard } from "@/components/blocks/dashboard/DashboardSurfaceCard"
 import {
     ContributionCalendar,
     type ContributionCalendarDay,

@@ -2,6 +2,7 @@ import { PressableSurface } from "@/components/branches/PressableSurface"
 import { Badge } from "@/components/leaves/Badge"
 import { Icon } from "@/components/leaves/Icon"
 import { Text } from "@/components/leaves/Text"
+import { evidenceIdentityClassName, evidenceRowClassName } from "./classNames"
 
 /** One reusable evidence row after product meaning and copy are resolved by its block. */
 export type EvidenceRowData = {
@@ -23,10 +24,10 @@ export const EvidenceRow = (props: EvidenceRowProps) => {
     const data = props.props
     const on = props.on
     const isLoading = props.isLoading ?? false
-    const content = <><div><Text props={{ content: data.title, size: "sm", weight: "semibold" }} isLoading={isLoading} />{data.subtitle === undefined ? null : <Text props={{ content: data.subtitle, size: "xs" }} isLoading={isLoading} />}</div>{data.fact === undefined ? null : <Badge props={{ content: data.fact, tone: data.factTone }} isLoading={isLoading} />}{data.isPressable === true ? <Icon props={{ name: "disclosure", role: "chip" }} /> : null}</>
+    const content = <div className={evidenceRowClassName}><div className={evidenceIdentityClassName}><Text props={{ content: data.title, size: "sm", weight: "semibold" }} isLoading={isLoading} />{data.subtitle === undefined ? null : <Text props={{ content: data.subtitle, size: "xs" }} isLoading={isLoading} />}</div>{data.fact === undefined ? null : <Badge props={{ content: data.fact, tone: data.factTone }} isLoading={isLoading} />}{data.isPressable === true ? <Icon props={{ name: "disclosure", role: "chip" }} /> : null}</div>
     return data.isPressable === true ? (
         <PressableSurface label={data.title ?? ""} press={on?.press}>{content}</PressableSurface>
     ) : (
-        <div>{content}</div>
+        content
     )
 }

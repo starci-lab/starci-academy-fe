@@ -68,13 +68,12 @@ export const PublicProfileLayout = (props: PublicProfileLayoutProps) => {
                 failedMessage: t("failed"),
                 lockedMessage: t("locked"),
                 lockedDescription: t("lockedDescription"),
-                homeLabel: t("actions.home"),
                 retryLabel: t("actions.retry"),
+                retryPending: profile.isValidating,
                 browseLabel: t("actions.browse"),
                 tabs: { label: tabsT("label"), selectedKey: selectedTab, tabs: visibleTabs },
             }}
             on={{
-                home: () => router.push("/"),
                 browse: () => router.push("/courses"),
                 retry: () => void profile.mutate(),
                 selectTab: (key) => router.push(key === "overview" ? `/profile/${username}` : `/profile/${username}/${key}`),

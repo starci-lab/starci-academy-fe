@@ -45,7 +45,7 @@ describe("authentication screen", () => {
         expect(page).not.toHaveClass("px-4", "py-6")
         expect(surface).toHaveClass("starci-core-form-surface")
         expect(surface).toHaveClass("starci-core-form-surface--compact")
-        expect(card).toHaveClass("p-0")
+        expect(card).toHaveClass("p-0!")
         expect(scrollShadow).toHaveClass("p-4", "scroll-shadow", "scroll-shadow--vertical", "starci-core-form-scroll-viewport")
         expect(scrollShadow).not.toHaveClass("max-w-lg", "overflow-y-auto", "scroll-shadow--hide-scrollbar")
         expect(card?.querySelector("[data-slot='card-content']")).not.toBeInTheDocument()

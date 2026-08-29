@@ -25,7 +25,7 @@ describe("SurfaceCard", () => {
         const scrollShadow = card?.querySelector(":scope > .scroll-shadow--vertical")
 
         expect(container.firstElementChild).toHaveClass("starci-core-form-surface")
-        expect(card).toHaveClass("p-0")
+        expect(card).toHaveClass("p-0!")
         expect(scrollShadow).toHaveClass("p-4", "scroll-shadow", "scroll-shadow--vertical", "starci-core-form-scroll-viewport")
         expect(scrollShadow?.firstElementChild).toBe(screen.getByRole("form", { name: label }))
         expect(card?.querySelector("[data-slot='card-content']")).not.toBeInTheDocument()

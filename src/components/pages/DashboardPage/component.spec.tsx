@@ -44,8 +44,8 @@ describe("DashboardPageBase", () => {
     it("draws the eight legacy overview blocks in their published reading order", () => {
         const { container } = render(<DashboardPageBase props={{ selectedTab: "overview", unavailableMessage }} />)
 
-        const main = container.querySelector("main")
-        const order = Array.from(main?.querySelectorAll("[data-testid]") ?? []).map((node) => node.getAttribute("data-testid"))
+        const panel = container.querySelector("aside")?.nextElementSibling
+        const order = Array.from(panel?.querySelectorAll("[data-testid]") ?? []).map((node) => node.getAttribute("data-testid"))
         expect(order).toEqual([
             "ContinueLearning",
             "DailyQuest",
@@ -84,7 +84,7 @@ describe("DashboardPageBase", () => {
         render(<DashboardPageBase props={{ selectedTab: "invoices", unavailableMessage }} />)
 
         expect(screen.getByText(unavailableMessage)).toBeInTheDocument()
-        expect(screen.getByRole("main")).toBeInTheDocument()
+        expect(screen.queryByRole("main")).not.toBeInTheDocument()
         expect(screen.queryByTestId("ContinueLearning")).toBeNull()
         expect(screen.getByTestId("IdentityRail")).toBeInTheDocument()
     })

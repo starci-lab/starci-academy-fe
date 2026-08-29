@@ -9,4 +9,5 @@ export { SurfaceListCard, type SurfaceListCardProps } from "./branch/SurfaceList
 export { FencedCodeBlock, MarkdownArticle, MarkdownTableFrame, type FencedCodeBlockProps, type MarkdownArticleProps, type MarkdownTableFrameProps } from "./branch/MarkdownArticle/index.js"
 export { SurfaceAccordionCard, type SurfaceAccordionCardItem, type SurfaceAccordionCardProps } from "./branch/SurfaceAccordionCard/index.js"
 export { Rail, type RailProps } from "./branch/Rail/index.js"
+export { Tabs, type TabItem, type TabsProps } from "./branch/Tabs/index.js"
 export { formCompactSurfaceClassName, formFieldClassName, formPageClassName, formScreenReaderLabelClassName, formScrollViewportClassName, formSurfaceClassName, horizontalScrollRegionClassName } from "./classNames.js"

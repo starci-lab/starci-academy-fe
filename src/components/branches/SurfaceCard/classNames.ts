@@ -10,8 +10,8 @@ export const getSurfaceCardClassName = (measure: "form" | "formCompact" | undefi
 )
 /** Label row alignment above a surface. */
 export const surfaceLabelClassName = cn("flex", "items-center", "justify-between", "gap-3")
-/** Surface frame with no vendor padding. */
-export const surfaceClassName = cn("w-full", "p-0")
+/** Surface frame with no vendor padding; important wins over HeroUI's component-layer inset. */
+export const surfaceClassName = cn("w-full", "p-0!")
 /** Surface content with no vendor padding. */
 export const surfaceContentClassName = cn("p-0")
 /** The compact surface inset used by forms. */

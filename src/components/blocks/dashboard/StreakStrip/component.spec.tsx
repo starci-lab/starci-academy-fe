@@ -33,6 +33,8 @@ describe("StreakStripBase", () => {
         )
 
         expect(container.querySelectorAll("li")).toHaveLength(7)
+        expect(container.querySelector("[data-part=\"streak-primary\"]")).toHaveClass("flex", "sm:flex-row", "sm:justify-between")
+        expect(container.querySelector("[data-part=\"streak-week-run\"]")).toHaveClass("flex", "gap-3")
         expect(container.querySelector("[role=\"row\"]")).toBeNull()
         expect(container.textContent).toContain("Read content to start your streak")
         fireEvent.click(container.querySelector("button")!)

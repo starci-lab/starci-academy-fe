@@ -1,5 +1,4 @@
-import { Text } from "@/components/leaves/Text"
-import { Icon } from "@/components/leaves/Icon"
+import { StaticStateRow } from "@starci/grammar/core"
 
 /** One read-only task row in a progress list. */
 export type TaskProgressRowData = { readonly id: string; readonly title?: string; readonly fact?: string; readonly isComplete?: boolean }
@@ -7,8 +6,9 @@ export type TaskProgressRowData = { readonly id: string; readonly title?: string
 export type TaskProgressRowProps = { readonly props: TaskProgressRowData; readonly isLoading?: boolean }
 
 /** Draw the mark-title-fact task row. */
-export const TaskProgressRow = (props: TaskProgressRowProps) => <div>
-    <Icon props={{ name: props.props.isComplete === true ? "complete" : "pending", role: "leading" }} isLoading={props.isLoading ?? false} />
-    <Text props={{ content: props.props.title, size: "sm" }} isLoading={props.isLoading ?? false} />
-    <Text props={{ content: props.props.fact, size: "xs" }} isLoading={props.isLoading ?? false} />
-</div>
+export const TaskProgressRow = (props: TaskProgressRowProps) => <StaticStateRow item={{
+    id: props.props.id,
+    label: props.props.title ?? "",
+    description: props.props.fact,
+    state: props.isLoading === true ? "pending" : props.props.isComplete === true ? "affirmative" : "neutral",
+}} />

@@ -10,17 +10,20 @@ vi.mock("@/components/blocks/profile/overview/OverviewCodeSkills", () => ({ Over
 import { ProfileOverviewPageBase } from "./component"
 
 describe("ProfileOverviewPageBase", () => {
-    it("keeps the five legacy owners in order and pairs only the two skill summaries", () => {
+    it("keeps primary evidence before the supporting readiness rail", () => {
         render(<ProfileOverviewPageBase />)
         const copy = screen.getAllByText(/owner$/).map((node) => node.textContent)
 
         expect(copy).toEqual([
-            "Job readiness owner",
             "Courses owner",
-            "Contributions owner",
             "Challenge skills owner",
             "Practice skills owner",
+            "Contributions owner",
+            "Job readiness owner",
         ])
-        expect(screen.getByRole("region", { name: "Profile skills" })).toBeInTheDocument()
+        const skills = screen.getByRole("region", { name: "Profile skills" })
+        expect(skills).toHaveClass("grid", "grid-cols-1", "gap-4", "@app-sm:grid-cols-2")
+        expect(skills.parentElement).toHaveClass("flex", "min-w-0", "flex-col", "gap-6")
+        expect(screen.getByRole("complementary", { name: "Profile readiness" })).toBeInTheDocument()
     })
 })

@@ -1,9 +1,10 @@
 import type { ReactNode } from "react"
+import NextLink from "next/link"
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { pressableLabelHoverClassName, pressableSurfaceHoverClassName } from "./classNames"
+import { pressableHoverClassName } from "./classNames"
 
 /**
- * BRANCH - `PressableSurface`: the control around a node that opens something.
+ * BRANCH - `PressableSurface`: the semantic action or link around a node that opens something.
  *
  * IT DRAWS ITS OWN CONTROL AND PUTS THE KEY'S NODE INSIDE IT. The branch it replaces rendered
  * somebody else's key ON a button host, which is a caller choosing the element for a key - the one
@@ -31,6 +32,8 @@ export type PressableSurfaceProps = {
     /** The accessible name of the destination. */
     readonly label: string
     readonly press?: () => void
+    /** A resolved internal destination. Locale ownership stays with the connected caller. */
+    readonly href?: string
     /** Prevent activation while a route is unavailable or already resolving. */
     readonly disabled?: boolean
     /**
@@ -64,10 +67,26 @@ export const PressableSurface = (props: PressableSurfaceProps) => {
         children,
         label,
         press,
+        href,
         disabled = false,
         hover = "surface",
         isRaised = false,
     } = props
+    const content = isRaised
+        ? <SurfaceCard>{children}</SurfaceCard>
+        : children
+    if (href !== undefined && !disabled) {
+        return (
+            <NextLink
+                href={href}
+                aria-label={label}
+                onClick={press}
+                className={pressableHoverClassName(hover)}
+            >
+                {content}
+            </NextLink>
+        )
+    }
     return (
         <button
             type="button"
@@ -75,11 +94,9 @@ export const PressableSurface = (props: PressableSurfaceProps) => {
             onClick={press}
             disabled={disabled}
             aria-busy={disabled || undefined}
-            className={hover === "label" ? pressableLabelHoverClassName : pressableSurfaceHoverClassName}
+            className={pressableHoverClassName(hover)}
         >
-            {isRaised
-                ? <SurfaceCard>{children}</SurfaceCard>
-                : children}
+            {content}
         </button>
     )
 }

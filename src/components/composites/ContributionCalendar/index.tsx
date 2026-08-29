@@ -2,6 +2,7 @@ import { ChoiceTabs } from "@/components/leaves/ChoiceTabs"
 import { ContributionGrid } from "@/components/leaves/ContributionGrid"
 import { ContributionIntensityLegend } from "@/components/leaves/ContributionIntensityLegend"
 import { Text } from "@/components/leaves/Text"
+import { contributionCalendarClassName, contributionCalendarRowClassName } from "./classNames"
 
 /** One contribution day with an accessible, already-resolved description. */
 export type ContributionCalendarDay = {
@@ -36,8 +37,8 @@ export const ContributionCalendar = (props: ContributionCalendarProps) => {
     const data = props.props
     const on = props.on
     const isLoading = props.isLoading ?? false
-    return <div>
-        <div><Text props={{ content: data.totalLabel, size: "xs", tone: "muted" }} isLoading={isLoading} /><ChoiceTabs
+    return <div className={contributionCalendarClassName}>
+        <div className={contributionCalendarRowClassName}><Text props={{ content: data.totalLabel, size: "xs", tone: "muted" }} isLoading={isLoading} /><ChoiceTabs
             props={{
                 label: data.totalLabel ?? "",
                 selectedKey: String(data.year),
@@ -55,7 +56,7 @@ export const ContributionCalendar = (props: ContributionCalendarProps) => {
             }}
             isLoading={isLoading}
         />
-        <div><Text props={{ content: data.streakLabel, size: "sm" }} isLoading={isLoading} /><ContributionIntensityLegend
+        <div className={contributionCalendarRowClassName}><Text props={{ content: data.streakLabel, size: "sm" }} isLoading={isLoading} /><ContributionIntensityLegend
             props={{ lessLabel: data.lessLabel, moreLabel: data.moreLabel }}
             isLoading={isLoading}
         /></div>

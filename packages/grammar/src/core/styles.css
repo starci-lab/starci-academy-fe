@@ -214,6 +214,33 @@
         min-width: 0;
     }
 
+    .starci-core-tabs-frame,
+    .starci-core-tabs-scroll {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .starci-core-tabs-scroll {
+        overflow-x: auto;
+    }
+
+    .starci-core-tabs {
+        width: max-content;
+        min-width: 100%;
+        white-space: nowrap;
+    }
+
+    .starci-core-tab-content {
+        display: flex;
+        min-width: 0;
+        align-items: center;
+        gap: var(--starci-core-inline-gap, 0.5rem);
+    }
+
+    .starci-core-tab-label {
+        display: none;
+    }
+
     .starci-core-static-row,
     .starci-core-empty-row {
         display: flex;
@@ -587,6 +614,12 @@
 
         .starci-core-rail-body {
             overflow-y: visible;
+        }
+    }
+
+    @media (min-width: 48rem) {
+        .starci-core-tab-label {
+            display: inline;
         }
     }
 

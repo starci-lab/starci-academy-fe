@@ -3,13 +3,17 @@
 import { useMemo } from "react"
 import { useParams } from "next/navigation"
 import { useRouter } from "@/i18n/navigation"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { useQueryMeSwr } from "@/hooks/swr/useQueryMeSwr"
 import { useQueryUserProfileSwr } from "@/hooks/swr/useQueryUserProfileSwr"
 import { useMutateSetFollowSwr } from "@/hooks/swr/useMutateSetFollowSwr"
+import { useOverviewEvidence } from "../overview/useOverviewEvidence"
 import { ProfileHeroBase } from "./component"
 
 type ProfileTranslator = (key: string) => string;
+type EvidenceCourse = { readonly label: string }
+type ChallengeEvidence = { readonly id: string }
+type PracticeEvidence = { readonly byDifficulty: ReadonlyArray<{ readonly solved: number }> }
 
 const primaryLabelOf = (
     isSelf: boolean,
@@ -29,12 +33,16 @@ export type ProfileHeroProps = Record<never, never>
 export const ProfileHero = (props: ProfileHeroProps) => {
     void props
     const t = useTranslations("profile")
+    const locale = useLocale()
     const params = useParams<{ username?: string }>()
     const router = useRouter()
     const username = params?.username ? String(params.username) : undefined
     const profile = useQueryUserProfileSwr(username)
     const viewer = useQueryMeSwr()
     const follow = useMutateSetFollowSwr()
+    const courses = useOverviewEvidence<ReadonlyArray<EvidenceCourse>>("courses")
+    const challenges = useOverviewEvidence<ReadonlyArray<ChallengeEvidence>>("solved-challenges")
+    const practice = useOverviewEvidence<PracticeEvidence>("coding-skills")
     const user = profile.data
     const isSelf = user?.id !== undefined && viewer.data?.id === user.id
     const canHire =
@@ -46,12 +54,25 @@ export const ProfileHero = (props: ProfileHeroProps) => {
         return Number.isNaN(date.getTime())
             ? ""
             : t("joined", {
-                date: new Intl.DateTimeFormat(undefined, {
+                date: new Intl.DateTimeFormat(locale, {
                     month: "long",
                     year: "numeric",
                 }).format(date),
             })
-    }, [t, user?.createdAt])
+    }, [locale, t, user?.createdAt])
+
+    const practiceTotal = practice.data?.byDifficulty.reduce(
+        (sum, item) => sum + item.solved,
+        0,
+    ) ?? 0
+    const evidenceLoading = courses.isLoading || challenges.isLoading || practice.isLoading
+    const evidenceItems = [
+        t("overview.challengeEvidence", { count: challenges.data?.length ?? 0 }),
+        t("overview.practiceEvidence", { count: practiceTotal }),
+        courses.data?.[0]?.label
+            ? t("overview.courseEvidence", { course: courses.data[0].label })
+            : t("overview.courseEvidenceEmpty"),
+    ]
 
     const onPrimary = () => {
         if (!user) return
@@ -105,6 +126,9 @@ export const ProfileHero = (props: ProfileHeroProps) => {
                 linkedinUrl: user?.linkedinUrl ?? undefined,
                 websiteUrl: user?.websiteUrl ?? undefined,
                 joinedLabel,
+                evidenceLabel: t("overview.evidenceSummary"),
+                evidenceItems,
+                evidenceLoading,
             }}
             on={{ primary: onPrimary, share: onShare }}
         />

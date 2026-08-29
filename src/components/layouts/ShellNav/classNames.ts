@@ -7,10 +7,10 @@ export const shellNavPrimaryClassName = cn("flex", "h-16", "min-h-16", "w-full",
 /** Brand and route group alignment. */
 export const shellNavNavigationClassName = cn("flex", "flex-row", "items-center", "gap-6")
 /** Desktop route group visibility and spacing. */
-export const shellNavRoutesClassName = cn("hidden", "flex-1", "items-center", "justify-center", "gap-2", "md:flex")
+export const shellNavRoutesClassName = cn("hidden", "min-w-0", "flex-1", "items-center", "justify-center", "gap-2", "lg:flex")
 /** Action controls alignment. */
 export const shellNavToolsClassName = cn("flex", "flex-row", "items-center", "gap-2")
 /** Desktop-only search and preference controls. */
-export const shellNavDesktopToolsClassName = cn("hidden", "items-center", "gap-2", "md:flex")
+export const shellNavDesktopToolsClassName = cn("hidden", "min-w-0", "items-center", "gap-2", "lg:flex")
 /** Optional tab strip width. */
 export const shellNavTabsClassName = cn("w-full")

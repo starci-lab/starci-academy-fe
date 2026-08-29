@@ -124,7 +124,7 @@ describe("DailyQuest", () => {
         // passes a `claim` action and `SurfaceListCard` hides an action label with no handler.
         expect(screen.getByText("reward:20")).toBeInTheDocument()
         expect(screen.queryByText("claimed")).toBeNull()
-        expect(container.querySelectorAll("svg.text-success-soft-foreground")).toHaveLength(1)
+        expect(container.querySelectorAll("[data-grammar-state-mark=\"check\"]")).toHaveLength(1)
     })
 
     it("stops offering the reward once it has been taken", () => {

@@ -58,8 +58,8 @@ const stub = (over: ReadinessEvidence) => {
 
 const pillars = (root: HTMLElement) =>
     Array.from(
-        root.querySelectorAll("[role=\"progressbar\"]"),
-        (row) => row.parentElement?.textContent,
+        root.querySelectorAll(".divide-y > *"),
+        (row) => row.textContent,
     )
 
 afterEach(() => {
@@ -89,7 +89,9 @@ describe("OverviewJobReadiness", () => {
                 name: "profile.evidence.job-readiness.label",
             }),
         ).toBeInTheDocument()
-        expect(container.textContent).toContain("64% · Backend track")
+        expect(container.textContent).not.toContain("64% · Backend track")
+        expect(screen.getByText("64%")).toHaveAttribute("data-tone", "neutral")
+        expect(screen.getByText("Backend track")).toHaveAttribute("data-size", "xs")
         expect(container.textContent).toContain("jobReadiness.band.building")
         expect(container.textContent).toContain(
             "jobReadiness.foundationPercentile:64",
@@ -102,7 +104,7 @@ describe("OverviewJobReadiness", () => {
         ])
     })
 
-    it("keeps every out-of-range backend score inside the drawn progress range", () => {
+    it("keeps every out-of-range backend score inside the displayed fact range", () => {
         stub({
             data: {
                 tracks: [
@@ -124,10 +126,9 @@ describe("OverviewJobReadiness", () => {
             "jobReadiness.metric.interview0%",
             "jobReadiness.metric.cv67%",
         ])
-        expect(
-            screen.getByRole("progressbar", { name: "jobReadiness.metric.capstone" }),
-        ).toHaveAttribute("aria-valuenow", "100")
-        expect(container.textContent).toContain("100% · Backend track")
+        expect(screen.queryByRole("progressbar")).toBeNull()
+        expect(container.textContent).not.toContain("100% · Backend track")
+        expect(screen.getAllByText("100%").some((item) => item.getAttribute("data-tone") === "neutral")).toBe(true)
         expect(container.textContent).toContain("jobReadiness.band.jobReady")
     })
 
@@ -138,11 +139,12 @@ describe("OverviewJobReadiness", () => {
         expect(container.textContent).toContain("jobReadiness.band.needsWork")
     })
 
-    it("drops the percentile line when the learner has no coding foundation score", () => {
+    it("explains insufficient evidence when the learner has no coding foundation score", () => {
         stub({ data: { foundation: {}, tracks: [backend] } })
         const { container } = render(<OverviewJobReadiness />)
 
         expect(container.textContent).not.toContain("foundationPercentile")
+        expect(container.textContent).toContain("jobReadiness.evidencePending")
         expect(pillars(container)).toHaveLength(3)
     })
 
@@ -165,7 +167,8 @@ describe("OverviewJobReadiness", () => {
         stub({ isLoading: true })
         const { container } = render(<OverviewJobReadiness />)
 
-        expect(pillars(container)).toHaveLength(0)
+        expect(pillars(container)).toHaveLength(3)
+        expect(container.querySelectorAll(".divide-y > .p-4")).toHaveLength(3)
         expect(container.textContent).not.toContain("jobReadiness.band.")
         expect(container.textContent).not.toContain("jobReadiness.empty")
     })
@@ -177,5 +180,21 @@ describe("OverviewJobReadiness", () => {
         expect(container.textContent).toContain("jobReadiness.error")
         fireEvent.click(screen.getByRole("button", { name: "jobReadiness.retry" }))
         expect(mutate).toHaveBeenCalledOnce()
+    })
+
+    it("nests the metric list inside the readiness surface", () => {
+        stub({ data: { tracks: [backend] } })
+        const { container } = render(<OverviewJobReadiness />)
+
+        const readinessHeading = screen.getByRole("heading", { name: "profile.evidence.job-readiness.label" })
+        const readinessSurface = readinessHeading.parentElement?.nextElementSibling
+        expect(screen.getByText("64%")).toHaveAttribute("data-tone", "neutral")
+        expect(screen.getByText("Backend track")).toHaveAttribute("data-size", "xs")
+        expect(screen.queryByRole("heading", { name: "64%" })).toBeNull()
+        expect(container.textContent).not.toContain("64% · Backend track")
+        expect(readinessSurface?.firstElementChild).toHaveClass("p-4")
+        expect(container.querySelector("[data-grammar-surface-depth=\"nested\"]")?.parentElement).not.toHaveClass("p-4")
+        expect(container.querySelector("[data-grammar-surface-depth=\"nested\"]")).toBeInTheDocument()
+        expect(container.querySelector("[data-grammar-surface-list=\"true\"]")).toBeInTheDocument()
     })
 })

@@ -12,6 +12,7 @@ import { ChangelogList } from "@/components/blocks/dashboard/ChangelogList"
 import { ExploreTab } from "@/components/blocks/dashboard/ExploreTab"
 import { CoursesTab } from "@/components/blocks/dashboard/CoursesTab"
 import { CommunityTab } from "@/components/blocks/dashboard/CommunityTab"
+import { dashboardAsideClassName, dashboardLayoutClassName, dashboardPanelClassName } from "./classNames"
 
 /**
  * PAGE - `DashboardPage`, presentational half.
@@ -61,9 +62,12 @@ export const DashboardPageBase = (props: DashboardPageProps) => {
                     : <EmptyNotice props={{ icon: props.props.selectedTab === "community" ? "community" : "explore", message: props.props.unavailableMessage }} />
 
     return (
-        <>
-            <aside><IdentityRail /><QuickActions /></aside>
-            <main>{main}</main>
-        </>
+        <div className={dashboardLayoutClassName}>
+            <aside className={dashboardAsideClassName}>
+                <IdentityRail />
+                <QuickActions />
+            </aside>
+            <div id={`dashboard-panel-${props.props.selectedTab}`} className={dashboardPanelClassName}>{main}</div>
+        </div>
     )
 }

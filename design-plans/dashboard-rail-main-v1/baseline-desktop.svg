@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1581" height="889" viewBox="0 0 1581 889">
+  <rect width="1581" height="889" fill="#f5f5f5"/>
+  <rect x="0" y="0" width="1581" height="64" fill="#ffffff" stroke="#d4d4d8"/>
+  <text x="24" y="39" font-family="system-ui" font-size="18" fill="#18181b">ShellNav</text>
+  <rect x="150.5" y="64" width="1280" height="825" fill="#fafafa" stroke="#a1a1aa" stroke-dasharray="6 4"/>
+  <rect x="174.5" y="88" width="288" height="640" rx="12" fill="#e4e4e7" stroke="#71717a"/>
+  <text x="198.5" y="126" font-family="system-ui" font-size="18" fill="#18181b">Identity rail · 288px</text>
+  <text x="198.5" y="154" font-family="system-ui" font-size="14" fill="#52525b">IdentityRail → QuickActions</text>
+  <rect x="494.5" y="88" width="912" height="760" rx="12" fill="#ffffff" stroke="#71717a"/>
+  <text x="518.5" y="126" font-family="system-ui" font-size="18" fill="#18181b">Selected Dashboard panel · flex-1 · min-w-0</text>
+  <text x="518.5" y="154" font-family="system-ui" font-size="14" fill="#52525b">Overview / Explore / Courses / Community</text>
+  <line x1="462.5" y1="72" x2="494.5" y2="72" stroke="#52525b" stroke-width="2"/>
+  <text x="468" y="68" font-family="system-ui" font-size="12" fill="#52525b">32</text>
+  <text x="150.5" y="882" font-family="system-ui" font-size="12" fill="#52525b">max-width 1280 · centered · 24px inset · one page scroll owner · one main landmark</text>
+</svg>

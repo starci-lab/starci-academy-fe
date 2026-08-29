@@ -1,13 +1,27 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import {
-    JobReadinessWidgetBase,
-    type JobReadinessBand,
-    type JobReadinessMetric,
-} from "@/components/blocks/dashboard/JobReadinessWidget/component"
+import { SurfaceCard } from "@/components/branches/SurfaceCard"
+import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
+import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { EvidenceRow } from "@/components/composites/EvidenceRow"
+import { Badge } from "@/components/leaves/Badge"
+import { Text } from "@/components/leaves/Text"
 import { useOverviewEvidence } from "./useOverviewEvidence"
 import { clamp } from "./shared"
+import {
+    profileReadinessCardClassName,
+    profileReadinessListClassName,
+    profileReadinessSummaryClassName,
+    profileReadinessTrackClassName,
+} from "./classNames"
+
+type JobReadinessBand = "needsWork" | "building" | "jobReady"
+type JobReadinessMetric = {
+  readonly id: string;
+  readonly label: string;
+  readonly scoreLabel?: string;
+};
 
 type Readiness = {
   readonly foundation?: {
@@ -32,6 +46,11 @@ const band = (value?: string): JobReadinessBand =>
             ? "building"
             : "needsWork"
 
+const restingMetrics: ReadonlyArray<JobReadinessMetric> = Array.from(
+    { length: 3 },
+    (_unused, index) => ({ id: `resting-${index + 1}`, label: "" }),
+)
+
 /** Public-profile readiness keeps the legacy strongest-track summary and its three scored pillars. */
 /** Props for the connected job-readiness overview block. */
 export type OverviewJobReadinessProps = Record<never, never>
@@ -52,53 +71,86 @@ export const OverviewJobReadiness = (props: OverviewJobReadinessProps) => {
         retryLabel: t("jobReadiness.retry"),
     }
 
-    if (request.error)
+    if (request.error || (!request.isLoading && !track)) {
+        const failed = Boolean(request.error)
         return (
-            <JobReadinessWidgetBase state="failed" props={common} on={{ retry }} />
+            <SurfaceCard props={{ label: common.label }}>
+                <EmptyNotice
+                    props={{
+                        icon: "jobs",
+                        message: failed ? common.errorMessage : common.emptyMessage,
+                        actionLabel: failed ? common.retryLabel : undefined,
+                    }}
+                    on={{ act: failed ? retry : undefined }}
+                />
+            </SurfaceCard>
         )
-    if (request.isLoading)
-        return <JobReadinessWidgetBase state="pending" props={common} />
-    if (!track) return <JobReadinessWidgetBase state="empty" props={common} />
+    }
 
-    const metrics: ReadonlyArray<JobReadinessMetric> = [
+    const metrics: ReadonlyArray<JobReadinessMetric> = track ? [
         {
             id: "capstone",
             label: t("jobReadiness.metric.capstone"),
-            score: clamp(track.capstoneScore),
             scoreLabel: `${clamp(track.capstoneScore)}%`,
         },
         {
             id: "interview",
             label: t("jobReadiness.metric.interview"),
-            score: clamp(track.interviewScore),
             scoreLabel: `${clamp(track.interviewScore)}%`,
         },
         {
             id: "cv",
             label: t("jobReadiness.metric.cv"),
-            score: clamp(track.cvScore),
             scoreLabel: `${clamp(track.cvScore)}%`,
         },
-    ]
-    const trackBand = band(track.band)
+    ] : restingMetrics
+    const trackBand = band(track?.band)
+    const loading = request.isLoading
+    const settledMetrics = loading ? restingMetrics : metrics
+    const scoreLabel = loading ? undefined : `${clamp(track?.depthScore)}%`
+    const trackLabel = loading ? undefined : track?.courseTitle
+    const codingPercentile = request.data?.foundation?.codingPercentile
+    const evidenceMessage = codingPercentile !== undefined && codingPercentile > 0
+        ? t("jobReadiness.foundationPercentile", { percent: codingPercentile })
+        : t("jobReadiness.evidencePending")
     return (
-        <JobReadinessWidgetBase
-            state="ready"
-            props={{
-                ...common,
-                courseTitle: track.courseTitle,
-                depthScore: clamp(track.depthScore),
-                depthScoreLabel: `${clamp(track.depthScore)}% · ${track.courseTitle}`,
-                band: trackBand,
-                bandLabel: t(`jobReadiness.band.${trackBand}`),
-                percentileLabel:
-          request.data?.foundation?.codingPercentile == null
-              ? undefined
-              : t("jobReadiness.foundationPercentile", {
-                  percent: request.data.foundation.codingPercentile,
-              }),
-                metrics,
-            }}
-        />
+        <SurfaceCard props={{ label: common.label, inset: "compact" }} isLoading={loading}>
+            <div className={profileReadinessCardClassName}>
+                <Text
+                    props={{
+                        content: evidenceMessage,
+                        size: "xs",
+                        tone: "muted",
+                    }}
+                    isLoading={loading}
+                />
+                <div className={profileReadinessSummaryClassName}>
+                    <div className={profileReadinessTrackClassName}>
+                        <Badge props={{ content: scoreLabel }} isLoading={loading} />
+                        <Text props={{ content: trackLabel, size: "xs", tone: "muted" }} isLoading={loading} />
+                    </div>
+                    <Text
+                        props={{ content: loading ? undefined : t(`jobReadiness.band.${trackBand}`), size: "xs", tone: "muted" }}
+                        isLoading={loading}
+                    />
+                </div>
+                <SurfaceListCard
+                    props={{
+                        label: common.label,
+                        isNested: true,
+                        isLabelHidden: true,
+                    }}
+                    isLoading={loading}
+                >
+                    <div className={profileReadinessListClassName}>
+                        {settledMetrics.map((metric) => <EvidenceRow
+                            key={metric.id}
+                            props={{ title: metric.label, fact: metric.scoreLabel }}
+                            isLoading={loading}
+                        />)}
+                    </div>
+                </SurfaceListCard>
+            </div>
+        </SurfaceCard>
     )
 }

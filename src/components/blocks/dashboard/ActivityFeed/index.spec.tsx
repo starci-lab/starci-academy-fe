@@ -82,7 +82,7 @@ describe("ActivityFeed", () => {
             />,
         )
         expect(screen.getByText(message)).toBeInTheDocument()
-        expect(container.querySelectorAll("section")).toHaveLength(0)
+        expect(container.querySelectorAll("section:not([data-grammar-surface-card])")).toHaveLength(0)
         fireEvent.click(screen.getByRole("button", { name: actionLabel }))
         expect(resultAction).toHaveBeenCalledOnce()
     })

@@ -1,4 +1,5 @@
 import { DayCell, type DayCellData } from "@/components/leaves/DayCell"
+import { streakWeekRunClassName } from "./classNames"
 
 
 /**
@@ -40,5 +41,11 @@ export type StreakWeekRunProps = { readonly props: StreakWeekRunData; readonly i
 export const StreakWeekRun = (props: StreakWeekRunProps) => {
     const data = props.props
     const isLoading = props.isLoading ?? false
-    return <div>{(isLoading ? RESTING_WEEK : (data.days ?? RESTING_WEEK)).map((day) => <DayCell key={day.id} props={day} isLoading={isLoading} />)}</div>
+    return (
+        <ul data-part="streak-week-run" className={streakWeekRunClassName}>
+            {(isLoading ? RESTING_WEEK : (data.days ?? RESTING_WEEK)).map((day) => (
+                <DayCell key={day.id} props={day} isLoading={isLoading} />
+            ))}
+        </ul>
+    )
 }

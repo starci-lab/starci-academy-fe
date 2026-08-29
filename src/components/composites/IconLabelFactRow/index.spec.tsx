@@ -5,7 +5,8 @@ import { IconLabelFactRow } from "."
 
 describe("IconLabelFactRow", () => {
     it("keeps peer label and fact at the same reading size", () => {
-        render(<IconLabelFactRow props={{ icon: "streak", label: "Streak", endText: "7 days", recipe: "peer" }} />)
+        const { container } = render(<IconLabelFactRow props={{ icon: "streak", label: "Streak", endText: "7 days", recipe: "peer" }} />)
+        expect(container.querySelector("[data-part=\"icon-label-fact-row\"]")).toHaveClass("grid", "items-center", "gap-3")
         expect(screen.getByText("Streak")).toHaveAttribute("data-size", "sm")
         expect(screen.getByText("7 days")).toHaveAttribute("data-size", "sm")
     })

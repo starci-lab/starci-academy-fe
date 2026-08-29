@@ -85,7 +85,8 @@ describe("DailyQuestBase", () => {
         const { container } = render(
             <DailyQuestBase state="open" props={{ label: "Today's quest", tasks: completedTasks, rewardLine: "x" }} />,
         )
-        expect(container.querySelectorAll("svg.text-success-soft-foreground")).toHaveLength(1)
+        expect(container.querySelectorAll("[data-grammar-state-mark=\"check\"]")).toHaveLength(1)
+        expect(container.querySelectorAll("[data-grammar-row=\"true\"]")).toHaveLength(2)
         expect(screen.getByText("Pass a challenge")).toBeInTheDocument()
     })
 

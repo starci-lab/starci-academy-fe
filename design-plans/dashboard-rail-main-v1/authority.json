@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "authorityId": "dashboard-rail-main-v1",
+  "status": "approved",
+  "approvedBy": "user",
+  "approvedAt": "2026-08-29",
+  "approvalCommand": "USER APPROVE DASHBOARD UI AUTHORITY dashboard-rail-main-v1",
+  "facts": [
+    "ui-direction-approved",
+    "ux-flow-approved",
+    "interaction-containers-approved"
+  ],
+  "direction": {
+    "mode": "strict-legacy-parity",
+    "composition": "dashboard-rail-then-main",
+    "desktop": "fixed-width leading rail beside min-width-zero flexible content",
+    "mobile": "rail then content in one vertical reading order"
+  },
+  "uxFlow": {
+    "entry": "authenticated Dashboard route",
+    "orientation": "identity and quick actions precede the selected Dashboard panel",
+    "continuity": "tab selection, refresh and session resume preserve the same shared frame",
+    "scrollOwner": "page"
+  },
+  "interactionContainers": {
+    "dashboardTabContent": "page",
+    "railAndPanelRelationship": "inline",
+    "newOverlayBehavior": "forbidden",
+    "newNavigationBehavior": "forbidden"
+  },
+  "scope": {
+    "included": [
+      "src/app/[lang]/dashboard/layout.tsx",
+      "src/components/pages/DashboardPage/component.tsx"
+    ],
+    "excluded": [
+      "Dashboard product block behavior",
+      "Dashboard tab navigation behavior",
+      "backend",
+      ".claude"
+    ]
+  },
+  "evidenceRefs": [
+    ".uat/reviews/dashboard/landing-tabs/runs/run-20260829-01/screenshots/07-overview-after-refresh.full.png",
+    ".uat/reviews/dashboard/landing-tabs/runs/run-20260829-01/dom/07-overview-after-refresh.txt",
+    "design-plans/dashboard-courses-community/plan-record.json",
+    "D:/Repositories/starci-academy/src/components/pages/DashboardPage/index.tsx"
+  ]
+}

@@ -1,4 +1,4 @@
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
+import { DashboardSurfaceCard as SurfaceCard } from "@/components/blocks/dashboard/DashboardSurfaceCard"
 import { LabelledProgressRow } from "@/components/composites/LabelledProgressRow"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { Text } from "@/components/leaves/Text"

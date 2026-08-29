@@ -9,9 +9,11 @@ describe("SurfaceListCard", () => {
         render(
             <SurfaceListCard props={{ label: "Results", isNested: true, isVerdict: true }}>{rows}</SurfaceListCard>,
         )
-        expect(screen.getByRole("heading", { name: "Results" })).toBeInTheDocument()
+        const heading = screen.getByRole("heading", { name: "Results" })
+        expect(heading.tagName).toBe("H4")
+        expect(heading).toHaveClass("text-xs", "font-medium", "leading-4")
         expect(screen.getByText("Alpha")).toBeInTheDocument()
-        expect(screen.getByRole("heading", { name: "Results" }).closest("section")).toBeInTheDocument()
+        expect(heading.closest("section")).toHaveAttribute("data-grammar-surface-depth", "nested")
     })
 
     it("renders an action footer or description, never both", () => {

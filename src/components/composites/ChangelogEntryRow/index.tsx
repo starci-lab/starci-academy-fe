@@ -1,6 +1,7 @@
 import { Badge, type BadgeTone } from "@/components/leaves/Badge"
 import { Text } from "@/components/leaves/Text"
 import { TextLink } from "@/components/leaves/TextLink"
+import { changelogEntryMetaClassName, changelogEntryRowClassName } from "./classNames"
 
 /** One dated product update rendered inside a joined changelog list. */
 export type ChangelogEntryRowData = {
@@ -26,5 +27,22 @@ export const ChangelogEntryRow = (props: ChangelogEntryRowProps) => {
     const data = props.props
     const on = props.on
     const isLoading = props.isLoading ?? false
-    return <div><div><Text props={{ content: data.dateLabel, size: "xs", tone: "muted" }} isLoading={isLoading} />{data.categoryLabel === undefined ? null : <Badge props={{ content: data.categoryLabel, tone: data.categoryTone }} isLoading={isLoading} />}</div>{data.isAction === true && on?.open !== undefined ? <TextLink props={{ label: data.title ?? "", size: "sm" }} on={{ press: on.open }} /> : <Text props={{ content: data.title, size: "sm", weight: "medium" }} isLoading={isLoading} />}{data.body === undefined && !isLoading ? null : <Text props={{ content: data.body, size: "xs", tone: "muted" }} isLoading={isLoading} />}</div>
+    return (
+        <div className={changelogEntryRowClassName} data-part="changelog-entry">
+            <div className={changelogEntryMetaClassName} data-part="changelog-meta">
+                <Text props={{ content: data.dateLabel, size: "xs", tone: "muted" }} isLoading={isLoading} />
+                {data.categoryLabel === undefined ? null : (
+                    <Badge props={{ content: data.categoryLabel, tone: data.categoryTone }} isLoading={isLoading} />
+                )}
+            </div>
+            {data.isAction === true && on?.open !== undefined ? (
+                <TextLink props={{ label: data.title ?? "", size: "sm" }} on={{ press: on.open }} />
+            ) : (
+                <Text props={{ content: data.title, size: "sm", weight: "medium" }} isLoading={isLoading} />
+            )}
+            {data.body === undefined && !isLoading ? null : (
+                <Text props={{ content: data.body, size: "xs", tone: "muted" }} isLoading={isLoading} />
+            )}
+        </div>
+    )
 }

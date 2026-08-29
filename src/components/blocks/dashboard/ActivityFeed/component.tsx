@@ -1,9 +1,10 @@
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
+import { DashboardSurfaceCard as SurfaceCard } from "@/components/blocks/dashboard/DashboardSurfaceCard"
 import { SurfaceListCard, type SurfaceListCardData } from "@/components/branches/SurfaceListCard"
 import { ActivityRow, type ActivityRowData } from "@/components/composites/ActivityRow"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { Text } from "@/components/leaves/Text"
 import type { ReactionType } from "@/modules/api/graphql/queries/types/reactions"
+import { activityDayClassName, activityFeedClassName } from "./classNames"
 
 /** One local calendar day and its activity rows. */
 export type ActivityDayData = { readonly id: string; readonly label: string; readonly rows: ReadonlyArray<ActivityRowData> }
@@ -23,7 +24,7 @@ const ActivityList = (props: ActivityListProps) => {
 
 /** Draw activity groups, result notices and reaction-capable rows. */
 export const ActivityFeedBase = (props: ActivityFeedProps) => {
-    if (props.state === "filteredEmpty" || props.state === "platformEmpty" || props.state === "failed") return <SurfaceCard props={{ label: "" }}><EmptyNotice props={{ message: props.props.message, description: props.props.description, actionLabel: props.props.actionLabel }} on={{ act: props.on?.resultAction }} /></SurfaceCard>
+    if (props.state === "filteredEmpty" || props.state === "platformEmpty" || props.state === "failed") return <SurfaceCard props={{ ariaLabel: props.props.message }}><EmptyNotice props={{ message: props.props.message, description: props.props.description, actionLabel: props.props.actionLabel }} on={{ act: props.on?.resultAction }} /></SurfaceCard>
     const days = props.state === "pending" ? Array.from({ length: 2 }, (_, index) => ({ id: `resting-day-${index}`, label: "", rows: [] })) : props.props.days
-    return <div>{days.map((day) => <section key={day.id}><Text props={{ content: day.label, size: "sm", tone: "muted" }} isLoading={props.state === "pending"} /><ActivityList label={day.label} rows={day.rows} isLabelHidden on={props.on} isLoading={props.state === "pending"} /></section>)}</div>
+    return <div className={activityFeedClassName}>{days.map((day) => <section className={activityDayClassName} key={day.id}><Text props={{ content: day.label, size: "sm", tone: "muted" }} isLoading={props.state === "pending"} /><ActivityList label={day.label} rows={day.rows} isLabelHidden on={props.on} isLoading={props.state === "pending"} /></section>)}</div>
 }

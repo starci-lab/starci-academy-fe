@@ -35,8 +35,8 @@ const stub = (over: CodingSkillsEvidence) => {
 
 const rows = (root: HTMLElement) =>
     Array.from(
-        root.querySelectorAll("[role=\"progressbar\"]"),
-        (row) => row.parentElement?.textContent,
+        root.querySelectorAll(".divide-y > *"),
+        (row) => row.textContent,
     )
 
 const headline = (root: HTMLElement) => root.textContent?.match(/overview\.solved\d+/)?.[0]
@@ -65,21 +65,10 @@ describe("OverviewCodeSkills", () => {
         ).toBeInTheDocument()
         expect(headline(container)).toContain("solved10")
         expect(rows(container)).toEqual(["Easy6", "Medium3", "Hard1"])
-        expect(screen.getByRole("progressbar", { name: "Easy" })).toHaveAttribute(
-            "aria-valuenow",
-            "60",
-        )
-        expect(screen.getByRole("progressbar", { name: "Medium" })).toHaveAttribute(
-            "aria-valuenow",
-            "30",
-        )
-        expect(screen.getByRole("progressbar", { name: "Hard" })).toHaveAttribute(
-            "aria-valuenow",
-            "10",
-        )
+        expect(screen.queryByRole("progressbar")).toBeNull()
     })
 
-    it("replaces the difficulty rungs with the per-language solved breakdown when one exists", () => {
+    it("keeps the difficulty rungs and adds the per-language solved breakdown", () => {
         stub({
             data: {
                 byLanguage: [
@@ -95,8 +84,8 @@ describe("OverviewCodeSkills", () => {
         expect(
             screen.getByText("overview.languageBreakdown:typescript 7 · python 3"),
         ).toBeInTheDocument()
-        expect(rows(container)).toEqual([])
-        expect(container.textContent).not.toContain("overview.solved")
+        expect(rows(container)).toEqual(["Easy10"])
+        expect(container.textContent).toContain("overview.solved10")
     })
 
     it("says the practice snapshot is empty when every rung is reported at zero solved", () => {
@@ -133,7 +122,7 @@ describe("OverviewCodeSkills", () => {
         stub({ isLoading: true })
         const { container } = render(<OverviewCodeSkills />)
 
-        expect(rows(container)).toHaveLength(0)
+        expect(rows(container)).toHaveLength(1)
         expect(container.textContent).toContain("overview.solved")
         expect(screen.queryByRole("progressbar")).toBeNull()
     })

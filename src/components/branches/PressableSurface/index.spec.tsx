@@ -3,6 +3,14 @@ import { describe, expect, it, vi } from "vitest"
 import { PressableSurface } from "."
 
 describe("PressableSurface", () => {
+    it("uses a real link when a resolved destination is available", () => {
+        const courseHref = "/courses/fullstack"
+        render(<PressableSurface label="Open course" href={courseHref}><span>Fullstack</span></PressableSurface>)
+
+        expect(screen.getByRole("link", { name: "Open course" })).toHaveAttribute("href", "/courses/fullstack")
+        expect(screen.queryByRole("button", { name: "Open course" })).toBeNull()
+    })
+
     it("exposes an accessible press target and forwards activation", () => {
         const press = vi.fn()
         render(<PressableSurface label="Open profile" press={press}><span>Profile</span></PressableSurface>)

@@ -1,0 +1,235 @@
+{
+  "schemaVersion": 6,
+  "runId": "dashboard-rail-main-v1",
+  "stage": "ui.detail.review",
+  "status": "pending",
+  "facts": [
+    "ui-direction-approved",
+    "ux-flow-approved",
+    "interaction-containers-approved",
+    "ui-detail-frozen"
+  ],
+  "payload": {
+    "decision": "detail-frozen",
+    "state": {
+      "operator": "fe/ui-detail-freeze",
+      "status": "pending",
+      "code": "ui-detail-frozen",
+      "retryable": false,
+      "emits": {
+        "stage": "ui.detail.review",
+        "status": "pending",
+        "factsAdd": ["ui-detail-frozen"],
+        "factsRemove": []
+      }
+    },
+    "produced": {
+      "artifactRefs": ["session://tasks/dashboard-rail-main-v1/ui-detail-output"],
+      "mutations": [],
+      "externalEffects": []
+    },
+    "context": {
+      "used": [
+        {
+          "kind": "approved-direction",
+          "ref": "design-plans/dashboard-rail-main-v1/authority.json#direction",
+          "revision": "sha256:66d375ff2a599c460d978611cbe18d98fc90ac1ac79edb8d056e20d5abe76783"
+        },
+        {
+          "kind": "approved-flow",
+          "ref": "design-plans/dashboard-rail-main-v1/authority.json#uxFlow",
+          "revision": "sha256:66d375ff2a599c460d978611cbe18d98fc90ac1ac79edb8d056e20d5abe76783"
+        },
+        {
+          "kind": "grammar",
+          "ref": "@starci/grammar/core",
+          "revision": "sha256:0d3f17d490ed65195b41039bcba4dd27f65b8f8477bd0ace6f0bc72654511c21"
+        },
+        {
+          "kind": "frontend-context",
+          "ref": "starci-academy-fe@321f0cb4261dffb475c617583f724bda0b612a0b",
+          "revision": "sha256:f1f9348432fd9882071d7464e2eb279a2c50b0270f554a93f6d64b5369c47531"
+        },
+        {
+          "kind": "knowledge",
+          "ref": "fe.layout-composition+fe.grammar-common-capabilities+fe.grammar-common-states-accessibility+fe.interaction-container-selection",
+          "revision": "v6.3"
+        }
+      ]
+    },
+    "cleanup": {
+      "scratchRefs": [],
+      "retention": "until-skill-terminal",
+      "purgeAt": "skill-terminal"
+    },
+    "evidenceRefs": [
+      "design-plans/dashboard-rail-main-v1/authority.json",
+      ".uat/reviews/dashboard/landing-tabs/runs/run-20260829-01/screenshots/07-overview-after-refresh.full.png",
+      "design-plans/dashboard-rail-main-v1/baseline-desktop.svg",
+      "design-plans/dashboard-rail-main-v1/baseline-mobile.svg"
+    ],
+    "findings": [],
+    "artifact": {
+      "artifactType": "frontend-ui-detail",
+      "pageId": "dashboard",
+      "breadcrumb": {
+        "owner": "DashboardLayout",
+        "visibility": "forbidden",
+        "items": []
+      },
+      "surfaceTree": [
+        {
+          "id": "dashboard-route-main",
+          "parentId": null,
+          "order": 0,
+          "role": "page",
+          "owner": "DashboardLayout",
+          "componentRef": "src/app/[lang]/dashboard/layout.tsx#main",
+          "mergePolicy": "forbidden",
+          "sticky": false,
+          "scrollOwner": "page"
+        },
+        {
+          "id": "dashboard-frame",
+          "parentId": "dashboard-route-main",
+          "order": 0,
+          "role": "primary",
+          "owner": "DashboardPageBase",
+          "componentRef": "src/components/pages/DashboardPage/component.tsx#DashboardPageBase",
+          "mergePolicy": "forbidden",
+          "sticky": false,
+          "scrollOwner": "none"
+        },
+        {
+          "id": "dashboard-rail",
+          "parentId": "dashboard-frame",
+          "order": 0,
+          "role": "supporting",
+          "owner": "DashboardPageBase",
+          "componentRef": "src/components/pages/DashboardPage/component.tsx#aside",
+          "mergePolicy": "forbidden",
+          "sticky": false,
+          "scrollOwner": "none"
+        },
+        {
+          "id": "dashboard-identity",
+          "parentId": "dashboard-rail",
+          "order": 0,
+          "role": "supporting",
+          "owner": "IdentityRail",
+          "componentRef": "src/components/blocks/dashboard/IdentityRail",
+          "mergePolicy": "forbidden",
+          "sticky": false,
+          "scrollOwner": "none"
+        },
+        {
+          "id": "dashboard-quick-actions",
+          "parentId": "dashboard-rail",
+          "order": 1,
+          "role": "action",
+          "owner": "QuickActions",
+          "componentRef": "src/components/blocks/dashboard/QuickActions",
+          "mergePolicy": "forbidden",
+          "sticky": false,
+          "scrollOwner": "none"
+        },
+        {
+          "id": "dashboard-panel",
+          "parentId": "dashboard-frame",
+          "order": 1,
+          "role": "primary",
+          "owner": "DashboardPageBase",
+          "componentRef": "src/components/pages/DashboardPage/component.tsx#selected-panel",
+          "mergePolicy": "forbidden",
+          "sticky": false,
+          "scrollOwner": "none"
+        }
+      ],
+      "decorationPolicy": {
+        "icons": [
+          {
+            "targetId": "dashboard-frame",
+            "policy": "none",
+            "position": "none",
+            "reason": "The shared frame is structural and gains no decorative icon."
+          }
+        ],
+        "separators": [
+          {
+            "targetId": "dashboard-frame",
+            "policy": "none",
+            "reason": "The 32px desktop seam and 24px mobile seam separate the two page regions without a decorative rule."
+          }
+        ]
+      },
+      "stateMatrix": [
+        {
+          "stateId": "authenticated-ready",
+          "surfaceIds": ["dashboard-route-main", "dashboard-frame", "dashboard-rail", "dashboard-identity", "dashboard-quick-actions", "dashboard-panel"],
+          "visibleActions": ["dashboard-tab-navigation", "dashboard-quick-actions"],
+          "iconOverrides": [],
+          "copyRef": "existing Dashboard block copy"
+        },
+        {
+          "stateId": "block-loading-or-settling",
+          "surfaceIds": ["dashboard-route-main", "dashboard-frame", "dashboard-rail", "dashboard-panel"],
+          "visibleActions": ["dashboard-tab-navigation"],
+          "iconOverrides": [],
+          "copyRef": "block-owned loading and recovery copy"
+        },
+        {
+          "stateId": "refresh-resume",
+          "surfaceIds": ["dashboard-route-main", "dashboard-frame", "dashboard-rail", "dashboard-panel"],
+          "visibleActions": ["dashboard-tab-navigation", "dashboard-quick-actions"],
+          "iconOverrides": [],
+          "copyRef": "existing selected tab and block copy"
+        }
+      ],
+      "responsiveMatrix": [
+        {
+          "viewport": "mobile",
+          "surfaceOrder": ["dashboard-route-main", "dashboard-frame", "dashboard-rail", "dashboard-identity", "dashboard-quick-actions", "dashboard-panel"],
+          "mergeOverrides": [],
+          "stickySurfaceIds": []
+        },
+        {
+          "viewport": "desktop",
+          "surfaceOrder": ["dashboard-route-main", "dashboard-frame", "dashboard-rail", "dashboard-identity", "dashboard-quick-actions", "dashboard-panel"],
+          "mergeOverrides": [],
+          "stickySurfaceIds": []
+        }
+      ],
+      "interactionContainers": [
+        {
+          "interactionId": "dashboard-tab-content",
+          "selected": "page",
+          "triggerSurfaceId": "dashboard-route-main",
+          "containerSurfaceId": "dashboard-panel",
+          "dismissal": "route-back",
+          "focusReturnSurfaceId": null,
+          "desktop": "page",
+          "mobile": "page"
+        }
+      ],
+      "baselines": [
+        {
+          "viewport": "1581x889",
+          "theme": "light",
+          "stateId": "authenticated-ready",
+          "seedRef": "seed:dashboard-test-data/system-design-mastery",
+          "visualRef": "design-plans/dashboard-rail-main-v1/baseline-desktop.svg",
+          "visualSha256": "sha256:6de7fbdf3923b2052cdec90a02c733d6d72bd1393140e5b65242b8be98db549d"
+        },
+        {
+          "viewport": "390x844",
+          "theme": "light",
+          "stateId": "authenticated-ready",
+          "seedRef": "seed:dashboard-test-data/system-design-mastery",
+          "visualRef": "design-plans/dashboard-rail-main-v1/baseline-mobile.svg",
+          "visualSha256": "sha256:830be31c1636542515d5dc395b904894f4aa2415c8219d8ee65007eeb416720d"
+        }
+      ],
+      "structureHash": "sha256:c01924fbff50c367cabd18a5f79b335f7d83c78f64b54ee99deedaa8050f9675"
+    }
+  }
+}

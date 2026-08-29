@@ -1,8 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import type { LabelledProgressRowData } from "@/components/composites/LabelledProgressRow"
-import { SkillSnapshot } from "./SkillSnapshot"
+import { SkillSnapshot, type SkillSnapshotRow } from "./SkillSnapshot"
 import { useOverviewEvidence } from "./useOverviewEvidence"
 
 type Breakdown = { readonly key: string; readonly solved: number };
@@ -23,12 +22,11 @@ export const OverviewCodeSkills = (props: OverviewCodeSkillsProps) => {
     const data = request.data
     const total =
     data?.byDifficulty.reduce((sum, item) => sum + item.solved, 0) ?? 0
-    const rows: Array<LabelledProgressRowData> = (data?.byDifficulty ?? []).map(
+    const rows: Array<SkillSnapshotRow> = (data?.byDifficulty ?? []).map(
         (item) => ({
             id: `difficulty-${item.key}`,
             title: item.key,
-            percent: total ? Math.round((item.solved / total) * 100) : 0,
-            percentText: String(item.solved),
+            value: String(item.solved),
         }),
     )
     if (request.isLoading) rows.push({ id: "resting", title: "" })
@@ -45,14 +43,13 @@ export const OverviewCodeSkills = (props: OverviewCodeSkillsProps) => {
                     ? t("evidence.error")
                     : !request.isLoading && total === 0
                         ? t("evidence.coding-skills.empty")
-                        : languages.length
-                            ? t("overview.languageBreakdown", {
-                                list: languages
-                                    .map((item) => `${item.key} ${item.solved}`)
-                                    .join(" · "),
-                            })
-                            : undefined
+                        : undefined
             }
+            supportingMessage={total > 0 && languages.length ? t("overview.languageBreakdown", {
+                list: languages
+                    .map((item) => `${item.key} ${item.solved}`)
+                    .join(" · "),
+            }) : undefined}
         />
     )
 }

@@ -1,8 +1,8 @@
 "use client"
 
-import { Tabs } from "@heroui/react"
+import { Tabs } from "@starci/grammar/core"
 import { Icon, type IconName } from "@/components/leaves/Icon"
-import { extendedTabContentClassName, extendedTabLabelClassName, extendedTabsClassName, extendedTabsRootClassName } from "./classNames"
+import { extendedTabsRootClassName } from "./classNames"
 
 /** One tab in the legacy dashboard strip. */
 export type ExtendedTab = {
@@ -39,29 +39,16 @@ export const ExtendedTabs = (props: ExtendedTabsProps) => {
     return (
         <div className={extendedTabsRootClassName}>
             <Tabs
-                variant="secondary"
+                label={data.label}
                 selectedKey={data.selectedKey}
-                onSelectionChange={(key) => on?.select?.(String(key))}
-                className={extendedTabsClassName}
-            >
-                <Tabs.ListContainer>
-                    <Tabs.List aria-label={data.label}>
-                        {data.tabs.map((tab) => (
-                            <Tabs.Tab
-                                key={tab.id}
-                                id={tab.id}
-                                aria-controls={`dashboard-panel-${tab.id}`}
-                            >
-                                <span className={extendedTabContentClassName}>
-                                    <Icon props={{ name: tab.icon, role: "leading" }} />
-                                    <span className={extendedTabLabelClassName}>{tab.label}</span>
-                                </span>
-                                <Tabs.Indicator />
-                            </Tabs.Tab>
-                        ))}
-                    </Tabs.List>
-                </Tabs.ListContainer>
-            </Tabs>
+                items={data.tabs.map((tab) => ({
+                    id: tab.id,
+                    label: tab.label,
+                    leading: <Icon props={{ name: tab.icon, role: "leading" }} />,
+                }))}
+                onSelect={on?.select}
+                panelId={(key) => `dashboard-panel-${key}`}
+            />
         </div>
     )
 }

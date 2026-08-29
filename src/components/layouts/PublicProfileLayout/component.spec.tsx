@@ -23,8 +23,8 @@ const base: PublicProfileLayoutProps = {
         failedMessage: "Failed",
         lockedMessage: "Private",
         lockedDescription: "Locked",
-        homeLabel: "Home",
         retryLabel: "Retry",
+        retryPending: false,
         browseLabel: "Browse",
         tabs: {
             label: "Public profile sections",
@@ -35,16 +35,20 @@ const base: PublicProfileLayoutProps = {
             ],
         },
     },
-    on: { home: vi.fn(), browse: vi.fn(), retry: vi.fn(), selectTab: vi.fn() },
+    on: { browse: vi.fn(), retry: vi.fn(), selectTab: vi.fn() },
     body: () => <div data-testid="profile-body" />,
 }
 
 describe("PublicProfileLayoutBase", () => {
-    it("owns profile tabs above the identity-and-evidence body", () => {
+    it("owns profile tabs above a full-width identity and evidence body", () => {
         const { container } = render(<PublicProfileLayoutBase {...base} />)
-        const profileChrome = container.querySelector("main")
-        expect(profileChrome).toBeTruthy()
-        expect(screen.getByTestId("profile-hero")).toBeTruthy()
+        expect(container.querySelector("main")).toBeNull()
+        const hero = screen.getByTestId("profile-hero")
+        const identity = hero.parentElement
+        const stack = identity?.parentElement
+        expect(hero).toBeTruthy()
+        expect(identity).toHaveClass("w-full", "min-w-0")
+        expect(stack).toHaveClass("flex", "w-full", "min-w-0", "flex-col", "gap-6")
         expect(screen.getByTestId("profile-body")).toBeTruthy()
         expect(screen.getByRole("tablist", { name: "Public profile sections" })).toBeTruthy()
     })
@@ -81,21 +85,30 @@ describe("PublicProfileLayoutBase", () => {
         expect(retry).toHaveBeenCalledOnce()
     })
 
-    it("sends a reader home rather than retrying a profile that does not exist", () => {
-        const home = vi.fn()
+    it("keeps the failure context and marks retry pending while revalidation runs", () => {
+        render(<PublicProfileLayoutBase {...base} state="failed" props={{ ...base.props, retryPending: true }} />)
+
+        expect(screen.getByText("Failed")).toBeTruthy()
+        const retry = screen.getByRole("button", { name: /Retry/ })
+        expect(retry).toHaveAttribute("data-action-pending", "true")
+        expect(retry).toBeDisabled()
+    })
+
+    it("sends a reader to public content rather than retrying a profile that does not exist", () => {
+        const browse = vi.fn()
         const retry = vi.fn()
-        render(<PublicProfileLayoutBase {...base} state="not-found" on={{ ...base.on, home, retry }} />)
+        render(<PublicProfileLayoutBase {...base} state="not-found" on={{ ...base.on, browse, retry }} />)
 
         expect(screen.getByText("Missing")).toBeTruthy()
-        fireEvent.click(screen.getByRole("button", { name: /Home/ }))
-        expect(home).toHaveBeenCalledOnce()
+        fireEvent.click(screen.getByRole("button", { name: /Browse/ }))
+        expect(browse).toHaveBeenCalledOnce()
         expect(retry).not.toHaveBeenCalled()
     })
 
     it("keeps the same chrome while the profile is still loading", () => {
         const { container } = render(<PublicProfileLayoutBase {...base} state="loading" />)
 
-        expect(container.querySelector("main")).toBeTruthy()
+        expect(container.querySelector("main")).toBeNull()
         expect(container.querySelector("[data-testid=\"profile-body\"]")).toBeTruthy()
     })
 

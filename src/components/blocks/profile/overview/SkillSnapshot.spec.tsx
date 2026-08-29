@@ -4,12 +4,12 @@ import { SkillSnapshot } from "./SkillSnapshot"
 
 const rows = (root: HTMLElement) =>
     Array.from(
-        root.querySelectorAll("[role=\"progressbar\"]"),
-        (row) => row.parentElement?.textContent,
+        root.querySelectorAll(".divide-y > *"),
+        (row) => row.textContent,
     )
 
 describe("SkillSnapshot", () => {
-    it("leads with the headline fact and follows it with one progress peer per breakdown", () => {
+    it("leads with the headline fact and follows it with one count row per breakdown", () => {
         const { container } = render(
             <SkillSnapshot
                 label="Challenge skills"
@@ -19,14 +19,12 @@ describe("SkillSnapshot", () => {
                     {
                         id: "difficulty-easy",
                         title: "Easy",
-                        percent: 75,
-                        percentText: "9",
+                        value: "9",
                     },
                     {
                         id: "difficulty-hard",
                         title: "Hard",
-                        percent: 25,
-                        percentText: "3",
+                        value: "3",
                     },
                 ]}
             />,
@@ -37,10 +35,7 @@ describe("SkillSnapshot", () => {
         ).toBeInTheDocument()
         expect(container.textContent).toContain("Passed12")
         expect(rows(container)).toEqual(["Easy9", "Hard3"])
-        expect(screen.getByRole("progressbar", { name: "Easy" })).toHaveAttribute(
-            "aria-valuenow",
-            "75",
-        )
+        expect(screen.queryByRole("progressbar")).toBeNull()
     })
 
     it("replaces the whole control stack with the settled state message", () => {
@@ -53,8 +48,7 @@ describe("SkillSnapshot", () => {
                     {
                         id: "difficulty-easy",
                         title: "Easy",
-                        percent: 10,
-                        percentText: "1",
+                        value: "1",
                     },
                 ]}
                 stateMessage="No solved challenges yet"
@@ -64,6 +58,22 @@ describe("SkillSnapshot", () => {
         expect(screen.getByText("No solved challenges yet")).toBeInTheDocument()
         expect(container.textContent).not.toContain("Passed")
         expect(rows(container)).toEqual([])
+    })
+
+    it("keeps populated totals and rows when supporting evidence is present", () => {
+        const { container } = render(
+            <SkillSnapshot
+                label="Challenge skills"
+                totalLabel="Passed"
+                totalValue="3"
+                rows={[{ id: "difficulty-easy", title: "Easy", value: "3" }]}
+                supportingMessage="2 languages · TypeScript · Python"
+            />,
+        )
+
+        expect(container.textContent).toContain("Passed3")
+        expect(rows(container)).toEqual(["Easy3"])
+        expect(screen.getByText("2 languages · TypeScript · Python")).toBeInTheDocument()
     })
 
     it("keeps the resting headline and rows while a state message is already known", () => {
@@ -79,7 +89,7 @@ describe("SkillSnapshot", () => {
 
         expect(screen.queryByText("No solved challenges yet")).toBeNull()
         expect(container.textContent).toContain("Passed")
-        expect(rows(container)).toHaveLength(0)
+        expect(rows(container)).toHaveLength(1)
         expect(screen.queryByRole("progressbar")).toBeNull()
     })
 })

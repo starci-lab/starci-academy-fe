@@ -1,4 +1,5 @@
 import { Text } from "@/components/leaves/Text"
+import { profileSegmentPieceClassName } from "./classNames"
 
 /** Resolved caption for one distribution segment. */
 export type ProfileSegmentData = { readonly label?: string }
@@ -9,5 +10,5 @@ export type ProfileSegmentProps = { readonly props: ProfileSegmentData; readonly
 export const ProfileSegment = (props: ProfileSegmentProps) => {
     const data = props.props
     const isLoading = props.isLoading ?? false
-    return <Text props={{ content: data.label, size: "xs", tone: "muted" }} isLoading={isLoading} />
+    return <div className={profileSegmentPieceClassName}><Text props={{ content: data.label, size: "xs", tone: "muted" }} isLoading={isLoading} /></div>
 }

@@ -1,4 +1,4 @@
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
+import { DashboardSurfaceCard as SurfaceCard } from "@/components/blocks/dashboard/DashboardSurfaceCard"
 import { QuickActionsList } from "@/components/leaves/QuickActionsList"
 import type { QuickActionItem } from "@/components/leaves/QuickActionsList"
 

@@ -8,6 +8,7 @@ test("exports traditional React components without metadata registries", () => {
     assert.ok(core.HorizontalScrollRegion)
     assert.equal(typeof core.SurfaceCard, "function")
     assert.equal(typeof core.SurfaceListCard, "function")
+    assert.equal(typeof core.Tabs, "function")
     assert.equal(core.formPageClassName, "starci-core-form-page")
     assert.equal(core.formScrollViewportClassName, "starci-core-form-scroll-viewport")
     assert.equal(core.formSurfaceClassName, "starci-core-form-surface")

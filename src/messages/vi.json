@@ -479,6 +479,7 @@
         "empty": "Bạn chưa có dữ liệu sẵn sàng đi làm.",
         "retry": "Thử lại",
         "foundationPercentile": "Thuộc top {percent}% hoạt động coding",
+        "evidencePending": "Chưa đủ bằng chứng để đánh giá.",
         "action": "Nâng mức sẵn sàng",
         "band": {
             "needsWork": "Cần cải thiện nhiều",
@@ -653,6 +654,11 @@
             "codeSkills": "Kỹ năng từ luyện tập",
             "passed": "Đã vượt qua",
             "solved": "Đã giải",
+            "evidenceSummary": "Bằng chứng nổi bật",
+            "challengeEvidence": "{count} thử thách",
+            "practiceEvidence": "{count} bài luyện tập",
+            "courseEvidence": "Đang học {course}",
+            "courseEvidenceEmpty": "Chưa có khóa học",
             "languages": "{count} ngôn ngữ · {list}",
             "languageBreakdown": "Ngôn ngữ · {list}",
             "streak": "Chuỗi hiện tại {current} ngày · dài nhất {longest} ngày"

@@ -21,6 +21,7 @@ const mocks = vi.hoisted(() => ({
     replace: vi.fn(),
     profile: undefined as unknown,
     profileError: undefined as unknown,
+    profileIsValidating: false,
     profileMutate: vi.fn(),
     publicCv: undefined as unknown,
     viewer: undefined as unknown,
@@ -33,14 +34,14 @@ vi.mock("@/i18n/navigation", () => ({
 }))
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
 vi.mock("@/hooks/swr/useQueryUserProfileSwr", () => ({
-    useQueryUserProfileSwr: () => ({ data: mocks.profile, error: mocks.profileError, mutate: mocks.profileMutate }),
+    useQueryUserProfileSwr: () => ({ data: mocks.profile, error: mocks.profileError, isValidating: mocks.profileIsValidating, mutate: mocks.profileMutate }),
 }))
 vi.mock("@/hooks/swr/useQueryPublicUserCvSwr", () => ({ useQueryPublicUserCvSwr: () => ({ data: mocks.publicCv }) }))
 vi.mock("@/hooks/swr/useQueryMeSwr", () => ({ useQueryMeSwr: () => ({ data: mocks.viewer }) }))
 
 type LayoutStub = {
     readonly state: string
-    readonly props: { readonly tabs: { readonly selectedKey: string, readonly tabs: ReadonlyArray<{ readonly id: string }> } }
+    readonly props: { readonly retryPending: boolean, readonly tabs: { readonly selectedKey: string, readonly tabs: ReadonlyArray<{ readonly id: string }> } }
     readonly on: Readonly<Record<string, ((key: string) => void) | (() => void)>>
     readonly body: React.ComponentType
 }
@@ -53,7 +54,7 @@ vi.mock("./component", () => ({
                 <output data-testid="state">{input.state}</output>
                 <output data-testid="tabs">{input.props.tabs.tabs.map((tab) => tab.id).join(",")}</output>
                 <output data-testid="selected">{input.props.tabs.selectedKey}</output>
-                <button type="button" onClick={input.on.home as () => void}>home</button>
+                <output data-testid="retry-pending">{String(input.props.retryPending)}</output>
                 <button type="button" onClick={input.on.browse as () => void}>browse</button>
                 <button type="button" onClick={input.on.retry as () => void}>retry</button>
                 <button type="button" onClick={() => (input.on.selectTab as (key: string) => void)("overview")}>tab overview</button>
@@ -72,6 +73,7 @@ describe("PublicProfileLayout", () => {
         mocks.pathname = "/profile/ada"
         mocks.profile = ada
         mocks.profileError = undefined
+        mocks.profileIsValidating = false
         mocks.publicCv = undefined
         mocks.viewer = { id: "user-2" }
         vi.clearAllMocks()
@@ -131,6 +133,16 @@ describe("PublicProfileLayout", () => {
         expect(screen.getByTestId("state")).toHaveTextContent("ready")
     })
 
+    it("forwards revalidation as pending feedback without hiding the failed state", () => {
+        mocks.profile = undefined
+        mocks.profileError = new Error("network")
+        mocks.profileIsValidating = true
+        render(<PublicProfileLayout content={<p />} />)
+
+        expect(screen.getByTestId("state")).toHaveTextContent("failed")
+        expect(screen.getByTestId("retry-pending")).toHaveTextContent("true")
+    })
+
     it("reads the open section from the path and defaults to the overview", () => {
         mocks.pathname = "/profile/ada/skills"
         const { unmount } = render(<PublicProfileLayout content={<p />} />)
@@ -151,11 +163,9 @@ describe("PublicProfileLayout", () => {
         expect(mocks.push).toHaveBeenCalledWith("/profile/ada/skills")
     })
 
-    it("offers home, browse and retry as three distinct ways out", () => {
+    it("offers browse and retry as distinct ways out", () => {
         render(<PublicProfileLayout content={<p />} />)
 
-        fireEvent.click(screen.getByRole("button", { name: "home" }))
-        expect(mocks.push).toHaveBeenCalledWith("/")
         fireEvent.click(screen.getByRole("button", { name: "browse" }))
         expect(mocks.push).toHaveBeenCalledWith("/courses")
         fireEvent.click(screen.getByRole("button", { name: "retry" }))

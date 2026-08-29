@@ -34,8 +34,8 @@ const stub = (over: ChallengeEvidence) => {
 
 const rows = (root: HTMLElement) =>
     Array.from(
-        root.querySelectorAll("[role=\"progressbar\"]"),
-        (row) => row.parentElement?.textContent,
+        root.querySelectorAll(".divide-y > *"),
+        (row) => row.textContent,
     )
 
 const headline = (root: HTMLElement) => root.textContent?.match(/overview\.passed\d+/)?.[0]
@@ -61,18 +61,11 @@ describe("OverviewChallengeSkills", () => {
         ).toBeInTheDocument()
         expect(headline(container)).toContain("passed4")
         expect(rows(container)).toEqual(["Easy2", "Hard1"])
-        expect(screen.getByRole("progressbar", { name: "Easy" })).toHaveAttribute(
-            "aria-valuenow",
-            "50",
-        )
-        expect(screen.getByRole("progressbar", { name: "Hard" })).toHaveAttribute(
-            "aria-valuenow",
-            "25",
-        )
+        expect(screen.queryByRole("progressbar")).toBeNull()
         expect(container.textContent).not.toContain("overview.languages")
     })
 
-    it("replaces the difficulty breakdown with the distinct languages the learner solved in", () => {
+    it("keeps the difficulty breakdown and adds the distinct solved languages", () => {
         stub({
             data: [
                 { id: "a", difficulty: "Easy", selectedLang: "typescript" },
@@ -85,15 +78,15 @@ describe("OverviewChallengeSkills", () => {
         expect(
             screen.getByText("overview.languages:2|typescript · python"),
         ).toBeInTheDocument()
-        expect(rows(container)).toEqual([])
-        expect(container.textContent).not.toContain("overview.passed")
+        expect(rows(container)).toEqual(["Easy1", "Hard2"])
+        expect(container.textContent).toContain("overview.passed3")
     })
 
     it("rests one difficulty peer and withholds the total while the evidence is in flight", () => {
         stub({ isLoading: true })
         const { container } = render(<OverviewChallengeSkills />)
 
-        expect(rows(container)).toHaveLength(0)
+        expect(rows(container)).toHaveLength(1)
         expect(container.textContent).toContain("overview.passed")
         expect(screen.queryByRole("progressbar")).toBeNull()
     })

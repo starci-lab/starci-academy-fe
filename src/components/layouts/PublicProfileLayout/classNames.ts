@@ -3,10 +3,14 @@ import { cn } from "@heroui/react"
 /** Stacks profile tabs over the measured route body. */
 export const profileTabsFrameClassName = cn("flex", "w-full", "flex-col")
 /** Keeps profile content inside its wide legacy measure. */
-export const profileMeasureClassName = cn("mx-auto", "w-full", "max-w-7xl")
+export const profileMeasureClassName = cn("@container", "mx-auto", "w-full", "max-w-app-xl")
 /** Provides the profile page inset. */
-export const profileInsetClassName = cn("p-6")
-/** Responsive rail and main arrangement. */
-export const profileSplitClassName = cn("flex", "w-full", "flex-col", "gap-6", "md:flex-row", "md:items-start", "md:gap-8")
-/** Fixed-width identity rail that becomes full width on small screens. */
-export const profileRailClassName = cn("flex", "w-full", "shrink-0", "flex-col", "md:w-72")
+export const profileInsetClassName = cn("p-4", "@app-md:p-6")
+/** Keeps identity and route evidence in one deliberate reading flow. */
+export const profileContentStackClassName = cn("flex", "w-full", "min-w-0", "flex-col", "gap-6")
+/** Full-width identity owner above the overview evidence grid. */
+export const profileIdentityClassName = cn("w-full", "min-w-0")
+/** Flexible route body; min-width prevents evidence surfaces from widening the page. */
+export const profileBodyClassName = cn("w-full", "min-w-0")
+/** Bounded screen-level recovery/empty surface. */
+export const profileStateClassName = cn("mx-auto", "w-full", "max-w-app-xl", "p-6")

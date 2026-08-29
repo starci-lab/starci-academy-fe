@@ -1,8 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import type { LabelledProgressRowData } from "@/components/composites/LabelledProgressRow"
-import { SkillSnapshot } from "./SkillSnapshot"
+import { SkillSnapshot, type SkillSnapshotRow } from "./SkillSnapshot"
 import { useOverviewEvidence } from "./useOverviewEvidence"
 
 type Challenge = {
@@ -31,14 +30,11 @@ export const OverviewChallengeSkills = (props: OverviewChallengeSkillsProps) => 
             )
         if (item.selectedLang) languages.add(item.selectedLang)
     })
-    const rows: Array<LabelledProgressRowData> = [...difficulty].map(
+    const rows: Array<SkillSnapshotRow> = [...difficulty].map(
         ([key, value]) => ({
             id: `difficulty-${key}`,
             title: key,
-            percent: challenges.length
-                ? Math.round((value / challenges.length) * 100)
-                : 0,
-            percentText: String(value),
+            value: String(value),
         }),
     )
     if (request.isLoading) rows.push({ id: "resting", title: "" })
@@ -54,13 +50,12 @@ export const OverviewChallengeSkills = (props: OverviewChallengeSkillsProps) => 
                     ? t("evidence.error")
                     : !request.isLoading && challenges.length === 0
                         ? t("evidence.solved-challenges.empty")
-                        : languages.size
-                            ? t("overview.languages", {
-                                count: languages.size,
-                                list: [...languages].join(" · "),
-                            })
-                            : undefined
+                        : undefined
             }
+            supportingMessage={languages.size ? t("overview.languages", {
+                count: languages.size,
+                list: [...languages].join(" · "),
+            }) : undefined}
         />
     )
 }

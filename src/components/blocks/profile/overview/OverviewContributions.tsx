@@ -30,7 +30,7 @@ export const OverviewContributions = (props: OverviewContributionsProps) => {
     const total = days.reduce((sum, day) => sum + day.total, 0)
     const currentYear = new Date().getFullYear()
     return (
-        <SurfaceCard props={{ label: t("profile.evidence.contributions.label") }}>
+        <SurfaceCard props={{ label: t("profile.evidence.contributions.label"), inset: "compact" }}>
             <ContributionCalendar
                 isLoading={calendar.isLoading}
                 props={{
