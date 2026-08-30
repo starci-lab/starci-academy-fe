@@ -15,7 +15,10 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock("next-intl", () => ({ useLocale: () => mocks.locale }))
-vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
+vi.mock("@/i18n/navigation", () => ({
+    useRouter: () => ({ push: mocks.push }),
+    getPathname: ({ locale, href }: { readonly locale: string; readonly href: string }) => `/${locale}${href}`,
+}))
 vi.mock("@/hooks/swr/useQueryCoursePersonalProjectSwr", () => ({
     useQueryCoursePersonalProjectSwr: () => ({ data: mocks.data, error: mocks.error, mutate: mocks.mutate }),
 }))
@@ -29,7 +32,6 @@ vi.mock("@/components/blocks/learn/CoursePersonalProject/component", () => ({
         <output data-testid="state">{input.state}</output>
         <output data-testid="props">{JSON.stringify(input.data)}</output>
         <button type="button" onClick={input.on?.openCourse}>Open course</button>
-        <button type="button" onClick={() => input.on?.openTask?.("task-9")}>Open task</button>
         <button type="button" onClick={input.on?.retry}>Retry</button>
         <button type="button" onClick={input.on?.retryRepository}>Retry repository</button>
         <button type="button" onClick={() => input.on?.searchRoadmap?.("ship")}>Search roadmap</button>
@@ -65,10 +67,11 @@ describe("CoursePersonalProjectPage", () => {
         render(<CoursePersonalProject displayId="system-design" />)
 
         expect(screen.getByTestId("state")).toHaveTextContent("ready")
-        expect(props().nextTask).toEqual({ id: "task-2", milestone: "Build", title: "Code", evidence: "10/20 · 1 submission" })
+        expect(props().nextTask).toEqual({ id: "task-2", milestone: "Build", title: "Code", evidence: "10/20 · 1 submission", href: "/en/courses/system-design/learn/personal-project/tasks/task-2" })
+        expect(props().continueLabel).toBe("Continue: Code")
         expect(props().milestones.map((milestone) => milestone.id)).toEqual(["milestone-1", "milestone-2"])
-        expect(props().milestones[0]).toMatchObject({ status: "In progress", progress: "1/2", targetTaskId: "task-2", tone: "accent" })
-        expect(props().milestones[1]).toMatchObject({ status: "Upcoming", progress: "0/1", tone: "neutral" })
+        expect(props().milestones[0]).toMatchObject({ status: "In progress", progress: "1/2", completionPercent: 50, href: "/en/courses/system-design/learn/personal-project/tasks/task-2", tone: "accent" })
+        expect(props().milestones[1]).toMatchObject({ status: "Upcoming", progress: "0/1", completionPercent: 0, tone: "neutral" })
         expect(props().completionFacts).toEqual([
             { label: "Tasks", value: "1/3" },
             { label: "Submissions", value: "3" },
@@ -99,11 +102,9 @@ describe("CoursePersonalProjectPage", () => {
         render(<CoursePersonalProject displayId="system-design" />)
 
         fireEvent.click(screen.getByRole("button", { name: "Open course" }))
-        fireEvent.click(screen.getByRole("button", { name: "Open task" }))
         fireEvent.click(screen.getByRole("button", { name: "Retry" }))
         fireEvent.click(screen.getByRole("button", { name: "Retry repository" }))
         expect(mocks.push).toHaveBeenNthCalledWith(1, "/courses/system-design/learn")
-        expect(mocks.push).toHaveBeenNthCalledWith(2, "/courses/system-design/learn/personal-project/tasks/task-9")
         expect(mocks.mutate).toHaveBeenCalledTimes(1)
         expect(mocks.repositoryMutate).toHaveBeenCalledTimes(1)
     })

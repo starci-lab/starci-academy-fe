@@ -8,7 +8,7 @@ const baseProps: CoursePersonalProjectProps["data"] = {
     title: "Personal Project",
     description: "One view of the next task and the whole project.",
     nextTaskLabel: "Next task",
-    nextTask: { id: "task-2", milestone: "Build", title: "Build the service", evidence: "10/20 · 1 submission" },
+    nextTask: { id: "task-2", milestone: "Build", title: "Build the service", evidence: "10/20 · 1 submission", href: "/en/courses/system-design/learn/personal-project/tasks/task-2" },
     continueLabel: "Continue project",
     allCompleteLabel: "All tasks complete",
     roadmapLabel: "Project roadmap",
@@ -17,9 +17,9 @@ const baseProps: CoursePersonalProjectProps["data"] = {
     roadmapCountLabel: "3 stages",
     roadmapEmptyLabel: "No stages match.",
     milestones: [
-        { id: "milestone-1", title: "Plan", status: "Completed", progress: "1/1", targetTaskId: "task-1", tone: "success" },
-        { id: "milestone-2", title: "Build", status: "In progress", progress: "0/2", targetTaskId: "task-2", tone: "accent" },
-        { id: "milestone-3", title: "Ship", status: "Upcoming", progress: "0/1", tone: "neutral" },
+        { id: "milestone-1", title: "Plan", status: "Completed", progress: "1/1", completionPercent: 100, href: "/en/courses/system-design/learn/personal-project/tasks/task-1", tone: "success" },
+        { id: "milestone-2", title: "Build", status: "In progress", progress: "0/2", completionPercent: 0, href: "/en/courses/system-design/learn/personal-project/tasks/task-2", tone: "accent" },
+        { id: "milestone-3", title: "Ship", status: "Upcoming", progress: "0/1", completionPercent: 0, tone: "neutral" },
     ],
     completionLabel: "Whole-project progress",
     completionPercent: 50,
@@ -58,15 +58,12 @@ describe("CoursePersonalProjectPageBase", () => {
         expect(screen.getByText("18/20")).toBeInTheDocument()
     })
 
-    it("routes the primary action and only navigable milestone summaries", () => {
-        const openTask = vi.fn()
-        draw("ready", {}, { openTask })
+    it("renders the primary action and navigable milestone summaries as native destinations", () => {
+        draw("ready")
 
-        fireEvent.click(screen.getByRole("button", { name: "Continue project" }))
-        fireEvent.click(screen.getByRole("button", { name: "Plan" }))
-        expect(openTask).toHaveBeenNthCalledWith(1, "task-2")
-        expect(openTask).toHaveBeenNthCalledWith(2, "task-1")
-        expect(screen.queryByRole("button", { name: "Ship" })).not.toBeInTheDocument()
+        expect(screen.getByRole("link", { name: "Continue project" })).toHaveAttribute("href", "/en/courses/system-design/learn/personal-project/tasks/task-2")
+        expect(screen.getByRole("link", { name: "Plan" })).toHaveAttribute("href", "/en/courses/system-design/learn/personal-project/tasks/task-1")
+        expect(screen.queryByRole("link", { name: "Ship" })).not.toBeInTheDocument()
     })
 
     it("submits roadmap search and keeps the collection bounded", () => {
@@ -78,6 +75,7 @@ describe("CoursePersonalProjectPageBase", () => {
 
         expect(searchRoadmap).toHaveBeenCalledWith("build")
         expect(container.querySelector("[data-grammar-scroll='contained']")).not.toBeNull()
+        expect(screen.getAllByRole("progressbar")).toHaveLength(4)
         expect(screen.getByText("3 stages")).toBeInTheDocument()
     })
 

@@ -1,10 +1,12 @@
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
+import { PressableSurface } from "@/components/branches/PressableSurface"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { EvidenceRow } from "@/components/composites/EvidenceRow"
 import { Breadcrumbs } from "@/components/leaves/Breadcrumbs"
-import { Button } from "@/components/leaves/Button"
+import { Badge } from "@/components/leaves/Badge"
 import { Heading } from "@/components/leaves/Heading"
+import { Icon } from "@/components/leaves/Icon"
 import { Link } from "@/components/leaves/Link"
 import { Progress } from "@/components/leaves/Progress"
 import { SearchBox } from "@/components/leaves/SearchBox"
@@ -12,7 +14,16 @@ import { Text } from "@/components/leaves/Text"
 import {
     coursePersonalProjectClassName,
     projectBodyClassName,
+    projectCompletionFactsClassName,
+    projectCurrentTaskHeaderClassName,
+    projectCurrentTaskLinkClassName,
+    projectCurrentTaskLinkCopyClassName,
     projectHeaderClassName,
+    projectMilestoneClassName,
+    projectMilestoneIdentityClassName,
+    projectMilestoneMetaClassName,
+    projectMilestoneNumberClassName,
+    projectMilestoneProgressClassName,
     projectNextTaskClassName,
     projectRepositoryClassName,
     projectRoadmapClassName,
@@ -28,7 +39,8 @@ export type CoursePersonalProjectMilestoneRow = {
     readonly title: string
     readonly status: string
     readonly progress: string
-    readonly targetTaskId?: string
+    readonly completionPercent: number
+    readonly href?: string
     readonly tone?: "neutral" | "accent" | "success"
 }
 
@@ -38,6 +50,7 @@ export type CoursePersonalProjectNextTask = {
     readonly milestone: string
     readonly title: string
     readonly evidence: string
+    readonly href: string
 }
 
 /** One aggregate project fact. */
@@ -86,7 +99,6 @@ export type CoursePersonalProjectProps = {
     }
     readonly on?: {
         readonly openCourse?: () => void
-        readonly openTask?: (id: string) => void
         readonly retry?: () => void
         readonly retryRepository?: () => void
         readonly searchRoadmap?: (query: string) => void
@@ -94,7 +106,29 @@ export type CoursePersonalProjectProps = {
 }
 
 const pendingMilestones = (count: number): ReadonlyArray<CoursePersonalProjectMilestoneRow> =>
-    Array.from({ length: count }, (_, index) => ({ id: `pending-${index}`, title: "", status: "", progress: "" }))
+    Array.from({ length: count }, (_, index) => ({ id: `pending-${index}`, title: "", status: "", progress: "", completionPercent: 0 }))
+
+const ProjectMilestoneRow = (props: { readonly milestone: CoursePersonalProjectMilestoneRow; readonly index: number; readonly isLoading: boolean }) => {
+    const milestone = props.milestone
+    const content = <div className={projectMilestoneClassName(milestone.tone)}>
+        <div className={projectMilestoneNumberClassName}>{String(props.index + 1).padStart(2, "0")}</div>
+        <div className={projectMilestoneIdentityClassName}>
+            <div className={projectMilestoneMetaClassName}>
+                <Text props={{ content: milestone.status, size: "xs" }} isLoading={props.isLoading} />
+                <Badge props={{ content: milestone.progress, tone: milestone.tone }} isLoading={props.isLoading} />
+            </div>
+            <Text props={{ content: milestone.title, size: "sm", weight: "semibold", isPressLabel: milestone.href !== undefined }} isLoading={props.isLoading} />
+            <div className={projectMilestoneProgressClassName}>
+                <Progress props={{ value: milestone.completionPercent, label: `${milestone.title}: ${milestone.progress}` }} isLoading={props.isLoading} />
+            </div>
+        </div>
+        {milestone.href === undefined ? null : <Icon props={{ name: "disclosure", role: "chip" }} />}
+    </div>
+
+    return milestone.href === undefined || props.isLoading
+        ? content
+        : <PressableSurface label={milestone.title} href={milestone.href} hover="label">{content}</PressableSurface>
+}
 
 /** Render a mission-control overview: next decision, roadmap, progress evidence and repository. */
 export const CoursePersonalProjectBase = (props: CoursePersonalProjectProps) => {
@@ -115,12 +149,21 @@ export const CoursePersonalProjectBase = (props: CoursePersonalProjectProps) => 
             <div className={projectStackClassName}>
                 <SurfaceCard props={{ label: props.data.nextTaskLabel }} isLoading={loading}>
                     <div className={projectNextTaskClassName}>
-                        {props.data.nextTask === undefined ? null : <Text props={{ content: props.data.nextTask.milestone, size: "xs", tone: "muted" }} isLoading={loading} />}
+                        {props.data.nextTask === undefined ? null : <div className={projectCurrentTaskHeaderClassName}>
+                            <Badge props={{ content: props.data.nextTask.milestone, tone: "accent" }} isLoading={loading} />
+                            <Text props={{ content: props.data.nextTask.evidence, size: "xs" }} isLoading={loading} />
+                        </div>}
                         {props.data.nextTask === undefined && !loading ? null : <Heading props={{ content: props.data.nextTask?.title, level: 2 }} isLoading={loading} />}
-                        {props.data.nextTask === undefined ? null : <Text props={{ content: props.data.nextTask.evidence, size: "sm", tone: "muted" }} isLoading={loading} />}
                         {props.data.nextTask === undefined && !loading
                             ? <Text props={{ content: props.data.allCompleteLabel, size: "sm", tone: "muted" }} />
-                            : <Button props={{ label: props.data.continueLabel, variant: "primary", size: "md", icon: "next", iconPlacement: "trailing" }} on={loading ? undefined : { press: () => props.data.nextTask === undefined ? undefined : props.on?.openTask?.(props.data.nextTask.id) }} isLoading={loading} />}
+                            : props.data.nextTask === undefined || loading
+                                ? <div className={projectCurrentTaskLinkClassName} aria-hidden="true"><span>{props.data.continueLabel}</span></div>
+                                : <PressableSurface label={props.data.continueLabel} href={props.data.nextTask.href} hover="surface">
+                                    <span className={projectCurrentTaskLinkClassName}>
+                                        <span className={projectCurrentTaskLinkCopyClassName}>{props.data.continueLabel}</span>
+                                        <Icon props={{ name: "next", role: "chip" }} />
+                                    </span>
+                                </PressableSurface>}
                     </div>
                 </SurfaceCard>
 
@@ -135,10 +178,10 @@ export const CoursePersonalProjectBase = (props: CoursePersonalProjectProps) => 
                     >
                         {milestones.length === 0 && !loading
                             ? <EmptyNotice props={{ message: props.data.roadmapEmptyLabel }} />
-                            : <div className={projectRoadmapRowsClassName}>{milestones.map((milestone) => <EvidenceRow
+                            : <div className={projectRoadmapRowsClassName}>{milestones.map((milestone, index) => <ProjectMilestoneRow
                                 key={milestone.id}
-                                props={{ title: milestone.title, subtitle: milestone.status, fact: milestone.progress, factTone: milestone.tone, isPressable: milestone.targetTaskId !== undefined }}
-                                on={milestone.targetTaskId === undefined ? undefined : { press: () => props.on?.openTask?.(milestone.targetTaskId ?? "") }}
+                                milestone={milestone}
+                                index={index}
                                 isLoading={loading}
                             />)}</div>}
                     </SurfaceListCard>
@@ -149,9 +192,7 @@ export const CoursePersonalProjectBase = (props: CoursePersonalProjectProps) => 
                 <SurfaceCard props={{ label: props.data.completionLabel, fact: props.data.completionPercentLabel }} isLoading={loading}>
                     <div className={projectStackClassName}>
                         <Progress props={{ value: props.data.completionPercent, label: props.data.completionLabel }} isLoading={loading} />
-                        <SurfaceListCard props={{ label: props.data.completionLabel, isNested: true, isLabelHidden: true }} isLoading={loading}>
-                            {props.data.completionFacts.map((fact) => <EvidenceRow key={fact.label} props={{ title: fact.label, fact: fact.value }} isLoading={loading} />)}
-                        </SurfaceListCard>
+                        <div className={projectCompletionFactsClassName}>{props.data.completionFacts.map((fact) => <EvidenceRow key={fact.label} props={{ title: fact.label, fact: fact.value }} isLoading={loading} />)}</div>
                     </div>
                 </SurfaceCard>
 
