@@ -95,6 +95,25 @@ describe("CourseLearnAiChat", () => {
         expect(mocks.quota.mutate).toHaveBeenCalled()
     })
 
+    it("never renders the machine-owned course-advisor envelope", async () => {
+        const envelope = "<!--starci-course-advisor:{\"intent\":\"answer\",\"recommendations\":[]}-->"
+        mocks.sessions.data = { sessions: [{ id: "session-1", title: "Thread", updatedAt: "2026-08-27T00:00:00.000Z" }] }
+        mocks.history.data = { messages: [{ role: "assistant", content: `Persisted answer\n${envelope}` }] }
+        render(<CourseLearnAiChat {...input} initialPrompt="Explain this" />)
+
+        expect(screen.getByTestId("props")).toHaveTextContent("Persisted answer")
+        expect(screen.getByTestId("props")).not.toHaveTextContent("starci-course-advisor")
+
+        fireEvent.click(screen.getByText("send"))
+        await waitFor(() => expect(mocks.stream.ask).toHaveBeenCalled())
+        const request = mocks.stream.ask.mock.calls[0]![0]
+        act(() => request.onDelta(`Streamed answer\n${envelope}`))
+        expect(screen.getByTestId("props")).toHaveTextContent("starci-course-advisor")
+        act(() => request.onDone(undefined))
+        expect(screen.getByTestId("props")).toHaveTextContent("Streamed answer")
+        expect(screen.getByTestId("props")).not.toHaveTextContent("starci-course-advisor")
+    })
+
     it("surfaces creation, stream and quota failures and exposes controls", async () => {
         mocks.create.trigger.mockRejectedValueOnce(new Error("offline"))
         const view = render(<CourseLearnAiChat {...input} initialPrompt="Question" onClearSelection={mocks.clear} />)

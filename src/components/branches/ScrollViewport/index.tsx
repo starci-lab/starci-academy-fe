@@ -1,10 +1,10 @@
 import type { ReactNode } from "react"
 import { ScrollShadow } from "@heroui/react"
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { authenticationFormScrollViewportClassName, pricingRailScrollViewportClassName } from "./classNames"
+import { aiTranscriptScrollViewportClassName, authenticationFormScrollViewportClassName, pricingRailScrollViewportClassName } from "./classNames"
 
 /** Approved bounded region whose content owns its internal scrolling. */
-export type ScrollViewportBoundary = "form-surface" | "pricing-rail" | "learn-navigation-groups" | "content-map-modules" | "content-reader-main" | "content-outline-rail"
+export type ScrollViewportBoundary = "form-surface" | "pricing-rail" | "ai-transcript" | "learn-navigation-groups" | "content-map-modules" | "content-reader-main" | "content-outline-rail"
 /** Traditional children API for a bounded viewport. */
 export type ScrollViewportProps = { readonly boundary: ScrollViewportBoundary; readonly children: ReactNode }
 
@@ -21,7 +21,8 @@ export const ScrollViewport = (props: ScrollViewportProps) => {
             </ScrollShadow>
         )
     }
+    if (boundary === "ai-transcript") return <ScrollShadow className={aiTranscriptScrollViewportClassName} orientation="vertical">{children}</ScrollShadow>
     return boundary === "pricing-rail"
-        ? <SurfaceCard><div className={pricingRailScrollViewportClassName}>{children}</div></SurfaceCard>
+        ? <SurfaceCard><ScrollShadow className={pricingRailScrollViewportClassName} orientation="vertical">{children}</ScrollShadow></SurfaceCard>
         : children
 }

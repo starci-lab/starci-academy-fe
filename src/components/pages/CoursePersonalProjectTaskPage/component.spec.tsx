@@ -41,6 +41,7 @@ describe("CoursePersonalProjectTaskBase", () => {
         expect(screen.getByRole("heading", { name: "Steps", level: 3 })).toBeInTheDocument()
         expect(screen.getByText("Handles timeouts")).toBeInTheDocument()
         expect(screen.getByText("Paste the repository that contains your implementation.")).toBeInTheDocument()
+        expect(screen.getByLabelText("Repository")).toHaveValue("https://github.com/starci/demo")
         expect(screen.getByRole("button", { name: "Submit for review" })).toBeEnabled()
         expect(screen.getByRole("button", { name: "Submit for review" })).toBeEnabled()
     })
@@ -74,7 +75,7 @@ describe("CoursePersonalProjectTaskBase", () => {
         expect(screen.getAllByRole("link", { name: "Back" })).toHaveLength(2)
         expect(screen.getByRole("button", { name: "Settings" })).toBeDisabled()
         expect(screen.getByRole("button", { name: "Submit for review" })).toBeDisabled()
-        expect(screen.getByRole("button", { name: "View feedback" })).toBeDisabled()
+        expect(screen.queryByRole("button", { name: "View feedback" })).not.toBeInTheDocument()
     })
 
     it("preserves every authored surface when ancillary workspace data is unavailable", () => {

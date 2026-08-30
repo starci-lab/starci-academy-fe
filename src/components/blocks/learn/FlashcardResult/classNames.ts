@@ -14,9 +14,15 @@ export const flashcardStatClassName = cn("flex", "flex-col", "gap-2", "rounded-x
 export const flashcardResultBodyClassName = cn("flex", "w-full", "min-w-0", "flex-col", "items-stretch", "gap-6", "md:flex-row", "md:items-start", "md:gap-8")
 /** Diagnostic evidence column. */
 export const flashcardEvidenceClassName = cn("flex", "w-full", "min-w-0", "flex-col", "gap-6", "md:grow")
+/** Bounded next-action rail prevents an empty full-width card beside evidence. */
+export const flashcardNextActionRailClassName = cn("w-full", "md:w-80", "md:shrink-0")
 /** Joined fact list. */
 export const flashcardFactListClassName = cn("flex", "w-full", "min-w-0", "flex-col", "divide-y", "divide-separator", "overflow-hidden", "p-0")
 /** One comparable fact row. */
 export const flashcardFactRowClassName = cn("flex", "flex-row", "flex-wrap", "items-baseline", "justify-between", "gap-2", "rounded-xl", "p-4")
 /** Continuously reachable next-action panel. */
-export const nextActionClassName = cn("flex", "w-full", "min-w-0", "flex-col", "gap-4", "p-4", "md:w-80", "md:shrink-0")
+export const nextActionClassName = cn("flex", "w-full", "min-w-0", "flex-col", "gap-4", "p-4")
+/** Dedicated result recovery owner; never leave the route as a blank canvas. */
+export const flashcardResultRecoveryClassName = cn("flex", "min-h-72", "min-w-0", "flex-col", "items-start", "justify-center", "gap-4", "p-6", "sm:p-8")
+/** Recovery and next actions wrap safely at constrained widths. */
+export const flashcardResultActionClassName = cn("flex", "min-w-0", "flex-wrap", "gap-2")

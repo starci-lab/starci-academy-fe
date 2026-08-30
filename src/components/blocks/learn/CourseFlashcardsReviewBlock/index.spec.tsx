@@ -97,4 +97,15 @@ describe("CourseFlashcardsReviewBlock", () => {
         act(() => { mocks.input?.on.openQuiz("deck-1") })
         expect(mocks.push).toHaveBeenCalledWith("/courses/fullstack-mastery/learn/flashcards/quiz?deckId=deck-1")
     })
+
+    it("filters only the deck library while keeping course-level quiz availability stable", async () => {
+        render(<CourseFlashcardsReviewBlock displayId="fullstack-mastery" />)
+        expect(mocks.input?.props.quizCardCount).toBe(5)
+
+        act(() => { mocks.input?.on.changeSearch("missing deck") })
+
+        await waitFor(() => expect(mocks.input?.props.decks).toHaveLength(0))
+        expect(mocks.input?.props.quizCardCount).toBe(5)
+        expect(mocks.input?.props.noResultsTitle).toBe("No matching decks")
+    })
 })

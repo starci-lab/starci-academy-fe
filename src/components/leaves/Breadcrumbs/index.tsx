@@ -32,6 +32,8 @@ export type BreadcrumbsData = {
     readonly label: string
     /** Keep every ancestor visible when each step communicates meaningful journey state. */
     readonly showFullTrail?: boolean
+    /** Localized compact label used when a deep trail resolves to its nearest useful ancestor. */
+    readonly backLabel?: string
 }
 
 /** One handler per step id, so the caller decides what "go back there" means. */
@@ -77,7 +79,7 @@ export const Breadcrumbs = (props: BreadcrumbsProps) => {
                 className={breadcrumbsBackLinkClassName}
             >
                 <Icon props={{ name: "back", role: "chip" }} />
-                {BACK_LABEL}
+                {data.backLabel ?? BACK_LABEL}
             </HeroLink>
         )
     }

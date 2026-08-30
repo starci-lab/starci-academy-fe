@@ -56,7 +56,9 @@ describe("personal-project workspace transport", () => {
     it("syncs only the repository settings named by the caller", async () => {
         const request = { courseId: "course-1", branch: "main", githubToken: "secret" }
         await mutateSyncPersonalProjectGithub(request)
-        expect(print(mocks.mutate.mock.calls[0][0].mutation)).toContain("syncPersonalProjectGithub")
+        const document = print(mocks.mutate.mock.calls[0][0].mutation)
+        expect(document).toContain("syncPersonalProjectGithub")
+        expect(document).not.toMatch(/syncPersonalProjectGithub[\s\S]*\bdata\b/u)
         expect(mocks.mutate.mock.calls[0][0].variables).toEqual({ request })
     })
 })

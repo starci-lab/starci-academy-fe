@@ -7,6 +7,20 @@ import { Text } from "@/components/leaves/Text"
 import { CartLine } from "@/components/blocks/commerce/CartLine"
 import { type CartLineData } from "@/components/blocks/commerce/CartLine/component"
 import { OrderSummaryBase, type OrderSummaryLabels } from "@/components/blocks/commerce/OrderSummary/component"
+import { CheckoutOverlayBase, type CheckoutOverlayData } from "@/components/overlays/commerce/CheckoutOverlay/component"
+import { SurfaceCard } from "@/components/branches/SurfaceCard"
+import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
+import {
+    cartActionsClassName,
+    cartHeaderClassName,
+    cartListClassName,
+    cartListItemClassName,
+    cartNoticeClassName,
+    cartPageClassName,
+    cartSummaryContentClassName,
+    cartSummaryRailClassName,
+    cartWorkspaceClassName,
+} from "./classNames"
 
 /** Aggregate transport state for the cart block. */
 export type CartBlockState = "pending" | "ready" | "empty" | "failed"
@@ -17,7 +31,7 @@ export type CartBlockLabels = {
     readonly navCart: string
     readonly title: string
     readonly summary: OrderSummaryLabels
-    readonly installmentHint: string
+    readonly paymentHint: string
     readonly checkout: string
     readonly clearAll: string
     readonly confirmClearAll: string
@@ -35,6 +49,7 @@ export type CartBlockData = {
     readonly savings?: string
     readonly total?: string
     readonly hasPricingFailed?: boolean
+    readonly payment?: CheckoutOverlayData
 }
 
 /** User actions emitted by the cart block. */
@@ -43,6 +58,8 @@ export type CartBlockActions = {
     readonly clearAll?: () => void
     readonly goHome?: () => void
     readonly browse?: () => void
+    readonly pay?: () => void
+    readonly dismissPayment?: () => void
 }
 
 /** Complete pure-renderer input for the cart block. */
@@ -65,20 +82,53 @@ export const CartBlockBase = (props: CartBlockProps) => {
     )
     const lines = isLoading ? restingLines : props.data.lines ?? []
     return (
-        <div>
-            <Breadcrumbs props={{ label: labels.title, steps: [{ id: "home", label: labels.navHome }, { id: "cart", label: labels.navCart }] }} on={{ home: props.on?.goHome }} />
-            <Heading props={{ content: labels.title, level: 1 }} />
-            {showsNotice ? <EmptyNotice props={{ icon: "cart", message: props.blockState === "failed" ? labels.failedMessage : labels.emptyMessage, actionLabel: props.blockState === "failed" ? labels.failedAction : labels.emptyAction }} on={{ act: props.on?.browse }} /> : (
-                <>
-                    <div>{lines.map((line) => <CartLine key={line.courseId} state={isLoading ? "pending" : "ready"} line={line} />)}</div>
-                    <OrderSummaryBase
-                        state={isLoading ? "pending" : props.data.hasPricingFailed === true ? "failed" : "ready"}
-                        props={{ labels: labels.summary, subtotal: props.data.subtotal, savings: props.data.savings, total: props.data.total }}
-                    />
-                    {showsNotice || isLoading || props.data.hasPricingFailed === true ? null : <Text props={{ content: labels.installmentHint, size: "sm", tone: "muted" }} />}
-                    <div><Button props={{ label: labels.checkout, variant: "primary", disabled: isLoading }} on={{ press: props.on?.checkout }} /><ConfirmButton props={{ label: labels.clearAll, confirmLabel: labels.confirmClearAll, disabled: isLoading }} on={{ confirm: props.on?.clearAll }} /></div>
-                </>
+        <>
+            <main className={cartPageClassName}>
+                <header className={cartHeaderClassName}>
+                    <Breadcrumbs props={{ label: labels.title, steps: [{ id: "home", label: labels.navHome }, { id: "cart", label: labels.navCart }] }} on={{ home: props.on?.goHome }} />
+                    <Heading props={{ content: labels.title, level: 1 }} />
+                </header>
+                {showsNotice ? (
+                    <SurfaceCard>
+                        <div className={cartNoticeClassName}>
+                            <EmptyNotice props={{ icon: "cart", message: props.blockState === "failed" ? labels.failedMessage : labels.emptyMessage, actionLabel: props.blockState === "failed" ? labels.failedAction : labels.emptyAction }} on={{ act: props.on?.browse }} />
+                        </div>
+                    </SurfaceCard>
+                ) : (
+                    <div className={cartWorkspaceClassName}>
+                        <SurfaceListCard props={{ label: labels.title, isLabelHidden: true }} isLoading={isLoading}>
+                            <ul className={cartListClassName}>
+                                {lines.map((line) => (
+                                    <li className={cartListItemClassName} key={line.courseId}>
+                                        <CartLine state={isLoading ? "pending" : "ready"} line={line} />
+                                    </li>
+                                ))}
+                            </ul>
+                        </SurfaceListCard>
+                        <aside className={cartSummaryRailClassName} aria-label={labels.summary.total}>
+                            <SurfaceCard>
+                                <div className={cartSummaryContentClassName}>
+                                    <OrderSummaryBase
+                                        state={isLoading ? "pending" : props.data.hasPricingFailed === true ? "failed" : "ready"}
+                                        props={{ labels: labels.summary, subtotal: props.data.subtotal, savings: props.data.savings, total: props.data.total }}
+                                    />
+                                    {isLoading || props.data.hasPricingFailed === true ? null : <Text props={{ content: labels.paymentHint, size: "sm", tone: "muted" }} />}
+                                    <div className={cartActionsClassName}>
+                                        <Button props={{ label: labels.checkout, variant: "primary", disabled: isLoading }} on={{ press: props.on?.checkout }} />
+                                        <ConfirmButton props={{ label: labels.clearAll, confirmLabel: labels.confirmClearAll, disabled: isLoading }} on={{ confirm: props.on?.clearAll }} />
+                                    </div>
+                                </div>
+                            </SurfaceCard>
+                        </aside>
+                    </div>
+                )}
+            </main>
+            {props.data.payment === undefined ? null : (
+                <CheckoutOverlayBase
+                    props={props.data.payment}
+                    on={{ pay: props.on?.pay, dismiss: props.on?.dismissPayment }}
+                />
             )}
-        </div>
+        </>
     )
 }

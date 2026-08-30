@@ -1,6 +1,7 @@
-import { useId, type ReactNode } from "react"
+import { Accordion } from "@heroui/react"
+import { type Key, type ReactNode } from "react"
 import { VerticalScrollRegion } from "../../composite/VerticalScrollRegion/index.js"
-import { accordionCardClassName, accordionHeadingClassName, accordionPanelClassName, accordionRowClassName, accordionScrollRegionClassName, getAccordionShellClassName, accordionTriggerClassName } from "./classNames.js"
+import { accordionBodyClassName, accordionCardClassName, accordionHeadingClassName, accordionPanelClassName, accordionRowClassName, accordionScrollRegionClassName, getAccordionShellClassName, accordionTriggerClassName } from "./classNames.js"
 
 export type SurfaceAccordionCardItem<Summary, Body> = {
     readonly id: string
@@ -50,61 +51,61 @@ const SurfaceAccordionRows = <Summary, Body>({
     onItemOpenChange,
     isScrollable = false,
 }: SurfaceAccordionRowsProps<Summary, Body>) => {
-    const ownerId = useId()
     const bounded = depth !== undefined
+    const expandedKeys = new Set(items.filter((item) => item.isOpen).map((item) => item.id))
+
+    const onExpandedChange = (nextKeys: Set<Key>) => {
+        const nextIds = new Set([...nextKeys].map(String))
+        for (const item of items) {
+            const nextOpen = nextIds.has(item.id)
+            if (nextOpen !== item.isOpen) onItemOpenChange(item.id, nextOpen)
+        }
+    }
 
     return (
         <div
             className={accordionCardClassName}
             data-grammar-surface-accordion-card="true"
         >
-            <div
-                className={getAccordionShellClassName(bounded)}
-                data-grammar-accordion-shell="true"
-                data-grammar-scroll={isScrollable ? "contained" : "page"}
-                data-grammar-surface={bounded ? "true" : undefined}
-                data-grammar-surface-depth={depth}
-                data-surface-context={depth === "nested" ? "nested" : depth === "top" ? "page" : undefined}
-            >
-                <VerticalScrollRegion className={accordionScrollRegionClassName} isScrollable={isScrollable}>
-                    {items.map((item, index) => {
-                        const triggerId = `${ownerId}-trigger-${index}`
-                        const panelId = `${ownerId}-panel-${index}`
+            <VerticalScrollRegion className={accordionScrollRegionClassName} isScrollable={isScrollable}>
+                <Accordion.Root
+                    allowsMultipleExpanded
+                    className={getAccordionShellClassName(bounded) ?? ""}
+                    data-grammar-accordion-shell="true"
+                    data-grammar-scroll={isScrollable ? "contained" : "page"}
+                    data-grammar-surface={bounded ? "true" : undefined}
+                    data-grammar-surface-depth={depth}
+                    data-surface-context={depth === "nested" ? "nested" : depth === "top" ? "page" : undefined}
+                    expandedKeys={expandedKeys}
+                    onExpandedChange={onExpandedChange}
+                >
+                    {items.map((item) => {
                         return (
-                            <div
-                                className={accordionRowClassName}
+                            <Accordion.Item
+                                className={accordionRowClassName ?? ""}
                                 data-grammar-accordion-row="true"
                                 data-grammar-disclosure-state={item.isOpen ? "open" : "closed"}
+                                id={item.id}
+                                {...(item.isDisabled === undefined ? {} : { isDisabled: item.isDisabled })}
                                 key={item.id}
                             >
-                                <h3 className={accordionHeadingClassName}>
-                                    <button
-                                        aria-controls={panelId}
-                                        aria-expanded={item.isOpen}
-                                        className={accordionTriggerClassName}
-                                        disabled={item.isDisabled}
-                                        id={triggerId}
-                                        onClick={() => onItemOpenChange(item.id, !item.isOpen)}
-                                        type="button"
+                                <Accordion.Heading className={accordionHeadingClassName ?? ""}>
+                                    <Accordion.Trigger
+                                        className={accordionTriggerClassName ?? ""}
                                     >
                                         {renderSummary(item.summaryRender)}
-                                    </button>
-                                </h3>
-                                {item.isOpen ? (
-                                    <div
-                                        aria-labelledby={triggerId}
-                                        className={accordionPanelClassName}
-                                        id={panelId}
-                                        role="region"
-                                    >
+                                    </Accordion.Trigger>
+                                </Accordion.Heading>
+                                <Accordion.Panel className={accordionPanelClassName ?? ""} role="region">
+                                    <Accordion.Body className={accordionBodyClassName ?? ""}>
                                         {renderBody(item.bodyRender)}
-                                    </div>
-                                ) : null}
-                            </div>
+                                    </Accordion.Body>
+                                </Accordion.Panel>
+                            </Accordion.Item>
                         )
                     })}
-                </VerticalScrollRegion>
-            </div>
+                </Accordion.Root>
+            </VerticalScrollRegion>
         </div>
     )
 }
@@ -124,6 +125,7 @@ export const SurfaceAccordionCard = <Summary, Body>(props: SurfaceAccordionCardP
             renderSummary={props.renderSummary}
             renderBody={props.renderBody}
             onItemOpenChange={(_id, isOpen) => props.onOpenChange(isOpen)}
+            {...(props.isScrollable === undefined ? {} : { isScrollable: props.isScrollable })}
         />
     )
     : (
@@ -133,5 +135,6 @@ export const SurfaceAccordionCard = <Summary, Body>(props: SurfaceAccordionCardP
             renderSummary={props.renderSummary}
             renderBody={props.renderBody}
             onItemOpenChange={props.onItemOpenChange}
+            {...(props.isScrollable === undefined ? {} : { isScrollable: props.isScrollable })}
         />
     )

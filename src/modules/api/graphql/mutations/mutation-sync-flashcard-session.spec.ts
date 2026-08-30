@@ -34,7 +34,8 @@ const quizRequest: SyncFlashcardQuizSessionRequest = {
     mode: "quiz",
     sessionId: "s-2",
     currentIndex: 2,
-    results: [{ cardId: "card-1", correctBlanks: 1, totalBlanks: 2 }],
+    expectedVersion: 3,
+    selections: [{ blankId: "card-1:c1:o1", tokenId: "00000000-0000-4000-8000-000000000001" }],
 }
 
 const reviewVariables = {
@@ -125,42 +126,53 @@ describe("mutationSyncFlashcardSession - due review", () => {
 })
 
 describe("mutationSyncFlashcardSession - quiz", () => {
-    it("sends the scored results rather than the review counters", async () => {
+    it("sends opaque selections with optimistic concurrency rather than client-authored scores", async () => {
+        mocks.mutate.mockResolvedValue({
+            data: {
+                syncFlashcardQuizSessionProgress: {
+                    success: true,
+                    message: "ok",
+                    data: { sessionId: "s-2", contractVersion: 1, items: [], currentIndex: 2, answerState: [], answerVersion: 4, status: "in_progress" },
+                },
+            },
+        })
         await mutationSyncFlashcardSession(quizRequest)
         expect(sentDocument()).toContain("syncFlashcardQuizSessionProgress(request: $request)")
         expect(mocks.mutate.mock.calls[0][0].variables).toEqual({
             request: {
                 sessionId: "s-2",
                 currentIndex: 2,
-                results: [{ cardId: "card-1", correctBlanks: 1, totalBlanks: 2 }],
+                expectedVersion: 3,
+                selections: [{ blankId: "card-1:c1:o1", tokenId: "00000000-0000-4000-8000-000000000001" }],
             },
         })
         expect(mocks.mutate.mock.calls[0][0].variables.request).not.toHaveProperty("gradedIndexes")
     })
 
-    it("reports true on a quiz acknowledgement", async () => {
+    it("returns the authoritative quiz snapshot on acknowledgement", async () => {
+        const data = { sessionId: "s-2", contractVersion: 1, items: [], currentIndex: 2, answerState: [], answerVersion: 4, status: "in_progress" }
         mocks.mutate.mockResolvedValue({
-            data: { syncFlashcardQuizSessionProgress: { success: true, message: "ok", data: { success: true } } },
+            data: { syncFlashcardQuizSessionProgress: { success: true, message: "ok", data } },
         })
-        await expect(mutationSyncFlashcardSession(quizRequest)).resolves.toBe(true)
+        await expect(mutationSyncFlashcardSession(quizRequest)).resolves.toEqual(data)
     })
 
-    it("reports false on a quiz refusal", async () => {
+    it("surfaces a quiz refusal so the session can keep its recovery state", async () => {
         mocks.mutate.mockResolvedValue({
-            data: { syncFlashcardQuizSessionProgress: { success: true, message: "stale", data: { success: false } } },
+            data: { syncFlashcardQuizSessionProgress: { success: false, message: "stale", data: undefined } },
         })
-        await expect(mutationSyncFlashcardSession(quizRequest)).resolves.toBe(false)
+        await expect(mutationSyncFlashcardSession(quizRequest)).rejects.toThrow("stale")
     })
 
-    it("reports false when the quiz envelope carried no payload", async () => {
+    it("surfaces the envelope message when the quiz payload is missing", async () => {
         mocks.mutate.mockResolvedValue({
             data: { syncFlashcardQuizSessionProgress: { success: false, message: "gone", data: undefined } },
         })
-        await expect(mutationSyncFlashcardSession(quizRequest)).resolves.toBe(false)
+        await expect(mutationSyncFlashcardSession(quizRequest)).rejects.toThrow("gone")
     })
 
-    it("reports false when the transport answered without a data root", async () => {
-        await expect(mutationSyncFlashcardSession(quizRequest)).resolves.toBe(false)
+    it("surfaces a stable fallback when the transport answered without a data root", async () => {
+        await expect(mutationSyncFlashcardSession(quizRequest)).rejects.toThrow("QUIZ_SYNC_REJECTED")
     })
 
     it("propagates a rejected snapshot write", async () => {

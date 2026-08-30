@@ -1,4 +1,4 @@
-import { fireEvent, render } from "@testing-library/react"
+import { fireEvent, render, waitFor } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import type { PropsWithChildren } from "react"
 import type * as HeroUi from "@heroui/react"
@@ -24,6 +24,7 @@ vi.mock("@heroui/react", () => {
         mocks.openChange = input.onOpenChange
         return <div>{input.children}</div>
     }
+    DrawerRoot.Trigger = () => null
     DrawerRoot.Backdrop = (input: VendorPartProps) => <div>{input.children}</div>
     DrawerRoot.Content = (input: VendorContentProps) => (
         <div data-testid="drawer-content" data-placement={input.placement}>{input.children}</div>
@@ -90,5 +91,32 @@ describe("DrawerBranch", () => {
 
         expect(getByRole("heading", { name: resolvedCopy.aiTitle })).toBeInTheDocument()
         expect(getByText(resolvedCopy.aiBody)).toBeInTheDocument()
+    })
+
+    it("locks the page at the viewport origin while open and restores its scroll position", async () => {
+        const scrollTo = vi.spyOn(window, "scrollTo").mockImplementation(() => undefined)
+        Object.defineProperty(window, "scrollX", { configurable: true, value: 12 })
+        Object.defineProperty(window, "scrollY", { configurable: true, value: 640 })
+
+        const { rerender } = render(
+            <DrawerBranch isOpen title={resolvedCopy.aiTitle} onDismiss={() => undefined}>
+                {drawerBody(resolvedCopy.aiBody)}
+            </DrawerBranch>,
+        )
+
+        await waitFor(() => expect(scrollTo).toHaveBeenCalledWith({ left: 0, top: 0, behavior: "auto" }))
+        expect(document.documentElement.style.overflow).toBe("hidden")
+        expect(document.body.style.overflow).toBe("hidden")
+
+        rerender(
+            <DrawerBranch isOpen={false} title={resolvedCopy.aiTitle} onDismiss={() => undefined}>
+                {drawerBody(resolvedCopy.aiBody)}
+            </DrawerBranch>,
+        )
+
+        await waitFor(() => expect(scrollTo).toHaveBeenCalledWith({ left: 12, top: 640, behavior: "auto" }))
+        expect(document.documentElement.style.overflow).toBe("")
+        expect(document.body.style.overflow).toBe("")
+        scrollTo.mockRestore()
     })
 })

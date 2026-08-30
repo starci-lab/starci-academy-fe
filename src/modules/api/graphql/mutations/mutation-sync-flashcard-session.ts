@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client"
 import { createApolloClient } from "../clients/create-apollo-client"
 import type { GraphQLResponse } from "../types"
-import type { FlashcardQuizAnswer, FlashcardReviewKind } from "../queries/query-my-in-progress-flashcard-session"
+import type { FlashcardQuizItem, FlashcardQuizSelection, FlashcardReviewKind } from "../queries/query-my-in-progress-flashcard-session"
 
 /** Progress snapshot shared by deck and due-review session stores. */
 export type SyncFlashcardReviewSessionRequest = {
@@ -19,7 +19,19 @@ export type SyncFlashcardQuizSessionRequest = {
     readonly mode: "quiz"
     readonly sessionId: string
     readonly currentIndex: number
-    readonly results: ReadonlyArray<FlashcardQuizAnswer>
+    readonly expectedVersion: number
+    readonly selections: ReadonlyArray<FlashcardQuizSelection>
+}
+
+/** Authoritative quiz state returned after a versioned sync. */
+export type SyncFlashcardQuizSessionData = {
+    readonly sessionId: string
+    readonly contractVersion: number
+    readonly items: ReadonlyArray<FlashcardQuizItem>
+    readonly currentIndex: number
+    readonly answerState: ReadonlyArray<FlashcardQuizSelection>
+    readonly answerVersion: number
+    readonly status: string
 }
 
 /** Backend-proven progress snapshots supported by the live page. */
@@ -57,7 +69,11 @@ const syncQuizDocument = gql`
     mutation SyncFlashcardQuizSessionProgress($request: SyncFlashcardQuizSessionProgressRequest!) {
         syncFlashcardQuizSessionProgress(request: $request) {
             success message error
-            data { success }
+            data {
+                sessionId contractVersion currentIndex answerVersion status
+                answerState { blankId tokenId }
+                items { cardId question clozeText blanks { blankId hint } tokens { tokenId label } }
+            }
         }
     }
 `
@@ -72,7 +88,7 @@ const rateDocument = gql`
 `
 
 /** Dispatches a resumable progress snapshot to its exact backend session family. */
-export const mutationSyncFlashcardSession = async (request: SyncFlashcardSessionRequest): Promise<boolean> => {
+export const mutationSyncFlashcardSession = async (request: SyncFlashcardSessionRequest): Promise<boolean | SyncFlashcardQuizSessionData | null> => {
     const apollo = createApolloClient({ withAuth: true })
     if (request.mode === "review") {
         const variables = {
@@ -96,18 +112,21 @@ export const mutationSyncFlashcardSession = async (request: SyncFlashcardSession
         return response.data?.syncFlashcardReviewSessionProgress.data?.success === true
     }
     const response = await apollo.mutate<{
-        readonly syncFlashcardQuizSessionProgress: GraphQLResponse<{ readonly success: boolean }>
+        readonly syncFlashcardQuizSessionProgress: GraphQLResponse<SyncFlashcardQuizSessionData>
     }>({
         mutation: syncQuizDocument,
         variables: {
             request: {
                 sessionId: request.sessionId,
                 currentIndex: request.currentIndex,
-                results: request.results,
+                expectedVersion: request.expectedVersion,
+                selections: request.selections.map(({ blankId, tokenId }) => ({ blankId, tokenId })),
             },
         },
     })
-    return response.data?.syncFlashcardQuizSessionProgress.data?.success === true
+    const envelope = response.data?.syncFlashcardQuizSessionProgress
+    if (envelope?.data == null) throw new Error(envelope?.error ?? envelope?.message ?? "QUIZ_SYNC_REJECTED")
+    return envelope.data
 }
 
 /** Grades one review card and returns its backend-computed scheduling outcome. */

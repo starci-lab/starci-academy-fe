@@ -14,14 +14,17 @@ import {
     useQueryMyAiQuotaSwr,
 } from "@/hooks"
 import { useGlobalAiChat } from "@/modules/ai/global-ai-chat-context"
+import { CourseAdvisorRecommendationCard } from "@/components/blocks/ai/CourseAdvisorRecommendationCard"
 import {
     resolveContentAiAnchorRequest,
+    resolveContentAiExperience,
 } from "@/modules/ai/content-ai-route-context"
 import {
     buildContentAiQuestion,
     formatContentAiContextSummary,
     parseContentAiQuestion,
 } from "@/modules/ai/content-ai-selection-context"
+import { parseCourseAdvisorResponse } from "@/modules/ai/course-advisor-response"
 import {
     StarCiAiChatBase,
     STARCI_AI_CHAT_STATES,
@@ -91,6 +94,7 @@ export const StarCiAiChat = (props: StarCiAiChatProps) => {
         () => resolveContentAiAnchorRequest(owner.anchor, course.data?.id),
         [course.data?.id, owner.anchor],
     )
+    const experience = resolveContentAiExperience(owner.anchor)
     const sessions = useQueryContentAiSessionsSwr(anchorRequest)
     const history = useQueryContentAiHistorySwr(activeSessionId)
     const quota = useQueryMyAiQuotaSwr()
@@ -126,20 +130,23 @@ export const StarCiAiChat = (props: StarCiAiChatProps) => {
     const persistedTurns = useMemo<ReadonlyArray<StarCiAiTurn>>(
         () => (history.data?.messages ?? []).map((turn, index) => {
             const parsed = turn.role === "user" ? parseContentAiQuestion(turn.content) : undefined
+            const advisor = turn.role === "assistant" ? parseCourseAdvisorResponse(turn.content) : undefined
             return {
                 id: `persisted-${index}`,
                 role: turn.role,
-                body: parsed?.question ?? turn.content,
+                body: parsed?.question ?? advisor?.body ?? turn.content,
                 quote: parsed?.selection?.quote,
                 quoteLanguage: parsed?.quoteLanguage,
+                courseAdvisor: advisor?.courseAdvisor,
             }
         }),
         [history.data?.messages],
     )
     const turns = [...persistedTurns, ...localTurns]
     const historyMode = mode === "history"
+    const historyOwnsTerminal = terminalState === "renaming" || terminalState === "archiving" || terminalState === "deleteConfirm" || terminalState === "historyFailed"
     const state: StarCiAiChatState = historyMode
-        ? resolveHistoryState(sessions.isLoading, sessions.error !== undefined, sessions.data?.sessions.length ?? 0)
+        ? historyOwnsTerminal ? terminalState : resolveHistoryState(sessions.isLoading, sessions.error !== undefined, sessions.data?.sessions.length ?? 0)
         : terminalState ?? resolveGeneralState({
             hasAnchor: anchorRequest !== null,
             isStreaming: stream.isStreaming,
@@ -226,12 +233,13 @@ export const StarCiAiChat = (props: StarCiAiChatProps) => {
         stream.ask({
             sessionId,
             ...anchorRequest,
+            experience,
             question: buildContentAiQuestion(draft, owner.codeContext),
             history: turns
                 .filter((turn) => !discardedIds.has(turn.id))
                 .map((turn) => ({ role: turn.role, content: turn.body })),
             onDelta: (delta) => setLocalTurns((current) => current.map((turn) => turn.id === assistantId ? { ...turn, body: `${turn.body}${delta}` } : turn)),
-            onDone: (error) => {
+            onDone: (error, courseAdvisor) => {
                 if (error !== undefined) {
                     const next = resolveStreamErrorState(error)
                     failedAttempt.current = { userId: userTurn.id, assistantId }
@@ -241,7 +249,7 @@ export const StarCiAiChat = (props: StarCiAiChatProps) => {
                     setTerminalState(next)
                     return
                 }
-                setLocalTurns((current) => current.map((turn) => turn.id === assistantId ? { ...turn, isPartial: false } : turn))
+                setLocalTurns((current) => current.map((turn) => turn.id === assistantId ? { ...turn, isPartial: false, courseAdvisor } : turn))
                 setDraft("")
                 setDraftKey((key) => key + 1)
                 owner.clearCodeContext()
@@ -265,6 +273,14 @@ export const StarCiAiChat = (props: StarCiAiChatProps) => {
     }
 
     const labels = {
+        eyebrow: experience === "course_advisor" ? t("identity.courseAdvisor") : t("identity.learningAssistant"),
+        subtitle: experience === "course_advisor" ? t("identity.courseAdvisorDescription") : t("identity.learningAssistantDescription"),
+        emptyTitle: experience === "course_advisor" ? t("empty.courseAdvisorTitle") : t("empty.learningTitle"),
+        emptyDescription: experience === "course_advisor" ? t("empty.courseAdvisorDescription") : t("empty.learningDescription"),
+        quickPrompts: experience === "course_advisor"
+            ? [t("prompts.goal"), t("prompts.compare")]
+            : [t("prompts.explain"), t("prompts.practice")],
+        recommendationList: t("recommendation.listLabel"),
         generalMode: t("modes.general"), historyMode: t("modes.history"),
         composer: t("composer.label"), placeholder: t("composer.placeholder"), send: t("actions.send"),
         stop: t("actions.stop"), retry: t("actions.retry"), clearContext: t("actions.clearContext"),
@@ -278,6 +294,11 @@ export const StarCiAiChat = (props: StarCiAiChatProps) => {
             ? t("quota.unavailable")
             : t("quota.remaining", { remaining: quota.data.credit.remainingWeek })
     }
+    const contextSummary = experience === "course_advisor"
+        ? owner.anchor.scope === "course"
+            ? t("context.course", { title: course.data?.title ?? owner.anchor.id ?? t("context.currentCourse") })
+            : t("context.catalog")
+        : formatContentAiContextSummary(owner.anchor, owner.codeContext)
 
     return (
         <StarCiAiChatBase
@@ -285,7 +306,7 @@ export const StarCiAiChat = (props: StarCiAiChatProps) => {
             props={{
                 labels,
                 mode,
-                contextSummary: formatContentAiContextSummary(owner.anchor, owner.codeContext),
+                contextSummary,
                 turns,
                 sessions: (sessions.data?.sessions ?? []).map((session) => ({
                     id: session.id,
@@ -297,6 +318,7 @@ export const StarCiAiChat = (props: StarCiAiChatProps) => {
                 draft,
                 draftKey,
                 quotaLabel,
+                recommendationCard: CourseAdvisorRecommendationCard,
             }}
             on={{
                 selectMode: setMode,
@@ -307,6 +329,10 @@ export const StarCiAiChat = (props: StarCiAiChatProps) => {
                     setMode("general")
                 },
                 changeDraft: setDraft,
+                usePrompt: (prompt) => {
+                    setDraft(prompt)
+                    setDraftKey((key) => key + 1)
+                },
                 send: () => void send(),
                 stop: stream.abort,
                 retry,

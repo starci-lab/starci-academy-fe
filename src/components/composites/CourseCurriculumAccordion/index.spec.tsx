@@ -39,6 +39,15 @@ describe("CourseCurriculumAccordion", () => {
                             description: "Build infrastructure from typed configuration.",
                             previews: [],
                         },
+                        {
+                            id: "observability",
+                            title: "Production observability",
+                            level: "advanced",
+                            levelLabel: "Advanced",
+                            summary: "2 contents · 48 min",
+                            description: "Trace failures across system boundaries.",
+                            previews: [],
+                        },
                     ],
                 }}
             />,
@@ -47,12 +56,18 @@ describe("CourseCurriculumAccordion", () => {
         expect(screen.getByRole("heading", { name: "Course content" })).toBeInTheDocument()
         expect(screen.getByRole("button", { name: /Linux foundations/ })).toBeInTheDocument()
         expect(screen.getByRole("button", { name: /Terraform fundamentals/ })).toBeInTheDocument()
+        expect(screen.getByRole("button", { name: /Production observability/ })).toBeInTheDocument()
         expect(screen.getByText("Foundation")).toBeInTheDocument()
+        expect(screen.getByText("Foundation").closest("[data-tone]")).toHaveAttribute("data-tone", "success")
+        expect(screen.getByText("Intermediate").closest("[data-tone]")).toHaveAttribute("data-tone", "warning")
+        expect(screen.getByText("Advanced").closest("[data-tone]")).toHaveAttribute("data-tone", "danger")
         expect(screen.getByText("2 previews")).toBeInTheDocument()
-        expect(screen.queryByText("4 contents · 96 min")).not.toBeInTheDocument()
+        expect(screen.getByText("4 contents · 96 min")).not.toBeVisible()
 
         fireEvent.click(screen.getByText("Linux foundations"))
 
+        expect(screen.getByRole("region")).toHaveClass("accordion__panel")
+        expect(screen.getByRole("region")).not.toHaveClass("border-t")
         expect(screen.getByText("4 contents · 96 min")).toBeVisible()
         expect(screen.getByText("Operate a real Linux machine from shell to services.")).toBeVisible()
         expect(screen.getByText("Navigate the filesystem safely.")).toBeVisible()

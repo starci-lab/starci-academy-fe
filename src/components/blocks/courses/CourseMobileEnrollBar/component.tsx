@@ -1,5 +1,6 @@
 import { Button } from "@/components/leaves/Button"
 import { Text } from "@/components/leaves/Text"
+import { mobileEnrollBarClassName, mobileEnrollPriceClassName } from "./classNames"
 
 /**
  * BLOCK - `CourseMobileEnrollBar`: the buy decision, kept reachable on a narrow viewport.
@@ -61,8 +62,8 @@ export type CourseMobileEnrollBarProps = {
  */
 export const CourseMobileEnrollBarBase = (props: CourseMobileEnrollBarProps) => {
     const isPricePending = props.state === "price-pending"
-    return <div>
-        <div>
+    return <div className={mobileEnrollBarClassName}>
+        <div className={mobileEnrollPriceClassName}>
             <Text props={{ content: props.props.price, size: "sm", weight: "semibold" }} isLoading={isPricePending} />
             {props.props.originalPrice === undefined || isPricePending ? null : <Text props={{ content: props.props.originalPrice, size: "xs", tone: "muted", isSuperseded: true }} />}
         </div>

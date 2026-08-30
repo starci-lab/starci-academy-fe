@@ -52,8 +52,9 @@ describe("GlobalAiChatLayout", () => {
     })
 
     it("keeps the global owner beside an authenticated product surface", () => {
-        render(<GlobalAiChatLayout surface={<Surface />} />)
+        const { container } = render(<GlobalAiChatLayout surface={<Surface />} />)
         expect(screen.getByText("Surface: global")).toBeInTheDocument()
+        expect(container.querySelector("[data-slot=\"global-ai-fab-safe-area\"]")).not.toBeInTheDocument()
         expect(screen.getByText("AI closed")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Open AI" }))
         expect(screen.getByText("AI open")).toBeInTheDocument()
@@ -61,17 +62,43 @@ describe("GlobalAiChatLayout", () => {
 
     it("keeps context available without mounting AI for a signed-out viewer", () => {
         setSessionToken(undefined)
-        render(<GlobalAiChatLayout surface={<Surface />} />)
+        const { container } = render(<GlobalAiChatLayout surface={<Surface />} />)
         expect(screen.getByText("Surface: global")).toBeInTheDocument()
+        expect(container.querySelector("[data-slot=\"global-ai-fab-safe-area\"]")).not.toBeInTheDocument()
         expect(screen.queryByRole("button", { name: "Open AI" })).not.toBeInTheDocument()
     })
 
     it("keeps the surface without AI furniture on a route that hides it", () => {
         pathname = "/en/authentication"
-        render(<GlobalAiChatLayout surface={<Surface />} />)
+        const { container } = render(<GlobalAiChatLayout surface={<Surface />} />)
         expect(screen.getByText("Surface: global")).toBeInTheDocument()
+        expect(container.querySelector("[data-slot=\"global-ai-fab-safe-area\"]")).not.toBeInTheDocument()
         expect(screen.queryByRole("button", { name: "Open AI" })).not.toBeInTheDocument()
         expect(screen.queryByText("AI closed")).not.toBeInTheDocument()
+    })
+
+    it("removes the floating trigger from focused grading routes without dropping AI context", () => {
+        pathname = "/vi/courses/fullstack-mastery/learn/personal-project/tasks/task-1"
+        render(<GlobalAiChatLayout surface={<Surface />} />)
+        expect(screen.getByText("Surface: task")).toBeInTheDocument()
+        expect(screen.queryByRole("button", { name: "Open AI" })).not.toBeInTheDocument()
+        expect(screen.getByText("AI closed")).toBeInTheDocument()
+    })
+
+    it("removes the floating trigger from focused Flashcard rooms without dropping AI context", () => {
+        pathname = "/vi/courses/fullstack-mastery/learn/flashcards/review"
+        render(<GlobalAiChatLayout surface={<Surface />} />)
+        expect(screen.getByText("Surface: course")).toBeInTheDocument()
+        expect(screen.queryByRole("button", { name: "Open AI" })).not.toBeInTheDocument()
+        expect(screen.getByText("AI closed")).toBeInTheDocument()
+    })
+
+    it("removes the floating trigger from Mock Interview setup without hiding the AI owner", () => {
+        pathname = "/vi/courses/fullstack-mastery/learn/mock-interview"
+        render(<GlobalAiChatLayout surface={<Surface />} />)
+        expect(screen.getByText("Surface: course")).toBeInTheDocument()
+        expect(screen.queryByRole("button", { name: "Open AI" })).not.toBeInTheDocument()
+        expect(screen.getByText("AI closed")).toBeInTheDocument()
     })
 
     it("closes the conversation the surface opened", () => {

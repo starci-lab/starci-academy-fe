@@ -36,10 +36,9 @@ const dueRequest: StartFlashcardDueReviewSessionRequest = {
 const quizRequest: StartFlashcardQuizSessionRequest = {
     mode: "quiz",
     courseId: "course-1",
-    cardIds: ["card-1", "card-2"],
-    practiceMode: "quick",
-    level: "junior",
-    name: "Ôn nhanh",
+    deckIds: ["00000000-0000-4000-8000-000000000001"],
+    requestedItemCount: 5,
+    startRequestId: "00000000-0000-4000-8000-000000000002",
 }
 
 describe("mutationStartFlashcardSession - deck review", () => {
@@ -114,32 +113,34 @@ describe("mutationStartFlashcardSession - due review", () => {
 })
 
 describe("mutationStartFlashcardSession - quiz", () => {
-    it("renames practiceMode to mode and asks for the deadline the timer needs", async () => {
+    it("sends the server-owned draw contract and asks for the deadline the timer needs", async () => {
         await mutationStartFlashcardSession(quizRequest)
         expect(sentDocument()).toContain("startFlashcardQuizSession(request: $request)")
         expect(sentDocument()).toContain("deadlineAt")
         expect(mocks.mutate.mock.calls[0][0].variables).toEqual({
             request: {
                 courseId: "course-1",
-                cardIds: ["card-1", "card-2"],
-                mode: "quick",
-                level: "junior",
-                name: "Ôn nhanh",
+                deckIds: ["00000000-0000-4000-8000-000000000001"],
+                requestedItemCount: 5,
+                startRequestId: "00000000-0000-4000-8000-000000000002",
             },
         })
     })
 
-    it("sends a null level and an undefined name when the learner named neither", async () => {
+    it("can ask the server to draw across the whole course", async () => {
         await mutationStartFlashcardSession({
             mode: "quiz",
             courseId: "course-1",
-            cardIds: [],
-            practiceMode: "deep",
-            level: null,
+            deckIds: [],
+            requestedItemCount: 10,
+            startRequestId: "00000000-0000-4000-8000-000000000003",
         })
-        expect(mocks.mutate.mock.calls[0][0].variables.request.level).toBeNull()
-        expect(mocks.mutate.mock.calls[0][0].variables.request.name).toBeUndefined()
-        expect(mocks.mutate.mock.calls[0][0].variables.request.mode).toBe("deep")
+        expect(mocks.mutate.mock.calls[0][0].variables.request).toEqual({
+            courseId: "course-1",
+            deckIds: [],
+            requestedItemCount: 10,
+            startRequestId: "00000000-0000-4000-8000-000000000003",
+        })
     })
 
     it("stamps the quiz mode onto the identity and keeps the server deadline", async () => {

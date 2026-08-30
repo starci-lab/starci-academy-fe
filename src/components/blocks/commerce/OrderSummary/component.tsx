@@ -1,4 +1,5 @@
 import { Text } from "@/components/leaves/Text"
+import { orderSummaryClassName, orderSummaryRowClassName, orderSummaryTotalClassName } from "./classNames"
 
 /**
  * BLOCK - `OrderSummary`: what this order costs, and what it is made of.
@@ -80,18 +81,18 @@ export const OrderSummaryBase = (props: OrderSummaryProps) => {
 
     /** One muted component of the total: what it is called, and how much of it there is. */
     const componentRow = (label: string, value?: string) => (
-        <div>
+        <div className={orderSummaryRowClassName}>
             <Text props={{ content: label, size: "sm", weight: "semibold" }} />
-            <Text props={{ content: figure(value), size: "xs", tone: "muted" }} isLoading={isLoading} />
+            <Text props={{ content: figure(value), size: "sm", tone: "muted" }} isLoading={isLoading} />
         </div>
     )
 
     return (
-        <div>
+        <div className={orderSummaryClassName}>
             {componentRow(labels.subtotal, props.props.subtotal)}
             {props.props.savings === undefined ? null : componentRow(labels.savings, props.props.savings)}
             {props.props.surcharge === undefined ? null : componentRow(labels.surcharge, props.props.surcharge)}
-            <div>
+            <div className={orderSummaryTotalClassName}>
                 <Text props={{ content: labels.total, size: "sm", weight: "semibold" }} />
                 <Text props={{ content: figure(props.props.total), size: "md", weight: "semibold" }} isLoading={isLoading} />
             </div>

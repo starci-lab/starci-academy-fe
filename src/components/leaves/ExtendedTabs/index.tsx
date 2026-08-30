@@ -2,7 +2,7 @@
 
 import { Tabs } from "@starci/grammar/core"
 import { Icon, type IconName } from "@/components/leaves/Icon"
-import { extendedTabsRootClassName } from "./classNames"
+import { getExtendedTabsRootClassName } from "./classNames"
 
 /** One tab in the legacy dashboard strip. */
 export type ExtendedTab = {
@@ -16,6 +16,9 @@ export type ExtendedTabsData = {
     readonly label: string
     readonly selectedKey: string
     readonly tabs: ReadonlyArray<ExtendedTab>
+    readonly labelVisibility?: "responsive" | "always"
+    /** Removes the strip inset when the containing workbench already owns page padding. */
+    readonly inset?: "page" | "none"
 }
 
 /** Events reported by the tab primitive. */
@@ -37,7 +40,7 @@ export const ExtendedTabs = (props: ExtendedTabsProps) => {
     const data = props.props
     const on = props.on
     return (
-        <div className={extendedTabsRootClassName}>
+        <div className={getExtendedTabsRootClassName(data.inset)}>
             <Tabs
                 label={data.label}
                 selectedKey={data.selectedKey}
@@ -48,6 +51,7 @@ export const ExtendedTabs = (props: ExtendedTabsProps) => {
                 }))}
                 onSelect={on?.select}
                 panelId={(key) => `dashboard-panel-${key}`}
+                labelVisibility={data.labelVisibility}
             />
         </div>
     )

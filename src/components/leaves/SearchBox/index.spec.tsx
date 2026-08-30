@@ -47,6 +47,18 @@ describe("SearchBox", () => {
         expect(search).toHaveBeenCalledWith("rust")
     })
 
+    it("reports the query when Enter is pressed in the vendor input host", () => {
+        const search = vi.fn()
+        render(<SearchBox props={props} on={{ search }} />)
+        const field = screen.getByRole("searchbox", { name: "Search" })
+
+        fireEvent.change(field, { target: { value: "rust" } })
+        fireEvent.keyDown(field, { key: "Enter" })
+
+        expect(search).toHaveBeenCalledTimes(1)
+        expect(search).toHaveBeenCalledWith("rust")
+    })
+
     it("submits without a listener rather than throwing at the reader", () => {
         const { container } = render(<SearchBox props={props} />)
         fireEvent.change(screen.getByRole("searchbox", { name: "Search" }), { target: { value: "rust" } })

@@ -91,6 +91,28 @@ describe("useContentAiStream", () => {
         expect(result.current.isStreaming).toBe(false)
     })
 
+    it("sends the advisor experience and forwards validated terminal fit metadata", () => {
+        const onDone = vi.fn()
+        const { result } = renderHook(() => useContentAiStream())
+        act(() => result.current.ask({
+            sessionId: "session-1",
+            question: "Which fullstack course fits?",
+            experience: "course_advisor",
+            onDelta: vi.fn(),
+            onDone,
+        }))
+        const ask = socketHarness.emit.mock.calls.find(([event]) => event === "content_ai.ask.publication")
+        expect(ask?.[1].data.experience).toBe("course_advisor")
+        const courseAdvisor = {
+            intent: "recommend",
+            recommendations: [{ courseDisplayId: "fullstack-mastery", reason: "Matches the goal", confidence: "high" }],
+        }
+        act(() => socketHarness.handlers.get("content_ai.chunk.subscription")?.({
+            data: { streamId: ask?.[1].data.streamId, delta: "", done: true, courseAdvisor },
+        }))
+        expect(onDone).toHaveBeenCalledWith(undefined, courseAdvisor)
+    })
+
     it("forwards a paid-model quota rejection but does not latch sending closed", () => {
         const firstDone = vi.fn()
         const secondDone = vi.fn()

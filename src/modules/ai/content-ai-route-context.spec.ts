@@ -4,6 +4,7 @@ import {
     isSameContentAiAnchor,
     normalizeContentAiPath,
     resolveContentAiAnchorRequest,
+    resolveContentAiExperience,
     resolveContentAiRouteAnchor,
 } from "./content-ai-route-context"
 
@@ -35,6 +36,13 @@ describe("content-ai-route-context", () => {
         const challengeAnchor = resolveContentAiRouteAnchor("/en/courses/a/learn/content/modules/m/contents/c/challenges/x")
         expect(resolveContentAiAnchorRequest(challengeAnchor))
             .toEqual({ scope: "challenge", challengeId: "x" })
+    })
+
+    it("uses the course advisor for discovery but never inside private Learn routes", () => {
+        expect(resolveContentAiExperience(resolveContentAiRouteAnchor("/vi/courses"))).toBe("course_advisor")
+        expect(resolveContentAiExperience(resolveContentAiRouteAnchor("/vi/courses/fullstack-mastery"))).toBe("course_advisor")
+        expect(resolveContentAiExperience(resolveContentAiRouteAnchor("/vi/dashboard"))).toBe("course_advisor")
+        expect(resolveContentAiExperience(resolveContentAiRouteAnchor("/vi/courses/fullstack-mastery/learn/content"))).toBeUndefined()
     })
 
     it("hides authentication and live full-bleed evaluation routes", () => {

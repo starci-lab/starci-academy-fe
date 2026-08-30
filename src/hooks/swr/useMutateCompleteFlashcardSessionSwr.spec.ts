@@ -57,14 +57,14 @@ describe("useMutateCompleteFlashcardSessionSwr", () => {
         expect(mocks.mutationCompleteFlashcardSession).toHaveBeenCalledWith(request)
     })
 
-    it("passes a quiz completion through with its scored answers", async () => {
+    it("passes a quiz completion through with opaque selections", async () => {
         const { result } = renderHook(() => useMutateCompleteFlashcardSessionSwr())
 
         const request = {
             mode: "quiz",
             sessionId: "session-1",
-            courseId: "course-1",
-            answers: [{ cardId: "card-1", correctBlanks: 2, totalBlanks: 3 }],
+            expectedVersion: 2,
+            selections: [{ blankId: "card-1:c1:o1", tokenId: "00000000-0000-4000-8000-000000000001" }],
         } as const
         await act(async () => {
             await result.current.trigger(request)

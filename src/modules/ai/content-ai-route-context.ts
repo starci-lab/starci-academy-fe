@@ -11,6 +11,13 @@ export type ContentAiRouteAnchor = {
     readonly path: string
 }
 
+/** Public discovery routes use marketplace decision support; Learn remains its own private assistant. */
+export const resolveContentAiExperience = (anchor: ContentAiRouteAnchor): "course_advisor" | undefined => {
+    if (anchor.path.includes("/learn")) return undefined
+    if (anchor.scope === "global" || anchor.path === "/courses" || anchor.path.startsWith("/courses/")) return "course_advisor"
+    return undefined
+}
+
 /** Drop query/hash/locale so every caller compares the same path identity. */
 export const normalizeContentAiPath = (pathname: string): string => {
     const clean = pathname.split(/[?#]/u, 1)[0]

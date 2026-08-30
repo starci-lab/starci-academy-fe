@@ -7,8 +7,11 @@ const mocks = vi.hoisted(() => ({
     locale: "en",
     push: vi.fn(),
     mutate: vi.fn(),
+    repositoryMutate: vi.fn(),
     data: undefined as unknown,
     error: undefined as unknown,
+    repositoryData: { githubUrl: "https://github.com/starci/shop", branch: "main", tokenLast4: "1234" } as unknown,
+    repositoryError: undefined as unknown,
 }))
 
 vi.mock("next-intl", () => ({ useLocale: () => mocks.locale }))
@@ -16,41 +19,31 @@ vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) })
 vi.mock("@/hooks/swr/useQueryCoursePersonalProjectSwr", () => ({
     useQueryCoursePersonalProjectSwr: () => ({ data: mocks.data, error: mocks.error, mutate: mocks.mutate }),
 }))
+vi.mock("@/hooks/swr/useQueryPersonalProjectRepositorySwr", () => ({
+    useQueryPersonalProjectRepositorySwr: () => ({ data: mocks.repositoryData, error: mocks.repositoryError, mutate: mocks.repositoryMutate }),
+}))
 
 type PageStubProps = CoursePersonalProjectProps
-
 vi.mock("@/components/blocks/learn/CoursePersonalProject/component", () => ({
-    CoursePersonalProjectBase: (input: PageStubProps) => (
-        <>
-            <output data-testid="state">{input.state}</output>
-            <output data-testid="props">{JSON.stringify(input.data)}</output>
-            <button type="button" onClick={input.on?.openCourse}>Open course</button>
-            <button type="button" onClick={() => input.on?.openTask?.("task-9")}>Open task</button>
-            <button type="button" onClick={input.on?.retry}>Retry</button>
-        </>
-    ),
+    CoursePersonalProjectBase: (input: PageStubProps) => <>
+        <output data-testid="state">{input.state}</output>
+        <output data-testid="props">{JSON.stringify(input.data)}</output>
+        <button type="button" onClick={input.on?.openCourse}>Open course</button>
+        <button type="button" onClick={() => input.on?.openTask?.("task-9")}>Open task</button>
+        <button type="button" onClick={input.on?.retry}>Retry</button>
+        <button type="button" onClick={input.on?.retryRepository}>Retry repository</button>
+        <button type="button" onClick={() => input.on?.searchRoadmap?.("ship")}>Search roadmap</button>
+    </>,
 }))
 
 const data = {
     course: { id: "course-1", title: "System Design", displayId: "system-design" },
     milestones: [
-        {
-            id: "milestone-2",
-            title: "Ship",
-            orderIndex: 1,
-            tasks: [
-                { id: "task-3", title: "Deploy", type: null, maxScore: 20, completed: false, lastScore: 0, numAttempts: 0 },
-            ],
-        },
-        {
-            id: "milestone-1",
-            title: "Build",
-            orderIndex: 0,
-            tasks: [
-                { id: "task-1", title: "Plan", type: null, maxScore: 20, completed: true, lastScore: 16, numAttempts: 2 },
-                { id: "task-2", title: "Code", type: null, maxScore: 20, completed: false, lastScore: 10, numAttempts: 1 },
-            ],
-        },
+        { id: "milestone-2", title: "Ship", orderIndex: 1, tasks: [{ id: "task-3", title: "Deploy", type: null, maxScore: 20, completed: false, lastScore: 0, numAttempts: 0 }] },
+        { id: "milestone-1", title: "Build", orderIndex: 0, tasks: [
+            { id: "task-1", title: "Plan", type: null, maxScore: 20, completed: true, lastScore: 16, numAttempts: 2 },
+            { id: "task-2", title: "Code", type: null, maxScore: 20, completed: false, lastScore: 10, numAttempts: 1 },
+        ] },
     ],
     progress: { tasksCompleted: 1, tasksTotal: 3, completionPercent: 33 },
     currentTask: { kind: "milestoneTask", id: "task-2", milestoneId: "milestone-1" },
@@ -63,59 +56,72 @@ describe("CoursePersonalProjectPage", () => {
         mocks.locale = "en"
         mocks.data = data
         mocks.error = undefined
+        mocks.repositoryData = { githubUrl: "https://github.com/starci/shop", branch: "main", tokenLast4: "1234" }
+        mocks.repositoryError = undefined
         vi.clearAllMocks()
     })
 
-    it("derives next action, aggregate evidence and only the current milestone task grid", () => {
+    it("derives one next decision, ordered milestone summaries and aggregate evidence", () => {
         render(<CoursePersonalProject displayId="system-design" />)
 
         expect(screen.getByTestId("state")).toHaveTextContent("ready")
-        expect(props().nextTask).toEqual({ id: "task-2", position: "Next task · Build", title: "Code" })
+        expect(props().nextTask).toEqual({ id: "task-2", milestone: "Build", title: "Code", evidence: "10/20 · 1 submission" })
+        expect(props().milestones.map((milestone) => milestone.id)).toEqual(["milestone-1", "milestone-2"])
+        expect(props().milestones[0]).toMatchObject({ status: "In progress", progress: "1/2", targetTaskId: "task-2", tone: "accent" })
+        expect(props().milestones[1]).toMatchObject({ status: "Upcoming", progress: "0/1", tone: "neutral" })
         expect(props().completionFacts).toEqual([
-            "1/3 tasks completed",
-            "3 submissions",
-            "Average score 13/20",
+            { label: "Tasks", value: "1/3" },
+            { label: "Submissions", value: "3" },
+            { label: "Average score", value: "13/20" },
         ])
-        expect(props().milestoneTitle).toBe("Build")
-        expect(props().tasks.map((task) => task.id)).toEqual(["task-1", "task-2"])
-        expect(props().tasks[1].isCurrent).toBe(true)
-    })
-
-    it("uses the first incomplete milestone when no resume pointer exists", () => {
-        mocks.data = { ...data, currentTask: null }
-        render(<CoursePersonalProject displayId="system-design" />)
-
-        expect(props().milestoneTitle).toBe("Build")
-        expect(props().nextTask).toBeUndefined()
+        expect(props().repository).toMatchObject({ state: "ready", branch: "main", url: "https://github.com/starci/shop" })
     })
 
     it("keeps pending, empty and failed outcomes distinct", () => {
         mocks.data = undefined
-        const { unmount } = render(<CoursePersonalProject displayId="system-design" />)
+        mocks.repositoryData = undefined
+        const pending = render(<CoursePersonalProject displayId="system-design" />)
         expect(screen.getByTestId("state")).toHaveTextContent("pending")
-        unmount()
+        pending.unmount()
 
         mocks.data = { ...data, milestones: [], progress: { tasksCompleted: 0, tasksTotal: 0, completionPercent: 0 }, currentTask: null }
         const empty = render(<CoursePersonalProject displayId="system-design" />)
         expect(screen.getByTestId("state")).toHaveTextContent("empty")
-        expect(props().notice).toContain("does not have")
         empty.unmount()
 
         mocks.data = undefined
         mocks.error = new Error("network")
         render(<CoursePersonalProject displayId="system-design" />)
         expect(screen.getByTestId("state")).toHaveTextContent("failed")
-        expect(props().notice).toContain("could not be loaded")
     })
 
-    it("routes course and task actions and retries the owned query", () => {
+    it("routes owned actions and retries primary and ancillary queries independently", () => {
         render(<CoursePersonalProject displayId="system-design" />)
 
         fireEvent.click(screen.getByRole("button", { name: "Open course" }))
         fireEvent.click(screen.getByRole("button", { name: "Open task" }))
         fireEvent.click(screen.getByRole("button", { name: "Retry" }))
+        fireEvent.click(screen.getByRole("button", { name: "Retry repository" }))
         expect(mocks.push).toHaveBeenNthCalledWith(1, "/courses/system-design/learn")
         expect(mocks.push).toHaveBeenNthCalledWith(2, "/courses/system-design/learn/personal-project/tasks/task-9")
         expect(mocks.mutate).toHaveBeenCalledTimes(1)
+        expect(mocks.repositoryMutate).toHaveBeenCalledTimes(1)
+    })
+
+    it("filters the roadmap by title or state without dropping project evidence", () => {
+        render(<CoursePersonalProject displayId="system-design" />)
+
+        fireEvent.click(screen.getByRole("button", { name: "Search roadmap" }))
+        expect(props().milestones).toHaveLength(1)
+        expect(props().milestones[0]).toMatchObject({ id: "milestone-2", title: "Ship" })
+        expect(props().roadmapCountLabel).toBe("1 results across 2 stages")
+        expect(props().completionFacts).toHaveLength(3)
+    })
+
+    it("does not present the total stage inventory as completed progress", () => {
+        render(<CoursePersonalProject displayId="system-design" />)
+
+        expect(props().roadmapCountLabel).toBe("2 stages")
+        expect(props().roadmapCountLabel).not.toContain("2/2")
     })
 })

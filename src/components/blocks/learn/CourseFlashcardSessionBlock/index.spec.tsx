@@ -34,7 +34,7 @@ vi.mock("./component", () => ({
     ),
 }))
 
-import { CourseFlashcardSessionBlock, parseFlashcardCloze } from "./index"
+import { CourseFlashcardSessionBlock, parseFlashcardCloze, quizPromptMarkdown, revealFlashcardMarkdown } from "./index"
 
 beforeEach(() => {
     vi.clearAllMocks()
@@ -59,6 +59,18 @@ describe("CourseFlashcardSessionBlock", () => {
 
         expect(parsed.terms).toEqual([largeTerm])
         expect(parsed.text).toBe("Before ____ after {{cx::malformed}}")
+    })
+
+    it("reveals cloze terms without leaking authoring markers into Study Markdown", () => {
+        const source = ":::muted\nDirect answer\n:::\nUse {{c12::a dead-letter queue::retry queue,error log}}."
+
+        expect(revealFlashcardMarkdown(source)).toBe(":::muted\nDirect answer\n:::\nUse a dead-letter queue.")
+    })
+
+    it("keeps Quiz on the sentences with blanks instead of exposing the study explanation", () => {
+        const source = "Direct answer\nPath and timestamp are not client decoration. Keep both so they {{blank:b1:o1}} one incident to its server log.\nTrade-off\nA fixed envelope keeps clients predictable."
+
+        expect(quizPromptMarkdown(source)).toBe("Keep both so they ____ one incident to its server log.")
     })
 
     it("reports pending, active, expired and failed states", () => {
@@ -118,9 +130,9 @@ describe("CourseFlashcardSessionBlock", () => {
             sessionSummaryLabel: "Session details", modeLabel: "Mode", deckLabel: "Deck", levelLabel: "Level", navigatorTitle: "Questions",
             navigatorDescription: "Open an answered card to review it.", navigatorStateLabel: "Question states", answeredLabel: "Answered", selectedLabel: "Reviewing", currentLabel: "Current", futureLabel: "Not reached",
             readOnlyLabel: "Reviewing a saved answer", readOnlyText: "This answer is read-only.", previousLabel: "Previous", nextLabel: "Next", continueHint: "Rate this card to continue.",
-            clozeInstructionLabel: "Complete the sentence", wordBankLabel: "Word bank",
+            clozeInstructionLabel: "Complete the sentence", wordBankLabel: "Word bank", blankLabel: "Blank", hintLabel: "Hint",
             checkAnswerLabel: "Check answer", showSolutionLabel: "Show solution", resultLabel: "correct", ratingLabel: "Rate this card",
-            againLabel: "Again", hardLabel: "Hard", goodLabel: "Good", easyLabel: "Easy", syncingLabel: "Saving progress", completingLabel: "Completing session",
+            againLabel: "Again", hardLabel: "Hard", goodLabel: "Good", easyLabel: "Easy", pendingRating: null, syncingLabel: "Saving progress", completingLabel: "Completing session",
             expiredText: "Session expired", failedText: "Could not load", retryLabel: "Retry", leaveLabel: "Leave session",
         }
         const actions = { reveal: vi.fn(), selectTerm: vi.fn(), checkQuiz: vi.fn(), showSolution: vi.fn(), rate: vi.fn(), selectQuestion: vi.fn(), previous: vi.fn(), next: vi.fn(), openCourse: vi.fn(), openMode: vi.fn(), retry: vi.fn(), leave: vi.fn() }
@@ -141,8 +153,8 @@ describe("CourseFlashcardSessionBlock", () => {
             answerUnavailableText: "This answer is locked for the current course access.", sessionSummaryLabel: "Session details", modeLabel: "Mode", deckLabel: "Deck", levelLabel: "Level",
             navigatorTitle: "Questions", navigatorDescription: "Open an answered card to review it.", navigatorStateLabel: "Question states", answeredLabel: "Answered", selectedLabel: "Reviewing", currentLabel: "Current", futureLabel: "Not reached",
             readOnlyLabel: "Reviewing a saved answer", readOnlyText: "This answer is read-only.", previousLabel: "Previous", nextLabel: "Next", continueHint: "Rate this card to continue.",
-            clozeInstructionLabel: "Complete the sentence", wordBankLabel: "Word bank", checkAnswerLabel: "Check answer", showSolutionLabel: "Show solution", resultLabel: "correct",
-            ratingLabel: "Rate this card", againLabel: "Again", hardLabel: "Hard", goodLabel: "Good", easyLabel: "Easy", syncingLabel: "Saving progress", completingLabel: "Completing session",
+            clozeInstructionLabel: "Complete the sentence", wordBankLabel: "Word bank", blankLabel: "Blank", hintLabel: "Hint", checkAnswerLabel: "Check answer", showSolutionLabel: "Show solution", resultLabel: "correct",
+            ratingLabel: "Rate this card", againLabel: "Again", hardLabel: "Hard", goodLabel: "Good", easyLabel: "Easy", pendingRating: null, syncingLabel: "Saving progress", completingLabel: "Completing session",
             expiredText: "Session expired", failedText: "Could not load", retryLabel: "Retry", leaveLabel: "Leave session",
         }
         const actions = { reveal: vi.fn(), selectTerm: vi.fn(), checkQuiz: vi.fn(), showSolution: vi.fn(), rate: vi.fn(), selectQuestion: vi.fn(), previous: vi.fn(), next: vi.fn(), openCourse: vi.fn(), openMode: vi.fn(), retry: vi.fn(), leave: vi.fn() }
@@ -158,6 +170,7 @@ describe("CourseFlashcardSessionBlock", () => {
         expect(screen.getByText("Use one structured pipeline so request context and framework events remain correlated.")).toBeVisible()
         expect(screen.getByText("Rate this card")).toBeVisible()
         expect(screen.getByRole("button", { name: "Good" })).toBeEnabled()
+        expect(screen.getByRole("button", { name: "Good" })).toHaveClass("button--outline")
     }, 15_000)
 
     it("orders the result continuation before the secondary return action", async () => {

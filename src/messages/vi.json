@@ -31,6 +31,7 @@
         },
         "themeLight": "Chuyển sang sáng",
         "themeDark": "Chuyển sang tối",
+        "utilities": "Tiện ích hiển thị",
         "locale": "Đổi ngôn ngữ",
         "localeOptions": {
             "en": "English",
@@ -273,6 +274,21 @@
             }
         }
     },
+    "payment": {
+        "title": "Kiểm tra thanh toán",
+        "subtitle": "{count} khoá học sẽ được thêm sau khi thanh toán được xác nhận.",
+        "methodTitle": "Phương thức thanh toán",
+        "provider": "Chuyển khoản ngân hàng qua PayOS",
+        "providerDescription": "Bạn sẽ hoàn tất chuyển khoản trên trang thanh toán bảo mật của PayOS.",
+        "processTitle": "Tiếp theo sẽ diễn ra thế nào",
+        "handoffStep": "Tiếp tục sang PayOS và hoàn tất chuyển khoản.",
+        "verificationStep": "Giao dịch giữ trạng thái chờ đến khi webhook PayOS xác nhận.",
+        "accessStep": "StarCi chỉ cấp quyền học sau xác nhận đó.",
+        "trustNote": "Việc trình duyệt quay về không tự động đánh dấu đơn hàng đã thanh toán.",
+        "action": "Tiếp tục đến PayOS · {total}",
+        "cancel": "Quay lại giỏ hàng",
+        "failedMessage": "Chưa thể mở PayOS. Giỏ hàng vẫn được giữ nguyên; vui lòng thử lại."
+    },
     "cart": {
         "navHome": "Trang chủ",
         "navCart": "Giỏ hàng",
@@ -282,7 +298,7 @@
         "total": "Tổng",
         "unavailable": "—",
         "installmentFee": "Phí trả góp 3 kỳ",
-        "installmentHint": "Có thể trả góp 3 kỳ — từ {amount} mỗi kỳ. Chi tiết ở bước thanh toán.",
+        "paymentHint": "Kiểm tra tổng tiền trước khi tiếp tục sang PayOS.",
         "checkout": "Thanh toán ({count})",
         "checkoutShort": "Thanh toán",
         "clearAll": "Xoá hết",
@@ -524,14 +540,54 @@
     },
     "globalAi": {
         "title": "StarCi AI",
-        "description": "Trợ giảng đồng hành trên toàn StarCi Academy.",
-        "modes": {
-            "general": "Hỏi mọi thứ",
+        "description": "Cố vấn chọn khóa học và trợ giảng theo đúng ngữ cảnh của bạn.",
+        "identity": {
+            "courseAdvisor": "Cố vấn khóa học StarCi AI",
+            "courseAdvisorDescription": "Trả lời trước, chỉ gợi ý khóa học khi thực sự phù hợp.",
+            "learningAssistant": "Trợ giảng StarCi AI",
+            "learningAssistantDescription": "Đồng hành theo nội dung bạn đang học."
+        },
+        "empty": {
+            "courseAdvisorTitle": "Bạn muốn tiến tới mục tiêu nào?",
+            "courseAdvisorDescription": "Chia sẻ mục tiêu và kinh nghiệm hiện tại. Thầy AI sẽ giúp bạn chọn đúng hướng.",
+            "learningTitle": "Mình cùng gỡ phần đang vướng",
+            "learningDescription": "Hỏi về nội dung, đoạn code hoặc bài tập đang mở."
+        },
+        "prompts": {
+            "goal": "Gợi ý lộ trình theo mục tiêu của tôi",
+            "compare": "So sánh các khóa phù hợp",
+            "prerequisites": "Tôi cần biết gì trước khi học?",
+            "explain": "Giải thích phần này dễ hiểu hơn",
+            "practice": "Cho tôi một bài luyện tập"
+        },
+        "context": {
+            "catalog": "Đang tư vấn trên toàn bộ khóa học",
+            "course": "Đang dùng ngữ cảnh khóa {title}",
+            "currentCourse": "hiện tại"
+        },
+    "recommendation": {
+      "listLabel": "Khóa học được gợi ý",
+      "aiAssessment": "Đánh giá từ StarCi AI",
+      "whyFit": "Vì sao phù hợp",
+      "fitGap": "Điểm cần cân nhắc",
+      "courseAction": "Thông tin khóa học từ StarCi",
+      "enrolled": "Bạn đã sở hữu khóa học",
+      "available": "Đang mở đăng ký",
+      "openCourse": "Xem khóa học & đăng ký",
+      "continueCourse": "Tiếp tục học",
+      "confidence": {
+        "low": "Độ tin cậy: cần làm rõ",
+        "medium": "Độ tin cậy: khá",
+        "high": "Độ tin cậy: cao"
+      }
+    },
+    "modes": {
+      "general": "Tư vấn khóa học",
             "history": "Lịch sử"
         },
         "composer": {
             "label": "Hỏi StarCi AI",
-            "placeholder": "Hỏi về bài học, code, challenge hoặc lộ trình..."
+            "placeholder": "Mục tiêu hoặc điều bạn đang phân vân..."
         },
         "actions": {
             "send": "Gửi",
@@ -549,7 +605,7 @@
         "untitled": "Conversation mới",
         "quota": {
             "unavailable": "Chưa tải được AI credits",
-            "remaining": "Còn {remaining} paid credits"
+      "remaining": "Còn {remaining} lượt AI trả phí"
         },
         "states": {
             "sessionsPending": "Đang tải conversations...",
@@ -824,6 +880,12 @@
             "challengeModelApplyAll": "Áp dụng cho mọi đầu ra",
             "challengeModelSelected": "Đang chọn",
             "challengeModelOverride": "Model cho {title}",
+            "challengeAnalysisPlan": "Thêm bằng chứng cho từng đầu ra. StarCi chấm các model đã chọn trên cùng một snapshot bài nộp bất biến.",
+            "challengeCachePolicy": "Ngữ cảnh lặp lại đủ điều kiện có thể dùng prompt cache của provider; từng lần chấm và kết quả vẫn được lưu độc lập.",
+            "challengeOpenSubmission": "Mở bảng nộp bài",
+            "challengeCloseSubmission": "Ẩn bảng nộp bài",
+            "challengeWorkspaceLabel": "Không gian làm challenge",
+            "challengeContentView": "Nội dung challenge",
             "challengeLanguage": "Ngôn ngữ bài nộp",
             "challengeLanguageAgnostic": "Không phụ thuộc ngôn ngữ",
             "challengeAskAi": "Hỏi Learn AI",
@@ -925,7 +987,8 @@
             "milestoneProgressLabel": "Tiến độ của {milestone}",
             "taskScore": "{score}/{maximum} điểm",
             "taskWorth": "{maximum} điểm",
-            "resizeRail": "Điều chỉnh độ rộng lộ trình dự án"
+            "resizeRail": "Điều chỉnh độ rộng lộ trình dự án",
+            "contentMapTitle": "Lộ trình dự án"
         },
         "foundations": {
             "title": "Nền tảng",

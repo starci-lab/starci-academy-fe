@@ -1,3 +1,5 @@
+import type { CourseAdvisorMetadata } from "@/modules/ai/course-advisor-response"
+
 /** Observable lifecycle of the authenticated `/content_ai` namespace. */
 export type ContentAiSocketState = "idle" | "connecting" | "connected" | "reconnecting" | "failed"
 
@@ -24,8 +26,9 @@ export interface AskContentAiStreamParams extends ContentAiStreamAnchor {
     readonly history?: ReadonlyArray<ContentAiStreamHistoryTurn>
     readonly model?: string | null
     readonly provider?: string | null
+    readonly experience?: "learn_companion" | "course_advisor" | null
     readonly onDelta: (delta: string) => void
-    readonly onDone: (error?: string) => void
+    readonly onDone: (error?: string, courseAdvisor?: CourseAdvisorMetadata) => void
 }
 
 /** Server chunk inside the common Socket.IO success envelope. */
@@ -34,6 +37,7 @@ export interface ContentAiStreamChunk {
     readonly delta: string
     readonly done: boolean
     readonly error?: string
+    readonly courseAdvisor?: CourseAdvisorMetadata
 }
 
 /** Shape emitted by the backend `WsResponseService`. */
@@ -53,6 +57,7 @@ export interface AskContentAiStreamMessage {
         readonly history?: ReadonlyArray<ContentAiStreamHistoryTurn>
         readonly model?: string | null
         readonly provider?: string | null
+        readonly experience?: "learn_companion" | "course_advisor" | null
     }
 }
 

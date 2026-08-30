@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useLocale } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
+import { useSessionRefresh } from "@/hooks/auth/useSessionRefresh"
 import {
     useQueryFlashcardDecksByCourseSwr,
     useQueryMyDueFlashcardsSwr,
@@ -30,15 +31,21 @@ const reviewStateOf = (failed: boolean, pending: boolean, empty: boolean) => {
 const labels = (locale: string) => locale === "vi" ? {
     title: "Flashcard",
     subtitle: "Ôn tập theo nhịp nhớ để ghi nhớ lâu hơn.", // vn-ok: localized Vietnamese interface copy.
-    review: "Ôn tập", // vn-ok: localized Vietnamese interface copy.
-    quiz: "Trắc nghiệm", // vn-ok: localized Vietnamese interface copy.
+    gatewayTitle: "Bạn muốn học theo cách nào?", // vn-ok: localized Vietnamese interface copy.
+    gatewayDescription: "Study giúp ghi nhớ theo nhịp ôn; Quick quiz kiểm tra bằng bài điền từ có tính điểm.", // vn-ok: localized Vietnamese interface copy.
+    review: "Study", // vn-ok: localized Vietnamese interface copy.
+    reviewDescription: "Ôn theo nhịp nhớ, hiện đáp án rồi tự đánh giá. Không tính điểm.", // vn-ok: localized Vietnamese interface copy.
+    reviewAction: "Vào Study", // vn-ok: localized Vietnamese interface copy.
+    quiz: "Quick quiz", // vn-ok: localized Vietnamese interface copy.
+    quizDescription: "Điền từ vào chỗ trống và nhận kết quả có tính điểm.", // vn-ok: localized Vietnamese interface copy.
+    quizAction: "Vào Quick quiz", // vn-ok: localized Vietnamese interface copy.
     modeTabsLabel: "Chế độ flashcard", // vn-ok: localized Vietnamese interface copy.
     viewTabsLabel: "Khu vực ôn tập", // vn-ok: localized Vietnamese interface copy.
     overview: "Tổng quan", // vn-ok: localized Vietnamese interface copy.
     history: "Lịch sử", // vn-ok: localized Vietnamese interface copy.
     statistics: "Thống kê", // vn-ok: localized Vietnamese interface copy.
     dueTitle: "Hôm nay cần ôn", // vn-ok: localized Vietnamese interface copy.
-    dueDescription: "Chọn một bộ thẻ để bắt đầu hoặc tiếp tục phiên đang dở.", // vn-ok: localized Vietnamese interface copy.
+    dueDescription: "Chọn một bộ thẻ để bắt đầu phiên Study theo chủ đề.", // vn-ok: localized Vietnamese interface copy.
     stats: "Tiến độ ôn tập", // vn-ok: localized Vietnamese interface copy.
     streak: "kỷ lục ngày liên tiếp", // vn-ok: localized Vietnamese interface copy.
     retention: "tỷ lệ nhớ đúng", // vn-ok: localized Vietnamese interface copy.
@@ -61,12 +68,18 @@ const labels = (locale: string) => locale === "vi" ? {
     mastered: "đã nhớ", // vn-ok: localized Vietnamese interface copy.
     start: "Bắt đầu", // vn-ok: localized Vietnamese interface copy.
     quizDeck: "Trắc nghiệm", // vn-ok: localized Vietnamese interface copy.
-    resume: "Tiếp tục phiên", // vn-ok: localized Vietnamese interface copy.
+    resume: "Phiên Study đang dở", // vn-ok: localized Vietnamese interface copy.
+    resumeAction: "Tiếp tục học", // vn-ok: localized Vietnamese interface copy.
+    resumeDescription: "Tiến độ gần nhất đã được lưu. Bạn có thể tiếp tục từ vị trí trước đó.", // vn-ok: localized Vietnamese interface copy.
+    activeSession: "Tiếp tục phiên đang dở trước khi bắt đầu một phiên Study mới.", // vn-ok: localized Vietnamese interface copy.
     retry: "Thử lại", // vn-ok: localized Vietnamese interface copy.
     empty: "Khóa học này chưa có bộ flashcard.", // vn-ok: localized Vietnamese interface copy.
+    emptyTitle: "Chưa có nội dung Flashcard", // vn-ok: localized Vietnamese interface copy.
+    emptyAction: "Về nội dung khóa học", // vn-ok: localized Vietnamese interface copy.
     historyEmpty: "Bạn chưa có phiên ôn nào trong khóa học này.", // vn-ok: localized Vietnamese interface copy.
     statsEmpty: "Sức khỏe ghi nhớ sẽ xuất hiện sau phiên ôn đầu tiên.", // vn-ok: localized Vietnamese interface copy.
     noResults: "Không có bộ thẻ nào khớp với tìm kiếm này.", // vn-ok: localized Vietnamese interface copy.
+    noResultsTitle: "Không tìm thấy bộ thẻ", // vn-ok: localized Vietnamese interface copy.
     failed: "Không thể tải flashcard.", // vn-ok: localized Vietnamese interface copy.
     historyFailed: "Không thể tải lịch sử ôn tập.", // vn-ok: localized Vietnamese interface copy.
     statsFailed: "Không thể tải sức khỏe ghi nhớ.", // vn-ok: localized Vietnamese interface copy.
@@ -79,15 +92,21 @@ const labels = (locale: string) => locale === "vi" ? {
 } : {
     title: "Flashcards",
     subtitle: "Review with spaced repetition to remember longer.",
-    review: "Review",
-    quiz: "Quiz",
+    gatewayTitle: "How do you want to learn?",
+    gatewayDescription: "Study builds recall with spaced repetition; Quick quiz checks knowledge with a scored cloze task.",
+    review: "Study",
+    reviewDescription: "Reveal, recall, and rate each card. Unscored.",
+    reviewAction: "Open Study",
+    quiz: "Quick quiz",
+    quizDescription: "Fill every blank and receive a scored result.",
+    quizAction: "Open Quick quiz",
     modeTabsLabel: "Flashcard mode",
     viewTabsLabel: "Review area",
     overview: "Overview",
     history: "History",
     statistics: "Statistics",
     dueTitle: "Due today",
-    dueDescription: "Choose a deck to start or continue an unfinished session.",
+    dueDescription: "Choose a deck to start a focused Study session.",
     stats: "Review progress",
     streak: "longest streak",
     retention: "retention",
@@ -110,12 +129,18 @@ const labels = (locale: string) => locale === "vi" ? {
     mastered: "mastered",
     start: "Start",
     quizDeck: "Quiz",
-    resume: "Resume session",
+    resume: "Unfinished Study session",
+    resumeAction: "Continue studying",
+    resumeDescription: "Your latest progress is saved and ready to continue.",
+    activeSession: "Continue the unfinished session before starting a new Study session.",
     retry: "Retry",
     empty: "This course has no flashcard decks yet.",
+    emptyTitle: "No Flashcard content yet",
+    emptyAction: "Back to course content",
     historyEmpty: "You have no review sessions in this course yet.",
     statsEmpty: "Memory health will appear after your first review session.",
     noResults: "No decks match this search.",
+    noResultsTitle: "No matching decks",
     failed: "Flashcards could not be loaded.",
     historyFailed: "Review history could not be loaded.",
     statsFailed: "Memory health could not be loaded.",
@@ -133,11 +158,13 @@ export const CourseFlashcardsReviewBlock = (props: CourseFlashcardsReviewBlockPr
     const locale = useLocale()
     const copy = labels(locale)
     const router = useRouter()
+    const auth = useSessionRefresh()
     const course = useQueryCourseSwr({ displayId })
     const courseId = course.data?.id
-    const decks = useQueryFlashcardDecksByCourseSwr(courseId)
-    const due = useQueryMyDueFlashcardsSwr(courseId)
-    const stats = useQueryMyFlashcardStatsSwr(courseId !== undefined)
+    const authenticatedCourseId = auth.isRestoring ? undefined : courseId
+    const decks = useQueryFlashcardDecksByCourseSwr(authenticatedCourseId)
+    const due = useQueryMyDueFlashcardsSwr(authenticatedCourseId)
+    const stats = useQueryMyFlashcardStatsSwr(authenticatedCourseId !== undefined)
     const [activeView, setActiveView] = useState<FlashcardReviewView>("overview")
     const [search, setSearch] = useState("")
     const [layout, setLayout] = useState<FlashcardReviewLayout>("grid")
@@ -145,17 +172,17 @@ export const CourseFlashcardsReviewBlock = (props: CourseFlashcardsReviewBlockPr
         const saved = window.localStorage.getItem(VIEW_STORAGE_KEY)
         if (saved === "grid" || saved === "line") setLayout(saved)
     }, [])
-    const history = useQueryMyFlashcardReviewHistorySwr(courseId, activeView === "history")
-    const reviewStats = useQueryMyFlashcardReviewStatsSwr(courseId, activeView === "stats")
+    const history = useQueryMyFlashcardReviewHistorySwr(authenticatedCourseId, activeView === "history")
+    const reviewStats = useQueryMyFlashcardReviewStatsSwr(authenticatedCourseId, activeView === "stats")
     const resolvedDecks = decks.data ?? []
-    const deckInProgress = useQueryMyInProgressFlashcardSessionSwr(courseId === undefined || resolvedDecks.length === 0 ? undefined : {
+    const deckInProgress = useQueryMyInProgressFlashcardSessionSwr(authenticatedCourseId === undefined || resolvedDecks.length === 0 ? undefined : {
         mode: "review",
-        courseId,
+        courseId: authenticatedCourseId,
         deckIds: resolvedDecks.map((deck) => deck.id),
     })
-    const dueInProgress = useQueryMyInProgressFlashcardSessionSwr(courseId === undefined ? undefined : {
+    const dueInProgress = useQueryMyInProgressFlashcardSessionSwr(authenticatedCourseId === undefined ? undefined : {
         mode: "review",
-        courseId,
+        courseId: authenticatedCourseId,
         reviewKind: "due",
     })
     const start = useMutateStartFlashcardSessionSwr()
@@ -163,20 +190,21 @@ export const CourseFlashcardsReviewBlock = (props: CourseFlashcardsReviewBlockPr
     const [reviewScope, setReviewScope] = useState<"all" | "due">("all")
 
     const overviewState = reviewStateOf(
-        course.error !== undefined || decks.error !== undefined || due.error !== undefined || stats.error !== undefined,
+        course.error !== undefined || decks.error !== undefined || due.error !== undefined || stats.error !== undefined
+            || course.data === null || decks.data === null || due.data === null || stats.data === null,
         course.data === undefined || decks.data === undefined || due.data === undefined || stats.data === undefined,
-        course.data === null || decks.data === null || resolvedDecks.length === 0,
+        resolvedDecks.length === 0,
     )
     const historyState = reviewStateOf(
-        course.error !== undefined || history.error !== undefined,
+        course.error !== undefined || history.error !== undefined || course.data === null || history.data === null,
         course.data === undefined || history.data === undefined,
-        course.data === null || history.data === null || (history.data?.items.length ?? 0) === 0,
+        (history.data?.items.length ?? 0) === 0,
     )
     const statsRowsCount = (reviewStats.data?.weakTags.length ?? 0) + (reviewStats.data?.deckRetention.length ?? 0) + (reviewStats.data?.leechFocus.length ?? 0)
     const statisticsState = reviewStateOf(
-        course.error !== undefined || reviewStats.error !== undefined,
+        course.error !== undefined || reviewStats.error !== undefined || course.data === null || reviewStats.data === null,
         course.data === undefined || reviewStats.data === undefined,
-        course.data === null || reviewStats.data === null || statsRowsCount === 0,
+        statsRowsCount === 0,
     )
     const blockState = activeView === "overview" ? overviewState : activeView === "history" ? historyState : statisticsState
     const normalizedSearch = search.trim().toLocaleLowerCase(locale)
@@ -230,17 +258,20 @@ export const CourseFlashcardsReviewBlock = (props: CourseFlashcardsReviewBlockPr
         pageState={activeView}
         blockState={blockState}
         props={{
-            title: copy.title, subtitle: copy.subtitle, reviewLabel: copy.review, quizLabel: copy.quiz,
+            title: copy.title, subtitle: copy.subtitle, gatewayTitle: copy.gatewayTitle, gatewayDescription: copy.gatewayDescription,
+            reviewLabel: copy.review, reviewDescription: copy.reviewDescription, reviewActionLabel: copy.reviewAction, quizLabel: copy.quiz, quizTitleLabel: copy.quiz, quizDescription: copy.quizDescription, quizActionLabel: copy.quizAction,
             modeTabsLabel: copy.modeTabsLabel, viewTabsLabel: copy.viewTabsLabel,
             overviewLabel: copy.overview, historyLabel: copy.history, statsLabel: copy.statistics, activeView,
             dueTitle: copy.dueTitle, dueDescription: copy.dueDescription, decksTitle: copy.decks,
             evidenceTitle: activeView === "history" ? copy.historyTitle : copy.statsTitle,
             cardsLabel: copy.cards, dueLabel: copy.due, masteredLabel: copy.mastered, startLabel: copy.start,
-            resumeLabel: copy.resume, retryLabel: copy.retry, emptyText: copy.empty,
+            resumeLabel: copy.resume, resumeActionLabel: copy.resumeAction, resumeDescription: copy.resumeDescription, activeSessionText: copy.activeSession, retryLabel: copy.retry,
+            emptyTitle: copy.emptyTitle, emptyText: copy.empty, emptyActionLabel: copy.emptyAction,
             evidenceEmptyText: activeView === "history" ? copy.historyEmpty : copy.statsEmpty,
-            noResultsText: copy.noResults,
+            noResultsTitle: copy.noResultsTitle, noResultsText: copy.noResults,
             failedText: activeView === "history" ? copy.historyFailed : activeView === "stats" ? copy.statsFailed : copy.failed,
             dueCount: due.data?.dueCount ?? 0,
+            quizCardCount: resolvedDecks.reduce((count, deck) => count + (deck.cards.length >= 5 ? deck.cards.length : 0), 0),
             statRows: [
                 { label: copy.totalCards, value: totalCards.toString() },
                 { label: copy.totalMastered, value: totalMastered.toString() },
@@ -259,7 +290,9 @@ export const CourseFlashcardsReviewBlock = (props: CourseFlashcardsReviewBlockPr
             startPending: start.isMutating, startErrorText: start.error === undefined ? undefined : copy.startFailed,
         }}
         on={{
-            openQuiz: (deckId) => router.push(`/courses/${displayId}/learn/flashcards/quiz${deckId === undefined ? "" : `?deckId=${encodeURIComponent(deckId)}`}`), selectView: setActiveView, changeSearch: setSearch,
+            openQuiz: (deckId) => router.push(`/courses/${displayId}/learn/flashcards/quiz${deckId === undefined ? "" : `?deckId=${encodeURIComponent(deckId)}`}`),
+            openCourse: () => router.push(`/courses/${displayId}/learn`),
+            selectView: setActiveView, changeSearch: setSearch,
             changeLayout: (next) => {
                 setLayout(next)
                 try {

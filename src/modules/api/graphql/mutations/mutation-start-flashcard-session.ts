@@ -24,10 +24,9 @@ export type StartFlashcardDueReviewSessionRequest = {
 export type StartFlashcardQuizSessionRequest = {
     readonly mode: "quiz"
     readonly courseId: string
-    readonly cardIds: ReadonlyArray<string>
-    readonly practiceMode: "quick" | "deep"
-    readonly level: string | null
-    readonly name?: string
+    readonly deckIds?: ReadonlyArray<string>
+    readonly requestedItemCount: number
+    readonly startRequestId: string
 }
 
 /** Backend-proven start requests supported by the flashcard pages. */
@@ -112,10 +111,9 @@ export const mutationStartFlashcardSession = async (
         variables: {
             request: {
                 courseId: request.courseId,
-                cardIds: request.cardIds,
-                mode: request.practiceMode,
-                level: request.level,
-                name: request.name,
+                deckIds: request.deckIds,
+                requestedItemCount: request.requestedItemCount,
+                startRequestId: request.startRequestId,
             },
         },
     })

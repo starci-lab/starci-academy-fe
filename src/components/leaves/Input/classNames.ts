@@ -1,7 +1,7 @@
 import { cn, skeletonVariants } from "@heroui/react"
 
 /** Input wrapper layout. */
-export const inputBoxClassName = cn("relative", "flex", "flex-row", "items-center")
+export const inputBoxClassName = cn("relative", "flex", "w-full", "max-w-full", "min-w-0", "flex-row", "items-center")
 /** Input loading shape. */
 export const inputLoadingClassName = skeletonVariants({ animationType: "shimmer" }).base({ className: cn("h-10", "w-full") })
 /** Password reveal affordance. */

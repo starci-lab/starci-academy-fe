@@ -2,7 +2,7 @@
 
 import { Tabs } from "@heroui/react"
 import { Icon, type IconName } from "@/components/leaves/Icon"
-import { choiceTabContentClassName, getChoiceTabClassName } from "./classNames"
+import { choiceTabContentClassName, getChoiceTabClassName, getChoiceTabsListClassName } from "./classNames"
 
 /** One peer choice, optionally led by a glyph naming the shape it selects. */
 export type ChoiceTabData = {
@@ -29,6 +29,8 @@ export type ChoiceTabsData = {
      * they are not a general importance scale.
      */
     readonly variant?: "primary" | "secondary"
+    /** Long primary labels may become one target per row at the narrowest effective width. */
+    readonly stackAtNarrow?: boolean
 }
 /** Selection reported by the peer-choice control. */
 export type ChoiceTabsActions = { readonly select?: (key: string) => void }
@@ -48,12 +50,11 @@ export type ChoiceTabsProps = { readonly props: ChoiceTabsData; readonly on?: Ch
  * Selection is a STATE OF THE TAB, so the tab draws it. Nothing is measured, so nothing can go
  * stale, and what it costs is the slide - which was never what the control was for.
  *
- * The underline variant keeps the vendor indicator. It names navigation between large content
- * regions, as ShellNav does, and leaving it alone keeps one implementation rather than two that
- * can disagree.
+ * The underline variant is painted from `aria-selected` for the same reason. The vendor indicator
+ * can retain a stale transform after a responsive shell or async content changes the rail width;
+ * it also adds phantom scroll width and exposes a meaningless overflow arrow when every tab fits.
+ * A selected border follows the tab itself, so hydration and viewport transitions cannot detach it.
  */
-
-/** The underline variant keeps the vendor's mechanics, so its tab only refuses to wrap. */
 
 /** Text-only peer choices, except where a glyph names the SHAPE being chosen. Business categories do not gain decorative glyphs. */
 export const ChoiceTabs = (props: ChoiceTabsProps) => {
@@ -68,13 +69,13 @@ export const ChoiceTabs = (props: ChoiceTabsProps) => {
             data-variant={variant}
         >
             <Tabs.ListContainer>
-                <Tabs.List aria-label={data.label}>
+                <Tabs.List aria-label={data.label} className={getChoiceTabsListClassName(data.stackAtNarrow === true)}>
                     {data.tabs.map((tab) => (
                     // `whitespace-nowrap` because the vendor gives every segment an equal, fixed
                     // width and leaves wrapping on: a two-word label breaks onto a second line
                     // inside its own pill while the row around it still has hundreds of pixels
                     // spare. A label is one line; the leaf owns that, not its callers.
-                        <Tabs.Tab key={tab.id} id={tab.id} className={getChoiceTabClassName(variant)}>
+                        <Tabs.Tab key={tab.id} id={tab.id} className={getChoiceTabClassName(variant, data.stackAtNarrow === true)}>
                             {/*
                           * The glyph and the words it belongs to are ONE line, held together by the
                           * one gap a leaf is allowed to keep. Left as siblings of the tab's own
@@ -85,7 +86,6 @@ export const ChoiceTabs = (props: ChoiceTabsProps) => {
                                 {tab.icon === undefined ? null : <Icon props={{ name: tab.icon, role: "leading" }} />}
                                 {tab.label}
                             </span>
-                            {variant === "primary" ? null : <Tabs.Indicator />}
                         </Tabs.Tab>
                     ))}
                 </Tabs.List>

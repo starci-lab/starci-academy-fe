@@ -241,6 +241,10 @@
         display: none;
     }
 
+    .starci-core-tabs-frame[data-grammar-tab-labels="always"] .starci-core-tab-label {
+        display: inline;
+    }
+
     .starci-core-static-row,
     .starci-core-empty-row {
         display: flex;

@@ -14,6 +14,7 @@ import {
     parseContentAiQuestion,
     type ContentAiSelectionContext,
 } from "@/modules/ai/content-ai-selection-context"
+import { parseCourseAdvisorResponse } from "@/modules/ai/course-advisor-response"
 import {
     CourseLearnAiChatBase,
 } from "./component"
@@ -96,10 +97,11 @@ export const CourseLearnAiChat = (props: CourseLearnAiChatProps) => {
     const persistedTurns = useMemo<ReadonlyArray<StarCiAiTurn>>(
         () => (history.data?.messages ?? []).map((turn, index) => {
             const parsed = turn.role === "user" ? parseContentAiQuestion(turn.content) : undefined
+            const advisor = turn.role === "assistant" ? parseCourseAdvisorResponse(turn.content) : undefined
             return {
                 id: `course-persisted-${index}`,
                 role: turn.role,
-                body: parsed?.question ?? turn.content,
+                body: parsed?.question ?? advisor?.body ?? turn.content,
                 quote: parsed?.selection?.quote,
                 quoteLanguage: parsed?.quoteLanguage,
             }
@@ -149,6 +151,7 @@ export const CourseLearnAiChat = (props: CourseLearnAiChatProps) => {
         stream.ask({
             sessionId,
             ...anchor,
+            experience: "learn_companion",
             question: buildContentAiQuestion(question, props.selection),
             history: turns.map((turn) => ({ role: turn.role, content: turn.body })),
             onDelta: (delta) => setLocalTurns((current) => current.map((turn) => (
@@ -160,7 +163,9 @@ export const CourseLearnAiChat = (props: CourseLearnAiChatProps) => {
                     return
                 }
                 setLocalTurns((current) => current.map((turn) => (
-                    turn.id === assistantId ? { ...turn, isPartial: false } : turn
+                    turn.id === assistantId
+                        ? { ...turn, body: parseCourseAdvisorResponse(turn.body).body, isPartial: false }
+                        : turn
                 )))
                 setDraft("")
                 setDraftKey((key) => key + 1)
@@ -171,6 +176,12 @@ export const CourseLearnAiChat = (props: CourseLearnAiChatProps) => {
         })
     }
     const labels = {
+        eyebrow: t("identity.learningAssistant"),
+        subtitle: t("identity.learningAssistantDescription"),
+        emptyTitle: t("empty.learningTitle"),
+        emptyDescription: t("empty.learningDescription"),
+        quickPrompts: [t("prompts.explain"), t("prompts.practice")],
+        recommendationList: t("recommendation.listLabel"),
         generalMode: t("modes.general"), historyMode: t("modes.history"),
         composer: t("composer.label"), placeholder: challengeText("challengeAiPlaceholder"), send: t("actions.send"),
         stop: t("actions.stop"), retry: t("actions.retry"), clearContext: t("actions.clearContext"),
@@ -213,6 +224,10 @@ export const CourseLearnAiChat = (props: CourseLearnAiChatProps) => {
                     setMode("general")
                 },
                 changeDraft: setDraft,
+                usePrompt: (prompt) => {
+                    setDraft(prompt)
+                    setDraftKey((key) => key + 1)
+                },
                 send: () => { void send() },
                 stop: stream.abort,
                 retry: () => { void send() },

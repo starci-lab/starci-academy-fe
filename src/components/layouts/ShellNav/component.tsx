@@ -6,9 +6,12 @@ import { LanguageMenu } from "@/components/blocks/locale/LanguageMenu"
 import { PressableInputLike } from "@/components/leaves/PressableInputLike"
 import { ThemeSwitch } from "@/components/leaves/ThemeSwitch"
 import { ExtendedTabs } from "@/components/leaves/ExtendedTabs"
+import { Icon } from "@/components/leaves/Icon"
+import { DropdownBranch } from "@/components/branches/DropdownBranch"
 import type { IconName } from "@/components/leaves/Icon"
 import {
     shellNavClassName,
+    shellNavCompactToolsClassName,
     shellNavDesktopToolsClassName,
     shellNavNavigationClassName,
     shellNavPrimaryClassName,
@@ -35,6 +38,8 @@ export type ShellNavData = {
     readonly routes: ReadonlyArray<ShellNavRoute>
     readonly tabs?: ReadonlyArray<ShellNavTab>
     readonly themeLabel: string
+    readonly utilitiesLabel: string
+    readonly localeActionLabel: string
     readonly isDark: boolean
     readonly searchPlaceholder: string
     readonly searchLabel: string
@@ -52,6 +57,7 @@ export type ShellNavActions = {
     readonly selectTab?: (key: string) => void
     readonly openSearch?: () => void
     readonly toggleTheme?: () => void
+    readonly toggleLocale?: () => void
     /** Opens the basket panel. The navbar owns the control; the shell owns the panel. */
     readonly openCart?: () => void
 }
@@ -70,17 +76,39 @@ export const ShellNavBase = (props: ShellNavProps) => {
             <div className={shellNavPrimaryClassName}>
                 <div className={shellNavNavigationClassName}>
                     <Link props={{ label: props.props.brand, emphasis: "brand" }} on={{ press: () => props.on?.navigate?.("dashboard") }} />
-                    <div className={shellNavRoutesClassName}>
-                        {props.props.routes.map((route) => (
-                            <NavLink key={route.id} props={{ label: route.label, isCurrent: route.isCurrent, kind: "route" }} on={{ press: () => props.on?.navigate?.(route.id) }} />
-                        ))}
-                    </div>
+                </div>
+                <div className={shellNavRoutesClassName}>
+                    {props.props.routes.map((route) => (
+                        <NavLink key={route.id} props={{ label: route.label, isCurrent: route.isCurrent, kind: "route" }} on={{ press: () => props.on?.navigate?.(route.id) }} />
+                    ))}
                 </div>
                 <div className={shellNavToolsClassName}>
                     <div className={shellNavDesktopToolsClassName}>
                         <PressableInputLike props={{ placeholder: props.props.searchPlaceholder, label: props.props.searchLabel, shortcut: props.props.searchShortcut }} on={{ press: props.on?.openSearch }} />
                         <LanguageMenu />
                         <ThemeSwitch props={{ isDark: props.props.isDark, label: props.props.themeLabel }} on={{ change: props.on?.toggleTheme }} />
+                    </div>
+                    <div className={shellNavCompactToolsClassName}>
+                        <DropdownBranch
+                            props={{
+                                label: props.props.utilitiesLabel,
+                                sections: [{
+                                    items: [
+                                        { id: "search", label: props.props.searchLabel, icon: "search" },
+                                        { id: "locale", label: props.props.localeActionLabel, icon: "locale" },
+                                        { id: "theme", label: props.props.themeLabel, icon: props.props.isDark ? "light" : "dark" },
+                                    ],
+                                }],
+                            }}
+                            on={{
+                                action: (id) => {
+                                    if (id === "search") props.on?.openSearch?.()
+                                    else if (id === "locale") props.on?.toggleLocale?.()
+                                    else props.on?.toggleTheme?.()
+                                },
+                            }}
+                            trigger={<Icon props={{ name: "settings", role: "leading" }} />}
+                        />
                     </div>
                     <IconButton props={{ icon: "cart", label: props.props.cartLabel }} on={{ press: props.on?.openCart }} />
                     {props.props.isSignedIn ? <IconButton props={{ icon: "notification", label: props.props.notificationLabel }} /> : null}

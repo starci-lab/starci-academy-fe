@@ -1,89 +1,115 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import {
-    CoursePersonalProjectBase,
-    type CoursePersonalProjectProps,
-    type CoursePersonalProjectTaskRow,
-} from "@/components/blocks/learn/CoursePersonalProject/component"
-
-const tasks: ReadonlyArray<CoursePersonalProjectTaskRow> = [
-    { id: "task-1", position: 1, title: "Plan", status: "Completed", actionLabel: "Continue" },
-    { id: "task-2", position: 2, title: "Build", status: "Next task", actionLabel: "Continue", isCurrent: true },
-]
+import { CoursePersonalProjectBase, type CoursePersonalProjectProps } from "@/components/blocks/learn/CoursePersonalProject/component"
 
 const baseProps: CoursePersonalProjectProps["data"] = {
     breadcrumbLabel: "Course path",
     courseTitle: "System Design",
     title: "Personal Project",
-    nextTask: { id: "task-2", position: "Next task · Build", title: "Build the service" },
-    continueLabel: "Continue",
+    description: "One view of the next task and the whole project.",
+    nextTaskLabel: "Next task",
+    nextTask: { id: "task-2", milestone: "Build", title: "Build the service", evidence: "10/20 · 1 submission" },
+    continueLabel: "Continue project",
     allCompleteLabel: "All tasks complete",
-    completionLabel: "Completion progress",
+    roadmapLabel: "Project roadmap",
+    roadmapSearchLabel: "Search the project roadmap",
+    roadmapSearchClearLabel: "Clear roadmap search",
+    roadmapCountLabel: "3 stages",
+    roadmapEmptyLabel: "No stages match.",
+    milestones: [
+        { id: "milestone-1", title: "Plan", status: "Completed", progress: "1/1", targetTaskId: "task-1", tone: "success" },
+        { id: "milestone-2", title: "Build", status: "In progress", progress: "0/2", targetTaskId: "task-2", tone: "accent" },
+        { id: "milestone-3", title: "Ship", status: "Upcoming", progress: "0/1", tone: "neutral" },
+    ],
+    completionLabel: "Whole-project progress",
     completionPercent: 50,
-    completionFacts: ["1/2 tasks completed", "3 submissions", "Average score 18/20"],
-    milestoneTitle: "Build",
-    tasks,
+    completionPercentLabel: "50%",
+    completionFacts: [
+        { label: "Tasks", value: "1/2" },
+        { label: "Submissions", value: "3" },
+        { label: "Average score", value: "18/20" },
+    ],
+    repository: {
+        state: "ready",
+        label: "Repository",
+        connectedLabel: "Connected",
+        emptyLabel: "Not connected",
+        failedLabel: "Unavailable",
+        branchLabel: "Branch",
+        branch: "main",
+        url: "https://github.com/starci/shop",
+        openLabel: "Open repository",
+        retryLabel: "Try again",
+    },
     retryLabel: "Try again",
 }
 
-const draw = (
-    state: CoursePersonalProjectProps["state"],
-    data: Partial<CoursePersonalProjectProps["data"]> = {},
-    on?: CoursePersonalProjectProps["on"],
-) => render(<CoursePersonalProjectBase state={state} data={{ ...baseProps, ...data }} on={on} />)
+const draw = (state: CoursePersonalProjectProps["state"], data: Partial<CoursePersonalProjectProps["data"]> = {}, on?: CoursePersonalProjectProps["on"]) =>
+    render(<CoursePersonalProjectBase state={state} data={{ ...baseProps, ...data }} on={on} />)
 
 describe("CoursePersonalProjectPageBase", () => {
-    it("orders next action before completion evidence and current milestone tasks", () => {
+    it("ranks the next decision before the roadmap and supporting evidence", () => {
         const { container } = draw("ready")
         const text = container.textContent ?? ""
 
-        expect(text.indexOf("Build the service")).toBeLessThan(text.indexOf("1/2 tasks completed"))
-        expect(text.indexOf("1/2 tasks completed")).toBeLessThan(text.indexOf("1.Plan"))
-        expect(screen.getByText("1/2 tasks completed · 3 submissions · Average score 18/20")).toBeInTheDocument()
-        expect(screen.getByText("1.")).toBeInTheDocument()
-        expect(screen.getAllByRole("button", { name: "Continue" })).toHaveLength(3)
+        expect(text.indexOf("Build the service")).toBeLessThan(text.indexOf("Project roadmap"))
+        expect(text.indexOf("Project roadmap")).toBeLessThan(text.indexOf("Whole-project progress"))
+        expect(screen.getByText("50%")).toBeInTheDocument()
+        expect(screen.getByText("18/20")).toBeInTheDocument()
     })
 
-    it("routes the continue action and task tiles by task identity", () => {
+    it("routes the primary action and only navigable milestone summaries", () => {
         const openTask = vi.fn()
         draw("ready", {}, { openTask })
 
-        const actions = screen.getAllByRole("button", { name: "Continue" })
-        fireEvent.click(actions[0])
-        fireEvent.click(actions[1])
+        fireEvent.click(screen.getByRole("button", { name: "Continue project" }))
+        fireEvent.click(screen.getByRole("button", { name: "Plan" }))
         expect(openTask).toHaveBeenNthCalledWith(1, "task-2")
         expect(openTask).toHaveBeenNthCalledWith(2, "task-1")
+        expect(screen.queryByRole("button", { name: "Ship" })).not.toBeInTheDocument()
     })
 
-    it("keeps four task destinations in the pending geometry", () => {
-        draw("pending", {
-            nextTask: undefined,
-            completionPercent: undefined,
-            completionFacts: ["", "", ""],
-            milestoneTitle: undefined,
-            tasks: [],
-        })
+    it("submits roadmap search and keeps the collection bounded", () => {
+        const searchRoadmap = vi.fn()
+        const { container } = draw("ready", {}, { searchRoadmap })
+        const search = screen.getByRole("search")
+        fireEvent.change(screen.getByRole("searchbox", { name: "Search the project roadmap" }), { target: { value: "build" } })
+        fireEvent.submit(search)
 
+        expect(searchRoadmap).toHaveBeenCalledWith("build")
+        expect(container.querySelector("[data-grammar-scroll='contained']")).not.toBeNull()
+        expect(screen.getByText("3 stages")).toBeInTheDocument()
     })
 
-    it("replaces the next action with completion copy when no task remains", () => {
+    it("draws a deliberate empty result inside the roadmap surface", () => {
+        draw("ready", { milestones: [], roadmapCountLabel: "0 results across 3 stages" })
+
+        expect(screen.getByText("No stages match.")).toBeInTheDocument()
+        expect(screen.getByText("0 results across 3 stages")).toBeInTheDocument()
+    })
+
+    it("replaces the primary action with completion copy when no task remains", () => {
         draw("ready", { nextTask: undefined })
 
         expect(screen.getByText("All tasks complete")).toBeInTheDocument()
-        expect(screen.getAllByRole("button", { name: "Continue" })).toHaveLength(2)
+        expect(screen.queryByRole("button", { name: "Continue project" })).not.toBeInTheDocument()
     })
 
-    it("retains the page header and offers recovery after a failed query", () => {
+    it("keeps roadmap usable when repository evidence fails", () => {
+        const retryRepository = vi.fn()
+        draw("ready", { repository: { ...baseProps.repository, state: "failed" } }, { retryRepository })
+
+        expect(screen.getByText("Project roadmap")).toBeInTheDocument()
+        fireEvent.click(screen.getByRole("button", { name: "Try again" }))
+        expect(retryRepository).toHaveBeenCalledTimes(1)
+    })
+
+    it("retains the page header and offers recovery after the primary query fails", () => {
         const retry = vi.fn()
-        draw("failed", { notice: "Could not load the project", tasks: [] }, { retry })
+        draw("failed", { notice: "Could not load the project", milestones: [] }, { retry })
 
         expect(screen.getByRole("heading", { name: "Personal Project" })).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Try again" }))
         expect(retry).toHaveBeenCalledTimes(1)
-    })
-
-    it("does not invent repository status without a source-backed value", () => {
-        draw("ready")
-        expect(screen.queryByText(/repository/i)).not.toBeInTheDocument()
     })
 })

@@ -43,6 +43,7 @@ icon leaf selects the outline or micro drawing from the role.
 | `hidePassword` | Hide a visible password | `EyeSlashIcon` | A crossed eye names returning a visible secret to its masked state |
 | `code` | Verification/security code | `ShieldCheckIcon` | The checked shield distinguishes verification from programming |
 | `complete` | Completed/successful state | `CheckCircleIcon` | A checked circle names completion across authentication, quests and progress without tying the glyph to one feature |
+| `included` | Benefit or capability included in an offering | `CheckCircleIcon` | A 20px outline checked circle marks what the offering contains; inherited foreground keeps inclusion distinct from achieved success without accent or solid weight |
 | `incomplete` | Explicit unread/incomplete state | `XCircleIcon` | The crossed circle states that the item is not complete, distinct from the neutral pending ring |
 | `pending` | Incomplete/pending progress | `CircleIcon` | The unfinished state is the exact empty twin of completion: keep Heroicons' outer `CheckCircleIcon` path and remove only its inner check |
 | `signIn` | Enter account/session | `ArrowRightOnRectangleIcon` | The arrow entering a boundary names session entry |

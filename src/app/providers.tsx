@@ -1,9 +1,10 @@
 "use client"
 
 import { I18nProvider } from "@heroui/react"
-import { ThemeProvider } from "next-themes"
 import { NextIntlClientProvider } from "next-intl"
 import type { ReactNode } from "react"
+import { StarCiThemeProvider } from "@/modules/theme/theme-context"
+import { PRODUCT_TIME_ZONE } from "@/i18n/config"
 
 /**
  * The three contexts that sit above every route, and nothing else.
@@ -44,7 +45,7 @@ export interface AppProvidersProps {
  * @param props - {@link AppProvidersProps}
  */
 export const AppProviders = (props: AppProvidersProps) => (
-    <NextIntlClientProvider locale={props.locale} messages={props.messages}>
+    <NextIntlClientProvider locale={props.locale} messages={props.messages} timeZone={PRODUCT_TIME_ZONE}>
         <I18nProvider locale={props.locale}>
             {/*
               * `class` rather than the `data-theme` attribute because the vendor's own stylesheet
@@ -52,9 +53,9 @@ export const AppProviders = (props: AppProvidersProps) => (
               * one that also dresses HeroUI's components. `system` is the default because a
               * reader who has told their OS which they want has already answered the question.
               */}
-            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <StarCiThemeProvider>
                 {props.children}
-            </ThemeProvider>
+            </StarCiThemeProvider>
         </I18nProvider>
     </NextIntlClientProvider>
 )

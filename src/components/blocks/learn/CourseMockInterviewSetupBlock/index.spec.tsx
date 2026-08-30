@@ -11,11 +11,15 @@ const mocks = vi.hoisted(() => ({
     start: { isMutating: false, trigger: vi.fn() }, push: vi.fn(), replace: vi.fn(), locale: "en",
     restoring: false,
     searchTab: null as string | null,
+    searchLevel: null as string | null,
+    searchMode: null as string | null,
     sessionHook: vi.fn(), startHook: vi.fn(), attemptsHook: vi.fn(), statsHook: vi.fn(),
 }))
 
 vi.mock("next-intl", () => ({ useLocale: () => mocks.locale }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => ({ get: () => mocks.searchTab }) }))
+vi.mock("next/navigation", () => ({ useSearchParams: () => ({
+    get: (key: string) => ({ tab: mocks.searchTab, level: mocks.searchLevel, mode: mocks.searchMode }[key] ?? null),
+}) }))
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push, replace: mocks.replace }) }))
 vi.mock("@/hooks/auth/useSessionRefresh", () => ({ useSessionRefresh: () => ({ isRestoring: mocks.restoring }) }))
 vi.mock("@/hooks/swr/useQueryCourseSwr", () => ({ useQueryCourseSwr: () => mocks.course }))
@@ -33,6 +37,8 @@ beforeEach(() => {
     mocks.locale = "en"
     mocks.restoring = false
     mocks.searchTab = null
+    mocks.searchLevel = null
+    mocks.searchMode = null
     mocks.start.isMutating = false
     for (const item of [mocks.course, mocks.session, mocks.attempts, mocks.stats]) { item.data = undefined; item.error = undefined }
 })
@@ -42,6 +48,33 @@ describe("CourseMockInterviewSetupBlock", () => {
         mocks.searchTab = "history"
         render(<CourseMockInterviewSetupBlock displayId="course" />)
         expect(mocks.input?.props).toMatchObject({ selectedTab: "history" })
+    })
+
+    it("synchronizes the visible destination when route search changes", async () => {
+        mocks.searchTab = "stats"
+        const view = render(<CourseMockInterviewSetupBlock displayId="course" />)
+        expect(mocks.input?.props).toMatchObject({ selectedTab: "stats" })
+
+        mocks.searchTab = null
+        view.rerender(<CourseMockInterviewSetupBlock displayId="course" />)
+        await waitFor(() => expect(mocks.input?.props).toMatchObject({ selectedTab: "begin" }))
+    })
+
+    it("restores selected interview choices from route state and sends them to start", async () => {
+        mocks.searchLevel = "senior"
+        mocks.searchMode = "design"
+        mocks.course.data = { id: "c1", title: "Course", isEnrolled: true }
+        mocks.session.data = null
+        mocks.attempts.data = { items: [] }
+        mocks.stats.data = { insufficientData: true, byPhase: [] }
+        mocks.start.trigger.mockResolvedValue({ data: { startMockInterviewSession: { success: true, data: { sessionId: "new" } } } })
+
+        render(<CourseMockInterviewSetupBlock displayId="course" />)
+        expect(mocks.input?.props).toMatchObject({ selectedLevel: "senior", selectedMode: "design" })
+
+        act(() => { mocks.input?.on.start() })
+
+        await waitFor(() => expect(mocks.start.trigger).toHaveBeenCalledWith({ courseId: "c1", level: "senior", mode: "design" }))
     })
 
     it("handles pending, failed, resumable and successful start states", async () => {

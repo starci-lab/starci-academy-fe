@@ -1,15 +1,17 @@
 import { SurfaceCard as GrammarSurfaceCard } from "@starci/grammar/core"
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { Button } from "@/components/leaves/Button"
 import { Heading } from "@/components/leaves/Heading"
 import { Text } from "@/components/leaves/Text"
 import type { FlashcardSessionMode } from "@/modules/api/graphql/queries/query-my-in-progress-flashcard-session"
 import {
     flashcardEvidenceClassName,
+    flashcardNextActionRailClassName,
     flashcardFactListClassName,
     flashcardFactRowClassName,
+    flashcardResultActionClassName,
     flashcardResultBodyClassName,
+    flashcardResultRecoveryClassName,
     flashcardResultWorkspaceClassName,
     flashcardStatClassName,
     flashcardStatGridClassName,
@@ -74,7 +76,14 @@ export const FlashcardResultBase = (props: FlashcardResultProps) => {
     return (
         <GrammarSurfaceCard ariaLabel={data.title} frame="frameless" state={grammarState}>
             <main className={flashcardResultWorkspaceClassName}>
-                {blockState === "failed" ? <EmptyNotice props={{ message: data.failedText, actionLabel: data.retryLabel }} on={{ act: on.retryLoad }} /> : <>
+                {blockState === "failed" ? <SurfaceCard><section className={flashcardResultRecoveryClassName}>
+                    <Heading props={{ content: data.title, level: 1 }} />
+                    <Text props={{ content: data.failedText, size: "md" }} />
+                    <div className={flashcardResultActionClassName}>
+                        <Button props={{ label: data.retryLabel, variant: "primary" }} on={{ press: on.retryLoad }} />
+                        <Button props={{ label: data.backLabel, variant: "outline" }} on={{ press: on.back }} />
+                    </div>
+                </section></SurfaceCard> : <>
                     <SurfaceCard><section className={flashcardSummaryClassName}>
                         <Text props={{ content: data.modeText, size: "sm", tone: "muted" }} />
                         <div className={titlePairClassName}><Heading props={{ content: data.title, level: 1 }} isLoading={isLoading} /><Text props={{ content: data.subtitle, size: "sm", tone: "muted" }} isLoading={isLoading} /></div>
@@ -85,11 +94,11 @@ export const FlashcardResultBase = (props: FlashcardResultProps) => {
                             {data.gradeRows.length === 0 ? null : <SurfaceCard props={{ label: data.breakdownTitle }}><div className={flashcardFactListClassName}>{data.gradeRows.map((row) => <div key={row.label} className={flashcardFactRowClassName}><Text props={{ content: row.label, size: "sm", weight: "medium" }} /><Text props={{ content: row.value.toString(), size: "sm", tone: "muted" }} /></div>)}</div></SurfaceCard>}
                             {data.weakTopics.length === 0 ? null : <SurfaceCard props={{ label: data.weakTopicsTitle }}><div className={flashcardFactListClassName}>{data.weakTopics.map((topic) => <div key={topic.tag} className={flashcardFactRowClassName}><Text props={{ content: topic.tag, size: "sm", weight: "medium" }} /><Text props={{ content: topic.value, size: "sm", tone: "muted" }} /></div>)}</div></SurfaceCard>}
                         </div>
-                        <SurfaceCard><aside className={nextActionClassName}>
+                        <div className={flashcardNextActionRailClassName}><SurfaceCard><aside className={nextActionClassName}>
                             {data.nextDueText === undefined ? null : <div className={titlePairClassName}><Heading props={{ content: data.nextDueLabel, level: 3 }} /><Text props={{ content: data.nextDueText, size: "sm", weight: "semibold" }} /></div>}
                             <Button props={{ label: data.retrySessionLabel, variant: "primary" }} on={{ press: on.retrySession }} />
                             <Button props={{ label: data.backLabel, variant: "outline" }} on={{ press: on.back }} />
-                        </aside></SurfaceCard>
+                        </aside></SurfaceCard></div>
                     </div> : null}
                 </>}
             </main>

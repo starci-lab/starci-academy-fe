@@ -4,6 +4,7 @@ import { IconTile } from "@/components/leaves/IconTile"
 import { Progress } from "@/components/leaves/Progress"
 import { StatusDot, type StatusDotTone } from "@/components/leaves/StatusDot"
 import { Text } from "@/components/leaves/Text"
+import { courseProgressBodyClassName, courseProgressHeadingClassName, courseProgressLegendClassName, courseProgressLegendItemClassName, courseProgressRowClassName, courseProgressTrackClassName } from "./classNames"
 
 /** One semantic course-progress dimension. */
 export type CourseProgressDimension = { readonly id: string; readonly label: string; readonly completed: number; readonly total: number; readonly percent: number; readonly tone: StatusDotTone }
@@ -19,11 +20,13 @@ export const CourseProgressRow = (props: CourseProgressRowProps) => {
     const { props: data, on, isLoading = false } = props
     return (
         <PressableSurface label={data.title ?? "Course"} press={on?.open} disabled={isLoading || data.isPending === true || data.isDisabled === true} hover="label">
-            <IconTile props={{ icon: "course", image: data.cover, tone: "accent", size: "md" }} isLoading={isLoading} />
-            <div>
-                <div><Text props={{ content: data.title, size: "md", weight: "semibold", isPressLabel: true }} isLoading={isLoading} />{data.isTrial === true && !isLoading ? <Badge props={{ content: data.trialLabel, tone: "warning" }} /> : null}<Text props={{ content: data.percentLabel, size: "xs", tone: "muted" }} isLoading={isLoading} /></div>
-                <div>{data.dimensions.map((dimension) => <Progress key={dimension.id} props={{ value: dimension.percent, label: dimension.label }} isLoading={isLoading} />)}</div>
-                <div>{data.dimensions.map((dimension) => <span key={dimension.id}><StatusDot props={{ tone: dimension.tone, label: dimension.label }} isLoading={isLoading} /><Text props={{ content: `${dimension.label} · ${dimension.completed}/${dimension.total}`, size: "xs", tone: "muted" }} isLoading={isLoading} /></span>)}</div>
+            <div className={courseProgressRowClassName}>
+                <IconTile props={{ icon: "course", image: data.cover, tone: "accent", size: "md" }} isLoading={isLoading} />
+                <div className={courseProgressBodyClassName}>
+                    <div className={courseProgressHeadingClassName}><Text props={{ content: data.title, size: "md", weight: "semibold", isPressLabel: true }} isLoading={isLoading} />{data.isTrial === true && !isLoading ? <Badge props={{ content: data.trialLabel, tone: "warning" }} /> : null}<Text props={{ content: data.percentLabel, size: "xs", tone: "muted" }} isLoading={isLoading} /></div>
+                    <div className={courseProgressTrackClassName}>{data.dimensions.map((dimension) => <Progress key={dimension.id} props={{ value: dimension.percent, label: dimension.label }} isLoading={isLoading} />)}</div>
+                    <div className={courseProgressLegendClassName}>{data.dimensions.map((dimension) => <span className={courseProgressLegendItemClassName} key={dimension.id}><StatusDot props={{ tone: dimension.tone, label: dimension.label }} isLoading={isLoading} /><Text props={{ content: `${dimension.label} · ${dimension.completed}/${dimension.total}`, size: "xs", tone: "muted" }} isLoading={isLoading} /></span>)}</div>
+                </div>
             </div>
         </PressableSurface>
     )

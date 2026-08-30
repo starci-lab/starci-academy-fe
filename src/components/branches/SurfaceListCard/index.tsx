@@ -25,6 +25,8 @@ export type SurfaceListCardData = {
      * down to restyle a child would make this card the row's second owner.
      */
     readonly isVerdict?: boolean
+    /** Keep a long collection inside its own bounded scroll region. */
+    readonly isScrollable?: boolean
 }
 
 /** The optional whole-list action reported below the joined surface. */
@@ -37,6 +39,8 @@ export type SurfaceListCardProps<D extends SurfaceListCardData> = {
     readonly props: D
     readonly on?: SurfaceListCardActions
     readonly isLoading?: boolean
+    /** A control or compact fact owned by the label line, outside the list frame. */
+    readonly labelEnd?: ReactNode
     readonly children: ReactNode
 }
 
@@ -44,7 +48,7 @@ export type SurfaceListCardProps<D extends SurfaceListCardData> = {
  * Draw a labelled, joined list while the child owns its row identity and count.
  */
 export const SurfaceListCard = <D extends SurfaceListCardData>(props: SurfaceListCardProps<D>) => {
-    const { props: surfaceProps, on, children, isLoading = false } = props
+    const { props: surfaceProps, on, children, isLoading = false, labelEnd } = props
     const footer = surfaceProps.actionLabel !== undefined && (isLoading || on?.act !== undefined) ? (
         <Button props={{ label: surfaceProps.actionLabel, size: "sm", variant: "primary" }} on={{ press: on?.act }} isLoading={isLoading} />
     ) : surfaceProps.description === undefined ? undefined : (
@@ -55,11 +59,13 @@ export const SurfaceListCard = <D extends SurfaceListCardData>(props: SurfaceLis
         <GrammarSurfaceListCard
             label={surfaceProps.label}
             fact={surfaceProps.fact}
+            labelEnd={labelEnd}
             labelHidden={surfaceProps.isLabelHidden === true}
             footer={footer}
             depth={surfaceProps.isNested === true ? "nested" : "top"}
             isLoading={isLoading}
             isVerdict={surfaceProps.isVerdict === true}
+            isScrollable={surfaceProps.isScrollable === true}
         >
             {children}
         </GrammarSurfaceListCard>

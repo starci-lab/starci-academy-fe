@@ -13,6 +13,12 @@ const stateLabels = Object.fromEntries(
 
 const props: StarCiAiChatData = {
     labels: {
+        eyebrow: "Course advisor",
+        subtitle: "Answers before recommending",
+        emptyTitle: "What is your goal?",
+        emptyDescription: "Share your goal and current experience.",
+        quickPrompts: ["Suggest a path", "Compare courses"],
+        recommendationList: "Recommended courses",
         generalMode: "General",
         historyMode: "History",
         composer: "Ask StarCi AI",
@@ -97,12 +103,15 @@ describe("StarCiAiChatBase", () => {
     })
 
     it("draws a plain answer with no fence and no partial marker", () => {
-        render(<StarCiAiChatBase state="ready" props={{
+        const { container } = render(<StarCiAiChatBase state="ready" props={{
             ...props,
             turns: [{ id: "turn-1", role: "assistant", body: "Because the request outlives the render." }],
         }} />)
         expect(screen.getByText("Because the request outlives the render.")).toBeInTheDocument()
         expect(screen.queryByText("Partial answer")).not.toBeInTheDocument()
+        const assistant = container.querySelector("[data-chat-role=\"assistant\"]")
+        expect(assistant?.querySelector("[data-slot=\"starci-ai-teacher\"]")).toHaveClass("rounded-full")
+        expect(assistant).toHaveClass("items-start")
     })
 
     it("fences an unlabelled quote as code and marks an interrupted answer", () => {

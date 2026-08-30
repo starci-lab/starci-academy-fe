@@ -17,10 +17,13 @@ type CartBlockProps = Record<never, never>
 export const CartBlock = (props: CartBlockProps) => {
     void props
     const t = useTranslations("cart")
+    const tPayment = useTranslations("payment")
     const locale = useLocale()
     const router = useRouter()
     const { mutate } = useSWRConfig()
     const [hasClearFailed, setHasClearFailed] = useState(false)
+    const [isPaymentOpen, setIsPaymentOpen] = useState(false)
+    const [hasCheckoutFailed, setHasCheckoutFailed] = useState(false)
     const token = useSessionToken()
     const isSignedOut = token === undefined
     const cart = useQueryMyCartSwr()
@@ -42,31 +45,79 @@ export const CartBlock = (props: CartBlockProps) => {
             removeLabel: t("remove"),
         }
     })
-    const instalment = preview.data?.installmentOptions?.[0]
     const state: CartBlockState = isSignedOut ? "failed" : cart.isLoading ? "pending" : cart.error !== undefined ? "failed" : lines.length === 0 ? "empty" : "ready"
-    return <CartBlockBase
-        blockState={state}
-        data={{
-            labels: {
-                navHome: t("navHome"), navCart: t("navCart"), title: t("title"),
-                summary: { subtotal: t("subtotal"), savings: t("savings"), surcharge: t("installmentFee"), total: t("total"), unavailable: t("unavailable") },
-                installmentHint: t("installmentHint", { amount: money.format(instalment?.monthlyAmountVnd ?? 0) }),
-                checkout: t("checkout", { count: lines.length }), clearAll: hasClearFailed ? t("clearFailed") : t("clearAll"), confirmClearAll: t("confirmClearAll"),
-                emptyMessage: t("emptyMessage"), failedMessage: isSignedOut ? t("signedOutMessage") : t("failedMessage"), failedAction: isSignedOut ? t("signedOutAction") : t("failedAction"), emptyAction: t("emptyAction"),
-            },
-            lines,
-            subtotal: preview.data === null || preview.data === undefined ? undefined : money.format(preview.data.totalListVnd),
-            savings: preview.data === null || preview.data === undefined || preview.data.savingsVnd <= 0 ? undefined : `-${money.format(preview.data.savingsVnd)}`,
-            total: preview.data === null || preview.data === undefined ? undefined : money.format(preview.data.totalChargedVnd),
-            hasPricingFailed: preview.error !== undefined,
-        }}
-        on={{
-            checkout: () => { if (lines.length === 0) return; const here = window.location.href; void checkout.trigger({ courseIds, paymentType: "payos", returnUrl: here, cancelUrl: here }).then((result) => { const url = result?.data?.coursesCheckout?.data?.checkoutUrl; if (typeof url === "string" && url !== "") window.location.assign(url) }) },
-            clearAll: () => { setHasClearFailed(false); void clearing.trigger().then((result) => { if (result?.data?.clearCart?.success !== true) { setHasClearFailed(true); return }; void mutate((key) => Array.isArray(key) && key[0] === QUERY_MY_CART_SWR_KEY[0]) }) },
-            goHome: () => router.push("/dashboard"),
-            browse: () => { if (isSignedOut) { router.push("/authentication"); return }; if (state === "failed") { void cart.mutate(); return }; router.push("/courses") },
-        }}
-    />
+    const subtotal = preview.data === null || preview.data === undefined ? undefined : money.format(preview.data.totalListVnd)
+    const savings = preview.data === null || preview.data === undefined || preview.data.savingsVnd <= 0 ? undefined : `-${money.format(preview.data.savingsVnd)}`
+    const total = preview.data === null || preview.data === undefined ? undefined : money.format(preview.data.totalChargedVnd)
+    const summaryLabels = { subtotal: t("subtotal"), savings: t("savings"), surcharge: t("installmentFee"), total: t("total"), unavailable: t("unavailable") }
+    const pay = () => {
+        if (lines.length === 0 || checkout.isMutating) return
+        setHasCheckoutFailed(false)
+        const here = window.location.href
+        void checkout.trigger({ courseIds, paymentType: "payos", returnUrl: here, cancelUrl: here })
+            .then((result) => {
+                const url = result?.data?.coursesCheckout?.data?.checkoutUrl
+                if (typeof url === "string" && url !== "") {
+                    window.location.assign(url)
+                    return
+                }
+                setHasCheckoutFailed(true)
+            })
+            .catch(() => setHasCheckoutFailed(true))
+    }
+    return (
+        <>
+            <CartBlockBase
+                blockState={state}
+                data={{
+                    labels: {
+                        navHome: t("navHome"), navCart: t("navCart"), title: t("title"),
+                        summary: summaryLabels,
+                        paymentHint: t("paymentHint"),
+                        checkout: t("checkout", { count: lines.length }), clearAll: hasClearFailed ? t("clearFailed") : t("clearAll"), confirmClearAll: t("confirmClearAll"),
+                        emptyMessage: t("emptyMessage"), failedMessage: isSignedOut ? t("signedOutMessage") : t("failedMessage"), failedAction: isSignedOut ? t("signedOutAction") : t("failedAction"), emptyAction: t("emptyAction"),
+                    },
+                    lines,
+                    subtotal,
+                    savings,
+                    total,
+                    hasPricingFailed: preview.error !== undefined,
+                    payment: {
+                        isOpen: isPaymentOpen,
+                        subtotal,
+                        savings,
+                        total,
+                        isPaying: checkout.isMutating,
+                        hasFailed: hasCheckoutFailed,
+                        labels: {
+                            title: tPayment("title"),
+                            subtitle: tPayment("subtitle", { count: lines.length }),
+                            methodTitle: tPayment("methodTitle"),
+                            provider: tPayment("provider"),
+                            providerDescription: tPayment("providerDescription"),
+                            summary: summaryLabels,
+                            processTitle: tPayment("processTitle"),
+                            handoffStep: tPayment("handoffStep"),
+                            verificationStep: tPayment("verificationStep"),
+                            accessStep: tPayment("accessStep"),
+                            trustNote: tPayment("trustNote"),
+                            action: tPayment("action", { total: total ?? "" }),
+                            cancel: tPayment("cancel"),
+                            failedMessage: tPayment("failedMessage"),
+                        },
+                    },
+                }}
+                on={{
+                    checkout: () => { if (lines.length === 0) return; setHasCheckoutFailed(false); setIsPaymentOpen(true) },
+                    clearAll: () => { setHasClearFailed(false); void clearing.trigger().then((result) => { if (result?.data?.clearCart?.success !== true) { setHasClearFailed(true); return }; void mutate((key) => Array.isArray(key) && key[0] === QUERY_MY_CART_SWR_KEY[0]) }) },
+                    goHome: () => router.push("/dashboard"),
+                    browse: () => { if (isSignedOut) { router.push("/authentication"); return }; if (state === "failed") { void cart.mutate(); return }; router.push("/courses") },
+                    pay,
+                    dismissPayment: () => { if (!checkout.isMutating) setIsPaymentOpen(false) },
+                }}
+            />
+        </>
+    )
 }
 
 export { CartBlockBase } from "./component"

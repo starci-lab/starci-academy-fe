@@ -26,8 +26,8 @@ describe("scrollable Core surfaces", () => {
         const markup = renderToStaticMarkup(<OtpInput id="otp" name="otp" />)
         expect(markup).toContain("scroll-shadow--horizontal")
         expect(markup.match(/data-slot="input-otp-slot"/g)).toHaveLength(6)
-        expect(markup).toContain("autocomplete=\"one-time-code\"")
-        expect(markup).toContain("inputmode=\"numeric\"")
+        expect(markup).toMatch(/auto[Cc]omplete="one-time-code"/)
+        expect(markup).toMatch(/input[Mm]ode="numeric"/)
     })
 
     it("makes SurfaceCard content vertically scrollable", () => {
@@ -64,7 +64,7 @@ describe("scrollable Core surfaces", () => {
     })
 
     it("makes SurfaceAccordionCard rows vertically scrollable", () => {
-        expectVerticalScrollShadow(renderToStaticMarkup(
+        const markup = renderToStaticMarkup(
             <SurfaceAccordionCard
                 bodyRender="Body"
                 isOpen
@@ -74,6 +74,11 @@ describe("scrollable Core surfaces", () => {
                 renderSummary={(summary) => summary}
                 summaryRender="Summary"
             />,
-        ))
+        )
+        expectVerticalScrollShadow(markup)
+        expect(markup).toContain("data-slot=\"accordion\"")
+        expect(markup).toContain("data-slot=\"accordion-panel\"")
+        expect(markup).toContain("accordion__panel")
+        expect(markup).not.toContain("border-t")
     })
 })

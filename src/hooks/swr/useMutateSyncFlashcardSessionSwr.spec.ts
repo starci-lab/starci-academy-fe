@@ -72,14 +72,15 @@ describe("useMutateSyncFlashcardSessionSwr", () => {
         expect(mocks.mutationSyncFlashcardSession).toHaveBeenCalledWith(request)
     })
 
-    it("passes a quiz snapshot through with its results", async () => {
+    it("passes a versioned quiz snapshot through with opaque selections", async () => {
         const { result } = renderHook(() => useMutateSyncFlashcardSessionSwr())
 
         const request = {
             mode: "quiz",
             sessionId: "session-1",
             currentIndex: 2,
-            results: [{ cardId: "card-1", correctBlanks: 1, totalBlanks: 2 }],
+            expectedVersion: 1,
+            selections: [{ blankId: "card-1:c1:o1", tokenId: "00000000-0000-4000-8000-000000000001" }],
         } as const
         await act(async () => {
             await result.current.trigger(request)
@@ -93,7 +94,7 @@ describe("useMutateSyncFlashcardSessionSwr", () => {
 
         await act(async () => {
             await expect(result.current.trigger({
-                mode: "quiz", sessionId: "session-1", currentIndex: 0, results: [],
+                mode: "quiz", sessionId: "session-1", currentIndex: 0, expectedVersion: 0, selections: [],
             })).rejects.toThrow("offline")
         })
         expect(result.current.error).toBeInstanceOf(Error)

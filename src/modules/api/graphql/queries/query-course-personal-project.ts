@@ -154,7 +154,6 @@ const syncPersonalProjectGithubMutation = gql`
             success
             message
             error
-            data
         }
     }
 `

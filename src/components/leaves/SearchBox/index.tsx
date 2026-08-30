@@ -104,6 +104,14 @@ export const SearchBox = (props: SearchBoxProps) => {
                     aria-label={data.label}
                     placeholder={data.placeholder}
                     onChange={(event) => setHasText(event.target.value !== "")}
+                    onKeyDown={(event) => {
+                        if (event.key !== "Enter" || event.nativeEvent.isComposing) return
+                        // HeroUI's input host consumes the native form submit in the browser. Own
+                        // the keyboard promise here so the visible search works the same way as an
+                        // explicit form submit, without firing twice in hosts that do submit.
+                        event.preventDefault()
+                        on?.search?.(event.currentTarget.value)
+                    }}
                 />
                 {/*
                  * CLEARING SEARCHES AGAIN, because a box emptied over a filtered list leaves the

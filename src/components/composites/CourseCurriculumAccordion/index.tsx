@@ -2,11 +2,13 @@
 
 import { useState } from "react"
 import { SurfaceAccordionCard } from "@starci/grammar/core"
+import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { SupportingDotList } from "@/components/composites/SupportingDotList"
 import { Badge } from "@/components/leaves/Badge"
 import { DisclosureIndicator } from "@/components/leaves/DisclosureIndicator"
 import { Heading } from "@/components/leaves/Heading"
 import { Text } from "@/components/leaves/Text"
+import { curriculumBodyClassName, curriculumClassName, curriculumMetaClassName, curriculumSummaryClassName } from "./classNames"
 
 /** Stable difficulty identity used by a course curriculum module. */
 export type CourseCurriculumLevel = "foundation" | "intermediate" | "advanced"
@@ -41,6 +43,7 @@ export type CourseCurriculumAccordionProps = {
     readonly isLoading?: boolean
 }
 
+/** Preserve the contract's stable visual identity for each authored curriculum level. */
 const LEVEL_TONES = {
     foundation: "success",
     intermediate: "warning",
@@ -57,26 +60,27 @@ export const CourseCurriculumAccordion = (props: CourseCurriculumAccordionProps)
             id: module.id,
             isOpen,
             isDisabled: isLoading,
-            summaryRender: <><Text props={{ content: module.title, size: "sm", weight: "medium" }} isLoading={isLoading} /><Badge props={{ content: module.levelLabel, tone: LEVEL_TONES[module.level] }} isLoading={isLoading} />{module.previewLabel === undefined ? null : <Text props={{ content: module.previewLabel, size: "xs", tone: "muted" }} />}{isLoading ? null : <DisclosureIndicator props={{ isOpen }} />}</>,
-            bodyRender: <><Text props={{ content: module.summary, size: "xs", tone: "muted" }} />{module.description.trim().length === 0 ? null : <Text props={{ content: module.description, size: "sm" }} />}{module.previews.length === 0 ? null : <SupportingDotList props={{ entries: module.previews.map((preview) => ({ id: preview.id, content: preview.title })) }} />}</>,
+            summaryRender: <div className={curriculumSummaryClassName}><Text props={{ content: module.title, size: "sm", weight: "medium" }} isLoading={isLoading} /><span className={curriculumMetaClassName}><Badge props={{ content: module.levelLabel, tone: LEVEL_TONES[module.level] }} isLoading={isLoading} />{module.previewLabel === undefined ? null : <Text props={{ content: module.previewLabel, size: "xs", tone: "muted" }} />}</span>{isLoading ? null : <DisclosureIndicator props={{ isOpen }} />}</div>,
+            bodyRender: <div className={curriculumBodyClassName}><Text props={{ content: module.summary, size: "xs", tone: "muted" }} />{module.description.trim().length === 0 ? null : <Text props={{ content: module.description, size: "sm" }} />}{module.previews.length === 0 ? null : <SupportingDotList props={{ entries: module.previews.map((preview) => ({ id: preview.id, content: preview.title })) }} />}</div>,
         }
     })
 
     return (
-        <section>
+        <section className={curriculumClassName}>
             <Heading props={{ content: props.props.label, level: 3 }} />
-            <SurfaceAccordionCard
-                depth="top"
-                items={items}
-                renderSummary={(summary) => <>{summary}</>}
-                renderBody={(body) => <>{body}</>}
-                onItemOpenChange={(id, isOpen) => setExpandedIds((current) => {
-                    const next = new Set(current)
-                    if (isOpen) next.add(id)
-                    else next.delete(id)
-                    return next
-                })}
-            />
+            <SurfaceCard props={{ inset: "none" }}>
+                <SurfaceAccordionCard
+                    items={items}
+                    renderSummary={(summary) => <>{summary}</>}
+                    renderBody={(body) => <>{body}</>}
+                    onItemOpenChange={(id, isOpen) => setExpandedIds((current) => {
+                        const next = new Set(current)
+                        if (isOpen) next.add(id)
+                        else next.delete(id)
+                        return next
+                    })}
+                />
+            </SurfaceCard>
         </section>
     )
 }

@@ -1,8 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import { useTranslations } from "next-intl"
-import { useTheme } from "next-themes"
+import { useLocale, useTranslations } from "next-intl"
 import { useSearchParams } from "next/navigation"
 import { usePathname, useRouter } from "@/i18n/navigation"
 import { SignInOverlay } from "@/components/overlays/auth/SignInOverlay"
@@ -10,6 +9,7 @@ import { CartDrawer } from "@/components/overlays/commerce/CartDrawer"
 import { GlobalSearchOverlay, type GlobalSearchOpenIntent } from "@/components/overlays/search/GlobalSearchOverlay"
 import { useSessionToken } from "@/hooks/auth/useSessionToken"
 import { useSessionRefresh } from "@/hooks/auth/useSessionRefresh"
+import { useStarCiTheme } from "@/modules/theme/theme-context"
 import { ShellNavBase, type ShellNavRoute, type ShellNavTab } from "./component"
 import type { IconName } from "@/components/leaves/Icon"
 import type { AuthMode } from "@/components/blocks/auth/AuthenticationPanel/component"
@@ -49,10 +49,11 @@ export const ShellNav = (props: ShellNavProps) => {
     void props
     useSessionRefresh()
     const t = useTranslations("shell")
+    const locale = useLocale()
     const pathname = usePathname()
     const router = useRouter()
     const searchParams = useSearchParams()
-    const { resolvedTheme, setTheme } = useTheme()
+    const { resolvedTheme, setTheme } = useStarCiTheme()
     const [isOpen, setIsOpen] = useState(false)
     const [isCartOpen, setIsCartOpen] = useState(false)
     const [searchIntent, setSearchIntent] = useState<GlobalSearchOpenIntent>()
@@ -146,6 +147,8 @@ export const ShellNav = (props: ShellNavProps) => {
                     routes,
                     tabs: dashboardTabs,
                     themeLabel: isDark ? t("themeLight") : t("themeDark"),
+                    utilitiesLabel: t("utilities"),
+                    localeActionLabel: t(`localeOptions.${locale === "vi" ? "en" : "vi"}`),
                     isDark,
                     searchPlaceholder: t("searchPlaceholder"),
                     searchLabel: t("search"),
@@ -158,7 +161,16 @@ export const ShellNav = (props: ShellNavProps) => {
                     // and every React-Aria id below this row shifts.
                     isSignedIn: isMounted && sessionToken !== undefined,
                 }}
-                on={{ openSignIn, openSignUp, navigate, selectTab, openSearch: () => openSearch("navbar"), toggleTheme: () => setTheme(isDark ? "light" : "dark"), openCart: () => setIsCartOpen(true) }}
+                on={{
+                    openSignIn,
+                    openSignUp,
+                    navigate,
+                    selectTab,
+                    openSearch: () => openSearch("navbar"),
+                    toggleTheme: () => setTheme(isDark ? "light" : "dark"),
+                    toggleLocale: () => router.replace(pathname, { locale: locale === "vi" ? "en" : "vi" }),
+                    openCart: () => setIsCartOpen(true),
+                }}
             />
             <SignInOverlay isOpen={isOpen} initialMode={authMode} onDismiss={dismiss} />
             {/*

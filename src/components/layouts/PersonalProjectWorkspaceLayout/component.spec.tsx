@@ -36,4 +36,18 @@ describe("PersonalProjectWorkspaceLayoutBase", () => {
         expect(screen.getByTestId("project-map")).toBeInTheDocument()
         expect(screen.getByRole("separator", { name: "Resize the project roadmap" })).toBeInTheDocument()
     })
+
+    it("lets the overview own its roadmap without duplicating navigation chrome", () => {
+        render(
+            <PersonalProjectWorkspaceLayoutBase
+                surface={<div>Project overview</div>}
+                resizeLabel="Resize the project roadmap"
+                showRoadmapNavigation={false}
+            />,
+        )
+
+        expect(screen.getByText("Project overview")).toBeInTheDocument()
+        expect(screen.queryByTestId("project-map")).not.toBeInTheDocument()
+        expect(screen.queryByRole("separator")).not.toBeInTheDocument()
+    })
 })

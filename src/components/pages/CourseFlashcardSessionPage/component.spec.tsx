@@ -63,6 +63,8 @@ const card: CourseFlashcardSessionPageData = {
     continueHint: "Choose a recall grade to continue.",
     clozeInstructionLabel: "Fill every blank",
     wordBankLabel: "Word bank",
+    blankLabel: "Blank",
+    hintLabel: "Hint",
     checkAnswerLabel: "Check answer",
     showSolutionLabel: "Show full answer",
     resultLabel: "blanks correct",
@@ -71,6 +73,7 @@ const card: CourseFlashcardSessionPageData = {
     hardLabel: "Hard",
     goodLabel: "Good",
     easyLabel: "Easy",
+    pendingRating: null,
     syncingLabel: "Saving your progress",
     completingLabel: "Completing the session",
     expiredText: "This session expired",
@@ -152,7 +155,7 @@ describe("CourseFlashcardSessionBlockBase", () => {
         expect(screen.getByRole("button", { name: "3" })).toBeInTheDocument()
         expect(screen.queryByRole("button", { name: "Good" })).not.toBeInTheDocument()
         expect(screen.queryByRole("button", { name: "Reveal answer" })).not.toBeInTheDocument()
-        expect(screen.queryByText("Reviewing a saved answer")).not.toBeInTheDocument()
+        expect(screen.getByText("Reviewing a saved answer")).toBeVisible()
     })
 
     it("traverses saved questions with previous and next without grading them", () => {
@@ -187,21 +190,28 @@ describe("CourseFlashcardSessionBlockBase", () => {
         expect(on.rate).toHaveBeenCalledWith(grade)
     })
 
-    it("marks the recommended grade as the main action and the other three as equal alternatives", () => {
+    it("keeps every unselected recall grade at equal visual weight", () => {
         draw("active")
 
-        expect(screen.getByRole("button", { name: "Good" })).toHaveAttribute("data-variant", "primary")
+        expect(screen.getByRole("button", { name: "Good" })).toHaveAttribute("data-variant", "outline")
         expect(screen.getByRole("button", { name: "Again" })).toHaveAttribute("data-variant", "outline")
         expect(screen.getByRole("button", { name: "Hard" })).toHaveAttribute("data-variant", "outline")
         expect(screen.getByRole("button", { name: "Easy" })).toHaveAttribute("data-variant", "outline")
     })
 
-    it("runs a cloze quiz through word bank, check, full solution and SM-2 rating", () => {
-        const cloze = { text: "Choose ____ and ____", blanks: ["Consistency", "Availability"], bank: ["Consistency", "Availability", "Durability"], selected: ["Consistency", "Availability"], checked: false, correctCount: 2 }
+    it("runs a cloze quiz with opaque tokens and no client-side score or SM-2 rating", () => {
+        const cloze = {
+            text: "Choose ____ and ____",
+            blanks: [{ id: "b1" }, { id: "b2" }],
+            bank: [{ id: "t1", label: "Consistency" }, { id: "t2", label: "Availability" }, { id: "t3", label: "Durability" }],
+            selected: [{ blankId: "b1", tokenId: "t1", label: "Consistency" }, { blankId: "b2", tokenId: "t2", label: "Availability" }],
+            isFinal: false,
+        }
         const first = draw("active", { mode: "quiz", answerVisible: false, cloze })
         expect(first.on.rate).not.toHaveBeenCalled()
-
-        expect(screen.getByRole("main", { name: "Study cards" })).toBeInTheDocument()
+        fireEvent.click(screen.getByRole("button", { name: "Check answer" }))
+        expect(first.on.checkQuiz).toHaveBeenCalledOnce()
+        expect(screen.queryByRole("button", { name: "Good" })).not.toBeInTheDocument()
     })
 
     it("falls back to reveal then SM-2 when a quiz card has no cloze markers", () => {
@@ -254,20 +264,19 @@ describe("CourseFlashcardSessionBlockBase", () => {
         expect(screen.getByRole("progressbar", { name: "Card 1 of 12" })).toHaveAttribute("aria-valuenow", "8")
     })
 
-    it("draws a partial quiz verdict as a warning surface instead of a success state", () => {
+    it("keeps a partially filled quiz ungradeable and disables continuation", () => {
         draw("active", {
             mode: "quiz",
             answerVisible: false,
             cloze: {
                 text: "Choose ____ and ____",
-                blanks: ["Consistency", "Availability"],
-                bank: ["Consistency", "Availability"],
-                selected: ["Consistency", "Durability"],
-                checked: true,
-                correctCount: 1,
+                blanks: [{ id: "b1" }, { id: "b2" }],
+                bank: [{ id: "t1", label: "Consistency" }, { id: "t2", label: "Availability" }],
+                selected: [{ blankId: "b1", tokenId: "t1", label: "Consistency" }],
+                isFinal: false,
             },
         })
-
+        expect(screen.getByRole("button", { name: "Check answer" })).toBeDisabled()
     })
 
     it("keeps the way out of the session reachable even after the session has died", () => {

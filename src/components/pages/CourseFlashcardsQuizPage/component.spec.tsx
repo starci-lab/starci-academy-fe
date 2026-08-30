@@ -6,8 +6,8 @@ import { CourseFlashcardsQuizBlockBase, type CourseFlashcardsQuizBlockProps as C
 /**
  * What these tests guard.
  *
- * Quiz setup is a configuration, not a list: mode and level are the two decisions, the card count is
- * the fact that justifies them, and starting is the only way out. A deck that settled empty or
+ * Quiz setup is a configuration, not a list: session depth is the learner decision while the server
+ * owns the eligible-card draw. A deck that settled empty or
  * failed replaces the whole configuration rather than offering controls that would start nothing.
  */
 
@@ -26,33 +26,22 @@ const makeInput = (): CourseFlashcardsQuizPageProps => ({
         evidenceTitle: "Recent sessions",
         evidenceRows: [{ id: "one", title: "Run one", description: "4/5 correct", fact: "80%" }],
         configurationTitle: "Session setup",
-        sessionNameLabel: "Session name",
-        sessionNamePlaceholder: "Name this run",
-        sessionName: "Distributed systems",
-        scopeLabel: "Scope",
-        allScopeLabel: "All cards",
-        dueScopeLabel: "Due only",
-        selectedScope: "all",
+        workflowTitle: "How Quick quiz works",
+        workflowSteps: ["Lock the set", "Save each answer", "Submit once"],
+        serverDrawDescription: "The server selects and locks the eligible question set.",
         modeLabel: "Mode",
         quickLabel: "Quick",
         deepLabel: "Deep",
-        levelLabel: "Level",
-        allLevelsLabel: "All levels",
-        juniorLabel: "Junior",
-        middleLabel: "Middle",
-        seniorLabel: "Senior",
-        staffLabel: "Staff",
         startLabel: "Start quiz",
         resumeLabel: "Resume session",
         retryLabel: "Retry",
         emptyText: "Empty",
         failedText: "Failed",
         selectedMode: "quick",
-        selectedLevel: null,
         cardCount: 5,
         cardsLabel: "cards available",
     },
-    on: { openReview: vi.fn(), selectView: vi.fn(), selectMode: vi.fn(), changeSessionName: vi.fn(), selectScope: vi.fn(), selectLevel: vi.fn(), start: vi.fn(), resume: vi.fn(), retry: vi.fn() },
+    on: { openReview: vi.fn(), selectView: vi.fn(), selectMode: vi.fn(), start: vi.fn(), resume: vi.fn(), retry: vi.fn() },
 })
 
 afterEach(cleanup)
@@ -70,17 +59,13 @@ describe("CourseFlashcardsQuizBlockBase", () => {
         render(<CourseFlashcardsQuizBlockBase {...makeInput()} />)
     })
 
-    it("selects the deep/staff configuration and starts the quiz", () => {
+    it("selects the deep server-owned draw and starts the quiz", () => {
         const input = makeInput()
         render(<CourseFlashcardsQuizBlockBase {...input} />)
 
         fireEvent.click(screen.getByRole("button", { name: "Deep" }))
-        fireEvent.click(screen.getByRole("button", { name: "Due only" }))
-        fireEvent.click(screen.getByRole("button", { name: "Staff" }))
         fireEvent.click(screen.getByRole("button", { name: "Start quiz" }))
         expect(input.on.selectMode).toHaveBeenCalledWith("deep")
-        expect(input.on.selectScope).toHaveBeenCalledWith("due")
-        expect(input.on.selectLevel).toHaveBeenCalledWith("staff")
         expect(input.on.start).toHaveBeenCalledOnce()
     })
 
@@ -114,7 +99,7 @@ describe("CourseFlashcardsQuizBlockBase", () => {
         render(
             <CourseFlashcardsQuizBlockBase
                 {...input}
-                props={{ ...input.props, resumeSessionId: "session-9", selectedMode: "deep", selectedLevel: "senior" }}
+                props={{ ...input.props, resumeSessionId: "session-9", selectedMode: "deep" }}
             />,
         )
 

@@ -78,7 +78,9 @@ export const PersonalProjectResult = (props: PersonalProjectResultProps) => {
             ? undefined
             : dateFormat.format(new Date(attempt.processedAt)),
     }))
-    const selectedAttempt = selectedAttemptOverride ?? rows[0]
+    const requestedAttemptId = search.get("attempt")
+    const requestedAttempt = rows.find((attempt) => attempt.id === requestedAttemptId)
+    const selectedAttempt = selectedAttemptOverride ?? requestedAttempt ?? rows[0]
     const feedbacks = useQueryPersonalTaskAttemptFeedbacksSwr(selectedAttempt?.id)
     const failed = project.error !== undefined || attempts.error !== undefined
     const pending = project.data === undefined || attempts.data === undefined

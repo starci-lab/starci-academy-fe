@@ -36,18 +36,14 @@ describe("AppProviders", () => {
         expect(container.querySelector("[data-part='routed']")?.textContent).toBe("Routed")
     })
 
-    it("wraps what it mounts in nothing, and adds only the theme's no-flash script beside it", () => {
-        // The theme provider writes one inline script so the resolved theme is on the element
-        // before the first paint - without it every reader in dark mode sees a white flash. That
-        // script is the ONLY thing these providers put in the tree, and this test pins it: a
-        // second element appearing here is a provider that started deciding layout.
+    it("wraps what it mounts in no provider-owned element", () => {
         const { container } = render(
             <AppProviders locale="en" messages={MESSAGES}>
                 <p data-part="routed">Routed</p>
             </AppProviders>,
         )
         const tags = [...container.children].map((node) => node.tagName)
-        expect(tags).toEqual(["SCRIPT", "P"])
+        expect(tags).toEqual(["P"])
         expect(container.querySelector("p")?.getAttribute("data-part")).toBe("routed")
     })
 

@@ -274,10 +274,10 @@ describe("StarCiAiChat", () => {
     })
 
     it("says which transport state is holding the conversation up", () => {
-        const cases: ReadonlyArray<readonly [Record<string, unknown>, string]> = [
+        const cases: ReadonlyArray<readonly [Record<string, unknown>, string | undefined]> = [
             [{ sessions: { isLoading: true, data: undefined } }, "states.sessionsPending"],
             [{ sessions: { error: new Error("down"), data: undefined } }, "states.sessionsFailed"],
-            [{ sessions: { data: { sessions: [] } } }, "states.noSession"],
+            [{ sessions: { data: { sessions: [] } } }, undefined],
             [{ stream: { state: "reconnecting" } }, "states.reconnecting"],
             [{ stream: { state: "connecting" } }, "states.reconnecting"],
             [{ stream: { state: "idle" } }, "states.reconnecting"],
@@ -288,7 +288,8 @@ describe("StarCiAiChat", () => {
         for (const [over, expected] of cases) {
             setup(over)
             const view = render(<StarCiAiChat />)
-            expect(turns()).toEqual([expected])
+            expect(turns()).toEqual(expected === undefined ? [] : [expected])
+            if (expected === undefined) expect(screen.getByText("empty.courseAdvisorTitle")).toBeInTheDocument()
             view.unmount()
         }
     })
@@ -504,12 +505,7 @@ describe("StarCiAiChat", () => {
         fireEvent.click(screen.getByRole("button", { name: "modes.history" }))
         fireEvent.click(screen.getByRole("button", { name: "actions.delete" }))
         expect(spies.remove).not.toHaveBeenCalled()
-        expect(screen.queryByRole("button", { name: "actions.confirmDelete" })).toBeNull()
-
-        // The confirmation only surfaces once the reader leaves the history list - see the
-        // "asks to delete" defect noted for this block: the history branch of the state ladder
-        // drops `terminalState` entirely, so the state the delete press set is invisible there.
-        fireEvent.click(screen.getByRole("button", { name: "modes.general" }))
+        expect(screen.getByRole("button", { name: "actions.confirmDelete" })).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "actions.confirmDelete" }))
         await waitFor(() => expect(spies.remove).toHaveBeenCalledExactlyOnceWith({ sessionId: "session-1" }))
     })

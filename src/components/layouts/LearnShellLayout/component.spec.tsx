@@ -29,7 +29,12 @@ describe("LearnShellLayoutBase", () => {
         const { rerender } = render(<LearnShellLayoutBase displayId="course" isFullBleed={false} mobileCourseNavigation={{ label: "Course navigation", currentLabel: "Review", isOpen: false }} on={{ openCourseNavigation, closeCourseNavigation }} surface={<div>Review surface</div>} />)
 
         expect(screen.getByRole("button", { name: "Course navigation" })).toBeTruthy()
-        expect(screen.getByText("Review")).toBeInTheDocument()
+        const currentLocation = screen.getByText("Review")
+        expect(currentLocation).toBeInTheDocument()
+        expect(currentLocation.parentElement?.className).toContain("[&>*]:truncate")
+        expect(currentLocation.parentElement?.className).toContain("w-full")
+        expect(screen.getByRole("button", { name: "Course navigation" }).parentElement?.className).toContain("flex-col")
+        expect(screen.getByRole("button", { name: "Course navigation" }).parentElement?.className).toContain("sm:flex-row")
         fireEvent.click(screen.getByRole("button", { name: "Course navigation" }))
         expect(openCourseNavigation).toHaveBeenCalledOnce()
 
@@ -49,6 +54,20 @@ describe("LearnShellLayoutBase", () => {
 
         const mobileNavigation = container.querySelector("nav")
         expect(mobileNavigation).not.toBeNull()
-        expect(mobileNavigation?.className).toContain("md:hidden")
+        expect(mobileNavigation?.className).toContain("min-[1120px]:hidden")
+    })
+
+    it("does not spend 256 pixels on the persistent rail at intermediate handoff widths", () => {
+        const { container } = render(<LearnShellLayoutBase
+            displayId="course"
+            isFullBleed={false}
+            mobileCourseNavigation={{ label: "Course navigation", currentLabel: "Personal project", isOpen: false }}
+            surface={<div>Task workbench</div>}
+        />)
+
+        const rail = container.querySelector("aside")
+        expect(rail?.className).toContain("min-[1120px]:flex")
+        expect(rail?.className).not.toContain("md:flex")
+        expect(screen.getByRole("button", { name: "Course navigation" }).parentElement?.className).toContain("min-[1120px]:hidden")
     })
 })

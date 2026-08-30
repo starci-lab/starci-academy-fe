@@ -52,7 +52,10 @@ export type SessionRefreshState = {
 /** Restore a cold session, then keep its in-memory access token fresh. */
 export const useSessionRefresh = (): SessionRefreshState => {
     const token = useSessionToken()
-    const [isRestoring, setIsRestoring] = useState(token === undefined)
+    // Keep the server and the first client render identical. The browser token lives in
+    // module memory and can survive client navigation/HMR while SSR can never observe it;
+    // deriving initial markup from that difference causes a hydration replacement.
+    const [isRestoring, setIsRestoring] = useState(true)
 
     useEffect(() => {
         if (token === undefined) {

@@ -12,6 +12,7 @@ import {
 import { useQueryPersonalTaskAttemptsSwr } from "@/hooks/swr/useQueryPersonalTaskAttemptsSwr"
 import { PersonalProjectTaskBase } from "./component"
 import { PersonalProjectGradingSettingsDrawer } from "@/components/overlays/learn/PersonalProjectGradingSettingsDrawer"
+import { PersonalProjectHistoryDrawer } from "@/components/overlays/learn/PersonalProjectHistoryDrawer"
 
 /** Route identity required to resolve one personal-project task workspace. */
 export type PersonalProjectTaskProps = { readonly displayId: string; readonly taskId: string }
@@ -20,7 +21,7 @@ const COPY = {
     en: {
         fallbackTitle: "Personal project task", fallbackDescription: "Complete this task to advance your personal project.",
         back: "Back to personal project", guidance: "Guidance", criteria: "Evaluation criteria", showCriteria: "Show criteria", hideCriteria: "Hide criteria",
-        implementation: "Implementation notes", points: (score: number) => `${score} points`, submission: "Project GitHub",
+        implementation: "Implementation notes", points: (score: number) => `${score} points`, submission: "Code review",
         repository: "GitHub repository URL", repositoryDescription: "Paste the GitHub repository that contains your implementation.",
         repositoryPlaceholder: "https://github.com/owner/repository", settings: "Grading settings",
         language: "Language", model: "Grading model", branch: "Branch", branchPlaceholder: "main", token: "Private repository token",
@@ -28,6 +29,13 @@ const COPY = {
         settingsSaved: "Grading settings saved.", evaluate: "Evaluate", feedback: "View feedback", history: "Attempt history",
         latest: "Latest grading", passed: "Passed", needsWork: "Needs another pass", saveSettings: "Save settings", retry: "Try again",
         lockedTitle: "Task is locked",
+        sourceStep: "Connect source code", analysisStep: "Configure analysis", reviewStep: "Run review",
+        analysisDescription: "StarCi reads the selected branch, checks the task rubric and keeps each result as an immutable attempt.",
+        branchFact: (branch: string) => `Branch to review: ${branch}`, tokenReady: (last4: string) => `Private access ready · token ending ${last4}`,
+        tokenMissing: "Public repositories need no token. Add a fine-grained token only for a private repository.",
+        promptCache: "Repeated grading reuses eligible provider prompt cache while every attempt remains separately recorded.",
+        openSubmission: "Open grading panel", closeSubmission: "Hide grading panel",
+        workspaceLabel: "Task workspace", contentView: "Task brief",
         invalidRepository: "Enter a valid HTTPS GitHub repository URL.", loadFailed: "This personal-project task could not be loaded.",
         locked: "Enroll in this course to unlock this personal-project task.",
         ancillaryFailed: "The task is ready, but repository or grading options are temporarily unavailable.",
@@ -43,7 +51,7 @@ const COPY = {
         hideCriteria: "Thu gọn tiêu chí", // vn-ok: localized Vietnamese interface copy.
         implementation: "Hướng dẫn triển khai", // vn-ok: localized Vietnamese interface copy.
         points: (score: number) => `${score} điểm`, // vn-ok: localized Vietnamese interface copy.
-        submission: "Project GitHub",
+        submission: "Chấm code", // vn-ok: localized Vietnamese interface copy.
         repository: "URL GitHub repo",
         repositoryDescription: "Dán URL repo GitHub chứa phần triển khai của bạn.", // vn-ok: localized Vietnamese interface copy.
         repositoryPlaceholder: "https://github.com/owner/repository",
@@ -65,6 +73,18 @@ const COPY = {
         saveSettings: "Lưu cài đặt", // vn-ok: localized Vietnamese interface copy.
         retry: "Thử lại", // vn-ok: localized Vietnamese interface copy.
         lockedTitle: "Bài tập đang bị khóa", // vn-ok: localized Vietnamese interface copy.
+        sourceStep: "Kết nối source code", // vn-ok: localized Vietnamese interface copy.
+        analysisStep: "Cấu hình phân tích", // vn-ok: localized Vietnamese interface copy.
+        reviewStep: "Chạy chấm code", // vn-ok: localized Vietnamese interface copy.
+        analysisDescription: "StarCi đọc đúng branch đã chọn, đối chiếu rubric của bài và lưu mỗi kết quả thành một lần chấm bất biến.", // vn-ok: localized Vietnamese interface copy.
+        branchFact: (branch: string) => `Branch sẽ đọc: ${branch}`, // vn-ok: localized Vietnamese interface copy.
+        tokenReady: (last4: string) => `Đã sẵn sàng đọc repo riêng tư · token đuôi ${last4}`, // vn-ok: localized Vietnamese interface copy.
+        tokenMissing: "Repo public không cần token. Chỉ thêm fine-grained token khi repo riêng tư.", // vn-ok: localized Vietnamese interface copy.
+        promptCache: "Các lần chấm lặp lại sẽ dùng prompt cache của provider khi đủ điều kiện; từng lần chấm vẫn được lưu riêng.", // vn-ok: localized Vietnamese interface copy.
+        openSubmission: "Mở bảng chấm", // vn-ok: localized Vietnamese interface copy.
+        closeSubmission: "Ẩn bảng chấm", // vn-ok: localized Vietnamese interface copy.
+        workspaceLabel: "Không gian làm bài", // vn-ok: localized Vietnamese interface copy.
+        contentView: "Nội dung bài", // vn-ok: localized Vietnamese interface copy.
         invalidRepository: "Nhập URL GitHub HTTPS hợp lệ.", // vn-ok: localized Vietnamese interface copy.
         loadFailed: "Không thể tải bài tập đồ án cá nhân này.", // vn-ok: localized Vietnamese interface copy.
         locked: "Bạn cần đăng ký khóa học để mở bài tập đồ án cá nhân này.", // vn-ok: localized Vietnamese interface copy.
@@ -76,6 +96,24 @@ const COPY = {
 } as const
 
 const isGithubRepository = (value: string) => /^https:\/\/github\.com\/[^/\s]+\/[^/\s]+\/?$/u.test(value.trim())
+
+/** Localize the closed difficulty vocabulary without rewriting authored task copy. */
+const difficultyLabel = (locale: string, difficulty: string | null | undefined): string | undefined => {
+    if (difficulty === undefined || difficulty === null) return undefined
+    if (locale === "vi") {
+        if (difficulty === "easy") return "Dễ" // vn-ok: localized Vietnamese interface copy.
+        if (difficulty === "medium") return "Vừa" // vn-ok: localized Vietnamese interface copy.
+        if (difficulty === "hard") return "Khó" // vn-ok: localized Vietnamese interface copy.
+        if (difficulty === "insane") return "Rất khó" // vn-ok: localized Vietnamese interface copy.
+        if (difficulty === "expert") return "Chuyên gia" // vn-ok: localized Vietnamese interface copy.
+    }
+    if (difficulty === "easy") return "Easy"
+    if (difficulty === "medium") return "Medium"
+    if (difficulty === "hard") return "Hard"
+    if (difficulty === "insane") return "Insane"
+    if (difficulty === "expert") return "Expert"
+    return difficulty
+}
 
 /** Resolves real task/settings data, persists grading choices and opens the result route. */
 export const PersonalProjectTask = (props: PersonalProjectTaskProps) => {
@@ -91,6 +129,13 @@ export const PersonalProjectTask = (props: PersonalProjectTaskProps) => {
     const [repositoryTouched, setRepositoryTouched] = useState(false)
     const [expandedBriefSectionIds, setExpandedBriefSectionIds] = useState<ReadonlyArray<string>>([])
     const [settingsOpen, setSettingsOpen] = useState(false)
+    const [historyOpen, setHistoryOpen] = useState(false)
+    const [submissionOpen, setSubmissionOpen] = useState(false)
+
+    useEffect(() => {
+        document.documentElement.scrollTop = 0
+        document.body.scrollTop = 0
+    }, [props.taskId])
 
     useEffect(() => {
         const data = workspace.data
@@ -168,7 +213,7 @@ export const PersonalProjectTask = (props: PersonalProjectTaskProps) => {
         props={{
             title: task?.title ?? roadmapTask?.title ?? copy.fallbackTitle,
             description: task?.description ?? copy.fallbackDescription,
-            difficulty: task?.difficulty ?? undefined,
+            difficulty: difficultyLabel(locale, task?.difficulty),
             maxScore: task?.maxScore ?? roadmapTask?.maxScore ?? 0,
             brief,
             hint: task?.hint,
@@ -177,9 +222,12 @@ export const PersonalProjectTask = (props: PersonalProjectTaskProps) => {
             implementation,
             repositoryUrl: workspace.data?.repository.githubUrl ?? undefined,
             repositoryDraft: repository,
+            repositoryBranch: workspace.data?.repository.branch ?? "main",
+            tokenLast4: workspace.data?.repository.tokenLast4 ?? undefined,
             repositoryState: repositoryInvalid ? "invalid" : "ready",
             latestAttempt: attempts.data?.data?.[0],
             notice,
+            isSubmissionOpen: submissionOpen,
             labels: copy,
         }}
         on={{
@@ -187,6 +235,7 @@ export const PersonalProjectTask = (props: PersonalProjectTaskProps) => {
             toggleBriefSection: (id, isOpen) => setExpandedBriefSectionIds((current) => isOpen
                 ? current.includes(id) ? current : [...current, id]
                 : current.filter((value) => value !== id)),
+            toggleSubmission: () => setSubmissionOpen((current) => !current),
             changeRepository: (value) => { setRepository(value); setRepositoryTouched(true) },
             openSettings: () => setSettingsOpen(true),
             submit: () => { void submit() },
@@ -195,9 +244,17 @@ export const PersonalProjectTask = (props: PersonalProjectTaskProps) => {
                 else void Promise.all([project.mutate(), workspace.mutate()])
             },
             openFeedback: () => router.push(`/courses/${props.displayId}/learn/personal-project/tasks/${props.taskId}/result`),
-            openHistory: () => router.push(`/courses/${props.displayId}/learn/personal-project/tasks/${props.taskId}/result?history=1`),
+            openHistory: () => setHistoryOpen(true),
         }}
         settingsOverlay={PersonalProjectGradingSettingsDrawer}
-        settingsOverlayProps={courseId === undefined ? undefined : { courseId, taskId: props.taskId, isOpen: settingsOpen && state !== "forbidden", onDismiss: () => setSettingsOpen(false) }}
+        settingsOverlayProps={courseId === undefined ? undefined : { courseId, taskId: props.taskId, repositoryUrl: repository, isOpen: settingsOpen && state !== "forbidden", onDismiss: () => setSettingsOpen(false) }}
+        historyOverlay={PersonalProjectHistoryDrawer}
+        historyOverlayProps={{
+            isOpen: historyOpen,
+            courseId,
+            taskId: props.taskId,
+            onDismiss: () => setHistoryOpen(false),
+            onSelect: (attempt) => router.push(`/courses/${props.displayId}/learn/personal-project/tasks/${props.taskId}/result?attempt=${attempt.id}`),
+        }}
     />
 }

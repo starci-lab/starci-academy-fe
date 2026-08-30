@@ -70,15 +70,15 @@ describe("useMutateStartFlashcardSessionSwr", () => {
         expect(mocks.mutationStartFlashcardSession).toHaveBeenCalledWith(request)
     })
 
-    it("passes a course quiz through as written, level included even when it is null", async () => {
+    it("passes a server-owned course quiz draw through as written", async () => {
         const { result } = renderHook(() => useMutateStartFlashcardSessionSwr())
 
         const request = {
             mode: "quiz",
             courseId: "course-1",
-            cardIds: ["card-1"],
-            practiceMode: "quick",
-            level: null,
+            deckIds: [],
+            requestedItemCount: 5,
+            startRequestId: "00000000-0000-4000-8000-000000000001",
         } as const
         await act(async () => {
             await result.current.trigger(request)

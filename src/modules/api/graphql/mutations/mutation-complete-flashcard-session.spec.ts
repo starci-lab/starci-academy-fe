@@ -26,11 +26,8 @@ const dueRequest = { ...deckRequest, kind: "due" } as const
 const quizRequest = {
     mode: "quiz",
     sessionId: "s-2",
-    courseId: "course-1",
-    answers: [
-        { cardId: "card-1", correctBlanks: 2, totalBlanks: 2 },
-        { cardId: "card-2", correctBlanks: 1, totalBlanks: 3 },
-    ],
+    expectedVersion: 4,
+    selections: [{ blankId: "card-1:c1:o1", tokenId: "00000000-0000-4000-8000-000000000001" }],
 } as const
 
 describe("mutationCompleteFlashcardSession - deck review", () => {
@@ -109,21 +106,21 @@ describe("mutationCompleteFlashcardSession - due review", () => {
 })
 
 describe("mutationCompleteFlashcardSession - quiz", () => {
-    it("sends the scored answer set on the quiz document, and no review counters", async () => {
+    it("sends opaque selections and the expected version, never a client-authored score", async () => {
         await mutationCompleteFlashcardSession(quizRequest)
         expect(sentDocument()).toContain("completeFlashcardQuizSession(request: $request)")
         expect(mocks.mutate.mock.calls[0][0].variables).toEqual({
-            request: { sessionId: "s-2", courseId: "course-1", answers: quizRequest.answers },
+            request: { sessionId: "s-2", expectedVersion: 4, selections: quizRequest.selections },
         })
         expect(mocks.mutate.mock.calls[0][0].variables.request).not.toHaveProperty("reviewedCount")
     })
 
-    it("derives reviewedCount from the answer count, because the quiz document only returns xp", async () => {
+    it("returns the server-owned total and XP", async () => {
         mocks.mutate.mockResolvedValue({
-            data: { completeFlashcardQuizSession: { success: true, message: "ok", data: { xpEarned: 30 } } },
+            data: { completeFlashcardQuizSession: { success: true, message: "ok", data: { totalBlanks: 5, xpEarned: 30 } } },
         })
         await expect(mutationCompleteFlashcardSession(quizRequest)).resolves.toEqual({
-            reviewedCount: 2,
+            reviewedCount: 5,
             xpEarned: 30,
         })
     })

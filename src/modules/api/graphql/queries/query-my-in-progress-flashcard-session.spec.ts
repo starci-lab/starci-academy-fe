@@ -257,19 +257,27 @@ describe("queryMyInProgressFlashcardSession resolving a deck review session", ()
 
 describe("queryMyInProgressFlashcardSession resolving a quiz session", () => {
     const quizData = {
+        kind: "ACTIVE_V1",
         sessionId: "q-1",
-        cardIds: ["c-1", "c-2"],
+        contractVersion: 1,
+        items: [{
+            cardId: "c-1",
+            question: "What is a layer?",
+            clozeText: "A {{blank:c-1:c1:o1}} diff",
+            blanks: [{ blankId: "c-1:c1:o1", hint: "filesystem" }],
+            tokens: [{ tokenId: "00000000-0000-4000-8000-000000000001", label: "filesystem" }],
+        }],
         currentIndex: 1,
-        results: [{ cardId: "c-1", correctBlanks: 2, totalBlanks: 3 }],
+        answerState: [{ blankId: "c-1:c1:o1", tokenId: "00000000-0000-4000-8000-000000000001" }],
+        answerVersion: 2,
+        status: "in_progress",
         updatedAt: "2026-08-19T10:00:00.000Z",
         deadlineAt: "2026-08-19T11:00:00.000Z",
-        name: "Sprint 3",
     }
 
-    it("counts answered results as the reviewed count and carries the deadline and name", async () => {
+    it("carries only the server-owned playable projection and saved selections", async () => {
         route({
             MyInProgressFlashcardQuizSession: () => envelope("myInProgressFlashcardQuizSession", quizData),
-            FlashcardCardsByIds: () => cardsEnvelope([card]),
         })
         await expect(queryMyInProgressFlashcardSession({
             mode: "quiz",
@@ -280,16 +288,19 @@ describe("queryMyInProgressFlashcardSession resolving a quiz session", () => {
             mode: "quiz",
             kind: undefined,
             status: "in_progress",
-            cardIds: ["c-1", "c-2"],
-            cards: [card],
+            cardIds: ["c-1"],
+            cards: [],
             currentIndex: 1,
-            reviewedCount: 1,
+            reviewedCount: 0,
             gradedIndexes: [],
-            results: quizData.results,
+            results: [],
             xpEarned: 0,
             updatedAt: "2026-08-19T10:00:00.000Z",
             deadlineAt: "2026-08-19T11:00:00.000Z",
-            name: "Sprint 3",
+            quizItems: quizData.items,
+            answerState: quizData.answerState,
+            answerVersion: 2,
+            recoveryReason: undefined,
         })
         expect(mocks.query.mock.calls[0][0].variables).toEqual({ courseId: "course-4" })
         expect(printedCalls()[0]).toContain("myInProgressFlashcardQuizSession")
@@ -315,6 +326,11 @@ describe("queryMyInProgressFlashcardSession resolving a quiz session", () => {
 
     it("answers null when the course has no quiz session in progress", async () => {
         route({ MyInProgressFlashcardQuizSession: () => envelope("myInProgressFlashcardQuizSession", undefined) })
+        await expect(queryMyInProgressFlashcardSession({ mode: "quiz", courseId: "course-4" })).resolves.toBeNull()
+    })
+
+    it("returns setup recovery as no resumable session", async () => {
+        route({ MyInProgressFlashcardQuizSession: () => envelope("myInProgressFlashcardQuizSession", { kind: "RECOVER_TO_SETUP", reason: "SESSION_EXPIRED" }) })
         await expect(queryMyInProgressFlashcardSession({ mode: "quiz", courseId: "course-4" })).resolves.toBeNull()
     })
 

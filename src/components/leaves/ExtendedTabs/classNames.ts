@@ -1,7 +1,12 @@
 import { cn } from "@heroui/react"
 
-/** Extended tab strip layout. */
-export const extendedTabsRootClassName = cn("w-full", "px-6")
+/** Extended tab strip layout; page chrome may opt out when its parent already owns the inset. */
+export const getExtendedTabsRootClassName = (inset: "page" | "none" | undefined) => cn(
+    "w-full",
+    "max-w-full",
+    "min-w-0",
+    inset === "none" ? undefined : "px-6",
+)
 /** Extended tab row styling. */
 export const extendedTabsClassName = cn("whitespace-nowrap")
 /** Extended tab content layout. */

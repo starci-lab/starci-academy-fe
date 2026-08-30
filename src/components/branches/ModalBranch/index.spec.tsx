@@ -22,6 +22,7 @@ vi.mock("@heroui/react", () => {
         return <div>{children}</div>
     }
     return { cn: (...tokens: Array<string>) => tokens.join(" "), Modal: Object.assign(Root, {
+        Trigger: () => null,
         Backdrop: (props: PropsWithChildren) => {
             const { children } = props
             return <div>{children}</div>

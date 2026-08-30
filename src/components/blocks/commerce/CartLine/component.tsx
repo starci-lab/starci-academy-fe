@@ -2,6 +2,13 @@ import { Badge } from "@/components/leaves/Badge"
 import { CoverImage } from "@/components/leaves/CoverImage"
 import { IconButton } from "@/components/leaves/IconButton"
 import { Text } from "@/components/leaves/Text"
+import {
+    cartLineClassName,
+    cartLineCoverClassName,
+    cartLineIdentityClassName,
+    cartLinePriceClassName,
+    cartLineRemoveClassName,
+} from "./classNames"
 
 /**
  * BLOCK - `CartLine`: one course already in the basket, and the one way to change your mind.
@@ -66,18 +73,22 @@ export const CartLineBase = (props: CartLineProps) => {
     const isLoading = props.state === "pending"
 
     return (
-        <div>
-            <CoverImage props={{ src: props.props.cover ?? null, alt: "", ratio: "wide" }} isLoading={isLoading} />
-            <div>
+        <div className={cartLineClassName}>
+            <div className={cartLineCoverClassName}>
+                <CoverImage props={{ src: props.props.cover ?? null, alt: "", ratio: "wide" }} isLoading={isLoading} />
+            </div>
+            <div className={cartLineIdentityClassName}>
                 <Text props={{ content: props.props.title, size: "sm", weight: "semibold" }} isLoading={isLoading} />
                 {props.props.tier === undefined ? null : <Text props={{ content: props.props.tier, size: "xs", tone: "muted" }} isLoading={isLoading} />}
             </div>
-            <div>
+            <div className={cartLinePriceClassName}>
                 <Text props={{ content: props.props.price, size: "sm", weight: "semibold" }} isLoading={isLoading} />
                 {props.props.originalPrice === undefined ? null : <Text props={{ content: props.props.originalPrice, size: "xs", tone: "muted", isSuperseded: true }} isLoading={isLoading} />}
                 {props.props.discountLabel === undefined ? null : <Badge props={{ content: props.props.discountLabel, tone: "success" }} isLoading={isLoading} />}
             </div>
-            <IconButton props={{ icon: "close", label: props.props.removeLabel }} on={{ press: props.state === "removing" ? undefined : props.on?.remove }} />
+            <div className={cartLineRemoveClassName}>
+                <IconButton props={{ icon: "close", label: props.props.removeLabel }} on={{ press: props.state === "removing" ? undefined : props.on?.remove }} />
+            </div>
         </div>
     )
 }

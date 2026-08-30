@@ -1,9 +1,13 @@
+import type { ComponentType } from "react"
+import { SurfaceAccordionCard } from "@starci/grammar/core"
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { Article } from "@/components/branches/Article"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { Field } from "@/components/composites/Field"
 import { Badge } from "@/components/leaves/Badge"
 import { Button } from "@/components/leaves/Button"
+import { DisclosureIndicator } from "@/components/leaves/DisclosureIndicator"
+import { ExtendedTabs } from "@/components/leaves/ExtendedTabs"
 import { Heading } from "@/components/leaves/Heading"
 import { Text } from "@/components/leaves/Text"
 import { Progress } from "@/components/leaves/Progress"
@@ -14,6 +18,22 @@ import { DrawerBranch } from "@/components/branches/DrawerBranch"
 import { CourseContentMapBase } from "@/components/blocks/learn/CourseContentMap/component"
 import type { CourseContentMapProps } from "@/components/blocks/learn/CourseContentMap/component"
 import type { ContentAiSelectionContext } from "@/modules/ai/content-ai-selection-context"
+import type { ChallengeAttemptHistoryDrawerProps } from "@/components/overlays/learn/ChallengeAttemptHistoryDrawer"
+import type { ChallengeGradingModelDrawerProps } from "@/components/overlays/learn/ChallengeGradingModelDrawer"
+import type { CourseLearnAiDrawerProps } from "@/components/overlays/learn/CourseLearnAiDrawer"
+import {
+    challengeActionsClassName,
+    challengeBriefColumnClassName,
+    challengeConsoleClassName,
+    challengeDeliverableClassName,
+    challengeGridClassName,
+    challengeGuidanceClassName,
+    challengeHeaderClassName,
+    challengeMetaClassName,
+    challengeSubmissionLauncherClassName,
+    challengeToolbarClassName,
+    challengeWorkbenchClassName,
+} from "./classNames"
 /** One challenge deliverable. */
 export type CourseLearnChallengeDeliverable = {
   readonly id: string;
@@ -105,6 +125,13 @@ export type CourseLearnChallengeLabels = {
   readonly expectedOutputs?: string;
   readonly hintLabel?: string;
   readonly evidenceLabel?: string;
+  readonly history?: string;
+  readonly analysisPlan?: string;
+  readonly cachePolicy?: string;
+  readonly openSubmission?: string;
+  readonly closeSubmission?: string;
+  readonly workspaceLabel?: string;
+  readonly contentView?: string;
 };
 /** Props and actions for the presentational challenge block. */
 export type CourseLearnChallengeBlockProps = {
@@ -152,6 +179,7 @@ export type CourseLearnChallengeBlockProps = {
     readonly labels: CourseLearnChallengeLabels;
     readonly activeSubmissionId?: string;
     readonly earnedScore?: number;
+    readonly isSubmissionOpen?: boolean;
   };
   readonly on?: {
     readonly requestExit?: () => void;
@@ -188,7 +216,15 @@ export type CourseLearnChallengeBlockProps = {
     readonly openAi?: () => void;
     readonly closeAi?: () => void;
     readonly clearAiSelection?: () => void;
+    readonly openHistory?: () => void;
+    readonly toggleSubmission?: () => void;
   };
+  readonly historyOverlay?: ComponentType<ChallengeAttemptHistoryDrawerProps>;
+  readonly historyOverlayProps?: ChallengeAttemptHistoryDrawerProps;
+  readonly modelOverlay?: ComponentType<ChallengeGradingModelDrawerProps>;
+  readonly modelOverlayProps?: ChallengeGradingModelDrawerProps;
+  readonly aiOverlay?: ComponentType<CourseLearnAiDrawerProps>;
+  readonly aiOverlayProps?: CourseLearnAiDrawerProps;
 };
 /** Compatibility alias for route fixtures. */
 export type CourseLearnChallengePageProps = CourseLearnChallengeBlockProps;
@@ -208,30 +244,42 @@ export const CourseLearnChallengeBlockBase = (
     ).length
     const requirements = props.props.requirements ?? []
     const steps = props.props.steps ?? []
+    const hasBlockingNotice = Boolean(props.props.notice?.trim())
     const renderGuidance = (items: ReadonlyArray<CourseLearnChallengeGuidanceItem>, label: string, accordion: boolean) => items.length === 0 ? null : (
-        <section>
+        <section className={challengeGuidanceClassName}>
             <Heading props={{ content: label, level: 2 }} />
-            {items.map((item, index) => accordion ? (
-                <details key={item.id} open={props.props.expandedStepIds.includes(item.id)} onToggle={(event) => props.on?.toggleStep?.(item.id, event.currentTarget.open)}>
-                    <summary><strong>{item.title ?? `${label} ${index + 1}`}</strong></summary>
-                    <Article props={{ body: item.body, measure: "compact" }} isLoading={loading} />
-                </details>
-            ) : (
+            {accordion ? <SurfaceAccordionCard
+                depth="top"
+                items={items.map((item, index) => ({
+                    id: item.id,
+                    isOpen: props.props.expandedStepIds.includes(item.id),
+                    summaryRender: <><Text props={{ content: item.title ?? `${label} ${index + 1}`, weight: "semibold" }} /><DisclosureIndicator props={{ isOpen: props.props.expandedStepIds.includes(item.id) }} /></>,
+                    bodyRender: <Article props={{ body: item.body, measure: "compact" }} isLoading={loading} />,
+                }))}
+                renderSummary={(summary) => <>{summary}</>}
+                renderBody={(body) => <>{body}</>}
+                onItemOpenChange={(id, open) => props.on?.toggleStep?.(id, open)}
+            /> : items.map((item, index) => (
                 <article key={item.id}><Heading props={{ content: item.title ?? `${label} ${index + 1}`, level: 3 }} isLoading={loading} /><Article props={{ body: item.body, measure: "compact" }} isLoading={loading} /></article>
             ))}
         </section>
     )
+    const activeView = props.props.isSubmissionOpen === true ? "submission" : "content"
+    const selectView = (key: string) => {
+        const shouldOpenSubmission = key === "submission"
+        if (shouldOpenSubmission !== props.props.isSubmissionOpen) props.on?.toggleSubmission?.()
+    }
     return (
-        <main>
-            <Breadcrumbs props={{ label: labels.breadcrumb, showFullTrail: true, steps: [
+        <main className={challengeWorkbenchClassName}>
+            <Breadcrumbs props={{ label: labels.breadcrumb, backLabel: labels.backToLesson, steps: [
                 { id: "course", label: props.props.courseTitle }, { id: "module", label: props.props.moduleTitle },
                 { id: "content", label: props.props.contentTitle }, { id: "challenge", label: props.props.title },
             ] }} on={{ course: props.on?.openCourse, module: props.on?.openModule, content: props.on?.openContent }} />
-            <div>
+            <div className={challengeToolbarClassName}>
                 <Button props={{ label: labels.openCourseMap, variant: "outline", size: "sm" }} on={{ press: props.on?.openCourseMap }} />
                 <Text props={{ content: props.props.courseMap.props.progressFact ?? "", size: "xs", tone: "muted" }} />
             </div>
-            <header>
+            <header className={challengeHeaderClassName}>
                 <Heading
                     props={{ content: props.props.title, level: 1 }}
                     isLoading={loading}
@@ -244,7 +292,7 @@ export const CourseLearnChallengeBlockBase = (
                     }}
                     isLoading={loading}
                 />
-                <Badge
+                <div className={challengeMetaClassName}><Badge
                     props={{ content: props.props.difficultyLabel }}
                     isLoading={loading}
                 />
@@ -255,10 +303,14 @@ export const CourseLearnChallengeBlockBase = (
                     }}
                     isLoading={loading}
                 />
-                <Badge props={{ content: labels.points(props.props.maximumScore) }} isLoading={loading} />
+                <Badge props={{ content: labels.points(props.props.maximumScore) }} isLoading={loading} /></div>
                 {props.props.languageOptions === undefined ? null : <Select props={{ id: "challenge-language", name: "challenge-language", label: labels.language ?? "Language", options: props.props.languageOptions, selectedKey: props.props.selectedLanguage }} on={{ select: props.on?.selectLanguage }} />}
             </header>
-            <SurfaceCard props={{ label: labels.brief }}>
+            <div className={challengeSubmissionLauncherClassName}><ExtendedTabs props={{ label: labels.workspaceLabel ?? labels.deliverables, selectedKey: activeView, labelVisibility: "always", inset: "none", tabs: [
+                { id: "content", label: labels.contentView ?? labels.brief, icon: "course" },
+                { id: "submission", label: labels.deliverables, icon: "review" },
+            ] }} on={{ select: selectView }} isLoading={loading} /></div>
+            <div className={challengeGridClassName}><div className={challengeBriefColumnClassName} data-active={activeView === "content"}><SurfaceCard props={{ label: labels.brief, inset: "compact" }}>
                 <Article
                     props={{ body: props.props.description, measure: "compact" }}
                     isLoading={loading}
@@ -269,15 +321,15 @@ export const CourseLearnChallengeBlockBase = (
                     />
                 )}
                 {renderGuidance(props.props.prerequisites ?? [], labels.prerequisites ?? "Prerequisites", false)}
-                {requirements.length === 0 ? null : <section><Heading props={{ content: labels.requirements ?? "Requirements", level: 2 }} />{requirements.map((item) => <details key={item.id} open={props.props.expandedRequirementIds.includes(item.id)} onToggle={(event) => props.on?.toggleRequirement?.(item.id, event.currentTarget.open)}><summary><strong>{item.title}</strong> <Badge props={{ content: labels.points(item.score) }} /></summary>{item.body === undefined ? null : <Article props={{ body: item.body, measure: "compact" }} />}</details>)}</section>}
+                {requirements.length === 0 ? null : <section className={challengeGuidanceClassName}><Heading props={{ content: labels.requirements ?? "Requirements", level: 2 }} /><SurfaceAccordionCard depth="top" items={requirements.map((item) => ({ id: item.id, isOpen: props.props.expandedRequirementIds.includes(item.id), summaryRender: <><Text props={{ content: item.title, weight: "semibold" }} /><Badge props={{ content: labels.points(item.score) }} /><DisclosureIndicator props={{ isOpen: props.props.expandedRequirementIds.includes(item.id) }} /></>, bodyRender: item.body === undefined ? null : <Article props={{ body: item.body, measure: "compact" }} /> }))} renderSummary={(summary) => <>{summary}</>} renderBody={(body) => <>{body}</>} onItemOpenChange={(id, open) => props.on?.toggleRequirement?.(id, open)} /></section>}
                 {renderGuidance(steps, labels.steps ?? "Steps", true)}
                 {renderGuidance(props.props.outputs ?? [], labels.expectedOutputs ?? "Expected outputs", false)}
-            </SurfaceCard>
-            <SurfaceCard props={{ label: labels.deliverables }}>
+            </SurfaceCard></div><aside className={challengeConsoleClassName} data-active={activeView === "submission"}><SurfaceCard props={{ label: labels.deliverables, inset: "compact", measure: "form" }}>
+                <Text props={{ content: labels.analysisPlan, size: "sm", tone: "muted" }} />
                 {props.props.notice === undefined ? null : <EmptyNotice props={{ message: props.props.notice, actionLabel: labels.retrySave }} on={{ act: () => props.on?.retry?.() }} />}
                 {deliverables.length === 0 ? <Text props={{ content: props.props.notice ?? "", live: "assertive" }} /> : (
                     deliverables.map((item) => (
-                        <section key={item.id}>
+                        <section className={challengeDeliverableClassName} key={item.id}>
                             <Heading
                                 props={{ content: item.title, level: 2 }}
                                 isLoading={loading}
@@ -288,7 +340,7 @@ export const CourseLearnChallengeBlockBase = (
                             <Badge
                                 props={{
                                     content: labels.points(item.score),
-                                    tone: item.url === undefined ? "neutral" : "success",
+                                    tone: item.url?.trim() ? "success" : "neutral",
                                 }}
                             />
                             {passed || props.props.isReviewing === true ? <Text props={{ content: item.url ?? "", size: "sm" }} /> : <Field
@@ -297,7 +349,8 @@ export const CourseLearnChallengeBlockBase = (
                                     name: `challenge-${item.id}`,
                                     label: labels.evidenceLabel ?? labels.repositoryPlaceholder,
                                     placeholder: labels.repositoryPlaceholder,
-                                    disabled: busy,
+                                    defaultValue: item.url,
+                                    disabled: busy || hasBlockingNotice,
                                     isInvalid: props.props.failedSubmissionId === item.id,
                                 }}
                                 on={{
@@ -306,13 +359,13 @@ export const CourseLearnChallengeBlockBase = (
                                 isLoading={loading}
                             />}
                             <Text props={{ content: `${labels.gradingModel ?? "Model"}: ${item.modelLabel ?? item.modelId ?? "auto"}`, size: "xs", tone: "muted" }} />
-                            <Button props={{ label: labels.changeModel ?? "Choose grading model", variant: "ghost", size: "sm" }} on={{ press: props.on?.openModelDrawer }} />
+                            <Button props={{ label: labels.changeModel ?? "Choose grading model", variant: "ghost", size: "sm", disabled: hasBlockingNotice }} on={{ press: props.on?.openModelDrawer }} />
                         </section>
                     ))
                 )}
             </SurfaceCard>
-            <SurfaceCard
-                props={{ label: labels.readinessTitle ?? labels.deliverables }}
+            {hasBlockingNotice ? null : <SurfaceCard
+                props={{ label: labels.readinessTitle ?? labels.deliverables, inset: "compact", measure: "form" }}
             >
                 <Text
                     props={{
@@ -339,6 +392,7 @@ export const CourseLearnChallengeBlockBase = (
                     isLoading={loading}
                 />
                 {props.props.draftStatus === undefined ? null : <Text props={{ content: props.props.draftStatus, size: "sm", tone: "muted", live: "polite" }} />}
+                <Text props={{ content: labels.cachePolicy, size: "xs", tone: "muted" }} />
                 {props.props.isReviewing ? <section><Heading props={{ content: labels.reviewTitle ?? labels.submitAttempt, level: 2 }} /><Text props={{ content: labels.reviewDescription ?? labels.confirmDescription, size: "sm", tone: "muted" }} />{deliverables.map((item) => <Text key={item.id} props={{ content: `${item.title}: ${item.url ?? ""}`, size: "sm" }} />)}<Button props={{ label: labels.returnToEdit ?? labels.cancel, variant: "outline" }} on={{ press: props.on?.returnToEdit }} /><Button props={{ label: labels.submitAttempt, variant: "primary" }} on={{ press: props.on?.submitAttempt }} /></section> : <><Button props={{ label: passed ? labels.result : labels.saveDraft, variant: "outline", disabled: loading || busy, isPending: props.blockState === "saving" }} on={{ press: passed ? () => props.on?.openResult?.(deliverables[0]?.id ?? "") : props.on?.saveDraft }} /><Button
                     props={{
                         label: loading || busy ? labels.submitAttempt : labels.reviewAttempt ?? labels.submitAttempt,
@@ -351,10 +405,13 @@ export const CourseLearnChallengeBlockBase = (
                             : props.on?.reviewAttempt ?? props.on?.submitAttempt,
                     }}
                 /></>}
-            </SurfaceCard>
-            <div><Button props={{ label: labels.askAi ?? "Ask AI", variant: "secondary" }} on={{ press: props.on?.openAi }} /><Button props={{ label: labels.saveAndExit ?? labels.backToLesson, variant: "ghost" }} on={{ press: props.on?.requestExit }} /></div>
+            </SurfaceCard>}<div className={challengeActionsClassName}><Button props={{ label: labels.history ?? "Attempt history", variant: "ghost", size: "sm", icon: "saved" }} on={{ press: props.on?.openHistory }} /><Button props={{ label: labels.askAi ?? "Ask AI", variant: "secondary", size: "sm", icon: "aiChatbot" }} on={{ press: props.on?.openAi }} /><Button props={{ label: labels.saveAndExit ?? labels.backToLesson, variant: "ghost", size: "sm" }} on={{ press: props.on?.requestExit }} /></div></aside></div>
             {props.props.isCourseMapOpen ? <DrawerBranch isOpen placement="left" title={labels.openCourseMap} onDismiss={() => props.on?.closeCourseMap?.()}><CourseContentMapBase {...props.props.courseMap} /></DrawerBranch> : null}
             <ModalBranch isOpen={props.props.isConfirmOpen} size="sm" onDismiss={() => props.on?.cancelSubmit?.()}><Heading props={{ content: labels.confirmTitle, level: 2 }} /><Text props={{ content: labels.confirmDescription, tone: "muted" }} /><Button props={{ label: labels.cancel, variant: "outline" }} on={{ press: props.on?.cancelSubmit }} /><Button props={{ label: labels.confirmSubmit, variant: "primary" }} on={{ press: props.on?.confirmSubmit }} /></ModalBranch>
+            <ModalBranch isOpen={props.props.isExitConfirmOpen === true} size="sm" onDismiss={() => props.on?.cancelExit?.()}><Heading props={{ content: labels.exitTitle ?? labels.saveAndExit ?? labels.backToLesson, level: 2 }} /><Text props={{ content: labels.exitDescription, tone: "muted" }} /><Button props={{ label: labels.cancel, variant: "outline" }} on={{ press: props.on?.cancelExit }} /><Button props={{ label: labels.exitWithoutSaving ?? labels.saveAndExit ?? labels.backToLesson, variant: "primary" }} on={{ press: props.on?.confirmExit }} /></ModalBranch>
+            {props.historyOverlay === undefined || props.historyOverlayProps === undefined ? null : <props.historyOverlay {...props.historyOverlayProps} />}
+            {props.modelOverlay === undefined || props.modelOverlayProps === undefined ? null : <props.modelOverlay {...props.modelOverlayProps} />}
+            {props.aiOverlay === undefined || props.aiOverlayProps === undefined ? null : <props.aiOverlay {...props.aiOverlayProps} />}
         </main>
     )
 }

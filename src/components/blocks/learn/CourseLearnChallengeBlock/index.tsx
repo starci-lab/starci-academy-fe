@@ -12,6 +12,9 @@ import { useQueryCourseOutlineSwr } from "@/hooks/swr/useQueryCourseOutlineSwr"
 import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
 import { filterCourseOutlineModules } from "@/modules/learn/course-outline"
 import { useGlobalAiChat } from "@/modules/ai/global-ai-chat-context"
+import { ChallengeAttemptHistoryDrawer } from "@/components/overlays/learn/ChallengeAttemptHistoryDrawer"
+import { ChallengeGradingModelDrawer } from "@/components/overlays/learn/ChallengeGradingModelDrawer"
+import { CourseLearnAiDrawer } from "@/components/overlays/learn/CourseLearnAiDrawer"
 import type {
     ContentChallengeRequirementLang,
     ContentChallengeStepLang,
@@ -78,6 +81,8 @@ export const CourseLearnChallengeBlock = (props: CourseLearnChallengeBlockProps)
     const [isReviewing, setIsReviewing] = useState(false)
     const [isModelDrawerOpen, setIsModelDrawerOpen] = useState(false)
     const [isAiDrawerOpen, setIsAiDrawerOpen] = useState(false)
+    const [isHistoryOpen, setIsHistoryOpen] = useState(false)
+    const [isSubmissionOpen, setIsSubmissionOpen] = useState(false)
     const [selectedLanguage, setSelectedLanguage] = useState<string>()
     const [defaultModelId, setDefaultModelId] = useState("auto")
     const [modelOverrides, setModelOverrides] = useState<Readonly<Record<string, string>>>({})
@@ -86,6 +91,11 @@ export const CourseLearnChallengeBlock = (props: CourseLearnChallengeBlockProps)
         readonly position: { readonly x: number; readonly y: number }
     }>()
     const [aiStarterPrompt, setAiStarterPrompt] = useState<string>()
+
+    useEffect(() => {
+        document.documentElement.scrollTop = 0
+        document.body.scrollTop = 0
+    }, [input.challengeId])
     const challenges = useMemo(
         () => [...(content.data?.challenges ?? [])].sort((first, second) => first.orderIndex - second.orderIndex),
         [content.data?.challenges],
@@ -163,12 +173,8 @@ export const CourseLearnChallengeBlock = (props: CourseLearnChallengeBlockProps)
 
     const pending = content.data === undefined
         || course.data === undefined
-        || (course.data !== null && progress.data === undefined)
-        || (challenge !== undefined && persistedSubmissions.data === undefined)
     const loadFailed = content.error !== undefined
         || course.error !== undefined
-        || progress.error !== undefined
-        || persistedSubmissions.error !== undefined
         || (content.data !== undefined && (content.data === null || challenge === undefined))
         || (course.data !== undefined && course.data === null)
         || (challenge !== undefined && challengeSubmissions.length === 0)
@@ -405,7 +411,7 @@ export const CourseLearnChallengeBlock = (props: CourseLearnChallengeBlockProps)
                 expandedRequirementIds,
                 expandedStepIds,
                 failedSubmissionId,
-                notice: submitError ?? contentText("failedMessage"),
+                notice: submitError ?? (loadFailed ? contentText("failedMessage") : undefined),
                 draftStatus,
                 isConfirmOpen,
                 isExitConfirmOpen,
@@ -414,6 +420,7 @@ export const CourseLearnChallengeBlock = (props: CourseLearnChallengeBlockProps)
                 isAiDrawerOpen,
                 allDraftsComplete,
                 isCourseMapOpen,
+                isSubmissionOpen,
                 languageOptions: challengeLanguages.length === 0
                     ? [{ id: "agnostic", label: contentText("challengeLanguageAgnostic") }]
                     : challengeLanguages.map((language) => ({ id: language, label: language })),
@@ -520,9 +527,57 @@ export const CourseLearnChallengeBlock = (props: CourseLearnChallengeBlockProps)
                     translateSelection: contentText("challengeTranslateSelection"),
                     dismissSelection: contentText("challengeDismissSelection"),
                     saveAndExit: contentText("challengeExit"),
+                    history: contentText("challengeHistoryTitle"),
+                    analysisPlan: contentText("challengeAnalysisPlan"),
+                    cachePolicy: contentText("challengeCachePolicy"),
+                    openSubmission: contentText("challengeOpenSubmission"),
+                    closeSubmission: contentText("challengeCloseSubmission"),
+                    workspaceLabel: contentText("challengeWorkspaceLabel"),
+                    contentView: contentText("challengeContentView"),
                     exitTitle: contentText("challengeExitTitle"),
                     exitDescription: contentText("challengeExitDescription"),
                     exitWithoutSaving: contentText("challengeExitWithoutSaving"),
+                },
+            }}
+            historyOverlay={ChallengeAttemptHistoryDrawer}
+            historyOverlayProps={{
+                isOpen: isHistoryOpen,
+                courseId: course.data?.id,
+                submissionId: challengeSubmissions[0]?.id,
+                selectedAttemptId: activeSubmissionId,
+                onDismiss: () => setIsHistoryOpen(false),
+                onSelect: () => {
+                    setIsHistoryOpen(false)
+                    const submissionId = challengeSubmissions[0]?.id
+                    if (submissionId !== undefined) router.push(resultPath(submissionId))
+                },
+            }}
+            modelOverlay={ChallengeGradingModelDrawer}
+            modelOverlayProps={{
+                isOpen: isModelDrawerOpen,
+                selectedDefaultModelId: defaultModelId,
+                deliverables: challengeSubmissions.map((item) => ({ id: item.id, title: item.title, selectedModelId: modelOverrides[item.id] ?? defaultModelId })),
+                onDismiss: () => setIsModelDrawerOpen(false),
+                onSelectDefault: setDefaultModelId,
+                onApplyAll: () => {
+                    setModelOverrides(Object.fromEntries(challengeSubmissions.map((item) => [item.id, defaultModelId])))
+                    setIsModelDrawerOpen(false)
+                },
+                onOverride: (deliverableId, modelId) => setModelOverrides((current) => ({ ...current, [deliverableId]: modelId })),
+            }}
+            aiOverlay={CourseLearnAiDrawer}
+            aiOverlayProps={{
+                isOpen: isAiDrawerOpen,
+                displayId: input.displayId,
+                courseId: course.data?.id,
+                challengeId: challenge?.id ?? input.challengeId,
+                challengeTitle: challenge?.title ?? contentText("failedMessage"),
+                selection: activeSelection?.context,
+                initialPrompt: aiStarterPrompt,
+                onDismiss: () => setIsAiDrawerOpen(false),
+                onClearSelection: () => {
+                    setActiveSelection(undefined)
+                    globalAi.clearCodeContext()
                 },
             }}
             on={{
@@ -593,6 +648,8 @@ export const CourseLearnChallengeBlock = (props: CourseLearnChallengeBlockProps)
                     setAiStarterPrompt(undefined)
                     setIsAiDrawerOpen(true)
                 },
+                openHistory: () => setIsHistoryOpen(true),
+                toggleSubmission: () => setIsSubmissionOpen((current) => !current),
                 closeAi: () => setIsAiDrawerOpen(false),
                 explainSelection: () => {
                     setAiStarterPrompt(contentText("challengeExplainSelectionPrompt"))

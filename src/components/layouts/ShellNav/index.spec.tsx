@@ -52,9 +52,9 @@ const mocks = vi.hoisted(() => ({
     replace: vi.fn(),
 }))
 
-vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
-vi.mock("next-themes", () => ({
-    useTheme: () => ({ resolvedTheme: mocks.resolvedTheme, setTheme: mocks.setTheme }),
+vi.mock("next-intl", () => ({ useLocale: () => "vi", useTranslations: () => (key: string) => key }))
+vi.mock("@/modules/theme/theme-context", () => ({
+    useStarCiTheme: () => ({ resolvedTheme: mocks.resolvedTheme, setTheme: mocks.setTheme }),
 }))
 vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(mocks.searchParams) }))
 vi.mock("@/i18n/navigation", () => ({

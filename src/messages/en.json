@@ -31,6 +31,7 @@
         },
         "themeLight": "Switch to light",
         "themeDark": "Switch to dark",
+        "utilities": "Display utilities",
         "locale": "Change language",
         "localeOptions": {
             "en": "English",
@@ -273,6 +274,21 @@
             }
         }
     },
+    "payment": {
+        "title": "Review payment",
+        "subtitle": "{count, plural, one {# course} other {# courses}} will be added after payment is confirmed.",
+        "methodTitle": "Payment method",
+        "provider": "Bank transfer via PayOS",
+        "providerDescription": "You will finish the transfer on PayOS's secure payment page.",
+        "processTitle": "What happens next",
+        "handoffStep": "Continue to PayOS and complete the bank transfer.",
+        "verificationStep": "Your payment stays pending until the PayOS webhook confirms it.",
+        "accessStep": "StarCi grants course access only after that confirmation.",
+        "trustNote": "A browser redirect alone never marks an order as paid.",
+        "action": "Continue to PayOS · {total}",
+        "cancel": "Back to basket",
+        "failedMessage": "We could not open PayOS. Your basket is unchanged; please try again."
+    },
     "cart": {
         "navHome": "Home",
         "navCart": "Basket",
@@ -282,7 +298,7 @@
         "total": "Total",
         "unavailable": "—",
         "installmentFee": "3-cycle instalment fee",
-        "installmentHint": "Payable over 3 cycles — from {amount} each. Details at the payment step.",
+        "paymentHint": "Review the final total before continuing to PayOS.",
         "checkout": "Check out ({count})",
         "checkoutShort": "Check out",
         "clearAll": "Clear basket",
@@ -524,14 +540,54 @@
     },
     "globalAi": {
         "title": "StarCi AI",
-        "description": "Your study assistant across StarCi Academy.",
-        "modes": {
-            "general": "Ask anything",
+        "description": "Course-choice guidance and learning help in the right context.",
+        "identity": {
+            "courseAdvisor": "StarCi AI Course Advisor",
+            "courseAdvisorDescription": "Answers first and recommends only when there is a real fit.",
+            "learningAssistant": "StarCi AI Learning Assistant",
+            "learningAssistantDescription": "Guidance grounded in what you are learning now."
+        },
+        "empty": {
+            "courseAdvisorTitle": "What would you like to work toward?",
+            "courseAdvisorDescription": "Share your goal and current experience. Your AI teacher will help you choose the right direction.",
+            "learningTitle": "Let's unblock the part you are working on",
+            "learningDescription": "Ask about the open lesson, code selection, or exercise."
+        },
+        "prompts": {
+            "goal": "Suggest a path for my goal",
+            "compare": "Compare courses that fit me",
+            "prerequisites": "What should I know first?",
+            "explain": "Explain this more simply",
+            "practice": "Give me a practice task"
+        },
+        "context": {
+            "catalog": "Advising across the complete course catalog",
+            "course": "Using context from {title}",
+            "currentCourse": "this course"
+        },
+    "recommendation": {
+      "listLabel": "Recommended courses",
+      "aiAssessment": "StarCi AI assessment",
+      "whyFit": "Why it fits",
+      "fitGap": "Consider before choosing",
+      "courseAction": "Course information from StarCi",
+      "enrolled": "You own this course",
+      "available": "Open for enrollment",
+      "openCourse": "View course & enroll",
+      "continueCourse": "Continue learning",
+      "confidence": {
+        "low": "Confidence: needs clarification",
+        "medium": "Confidence: medium",
+        "high": "Confidence: high"
+      }
+    },
+    "modes": {
+      "general": "Course advice",
             "history": "History"
         },
         "composer": {
             "label": "Ask StarCi AI",
-            "placeholder": "Ask about the lesson, code, challenge, or learning path..."
+            "placeholder": "Your goal or what you are weighing up..."
         },
         "actions": {
             "send": "Send",
@@ -824,6 +880,12 @@
             "challengeModelApplyAll": "Apply to all deliverables",
             "challengeModelSelected": "Selected",
             "challengeModelOverride": "Model for {title}",
+            "challengeAnalysisPlan": "Add the evidence for each deliverable. StarCi checks the selected model against the same frozen submission snapshot.",
+            "challengeCachePolicy": "Eligible repeated context may reuse provider prompt cache; every grading attempt and result remains independently recorded.",
+            "challengeOpenSubmission": "Open submission panel",
+            "challengeCloseSubmission": "Hide submission panel",
+            "challengeWorkspaceLabel": "Challenge workspace",
+            "challengeContentView": "Challenge brief",
             "challengeLanguage": "Submission language",
             "challengeLanguageAgnostic": "Language agnostic",
             "challengeAskAi": "Ask Learn AI",
@@ -925,7 +987,8 @@
             "milestoneProgressLabel": "Progress of {milestone}",
             "taskScore": "{score}/{maximum} points",
             "taskWorth": "{maximum} points",
-            "resizeRail": "Resize the project roadmap"
+            "resizeRail": "Resize the project roadmap",
+            "contentMapTitle": "Project roadmap"
         },
         "foundations": {
             "title": "Foundations",

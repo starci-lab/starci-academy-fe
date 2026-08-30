@@ -1,6 +1,15 @@
 import type { ReactNode } from "react"
 import { RailDivider } from "@/components/leaves/RailDivider"
+import { Button } from "@/components/leaves/Button"
+import { DrawerBranch } from "@/components/branches/DrawerBranch"
 import { PersonalProjectContentMap } from "@/components/blocks/learn/PersonalProjectContentMap"
+import {
+    personalProjectWorkspaceClassName,
+    personalProjectWorkspaceDividerClassName,
+    personalProjectWorkspaceMobileBarClassName,
+    personalProjectWorkspaceRailClassName,
+    personalProjectWorkspaceSurfaceClassName,
+} from "./classNames"
 
 /**
  * LAYOUT - `PersonalProjectWorkspaceLayoutBase`: the frame every personal-project surface is read
@@ -24,23 +33,43 @@ export type PersonalProjectWorkspaceLayoutProps = {
     readonly surface: ReactNode
     /** The accessible name of the separator the reader drags to rewidth the rail. */
     readonly resizeLabel: string
+    /** Compact entry into the project roadmap when the persistent rail is not viable. */
+    readonly roadmapLabel?: string
+    readonly isRoadmapOpen?: boolean
+    readonly onOpenRoadmap?: () => void
+    readonly onCloseRoadmap?: () => void
+    /** The overview already owns the roadmap; task and result surfaces need the navigation rail. */
+    readonly showRoadmapNavigation?: boolean
 }
 
 /** Keeps the shared course map mounted around dashboard, task and result surfaces. */
-export const PersonalProjectWorkspaceLayoutBase = (props: PersonalProjectWorkspaceLayoutProps) => (
-    <>
-        <aside><PersonalProjectContentMap /></aside>
-        {/* Milestone labels are authored content, so this route rail resizes instead of
-                collapsing them into an icon-only state that cannot preserve their meaning. */}
-        <RailDivider
-            props={{
-                label: props.resizeLabel,
-                storageKey: "starci.learn.milestoneMap.width",
-                defaultWidth: 320,
-                minWidth: 256,
-                maxWidth: 560,
-            }}
-        />
-        <main>{props.surface}</main>
-    </>
-)
+export const PersonalProjectWorkspaceLayoutBase = (props: PersonalProjectWorkspaceLayoutProps) => {
+    const showRoadmapNavigation = props.showRoadmapNavigation !== false
+    return (
+        <div className={personalProjectWorkspaceClassName} data-roadmap-navigation={showRoadmapNavigation ? "visible" : "owned-by-surface"}>
+            {showRoadmapNavigation ? <>
+                <div className={personalProjectWorkspaceMobileBarClassName}>
+                    <Button props={{ label: props.roadmapLabel ?? "Project roadmap", variant: "outline", size: "sm", icon: "personalProject" }} on={{ press: props.onOpenRoadmap }} />
+                </div>
+                <aside className={personalProjectWorkspaceRailClassName}><PersonalProjectContentMap /></aside>
+                {/* Milestone labels are authored content, so this route rail resizes instead of
+                        collapsing them into an icon-only state that cannot preserve their meaning. */}
+                <div className={personalProjectWorkspaceDividerClassName}>
+                    <RailDivider
+                        props={{
+                            label: props.resizeLabel,
+                            storageKey: "starci.learn.milestoneMap.width",
+                            defaultWidth: 320,
+                            minWidth: 256,
+                            maxWidth: 560,
+                        }}
+                    />
+                </div>
+            </> : null}
+            <main className={personalProjectWorkspaceSurfaceClassName}>{props.surface}</main>
+            {showRoadmapNavigation ? <DrawerBranch isOpen={props.isRoadmapOpen === true} placement="left" title={props.roadmapLabel ?? "Project roadmap"} onDismiss={() => props.onCloseRoadmap?.()}>
+                <PersonalProjectContentMap />
+            </DrawerBranch> : null}
+        </div>
+    )
+}

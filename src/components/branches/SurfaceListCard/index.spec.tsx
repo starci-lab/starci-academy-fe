@@ -21,4 +21,16 @@ describe("SurfaceListCard", () => {
         expect(screen.getByRole("button", { name: "Open all" })).toBeInTheDocument()
         expect(screen.queryByText("Updated")).not.toBeInTheDocument()
     })
+
+    it("keeps label controls outside a bounded list frame", () => {
+        render(<SurfaceListCard props={{ label: "Roadmap", fact: "9 stages", isScrollable: true }} labelEnd={<button type="button">Search</button>}>{rows}</SurfaceListCard>)
+
+        const heading = screen.getByRole("heading", { name: "Roadmap" })
+        const search = screen.getByRole("button", { name: "Search" })
+        const frame = heading.closest("section")?.querySelector("[data-grammar-surface='true']")
+        expect(search.closest("[data-grammar-surface-label='true']")).not.toBeNull()
+        expect(search.closest("[data-grammar-surface='true']")).toBeNull()
+        expect(frame).toHaveAttribute("data-grammar-scroll", "contained")
+        expect(screen.queryByText("9 stages")).not.toBeInTheDocument()
+    })
 })

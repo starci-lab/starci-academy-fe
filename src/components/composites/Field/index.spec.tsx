@@ -70,4 +70,13 @@ describe("Field", () => {
         expect(screen.getByLabelText("OTP code")).toBeInTheDocument()
         expect(screen.getByText("OTP code")).toHaveClass("starci-core-form-label--screen-reader")
     })
+
+    it("restores an owner-supplied draft when an uncontrolled field remounts", () => {
+        const { unmount } = render(<Field props={{ id: "evidence", name: "evidence", label: "Evidence", defaultValue: "https://github.com/starci/demo" }} />)
+        expect(screen.getByLabelText("Evidence")).toHaveValue("https://github.com/starci/demo")
+        unmount()
+
+        render(<Field props={{ id: "evidence", name: "evidence", label: "Evidence", defaultValue: "https://github.com/starci/demo" }} />)
+        expect(screen.getByLabelText("Evidence")).toHaveValue("https://github.com/starci/demo")
+    })
 })

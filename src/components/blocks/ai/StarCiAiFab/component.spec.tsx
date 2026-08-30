@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react"
+import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { StarCiAiFab } from "./component"
 
@@ -9,8 +9,15 @@ describe("StarCiAiFab", () => {
 
         const trigger = screen.getByRole("button", { name: "StarCi AI" })
         expect(trigger).toHaveAttribute("aria-expanded", "false")
+        expect(trigger).toHaveAttribute("draggable", "false")
+        expect(trigger).toHaveAttribute("data-slot", "starci-ai-mascot")
+        const boundary = document.querySelector("[data-slot=\"starci-ai-drag-boundary\"]")
+        expect(boundary).toHaveClass("bottom-20", "lg:bottom-4")
+        expect(trigger).toHaveClass("bottom-0")
+        expect(trigger).not.toHaveClass("bottom-20")
         expect(trigger.querySelector("img")).toBeInTheDocument()
-        expect(trigger.querySelector("img")?.getAttribute("src")).toContain("starci-ai-mark-v1.png")
+        expect(trigger.querySelector("img")?.getAttribute("src")).toContain("starci-ai-teacher-v1.png")
+        expect(trigger.querySelector("[data-slot=\"starci-ai-teacher\"]")).toHaveClass("rounded-full")
         fireEvent.click(trigger)
         expect(press).toHaveBeenCalledTimes(1)
     })
@@ -40,5 +47,15 @@ describe("StarCiAiFab", () => {
         const trigger = screen.getByRole("button", { name: "StarCi AI" })
         expect(trigger.querySelector("[data-loading=\"true\"]")).toBeInTheDocument()
         expect(trigger.textContent).not.toContain("StarCi AI")
+    })
+
+    it("restores the safe drag origin when viewport geometry changes", async () => {
+        render(<StarCiAiFab props={{ label: "StarCi AI", isOpen: false }} />)
+        expect(screen.getByRole("button", { name: "StarCi AI" })).toHaveAttribute("data-drag-frame", "0")
+
+        fireEvent(window, new Event("resize"))
+
+        await waitFor(() => expect(screen.getByRole("button", { name: "StarCi AI" })).toHaveAttribute("data-drag-frame", "1"))
+        expect(screen.getByRole("button", { name: "StarCi AI" })).toHaveClass("bottom-0")
     })
 })

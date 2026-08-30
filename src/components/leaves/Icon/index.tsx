@@ -148,7 +148,7 @@ import { getIconClassName, iconLoadingClassName } from "./classNames"
 export type IconName =
     | "brand" | "aiChatbot" | "streak" | "credit" | "reward" | "course"
     | "email" | "password" | "revealPassword" | "hidePassword" | "code"
-    | "complete" | "incomplete" | "pending" | "signIn" | "signUp" | "close" | "back" | "next" | "disclosure" | "retry" | "send"
+    | "complete" | "included" | "incomplete" | "pending" | "signIn" | "signUp" | "close" | "back" | "next" | "disclosure" | "retry" | "send"
     | "home" | "explore" | "community" | "league" | "review" | "livestream"
     | "light" | "dark" | "locale" | "google" | "github"
     | "search" | "cart" | "notification" | "account" | "profile" | "cv" | "settings" | "signOut"
@@ -231,6 +231,7 @@ const GLYPHS: Record<IconName, GlyphCuts> = {
     hidePassword: cuts(EyeSlashIcon, EyeSlashSolidIcon),
     code: cuts(ShieldCheckIcon, ShieldCheckSolidIcon),
     complete: cuts(CheckCircleIcon, CheckCircleSolidIcon),
+    included: cuts(CheckCircleIcon, CheckCircleIcon),
     incomplete: cuts(XCircleIcon, XCircleSolidIcon),
     pending: cuts(CircleIcon, CircleSolidIcon),
     signIn: cuts(ArrowRightOnRectangleIcon, ArrowRightOnRectangleSolidIcon),

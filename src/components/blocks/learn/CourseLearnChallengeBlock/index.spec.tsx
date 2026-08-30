@@ -22,6 +22,7 @@ type TestBlockInput = {
         readonly openCourseMapItem?: (id: string) => void
         readonly openModelDrawer?: () => void
         readonly closeModelDrawer?: () => void
+        readonly openHistory?: () => void
         readonly selectDefaultModel?: (id: string) => void
         readonly applyDefaultModel?: () => void
         readonly overrideModel?: (deliverableId: string, modelId: string) => void
@@ -29,7 +30,10 @@ type TestBlockInput = {
         readonly closeAi?: () => void
         readonly retry?: (id?: string) => void
     }
+    readonly historyOverlayProps?: { readonly isOpen: boolean }
 }
+
+type DrawerVisibilityProps = { readonly isOpen: boolean }
 
 const mocks = vi.hoisted(() => ({
     content: { data: undefined as unknown, error: undefined as unknown, mutate: vi.fn() },
@@ -44,7 +48,7 @@ const mocks = vi.hoisted(() => ({
     replace: vi.fn(),
 }))
 
-vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
+vi.mock("next-intl", () => ({ useLocale: () => "en", useTranslations: () => (key: string) => key }))
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push, replace: mocks.replace }) }))
 vi.mock("@/hooks/swr/useQueryContentSwr", () => ({ useQueryContentSwr: () => mocks.content }))
 vi.mock("@/hooks/swr/useQueryCourseSwr", () => ({ useQueryCourseSwr: () => mocks.course }))
@@ -54,11 +58,21 @@ vi.mock("@/hooks/swr/useQueryContentChallengeSubmissionsSwr", () => ({ useQueryC
 vi.mock("@/hooks/swr/useMutateSubmitContentChallengeSwr", () => ({ useMutateSubmitContentChallengeSwr: () => mocks.submission }))
 vi.mock("@/hooks/swr/useMutateSyncContentChallengeSwr", () => ({ useMutateSyncContentChallengeSwr: () => mocks.draftSync }))
 vi.mock("@/modules/ai/global-ai-chat-context", () => ({ useGlobalAiChat: () => mocks.globalAi }))
+vi.mock("@/components/overlays/learn/ChallengeAttemptHistoryDrawer", () => ({
+    ChallengeAttemptHistoryDrawer: ({ isOpen }: DrawerVisibilityProps) => <output>{String(isOpen)}</output>,
+}))
+vi.mock("@/components/overlays/learn/ChallengeGradingModelDrawer", () => ({
+    ChallengeGradingModelDrawer: ({ isOpen }: DrawerVisibilityProps) => <output>{String(isOpen)}</output>,
+}))
+vi.mock("@/components/overlays/learn/CourseLearnAiDrawer", () => ({
+    CourseLearnAiDrawer: ({ isOpen }: DrawerVisibilityProps) => <output>{String(isOpen)}</output>,
+}))
 vi.mock("./component", () => ({
-    CourseLearnChallengeBlockBase: ({ blockState, props, on }: TestBlockInput) => (
+    CourseLearnChallengeBlockBase: ({ blockState, props, on, historyOverlayProps }: TestBlockInput) => (
         <>
             <output data-testid="state">{blockState}</output>
             <output data-testid="props">{JSON.stringify(props)}</output>
+            <output data-testid="history-drawer">{String(historyOverlayProps?.isOpen)}</output>
             <button onClick={() => on.changeUrl?.("submission-1", "https://github.com/starci/repo")}>change-url</button>
             <button onClick={on.saveDraft}>save</button>
             <button onClick={on.reviewAttempt}>review</button>
@@ -76,6 +90,7 @@ vi.mock("./component", () => ({
             <button onClick={() => on.openCourseMapItem?.("lesson:content")}>open-map-item</button>
             <button onClick={on.openModelDrawer}>open-models</button>
             <button onClick={on.closeModelDrawer}>close-models</button>
+            <button onClick={on.openHistory}>open-history</button>
             <button onClick={() => on.selectDefaultModel?.("openai:gpt")}>select-model</button>
             <button onClick={on.applyDefaultModel}>apply-model</button>
             <button onClick={() => on.overrideModel?.("submission-1", "openai:gpt")}>override-model</button>
@@ -207,6 +222,8 @@ describe("CourseLearnChallengeBlock", () => {
         fireEvent.click(screen.getByText("open-map-item"))
         fireEvent.click(screen.getByText("close-map"))
         fireEvent.click(screen.getByText("open-models"))
+        fireEvent.click(screen.getByText("open-history"))
+        expect(screen.getByTestId("history-drawer")).toHaveTextContent("true")
         fireEvent.click(screen.getByText("select-model"))
         fireEvent.click(screen.getByText("override-model"))
         fireEvent.click(screen.getByText("apply-model"))

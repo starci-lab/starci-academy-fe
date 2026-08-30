@@ -11,6 +11,17 @@ import {
 } from "@/components/blocks/courses/CourseCatalogCard"
 import { MyCoursesProgress } from "@/components/blocks/dashboard/MyCoursesProgress"
 import { CoursePriceOverlay } from "@/components/overlays/courses/CoursePriceOverlay"
+import { SurfaceCard } from "@/components/branches/SurfaceCard"
+import {
+    catalogGridClassName,
+    catalogHeaderClassName,
+    catalogLineClassName,
+    catalogPageClassName,
+    catalogSearchClassName,
+    catalogSectionClassName,
+    catalogToolbarClassName,
+    catalogViewClassName,
+} from "./classNames"
 
 /** Catalog loading and result states. */
 export type CoursesCatalogBlockState =
@@ -75,8 +86,8 @@ export const CoursesCatalogBlockBase = (props: CoursesCatalogBlockProps) => {
     props.blockState === "failed"
     const courses = props.props.discover ?? []
     return (
-        <>
-            <div>
+        <div className={catalogPageClassName}>
+            <div className={catalogHeaderClassName}>
                 <Breadcrumbs
                     props={{
                         steps: [
@@ -89,36 +100,40 @@ export const CoursesCatalogBlockBase = (props: CoursesCatalogBlockProps) => {
                 />
                 <Heading props={{ content: labels.title, level: 1 }} />
             </div>
-            <div>
-                <SearchBox
-                    props={{
-                        placeholder: labels.searchPlaceholder,
-                        label: labels.searchLabel,
-                        clearLabel: labels.searchClearLabel,
-                    }}
-                    on={{ search: props.on?.search }}
-                />
-                {props.props.countLabel && (
-                    <Text
+            <div className={catalogToolbarClassName}>
+                <div className={catalogSearchClassName}>
+                    <SearchBox
                         props={{
-                            content: props.props.countLabel,
-                            size: "sm",
-                            tone: "muted",
+                            placeholder: labels.searchPlaceholder,
+                            label: labels.searchLabel,
+                            clearLabel: labels.searchClearLabel,
                         }}
+                        on={{ search: props.on?.search }}
                     />
-                )}
-                <ChoiceTabs
-                    props={{
-                        label: labels.viewLabel,
-                        selectedKey: props.props.view ?? "grid",
-                        variant: "primary",
-                        tabs: [
-                            { id: "grid", label: labels.viewGrid, icon: "viewGrid" },
-                            { id: "line", label: labels.viewLine, icon: "viewList" },
-                        ],
-                    }}
-                    on={{ select: props.on?.changeView }}
-                />
+                    {props.props.countLabel && (
+                        <Text
+                            props={{
+                                content: props.props.countLabel,
+                                size: "sm",
+                                tone: "muted",
+                            }}
+                        />
+                    )}
+                </div>
+                <div className={catalogViewClassName}>
+                    <ChoiceTabs
+                        props={{
+                            label: labels.viewLabel,
+                            selectedKey: props.props.view ?? "grid",
+                            variant: "primary",
+                            tabs: [
+                                { id: "grid", label: labels.viewGrid, icon: "viewGrid" },
+                                { id: "line", label: labels.viewLine, icon: "viewList" },
+                            ],
+                        }}
+                        on={{ select: props.on?.changeView }}
+                    />
+                </div>
             </div>
             {!notice && props.props.hasOwned && <MyCoursesProgress />}
             {notice ? (
@@ -131,22 +146,35 @@ export const CoursesCatalogBlockBase = (props: CoursesCatalogBlockProps) => {
                     on={{ act: props.on?.recover }}
                 />
             ) : (
-                <section>
+                <section className={catalogSectionClassName}>
                     <Heading props={{ content: labels.discoverTitle, level: 2 }} />
-                    <div>
-                        {courses.map((course) => (
-                            <CourseCatalogCard
-                                key={course.id}
-                                state={loading ? "pending" : "ready"}
-                                course={{
-                                    ...course,
-                                    layout: props.props.view === "line" ? ("line" as const) : ("grid" as const),
-                                }}
-                                onView={props.on?.[`view:${course.id}`]}
-                                onOpenPriceDetail={props.on?.[`priceDetail:${course.id}`]}
-                            />
-                        ))}
-                    </div>
+                    {props.props.view === "line" ? (
+                        <SurfaceCard props={{ inset: "none" }}>
+                            <div className={catalogLineClassName}>
+                                {courses.map((course) => (
+                                    <CourseCatalogCard
+                                        key={course.id}
+                                        state={loading ? "pending" : "ready"}
+                                        course={{ ...course, layout: "line" }}
+                                        onView={props.on?.[`view:${course.id}`]}
+                                        onOpenPriceDetail={props.on?.[`priceDetail:${course.id}`]}
+                                    />
+                                ))}
+                            </div>
+                        </SurfaceCard>
+                    ) : (
+                        <div className={catalogGridClassName}>
+                            {courses.map((course) => (
+                                <CourseCatalogCard
+                                    key={course.id}
+                                    state={loading ? "pending" : "ready"}
+                                    course={{ ...course, layout: "grid" }}
+                                    onView={props.on?.[`view:${course.id}`]}
+                                    onOpenPriceDetail={props.on?.[`priceDetail:${course.id}`]}
+                                />
+                            ))}
+                        </div>
+                    )}
                 </section>
             )}
             {!notice && !loading && props.props.totalPages !== undefined && (
@@ -169,6 +197,6 @@ export const CoursesCatalogBlockBase = (props: CoursesCatalogBlockProps) => {
                     onDismiss={props.on?.dismissPrice ?? (() => undefined)}
                 />
             )}
-        </>
+        </div>
     )
 }

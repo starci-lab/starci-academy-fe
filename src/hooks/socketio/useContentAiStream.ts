@@ -11,6 +11,7 @@ import type {
     ContentAiSocketState,
     ContentAiStreamChunkMessage,
 } from "./types/content-ai"
+import type { CourseAdvisorMetadata } from "@/modules/ai/course-advisor-response"
 
 const CONTENT_AI_NAMESPACE = "/content_ai"
 const ASK_EVENT = "content_ai.ask.publication"
@@ -45,10 +46,11 @@ export const useContentAiStream = () => {
         })
         socketRef.current = socket
 
-        const finishActive = (error?: string) => {
+        const finishActive = (error?: string, courseAdvisor?: CourseAdvisorMetadata) => {
             const active = activeRef.current
             if (active === null) return
-            active.onDone(error)
+            if (courseAdvisor === undefined) active.onDone(error)
+            else active.onDone(error, courseAdvisor)
             activeRef.current = null
             setIsStreaming(false)
         }
@@ -57,7 +59,7 @@ export const useContentAiStream = () => {
             const chunk = message.data
             if (active === null || chunk === undefined || chunk.streamId !== active.streamId) return
             if (chunk.delta.length > 0) active.onDelta(chunk.delta)
-            if (chunk.done) finishActive(chunk.error)
+            if (chunk.done) finishActive(chunk.error, chunk.courseAdvisor)
         }
         const onConnect = () => setState("connected")
         const onDisconnect = () => {
@@ -123,6 +125,7 @@ export const useContentAiStream = () => {
                 history: params.history,
                 model: params.model,
                 provider: params.provider,
+                experience: params.experience,
             },
         }
         socket.emit(ASK_EVENT, message)

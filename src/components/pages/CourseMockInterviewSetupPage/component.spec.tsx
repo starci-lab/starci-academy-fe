@@ -57,6 +57,14 @@ const copy: CourseMockInterviewSetupData = {
     statsState: "empty",
     historyRows: [],
     statsRows: [],
+    historyCountLabel: "0 completed",
+    recentHistoryTitle: "Recent interviews",
+    progressTitle: "Practice progress",
+    viewHistoryLabel: "View all history",
+    viewStatsLabel: "View statistics",
+    historyActionLabel: "View result",
+    newSessionEyebrow: "New practice session",
+    preflightTitle: "Review before starting",
     returnToBegin: "Prepare an interview",
     resumeTitle: "Latest session",
     readinessLabels: ["Readiness", "Format", "Focus"],
@@ -161,13 +169,22 @@ describe("CourseMockInterviewSetupPageBase", () => {
 
     it("replaces protected setup controls with a course-access explanation when locked", () => {
         const access = vi.fn()
-        draw("locked", {}, { access })
+        draw("locked", { selectedTab: "stats", statsState: "ready", statsRows: [{ id: "qna", title: "Q&A", percent: 82, percentText: "82/100" }] }, { access })
 
         expect(screen.queryByRole("button", { name: "Start interview" })).not.toBeInTheDocument()
         expect(screen.queryByRole("tab", { name: "History" })).not.toBeInTheDocument()
+        expect(screen.queryByRole("heading", { name: "Interview statistics" })).not.toBeInTheDocument()
         expect(screen.getByText("Course access is required")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "View course access" }))
         expect(access).toHaveBeenCalledTimes(1)
+    })
+
+    it("opens the result owned by one completed interview row", () => {
+        const openHistory = vi.fn()
+        draw("history", { historyState: "ready", historyRows: [{ id: "session-one", title: "Attempt", fact: "82/100" }] }, { openHistory })
+
+        fireEvent.click(screen.getByRole("button", { name: "View result" }))
+        expect(openHistory).toHaveBeenCalledWith("session-one")
     })
 
     it.each(["failed", "resumable"] as const)("keeps the resolved status visible in the %s state", (state) => {

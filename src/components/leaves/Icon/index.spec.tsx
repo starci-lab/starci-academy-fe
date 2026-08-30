@@ -20,6 +20,14 @@ describe("Icon", () => {
         expect(glyph?.querySelectorAll("path")[1]).toHaveAttribute("d", "M9 4.5v15")
     })
 
+    it("draws an included value as a foreground circle-check, not achieved success", () => {
+        const { container } = render(<Icon props={{ name: "included", role: "leading" }} />)
+        const glyph = container.querySelector("svg")
+        expect(glyph).toBeInTheDocument()
+        expect(glyph).toHaveClass("size-5")
+        expect(glyph).not.toHaveClass("text-success-soft-foreground")
+    })
+
     it.each([
         ["learnHome", 3],
         ["courseContent", 2],

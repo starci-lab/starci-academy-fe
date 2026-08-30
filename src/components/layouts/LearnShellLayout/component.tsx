@@ -5,7 +5,7 @@ import { NavLink } from "@/components/leaves/NavLink"
 import { Text } from "@/components/leaves/Text"
 import type { IconName } from "@/components/leaves/Icon"
 import type { ReactNode } from "react"
-import { learnShellBodyClassName, learnShellFrameClassName, learnShellMobileBarClassName, learnShellMobileNavigationClassName, learnShellRailClassName } from "./classNames"
+import { learnShellBodyClassName, learnShellFrameClassName, learnShellMobileBarClassName, learnShellMobileCurrentClassName, learnShellMobileNavigationClassName, learnShellRailClassName } from "./classNames"
 
 /**
  * LAYOUT - `LearnShellLayoutBase`: the frame every learn surface is read inside.
@@ -92,7 +92,7 @@ export const LearnShellLayoutBase = (props: LearnShellLayoutProps) => {
                 {props.isFullBleed ? null : <aside className={learnShellRailClassName}><LearnSpine displayId={props.displayId} /></aside>}
                 {props.mobileCourseNavigation === undefined ? null : <div className={learnShellMobileNavigationClassName}>
                     <Button props={{ label: props.mobileCourseNavigation.label, variant: "outline", size: "sm", icon: "course" }} on={{ press: props.on?.openCourseNavigation }} />
-                    <Text props={{ content: props.mobileCourseNavigation.currentLabel, size: "xs", tone: "muted" }} />
+                    <div className={learnShellMobileCurrentClassName}><Text props={{ content: props.mobileCourseNavigation.currentLabel, size: "xs", tone: "muted" }} /></div>
                 </div>}
                 <main className={learnShellBodyClassName}>{props.surface}</main>
                 {mobileTabs.length === 0 ? null : <nav className={learnShellMobileBarClassName}>

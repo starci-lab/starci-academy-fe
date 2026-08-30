@@ -32,6 +32,8 @@ const props = {
     routes: [{ id: "home", label: "Home", isCurrent: true }],
     tabs: [{ id: "overview", label: "Overview", icon: "home" as const, isCurrent: true }],
     themeLabel: "Switch theme",
+    utilitiesLabel: "Display utilities",
+    localeActionLabel: "Tiếng Việt",
     isDark: false,
     searchPlaceholder: "Search",
     searchLabel: "Open search",
@@ -62,6 +64,25 @@ describe("ShellNavBase", () => {
         render(<ShellNavBase props={props} on={{ openSearch }} />)
         fireEvent.click(screen.getByRole("button", { name: "Open search" }))
         expect(openSearch).toHaveBeenCalledOnce()
+    })
+
+    it("keeps compact search, locale and theme actions inside one utility disclosure", () => {
+        const openSearch = vi.fn()
+        const toggleLocale = vi.fn()
+        const toggleTheme = vi.fn()
+        render(<ShellNavBase props={props} on={{ openSearch, toggleLocale, toggleTheme }} />)
+
+        fireEvent.click(screen.getByRole("button", { name: "Display utilities" }))
+        fireEvent.click(screen.getByRole("menuitem", { name: "Open search" }))
+        expect(openSearch).toHaveBeenCalledOnce()
+
+        fireEvent.click(screen.getByRole("button", { name: "Display utilities" }))
+        fireEvent.click(screen.getByRole("menuitem", { name: "Tiếng Việt" }))
+        expect(toggleLocale).toHaveBeenCalledOnce()
+
+        fireEvent.click(screen.getByRole("button", { name: "Display utilities" }))
+        fireEvent.click(screen.getByRole("menuitem", { name: "Switch theme" }))
+        expect(toggleTheme).toHaveBeenCalledOnce()
     })
 
     it("composes the language and account blocks with the original switch and tabs", () => {

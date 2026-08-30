@@ -1,6 +1,8 @@
-import type { ReactNode } from "react"
+"use client"
+
+import { useEffect, useRef, useState, type ReactNode } from "react"
 import { Drawer } from "@heroui/react"
-import { drawerBodyClassName } from "./classNames"
+import { drawerBodyClassName, drawerCloseTriggerClassName, drawerControlledTriggerClassName, getDrawerContentClassName } from "./classNames"
 
 /**
  * BRANCH - `DrawerBranch`: the vendor's edge-anchored mechanics around typed children.
@@ -43,30 +45,83 @@ export type DrawerBranchProps = {
  *
  * @param input - {@link DrawerBranchProps}
  */
-export const DrawerBranch = (props: DrawerBranchProps) => (
-    <Drawer
-        isOpen={props.isOpen}
-        onOpenChange={(open) => {
-            if (!open) props.onDismiss()
-        }}
-    >
-        <Drawer.Backdrop>
-            <Drawer.Content placement={props.placement ?? "right"}>
-                <Drawer.Dialog>
-                    <Drawer.Header>
-                        <Drawer.Heading>{props.title}</Drawer.Heading>
-                    </Drawer.Header>
-                    <Drawer.CloseTrigger />
-                    {/*
-                     * The vendor inset is zeroed for the same reason `ModalBranch` zeroes it: the
-                     * interior owns its own padding, so a branch that also padded would inset the
-                     * same content twice and the two insets would drift apart.
-                     */}
-                    <Drawer.Body className={drawerBodyClassName}>
-                        {props.children}
-                    </Drawer.Body>
-                </Drawer.Dialog>
-            </Drawer.Content>
-        </Drawer.Backdrop>
-    </Drawer>
-)
+export const DrawerBranch = (props: DrawerBranchProps) => {
+    const pageScrollRef = useRef({ x: 0, y: 0 })
+    const [viewportEpoch, setViewportEpoch] = useState(0)
+
+    useEffect(() => {
+        if (!props.isOpen) return
+
+        const root = document.documentElement
+        const body = document.body
+        const previousRootOverflow = root.style.overflow
+        const previousBodyOverflow = body.style.overflow
+        pageScrollRef.current = { x: window.scrollX, y: window.scrollY }
+
+        // This overlay owns the viewport. Some embedded browsers otherwise paint fixed drawer
+        // chrome at the underlying document offset, leaving its title and close action unreachable.
+        if (pageScrollRef.current.x !== 0 || pageScrollRef.current.y !== 0) {
+            window.scrollTo({ left: 0, top: 0, behavior: "auto" })
+        }
+        root.style.overflow = "hidden"
+        body.style.overflow = "hidden"
+        const keepDocumentAtOrigin = () => {
+            if (window.scrollX !== 0 || window.scrollY !== 0) {
+                window.scrollTo({ left: 0, top: 0, behavior: "auto" })
+                window.requestAnimationFrame(() => setViewportEpoch((value) => value + 1))
+            }
+        }
+        window.addEventListener("scroll", keepDocumentAtOrigin, { passive: true })
+
+        return () => {
+            window.removeEventListener("scroll", keepDocumentAtOrigin)
+            root.style.overflow = previousRootOverflow
+            body.style.overflow = previousBodyOverflow
+            if (pageScrollRef.current.x !== 0 || pageScrollRef.current.y !== 0) {
+                window.scrollTo({
+                    left: pageScrollRef.current.x,
+                    top: pageScrollRef.current.y,
+                    behavior: "auto",
+                })
+            }
+        }
+    }, [props.isOpen])
+
+    return (
+        <Drawer
+            isOpen={props.isOpen}
+            onOpenChange={(open) => {
+                if (!open) props.onDismiss()
+            }}
+        >
+            {/*
+              * Controlled HeroUI drawers still sit on React-Aria DialogTrigger. Complete that
+              * vendor anatomy so its PressResponder is not left orphaned; the actual opener stays
+              * with the calling block, while this hidden adapter creates no user-facing action.
+              */}
+            <Drawer.Trigger className={drawerControlledTriggerClassName} aria-hidden isDisabled />
+            <Drawer.Backdrop>
+                <Drawer.Content
+                    key={viewportEpoch}
+                    className={getDrawerContentClassName(props.placement ?? "right")}
+                    placement={props.placement ?? "right"}
+                >
+                    <Drawer.Dialog>
+                        <Drawer.Header>
+                            <Drawer.Heading>{props.title}</Drawer.Heading>
+                        </Drawer.Header>
+                        <Drawer.CloseTrigger className={drawerCloseTriggerClassName} />
+                        {/*
+                         * The vendor inset is zeroed for the same reason `ModalBranch` zeroes it: the
+                         * interior owns its own padding, so a branch that also padded would inset the
+                         * same content twice and the two insets would drift apart.
+                         */}
+                        <Drawer.Body className={drawerBodyClassName}>
+                            {props.children}
+                        </Drawer.Body>
+                    </Drawer.Dialog>
+                </Drawer.Content>
+            </Drawer.Backdrop>
+        </Drawer>
+    )
+}

@@ -3,7 +3,7 @@ import { cn } from "@heroui/react"
 
 /** Base and current styles for each navigation kind. */
 export const kindClasses = {
-    route: { base: cn("inline-flex", "items-center", "gap-2", "text-sm"), current: cn("inline-flex", "items-center", "gap-2", "text-sm", "font-semibold") },
+    route: { base: cn("inline-flex", "items-center", "gap-2", "whitespace-nowrap", "rounded-full", "px-3", "py-2", "text-sm", "text-muted"), current: cn("inline-flex", "items-center", "gap-2", "whitespace-nowrap", "rounded-full", "bg-accent-soft", "px-3", "py-2", "text-sm", "font-semibold", "text-accent-soft-foreground") },
     tab: { base: cn("inline-flex", "items-center", "gap-2", "border-b-2", "border-transparent", "text-sm"), current: cn("inline-flex", "items-center", "gap-2", "border-b-2", "border-accent", "text-sm") },
     section: { base: cn("inline-flex", "items-center", "gap-2", "text-sm"), current: cn("inline-flex", "items-center", "gap-2", "text-sm", "font-semibold") },
 } as const

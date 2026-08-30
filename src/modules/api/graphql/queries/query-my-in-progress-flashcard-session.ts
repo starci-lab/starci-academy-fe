@@ -32,6 +32,24 @@ export type FlashcardQuizAnswer = {
     readonly totalBlanks: number
 }
 
+/** One server-owned cloze target. */
+export type FlashcardQuizBlank = { readonly blankId: string; readonly hint?: string | null }
+
+/** One opaque single-use token. Its label is presentation-only. */
+export type FlashcardQuizToken = { readonly tokenId: string; readonly label: string }
+
+/** One playable quiz item without the hidden answer key. */
+export type FlashcardQuizItem = {
+    readonly cardId: string
+    readonly question: string
+    readonly clozeText: string
+    readonly blanks: ReadonlyArray<FlashcardQuizBlank>
+    readonly tokens: ReadonlyArray<FlashcardQuizToken>
+}
+
+/** One persisted blank-to-token assignment. */
+export type FlashcardQuizSelection = { readonly blankId: string; readonly tokenId: string }
+
 /** Hydrated resumable session consumed by the canonical live page. */
 export type FlashcardSession = {
     readonly sessionId: string
@@ -48,6 +66,10 @@ export type FlashcardSession = {
     readonly updatedAt?: string
     readonly deadlineAt?: string | null
     readonly name?: string | null
+    readonly quizItems?: ReadonlyArray<FlashcardQuizItem>
+    readonly answerState?: ReadonlyArray<FlashcardQuizSelection>
+    readonly answerVersion?: number
+    readonly recoveryReason?: string | null
 }
 
 /** Lookup parameters for a review session, including deck and due-review families. */
@@ -84,13 +106,17 @@ type ReviewSessionData = {
 }
 
 type QuizSessionData = {
-    readonly sessionId: string
-    readonly cardIds: ReadonlyArray<string>
-    readonly currentIndex: number
-    readonly results: ReadonlyArray<FlashcardQuizAnswer>
+    readonly kind: "ACTIVE_V1" | "RECOVER_TO_SETUP"
+    readonly reason?: string | null
+    readonly sessionId?: string | null
+    readonly contractVersion?: number | null
+    readonly items?: ReadonlyArray<FlashcardQuizItem> | null
+    readonly currentIndex?: number | null
+    readonly answerState?: ReadonlyArray<FlashcardQuizSelection> | null
+    readonly answerVersion?: number | null
+    readonly status?: string | null
     readonly updatedAt?: string
     readonly deadlineAt?: string | null
-    readonly name?: string | null
 }
 
 type CardsResponse = {
@@ -131,7 +157,15 @@ const quizByCourseQuery = gql`
     query MyInProgressFlashcardQuizSession($courseId: ID!) {
         myInProgressFlashcardQuizSession(courseId: $courseId) {
             success message error
-            data { sessionId cardIds currentIndex results { cardId correctBlanks totalBlanks } updatedAt deadlineAt name }
+            data {
+                kind reason sessionId contractVersion currentIndex answerVersion status updatedAt deadlineAt
+                answerState { blankId tokenId }
+                items {
+                    cardId question clozeText
+                    blanks { blankId hint }
+                    tokens { tokenId label }
+                }
+            }
         }
     }
 `
@@ -156,28 +190,47 @@ const hydrate = async (
     courseId?: string,
     kind?: FlashcardReviewKind,
 ): Promise<FlashcardSession> => {
+    if (mode === "quiz") {
+        const quiz = data as QuizSessionData
+        const items = quiz.items ?? []
+        return {
+            sessionId: quiz.sessionId ?? "",
+            mode,
+            status: "in_progress",
+            cardIds: items.map((item) => item.cardId),
+            cards: [],
+            currentIndex: quiz.currentIndex ?? 0,
+            reviewedCount: 0,
+            gradedIndexes: [],
+            results: [],
+            xpEarned: 0,
+            updatedAt: quiz.updatedAt,
+            deadlineAt: quiz.deadlineAt,
+            quizItems: items,
+            answerState: quiz.answerState ?? [],
+            answerVersion: quiz.answerVersion ?? 0,
+            recoveryReason: quiz.reason,
+        }
+    }
+    const review = data as ReviewSessionData
     const apollo = createApolloClient({ withAuth: true })
     const cardsResponse = await apollo.query<CardsResponse>({
         query: cardsQuery,
-        variables: { courseId, cardIds: data.cardIds },
+        variables: { courseId, cardIds: review.cardIds },
     })
-    const review = mode === "review" ? data as ReviewSessionData : undefined
-    const quiz = mode === "quiz" ? data as QuizSessionData : undefined
     return {
-        sessionId: data.sessionId,
+        sessionId: review.sessionId,
         mode,
-        kind: mode === "review" ? kind ?? review?.kind ?? "deck" : undefined,
+        kind: kind ?? review.kind ?? "deck",
         status: "in_progress",
-        cardIds: data.cardIds,
+        cardIds: review.cardIds,
         cards: cardsResponse.data?.flashcardCardsByIds.data?.cards ?? [],
-        currentIndex: data.currentIndex,
-        reviewedCount: review?.reviewedCount ?? quiz?.results.length ?? 0,
-        gradedIndexes: review?.gradedIndexes ?? [],
-        results: quiz?.results ?? [],
-        xpEarned: review?.xpEarned ?? 0,
-        updatedAt: data.updatedAt,
-        deadlineAt: quiz?.deadlineAt,
-        name: quiz?.name,
+        currentIndex: review.currentIndex,
+        reviewedCount: review.reviewedCount ?? 0,
+        gradedIndexes: review.gradedIndexes ?? [],
+        results: [],
+        xpEarned: review.xpEarned ?? 0,
+        ...(review.updatedAt === undefined ? {} : { updatedAt: review.updatedAt }),
     }
 }
 
@@ -220,6 +273,7 @@ export const queryMyInProgressFlashcardSession = async (
         readonly myInProgressFlashcardQuizSession: GraphQLResponse<QuizSessionData>
     }>({ query: quizByCourseQuery, variables: { courseId: request.courseId } })
     const data = response.data?.myInProgressFlashcardQuizSession.data
-    if (data == null || (request.sessionId !== undefined && data.sessionId !== request.sessionId)) return null
+    if (data == null || data.kind !== "ACTIVE_V1" || data.sessionId == null || data.items == null) return null
+    if (request.sessionId !== undefined && data.sessionId !== request.sessionId) return null
     return hydrate(data, "quiz", request.courseId)
 }

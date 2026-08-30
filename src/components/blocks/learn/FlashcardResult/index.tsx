@@ -3,6 +3,7 @@
 import { useLocale } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useQueryFlashcardSessionResultSwr } from "@/hooks/swr/useQueryFlashcardSessionResultSwr"
+import { useSessionRefresh } from "@/hooks/auth/useSessionRefresh"
 import type { FlashcardSessionMode } from "@/modules/api/graphql/queries/query-my-in-progress-flashcard-session"
 import { FlashcardResultBase } from "./component"
 
@@ -22,16 +23,18 @@ const COPY = {
         subtitle: "Your persisted session result is ready.",
         score: "Score",
         reviewed: "Cards reviewed",
+        quizReviewed: "Questions answered",
         xp: "XP earned",
         duration: "Duration",
         nextDue: "Next review",
         breakdown: "Review breakdown",
         weakTopics: "Topics to revisit",
+        topicCoverage: "Accuracy by topic",
         failed: "This result could not be loaded.",
         retry: "Try again",
         retrySession: "Practice again",
         back: "Back to flashcards",
-        seconds: (value: number) => `${value}s`,
+        durationText: (value: number) => value < 60 ? `${value}s` : `${Math.floor(value / 60)}m ${value % 60}s`,
         again: "Again",
         hard: "Hard",
         good: "Good",
@@ -45,16 +48,18 @@ const COPY = {
         subtitle: "Kết quả phiên đã được lưu.", // vn-ok: localized Vietnamese interface copy.
         score: "Điểm", // vn-ok: localized Vietnamese interface copy.
         reviewed: "Số thẻ đã ôn", // vn-ok: localized Vietnamese interface copy.
+        quizReviewed: "Số câu đã trả lời", // vn-ok: localized Vietnamese interface copy.
         xp: "XP nhận được", // vn-ok: localized Vietnamese interface copy.
         duration: "Thời lượng", // vn-ok: localized Vietnamese interface copy.
         nextDue: "Lần ôn tiếp theo", // vn-ok: localized Vietnamese interface copy.
         breakdown: "Chi tiết ôn tập", // vn-ok: localized Vietnamese interface copy.
         weakTopics: "Chủ đề cần ôn lại", // vn-ok: localized Vietnamese interface copy.
+        topicCoverage: "Độ chính xác theo chủ đề", // vn-ok: localized Vietnamese interface copy.
         failed: "Không thể tải kết quả này.", // vn-ok: localized Vietnamese interface copy.
         retry: "Thử lại", // vn-ok: localized Vietnamese interface copy.
         retrySession: "Luyện tập lại", // vn-ok: localized Vietnamese interface copy.
         back: "Quay lại flashcard", // vn-ok: localized Vietnamese interface copy.
-        seconds: (value: number) => `${value} giây`, // vn-ok: localized Vietnamese interface copy.
+        durationText: (value: number) => value < 60 ? `${value} giây` : `${Math.floor(value / 60)} phút ${value % 60} giây`, // vn-ok: localized Vietnamese interface copy.
         again: "Học lại", // vn-ok: localized Vietnamese interface copy.
         hard: "Khó", // vn-ok: localized Vietnamese interface copy.
         good: "Tốt", // vn-ok: localized Vietnamese interface copy.
@@ -68,7 +73,8 @@ export const FlashcardResultBlock = (props: FlashcardResultBlockProps) => {
     const isVietnamese = useLocale() === "vi"
     const copy = isVietnamese ? COPY.vi : COPY.en
     const router = useRouter()
-    const result = useQueryFlashcardSessionResultSwr(mode, sessionId)
+    const auth = useSessionRefresh()
+    const result = useQueryFlashcardSessionResultSwr(auth.isRestoring ? undefined : mode, auth.isRestoring ? undefined : sessionId)
     const state = result.error !== undefined
         ? "failed"
         : result.data === undefined
@@ -90,12 +96,12 @@ export const FlashcardResultBlock = (props: FlashcardResultBlockProps) => {
                 subtitle: copy.subtitle,
                 scoreLabel: copy.score,
                 scoreText: data === undefined ? undefined : `${data.scorePercent}%`,
-                reviewedLabel: copy.reviewed,
+                reviewedLabel: mode === "quiz" ? copy.quizReviewed : copy.reviewed,
                 reviewedText: data?.reviewedCount.toString(),
                 xpLabel: copy.xp,
-                xpText: data?.xpEarned.toString(),
+                xpText: data === undefined ? undefined : data.xpEarned > 0 ? `+${data.xpEarned}` : "0",
                 durationLabel: copy.duration,
-                durationText: data?.durationSeconds == null ? "—" : copy.seconds(data.durationSeconds),
+                durationText: data?.durationSeconds == null ? "—" : copy.durationText(data.durationSeconds),
                 nextDueLabel: copy.nextDue,
                 nextDueText: data?.nextDueAt == null ? undefined : new Date(data.nextDueAt).toLocaleString(),
                 breakdownTitle: copy.breakdown,
@@ -105,7 +111,7 @@ export const FlashcardResultBlock = (props: FlashcardResultBlockProps) => {
                     { label: copy.good, value: gradeCounts.good },
                     { label: copy.easy, value: gradeCounts.easy },
                 ],
-                weakTopicsTitle: copy.weakTopics,
+                weakTopicsTitle: mode === "quiz" ? copy.topicCoverage : copy.weakTopics,
                 weakTopics: (data?.weakTags ?? []).map((topic) => ({
                     tag: topic.tag,
                     value: mode === "quiz" ? `${topic.value}%` : topic.value.toString(),

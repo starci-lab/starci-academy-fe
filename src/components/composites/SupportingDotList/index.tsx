@@ -1,4 +1,5 @@
 import { Text } from "@/components/leaves/Text"
+import { supportingDotListClassName, supportingDotListRowClassName } from "./classNames"
 
 /** One stable supporting statement. */
 export type SupportingDotListEntry = { readonly id: string; readonly content: string }
@@ -11,6 +12,6 @@ export type SupportingDotListProps = { readonly props: SupportingDotListData; re
 export const SupportingDotList = (props: SupportingDotListProps) => {
     const { props: data, isLoading = false } = props
     return (
-        <ul>{data.entries.map((entry) => <li key={entry.id}><Text props={{ content: "•", size: "sm", tone: "muted" }} isLoading={isLoading} /><Text props={{ content: entry.content, size: "sm", tone: "muted" }} isLoading={isLoading} /></li>)}</ul>
+        <ul className={supportingDotListClassName}>{data.entries.map((entry) => <li className={supportingDotListRowClassName} key={entry.id}><Text props={{ content: "•", size: "sm", tone: "muted" }} isLoading={isLoading} /><Text props={{ content: entry.content, size: "sm", tone: "muted" }} isLoading={isLoading} /></li>)}</ul>
     )
 }

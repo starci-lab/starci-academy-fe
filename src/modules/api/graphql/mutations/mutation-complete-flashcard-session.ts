@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client"
 import { createApolloClient } from "../clients/create-apollo-client"
 import type { GraphQLResponse } from "../types"
-import type { FlashcardQuizAnswer, FlashcardReviewKind } from "../queries/query-my-in-progress-flashcard-session"
+import type { FlashcardQuizSelection, FlashcardReviewKind } from "../queries/query-my-in-progress-flashcard-session"
 
 /** Final snapshot for a deck or due-review session. */
 export type CompleteFlashcardReviewSessionRequest = {
@@ -16,8 +16,8 @@ export type CompleteFlashcardReviewSessionRequest = {
 export type CompleteFlashcardQuizSessionRequest = {
     readonly mode: "quiz"
     readonly sessionId: string
-    readonly courseId: string
-    readonly answers: ReadonlyArray<FlashcardQuizAnswer>
+    readonly expectedVersion: number
+    readonly selections: ReadonlyArray<FlashcardQuizSelection>
 }
 
 /** Backend-proven completion requests supported by the live page. */
@@ -51,7 +51,7 @@ const completeQuizDocument = gql`
     mutation CompleteFlashcardQuizSession($request: CompleteFlashcardQuizSessionRequest!) {
         completeFlashcardQuizSession(request: $request) {
             success message error
-            data { xpEarned }
+            data { sessionId status answerVersion correctBlanks totalBlanks scorePercent xpEarned dailyCapReached }
         }
     }
 `
@@ -81,17 +81,17 @@ export const mutationCompleteFlashcardSession = async (
         return response.data?.completeFlashcardReviewSession.data ?? null
     }
     const response = await apollo.mutate<{
-        readonly completeFlashcardQuizSession: GraphQLResponse<{ readonly xpEarned: number }>
+        readonly completeFlashcardQuizSession: GraphQLResponse<{ readonly xpEarned: number; readonly totalBlanks: number }>
     }>({
         mutation: completeQuizDocument,
         variables: {
             request: {
                 sessionId: request.sessionId,
-                courseId: request.courseId,
-                answers: request.answers,
+                expectedVersion: request.expectedVersion,
+                selections: request.selections.map(({ blankId, tokenId }) => ({ blankId, tokenId })),
             },
         },
     })
     const data = response.data?.completeFlashcardQuizSession.data
-    return data == null ? null : { reviewedCount: request.answers.length, xpEarned: data.xpEarned }
+    return data == null ? null : { reviewedCount: data.totalBlanks, xpEarned: data.xpEarned }
 }

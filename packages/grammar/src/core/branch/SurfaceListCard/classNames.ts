@@ -5,10 +5,6 @@ export const surfaceListClassName = cn("starci-core-surface-list", "flex", "min-
 /** Identifies the external label row shared by surface branches. */
 export const surfaceLabelClassName = cn(
     "starci-core-surface-label",
-    "flex",
-    "items-center",
-    "justify-between",
-    "gap-2",
 )
 /** Selects a heading level that recedes when the list is nested in another surface. */
 export const getSurfaceHeadingClassName = (depth: "top" | "nested") => cn(

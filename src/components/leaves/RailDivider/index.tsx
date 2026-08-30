@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
-import type { KeyboardEvent, PointerEvent } from "react"
+import type { KeyboardEvent, MouseEvent as ReactMouseEvent, PointerEvent } from "react"
 import { railDividerClassName, railDividerHandleClassName } from "./classNames"
 
 /** Width policy and accessible identity for one adjustable rail separator. */
@@ -71,6 +71,33 @@ export const RailDivider = (props: RailDividerProps) => {
         window.localStorage.setItem(props.props.storageKey, String(Math.round(widthRef.current)))
     }
 
+    useEffect(() => {
+        const onMouseMove = (event: MouseEvent) => {
+            if (dragRef.current === null) return
+            applyWidth(dragRef.current.startWidth + event.clientX - dragRef.current.startX)
+        }
+        const onMouseUp = () => {
+            if (dragRef.current === null) return
+            dragRef.current = null
+            document.body.style.removeProperty("cursor")
+            document.body.style.removeProperty("user-select")
+            window.localStorage.setItem(props.props.storageKey, String(Math.round(widthRef.current)))
+        }
+        window.addEventListener("mousemove", onMouseMove)
+        window.addEventListener("mouseup", onMouseUp)
+        return () => {
+            window.removeEventListener("mousemove", onMouseMove)
+            window.removeEventListener("mouseup", onMouseUp)
+        }
+    }, [applyWidth, props.props.storageKey])
+
+    const onMouseDown = (event: ReactMouseEvent<HTMLDivElement>) => {
+        if (event.button !== 0) return
+        dragRef.current = { startX: event.clientX, startWidth: widthRef.current }
+        document.body.style.cursor = "col-resize"
+        document.body.style.userSelect = "none"
+    }
+
     const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
         if (event.key !== "ArrowLeft" && event.key !== "ArrowRight" && event.key !== "Home" && event.key !== "End") return
         event.preventDefault()
@@ -99,6 +126,7 @@ export const RailDivider = (props: RailDividerProps) => {
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
             onPointerCancel={onPointerUp}
+            onMouseDown={onMouseDown}
             onKeyDown={onKeyDown}
         >
             <span aria-hidden="true" className={railDividerHandleClassName} />

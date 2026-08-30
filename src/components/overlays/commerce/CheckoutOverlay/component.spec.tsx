@@ -2,23 +2,12 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { CheckoutOverlayBase, type CheckoutOverlayLabels } from "./component"
 
-/**
- * What these tests guard.
- *
- * IT OPENS ON PAYING AT ONCE, and everything that belongs to paying over time appears only once that
- * plan is selected: the schedule, the surcharge line and the warning. Opening on instalments would
- * collect a surcharge from every buyer who did not notice.
- *
- * THE MARK IS ONLY DRAWN WHERE IT IS TRUE. `StatusDot`'s tones are all affirmative and it requires
- * an accessible name, so a cycle that is not the one due keeps a resting line in that slot rather
- * than a dot that would claim something about it.
- */
-
 const labels: CheckoutOverlayLabels = {
-    title: "Checkout",
-    planLabel: "How to pay",
-    payFull: "Pay in full",
-    payInstalments: "Pay over time",
+    title: "Review payment",
+    subtitle: "2 courses will be added after payment is confirmed.",
+    methodTitle: "Payment method",
+    provider: "Bank transfer via PayOS",
+    providerDescription: "Finish the transfer on PayOS.",
     summary: {
         subtotal: "Subtotal",
         savings: "Savings",
@@ -26,164 +15,66 @@ const labels: CheckoutOverlayLabels = {
         total: "Total",
         unavailable: "Unavailable",
     },
-    terms: "Nothing is charged automatically.",
-    gateways: "SePay and PayOS",
-    action: "Pay 2.750.000 ₫",
+    processTitle: "What happens next",
+    handoffStep: "Continue to PayOS.",
+    verificationStep: "Payment stays pending until the webhook confirms it.",
+    accessStep: "Access is granted after confirmation.",
+    trustNote: "A browser redirect alone never marks an order as paid.",
+    action: "Continue to PayOS · 2,750,000 ₫",
+    cancel: "Back to basket",
+    failedMessage: "Could not open PayOS.",
 }
 
-const cycles = [
-    {
-        id: "cycle-1",
-        name: "First cycle · today · 50%",
-        amount: "1.375.000 ₫",
-        isCurrent: true,
-    },
-    {
-        id: "cycle-2",
-        name: "Second cycle · in 30 days · 50%",
-        amount: "1.375.000 ₫",
-    },
-]
-
 describe("CheckoutOverlayBase", () => {
-    it("opens on paying at once, with no schedule, no surcharge and no warning", () => {
+    it("shows the payable total, one real method and the webhook-owned sequence", () => {
         render(
             <CheckoutOverlayBase
                 props={{
                     labels,
                     isOpen: true,
-                    plan: "full",
-                    subtotal: "2.950.000 ₫",
-                    savings: "-200.000 ₫",
-                    total: "2.750.000 ₫",
-                    cycles,
+                    subtotal: "2,950,000 ₫",
+                    savings: "-200,000 ₫",
+                    total: "2,750,000 ₫",
                 }}
             />,
         )
 
-        expect(screen.queryByText("First cycle · today · 50%")).toBeNull()
-        expect(
-            screen.queryByText("Nothing is charged automatically."),
-        ).not.toBeInTheDocument()
+        expect(screen.getByRole("heading", { name: "Review payment" })).toBeInTheDocument()
+        expect(screen.getByText("Bank transfer via PayOS")).toBeInTheDocument()
+        expect(screen.getByText("Payment stays pending until the webhook confirms it.")).toBeInTheDocument()
+        expect(screen.getByText("2,750,000 ₫")).toBeInTheDocument()
         expect(screen.queryByText("Instalment fee")).not.toBeInTheDocument()
-        expect(screen.getByText("SePay and PayOS")).toBeInTheDocument()
-        expect(screen.getByText("2.750.000 ₫")).toBeInTheDocument()
     })
 
-    it("draws the schedule and the warning only once paying over time is chosen", () => {
-        render(
-            <CheckoutOverlayBase
-                props={{
-                    labels,
-                    isOpen: true,
-                    plan: "instalments",
-                    subtotal: "2.950.000 ₫",
-                    surcharge: "150.000 ₫",
-                    total: "2.900.000 ₫",
-                    cycles,
-                }}
-            />,
-        )
-
-        expect(screen.getByText("First cycle · today · 50%")).toBeInTheDocument()
-        expect(
-            screen.getByText("Nothing is charged automatically."),
-        ).toBeInTheDocument()
-        expect(screen.getByText("Instalment fee")).toBeInTheDocument()
-        expect(screen.getByText("First cycle · today · 50%")).toBeInTheDocument()
-    })
-
-    it("marks only the cycle that is actually due", () => {
-        render(
-            <CheckoutOverlayBase
-                props={{ labels, isOpen: true, plan: "instalments", cycles }}
-            />,
-        )
-
-        expect(screen.getByText("First cycle · today · 50%")).toBeInTheDocument()
-        expect(
-            screen.getByText("Second cycle · in 30 days · 50%"),
-        ).toBeInTheDocument()
-    })
-
-    it("draws no empty ladder when paying over time carries no cycles yet", () => {
-        render(
-            <CheckoutOverlayBase
-                props={{ labels, isOpen: true, plan: "instalments" }}
-            />,
-        )
-
-        expect(screen.queryByText("First cycle · today · 50%")).toBeNull()
-        expect(
-            screen.getByText("Nothing is charged automatically."),
-        ).toBeInTheDocument()
-    })
-
-    it("reports the plan the reader switched to", () => {
-        const choosePlan = vi.fn()
-        render(
-            <CheckoutOverlayBase
-                props={{ labels, isOpen: true, plan: "full" }}
-                on={{ choosePlan }}
-            />,
-        )
-
-        fireEvent.click(screen.getByText("Pay over time"))
-        expect(choosePlan).toHaveBeenCalledWith("instalments")
-    })
-
-    it("hands off to the provider on the press and says so while it is in flight", () => {
+    it("hands off once and exposes progress on the exact action", () => {
         const pay = vi.fn()
         const { rerender } = render(
-            <CheckoutOverlayBase
-                props={{ labels, isOpen: true, plan: "full" }}
-                on={{ pay }}
-            />,
+            <CheckoutOverlayBase props={{ labels, isOpen: true }} on={{ pay }} />,
         )
 
-        const control = screen.getByRole("button", { name: /Pay 2\.750\.000/ })
-        expect(control).toHaveAttribute("data-action-pending", "false")
+        const control = screen.getByRole("button", { name: /Continue to PayOS/ })
         fireEvent.click(control)
         expect(pay).toHaveBeenCalledOnce()
 
         rerender(
-            <CheckoutOverlayBase
-                props={{ labels, isOpen: true, plan: "full", isPaying: true }}
-                on={{ pay }}
-            />,
+            <CheckoutOverlayBase props={{ labels, isOpen: true, isPaying: true }} on={{ pay }} />,
         )
-        expect(
-            screen.getByRole("button", { name: /Pay 2\.750\.000/ }),
-        ).toHaveAttribute("data-action-pending", "true")
+        expect(screen.getByRole("button", { name: /Continue to PayOS/ })).toHaveAttribute("data-action-pending", "true")
+        expect(screen.getByRole("button", { name: "Back to basket" })).toBeDisabled()
     })
 
-    it("stays dismissable when nothing is listening for the way out", () => {
-        render(
-            <CheckoutOverlayBase props={{ labels, isOpen: true, plan: "full" }} />,
-        )
-
-        expect(screen.getByRole("dialog")).toBeInTheDocument()
-        expect(() =>
-            fireEvent.keyDown(screen.getByRole("dialog"), {
-                key: "Escape",
-                code: "Escape",
-            }),
-        ).not.toThrow()
+    it("reports a recoverable provider hand-off failure without claiming payment failed", () => {
+        render(<CheckoutOverlayBase props={{ labels, isOpen: true, hasFailed: true }} />)
+        expect(screen.getByRole("alert")).toHaveTextContent("Could not open PayOS.")
+        expect(screen.getByRole("button", { name: /Continue to PayOS/ })).toBeEnabled()
     })
 
-    it("reports the vendor's own way out to the surface that mounted it", () => {
+    it("supports both the explicit escape action and the modal's own dismissal", () => {
         const dismiss = vi.fn()
-        render(
-            <CheckoutOverlayBase
-                props={{ labels, isOpen: true, plan: "full" }}
-                on={{ dismiss }}
-            />,
-        )
+        render(<CheckoutOverlayBase props={{ labels, isOpen: true }} on={{ dismiss }} />)
 
-        fireEvent.keyDown(screen.getByRole("dialog"), {
-            key: "Escape",
-            code: "Escape",
-        })
-        expect(dismiss).toHaveBeenCalled()
+        fireEvent.click(screen.getByRole("button", { name: "Back to basket" }))
+        fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape", code: "Escape" })
+        expect(dismiss).toHaveBeenCalledTimes(2)
     })
 })

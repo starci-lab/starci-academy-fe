@@ -6,7 +6,8 @@
 
 @import "@starci/grammar/common/styles.css";
 @import "@starci/grammar/core/styles.css";
-@import "tailwindcss";
+/* Runtime utilities come from application source only; repository caches are not UI authority. */
+@import "tailwindcss" source("../");
 @import "@heroui/styles/css";
 
 /*
@@ -69,9 +70,10 @@
     --min-height-app-rail: calc(100dvh - 4rem - 1px);
 
     /*
-     * Course detail has TWO sticky navbar rows. Measured on the live route, the primary row occupies
-     * 4rem and the course section row adds 2.1rem after its one-pixel overlap: 6.1rem in total.
-     * The pricing rail starts below that complete stack and may use only 80% of the space left by it.
+     * Course detail has TWO sticky navbar rows. The primary row occupies 4rem and the course section
+     * row adds 2.1rem after its one-pixel overlap. The sticky wrapper rests below that stack; its
+     * content owns the separate page `gap-6` breathing boundary so the clearance survives when the
+     * wrapper is constrained by the end of its parent.
      */
     --spacing-course-rail: 6.1rem;
     --max-height-pricing-rail: calc((100dvh - var(--spacing-course-rail)) * 0.8);

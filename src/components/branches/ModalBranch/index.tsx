@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 import { Modal } from "@heroui/react"
-import { modalBodyClassName, modalCoverClassName } from "./classNames"
+import { modalBodyClassName, modalControlledTriggerClassName, modalCoverClassName } from "./classNames"
 
 /**
  * BRANCH - `ModalBranch`: the vendor's covering mechanics around typed children.
@@ -31,6 +31,13 @@ export const ModalBranch = (props: ModalBranchProps) => (
             if (!open) props.onDismiss()
         }}
     >
+        {/*
+          * HeroUI's controlled Modal root is still implemented with React-Aria DialogTrigger.
+          * Supplying its trigger slot consumes that root's PressResponder even though the visible
+          * opener is owned by the calling block. Hidden and removed from the accessibility tree,
+          * this adapter has no second interaction path; it only completes the vendor anatomy.
+          */}
+        <Modal.Trigger className={modalControlledTriggerClassName} aria-hidden tabIndex={-1} />
         <Modal.Backdrop>
             <Modal.Container size={props.size ?? "md"} placement="center">
                 <Modal.Dialog

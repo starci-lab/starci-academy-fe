@@ -1,5 +1,12 @@
 import { Button } from "@/components/leaves/Button"
+import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { Text } from "@/components/leaves/Text"
+import {
+    personalProjectHistoryClassName,
+    personalProjectHistoryListClassName,
+    personalProjectHistoryNavClassName,
+    personalProjectHistoryRowClassName,
+} from "./classNames"
 
 /** One immutable grading attempt shown by the history drawer. */
 export type PersonalProjectHistoryAttempt = {
@@ -22,6 +29,7 @@ export type PersonalProjectHistoryLabels = {
     readonly pending: string
     readonly empty: string
     readonly failed: string
+    readonly retry: string
 }
 
 /** Data and actions for the pure attempt-history renderer. */
@@ -55,12 +63,12 @@ export const PersonalProjectHistoryBase = (props: PersonalProjectHistoryProps) =
             : props.props.labels.empty
 
     return (
-        <section aria-label={props.props.labels.summary(props.props.attemptCount)}>
+        <section className={personalProjectHistoryClassName} aria-label={props.props.labels.summary(props.props.attemptCount)}>
             <Text props={{ content: props.props.labels.summary(props.props.attemptCount), size: "sm", tone: "muted" }} isLoading={loading} />
             {props.state === "ready" && props.props.attempts.length > 0 ? (
-                <ul aria-label={props.props.labels.summary(props.props.attemptCount)}>
+                <ul className={personalProjectHistoryListClassName} aria-label={props.props.labels.summary(props.props.attemptCount)}>
                     {props.props.attempts.map((attempt) => (
-                        <li key={attempt.id}>
+                        <li className={personalProjectHistoryRowClassName} key={attempt.id}>
                             <Button
                                 props={{
                                     label: props.props.labels.selectAttempt(attempt.attemptNumber, attempt.score),
@@ -82,11 +90,18 @@ export const PersonalProjectHistoryBase = (props: PersonalProjectHistoryProps) =
                         </li>
                     ))}
                 </ul>
-            ) : (
-                <Text props={{ content: notice, live: props.state === "failed" ? "assertive" : "polite" }} isLoading={loading} />
-            )}
+            ) : props.state === "pending" ? (
+                <Text props={{ content: notice, live: "polite" }} isLoading />
+            ) : <EmptyNotice
+                props={{
+                    icon: props.state === "failed" ? "retry" : "saved",
+                    message: notice,
+                    actionLabel: props.state === "failed" ? props.props.labels.retry : undefined,
+                }}
+                on={{ act: props.on?.retry }}
+            />}
             {hasPrevious || hasNext ? (
-                <nav aria-label={props.props.labels.summary(props.props.attemptCount)}>
+                <nav className={personalProjectHistoryNavClassName} aria-label={props.props.labels.summary(props.props.attemptCount)}>
                     <Button props={{ label: props.props.labels.previous, disabled: !hasPrevious }} on={{ press: props.on?.previous }} />
                     <Button props={{ label: props.props.labels.next, disabled: !hasNext }} on={{ press: props.on?.next }} />
                 </nav>

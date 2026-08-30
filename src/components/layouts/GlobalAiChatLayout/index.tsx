@@ -27,6 +27,10 @@ export const GlobalAiChatLayout = (props: GlobalAiChatLayoutProps) => {
     const [isOpen, setIsOpen] = useState(false)
     const [codeContext, setCodeContext] = useState<ContentAiSelectionContext>()
     const [tangentVersion, setTangentVersion] = useState(0)
+    const hidesFloatingTrigger = anchor.scope === "task"
+        || anchor.scope === "challenge"
+        || anchor.path.includes("/learn/flashcards")
+        || /\/learn\/mock-interview$/u.test(anchor.path)
 
     useEffect(() => {
         setCodeContext(undefined)
@@ -60,7 +64,7 @@ export const GlobalAiChatLayout = (props: GlobalAiChatLayoutProps) => {
         <GlobalAiChatContext.Provider value={value}>
             {surface}
             <StarCiAiSelectionAsk />
-            <StarCiAiFab props={{ label: "StarCi AI", isOpen }} on={{ press: value.open }} />
+            {hidesFloatingTrigger ? null : <StarCiAiFab props={{ label: "StarCi AI", isOpen }} on={{ press: value.open }} />}
             <StarCiAiDrawer {...{}} />
         </GlobalAiChatContext.Provider>
     )
