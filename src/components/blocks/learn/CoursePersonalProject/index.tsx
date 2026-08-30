@@ -2,7 +2,7 @@
 
 import { useLocale } from "next-intl"
 import { useState } from "react"
-import { useRouter } from "@/i18n/navigation"
+import { getPathname, useRouter } from "@/i18n/navigation"
 import { useQueryCoursePersonalProjectSwr } from "@/hooks/swr/useQueryCoursePersonalProjectSwr"
 import { useQueryPersonalProjectRepositorySwr } from "@/hooks/swr/useQueryPersonalProjectRepositorySwr"
 import type { PersonalProjectMilestone, PersonalProjectTask } from "@/modules/api/graphql/queries/types/course-personal-project"
@@ -17,7 +17,7 @@ const COPY = {
         breadcrumb: "Course path",
         description: "See the next decision, the whole delivery path, and the evidence your project has accumulated.",
         nextTask: "Next task",
-        continue: "Continue project",
+        continue: (title: string) => `Continue: ${title}`,
         allComplete: "You've completed every task in your personal project.",
         roadmap: "Project roadmap",
         roadmapSearch: "Search stages",
@@ -48,7 +48,7 @@ const COPY = {
         breadcrumb: "Lộ trình khóa học", // vn-ok: Vietnamese runtime copy while shared catalogs are frozen.
         description: "Nắm bài cần làm tiếp, toàn bộ lộ trình và bằng chứng tiến độ của đồ án trong một màn hình.", // vn-ok: Vietnamese runtime copy while shared catalogs are frozen.
         nextTask: "Bài cần làm tiếp", // vn-ok: Vietnamese runtime copy while shared catalogs are frozen.
-        continue: "Tiếp tục đồ án", // vn-ok: Vietnamese runtime copy while shared catalogs are frozen.
+        continue: (title: string) => `Tiếp tục: ${title}`, // vn-ok: Vietnamese runtime copy while shared catalogs are frozen.
         allComplete: "Bạn đã hoàn thành toàn bộ bài trong đồ án cá nhân.", // vn-ok: Vietnamese runtime copy while shared catalogs are frozen.
         roadmap: "Lộ trình đồ án", // vn-ok: Vietnamese runtime copy while shared catalogs are frozen.
         roadmapSearch: "Tìm chặng", // vn-ok: Vietnamese runtime copy while shared catalogs are frozen.
@@ -91,6 +91,8 @@ const milestoneRowsOf = (
     milestones: ReadonlyArray<PersonalProjectMilestone>,
     currentTaskId: string | undefined,
     copy: ProjectCopy,
+    locale: string,
+    displayId: string,
 ) => milestones.map((milestone) => {
     const completed = milestone.tasks.filter((task) => task.completed).length
     const isComplete = milestone.tasks.length > 0 && completed === milestone.tasks.length
@@ -101,7 +103,8 @@ const milestoneRowsOf = (
         title: milestone.title,
         status: isComplete ? copy.completed : currentTask === undefined ? copy.upcoming : copy.active,
         progress: copy.milestoneProgress(completed, milestone.tasks.length),
-        targetTaskId,
+        completionPercent: milestone.tasks.length === 0 ? 0 : Math.round(completed / milestone.tasks.length * 100),
+        href: targetTaskId === undefined ? undefined : getPathname({ locale, href: `/courses/${displayId}/learn/personal-project/tasks/${targetTaskId}` }),
         tone: isComplete ? "success" as const : currentTask === undefined ? "neutral" as const : "accent" as const,
     }
 })
@@ -134,7 +137,7 @@ export const CoursePersonalProject = (props: CoursePersonalProjectProps) => {
     const attempts = allTasks.reduce((sum, task) => sum + task.numAttempts, 0)
     const completionPercent = data?.progress.completionPercent
     const normalizedRoadmapQuery = roadmapQuery.trim().toLocaleLowerCase(locale)
-    const roadmapRows = milestoneRowsOf(milestones, currentTaskId, copy)
+    const roadmapRows = milestoneRowsOf(milestones, currentTaskId, copy, locale, displayId)
     const visibleRoadmapRows = normalizedRoadmapQuery === ""
         ? roadmapRows
         : roadmapRows.filter((milestone) => `${milestone.title} ${milestone.status}`.toLocaleLowerCase(locale).includes(normalizedRoadmapQuery))
@@ -152,8 +155,9 @@ export const CoursePersonalProject = (props: CoursePersonalProjectProps) => {
                 milestone: currentMilestone.title,
                 title: currentTask.title,
                 evidence: copy.taskEvidence(currentTask.numAttempts, currentTask.lastScore, currentTask.maxScore),
+                href: getPathname({ locale, href: `/courses/${displayId}/learn/personal-project/tasks/${currentTask.id}` }),
             },
-            continueLabel: copy.continue,
+            continueLabel: currentTask === undefined ? copy.title : copy.continue(currentTask.title),
             allCompleteLabel: copy.allComplete,
             roadmapLabel: copy.roadmap,
             roadmapSearchLabel: copy.roadmapSearch,
@@ -182,7 +186,6 @@ export const CoursePersonalProject = (props: CoursePersonalProjectProps) => {
         }}
         on={{
             openCourse: () => router.push(`/courses/${displayId}/learn`),
-            openTask: (taskId) => router.push(`/courses/${displayId}/learn/personal-project/tasks/${taskId}`),
             retry: () => { void project.mutate() },
             retryRepository: () => { void repository.mutate() },
             searchRoadmap: setRoadmapQuery,
