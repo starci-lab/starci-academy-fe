@@ -6,6 +6,8 @@ import { useRouter } from "@/i18n/navigation"
 import { usePlaygroundSession } from "@/components/layouts/PlaygroundSessionLayout"
 import { PlaygroundSessionBase, type CoursePlaygroundSessionState } from "./component"
 
+const VERIFY_PENDING_TIMEOUT_MS = 15_000
+
 /** Course and playground route identities consumed by the live session. */
 export type PlaygroundSessionProps = { readonly displayId: string; readonly slug: string }
 
@@ -16,6 +18,7 @@ export const PlaygroundSession = (props: PlaygroundSessionProps) => {
     const router = useRouter()
     const session = usePlaygroundSession()
     const [selectedOverride, setSelectedOverride] = useState<number | null>(null)
+    const [isVerifying, setIsVerifying] = useState(false)
     const steps = session.session?.steps ?? session.playground?.steps ?? []
     const currentStepIndex = Math.min(session.passedStepIndexes.length, Math.max(0, steps.length - 1))
     const selectedStepIndex = selectedOverride ?? currentStepIndex
@@ -25,6 +28,16 @@ export const PlaygroundSession = (props: PlaygroundSessionProps) => {
         if (session.isRestoring || session.hasPaired) return
         router.replace(`/courses/${displayId}/learn/playground/${slug}`)
     }, [displayId, router, session.hasPaired, session.isRestoring, slug])
+
+    useEffect(() => {
+        setIsVerifying(false)
+    }, [session.agentConnected, session.socketState, session.verifiedStepIndex])
+
+    useEffect(() => {
+        if (!isVerifying) return undefined
+        const timeout = window.setTimeout(() => setIsVerifying(false), VERIFY_PENDING_TIMEOUT_MS)
+        return () => window.clearTimeout(timeout)
+    }, [isVerifying])
 
     let state: CoursePlaygroundSessionState = "live"
     if (session.failed || session.startFailed) state = "failed"
@@ -55,11 +68,18 @@ export const PlaygroundSession = (props: PlaygroundSessionProps) => {
                 failedText: t("session.failed"),
                 stepLabel: t("session.step"),
                 passedLabel: t("session.passed"),
+                scratchpadTitle: t("session.scratchpadTitle"),
+                scratchpadDescription: t("session.scratchpadDescription"),
+                outputTitle: t("session.outputTitle"),
+                outputWaiting: t("session.outputWaiting"),
+                verifyingLabel: t("session.verifying"),
+                isVerifying,
             }}
             on={{
                 step: (index) => setSelectedOverride(index),
                 submit: () => {
                     setSelectedOverride(null)
+                    setIsVerifying(true)
                     session.verify()
                 },
                 leave: () => router.push(`/courses/${displayId}/learn/playground/${slug}`),

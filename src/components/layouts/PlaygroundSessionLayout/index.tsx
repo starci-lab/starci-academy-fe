@@ -130,6 +130,7 @@ export const PlaygroundSessionLayout = (props: PlaygroundSessionLayoutProps) => 
     const retry = useCallback(() => {
         setStartFailed(false)
         void playground.mutate()
+        socket.retry()
         if (session === null) return
         subscribedSessionId.current = session.id
         socket.subscribe(session.id)

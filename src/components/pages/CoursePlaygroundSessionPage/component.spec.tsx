@@ -128,13 +128,16 @@ describe("CoursePlaygroundSessionPageBase", () => {
         expect(on.leave).toHaveBeenCalledTimes(1)
     })
 
-    it("reports a completed session and offers no retry for an outcome nothing can improve", () => {
-        draw("completed")
+    it("reports a completed session and offers a clear exit without retry", () => {
+        const on = handlers()
+        draw("completed", {}, on)
 
         expect(screen.getByText("Playground completed")).toBeInTheDocument()
         expect(screen.getByText("Every step passed.")).toBeInTheDocument()
         expect(screen.queryByRole("button", { name: "Try again" })).not.toBeInTheDocument()
         expect(screen.queryByRole("button", { name: "Verify this step" })).not.toBeInTheDocument()
+        fireEvent.click(screen.getAllByRole("button", { name: "Back to setup" }).at(-1)!)
+        expect(on.leave).toHaveBeenCalledTimes(1)
     })
 
     it("reports a failed session and offers the one action that can fix it", () => {

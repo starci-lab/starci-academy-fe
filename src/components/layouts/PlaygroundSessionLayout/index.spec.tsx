@@ -21,6 +21,7 @@ const mocks = vi.hoisted(() => ({
     isMutating: false,
     subscribe: vi.fn(),
     verify: vi.fn(),
+    socketRetry: vi.fn(),
     socketState: "idle" as string,
     agentConnected: false,
     verifiedStepIndex: null as number | null,
@@ -45,6 +46,7 @@ vi.mock("@/hooks/socketio/usePlaygroundSocketIo", () => ({
         passedStepIndexes: mocks.passedStepIndexes,
         subscribe: mocks.subscribe,
         verify: mocks.verify,
+        retry: mocks.socketRetry,
     }),
 }))
 
@@ -229,6 +231,7 @@ describe("PlaygroundSessionLayout", () => {
         expect(screen.getByTestId("frame-state")).toHaveTextContent("failed")
         fireEvent.click(screen.getByRole("button", { name: "retry" }))
         expect(mocks.mutate).toHaveBeenCalledOnce()
+        expect(mocks.socketRetry).toHaveBeenCalledOnce()
     })
 
     it("says a start is in flight while the mutation is running", () => {

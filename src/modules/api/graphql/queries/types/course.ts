@@ -123,6 +123,8 @@ export interface CourseDetail {
     description: string
     /** Cover artwork; absent when the course has none, and the leaf draws its token fallback. */
     coverImageUrl?: string
+    /** Course-owned visual orientation for the Playground hub; nullable when no preview is authored. */
+    playgroundPreviewImageUrl?: string | null
     /** List price before any phase discount. */
     originalPrice: number
     /** How many learners have enrolled - the rail's proof line and the "learners" chip. */

@@ -35,6 +35,7 @@ const query1 = gql`
                 title
                 description
                 coverImageUrl
+                playgroundPreviewImageUrl
                 originalPrice
                 enrollmentCount
                 isEnrolled

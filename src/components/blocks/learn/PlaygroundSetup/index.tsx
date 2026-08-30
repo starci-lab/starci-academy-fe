@@ -15,8 +15,9 @@ export const PlaygroundSetup = (props: PlaygroundSetupProps) => {
     const router = useRouter()
     const session = usePlaygroundSession()
     let state: CoursePlaygroundSetupState = "paired"
-    if (session.failed || session.startFailed) state = "failed"
+    if (session.failed || session.startFailed || session.socketState === "failed") state = "failed"
     else if (session.isLoading) state = "loading"
+    else if (session.playground === null) state = "not-found"
     else if (session.isStarting) state = "starting"
     else if (session.session === null) state = "unpaired"
     else if (session.agentConnected) state = "ready"
@@ -35,6 +36,7 @@ export const PlaygroundSetup = (props: PlaygroundSetupProps) => {
             enterLabel: t("setup.enter"),
             retryLabel: t("retry"),
             failedText: t("setup.failed"),
+            notFoundText: t("setup.notFound"),
             pairingCode: session.session?.pairingCode,
         }} on={{
             start: () => { void session.start() },
