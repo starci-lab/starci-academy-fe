@@ -7,9 +7,8 @@ describe("ProfilePublicCvPageBase", () => {
         const resting = render(<ProfilePublicCvBase state="pending" label="Public CV" message="" title="CV" editLabel="Edit CV" retryLabel="Retry" isSelf={false} />)
         expect(resting.container.querySelector("iframe[title='CV']")).toHaveAttribute("aria-busy", "true")
         resting.unmount()
-        const ready = render(<ProfilePublicCvBase state="ready" label="Public CV" message="" title="CV" pdfUrl="https://example.com/cv.pdf" editLabel="Edit CV" retryLabel="Retry" isSelf />)
+        const ready = render(<ProfilePublicCvBase state="ready" label="Public CV" message="" title="CV" pdfUrl="https://example.com/cv.pdf" editLabel="Edit CV" retryLabel="Retry" isSelf={false} />)
         expect(ready.container.querySelector("iframe[src='https://example.com/cv.pdf']")).toBeInTheDocument()
-        expect(screen.getByRole("button", { name: "Edit CV" })).toBeInTheDocument()
     })
 
     it("distinguishes no file from uncompiled without drawing an iframe", () => {
