@@ -2,14 +2,14 @@
 
 import { useParams } from "next/navigation"
 import { useRouter } from "@/i18n/navigation"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { useQueryMeSwr } from "@/hooks/swr/useQueryMeSwr"
 import { useQueryPublicUserCvSwr } from "@/hooks/swr/useQueryPublicUserCvSwr"
 import { useQueryUserProfileSwr } from "@/hooks/swr/useQueryUserProfileSwr"
 import { ProfilePublicCvBase } from "./component"
 
 type PublicCvData = { readonly pdfUrl?: string | null; readonly label?: string | null }
-const stateOf = (error: unknown, data: PublicCvData | null | undefined) => error !== undefined ? "error" as const : data === undefined ? "pending" as const : data === null ? "empty" as const : data.pdfUrl === undefined ? "uncompiled" as const : "ready" as const
+const stateOf = (error: unknown, data: PublicCvData | null | undefined) => error !== undefined ? "error" as const : data === undefined ? "pending" as const : data === null ? "empty" as const : data.pdfUrl == null ? "uncompiled" as const : "ready" as const
 
 /** Connected public-CV owner; the page shell does not proxy this block's query state. */
 export type ProfilePublicCvBlockProps = Record<never, never>
@@ -17,6 +17,7 @@ export type ProfilePublicCvBlockProps = Record<never, never>
 export const ProfilePublicCvBlock = (props: ProfilePublicCvBlockProps) => {
     void props
     const t = useTranslations("profile.cv")
+    const locale = useLocale()
     const params = useParams<{ username?: string }>()
     const router = useRouter()
     const username = String(params.username ?? "")
@@ -25,6 +26,16 @@ export const ProfilePublicCvBlock = (props: ProfilePublicCvBlockProps) => {
     const cv = useQueryPublicUserCvSwr(username)
     const isSelf = Boolean(profile.data?.id && viewer.data?.id === profile.data.id)
     const state = stateOf(cv.error, cv.data)
-    const message = state === "error" ? "The public CV couldn't be loaded." : state === "empty" ? t("empty") : state === "uncompiled" ? t("pending") : ""
-    return <ProfilePublicCvBase state={state} label={t("label")} message={message} title={cv.data?.label ?? t("label")} pdfUrl={cv.data?.pdfUrl ?? undefined} editLabel={t("edit")} retryLabel="Try again" isSelf={isSelf} on={{ edit: () => router.push("/profile/cv"), retry: () => { void cv.mutate() } }} />
+    const notice = state === "error"
+        ? { title: t("states.error.title"), description: t("states.error.description") }
+        : state === "empty"
+            ? { title: t("states.empty.title"), description: t("states.empty.description") }
+            : state === "uncompiled"
+                ? { title: t("states.uncompiled.title"), description: t("states.uncompiled.description") }
+                : { title: "", description: "" }
+    const updatedLabel = cv.data?.updatedAt === undefined || Number.isNaN(Date.parse(cv.data.updatedAt))
+        ? undefined
+        : t("updated", { date: new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(cv.data.updatedAt)) })
+    const statusLabel = state === "pending" ? t("status.loading") : state === "empty" ? t("status.empty") : state === "uncompiled" ? t("status.uncompiled") : state === "ready" ? t("status.ready") : t("status.error")
+    return <ProfilePublicCvBase state={state} label={t("label")} title={cv.data?.label ?? t("defaultTitle")} description={t("description")} statusLabel={statusLabel} noticeTitle={notice.title} noticeDescription={notice.description} updatedLabel={updatedLabel} pdfUrl={cv.data?.pdfUrl ?? undefined} openLabel={t("open")} editLabel={t("edit")} retryLabel={t("retry")} retryPending={state === "error" && cv.isValidating} isSelf={isSelf} on={{ edit: () => router.push("/profile/cv"), retry: () => { void cv.mutate() } }} />
 }

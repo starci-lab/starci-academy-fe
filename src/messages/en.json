@@ -724,7 +724,32 @@
             "empty": "No public CV is available.",
             "pending": "This CV has not been compiled yet.",
             "open": "Open CV",
-            "edit": "Manage CV"
+            "edit": "Manage CV",
+            "retry": "Try again",
+            "defaultTitle": "Professional profile",
+            "description": "A public, read-only view of this learner's CV.",
+            "updated": "Updated {date}",
+            "status": {
+                "loading": "Loading",
+                "empty": "Not published",
+                "uncompiled": "Preparing",
+                "ready": "Ready",
+                "error": "Unavailable"
+            },
+            "states": {
+                "empty": {
+                    "title": "No public CV yet",
+                    "description": "This learner has not published a CV for visitors."
+                },
+                "uncompiled": {
+                    "title": "The CV is being prepared",
+                    "description": "The CV is public, but its readable document is not available yet."
+                },
+                "error": {
+                    "title": "The public CV could not be loaded",
+                    "description": "The connection may have been interrupted. Try loading this section again."
+                }
+            }
         }
     },
     "kpi": {

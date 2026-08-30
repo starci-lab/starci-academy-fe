@@ -724,7 +724,32 @@
             "empty": "Chưa có CV công khai.",
             "pending": "CV này chưa được biên soạn.",
             "open": "Mở CV",
-            "edit": "Quản lý CV"
+            "edit": "Quản lý CV",
+            "retry": "Thử lại",
+            "defaultTitle": "Hồ sơ nghề nghiệp",
+            "description": "Bản CV công khai, chỉ đọc của học viên này.",
+            "updated": "Cập nhật {date}",
+            "status": {
+                "loading": "Đang tải",
+                "empty": "Chưa công khai",
+                "uncompiled": "Đang chuẩn bị",
+                "ready": "Sẵn sàng",
+                "error": "Không khả dụng"
+            },
+            "states": {
+                "empty": {
+                    "title": "Chưa có CV công khai",
+                    "description": "Học viên này chưa công khai CV cho người xem."
+                },
+                "uncompiled": {
+                    "title": "CV đang được chuẩn bị",
+                    "description": "CV đã được công khai nhưng tài liệu để xem vẫn chưa sẵn sàng."
+                },
+                "error": {
+                    "title": "Không thể tải CV công khai",
+                    "description": "Kết nối có thể đã bị gián đoạn. Hãy thử tải lại mục này."
+                }
+            }
         }
     },
     "kpi": {
