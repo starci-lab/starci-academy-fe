@@ -16,6 +16,7 @@ const COPY = {
         title: "Personal Project",
         breadcrumb: "Course path",
         description: "See the next decision, the whole delivery path, and the evidence your project has accumulated.",
+        mediaAlt: "Illustration of a software project moving through planning, building, testing, and launch.",
         nextTask: "Next task",
         continue: "Continue project",
         allComplete: "You've completed every task in your personal project.",
@@ -40,6 +41,7 @@ const COPY = {
         repositoryFailed: "Repository status could not be loaded. The project roadmap is still available.",
         branch: "Branch",
         openRepository: "Open repository",
+        continueRepository: "Continue to connect",
         milestoneProgress: (completed: number, total: number) => `${completed}/${total}`,
         taskEvidence: (attempts: number, score: number, maximum: number) => attempts === 0 ? `Worth ${maximum} points` : `${score}/${maximum} · ${attempts} ${attempts === 1 ? "submission" : "submissions"}`,
     },
@@ -47,6 +49,7 @@ const COPY = {
         title: "Đồ án cá nhân", // vn-ok: Vietnamese runtime copy while shared catalogs are frozen.
         breadcrumb: "Lộ trình khóa học", // vn-ok: Vietnamese runtime copy while shared catalogs are frozen.
         description: "Nắm bài cần làm tiếp, toàn bộ lộ trình và bằng chứng tiến độ của đồ án trong một màn hình.", // vn-ok: Vietnamese runtime copy while shared catalogs are frozen.
+        mediaAlt: "Minh họa lộ trình xây dựng, kiểm thử và triển khai một dự án phần mềm.", // vn-ok: Vietnamese runtime copy while shared catalogs are frozen.
         nextTask: "Bài cần làm tiếp", // vn-ok: Vietnamese runtime copy while shared catalogs are frozen.
         continue: "Tiếp tục đồ án", // vn-ok: Vietnamese runtime copy while shared catalogs are frozen.
         allComplete: "Bạn đã hoàn thành toàn bộ bài trong đồ án cá nhân.", // vn-ok: Vietnamese runtime copy while shared catalogs are frozen.
@@ -71,6 +74,7 @@ const COPY = {
         repositoryFailed: "Không thể tải trạng thái repository. Lộ trình đồ án vẫn dùng được.", // vn-ok: Vietnamese runtime copy while shared catalogs are frozen.
         branch: "Nhánh", // vn-ok: Vietnamese runtime copy while shared catalogs are frozen.
         openRepository: "Mở repository", // vn-ok: Vietnamese runtime copy while shared catalogs are frozen.
+        continueRepository: "Tiếp tục để kết nối", // vn-ok: Vietnamese runtime copy while shared catalogs are frozen.
         milestoneProgress: (completed: number, total: number) => `${completed}/${total}`,
         taskEvidence: (attempts: number, score: number, maximum: number) => attempts === 0 ? `Tối đa ${maximum} điểm` : `${score}/${maximum} · ${attempts} lượt nộp`, // vn-ok: Vietnamese runtime copy while shared catalogs are frozen.
     },
@@ -91,13 +95,14 @@ const milestoneRowsOf = (
     milestones: ReadonlyArray<PersonalProjectMilestone>,
     currentTaskId: string | undefined,
     copy: ProjectCopy,
-) => milestones.map((milestone) => {
+) => milestones.map((milestone, index) => {
     const completed = milestone.tasks.filter((task) => task.completed).length
     const isComplete = milestone.tasks.length > 0 && completed === milestone.tasks.length
     const currentTask = milestone.tasks.find((task) => task.id === currentTaskId)
     const targetTaskId = currentTask?.id ?? (isComplete ? milestone.tasks.at(0)?.id : undefined)
     return {
         id: milestone.id,
+        position: index + 1,
         title: milestone.title,
         status: isComplete ? copy.completed : currentTask === undefined ? copy.upcoming : copy.active,
         progress: copy.milestoneProgress(completed, milestone.tasks.length),
@@ -146,6 +151,7 @@ export const CoursePersonalProject = (props: CoursePersonalProjectProps) => {
             courseTitle: data?.course.title,
             title: copy.title,
             description: copy.description,
+            mediaAlt: copy.mediaAlt,
             nextTaskLabel: copy.nextTask,
             nextTask: currentTask === undefined || currentMilestone === undefined ? undefined : {
                 id: currentTask.id,
@@ -176,6 +182,7 @@ export const CoursePersonalProject = (props: CoursePersonalProjectProps) => {
                 url: repository.data?.githubUrl ?? undefined,
                 openLabel: copy.openRepository,
                 retryLabel: copy.retry,
+                continueLabel: copy.continueRepository,
             },
             notice: pageState === "empty" ? copy.empty : pageState === "failed" ? copy.failed : undefined,
             retryLabel: copy.retry,

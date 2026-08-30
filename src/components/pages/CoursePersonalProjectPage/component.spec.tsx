@@ -7,6 +7,7 @@ const baseProps: CoursePersonalProjectProps["data"] = {
     courseTitle: "System Design",
     title: "Personal Project",
     description: "One view of the next task and the whole project.",
+    mediaAlt: "Illustration of a project delivery journey.",
     nextTaskLabel: "Next task",
     nextTask: { id: "task-2", milestone: "Build", title: "Build the service", evidence: "10/20 · 1 submission" },
     continueLabel: "Continue project",
@@ -40,6 +41,7 @@ const baseProps: CoursePersonalProjectProps["data"] = {
         url: "https://github.com/starci/shop",
         openLabel: "Open repository",
         retryLabel: "Try again",
+        continueLabel: "Continue to connect",
     },
     retryLabel: "Try again",
 }
@@ -88,6 +90,16 @@ describe("CoursePersonalProjectPageBase", () => {
         expect(screen.getByText("0 results across 3 stages")).toBeInTheDocument()
     })
 
+    it("keeps authored milestone positions when a filtered roadmap renders one result", () => {
+        draw("ready", {
+            roadmapCountLabel: "1 result across 20 stages",
+            milestones: [{ id: "milestone-15", position: 15, title: "Package Docker", status: "Upcoming", progress: "0/5", tone: "neutral" }],
+        })
+
+        expect(screen.getByText("15")).toBeInTheDocument()
+        expect(screen.getByRole("img", { name: "Illustration of a project delivery journey." })).toBeInTheDocument()
+    })
+
     it("replaces the primary action with completion copy when no task remains", () => {
         draw("ready", { nextTask: undefined })
 
@@ -102,6 +114,14 @@ describe("CoursePersonalProjectPageBase", () => {
         expect(screen.getByText("Project roadmap")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Try again" }))
         expect(retryRepository).toHaveBeenCalledTimes(1)
+    })
+
+    it("offers the current task beside an unresolved repository", () => {
+        const openTask = vi.fn()
+        draw("ready", { repository: { ...baseProps.repository, branch: undefined, url: undefined } }, { openTask })
+
+        fireEvent.click(screen.getByRole("button", { name: "Continue to connect" }))
+        expect(openTask).toHaveBeenCalledWith("task-2")
     })
 
     it("retains the page header and offers recovery after the primary query fails", () => {
