@@ -108,7 +108,9 @@ export type CoursePersonalProjectProps = {
 const pendingMilestones = (count: number): ReadonlyArray<CoursePersonalProjectMilestoneRow> =>
     Array.from({ length: count }, (_, index) => ({ id: `pending-${index}`, title: "", status: "", progress: "", completionPercent: 0 }))
 
-const ProjectMilestoneRow = (props: { readonly milestone: CoursePersonalProjectMilestoneRow; readonly index: number; readonly isLoading: boolean }) => {
+type ProjectMilestoneRowProps = { readonly milestone: CoursePersonalProjectMilestoneRow; readonly index: number; readonly isLoading: boolean }
+
+const ProjectMilestoneRow = (props: ProjectMilestoneRowProps) => {
     const milestone = props.milestone
     const content = <div className={projectMilestoneClassName(milestone.tone)}>
         <div className={projectMilestoneNumberClassName}>{String(props.index + 1).padStart(2, "0")}</div>

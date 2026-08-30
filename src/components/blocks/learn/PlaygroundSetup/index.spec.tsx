@@ -17,8 +17,9 @@ const session = vi.hoisted(() => ({
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }))
 vi.mock("@/components/layouts/PlaygroundSessionLayout", () => ({ usePlaygroundSession: () => session }))
+type PlaygroundSetupStubProps = { readonly state: string }
 vi.mock("./component", () => ({
-    PlaygroundSetupBase: (input: { readonly state: string }) => <output data-testid="state">{input.state}</output>,
+    PlaygroundSetupBase: (input: PlaygroundSetupStubProps) => <output data-testid="state">{input.state}</output>,
 }))
 
 import { PlaygroundSetup } from "."

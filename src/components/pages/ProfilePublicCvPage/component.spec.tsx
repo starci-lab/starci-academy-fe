@@ -21,10 +21,9 @@ describe("ProfilePublicCvPageBase", () => {
         expect(resting.container.querySelector("[data-state='pending']")).toBeInTheDocument()
         expect(resting.container.querySelector("iframe")).toBeNull()
         resting.unmount()
-        const ready = render(<ProfilePublicCvBase {...baseProps} state="ready" pdfUrl="https://example.com/cv.pdf" updatedLabel="Updated Aug 30, 2026" isSelf />)
+        const ready = render(<ProfilePublicCvBase {...baseProps} state="ready" pdfUrl="https://example.com/cv.pdf" updatedLabel="Updated Aug 30, 2026" />)
         expect(ready.container.querySelector("iframe[src='https://example.com/cv.pdf']")).toBeInTheDocument()
         expect(screen.getByRole("link", { name: "Open CV" })).toHaveAttribute("href", "https://example.com/cv.pdf")
-        expect(screen.getByRole("button", { name: "Manage CV" })).toBeInTheDocument()
         expect(screen.getByText("Updated Aug 30, 2026")).toBeInTheDocument()
     })
 

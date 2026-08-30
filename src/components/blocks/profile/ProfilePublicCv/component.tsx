@@ -7,6 +7,7 @@ import { IconTile } from "@/components/leaves/IconTile"
 import { Link } from "@/components/leaves/Link"
 import { ProfileCvDocument } from "@/components/leaves/ProfileCvDocument"
 import { Text } from "@/components/leaves/Text"
+import { ProfileCvBuilder } from "../ProfileCvBuilder"
 import {
     publicCvActionsClassName,
     publicCvDocumentFrameClassName,
@@ -81,6 +82,7 @@ const PublicCvNotice = (props: ProfilePublicCvProps) => {
 
 /** Draw a stable public-CV workspace across document, loading, absence and recovery states. */
 export const ProfilePublicCvBase = (props: ProfilePublicCvProps) => {
+    if (props.isSelf) return <ProfileCvBuilder />
     const loading = props.state === "pending"
     return (
         <SurfaceCard props={{ label: props.label, isFrameless: true }}>

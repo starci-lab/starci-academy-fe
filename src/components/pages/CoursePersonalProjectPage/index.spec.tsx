@@ -15,9 +15,10 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock("next-intl", () => ({ useLocale: () => mocks.locale }))
+type LocalizedPathnameInput = { readonly locale: string; readonly href: string }
 vi.mock("@/i18n/navigation", () => ({
     useRouter: () => ({ push: mocks.push }),
-    getPathname: ({ locale, href }: { readonly locale: string; readonly href: string }) => `/${locale}${href}`,
+    getPathname: ({ locale, href }: LocalizedPathnameInput) => `/${locale}${href}`,
 }))
 vi.mock("@/hooks/swr/useQueryCoursePersonalProjectSwr", () => ({
     useQueryCoursePersonalProjectSwr: () => ({ data: mocks.data, error: mocks.error, mutate: mocks.mutate }),

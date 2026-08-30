@@ -21,8 +21,9 @@ const mocks = vi.hoisted(() => ({
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ replace: vi.fn(), push: vi.fn() }) }))
 vi.mock("@/components/layouts/PlaygroundSessionLayout", () => ({ usePlaygroundSession: () => mocks.session }))
+type PlaygroundSessionStubProps = { readonly props: { readonly submitLabel: string; readonly verifyingLabel: string; readonly isVerifying: boolean }; readonly on: { readonly submit: () => void } }
 vi.mock("./component", () => ({
-    PlaygroundSessionBase: (input: { readonly props: { readonly submitLabel: string; readonly verifyingLabel: string; readonly isVerifying: boolean }; readonly on: { readonly submit: () => void } }) => (
+    PlaygroundSessionBase: (input: PlaygroundSessionStubProps) => (
         <button type="button" disabled={input.props.isVerifying} onClick={input.on.submit}>
             {input.props.isVerifying ? input.props.verifyingLabel : input.props.submitLabel}
         </button>

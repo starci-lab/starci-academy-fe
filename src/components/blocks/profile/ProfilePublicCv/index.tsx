@@ -2,7 +2,6 @@
 
 import { useParams } from "next/navigation"
 import { useLocale, useTranslations } from "next-intl"
-import { ProfileCvBuilder } from "../ProfileCvBuilder"
 import { useQueryMeSwr } from "@/hooks/swr/useQueryMeSwr"
 import { useQueryPublicUserCvSwr } from "@/hooks/swr/useQueryPublicUserCvSwr"
 import { useQueryUserProfileSwr } from "@/hooks/swr/useQueryUserProfileSwr"
@@ -25,7 +24,6 @@ export const ProfilePublicCvBlock = (props: ProfilePublicCvBlockProps) => {
     const cv = useQueryPublicUserCvSwr(username)
     if (profile.data === undefined || viewer.data === undefined) return <ProfilePublicCvBase state="pending" label={t("label")} title={t("defaultTitle")} description={t("description")} statusLabel={t("status.loading")} noticeTitle="" noticeDescription="" openLabel={t("open")} editLabel={t("edit")} retryLabel={t("retry")} isSelf={false} />
     const isSelf = Boolean(profile.data?.id && viewer.data?.id === profile.data.id)
-    if (isSelf) return <ProfileCvBuilder />
     const state = stateOf(cv.error, cv.data)
     const notice = state === "error"
         ? { title: t("states.error.title"), description: t("states.error.description") }
@@ -38,5 +36,5 @@ export const ProfilePublicCvBlock = (props: ProfilePublicCvBlockProps) => {
         ? undefined
         : t("updated", { date: new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(cv.data.updatedAt)) })
     const statusLabel = state === "pending" ? t("status.loading") : state === "empty" ? t("status.empty") : state === "uncompiled" ? t("status.uncompiled") : state === "ready" ? t("status.ready") : t("status.error")
-    return <ProfilePublicCvBase state={state} label={t("label")} title={cv.data?.label ?? t("defaultTitle")} description={t("description")} statusLabel={statusLabel} noticeTitle={notice.title} noticeDescription={notice.description} updatedLabel={updatedLabel} pdfUrl={cv.data?.pdfUrl ?? undefined} openLabel={t("open")} editLabel={t("edit")} retryLabel={t("retry")} retryPending={state === "error" && cv.isValidating} isSelf={false} on={{ retry: () => { void cv.mutate() } }} />
+    return <ProfilePublicCvBase state={state} label={t("label")} title={cv.data?.label ?? t("defaultTitle")} description={t("description")} statusLabel={statusLabel} noticeTitle={notice.title} noticeDescription={notice.description} updatedLabel={updatedLabel} pdfUrl={cv.data?.pdfUrl ?? undefined} openLabel={t("open")} editLabel={t("edit")} retryLabel={t("retry")} retryPending={state === "error" && cv.isValidating} isSelf={isSelf} on={{ retry: () => { void cv.mutate() } }} />
 }

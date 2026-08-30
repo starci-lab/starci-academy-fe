@@ -10,8 +10,9 @@ vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }))
 vi.mock("@/hooks/swr/useQueryCourseSwr", () => ({ useQueryCourseSwr: () => mocks.course }))
 vi.mock("@/hooks/swr/useQueryPlaygroundsSwr", () => ({ useQueryPlaygroundsSwr: () => mocks.playgrounds }))
+type CoursePlaygroundCatalogStubProps = { readonly state: string }
 vi.mock("./component", () => ({
-    CoursePlaygroundCatalogBase: (input: { readonly state: string }) => <output data-testid="state">{input.state}</output>,
+    CoursePlaygroundCatalogBase: (input: CoursePlaygroundCatalogStubProps) => <output data-testid="state">{input.state}</output>,
 }))
 
 import { CoursePlaygroundCatalog } from "."
