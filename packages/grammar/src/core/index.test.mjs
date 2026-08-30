@@ -3,6 +3,19 @@ import test from "node:test"
 import * as core from "../../dist/core/index.js"
 
 test("exports traditional React components without metadata registries", () => {
+    assert.equal(core.STARCI_CORE_DNA.id, "starci-core")
+    assert.equal(core.STARCI_CORE_DNA.color.accent, "#7547ff")
+    assert.equal(core.STARCI_CORE_TOKEN_NAMES.surface, "--starci-core-surface")
+    assert.equal(core.STARCI_CORE_TOKEN_DEFAULTS[core.STARCI_CORE_TOKEN_NAMES.surface], core.STARCI_CORE_DNA.color.light.surface)
+    assert.equal(core.STARCI_CORE_DARK_TOKEN_DEFAULTS[core.STARCI_CORE_TOKEN_NAMES.surface], core.STARCI_CORE_DNA.color.dark.surface)
+    assert.equal(Object.isFrozen(core.STARCI_CORE_DNA), true)
+    assert.equal(typeof core.GrammarRoot, "function")
+    assert.equal(typeof core.PageContainer, "function")
+    assert.equal(typeof core.SectionHeader, "function")
+    assert.equal(typeof core.MediaFrame, "function")
+    assert.equal(typeof core.IncludedMark, "function")
+    assert.equal(typeof core.SurfaceCopyGroup, "function")
+    assert.equal(typeof core.PrimaryRailLayout, "function")
     assert.equal(typeof core.LeadingNumber, "function")
     assert.equal(typeof core.OtpInput, "function")
     assert.ok(core.HorizontalScrollRegion)
@@ -20,4 +33,26 @@ test("exports traditional React components without metadata registries", () => {
     assert.equal("CORE_LAYOUT_CLASS_NAMES" in core, false)
     assert.equal("CORE_NEUTRAL_TREATMENTS" in core, false)
     assert.equal("treatmentFor" in core, false)
+})
+
+test("binds DNA, responsive composition and media through concrete Core components", () => {
+    const root = core.GrammarRoot({ theme: "dark", children: "content" })
+    assert.equal(root.props["data-grammar"], "starci-core")
+    assert.equal(root.props["data-grammar-theme"], "dark")
+
+    const layout = core.PrimaryRailLayout({ primary: "primary", rail: "rail", railWidth: "wide" })
+    assert.match(layout.props.className, /starci-core-primary-rail-container/)
+    assert.equal(layout.props.children.props["data-grammar-layout-rail"], "present")
+    assert.equal(layout.props.children.props["data-grammar-layout-rail-width"], "wide")
+
+    const media = core.MediaFrame({ children: "image", aspect: "square", fit: "contain" })
+    assert.equal(media.props["data-grammar-media-aspect"], "square")
+    assert.equal(media.props["data-grammar-media-fit"], "contain")
+
+    const included = core.IncludedMark({})
+    assert.equal(included.props.viewBox, "0 0 20 20")
+    assert.match(included.props.className, /starci-core-included-mark/)
+
+    const copyGroup = core.SurfaceCopyGroup({ children: "copy" })
+    assert.equal(copyGroup.props["data-grammar-copy-density"], "compact")
 })

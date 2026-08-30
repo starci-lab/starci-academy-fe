@@ -1,7 +1,7 @@
 {
   "name": "@starci/grammar",
   "version": "0.3.0",
-  "description": "Business-neutral StarCi React components and the Offset Pop visual layer.",
+  "description": "Reusable StarCi React components, compositions, and packaged visual DNA.",
   "keywords": [
     "starci",
     "design-system",

@@ -1,9 +1,39 @@
 import { readFileSync } from "node:fs"
 import { describe, expect, it } from "vitest"
+import { STARCI_CORE_TOKEN_DEFAULTS, STARCI_CORE_TOKEN_NAMES } from "./dna.js"
 
 const css = readFileSync(new URL("./styles.css", import.meta.url), "utf8")
 
 describe("Core capability styles", () => {
+    it("packages the StarCi DNA behind one explicit root boundary", () => {
+        expect(css).toMatch(/\.starci-core-root\s*\{[\s\S]*?--starci-core-accent: #7547ff;/)
+        expect(css).toMatch(/\.starci-core-root\s*\{[\s\S]*?--starci-core-surface-radius: 1rem;/)
+        expect(css).toMatch(/\.starci-core-root\[data-grammar-theme="dark"\]\s*\{[\s\S]*?color-scheme: dark;/)
+        expect(css).toContain(".starci-core-root[data-grammar-theme=\"system\"]")
+        expect(css).toContain("@media (forced-colors: active)")
+        for (const tokenName of Object.values(STARCI_CORE_TOKEN_NAMES)) {
+            expect(css, `missing CSS definition for ${tokenName}`).toContain(`${tokenName}:`)
+        }
+        for (const [tokenName, value] of Object.entries(STARCI_CORE_TOKEN_DEFAULTS)) {
+            expect(css, `CSS default drifted from ${tokenName}`).toContain(`${tokenName}: ${value};`)
+        }
+    })
+
+    it("owns reusable page, section, media and primary-rail compositions", () => {
+        expect(css).toContain(".starci-core-page-container")
+        expect(css).toContain(".starci-core-section-header")
+        expect(css).toContain(".starci-core-media-viewport")
+        expect(css).toMatch(/\.starci-core-primary-rail-container\s*\{[\s\S]*?container: starci-core-primary-rail \/ inline-size;/)
+        expect(css).toContain("@container starci-core-primary-rail (max-width: 56rem)")
+    })
+
+    it("owns included-mark, compact copy and accordion anatomy instead of UI knowledge", () => {
+        expect(css).toMatch(/\.starci-core-included-mark\s*\{[\s\S]*?width: 1\.25rem;[\s\S]*?height: 1\.25rem;[\s\S]*?color: inherit;/)
+        expect(css).toMatch(/\.starci-core-surface-copy-group\s*\{[\s\S]*?gap: 0\.5rem;/)
+        expect(css).toContain(".starci-core-accordion-trigger")
+        expect(css).toContain(".starci-core-accordion-panel")
+    })
+
     it("owns compact form measure, bounded branch scrolling and field rhythm", () => {
         expect(css).toMatch(/\.starci-core-form-page\s*\{[\s\S]*?align-items: center;[\s\S]*?justify-content: center;[\s\S]*?overflow: hidden;/)
         expect(css).toMatch(/\.starci-core-form-scroll-viewport\s*\{[\s\S]*?width: 100%;[\s\S]*?max-height: calc\(100dvh - 3rem\);/)

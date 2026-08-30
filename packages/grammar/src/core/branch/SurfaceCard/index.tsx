@@ -102,6 +102,7 @@ export const SurfaceCard = (props: SurfaceCardProps) => {
         <section
             className={surfaceCardClassName}
             data-grammar-frame={frame}
+            data-grammar-interaction={wholeAction === undefined ? "static" : "whole-action"}
             data-grammar-surface-card="true"
         >
             {label === undefined ? null : (
