@@ -2,6 +2,7 @@ import { SurfaceCard as GrammarSurfaceCard } from "@starci/grammar/core"
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { Button } from "@/components/leaves/Button"
 import { Heading } from "@/components/leaves/Heading"
+import { Progress } from "@/components/leaves/Progress"
 import { Text } from "@/components/leaves/Text"
 import type { FlashcardSessionMode } from "@/modules/api/graphql/queries/query-my-in-progress-flashcard-session"
 import {
@@ -24,6 +25,7 @@ import {
 export type CourseFlashcardResultWeakTopic = {
     readonly tag: string
     readonly value: string
+    readonly percent?: number
 }
 
 /** Pure result input after its route-specific projection resolves. */
@@ -38,6 +40,7 @@ export type FlashcardResultProps = {
         readonly subtitle: string
         readonly scoreLabel: string
         readonly scoreText?: string
+        readonly scorePercent?: number
         readonly reviewedLabel: string
         readonly reviewedText?: string
         readonly xpLabel: string
@@ -88,11 +91,12 @@ export const FlashcardResultBase = (props: FlashcardResultProps) => {
                         <Text props={{ content: data.modeText, size: "sm", tone: "muted" }} />
                         <div className={titlePairClassName}><Heading props={{ content: data.title, level: 1 }} isLoading={isLoading} /><Text props={{ content: data.subtitle, size: "sm", tone: "muted" }} isLoading={isLoading} /></div>
                         <div className={flashcardStatGridClassName}>{statValues.map(([label, value]) => <div key={label} className={flashcardStatClassName}><Text props={{ content: label, size: "xs" }} isLoading={isLoading} /><Heading props={{ content: value, level: 2 }} isLoading={isLoading} /></div>)}</div>
+                        {data.scorePercent === undefined ? null : <Progress props={{ value: data.scorePercent, label: data.scoreLabel }} isLoading={isLoading} />}
                     </section></SurfaceCard>
                     {blockState === "ready" ? <div className={flashcardResultBodyClassName}>
                         <div className={flashcardEvidenceClassName}>
                             {data.gradeRows.length === 0 ? null : <SurfaceCard props={{ label: data.breakdownTitle }}><div className={flashcardFactListClassName}>{data.gradeRows.map((row) => <div key={row.label} className={flashcardFactRowClassName}><Text props={{ content: row.label, size: "sm", weight: "medium" }} /><Text props={{ content: row.value.toString(), size: "sm", tone: "muted" }} /></div>)}</div></SurfaceCard>}
-                            {data.weakTopics.length === 0 ? null : <SurfaceCard props={{ label: data.weakTopicsTitle }}><div className={flashcardFactListClassName}>{data.weakTopics.map((topic) => <div key={topic.tag} className={flashcardFactRowClassName}><Text props={{ content: topic.tag, size: "sm", weight: "medium" }} /><Text props={{ content: topic.value, size: "sm", tone: "muted" }} /></div>)}</div></SurfaceCard>}
+                            {data.weakTopics.length === 0 ? null : <SurfaceCard props={{ label: data.weakTopicsTitle }}><div className={flashcardFactListClassName}>{data.weakTopics.map((topic) => <div key={topic.tag} className={flashcardFactRowClassName}><Text props={{ content: topic.tag, size: "sm", weight: "medium" }} /><Text props={{ content: topic.value, size: "sm", tone: "muted" }} />{topic.percent === undefined ? null : <Progress props={{ value: topic.percent, label: topic.tag }} />}</div>)}</div></SurfaceCard>}
                         </div>
                         <div className={flashcardNextActionRailClassName}><SurfaceCard><aside className={nextActionClassName}>
                             {data.nextDueText === undefined ? null : <div className={titlePairClassName}><Heading props={{ content: data.nextDueLabel, level: 3 }} /><Text props={{ content: data.nextDueText, size: "sm", weight: "semibold" }} /></div>}

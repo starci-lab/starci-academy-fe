@@ -19,7 +19,7 @@ export const flashcardNextActionRailClassName = cn("w-full", "md:w-80", "md:shri
 /** Joined fact list. */
 export const flashcardFactListClassName = cn("flex", "w-full", "min-w-0", "flex-col", "divide-y", "divide-separator", "overflow-hidden", "p-0")
 /** One comparable fact row. */
-export const flashcardFactRowClassName = cn("flex", "flex-row", "flex-wrap", "items-baseline", "justify-between", "gap-2", "rounded-xl", "p-4")
+export const flashcardFactRowClassName = cn("grid", "min-w-0", "grid-cols-[1fr_auto]", "items-baseline", "gap-x-3", "gap-y-2", "rounded-xl", "p-4", "[&_[role=progressbar]]:col-span-2")
 /** Continuously reachable next-action panel. */
 export const nextActionClassName = cn("flex", "w-full", "min-w-0", "flex-col", "gap-4", "p-4")
 /** Dedicated result recovery owner; never leave the route as a blank canvas. */

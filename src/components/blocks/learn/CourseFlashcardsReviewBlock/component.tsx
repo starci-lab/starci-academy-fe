@@ -4,6 +4,7 @@ import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
 import { Button } from "@/components/leaves/Button"
 import { ChoiceTabs } from "@/components/leaves/ChoiceTabs"
 import { Heading } from "@/components/leaves/Heading"
+import { Progress } from "@/components/leaves/Progress"
 import { SearchBox } from "@/components/leaves/SearchBox"
 import { Text } from "@/components/leaves/Text"
 import {
@@ -19,7 +20,7 @@ import {
 /** One deck summary and its mode eligibility. */
 export type FlashcardReviewDeckRow = { readonly id: string; readonly title: string; readonly description: string; readonly difficulty: string; readonly cardCount: number; readonly dueCount: number; readonly masteredCount: number; readonly quizEligible: boolean }
 /** One persisted history or study-health fact. */
-export type FlashcardReviewEvidenceRow = { readonly id: string; readonly title: string; readonly description: string; readonly fact: string }
+export type FlashcardReviewEvidenceRow = { readonly id: string; readonly title: string; readonly description: string; readonly fact: string; readonly percent?: number }
 /** Secondary evidence surface visible below the mode gateway. */
 export type FlashcardReviewView = "overview" | "history" | "stats"
 /** Deck-library density selected by the learner. */
@@ -114,7 +115,7 @@ export const CourseFlashcardsReviewBlockBase = (props: CourseFlashcardsReviewBlo
                         <div className={flashcardActionRowClassName}><Button props={{ label: data.startLabel, size: "sm", variant: "outline", disabled: data.resumeSessionId !== undefined }} on={{ press: () => props.on.openReview(deck.id) }} />{deck.quizEligible ? <Button props={{ label: data.quizDeckLabel, size: "sm", variant: "outline" }} on={{ press: () => props.on.openQuiz(deck.id) }} /> : null}</div>
                     </article></SurfaceCard>)}</div>}
                 </section>
-            </div> : failed || unavailable ? renderState(failed ? data.failedText : data.evidenceEmptyText, failed, data.evidenceTitle) : <SurfaceListCard props={{ label: data.evidenceTitle }} isLoading={loading}><ul className={flashcardEvidenceListClassName}>{data.evidenceRows.map((row) => <li className={flashcardEvidenceRowClassName} key={row.id}><Text props={{ content: row.title, size: "sm", weight: "medium" }} /><Text props={{ content: row.description, size: "sm", tone: "muted" }} /><Text props={{ content: row.fact, size: "xs", tone: "muted" }} /></li>)}</ul></SurfaceListCard>}
+            </div> : failed || unavailable ? renderState(failed ? data.failedText : data.evidenceEmptyText, failed, data.evidenceTitle) : <SurfaceListCard props={{ label: data.evidenceTitle }} isLoading={loading}><ul className={flashcardEvidenceListClassName}>{data.evidenceRows.map((row) => <li className={flashcardEvidenceRowClassName} key={row.id}><Text props={{ content: row.title, size: "sm", weight: "medium" }} /><Text props={{ content: row.description, size: "sm", tone: "muted" }} /><Text props={{ content: row.fact, size: "xs", tone: "muted" }} />{row.percent === undefined ? null : <Progress props={{ value: row.percent, label: row.title }} />}</li>)}</ul></SurfaceListCard>}
         </main>
 
         <ModalBranch isOpen={data.modalOpen} size="md" onDismiss={props.on.dismissModal}><section className={flashcardModalClassName}>

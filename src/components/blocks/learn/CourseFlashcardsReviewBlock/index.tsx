@@ -221,8 +221,8 @@ export const CourseFlashcardsReviewBlock = (props: CourseFlashcardsReviewBlockPr
             fact: `${new Date(item.updatedAt).toLocaleDateString(locale)} · +${item.xpEarned} ${copy.xp}`,
         }))
         : [
-            ...(reviewStats.data?.weakTags ?? []).map((item) => ({ id: `tag-${item.tag}`, title: item.tag, description: `${item.cardCount} ${copy.cards}`, fact: `${item.retention}%` })),
-            ...(reviewStats.data?.deckRetention ?? []).map((item) => ({ id: `deck-${item.deckId}`, title: item.deckTitle, description: `${item.reviewCount} ${copy.reviews}`, fact: `${item.retention}%` })),
+            ...(reviewStats.data?.weakTags ?? []).map((item) => ({ id: `tag-${item.tag}`, title: item.tag, description: `${item.cardCount} ${copy.cards}`, fact: `${item.retention}%`, percent: item.retention })),
+            ...(reviewStats.data?.deckRetention ?? []).map((item) => ({ id: `deck-${item.deckId}`, title: item.deckTitle, description: `${item.reviewCount} ${copy.reviews}`, fact: `${item.retention}%`, percent: item.retention })),
             ...(reviewStats.data?.leechFocus ?? []).map((item) => ({ id: `leech-${item.cardId}`, title: item.question, description: item.deckTitle, fact: `${item.lapseCount}×` })),
         ]
     const difficultyOf = (value: string) => copy.difficulties[value.toLocaleLowerCase() as keyof typeof copy.difficulties] ?? value

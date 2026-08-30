@@ -41,6 +41,7 @@ const flashcardStateOf = (
 const COPY = {
     en: {
         breadcrumbLabel: "Course path",
+        focusMode: "Focused session",
         navigatorTitle: "Questions",
         navigatorDescription: "Open an answered card to review it. Saved grades cannot be changed.",
         quizNavigatorDescription: "Open a saved question to review your choices. Answers are graded only when you submit.",
@@ -96,6 +97,7 @@ const COPY = {
     },
     vi: {
         breadcrumbLabel: "Lộ trình khóa học", // vn-ok: localized Vietnamese interface copy.
+        focusMode: "Phiên tập trung", // vn-ok: localized Vietnamese interface copy.
         navigatorTitle: "Danh sách câu", // vn-ok: localized Vietnamese interface copy.
         navigatorDescription: "Mở câu đã trả lời để xem lại. Điểm đã lưu không thể thay đổi.", // vn-ok: localized Vietnamese interface copy.
         quizNavigatorDescription: "Mở câu đã lưu để xem lại lựa chọn. Đáp án chỉ được chấm khi nộp bài.", // vn-ok: localized Vietnamese interface copy.
@@ -415,6 +417,7 @@ export const CourseFlashcardSessionBlock = (props: CourseFlashcardSessionBlockPr
                 progressCard: index + 1,
                 totalCards: itemCount,
                 progressText: mode === "quiz" ? copy.quizProgress(displayIndex + 1, itemCount) : copy.progress(displayIndex + 1, itemCount),
+                focusModeLabel: copy.focusMode,
                 progressLabel: mode === "quiz" ? copy.quizProgress(index + 1, itemCount) : copy.progress(index + 1, itemCount),
                 readOnly,
                 questions,

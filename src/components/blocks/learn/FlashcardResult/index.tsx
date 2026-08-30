@@ -96,6 +96,7 @@ export const FlashcardResultBlock = (props: FlashcardResultBlockProps) => {
                 subtitle: copy.subtitle,
                 scoreLabel: copy.score,
                 scoreText: data === undefined ? undefined : `${data.scorePercent}%`,
+                scorePercent: data?.scorePercent,
                 reviewedLabel: mode === "quiz" ? copy.quizReviewed : copy.reviewed,
                 reviewedText: data?.reviewedCount.toString(),
                 xpLabel: copy.xp,
@@ -115,6 +116,7 @@ export const FlashcardResultBlock = (props: FlashcardResultBlockProps) => {
                 weakTopics: (data?.weakTags ?? []).map((topic) => ({
                     tag: topic.tag,
                     value: mode === "quiz" ? `${topic.value}%` : topic.value.toString(),
+                    percent: mode === "quiz" ? topic.value : undefined,
                 })),
                 failedText: copy.failed,
                 retryLabel: copy.retry,

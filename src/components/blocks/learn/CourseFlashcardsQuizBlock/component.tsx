@@ -75,7 +75,7 @@ export const CourseFlashcardsQuizBlockBase = (props: CourseFlashcardsQuizBlockPr
         </section></SurfaceCard>
         <SurfaceCard props={{ label: data.eligibilityTitle ?? data.quizLabel }} isLoading={loading}><aside className={quizPreflightClassName}>
             <div className={quizPreflightStatusClassName} aria-live="polite">
-                <Heading props={{ content: data.resumeSessionId !== undefined ? data.activeSessionText ?? data.resumeLabel : eligible ? data.eligibilityReadyText ?? data.startLabel : data.eligibilityBlockedText ?? data.emptyText, level: 3 }} />
+                <Heading props={{ content: data.resumeSessionId !== undefined ? data.activeSessionText ?? data.resumeLabel : eligible ? data.eligibilityReadyText ?? data.startLabel : data.eligibilityBlockedText ?? data.emptyText, level: 3 }} isLoading={loading} />
                 <Text props={{ content: `${data.cardCount} ${data.cardsLabel} · ${data.requiredCardsLabel ?? "minimum"} ${requiredCount}`, size: "sm", weight: "medium" }} isLoading={loading} />
             </div>
             {data.startErrorText === undefined ? null : <Text props={{ content: data.startErrorText, size: "sm", weight: "semibold" }} />}
