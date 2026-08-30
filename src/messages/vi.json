@@ -1023,9 +1023,18 @@
             "openPlayground": "Thực hành trong Playground"
         },
         "playground": {
-            "title": "Playground",
-            "description": "Thực hành trên máy của bạn và để máy chủ xác minh từng bước.",
+            "title": "Playground DevOps",
+            "description": "Luyện quy trình production với Kubernetes, Docker và RAG. Hoàn thành từng tác vụ trên máy của bạn; tiến độ chỉ được ghi nhận sau khi server xác minh.",
+            "eyebrow": "Học bằng dự án thật",
+            "verifiedLabel": "Server xác minh",
+            "previewAlt": "Bản xem trước lộ trình Playground DevOps",
+            "startLabel": "Bắt đầu lab đầu tiên",
+            "labsTitle": "Dựng trọn quy trình production",
+            "labsDescription": "Chọn một lab có hướng dẫn, hoàn thành checkpoint theo thứ tự và để server xác nhận từng bước.",
+            "labCountLabel": "lab có hướng dẫn",
+            "labLabel": "Lab",
             "stepLabel": "bước hướng dẫn",
+            "openLabel": "Mở lab",
             "empty": "Khóa học này chưa có playground.",
             "failed": "Không tải được danh sách playground.",
             "retry": "Thử lại",
@@ -1043,6 +1052,7 @@
                 "ready": "Agent đã kết nối. Không gian làm việc đã sẵn sàng.",
                 "enter": "Vào không gian làm việc",
                 "failed": "Không thể chuẩn bị phiên playground."
+                ,"notFound": "Không tìm thấy playground này. Hãy quay lại danh sách hoặc thử lại."
             },
             "session": {
                 "agentConnected": "Agent đã kết nối",
@@ -1052,10 +1062,15 @@
                 "verify": "Xác minh bước này",
                 "leave": "Thiết lập",
                 "completedTitle": "Đã hoàn thành playground",
-                "completedText": "Máy chủ đã xác minh mọi bước trong playground này.",
+                "completedText": "Mọi bước hướng dẫn trong playground này đều đã đạt trạng thái xác minh.",
                 "failed": "Phiên playground không khả dụng. Hãy quay lại thiết lập và tạo phiên mới.",
                 "step": "Bước",
                 "passed": "Đã đạt"
+                ,"scratchpadTitle": "Bản nháp lệnh"
+                ,"scratchpadDescription": "Chỉnh sửa lệnh tại đây trước khi chạy trên máy của bạn. Trình duyệt không thực thi lệnh này."
+                ,"outputTitle": "Hoạt động xác minh"
+                ,"outputWaiting": "Sự kiện xác minh từ máy chủ sẽ xuất hiện sau khi bạn chạy tác vụ trên máy của mình."
+                ,"verifying": "Đang chờ xác minh..."
             }
         },
         "mindMap": {

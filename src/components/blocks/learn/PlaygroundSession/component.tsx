@@ -2,11 +2,11 @@ import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { Article } from "@/components/branches/Article"
 import { Button } from "@/components/leaves/Button"
-import { CodeBlock } from "@/components/leaves/CodeBlock"
 import { Heading } from "@/components/leaves/Heading"
 import { NavLink } from "@/components/leaves/NavLink"
 import { Progress } from "@/components/leaves/Progress"
 import { Text } from "@/components/leaves/Text"
+import { Textarea } from "@/components/leaves/Textarea"
 import type { PlaygroundStep } from "@/modules/api/graphql/queries/query-playground"
 import {
     playgroundIdentityClassName,
@@ -14,6 +14,10 @@ import {
     playgroundSplitClassName,
     playgroundStepRailClassName,
     playgroundTaskClassName,
+    playgroundWorkbenchClassName,
+    playgroundVerifyActionClassName,
+    playgroundActivityClassName,
+    playgroundActivityRowClassName,
 } from "./classNames"
 
 /** Live relay states exposed by the pure playground workspace. */
@@ -36,6 +40,12 @@ export type PlaygroundSessionProps = {
         readonly failedText: string
         readonly stepLabel: string
         readonly passedLabel: string
+        readonly scratchpadTitle?: string
+        readonly scratchpadDescription?: string
+        readonly outputTitle?: string
+        readonly outputWaiting?: string
+        readonly verifyingLabel?: string
+        readonly isVerifying?: boolean
     }
     readonly on: {
         readonly step: (index: number) => void
@@ -51,6 +61,7 @@ export const PlaygroundSessionBase = (props: PlaygroundSessionProps) => {
     const current = props.props.steps[props.props.selectedStepIndex]
     const commandHint = current?.commandHint ?? undefined
     const actionHint = current?.actionHint ?? undefined
+    const scratchpadTitle = props.props.scratchpadTitle ?? props.props.submitLabel
     const settled = sessionState === "failed" || sessionState === "completed"
     const progressValue = props.props.steps.length === 0 ? 0 : Math.round((props.props.passedStepIndexes.length / props.props.steps.length) * 100)
     return <section className={playgroundSessionClassName}>
@@ -60,7 +71,7 @@ export const PlaygroundSessionBase = (props: PlaygroundSessionProps) => {
             <Progress props={{ label: props.props.title, value: progressValue }} />
             <Text props={{ content: props.props.connectionText, size: "xs", tone: "muted", live: "polite" }} />
         </header></SurfaceCard>
-        {settled ? <EmptyNotice props={{ message: sessionState === "completed" ? props.props.completedTitle : props.props.failedText, description: sessionState === "completed" ? props.props.completedText : undefined, actionLabel: sessionState === "failed" ? props.props.retryLabel : undefined }} on={{ act: props.on.retry }} /> : <div className={playgroundSplitClassName}>
+        {settled ? <EmptyNotice props={{ message: sessionState === "completed" ? props.props.completedTitle : props.props.failedText, description: sessionState === "completed" ? props.props.completedText : undefined, actionLabel: sessionState === "completed" ? props.props.leaveLabel : props.props.retryLabel, actionIcon: sessionState === "completed" ? "back" : "retry" }} on={{ act: sessionState === "completed" ? props.on.leave : props.on.retry }} /> : <div className={playgroundSplitClassName}>
             <SurfaceCard><aside className={playgroundStepRailClassName}>{props.props.steps.map((step, index) => {
                 const passed = props.props.passedStepIndexes.includes(index)
                 const available = passed || index <= Math.max(0, props.props.passedStepIndexes.length)
@@ -69,10 +80,19 @@ export const PlaygroundSessionBase = (props: PlaygroundSessionProps) => {
             })}</aside></SurfaceCard>
             <SurfaceCard><section className={playgroundTaskClassName}>
                 <Article props={{ body: current?.body }} />
-                {commandHint === undefined ? null : <CodeBlock props={{ code: commandHint }} />}
                 {actionHint === undefined ? null : <Text props={{ content: actionHint, size: "sm" }} />}
-                {sessionState !== "live" || current === undefined || props.props.passedStepIndexes.includes(props.props.selectedStepIndex) ? null : <Button props={{ label: props.props.submitLabel, variant: "primary" }} on={{ press: props.on.submit }} />}
             </section></SurfaceCard>
+            <div className={playgroundWorkbenchClassName}>
+                <Heading props={{ content: scratchpadTitle, level: 2 }} />
+                {props.props.scratchpadDescription === undefined ? null : <Text props={{ content: props.props.scratchpadDescription, size: "xs", tone: "muted" }} />}
+                <Textarea key={current?.id ?? "empty"} props={{ id: "playground-command-scratchpad", name: "playground-command-scratchpad", label: scratchpadTitle, defaultValue: commandHint, rows: 6, disabled: sessionState !== "live" }} />
+                {sessionState !== "live" || current === undefined || props.props.passedStepIndexes.includes(props.props.selectedStepIndex) ? null : <div className={playgroundVerifyActionClassName}><Button props={{ label: props.props.isVerifying ? props.props.verifyingLabel ?? props.props.submitLabel : props.props.submitLabel, variant: "primary", disabled: props.props.isVerifying, isPending: props.props.isVerifying }} on={{ press: props.on.submit }} /></div>}
+            </div>
+            {props.props.outputTitle === undefined ? null : <SurfaceCard><aside className={playgroundActivityClassName}>
+                <Heading props={{ content: props.props.outputTitle, level: 2 }} />
+                <div className={playgroundActivityRowClassName}><Text props={{ content: sessionState, size: "xs", tone: "muted" }} /></div>
+                {props.props.passedStepIndexes.length === 0 ? props.props.outputWaiting === undefined ? null : <Text props={{ content: props.props.outputWaiting, size: "sm", tone: "muted" }} /> : props.props.passedStepIndexes.map((index) => <div className={playgroundActivityRowClassName} key={index}><Text props={{ content: props.props.steps[index]?.title ?? `${props.props.stepLabel} ${index + 1}`, size: "sm" }} /><Text props={{ content: props.props.passedLabel, size: "xs", tone: "muted" }} /></div>)}
+            </aside></SurfaceCard>}
         </div>}
     </section>
 }

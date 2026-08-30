@@ -94,5 +94,10 @@ export const usePlaygroundSocketIo = () => {
         }
     }, [])
 
-    return { state, agentConnected, verifiedStepIndex, passedStepIndexes, subscribe, verify }
+    const retry = useCallback(() => {
+        setState("connecting")
+        socketRef.current?.connect()
+    }, [])
+
+    return { state, agentConnected, verifiedStepIndex, passedStepIndexes, subscribe, verify, retry }
 }

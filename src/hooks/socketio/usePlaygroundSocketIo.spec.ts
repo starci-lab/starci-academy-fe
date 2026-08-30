@@ -5,6 +5,7 @@ const relay = vi.hoisted(() => {
     const handlers = new Map<string, (payload?: unknown) => void>()
     const socket = {
         connected: true,
+        connect: vi.fn(),
         on: vi.fn((event: string, handler: (payload?: unknown) => void) => { handlers.set(event, handler) }),
         off: vi.fn(),
         emit: vi.fn(),
@@ -28,6 +29,7 @@ describe("usePlaygroundSocketIo", () => {
         relay.socket.on.mockClear()
         relay.socket.off.mockClear()
         relay.socket.emit.mockClear()
+        relay.socket.connect.mockClear()
         relay.socket.disconnect.mockClear()
         relay.io.mockClear()
     })
@@ -105,6 +107,16 @@ describe("usePlaygroundSocketIo", () => {
         const hook = renderHook(() => usePlaygroundSocketIo())
         act(() => relay.handlers.get("connect_error")?.())
         expect(hook.result.current.state).toBe("failed")
+    })
+
+    it("retries a relay that could not be reached", () => {
+        const hook = renderHook(() => usePlaygroundSocketIo())
+        act(() => relay.handlers.get("connect_error")?.())
+
+        act(() => hook.result.current.retry())
+
+        expect(hook.result.current.state).toBe("connecting")
+        expect(relay.socket.connect).toHaveBeenCalledOnce()
     })
 
     it("ignores a verification message that names no step", () => {

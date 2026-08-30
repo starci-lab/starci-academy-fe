@@ -1023,9 +1023,18 @@
             "openPlayground": "Practice in Playground"
         },
         "playground": {
-            "title": "Playground",
-            "description": "Practice on your own machine with each step verified live.",
+            "title": "DevOps Playground",
+            "description": "Practice production workflows with Kubernetes, Docker, and RAG. Complete each task on your machine; progress advances only after server verification.",
+            "eyebrow": "Learn by building",
+            "verifiedLabel": "Server-verified",
+            "previewAlt": "DevOps Playground learning path preview",
+            "startLabel": "Start the first lab",
+            "labsTitle": "Build the production path",
+            "labsDescription": "Choose a guided lab, work through its checkpoints in order, and let the server confirm each completed step.",
+            "labCountLabel": "guided labs",
+            "labLabel": "Lab",
             "stepLabel": "guided steps",
+            "openLabel": "Open lab",
             "empty": "This course has no playgrounds yet.",
             "failed": "The playground catalog could not be loaded.",
             "retry": "Try again",
@@ -1043,6 +1052,7 @@
                 "ready": "Agent connected. Your workspace is ready.",
                 "enter": "Enter workspace",
                 "failed": "The playground session could not be prepared."
+                ,"notFound": "This playground could not be found. Return to the catalog or try again."
             },
             "session": {
                 "agentConnected": "Agent connected",
@@ -1052,10 +1062,15 @@
                 "verify": "Verify this step",
                 "leave": "Setup",
                 "completedTitle": "Playground completed",
-                "completedText": "The server verified every step in this playground.",
+                "completedText": "Every guided step reached a verified state in this playground.",
                 "failed": "This playground session is unavailable. Return to setup and create a new session.",
                 "step": "Step",
                 "passed": "Passed"
+                ,"scratchpadTitle": "Command scratchpad"
+                ,"scratchpadDescription": "Edit commands here before running them on your machine. This browser does not execute the command."
+                ,"outputTitle": "Verification activity"
+                ,"outputWaiting": "Server verification events will appear here after you run the task on your machine."
+                ,"verifying": "Waiting for verification..."
             }
         },
         "mindMap": {
