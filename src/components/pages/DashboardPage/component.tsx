@@ -165,7 +165,7 @@ export const DashboardPageBase = (props: DashboardPageProps) => {
                         className={dashboardCompactSubnavClassName}
                         label={railLabel}
                         title={<Link props={{ label: props.props.backLabel ?? "Back", icon: "back", emphasis: "muted" }} on={{ press: props.on?.goBack }} />}
-                        menuIcon={<Icon props={{ name: "navigationOverflow", role: "leading" }} />}
+                        menuIcon={<Icon props={{ name: "collapseRail", role: "leading" }} />}
                         openMenuLabel={props.props.railOpenLabel ?? railLabel}
                         closeMenuLabel={props.props.railCloseLabel ?? railLabel}
                         isMenuOpen={isRailOpen}

@@ -145,11 +145,12 @@ describe("DashboardPageBase", () => {
         }
         const { container, rerender } = render(<DashboardPageBase props={compactProps} on={{ setRailOpen }} />)
 
-        expect(container.querySelector("[data-dashboard-frame='true']")).toHaveClass("gap-0")
+        expect(container.querySelector("[data-dashboard-frame='true']")).toHaveClass("gap-0", "pb-0", "scroll-pb-6")
+        expect(container.querySelector("[data-dashboard-frame='true']")).not.toHaveClass("pb-24", "scroll-pb-24")
         expect(container.querySelector("[data-dashboard-selected-panel='true']")).toHaveClass("px-3", "py-6")
         expect(container.querySelector("[data-dashboard-selected-panel='true']")).not.toHaveClass("sm:px-5", "lg:px-8")
         expect(container.querySelector("[data-grammar-subnav='true']")).toHaveAttribute("data-grammar-subnav-position", "sticky")
-        expect(container.querySelector("[data-grammar-subnav='true']")).toHaveClass("!top-24", "[--starci-core-subnav-offset:6rem]")
+        expect(container.querySelector("[data-grammar-subnav='true']")).toHaveClass("!top-[calc(6rem+1px)]", "[--starci-core-subnav-offset:calc(6rem+1px)]")
         expect(container.querySelector("[data-dashboard-rail='true']")).toBeNull()
         expect(screen.getByRole("link", { name: "Back" })).toHaveAttribute("data-emphasis", "muted")
         const openButton = screen.getByRole("button", { name: "Open stats and quick access" })

@@ -7,8 +7,8 @@ export const dashboardFrameClassName = cn(
     "min-w-0",
     "flex-col",
     "gap-0",
-    "pb-24",
-    "scroll-pb-24",
+    "pb-0",
+    "scroll-pb-6",
     "lg:flex-row",
     "lg:items-start",
     "lg:gap-0",
@@ -18,7 +18,7 @@ export const dashboardFrameClassName = cn(
 )
 
 /** Pin compact rail controls immediately below the two-layer application navigation. */
-export const dashboardCompactSubnavClassName = cn("!top-24", "[--starci-core-subnav-offset:6rem]")
+export const dashboardCompactSubnavClassName = cn("!top-[calc(6rem+1px)]", "[--starci-core-subnav-offset:calc(6rem+1px)]")
 
 /** Identity and shortcuts stay pinned flush left with an independent scroll lane. */
 export const dashboardLeadingRailRegionClassName = cn(
