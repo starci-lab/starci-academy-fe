@@ -7,8 +7,8 @@ import { PublicProfileLayout } from "."
  *
  * The connected half settles two things the pure half must never guess: which whole-screen situation
  * the profile is in, and which tabs the asking viewer is allowed to see. A locked profile is locked
- * only for somebody else; the CV tab exists for its owner always and for a visitor only when a public
- * CV was actually published.
+ * only for somebody else; the CV editor tab exists only for its owner because the active API does not
+ * publish a public-CV contract.
  *
  * It also owns canonicalization: a profile reached under a stale username is replaced with the real
  * one rather than rendered under a URL that no longer names it.
@@ -23,7 +23,6 @@ const mocks = vi.hoisted(() => ({
     profileError: undefined as unknown,
     profileIsValidating: false,
     profileMutate: vi.fn(),
-    publicCv: undefined as unknown,
     viewer: undefined as unknown,
 }))
 
@@ -36,7 +35,6 @@ vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
 vi.mock("@/hooks/swr/useQueryUserProfileSwr", () => ({
     useQueryUserProfileSwr: () => ({ data: mocks.profile, error: mocks.profileError, isValidating: mocks.profileIsValidating, mutate: mocks.profileMutate }),
 }))
-vi.mock("@/hooks/swr/useQueryPublicUserCvSwr", () => ({ useQueryPublicUserCvSwr: () => ({ data: mocks.publicCv }) }))
 vi.mock("@/hooks/swr/useQueryMeSwr", () => ({ useQueryMeSwr: () => ({ data: mocks.viewer }) }))
 
 type LayoutStub = {
@@ -74,7 +72,6 @@ describe("PublicProfileLayout", () => {
         mocks.profile = ada
         mocks.profileError = undefined
         mocks.profileIsValidating = false
-        mocks.publicCv = undefined
         mocks.viewer = { id: "user-2" }
         vi.clearAllMocks()
     })
@@ -91,10 +88,9 @@ describe("PublicProfileLayout", () => {
         expect(screen.getByTestId("tabs")).toHaveTextContent("overview,projects,challenges,skills,activity")
     })
 
-    it("shows the CV tab to a visitor once a public CV exists", () => {
-        mocks.publicCv = { headline: "Staff engineer" }
+    it("does not advertise an unsupported public CV to a visitor", () => {
         render(<PublicProfileLayout content={<p />} />)
-        expect(screen.getByTestId("tabs")).toHaveTextContent("overview,projects,challenges,skills,cv,activity")
+        expect(screen.getByTestId("tabs")).toHaveTextContent("overview,projects,challenges,skills,activity")
     })
 
     it("shows the owner their own CV tab and never locks them out of their own profile", () => {
@@ -119,6 +115,15 @@ describe("PublicProfileLayout", () => {
         mocks.profile = profile
         render(<PublicProfileLayout content={<p />} />)
         expect(screen.getByTestId("state")).toHaveTextContent(state)
+    })
+
+    it("keeps the CV tab stable while profile ownership is still loading", () => {
+        mocks.profile = undefined
+        mocks.viewer = undefined
+        render(<PublicProfileLayout content={<p />} />)
+
+        expect(screen.getByTestId("state")).toHaveTextContent("loading")
+        expect(screen.getByTestId("tabs")).toHaveTextContent("overview,projects,challenges,skills,cv,activity")
     })
 
     it("settles as failed only while there is no profile to show", () => {

@@ -60,6 +60,13 @@ describe("GlobalAiChatLayout", () => {
         expect(screen.getByText("AI open")).toBeInTheDocument()
     })
 
+    it("reserves header clearance for Profile routes so the trigger never floats over cards", () => {
+        pathname = "/vi/profile/uat-personal-project-r10/activity"
+        const { container } = render(<GlobalAiChatLayout surface={<Surface />} />)
+        expect(container.querySelector("[data-ai-clearance=\"profile\"]")).toBeInTheDocument()
+        expect(screen.getByRole("button", { name: "Open AI" })).toBeInTheDocument()
+    })
+
     it("keeps context available without mounting AI for a signed-out viewer", () => {
         setSessionToken(undefined)
         const { container } = render(<GlobalAiChatLayout surface={<Surface />} />)

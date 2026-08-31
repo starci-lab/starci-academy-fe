@@ -36,6 +36,11 @@ export const ProfileChallengeManage = (props: ProfileChallengeManageProps) => {
             search: setSearch,
             filter: () => setDifficulty((current) => current === null ? difficulties[0] ?? null : difficulties[difficulties.indexOf(current) + 1] ?? null),
             select: (id) => router.push(`/profile/${username}/challenges/${courseId}/${id}`),
+            clearSearch: () => setSearch(""),
+            browseCourses: () => router.push("/courses"),
+            retry: () => {
+                void query.mutate()
+            },
         }}
     />
 }

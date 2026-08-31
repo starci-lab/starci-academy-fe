@@ -41,6 +41,7 @@ import {
     cvBuilderSectionHeaderClassName,
     cvBuilderSettingsClassName,
     cvBuilderSituationClassName,
+    cvBuilderSituationSurfaceClassName,
     cvBuilderTexClassName,
     cvBuilderTitleClassName,
     cvBuilderWideFieldClassName,
@@ -52,7 +53,7 @@ import {
 type CvBuilderMode = "blocks" | "latex"
 type SaveState = "saved" | "saving" | "error"
 
-/** Settled data required to edit, compile and publish one CV. */
+/** Settled data required to edit and compile one CV. */
 export type ProfileCvBuilderData = {
     readonly situation?: "ready" | "loading" | "error"
     readonly document?: CvDocument
@@ -64,7 +65,6 @@ export type ProfileCvBuilderData = {
     readonly isCreating: boolean
     readonly isCompiling: boolean
     readonly isRewriting: boolean
-    readonly isPublishing: boolean
     readonly mutationMessage?: string
 }
 
@@ -72,17 +72,33 @@ export type ProfileCvBuilderData = {
 export type ProfileCvBuilderActions = {
     readonly create?: () => void
     readonly retry?: () => void
+    readonly overview?: () => void
     readonly mode?: (mode: CvBuilderMode) => void
     readonly field?: (type: CvBlockType, key: string, value: string) => void
     readonly documentStyle?: (key: "template" | "language", value: string) => void
     readonly tex?: (value: string) => void
     readonly rewrite?: (type: CvBlockType) => void
     readonly compile?: () => void
-    readonly publish?: () => void
+}
+
+/** Recovery copy is supplied by the route locale while the base stays presentational. */
+export type ProfileCvBuilderRecoveryCopy = {
+    readonly loading: string
+    readonly errorTitle: string
+    readonly errorDescription: string
+    readonly retry: string
+    readonly overview: string
+}
+
+/** Empty-state copy is supplied by the route locale while the base stays presentational. */
+export type ProfileCvBuilderEmptyCopy = {
+    readonly title: string
+    readonly description: string
+    readonly create: string
 }
 
 /** CV builder input and outcomes. */
-export type ProfileCvBuilderProps = { readonly props: ProfileCvBuilderData; readonly on?: ProfileCvBuilderActions }
+export type ProfileCvBuilderProps = { readonly props: ProfileCvBuilderData; readonly on?: ProfileCvBuilderActions; readonly recovery: ProfileCvBuilderRecoveryCopy; readonly empty: ProfileCvBuilderEmptyCopy; readonly retryPending?: boolean }
 
 const blockOf = (document: CvDocument, type: CvBlockType) => document.blocks.find((block) => block.type === type)
 const valueOf = (block: CvBlock | undefined, key: string) => {
@@ -138,22 +154,32 @@ const SectionHeader = (props: SectionHeaderProps) => <div className={cvBuilderSe
 export const ProfileCvBuilderBase = (props: ProfileCvBuilderProps) => {
     const data = props.props
     const on = props.on
+    const recovery = props.recovery
+    const empty = props.empty
     const document = data.document
-    if (data.situation === "loading") return <SurfaceCard><div className={cvBuilderSituationClassName}><Text props={{ content: "Đang mở CV Builder…", tone: "muted", live: "polite" }} /></div></SurfaceCard> // vn-ok: localized Vietnamese interface copy.
-    if (data.situation === "error") return <SurfaceCard><div className={cvBuilderSituationClassName}><IconTile props={{ icon: "retry", tone: "accent", size: "md" }} /><Heading props={{ content: "Không tải được dữ liệu CV", level: 2 }} /><Button props={{ label: "Thử lại", variant: "secondary", icon: "retry" }} on={{ press: on?.retry }} /></div></SurfaceCard> // vn-ok: localized Vietnamese interface copy.
-    if (!document) return <SurfaceCard><div className={cvBuilderSituationClassName}><IconTile props={{ icon: "saved", tone: "accent", size: "md" }} /><Heading props={{ content: "Tạo CV bằng LaTeX", level: 2 }} /><Text props={{ content: "Nhập dữ liệu theo từng mục, dùng AI để chỉnh câu chữ và biên dịch thành PDF ATS-friendly.", tone: "muted" }} /><Button props={{ label: "Tạo CV đầu tiên", variant: "primary", icon: "talents", isPending: data.isCreating }} on={{ press: on?.create }} /></div></SurfaceCard> // vn-ok: localized Vietnamese interface copy.
+    const situationSurface = (children: ReactNode) => <div className={cvBuilderSituationSurfaceClassName}><SurfaceCard>{children}</SurfaceCard></div>
+    if (data.situation === "loading") return situationSurface(<div className={cvBuilderSituationClassName}><Text props={{ content: recovery.loading, tone: "muted", live: "polite" }} /></div>)
+    if (data.situation === "error") return situationSurface(<div className={cvBuilderSituationClassName}><IconTile props={{ icon: "retry", tone: "accent", size: "md" }} /><Heading props={{ content: recovery.errorTitle, level: 2 }} /><Text props={{ content: recovery.errorDescription, tone: "muted" }} /><div className={cvBuilderActionsClassName}><Button props={{ label: recovery.retry, variant: "primary", icon: "retry", isPending: props.retryPending }} on={{ press: on?.retry }} /><Button props={{ label: recovery.overview, variant: "secondary" }} on={{ press: on?.overview }} /></div></div>)
+    if (!document) return situationSurface(<div className={cvBuilderSituationClassName}><IconTile props={{ icon: "saved", tone: "accent", size: "md" }} /><Heading props={{ content: empty.title, level: 2 }} /><Text props={{ content: empty.description, tone: "muted" }} /><Button props={{ label: empty.create, variant: "primary", icon: "talents", isPending: data.isCreating }} on={{ press: on?.create }} /></div>)
 
     const saveLabel = data.saveState === "saving" ? "Đang lưu…" : data.saveState === "error" ? "Chưa lưu được" : "Đã lưu" // vn-ok: localized Vietnamese interface copy.
-    const outline = ["Thông tin cá nhân", "Tóm tắt", "Kinh nghiệm", "Dự án", "Kỹ năng", "Học vấn"]
+    const outline: ReadonlyArray<{ readonly label: string; readonly complete: boolean }> = [
+        { label: "Thông tin cá nhân", complete: valueOf(blockOf(document, "personal"), "name").trim() !== "" }, // vn-ok: localized CV outline label.
+        { label: "Tóm tắt", complete: valueOf(blockOf(document, "summary"), "text").trim() !== "" }, // vn-ok: localized CV outline label.
+        { label: "Kinh nghiệm", complete: valueOf(blockOf(document, "experience"), "role").trim() !== "" }, // vn-ok: localized CV outline label.
+        { label: "Dự án", complete: valueOf(blockOf(document, "project"), "title").trim() !== "" }, // vn-ok: localized CV outline label.
+        { label: "Kỹ năng", complete: valueOf(blockOf(document, "skills"), "skillsText").trim() !== "" }, // vn-ok: localized CV outline label.
+        { label: "Học vấn", complete: valueOf(blockOf(document, "education"), "school").trim() !== "" }, // vn-ok: localized CV outline label.
+    ]
     return <div className={cvBuilderClassName}>
         <header className={cvBuilderHeaderClassName}>
             <div className={cvBuilderTitleClassName}><Text props={{ content: "CV BUILDER · LATEX", size: "xs" }} /><Heading props={{ content: document.label, level: 2 }} /><Text props={{ content: "Biến dữ liệu thật thành một CV rõ ràng, dễ đọc và dễ qua ATS.", tone: "muted", size: "sm" }} /><Text props={{ content: saveLabel, size: "xs", icon: data.saveState === "error" ? "retry" : "complete" }} /></div> {/* vn-ok: localized Vietnamese interface copy. */}
-            <div className={cvBuilderActionsClassName}><Button props={{ label: document.isPublic ? "Đang công khai" : "Đặt công khai", variant: "secondary", icon: "send", isPending: data.isPublishing }} on={{ press: on?.publish }} /><Button props={{ label: "Biên dịch PDF", variant: "primary", icon: "review", isPending: data.isCompiling }} on={{ press: on?.compile }} />{data.previewUrl && <a href={data.previewUrl} target="_blank" rel="noreferrer" className={cvBuilderPdfLinkClassName}><Icon props={{ name: "explore", role: "chip" }} />Mở PDF</a>}</div> {/* vn-ok: localized Vietnamese interface copy. */}
+            <div className={cvBuilderActionsClassName}><Button props={{ label: "Biên dịch PDF", variant: "primary", icon: "review", isPending: data.isCompiling }} on={{ press: on?.compile }} />{data.previewUrl && <a href={data.previewUrl} target="_blank" rel="noreferrer" className={cvBuilderPdfLinkClassName}><Icon props={{ name: "explore", role: "chip" }} />Mở PDF</a>}</div> {/* vn-ok: localized Vietnamese interface copy. */}
         </header>
         {data.mutationMessage && <div className={cvBuilderFeedbackClassName}><Text props={{ content: data.mutationMessage, size: "sm", live: data.saveState === "error" ? "assertive" : "polite" }} /></div>}
         <div className={cvBuilderWorkspaceClassName}>
-            <aside className={cvBuilderOutlineClassName} aria-label="Cấu trúc CV"><SurfaceCard props={{ inset: "compact" }}><div className={cvBuilderProgressClassName}><div className={cvBuilderProgressHeaderClassName}><Text props={{ content: "Mức hoàn thiện", size: "sm" }} /><Text props={{ content: `${data.completeness}%`, weight: "semibold" }} /></div><div className={cvBuilderProgressTrackClassName} role="progressbar" aria-label="Mức hoàn thiện CV" aria-valuemin={0} aria-valuemax={100} aria-valuenow={data.completeness}><div className={cvBuilderProgressBarClassName} style={{ width: `${data.completeness}%` }} /></div><Text props={{ content: data.completeness === 100 ? "Đủ dữ liệu cốt lõi để ứng tuyển." : "Hoàn thiện các mục cốt lõi trước khi công khai.", size: "xs" }} /></div><div className={cvBuilderOutlineListClassName}>{outline.map((item) => <div key={item} className={cvBuilderOutlineItemClassName}><span>{item}</span><Icon props={{ name: "complete", role: "chip" }} /></div>)}</div><div className={cvBuilderSettingsClassName}><label htmlFor="cv-template" className={cvBuilderFieldClassName}>Mẫu CV<Select props={{ id: "cv-template", name: "template", label: "Mẫu CV", selectedKey: document.style.template ?? "classic", options: [{ id: "classic", label: "Cổ điển · ATS" }, { id: "modern", label: "Hiện đại" }, { id: "minimal", label: "Tối giản" }] }} on={{ select: (value) => on?.documentStyle?.("template", value) }} /></label><label htmlFor="cv-language" className={cvBuilderFieldClassName}>Ngôn ngữ<Select props={{ id: "cv-language", name: "language", label: "Ngôn ngữ", selectedKey: document.style.language ?? "vi", options: [{ id: "vi", label: "Tiếng Việt" }, { id: "en", label: "English" }] }} on={{ select: (value) => on?.documentStyle?.("language", value) }} /></label></div></SurfaceCard></aside> {/* vn-ok: localized Vietnamese interface copy. */}
-            <main className={cvBuilderEditorClassName}><SurfaceCard props={{ inset: "compact" }}><div className={cvBuilderModeClassName} role="tablist" aria-label="Chế độ soạn CV"><button type="button" role="tab" aria-selected={data.mode === "blocks"} className={getCvBuilderModeButtonClassName(data.mode === "blocks")} onClick={() => on?.mode?.("blocks")}>Khối nội dung</button><button type="button" role="tab" aria-selected={data.mode === "latex"} className={getCvBuilderModeButtonClassName(data.mode === "latex")} onClick={() => on?.mode?.("latex")}>Mã LaTeX</button></div>{data.mode === "latex" ? <textarea aria-label="Mã nguồn LaTeX" value={data.texDraft} onChange={(event) => on?.tex?.(event.target.value)} className={cvBuilderTexClassName} /> : <div className={cvBuilderFormClassName}> {/* vn-ok: localized Vietnamese interface copy. */}
+            <aside className={cvBuilderOutlineClassName} aria-label="Cấu trúc CV"><SurfaceCard props={{ inset: "compact" }}><div className={cvBuilderProgressClassName}><div className={cvBuilderProgressHeaderClassName}><Text props={{ content: "Mức hoàn thiện", size: "sm" }} /><Text props={{ content: `${data.completeness}%`, weight: "semibold" }} /></div><div className={cvBuilderProgressTrackClassName} role="progressbar" aria-label="Mức hoàn thiện CV" aria-valuemin={0} aria-valuemax={100} aria-valuenow={data.completeness}><div className={cvBuilderProgressBarClassName} style={{ width: `${data.completeness}%` }} /></div><Text props={{ content: data.completeness === 100 ? "Đủ dữ liệu cốt lõi để ứng tuyển." : "Hoàn thiện các mục cốt lõi trước khi công khai.", size: "xs" }} /></div><div className={cvBuilderOutlineListClassName}>{outline.map((item) => <div key={item.label} className={cvBuilderOutlineItemClassName}><span>{item.label}</span>{item.complete ? <Icon props={{ name: "complete", role: "chip" }} /> : <Text props={{ content: "Chưa đủ", size: "xs", tone: "muted" }} />}</div>)}</div><div className={cvBuilderSettingsClassName}><label htmlFor="cv-template" className={cvBuilderFieldClassName}>Mẫu CV<Select props={{ id: "cv-template", name: "template", label: "Mẫu CV", selectedKey: document.style.template ?? "classic", options: [{ id: "classic", label: "Cổ điển · ATS" }, { id: "modern", label: "Hiện đại" }, { id: "minimal", label: "Tối giản" }] }} on={{ select: (value) => on?.documentStyle?.("template", value) }} /></label><label htmlFor="cv-language" className={cvBuilderFieldClassName}>Ngôn ngữ<Select props={{ id: "cv-language", name: "language", label: "Ngôn ngữ", selectedKey: document.style.language ?? "vi", options: [{ id: "vi", label: "Tiếng Việt" }, { id: "en", label: "English" }] }} on={{ select: (value) => on?.documentStyle?.("language", value) }} /></label></div></SurfaceCard></aside> {/* vn-ok: localized Vietnamese interface copy. */}
+            <section className={cvBuilderEditorClassName} aria-label="Trình soạn CV"><SurfaceCard props={{ inset: "compact" }}><div className={cvBuilderModeClassName} role="tablist" aria-label="Chế độ soạn CV"><button type="button" role="tab" aria-selected={data.mode === "blocks"} className={getCvBuilderModeButtonClassName(data.mode === "blocks")} onClick={() => on?.mode?.("blocks")}>Khối nội dung</button><button type="button" role="tab" aria-selected={data.mode === "latex"} className={getCvBuilderModeButtonClassName(data.mode === "latex")} onClick={() => on?.mode?.("latex")}>Mã LaTeX</button></div>{data.mode === "latex" ? <textarea aria-label="Mã nguồn LaTeX" value={data.texDraft} onChange={(event) => on?.tex?.(event.target.value)} className={cvBuilderTexClassName} /> : <div className={cvBuilderFormClassName}> {/* vn-ok: localized Vietnamese interface copy. */}
                 <section className={cvBuilderSectionClassName}><SectionHeader eyebrow="BƯỚC 1 · NỀN TẢNG" title="Thông tin cá nhân" description="Tạo phần đầu của CV và thông tin liên hệ." /><div className={cvBuilderFieldsClassName}><Field document={document} type="personal" name="name" label="Họ tên" placeholder="Nguyễn Văn A" on={on?.field} /><Field document={document} type="personal" name="role" label="Vị trí ứng tuyển" placeholder="Backend Developer" on={on?.field} /><Field document={document} type="personal" name="email" label="Email" placeholder="ban@email.com" on={on?.field} /><Field document={document} type="personal" name="phone" label="Số điện thoại" placeholder="0901 234 567" on={on?.field} /><Field document={document} type="personal" name="location" label="Nơi ở" placeholder="TP. Hồ Chí Minh" on={on?.field} /><Field document={document} type="personal" name="githubUsername" label="GitHub" placeholder="github.com/username" on={on?.field} /></div></section>
                 <section className={cvBuilderSectionClassName}><SectionHeader eyebrow="BƯỚC 2 · ĐỊNH VỊ" title="Tóm tắt nghề nghiệp" description="AI chỉ đề xuất; bạn duyệt trước khi lưu." action={<Button props={{ label: "AI viết giúp", variant: "tertiary", size: "sm", icon: "talents", isPending: data.isRewriting }} on={{ press: () => on?.rewrite?.("summary") }} />} /><div className={cvBuilderFieldsClassName}><ProseField document={document} type="summary" name="text" label="Tóm tắt bản thân" placeholder="Giới thiệu ngắn về kinh nghiệm và mục tiêu nghề nghiệp…" on={on?.field} /></div></section> {/* vn-ok: localized Vietnamese interface copy. */}
                 <section className={cvBuilderSectionClassName}><SectionHeader eyebrow="BƯỚC 3 · KINH NGHIỆM" title="Kinh nghiệm làm việc" action={<Button props={{ label: "AI viết bullet", variant: "tertiary", size: "sm", icon: "talents", isPending: data.isRewriting }} on={{ press: () => on?.rewrite?.("experience") }} />} /><div className={cvBuilderFieldsClassName}><Field document={document} type="experience" name="company" label="Công ty" placeholder="Tên công ty" on={on?.field} /><Field document={document} type="experience" name="role" label="Vị trí" placeholder="Backend Developer" on={on?.field} /><Field document={document} type="experience" name="startDate" label="Bắt đầu" placeholder="Th01/2024" on={on?.field} /><Field document={document} type="experience" name="endDate" label="Kết thúc" placeholder="Hiện tại" on={on?.field} /><ProseField document={document} type="experience" name="bullets" label="Kết quả nổi bật" placeholder="Mỗi dòng là một kết quả có hành động và số liệu…" rows={5} on={on?.field} /></div></section> {/* vn-ok: localized Vietnamese interface copy. */}
@@ -161,7 +187,7 @@ export const ProfileCvBuilderBase = (props: ProfileCvBuilderProps) => {
                 <section className={cvBuilderSectionClassName}><SectionHeader eyebrow="BƯỚC 5 · NĂNG LỰC" title="Kỹ năng" /><div className={cvBuilderFieldsClassName}><Field document={document} type="skills" name="skillsText" label="Danh sách kỹ năng" placeholder="TypeScript, NestJS, PostgreSQL, Docker" wide on={on?.field} /></div></section> {/* vn-ok: localized Vietnamese interface copy. */}
                 <section className={cvBuilderSectionClassName}><SectionHeader eyebrow="BƯỚC 6 · HỌC VẤN" title="Học vấn" /><div className={cvBuilderFieldsClassName}><Field document={document} type="education" name="school" label="Trường" placeholder="Tên trường" on={on?.field} /><Field document={document} type="education" name="degree" label="Bằng cấp / chuyên ngành" placeholder="Kỹ thuật phần mềm" on={on?.field} /><Field document={document} type="education" name="startDate" label="Bắt đầu" placeholder="2019" on={on?.field} /><Field document={document} type="education" name="endDate" label="Kết thúc" placeholder="2023" on={on?.field} /></div></section> {/* vn-ok: localized Vietnamese interface copy. */}
                 <section className={cvBuilderSectionClassName}><SectionHeader eyebrow="BỔ SUNG · LEGACY" title="Điểm khác biệt" description="Các mục tùy chọn từ CV StarCi cũ; để trống nếu không cần." /><div className={cvBuilderFieldsClassName}><Field document={document} type="achievement" name="title" label="Thành tích" placeholder="Giải thưởng hoặc cột mốc" on={on?.field} /><Field document={document} type="certification" name="title" label="Chứng chỉ" placeholder="Tên chứng chỉ" on={on?.field} /><Field document={document} type="language" name="name" label="Ngoại ngữ" placeholder="English · B2" on={on?.field} /><Field document={document} type="activity" name="description" label="Hoạt động" placeholder="Cộng đồng hoặc tình nguyện" on={on?.field} /><Field document={document} type="interest" name="name" label="Sở thích" placeholder="Đọc sách, chạy bộ…" wide on={on?.field} /></div></section> {/* vn-ok: localized Vietnamese interface copy. */}
-            </div>}</SurfaceCard></main>
+            </div>}</SurfaceCard></section>
             <aside className={cvBuilderPreviewClassName} aria-label="Bản xem trước CV"><SurfaceCard props={{ inset: "compact" }}><div className={cvBuilderPreviewHeaderClassName}><div><Heading props={{ content: "Bản xem trước", level: 3 }} /><Text props={{ content: data.previewUrl ? "PDF đã biên dịch" : "Bản nháp ATS · A4", size: "xs" }} /></div><Button props={{ label: "Biên dịch lại", variant: "secondary", size: "sm", icon: "retry", isPending: data.isCompiling }} on={{ press: on?.compile }} /></div>{data.previewUrl ? <ProfileCvDocument props={{ title: document.label, src: data.previewUrl }} /> : <div className={cvBuilderPaperStageClassName}><DraftPaper document={document} /></div>}</SurfaceCard></aside> {/* vn-ok: localized Vietnamese interface copy. */}
         </div>
     </div>

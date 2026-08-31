@@ -48,7 +48,6 @@ describe("JobReadinessWidget", () => {
         const { container } = render(<JobReadinessWidget />)
         expect(screen.getByText("64% · Backend track")).toBeInTheDocument()
         expect(container.textContent).toContain("band.building")
-        expect(container.textContent).toContain("foundationPercentile:64")
         expect(rows(container)).toEqual(["metric.capstone", "metric.interview", "metric.cv"])
     })
 

@@ -42,7 +42,7 @@ export interface ApiEnv {
     debug: boolean
 }
 
-const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "::1"])
+const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "::1", "[::1]"])
 
 /**
  * `*.lvh.me` resolves to 127.0.0.1 and gives parallel UAT browser cases distinct cookie hosts.
@@ -53,19 +53,20 @@ const isLoopbackHost = (hostname?: string): boolean =>
     && (LOOPBACK_HOSTS.has(hostname) || hostname === "lvh.me" || hostname.endsWith(".lvh.me"))
 
 /**
- * Keep local API cookies on the same loopback host spelling as the page.
+ * Keep local API cookies on the canonical local host, except for isolated UAT cases.
  *
- * Browsers deliberately treat `localhost` and `127.0.0.1` as different cookie hosts. A local page
- * opened through one while GraphQL uses the other can complete sign-in in memory, then lose the
- * HttpOnly refresh + readable CSRF pair on reload. Only loopback-to-loopback URLs are normalized;
- * deployed hosts and non-URL configuration are returned verbatim.
+ * Browsers deliberately treat different loopback spellings as different cookie hosts. Normal
+ * development therefore always uses `localhost`; only `*.lvh.me` UAT cases retain distinct hosts
+ * so parallel cookie jars stay isolated. Deployed hosts and non-URL configuration remain verbatim.
  */
 const alignLoopbackHost = (configured: string): string => {
     if (typeof window === "undefined" || !isLoopbackHost(window.location.hostname)) return configured
     try {
         const url = new URL(configured)
-        if (!isLoopbackHost(url.hostname) || url.hostname === window.location.hostname) return configured
-        url.hostname = window.location.hostname
+        if (!isLoopbackHost(url.hostname)) return configured
+        url.hostname = window.location.hostname === "lvh.me" || window.location.hostname.endsWith(".lvh.me")
+            ? window.location.hostname
+            : "localhost"
         return url.toString()
     } catch {
         return configured

@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { useParams } from "next/navigation"
 import { useRouter } from "@/i18n/navigation"
 import { useLocale, useTranslations } from "next-intl"
@@ -21,7 +21,7 @@ const primaryLabelOf = (
     followed: boolean | undefined,
     t: ProfileTranslator,
 ) => {
-    if (isSelf) return t("actions.edit")
+    if (isSelf) return t("cv.edit")
     if (canHire) return t("actions.hire")
     return followed ? t("actions.following") : t("actions.follow")
 }
@@ -40,6 +40,7 @@ export const ProfileHero = (props: ProfileHeroProps) => {
     const profile = useQueryUserProfileSwr(username)
     const viewer = useQueryMeSwr()
     const follow = useMutateSetFollowSwr()
+    const [sharePending, setSharePending] = useState(false)
     const courses = useOverviewEvidence<ReadonlyArray<EvidenceCourse>>("courses")
     const challenges = useOverviewEvidence<ReadonlyArray<ChallengeEvidence>>("solved-challenges")
     const practice = useOverviewEvidence<PracticeEvidence>("coding-skills")
@@ -77,7 +78,7 @@ export const ProfileHero = (props: ProfileHeroProps) => {
     const onPrimary = () => {
         if (!user) return
         if (isSelf) {
-            router.push("/profile/settings/edit")
+            router.push(`/profile/${user.username}/cv`)
             return
         }
         if (canHire && user.githubUsername) {
@@ -92,15 +93,23 @@ export const ProfileHero = (props: ProfileHeroProps) => {
             .trigger({ userId: user.id, follow: !user.isFollowedByMe })
             .then(() => profile.mutate())
     }
-    const onShare = () => {
+    const onShare = async () => {
+        if (sharePending) return
         const url = window.location.href
-        if (navigator.share) {
-            void navigator.share({
-                title: user?.displayName ?? user?.username ?? "",
-                url,
-            })
-        } else {
-            void navigator.clipboard.writeText(url)
+        setSharePending(true)
+        try {
+            if (navigator.share) {
+                await navigator.share({
+                    title: user?.displayName ?? user?.username ?? "",
+                    url,
+                })
+            } else {
+                await navigator.clipboard.writeText(url)
+            }
+        } catch {
+            return
+        } finally {
+            setSharePending(false)
         }
     }
 
@@ -120,6 +129,7 @@ export const ProfileHero = (props: ProfileHeroProps) => {
                 primaryLabel,
                 primaryPending: follow.isMutating,
                 shareLabel: t("actions.share"),
+                sharePending,
                 githubUrl: user?.githubUsername
                     ? `https://github.com/${user.githubUsername}`
                     : undefined,

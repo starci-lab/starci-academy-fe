@@ -15,6 +15,6 @@ export const ProfileRedirectPage = (props: ProfileRedirectPageProps) => {
         if (me.data?.username) router.replace(`/profile/${me.data.username}`)
         else if (me.data === null) router.replace("/authentication")
     }, [me.data, router])
-    return <ProfileRedirectPageBase {...{}} />
+    return <ProfileRedirectPageBase state={me.error ? "error" : "pending"} retryPending={me.isValidating} on={{ retry: () => void me.mutate() }} />
 }
 export * from "./component"

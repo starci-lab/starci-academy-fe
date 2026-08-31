@@ -5,10 +5,10 @@ import { useQueryResolveRouteSwr, useQueryTrendingContentsSwr } from "@/hooks"
 import { TrendingContents } from "./index"
 
 /**
- * What these tests guard - that a rail nobody can act on is not drawn at all.
+ * What these tests guard - that the ranked rail stays visible and explains settled outcomes.
  *
  * The block has two ways of having nothing to say (a failed request and a settled empty list) and
- * both must vanish rather than leave an empty card in the sidebar. The third situation, a request
+ * both must keep a list surface rather than leave an unexplained gap. The third situation, a request
  * still in flight, must keep its height instead.
  */
 
@@ -22,7 +22,7 @@ vi.mock("@/hooks", () => ({
 }))
 
 /** One settled SWR answer, shaped the way the barrel hook returns it. */
-const answer = (over: Partial<{ data: unknown, error: unknown }>) => ({
+const answer = (over: Partial<{ data: unknown, error: unknown, mutate: () => void }>) => ({
     data: undefined,
     error: undefined,
     isLoading: false,
@@ -44,20 +44,23 @@ afterEach(() => {
 })
 
 describe("TrendingContents", () => {
-    it("draws nothing at all when the ranking could not be read", () => {
-        vi.mocked(useQueryTrendingContentsSwr).mockReturnValue(answer({ error: new Error("down") }))
+    it("keeps a retryable list surface when the ranking could not be read", () => {
+        const mutate = vi.fn()
+        vi.mocked(useQueryTrendingContentsSwr).mockReturnValue(answer({ error: new Error("down"), mutate }))
         vi.mocked(useQueryResolveRouteSwr).mockReturnValue(resolver("/x"))
 
-        const { container } = render(<TrendingContents />)
-        expect(container).toBeEmptyDOMElement()
+        render(<TrendingContents />)
+        expect(screen.getByText("feedFailed")).toBeInTheDocument()
+        fireEvent.click(screen.getByRole("button", { name: "retry" }))
+        expect(mutate).toHaveBeenCalledOnce()
     })
 
-    it("draws nothing at all when the platform has no trending content yet", () => {
+    it("keeps an explicit empty list surface when the platform has no trending content yet", () => {
         vi.mocked(useQueryTrendingContentsSwr).mockReturnValue(answer({ data: [] }))
         vi.mocked(useQueryResolveRouteSwr).mockReturnValue(resolver("/x"))
 
-        const { container } = render(<TrendingContents />)
-        expect(container).toBeEmptyDOMElement()
+        render(<TrendingContents />)
+        expect(screen.getByText("trending: feedEmptyPlatformDescription")).toBeInTheDocument()
     })
 
     it("holds six resting ranks while the ranking is on its way", () => {

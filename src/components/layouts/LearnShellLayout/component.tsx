@@ -1,11 +1,10 @@
 import { DrawerBranch } from "@/components/branches/DrawerBranch"
 import { LearnSpine } from "@/components/blocks/learn/LearnSpine"
-import { Button } from "@/components/leaves/Button"
 import { NavLink } from "@/components/leaves/NavLink"
-import { Text } from "@/components/leaves/Text"
-import type { IconName } from "@/components/leaves/Icon"
+import { Icon, type IconName } from "@/components/leaves/Icon"
+import { Subnav } from "@starci/grammar/core"
 import type { ReactNode } from "react"
-import { learnShellBodyClassName, learnShellFrameClassName, learnShellMobileBarClassName, learnShellMobileCurrentClassName, learnShellMobileNavigationClassName, learnShellRailClassName } from "./classNames"
+import { getLearnShellRailClassName, learnShellBodyClassName, learnShellFrameClassName, learnShellMobileBarClassName } from "./classNames"
 
 /**
  * LAYOUT - `LearnShellLayoutBase`: the frame every learn surface is read inside.
@@ -56,7 +55,7 @@ export type LearnShellLayoutData = {
      */
     readonly mobileTabs?: ReadonlyArray<LearnMobileTab>
     /** The compact course location that opens the persistent spine as a left drawer. */
-    readonly mobileCourseNavigation?: { readonly label: string; readonly currentLabel: string; readonly isOpen: boolean }
+    readonly mobileCourseNavigation?: { readonly label: string; readonly closeLabel: string; readonly courseTitle: string; readonly isOpen: boolean }
     /** Focused work sessions remove course furniture and give the routed surface the full frame. */
     readonly isFullBleed: boolean
 }
@@ -66,6 +65,7 @@ export type LearnShellLayoutActions = {
     readonly openMobileTab?: (id: string) => void
     readonly openCourseNavigation?: () => void
     readonly closeCourseNavigation?: () => void
+    readonly setRailCollapsed?: (collapsed: boolean) => void
 }
 
 /** Props for {@link LearnShellLayoutBase}. */
@@ -74,6 +74,7 @@ export type LearnShellLayoutProps = {
     readonly mobileTabs?: ReadonlyArray<LearnMobileTab>
     readonly mobileCourseNavigation?: LearnShellLayoutData["mobileCourseNavigation"]
     readonly isFullBleed: boolean
+    readonly isRailCollapsed?: boolean
     readonly on?: LearnShellLayoutActions
     /** The routed surface - the one thing the frame does not decide. */
     readonly surface: ReactNode
@@ -89,12 +90,18 @@ export const LearnShellLayoutBase = (props: LearnShellLayoutProps) => {
     return (
         <>
             <div className={learnShellFrameClassName}>
-                {props.isFullBleed ? null : <aside className={learnShellRailClassName}><LearnSpine displayId={props.displayId} /></aside>}
-                {props.mobileCourseNavigation === undefined ? null : <div className={learnShellMobileNavigationClassName}>
-                    <Button props={{ label: props.mobileCourseNavigation.label, variant: "outline", size: "sm", icon: "course" }} on={{ press: props.on?.openCourseNavigation }} />
-                    <div className={learnShellMobileCurrentClassName}><Text props={{ content: props.mobileCourseNavigation.currentLabel, size: "xs", tone: "muted" }} /></div>
-                </div>}
-                <main className={learnShellBodyClassName}>{props.surface}</main>
+                {props.isFullBleed ? null : <aside className={getLearnShellRailClassName(props.isRailCollapsed === true)}><LearnSpine displayId={props.displayId} isCollapsed={props.isRailCollapsed} onCollapsedChange={props.on?.setRailCollapsed} /></aside>}
+                {props.mobileCourseNavigation === undefined ? null : <Subnav
+                    label={props.mobileCourseNavigation.label}
+                    title={props.mobileCourseNavigation.courseTitle}
+                    leading={<Icon props={{ name: "course", role: "leading" }} />}
+                    menuIcon={<Icon props={{ name: "menu", role: "leading" }} />}
+                    openMenuLabel={props.mobileCourseNavigation.label}
+                    closeMenuLabel={props.mobileCourseNavigation.closeLabel}
+                    isMenuOpen={props.mobileCourseNavigation.isOpen}
+                    onMenuOpenChange={(isOpen) => isOpen ? props.on?.openCourseNavigation?.() : props.on?.closeCourseNavigation?.()}
+                />}
+                <div className={learnShellBodyClassName} data-learn-shell-body="true">{props.surface}</div>
                 {mobileTabs.length === 0 ? null : <nav className={learnShellMobileBarClassName}>
                     {mobileTabs.map((tab) => <NavLink key={tab.id} props={{ label: tab.label, icon: tab.icon, kind: "tab", isCurrent: tab.isCurrent }} on={{ press: () => props.on?.openMobileTab?.(tab.id) }} />)}
                 </nav>}
@@ -103,7 +110,7 @@ export const LearnShellLayoutBase = (props: LearnShellLayoutProps) => {
                 <DrawerBranch
                     isOpen={props.mobileCourseNavigation.isOpen}
                     placement="left"
-                    title={props.mobileCourseNavigation.label}
+                    title={props.mobileCourseNavigation.courseTitle}
                     onDismiss={() => props.on?.closeCourseNavigation?.()}
                 >
                     <LearnSpine displayId={props.displayId} presentation="drawer" onNavigate={props.on?.closeCourseNavigation} />

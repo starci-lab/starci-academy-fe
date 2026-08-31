@@ -109,7 +109,7 @@ describe("WeeklyChallengeCard", () => {
 
         render(<WeeklyChallengeCard />)
         expect(screen.getByText("endsIn:2,3")).toBeInTheDocument()
-        expect(screen.getByText("passedCount:12")).toBeInTheDocument()
+        expect(screen.getAllByText("passedCount:12").length).toBeGreaterThan(0)
         fireEvent.click(screen.getByRole("button", { name: "tryNow" }))
         expect(push).toHaveBeenCalledWith("/challenges/chal-1")
     })

@@ -6,6 +6,8 @@ import { SurfaceListCard } from "./branch/SurfaceListCard/index.js"
 import { HorizontalScrollRegion } from "./composite/HorizontalScrollRegion/index.js"
 import { StaticStateRow } from "./composite/StaticStateRow/index.js"
 import { OtpInput } from "./OtpInput.js"
+import { SectionHeader } from "./primitive/SectionHeader/index.js"
+import { Rail } from "./branch/Rail/index.js"
 
 const expectVerticalScrollShadow = (markup: string) => {
     expect(markup).toContain("data-grammar-scroll=\"contained\"")
@@ -14,6 +16,24 @@ const expectVerticalScrollShadow = (markup: string) => {
 }
 
 describe("scrollable Core surfaces", () => {
+    it("owns the three semantic layers of ContextIntro", () => {
+        const markup = renderToStaticMarkup(<SectionHeader eyebrow="Next task" title="Personal project" description="Supporting evidence" level={1} composition="context-intro" />)
+        expect(markup).toContain("data-grammar-composition=\"context-intro\"")
+        expect(markup).toContain("starci-core-section-eyebrow")
+        expect(markup).toContain("<h1 class=\"starci-core-section-title\"")
+        expect(markup).toContain("starci-core-section-description")
+    })
+
+    it("owns right-rail padding and sticky lifecycle", () => {
+        const markup = renderToStaticMarkup(<Rail label="Project evidence" mode="sticky" inset="content" isLabelHidden>Facts</Rail>)
+        expect(markup).toContain("data-grammar-rail-mode=\"sticky\"")
+        expect(markup).toContain("px-3 py-6")
+        expect(markup).toContain("starci-core-visually-hidden")
+        expect(markup).toContain("starci-core-rail")
+        expect(markup).toContain("starci-core-rail-frame")
+        expect(markup).toContain("starci-core-rail-body")
+    })
+
     it("preserves intrinsic-width content in a horizontal ScrollShadow", () => {
         const markup = renderToStaticMarkup(
             <HorizontalScrollRegion><div>Six fixed slots</div></HorizontalScrollRegion>,
@@ -46,7 +66,22 @@ describe("scrollable Core surfaces", () => {
         )
         expect(markup).toContain("starci-core-surface-card")
         expect(markup).toContain("starci-core-surface starci-core-frameless-surface")
+        expect(markup).toContain("overflow-visible")
+        expect(markup).not.toContain("overflow-hidden")
         expect(markup).toContain("starci-core-surface-content")
+    })
+
+    it("owns the singular legacy highlight boundary and suppresses it while pending", () => {
+        const highlighted = renderToStaticMarkup(
+            <SurfaceCard ariaLabel="Featured card" isHighlight><p>Body</p></SurfaceCard>,
+        )
+        const pending = renderToStaticMarkup(
+            <SurfaceCard ariaLabel="Loading card" isHighlight state="pending"><p>Body</p></SurfaceCard>,
+        )
+
+        expect(highlighted).toContain("data-grammar-highlight=\"true\"")
+        expect(highlighted).toContain("starci-core-surface-highlight-sweep")
+        expect(pending).not.toContain("data-grammar-highlight")
     })
 
     it("makes SurfaceListCard rows vertically scrollable", () => {

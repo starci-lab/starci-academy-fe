@@ -1,4 +1,6 @@
-import { ErrorMessage as HeroErrorMessage } from "@heroui/react"
+import {
+    errorMessageClassName,
+} from "./classNames"
 
 /** Resolved copy for one surface-level failure. */
 export type ErrorMessageData = {
@@ -10,9 +12,9 @@ export type ErrorMessageProps = {
     readonly props: ErrorMessageData
 }
 
-/** Draw an assertive HeroUI error message for a non-field surface failure. */
+/** Draw an assertive semantic error message without requiring a field-slot context. */
 export const ErrorMessage = (props: ErrorMessageProps) => (
-    <HeroErrorMessage role="alert" aria-live="assertive">
+    <p slot="errorMessage" role="alert" aria-live="assertive" className={errorMessageClassName}>
         {props.props.content}
-    </HeroErrorMessage>
+    </p>
 )

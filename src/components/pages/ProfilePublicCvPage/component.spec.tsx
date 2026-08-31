@@ -2,6 +2,8 @@ import { render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { ProfilePublicCvBase } from "@/components/blocks/profile/ProfilePublicCv/component"
 
+vi.mock("@/components/blocks/profile/ProfileCvBuilder", () => ({ ProfileCvBuilder: () => <div>CV builder</div> }))
+
 describe("ProfilePublicCvPageBase", () => {
     const baseProps = {
         label: "Public CV",

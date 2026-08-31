@@ -75,7 +75,9 @@ export const LeagueCard = (props: LeagueCardProps) => {
             // countdown into a badge of its own made it look like a warning about something else.
             subtitle: mine && data
                 ? `${t("points", { count: mine.weekPoints })} · ${t("resetIn", countdown)}`
-                : t("league.empty"),
+                : data && entries.length > 0
+                    ? t("league.empty")
+                    : undefined,
         },
         rows,
         emptyMessage: t("league.empty"),

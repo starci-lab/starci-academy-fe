@@ -7,7 +7,8 @@ import { TitleDescriptionAccordion, type TitleDescriptionAccordionItem } from "@
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
-import { ChoiceTabs } from "@/components/leaves/ChoiceTabs"
+import { ExtendedTabs } from "@/components/leaves/ExtendedTabs"
+import type { IconName } from "@/components/leaves/Icon"
 import { Breadcrumbs } from "@/components/leaves/Breadcrumbs"
 import { Heading } from "@/components/leaves/Heading"
 import { Text } from "@/components/leaves/Text"
@@ -23,6 +24,7 @@ import {
     courseDetailStateClassName,
     courseDetailStatClassName,
     courseDetailStatsClassName,
+    courseDetailTabsClassName,
 } from "./classNames"
 
 /** One trust statistic shown in the course hero. */
@@ -58,6 +60,13 @@ export type CourseDetailPageProps = { readonly displayId: string; readonly pageS
 const RESTING_COUNTS = { stats: 5, promises: 4, modules: 3, prerequisites: 3, faqs: 3 } as const
 const reviewStateOf = (total: number | undefined): "unrated" | "rated" => (total ?? 0) === 0 ? "unrated" : "rated"
 
+const COURSE_SECTION_TAB_ICONS = {
+    overview: "explore",
+    curriculum: "courseContent",
+    reviews: "ratingStarFilled",
+    faq: "courseQa",
+} as const satisfies Record<CourseDetailSection, IconName>
+
 /** Draw the course detail page with ordinary React composition. */
 export const CourseDetailPageBase = (props: CourseDetailPageProps) => {
     if (props.pageState === "not-found" || props.pageState === "failed") return <div className={courseDetailStateClassName}><EmptyNotice props={{ icon: "course", message: props.props.noticeMessage ?? "", actionLabel: props.pageState === "failed" ? props.props.noticeActionLabel : undefined }} on={{ act: props.on?.retry }} /></div>
@@ -70,7 +79,23 @@ export const CourseDetailPageBase = (props: CourseDetailPageProps) => {
     const faqs = isLoading ? Array.from({ length: RESTING_COUNTS.faqs }, (_, index) => ({ id: `resting-faq-${index}`, title: "", description: "" })) : props.props.faqs ?? []
     return <div className={courseDetailPageClassName}>
         <nav className={courseDetailNavigationClassName} aria-label={props.props.labels.sectionTabsLabel}>
-            <ChoiceTabs props={{ label: props.props.labels.sectionTabsLabel, selectedKey: props.props.selectedSection ?? "overview", tabs: [{ id: "overview", label: props.props.labels.overviewTab }, { id: "curriculum", label: props.props.labels.curriculumTab }, { id: "reviews", label: props.props.labels.reviewsTab }, { id: "faq", label: props.props.labels.faqTab }] }} on={{ select: (key) => props.on?.selectSection?.(key as CourseDetailSection) }} />
+            <div className={courseDetailTabsClassName}>
+                <ExtendedTabs
+                    props={{
+                        label: props.props.labels.sectionTabsLabel,
+                        selectedKey: props.props.selectedSection ?? "overview",
+                        inset: "none",
+                        labelVisibility: "responsive",
+                        tabs: [
+                            { id: "overview", label: props.props.labels.overviewTab, icon: COURSE_SECTION_TAB_ICONS.overview },
+                            { id: "curriculum", label: props.props.labels.curriculumTab, icon: COURSE_SECTION_TAB_ICONS.curriculum },
+                            { id: "reviews", label: props.props.labels.reviewsTab, icon: COURSE_SECTION_TAB_ICONS.reviews },
+                            { id: "faq", label: props.props.labels.faqTab, icon: COURSE_SECTION_TAB_ICONS.faq },
+                        ],
+                    }}
+                    on={{ select: (key) => props.on?.selectSection?.(key as CourseDetailSection) }}
+                />
+            </div>
         </nav>
         <div className={courseDetailBodyClassName}>
             <div className={courseDetailContentClassName}>

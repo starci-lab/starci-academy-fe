@@ -34,8 +34,6 @@ export type CvDocument = {
     readonly blocks: ReadonlyArray<CvBlock>
     readonly style: CvStyle
     readonly pdfCdnKey: string | null
-    readonly texSource: string | null
-    readonly isPublic: boolean
     readonly createdAt: string
     readonly updatedAt: string
 }

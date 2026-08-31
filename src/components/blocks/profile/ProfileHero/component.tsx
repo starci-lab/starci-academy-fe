@@ -2,7 +2,6 @@ import { Avatar } from "@/components/leaves/Avatar"
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { Button } from "@/components/leaves/Button"
 import { Heading } from "@/components/leaves/Heading"
-import { IconButton } from "@/components/leaves/IconButton"
 import { Link } from "@/components/leaves/Link"
 import { Text } from "@/components/leaves/Text"
 import {
@@ -32,6 +31,7 @@ export type ProfileHeroData = {
     readonly primaryLabel: string
     readonly primaryPending: boolean
     readonly shareLabel: string
+    readonly sharePending: boolean
     readonly githubUrl?: string
     readonly linkedinUrl?: string
     readonly websiteUrl?: string
@@ -73,7 +73,7 @@ export const ProfileHeroBase = (props: ProfileHeroProps) => {
             <div className={profileActionColumnClassName}>
                 <div className={profileActionRowClassName}>
                     <Button props={{ label: data.primaryLabel, variant: "primary", isPending: data.primaryPending }} on={{ press: props.on?.primary }} isLoading={loading} />
-                    <IconButton props={{ icon: "send", label: data.shareLabel }} on={{ press: props.on?.share }} />
+                    <Button props={{ icon: "send", label: data.shareLabel, variant: "secondary", isPending: data.sharePending }} on={{ press: props.on?.share }} />
                 </div>
                 <Text props={{ content: data.joinedLabel, size: "xs" }} isLoading={loading} />
                 <div className={profileMetaListClassName}>
@@ -83,9 +83,9 @@ export const ProfileHeroBase = (props: ProfileHeroProps) => {
                 </div>
             </div>
             <div className={profileEvidenceSummaryClassName}>
-                <Text props={{ content: data.evidenceLabel, size: "sm", tone: "accent", weight: "semibold", icon: "talents" }} isLoading={evidenceLoading} />
+                <Text props={{ content: data.evidenceLabel, size: "sm", weight: "semibold" }} isLoading={evidenceLoading} />
                 <div className={profileEvidenceFactRunClassName}>
-                    {data.evidenceItems.map((item, index) => <Text key={`${index}-${item}`} props={{ content: item, size: "sm" }} isLoading={evidenceLoading} />)}
+                    {data.evidenceItems.map((item, index) => <Text key={`${index}-${item}`} props={{ content: item, size: "xs" }} isLoading={evidenceLoading} />)}
                 </div>
             </div>
         </div>

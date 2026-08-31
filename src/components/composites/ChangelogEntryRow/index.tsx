@@ -38,7 +38,7 @@ export const ChangelogEntryRow = (props: ChangelogEntryRowProps) => {
             {data.isAction === true && on?.open !== undefined ? (
                 <TextLink props={{ label: data.title ?? "", size: "sm" }} on={{ press: on.open }} />
             ) : (
-                <Text props={{ content: data.title, size: "sm", weight: "medium" }} isLoading={isLoading} />
+                <Text props={{ content: data.title, size: "sm", weight: "normal" }} isLoading={isLoading} />
             )}
             {data.body === undefined && !isLoading ? null : (
                 <Text props={{ content: data.body, size: "xs", tone: "muted" }} isLoading={isLoading} />

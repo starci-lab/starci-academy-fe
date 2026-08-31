@@ -4,7 +4,7 @@ import { StreakStatRow } from "@/components/blocks/dashboard/StreakStatRow"
 import { CreditStatRow } from "@/components/blocks/dashboard/CreditStatRow"
 import { RewardStatRow } from "@/components/blocks/dashboard/RewardStatRow"
 import { ProfileIdentityRow } from "@/components/blocks/dashboard/ProfileIdentityRow"
-import { identityRailClassName } from "./classNames"
+import { identityRailClassName, identityRailStatsClassName } from "./classNames"
 
 /**
  * BLOCK - `IdentityRail`: the three standing figures, read as one rail.
@@ -25,6 +25,13 @@ export type IdentityRailProps = Record<string, never>
 export const IdentityRail = (props: IdentityRailProps) => {
     void props
     return (
-        <div className={identityRailClassName}><ProfileIdentityRow /><StreakStatRow /><CreditStatRow /><RewardStatRow /></div>
+        <div className={identityRailClassName}>
+            <ProfileIdentityRow />
+            <div className={identityRailStatsClassName}>
+                <StreakStatRow />
+                <CreditStatRow />
+                <RewardStatRow />
+            </div>
+        </div>
     )
 }

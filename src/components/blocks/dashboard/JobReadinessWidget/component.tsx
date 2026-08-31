@@ -3,7 +3,14 @@ import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { LabelledProgressRow } from "@/components/composites/LabelledProgressRow"
 import { Button } from "@/components/leaves/Button"
 import { Text } from "@/components/leaves/Text"
-import { readinessHeadlineClassName, readinessMetricsClassName } from "./classNames"
+import {
+    readinessCardClassName,
+    readinessFooterClassName,
+    readinessHeadlineClassName,
+    readinessMetricsClassName,
+    readinessSeparatorClassName,
+    readinessSurfaceClassName,
+} from "./classNames"
 /** Readiness band. */
 export type JobReadinessBand = "needsWork" | "building" | "jobReady"
 /** One readiness pillar. */
@@ -34,28 +41,41 @@ export const JobReadinessWidgetBase = (props: JobReadinessWidgetProps) => {
     const headline = props.props.depthScoreLabel ?? (props.props.depthScore === undefined
         ? props.props.courseTitle
         : `${props.props.depthScore} · ${props.props.courseTitle ?? ""}`)
+    const action = props.props.actionLabel === undefined
+        ? null
+        : (
+            <div className={readinessFooterClassName}>
+                <Button props={{ label: props.props.actionLabel, size: "sm", variant: "secondary" }} on={{ press: props.on?.act }} isLoading={loading} />
+            </div>
+        )
 
     return (
-        <SurfaceCard props={{ label: props.props.label }} isLoading={loading}>
-            <div data-part="readiness-headline" className={readinessHeadlineClassName}>
-                <Text props={{ content: headline, size: "sm", weight: "semibold" }} isLoading={loading} />
-                <Text props={{ content: props.props.bandLabel, size: "xs", tone: "muted" }} isLoading={loading} />
-            </div>
-            {props.props.percentileLabel === undefined ? null : (
-                <Text props={{ content: props.props.percentileLabel, size: "xs", tone: "muted" }} />
-            )}
-            <div data-part="readiness-metrics" className={readinessMetricsClassName}>
-                {metrics.map((metric) => (
-                    <LabelledProgressRow
-                        key={metric.id}
-                        props={{ id: metric.id, title: metric.label, percent: metric.score, percentText: metric.scoreLabel }}
-                        isLoading={loading}
-                    />
-                ))}
-            </div>
-            {props.props.actionLabel === undefined ? null : (
-                <Button props={{ label: props.props.actionLabel, size: "sm", variant: "primary" }} on={{ press: props.on?.act }} isLoading={loading} />
-            )}
-        </SurfaceCard>
+        <div className={readinessSurfaceClassName}>
+            <SurfaceCard props={{ label: props.props.label }} isLoading={loading}>
+                <div className={readinessCardClassName} data-part="readiness-body">
+                    <div className={readinessHeadlineClassName} data-part="readiness-headline">
+                        <Text props={{ content: headline, size: "sm", weight: "semibold" }} isLoading={loading} />
+                        <Text props={{ content: props.props.bandLabel, size: "xs", tone: "muted" }} isLoading={loading} />
+                    </div>
+                    <div aria-hidden className={readinessSeparatorClassName} />
+                    <div className={readinessMetricsClassName} data-part="readiness-metrics">
+                        {metrics.map((metric) => (
+                            <LabelledProgressRow
+                                key={metric.id}
+                                props={{ id: metric.id, title: metric.label, percent: metric.score, percentText: metric.scoreLabel }}
+                                titleWeight="normal"
+                                isLoading={loading}
+                            />
+                        ))}
+                    </div>
+                    {action === null ? null : (
+                        <>
+                            <div aria-hidden className={readinessSeparatorClassName} />
+                            {action}
+                        </>
+                    )}
+                </div>
+            </SurfaceCard>
+        </div>
     )
 }

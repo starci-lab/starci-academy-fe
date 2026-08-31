@@ -20,9 +20,9 @@ export const WhoToFollow = (props: WhoToFollowProps) => {
     const [followed, setFollowed] = useState<ReadonlySet<string>>(new Set())
     const [pending, setPending] = useState<string>()
     const available = query.data ?? []
-    if (query.error !== undefined || query.data === null || (query.data !== undefined && available.length === 0)) {
-        return <WhoToFollowBase state="hidden" props={{ label: t("whoToFollow"), users: [] }} />
-    }
+    const viewProps = { label: t("whoToFollow"), users: [], emptyMessage: t("feedEmptyPlatform"), errorMessage: t("feedFailed"), retryLabel: t("retry") }
+    if (query.error !== undefined) return <WhoToFollowBase state="failed" props={viewProps} on={{ retry: () => { void query.mutate() } }} />
+    if (query.data === null || (query.data !== undefined && available.length === 0)) return <WhoToFollowBase state="empty" props={viewProps} />
     const users = available.slice(0, 4).map((user) => ({
         id: user.globalId,
         name: user.displayName ?? user.username,
@@ -63,5 +63,5 @@ export const WhoToFollow = (props: WhoToFollowProps) => {
             } finally { setPending(undefined) }
         }],
     ]))
-    return <WhoToFollowBase state={query.data === undefined ? "pending" : "ready"} props={{ label: t("whoToFollow"), users }} on={on} />
+    return <WhoToFollowBase state={query.data === undefined ? "pending" : "ready"} props={{ ...viewProps, users }} on={on} />
 }

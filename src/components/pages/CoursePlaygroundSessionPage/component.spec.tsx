@@ -109,13 +109,13 @@ describe("CoursePlaygroundSessionPageBase", () => {
         ]
         draw("live", { steps, selectedStepIndex: 1, passedStepIndexes: [0] }, on)
 
-        expect(screen.getByRole("link", { name: "Step 1 · Passed · Run a container" })).toBeInTheDocument()
-        expect(screen.getByRole("link", { name: "Step 2 · Inspect the container" })).toHaveAttribute("aria-current", "page")
+        expect(screen.getByRole("button", { name: "Step 1 · Passed · Run a container" })).toBeInTheDocument()
+        expect(screen.getByRole("button", { name: "Step 2 · Inspect the container" })).toHaveAttribute("aria-current", "step")
 
-        fireEvent.click(screen.getByRole("link", { name: "Step 3 · Remove the container" }))
+        fireEvent.click(screen.getByRole("button", { name: "Step 3 · Remove the container" }))
         expect(on.step).not.toHaveBeenCalled()
 
-        fireEvent.click(screen.getByRole("link", { name: "Step 1 · Passed · Run a container" }))
+        fireEvent.click(screen.getByRole("button", { name: "Step 1 · Passed · Run a container" }))
         expect(on.step).toHaveBeenCalledWith(0)
     })
 

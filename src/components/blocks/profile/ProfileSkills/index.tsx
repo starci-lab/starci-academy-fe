@@ -95,12 +95,17 @@ export const ProfileSkills = (props: ProfileSkillsProps) => {
                 byDomain: skills.data?.byDomain ?? [],
                 byLanguage: skills.data?.byLanguage ?? [],
                 history: filtered,
+                historyTotal: history.data?.length ?? 0,
                 filterLabel: filter === "all" ? "Filters" : `Filter: ${filter}`,
             }}
             on={{
                 search: setSearch,
                 filter: () => setFilterIndex((filterIndex + 1) % FILTERS.length),
                 select: (slug) => router.push(`/profile/${username}/skills/${slug}`),
+                browseCourses: () => router.push("/courses"),
+                retry: () => {
+                    void Promise.all(queries.map((query) => query.mutate()))
+                },
             }}
         />
     )

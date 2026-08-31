@@ -37,6 +37,21 @@ describe("PersonalProjectWorkspaceLayoutBase", () => {
         expect(screen.getByRole("separator", { name: "Resize the project roadmap" })).toBeInTheDocument()
     })
 
+    it("mounts one roadmap owner when the compact drawer is open", () => {
+        render(
+            <PersonalProjectWorkspaceLayoutBase
+                surface={<div>Task workspace</div>}
+                resizeLabel="Resize the project roadmap"
+                roadmapLabel="Project roadmap"
+                isRoadmapOpen
+                onCloseRoadmap={vi.fn()}
+            />,
+        )
+
+        expect(screen.getAllByTestId("project-map")).toHaveLength(1)
+        expect(screen.getByRole("dialog", { name: "Project roadmap" })).toBeInTheDocument()
+    })
+
     it("lets the overview own its roadmap without duplicating navigation chrome", () => {
         render(
             <PersonalProjectWorkspaceLayoutBase

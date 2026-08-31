@@ -16,7 +16,7 @@ export const ProfileCodingProblem = (props: ProfileCodingProblemProps) => {
     const username = String(params.username ?? "")
     const profile = useQueryUserProfileSwr(username)
     const query = useQueryProfileEvidenceSwr<CodingDetail | null>("coding-detail", profile.data?.id, { slug: params.slug })
-    return <ProfileCodingProblemBase state={query.error ? "error" : query.isLoading || profile.isLoading ? "pending" : "ready"} detail={query.data} on={{ back: () => router.push(`/profile/${username}/skills`), retry: () => { void query.mutate() } }} />
+    return <ProfileCodingProblemBase state={query.error ? "error" : query.isLoading || profile.isLoading ? "pending" : "ready"} slug={String(params.slug ?? "")} detail={query.data} on={{ back: () => router.push(`/profile/${username}/skills`), retry: () => { void query.mutate() } }} />
 }
 
 export { ProfileCodingProblemBase } from "./component"

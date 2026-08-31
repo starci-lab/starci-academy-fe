@@ -1,7 +1,7 @@
 import { cn } from "@heroui/react"
 
 /** One shared measure aligns route context and the complete Mock Interview practice home. */
-export const mockInterviewPageClassName = cn("mx-auto", "w-full", "max-w-6xl", "min-w-0", "px-4", "sm:px-6", "lg:px-8")
+export const mockInterviewPageClassName = cn("mx-auto", "w-full", "max-w-[96rem]", "min-w-0", "px-4", "sm:px-6", "lg:px-8")
 /** Breadcrumbs retain a small top breathing space without becoming a second page inset. */
 export const mockInterviewBreadcrumbClassName = cn("pt-1")
 /** Compact routes use one explicit course return instead of clipping a three-step trail. */

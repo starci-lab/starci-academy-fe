@@ -167,6 +167,44 @@ describe("mutationSyncMockInterviewSessionTurns", () => {
         })
     })
 
+    it("strips Apollo cache metadata from restored turns before mutation serialization", async () => {
+        const request = {
+            sessionId: "s-1",
+            expectedRevision: 2,
+            turns: [{
+                role: "interviewer",
+                phase: "requirements",
+                content: "Explain the trade-off",
+                questionIndex: 0,
+                artifactHint: null,
+                __typename: "MyInProgressMockInterviewSessionTurnItem",
+            }],
+            questionIndex: 0,
+            phaseIndex: 0,
+        }
+
+        await mutationSyncMockInterviewSessionTurns(request)
+
+        expect(mocks.mutate).toHaveBeenCalledWith({
+            mutation: syncMockInterviewSessionTurnsDocument,
+            variables: {
+                request: {
+                    sessionId: "s-1",
+                    expectedRevision: 2,
+                    turns: [{
+                        role: "interviewer",
+                        phase: "requirements",
+                        content: "Explain the trade-off",
+                        questionIndex: 0,
+                        artifactHint: null,
+                    }],
+                    questionIndex: 0,
+                    phaseIndex: 0,
+                },
+            },
+        })
+    })
+
     it("merges transport options on the periodic write", async () => {
         const signal = new AbortController().signal
         await mutationSyncMockInterviewSessionTurns(

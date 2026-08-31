@@ -59,6 +59,37 @@ describe("ProfileSkillsBase", () => {
         expect(screen.getByText("Top 8%")).toBeInTheDocument()
     })
 
+    it("consolidates a completely empty coding profile into one discoverable evidence surface", () => {
+        const browseCourses = vi.fn()
+        render(
+            <ProfileSkillsBase
+                state="ready"
+                props={{ ...ready, byDifficulty: [], byDomain: [], byLanguage: [], history: [] }}
+                on={{ browseCourses }}
+            />,
+        )
+
+        expect(screen.getByText("No coding evidence yet.")).toBeInTheDocument()
+        expect(screen.getByText("Complete challenges and practice problems to build your public skills history.")).toBeInTheDocument()
+        expect(screen.getAllByText("No coding evidence yet.")).toHaveLength(1)
+        expect(screen.queryByText("No public breakdown yet.")).not.toBeInTheDocument()
+        fireEvent.click(screen.getByRole("button", { name: "Browse courses" }))
+        expect(browseCourses).toHaveBeenCalledOnce()
+    })
+
+    it("keeps a filtered no-match state inside the populated history layout", () => {
+        render(
+            <ProfileSkillsBase
+                state="ready"
+                props={{ ...ready, byDifficulty: [], byDomain: [], byLanguage: [], history: [], historyTotal: 1 }}
+                on={{}}
+            />,
+        )
+
+        expect(screen.queryByText("No coding evidence yet.")).not.toBeInTheDocument()
+        expect(screen.getByText("No solved problems yet.")).toBeInTheDocument()
+    })
+
     it("counts settled results and opens the solved problem behind a pressed row", () => {
         const select = vi.fn()
         const search = vi.fn()

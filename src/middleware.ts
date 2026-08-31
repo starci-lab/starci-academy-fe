@@ -1,5 +1,23 @@
 import createMiddleware from "next-intl/middleware"
+import {
+    NextRequest,
+    NextResponse,
+} from "next/server"
 import { routing } from "@/i18n/routing"
+import { canonicalLocalUrl } from "@/modules/routing/canonical-local-url"
+
+const intlMiddleware = createMiddleware(routing)
+
+/** Numeric loopback aliases are accepted only long enough to move the browser onto localhost. */
+export const canonicalLocalRedirect = (request: NextRequest): NextResponse | undefined => {
+    const target = canonicalLocalUrl(request.nextUrl, {
+        host: request.headers.get("host"),
+        forwardedHost: request.headers.get("x-forwarded-host"),
+        forwardedProto: request.headers.get("x-forwarded-proto"),
+    })
+    if (!target) return undefined
+    return NextResponse.redirect(target, 308)
+}
 
 /**
  * The one thing that runs before a route exists: deciding which language it is in.
@@ -8,7 +26,11 @@ import { routing } from "@/i18n/routing"
  * the addressed form. next-intl's middleware is that something: it reads the cookie this app
  * already sets, falls back to the default, and redirects to the prefixed path.
  */
-export default createMiddleware(routing)
+const middleware = (request: NextRequest) => {
+    return canonicalLocalRedirect(request) ?? intlMiddleware(request)
+}
+
+export default middleware
 
 /** Which requests this middleware is allowed to touch, and by omission which it must leave alone. */
 export const config = {

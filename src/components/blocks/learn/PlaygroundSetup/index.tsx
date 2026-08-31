@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { usePlaygroundSession } from "@/components/layouts/PlaygroundSessionLayout"
@@ -14,6 +15,7 @@ export const PlaygroundSetup = (props: PlaygroundSetupProps) => {
     const t = useTranslations("learn.playground")
     const router = useRouter()
     const session = usePlaygroundSession()
+    const [copied, setCopied] = useState(false)
     let state: CoursePlaygroundSetupState = "paired"
     if (session.failed || session.startFailed || session.socketState === "failed") state = "failed"
     else if (session.isLoading) state = "loading"
@@ -38,10 +40,25 @@ export const PlaygroundSetup = (props: PlaygroundSetupProps) => {
             failedText: t("setup.failed"),
             notFoundText: t("setup.notFound"),
             pairingCode: session.session?.pairingCode,
+            catalogLabel: t("setup.backToCatalog"),
+            sessionTitle: t("setup.sessionTitle"),
+            createDescription: t("setup.createDescription"),
+            stageLabels: [t("setup.stageCreate"), t("setup.stagePair"), t("setup.stageEnter")],
+            copyLabel: t("setup.copyCode"),
+            copiedLabel: t("setup.codeCopied"),
+            copied,
         }} on={{
             start: () => { void session.start() },
             enter: () => router.push(`/courses/${displayId}/learn/playground/${slug}/session`),
             retry: session.retry,
+            back: () => router.push(`/courses/${displayId}/learn/playground`),
+            copy: () => {
+                if (session.session?.pairingCode === undefined) return
+                void navigator.clipboard.writeText(session.session.pairingCode).then(() => {
+                    setCopied(true)
+                    window.setTimeout(() => setCopied(false), 2_000)
+                }).catch(() => setCopied(false))
+            },
         }} />
     )
 }

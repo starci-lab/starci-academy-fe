@@ -12,7 +12,7 @@ import { WhoToFollow } from "./index"
  * label a reader sees, not through the mutation call.
  *
  * The three ways of having nobody to suggest - a failed request, an explicit null, and a settled
- * empty list - all have to leave the rail absent rather than draw an empty card.
+ * empty list - all have to leave a visible, explanatory list surface.
  */
 
 const push = vi.fn()
@@ -59,13 +59,13 @@ describe("WhoToFollow", () => {
         ["the request failed", { error: new Error("down") }],
         ["the server answered with nothing at all", { data: null }],
         ["there is nobody left to suggest", { data: [] }],
-    ])("draws no rail when %s", (_why, over) => {
+    ])("draws an explanatory list surface when %s", (_why, over) => {
         vi.mocked(useQuerySuggestedUsersSwr).mockReturnValue(answer(over))
         vi.mocked(useQueryResolveRouteSwr).mockReturnValue(resolver("/x"))
         vi.mocked(useMutateSetFollowSwr).mockReturnValue({ trigger: vi.fn() } as never)
 
-        const { container } = render(<WhoToFollow />)
-        expect(container).toBeEmptyDOMElement()
+        render(<WhoToFollow />)
+        expect(screen.getByText(_why === "the request failed" ? "feedFailed" : "feedEmptyPlatform")).toBeInTheDocument()
     })
 
     it("holds four resting rows while the suggestions are on their way", () => {

@@ -31,7 +31,7 @@ const COPY = {
         lockedTitle: "Task is locked",
         sourceStep: "Connect source code", analysisStep: "Configure analysis", reviewStep: "Run review",
         analysisDescription: "StarCi reads the selected branch, checks the task rubric and keeps each result as an immutable attempt.",
-        branchFact: (branch: string) => `Branch to review: ${branch}`, tokenReady: (last4: string) => `Private access ready · token ending ${last4}`,
+        branchFact: (branch: string) => `Branch to review: ${branch}`, languageFact: (language: string) => `Language: ${language}`, modelFact: (model: string) => `Grading model: ${model}`, tokenReady: (last4: string) => `Private access ready · token ending ${last4}`,
         tokenMissing: "Public repositories need no token. Add a fine-grained token only for a private repository.",
         promptCache: "Repeated grading reuses eligible provider prompt cache while every attempt remains separately recorded.",
         openSubmission: "Open grading panel", closeSubmission: "Hide grading panel",
@@ -78,6 +78,8 @@ const COPY = {
         reviewStep: "Chạy chấm code", // vn-ok: localized Vietnamese interface copy.
         analysisDescription: "StarCi đọc đúng branch đã chọn, đối chiếu rubric của bài và lưu mỗi kết quả thành một lần chấm bất biến.", // vn-ok: localized Vietnamese interface copy.
         branchFact: (branch: string) => `Branch sẽ đọc: ${branch}`, // vn-ok: localized Vietnamese interface copy.
+        languageFact: (language: string) => `Ngôn ngữ: ${language}`, // vn-ok: localized Vietnamese interface copy.
+        modelFact: (model: string) => `Mô hình chấm: ${model}`, // vn-ok: localized Vietnamese interface copy.
         tokenReady: (last4: string) => `Đã sẵn sàng đọc repo riêng tư · token đuôi ${last4}`, // vn-ok: localized Vietnamese interface copy.
         tokenMissing: "Repo public không cần token. Chỉ thêm fine-grained token khi repo riêng tư.", // vn-ok: localized Vietnamese interface copy.
         promptCache: "Các lần chấm lặp lại sẽ dùng prompt cache của provider khi đủ điều kiện; từng lần chấm vẫn được lưu riêng.", // vn-ok: localized Vietnamese interface copy.
@@ -131,6 +133,8 @@ export const PersonalProjectTask = (props: PersonalProjectTaskProps) => {
     const [settingsOpen, setSettingsOpen] = useState(false)
     const [historyOpen, setHistoryOpen] = useState(false)
     const [submissionOpen, setSubmissionOpen] = useState(false)
+    const [reviewLanguage, setReviewLanguage] = useState<string>()
+    const [reviewModelId, setReviewModelId] = useState("auto")
 
     useEffect(() => {
         document.documentElement.scrollTop = 0
@@ -147,11 +151,22 @@ export const PersonalProjectTask = (props: PersonalProjectTaskProps) => {
     const roadmapTask = project.data?.milestones
         .flatMap((milestone) => milestone.tasks)
         .find((item) => item.id === props.taskId)
-    const selectedLanguage = task?.briefs[0]?.lang ?? task?.codeImplementations[0]?.lang ?? "agnostic"
-    const brief = task?.briefs.find((item) => item.lang === selectedLanguage)?.body
+    const taskLanguage = task?.briefs[0]?.lang ?? task?.codeImplementations[0]?.lang ?? "agnostic"
+    const selectedReviewLanguage = reviewLanguage ?? taskLanguage
+    const modelSeparator = reviewModelId.indexOf(":")
+    const selectedReviewModel = reviewModelId === "auto" || modelSeparator < 1
+        ? undefined
+        : { provider: reviewModelId.slice(0, modelSeparator), model: reviewModelId.slice(modelSeparator + 1) }
+    const selectedReviewModelOption = selectedReviewModel === undefined
+        ? undefined
+        : workspace.data?.models.find((model) => model.provider === selectedReviewModel.provider && model.model === selectedReviewModel.model)
+    const selectedReviewModelLabel = selectedReviewModel === undefined
+        ? copy.auto
+        : `${selectedReviewModel.model} · ${selectedReviewModelOption?.category ?? selectedReviewModel.provider}`
+    const brief = task?.briefs.find((item) => item.lang === taskLanguage)?.body
         ?? task?.briefs[0]?.body
         ?? task?.description
-    const implementationRow = task?.codeImplementations.find((item) => item.lang === selectedLanguage)
+    const implementationRow = task?.codeImplementations.find((item) => item.lang === taskLanguage)
         ?? task?.codeImplementations[0]
     const implementation = implementationRow === undefined
         ? undefined
@@ -195,15 +210,18 @@ export const PersonalProjectTask = (props: PersonalProjectTaskProps) => {
         setRepositoryTouched(true)
         if (!isGithubRepository(repository)) return
         try {
-            await submission.trigger({
+            const accepted = await submission.trigger({
                 courseId,
                 taskId: props.taskId,
                 githubUrl: repository,
                 branch: workspace.data?.repository.branch ?? null,
-                lang: selectedLanguage === "agnostic" ? undefined : selectedLanguage,
+                lang: selectedReviewLanguage === "agnostic" ? undefined : selectedReviewLanguage,
+                selectedModel: selectedReviewModel?.model,
+                selectedModelProvider: selectedReviewModel?.provider,
             })
             await Promise.all([project.mutate(), workspace.mutate(), attempts.mutate()])
-            router.push(`/courses/${props.displayId}/learn/personal-project/tasks/${props.taskId}/result`)
+            const jobQuery = accepted.jobId === undefined ? "" : `?job=${encodeURIComponent(accepted.jobId)}`
+            router.push(`/courses/${props.displayId}/learn/personal-project/tasks/${props.taskId}/result${jobQuery}`)
         } catch {
             // Mutation hooks retain the backend error for the pure state mapper.
         }
@@ -223,6 +241,8 @@ export const PersonalProjectTask = (props: PersonalProjectTaskProps) => {
             repositoryUrl: workspace.data?.repository.githubUrl ?? undefined,
             repositoryDraft: repository,
             repositoryBranch: workspace.data?.repository.branch ?? "main",
+            reviewLanguage: selectedReviewLanguage,
+            reviewModelLabel: selectedReviewModelLabel,
             tokenLast4: workspace.data?.repository.tokenLast4 ?? undefined,
             repositoryState: repositoryInvalid ? "invalid" : "ready",
             latestAttempt: attempts.data?.data?.[0],
@@ -247,7 +267,20 @@ export const PersonalProjectTask = (props: PersonalProjectTaskProps) => {
             openHistory: () => setHistoryOpen(true),
         }}
         settingsOverlay={PersonalProjectGradingSettingsDrawer}
-        settingsOverlayProps={courseId === undefined ? undefined : { courseId, taskId: props.taskId, repositoryUrl: repository, isOpen: settingsOpen && state !== "forbidden", onDismiss: () => setSettingsOpen(false) }}
+        settingsOverlayProps={courseId === undefined ? undefined : {
+            courseId,
+            taskId: props.taskId,
+            repositoryUrl: repository,
+            initialLanguage: selectedReviewLanguage,
+            initialModelId: reviewModelId,
+            isOpen: settingsOpen && state !== "forbidden",
+            onDismiss: () => setSettingsOpen(false),
+            onApplied: (selection) => {
+                setReviewLanguage(selection.language)
+                setReviewModelId(selection.modelId)
+                setSettingsOpen(false)
+            },
+        }}
         historyOverlay={PersonalProjectHistoryDrawer}
         historyOverlayProps={{
             isOpen: historyOpen,

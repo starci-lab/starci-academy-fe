@@ -30,6 +30,7 @@ describe("ExtendedTabs", () => {
             ],
         }} />)
 
+        expect(container.firstElementChild).toHaveClass("extended-tabs")
         expect(container.firstElementChild).not.toHaveClass("overflow-x-auto")
         expect(container.querySelector("[data-grammar-tabs-overflow='scroll']")).toBeTruthy()
     })

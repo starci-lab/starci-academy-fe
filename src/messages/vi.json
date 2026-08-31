@@ -32,6 +32,8 @@
         "themeLight": "Chuyển sang sáng",
         "themeDark": "Chuyển sang tối",
         "utilities": "Tiện ích hiển thị",
+        "navigationOverflow": "Điều hướng và tiện ích",
+        "accountActions": "Tài khoản và mua sắm",
         "locale": "Đổi ngôn ngữ",
         "localeOptions": {
             "en": "English",
@@ -73,6 +75,9 @@
         "title": "Bảng điều khiển",
         "progressHeading": "Tiến độ của bạn",
         "railHeading": "Vị trí của bạn",
+        "back": "Trở lại",
+        "openRail": "Mở thông tin và truy cập nhanh",
+        "closeRail": "Đóng thông tin và truy cập nhanh",
         "unavailable": "Mục dashboard này hiện chưa khả dụng.",
         "continueLearning": {
             "heading": "Tiếp tục học",
@@ -696,16 +701,25 @@
                 "label": "Bài toán đã giải",
                 "empty": "Chưa giải bài toán nào."
             },
-            "achievements": {
-                "label": "Thành tựu",
-                "empty": "Chưa có thành tựu."
-            },
+        "achievements": {
+          "label": "Thành tựu",
+          "empty": "Chưa có thành tựu.",
+          "tier": "Cấp",
+          "rarity": "Độ hiếm"
+        },
             "activity": {
                 "label": "Hoạt động gần đây",
                 "empty": "Chưa có hoạt động công khai."
             }
+      },
+      "projects": {
+        "kind": {
+          "course": "Khóa học",
+          "external": "Dự án ngoài"
         },
-        "overview": {
+        "open": "Mở dự án"
+      },
+      "overview": {
             "challengeSkills": "Kỹ năng từ thử thách",
             "codeSkills": "Kỹ năng từ luyện tập",
             "passed": "Đã vượt qua",
@@ -1053,6 +1067,10 @@
             "eyebrow": "Học bằng dự án thật",
             "verifiedLabel": "Server xác minh",
             "previewAlt": "Bản xem trước lộ trình Playground DevOps",
+            "processTitle": "Từ máy của bạn đến kết quả được xác minh",
+            "processChoose": "Chọn lab có hướng dẫn và kiểm tra yêu cầu môi trường",
+            "processPair": "Ghép agent cục bộ với phiên được tạo riêng cho bạn",
+            "processVerify": "Chủ động xác minh từng checkpoint khi tác vụ đã sẵn sàng",
             "startLabel": "Bắt đầu lab đầu tiên",
             "labsTitle": "Dựng trọn quy trình production",
             "labsDescription": "Chọn một lab có hướng dẫn, hoàn thành checkpoint theo thứ tự và để server xác nhận từng bước.",
@@ -1076,8 +1094,16 @@
                 "waiting": "Đang chờ agent trên máy của bạn kết nối.",
                 "ready": "Agent đã kết nối. Không gian làm việc đã sẵn sàng.",
                 "enter": "Vào không gian làm việc",
-                "failed": "Không thể chuẩn bị phiên playground."
-                ,"notFound": "Không tìm thấy playground này. Hãy quay lại danh sách hoặc thử lại."
+                "failed": "Không thể chuẩn bị phiên playground.",
+                "notFound": "Không tìm thấy playground này. Hãy quay lại danh sách hoặc thử lại.",
+                "backToCatalog": "Quay lại danh sách playground",
+                "sessionTitle": "Phiên lab trên máy của bạn",
+                "createDescription": "Hãy tạo một phiên riêng trước. Mã ghép nối sẽ xuất hiện ở bước tiếp theo.",
+                "stageCreate": "Tạo phiên",
+                "stagePair": "Ghép máy",
+                "stageEnter": "Vào workspace",
+                "copyCode": "Sao chép mã ghép nối",
+                "codeCopied": "Đã sao chép mã ghép nối"
             },
             "session": {
                 "agentConnected": "Agent đã kết nối",
@@ -1090,12 +1116,23 @@
                 "completedText": "Mọi bước hướng dẫn trong playground này đều đã đạt trạng thái xác minh.",
                 "failed": "Phiên playground không khả dụng. Hãy quay lại thiết lập và tạo phiên mới.",
                 "step": "Bước",
-                "passed": "Đã đạt"
-                ,"scratchpadTitle": "Bản nháp lệnh"
-                ,"scratchpadDescription": "Chỉnh sửa lệnh tại đây trước khi chạy trên máy của bạn. Trình duyệt không thực thi lệnh này."
-                ,"outputTitle": "Hoạt động xác minh"
-                ,"outputWaiting": "Sự kiện xác minh từ máy chủ sẽ xuất hiện sau khi bạn chạy tác vụ trên máy của mình."
-                ,"verifying": "Đang chờ xác minh..."
+                "passed": "Đã đạt",
+                "scratchpadTitle": "Bản nháp lệnh",
+                "scratchpadDescription": "Chỉnh sửa lệnh tại đây trước khi chạy trên máy của bạn. Trình duyệt không thực thi lệnh này.",
+                "outputTitle": "Hoạt động xác minh",
+                "outputWaiting": "Sự kiện xác minh từ máy chủ sẽ xuất hiện sau khi bạn chạy tác vụ trên máy của mình.",
+                "verifying": "Đang chờ xác minh...",
+                "progressLabel": "Tiến độ Playground đã xác minh",
+                "progressText": "Đã xác minh {passed}/{total}",
+                "stepsTitle": "Các bước lab có hướng dẫn",
+                "reconnectText": "Hãy giữ agent cục bộ hoạt động. Phiên sẽ được kết nối lại mà không làm mất tiến độ đã xác minh.",
+                "recoveryFailed": "Kết nối cần được xử lý",
+                "recoveryFailedTitle": "Không thể kết nối lại agent cục bộ",
+                "recoveryFailedText": "Khởi động lại agent cục bộ bằng phiên này, sau đó thử kết nối lại hoặc quay về thiết lập.",
+                "failedStatus": "Phiên không khả dụng",
+                "exitToCatalog": "Quay lại danh sách playground",
+                "currentStep": "Tác vụ hiện tại",
+                "locked": "Chưa mở"
             }
         },
         "mindMap": {
@@ -1139,6 +1176,7 @@
                 "page": "Trang này"
             },
             "mobileCourseNavigation": "Điều hướng khóa học",
+            "closeMobileCourseNavigation": "Đóng điều hướng khóa học",
             "locked": "Khoá",
             "collapse": "Thu gọn",
             "expand": "Mở rộng",

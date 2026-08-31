@@ -1,7 +1,7 @@
 import {spawn} from "node:child_process"
 
 const port = process.env.E2E_PORT ?? "3101"
-const baseUrl = process.env.E2E_BASE_URL ?? `http://127.0.0.1:${port}`
+const baseUrl = process.env.E2E_BASE_URL ?? `http://localhost:${port}`
 const external = Boolean(process.env.E2E_BASE_URL)
 let server
 
@@ -26,7 +26,7 @@ const waitForServer = async () => {
 
 try {
     if (!external) {
-        server = spawn(process.execPath, ["node_modules/next/dist/bin/next", "start", "--hostname", "127.0.0.1", "--port", port], {
+        server = spawn(process.execPath, ["node_modules/next/dist/bin/next", "start", "--hostname", "0.0.0.0", "--port", port], {
             cwd: process.cwd(),
             stdio: "inherit",
             env: {...process.env, PORT: port},

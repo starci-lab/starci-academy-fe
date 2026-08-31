@@ -1,7 +1,7 @@
 import { act, render, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-type TestInput = { state: string; props: { status?: string; selectedTab?: string }; on: { access: () => void; configure: (field: string, value: string) => void; start: () => void; resume?: () => void; retry: () => void; selectTab: (tab: string) => void } }
+type TestInput = { state: string; props: { status?: string; selectedTab?: string; selectedLevel?: string; selectedMode?: string }; on: { access: () => void; configure: (field: string, value: string) => void; start: () => void; resume?: () => void; retry: () => void; selectTab: (tab: string) => void } }
 const mocks = vi.hoisted(() => ({
     input: undefined as TestInput | undefined,
     course: { data: undefined as unknown, error: undefined as unknown, mutate: vi.fn() },
@@ -44,6 +44,20 @@ beforeEach(() => {
 })
 
 describe("CourseMockInterviewSetupBlock", () => {
+    it("renders the guided setup workspace directly in the overview", () => {
+        mocks.course.data = { id: "c1", title: "Course", isEnrolled: true }
+        mocks.session.data = null
+        mocks.attempts.data = { items: [] }
+        mocks.stats.data = { insufficientData: true, byPhase: [] }
+
+        render(<CourseMockInterviewSetupBlock displayId="course" />)
+        expect(mocks.input?.props).toMatchObject({
+            selectedTab: "begin",
+            selectedMode: "qna",
+            selectedLevel: "middle",
+        })
+    })
+
     it("opens a report-linked history destination", () => {
         mocks.searchTab = "history"
         render(<CourseMockInterviewSetupBlock displayId="course" />)

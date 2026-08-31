@@ -21,6 +21,7 @@ export const ProfileChallengeSubmission = (props: ProfileChallengeSubmissionProp
         state={query.error ? "error" : query.isLoading || profile.isLoading ? "pending" : "ready"}
         detail={query.data}
         onBack={() => router.push(`/profile/${username}/challenges/${courseId}`)}
+        onRetry={() => { void query.mutate() }}
     />
 }
 

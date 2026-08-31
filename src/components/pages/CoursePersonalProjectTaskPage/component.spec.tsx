@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { PersonalProjectTaskBase, type PersonalProjectTaskLabels } from "@/components/blocks/learn/PersonalProjectTask/component"
 
@@ -11,6 +11,7 @@ const labels: PersonalProjectTaskLabels = {
     tokenPlaceholder: "Paste token", tokenStored: (last4) => `Stored token ${last4}`, settingsSaved: "Saved",
     evaluate: "Submit for review", feedback: "View feedback", history: "Attempt history", latest: "Latest result",
     passed: "Passed", needsWork: "Needs work", saveSettings: "Save settings", retry: "Try again", lockedTitle: "Task is locked",
+    openSubmission: "Open grading panel",
 }
 
 const props = {
@@ -48,6 +49,21 @@ describe("CoursePersonalProjectTaskBase", () => {
 
     it("keeps evaluation disabled while a submission is running", () => {
         render(<PersonalProjectTaskBase state="submitting" props={props} />)
+        expect(screen.getByRole("button", { name: "Submit for review" })).toBeDisabled()
+    })
+
+    it("hands compact task readers into the grading workflow at the end of the brief", () => {
+        const toggleSubmission = vi.fn()
+        render(<PersonalProjectTaskBase state="ready" props={props} on={{ toggleSubmission }} />)
+
+        fireEvent.click(screen.getByRole("button", { name: "Open grading panel" }))
+        expect(toggleSubmission).toHaveBeenCalledOnce()
+    })
+
+    it("announces an invalid repository once at the owning field", () => {
+        render(<PersonalProjectTaskBase state="invalid-repository" props={{ ...props, repositoryState: "invalid", notice: "Invalid repository." }} />)
+
+        expect(screen.getAllByText("Invalid repository.")).toHaveLength(1)
         expect(screen.getByRole("button", { name: "Submit for review" })).toBeDisabled()
     })
 

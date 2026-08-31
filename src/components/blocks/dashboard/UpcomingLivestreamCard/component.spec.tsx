@@ -11,14 +11,14 @@ import { UpcomingLivestreamCardBase } from "./component"
  * worse than one that renders an empty line with a way out beside it.
  */
 
-const frame = { label: "Upcoming sessions", errorMessage: "Could not load sessions", retryLabel: "Retry" } as const
+const frame = { label: "Upcoming sessions", emptyMessage: "No courses to show", errorMessage: "Could not load sessions", retryLabel: "Retry" } as const
 
 afterEach(cleanup)
 
 describe("UpcomingLivestreamCardBase", () => {
-    it("draws nothing when the situation is settled absence", () => {
-        const { container } = render(<UpcomingLivestreamCardBase state="hidden" props={{ ...frame, rows: [] }} />)
-        expect(container).toBeEmptyDOMElement()
+    it("keeps a settled empty list surface with a useful message", () => {
+        render(<UpcomingLivestreamCardBase state="empty" props={{ ...frame, rows: [] }} />)
+        expect(screen.getByText("No courses to show")).toBeInTheDocument()
     })
 
     it("says what went wrong and offers the request again", () => {

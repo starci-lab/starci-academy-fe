@@ -1,6 +1,7 @@
 /** @vitest-environment jsdom */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import type { ReactNode } from "react"
 import type { AuthMode } from "@/components/blocks/auth/AuthenticationPanel/component"
 import type { ShellNavRoute, ShellNavTab } from "./component"
 import { ShellNav } from "."
@@ -27,6 +28,7 @@ type ShellNavMockInput = {
         readonly navigate: (id: string) => void
         readonly selectTab: (key: string) => void
         readonly openSearch: () => void
+        readonly openNavigation: () => void
         readonly toggleTheme: () => void
         readonly openCart: () => void
     }
@@ -37,6 +39,7 @@ type SignInOverlayMockInput = {
     readonly onDismiss: () => void
 }
 type DrawerMockInput = { readonly isOpen: boolean, readonly onDismiss: () => void }
+type NavigationDrawerMockInput = DrawerMockInput & { readonly title: string, readonly children: ReactNode }
 type SearchOverlayMockInput = {
     readonly intent?: { readonly source: string }
     readonly on?: { readonly dismissed?: () => void }
@@ -82,6 +85,11 @@ vi.mock("@/components/overlays/search/GlobalSearchOverlay", () => ({
         ? null
         : <button type="button" onClick={on?.dismissed}>Search from {intent.source}</button>,
 }))
+vi.mock("@/components/branches/DrawerBranch", () => ({
+    DrawerBranch: (input: NavigationDrawerMockInput) => input.isOpen
+        ? <aside data-testid="navigation-drawer"><span>{input.title}</span>{input.children}<button type="button" onClick={input.onDismiss}>Close navigation</button></aside>
+        : null,
+}))
 vi.mock("./component", () => ({
     ShellNavBase: (input: ShellNavMockInput) => (
         <div>
@@ -96,6 +104,7 @@ vi.mock("./component", () => ({
                     : input.props.tabs.map((tab) => `${tab.id}${tab.isCurrent === true ? "*" : ""}`).join(",")}
             </span>
             <button type="button" onClick={input.on.openSearch}>Open search</button>
+            <button type="button" onClick={input.on.openNavigation}>Open navigation</button>
             <button type="button" onClick={input.on.openSignIn}>Sign in</button>
             <button type="button" onClick={input.on.openSignUp}>Sign up</button>
             <button type="button" onClick={input.on.toggleTheme}>Toggle theme</button>
@@ -104,6 +113,13 @@ vi.mock("./component", () => ({
             <button type="button" onClick={() => input.on.navigate("nowhere")}>Go nowhere</button>
             <button type="button" onClick={() => input.on.selectTab("overview")}>Tab overview</button>
             <button type="button" onClick={() => input.on.selectTab("explore")}>Tab explore</button>
+        </div>
+    ),
+    ShellNavigationDrawerBase: (input: ShellNavMockInput) => (
+        <div>
+            <button type="button" onClick={() => input.on.navigate("contact")}>Drawer contact</button>
+            <button type="button" onClick={input.on.openSearch}>Drawer search</button>
+            <button type="button" onClick={input.on.toggleTheme}>Drawer theme</button>
         </div>
     ),
 }))
@@ -242,6 +258,18 @@ describe("ShellNav theme and session", () => {
 })
 
 describe("ShellNav dialogs", () => {
+    it("opens compact navigation as a drawer and closes it before the selected action continues", () => {
+        render(<ShellNav />)
+        expect(screen.queryByTestId("navigation-drawer")).toBeNull()
+
+        fireEvent.click(screen.getByRole("button", { name: "Open navigation" }))
+        expect(screen.getByTestId("navigation-drawer")).toBeTruthy()
+
+        fireEvent.click(screen.getByRole("button", { name: "Drawer search" }))
+        expect(screen.queryByTestId("navigation-drawer")).toBeNull()
+        expect(screen.getByRole("button", { name: "Search from navbar" })).toBeTruthy()
+    })
+
     it("opens the dialog on sign-in and closes it again from every way out", () => {
         render(<ShellNav />)
         const dialog = screen.getByTestId("sign-in")

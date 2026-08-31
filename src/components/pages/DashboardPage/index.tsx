@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState, useSyncExternalStore } from "react"
 import { useTranslations } from "next-intl"
 import { useSearchParams } from "next/navigation"
 import { useRouter } from "@/i18n/navigation"
@@ -17,6 +17,20 @@ import { DashboardPageBase } from "./component"
 
 /** The sections of the dashboard, in reading order. */
 const TAB_IDS = ["overview", "explore", "courses", "community"] as const
+const compactDashboardRailQuery = "(max-width: 69.999rem)"
+
+const subscribeToCompactDashboardRail = (onStoreChange: () => void) => {
+    if (typeof window === "undefined") return () => undefined
+    const query = window.matchMedia(compactDashboardRailQuery)
+    query.addEventListener("change", onStoreChange)
+    return () => query.removeEventListener("change", onStoreChange)
+}
+
+const getCompactDashboardRailSnapshot = () => (
+    typeof window === "undefined" ? false : window.matchMedia(compactDashboardRailQuery).matches
+)
+
+const getCompactDashboardRailServerSnapshot = () => false
 
 /**
  * Resolve the session and draw the dashboard.
@@ -33,16 +47,40 @@ export const DashboardPage = (props: DashboardPageProps) => {
     const searchParams = useSearchParams()
     const requestedTab = searchParams.get("tab")
     const selectedTab = TAB_IDS.some((id) => id === requestedTab) ? requestedTab! : "overview"
+    const isCompactRail = useSyncExternalStore(
+        subscribeToCompactDashboardRail,
+        getCompactDashboardRailSnapshot,
+        getCompactDashboardRailServerSnapshot,
+    )
+    const [isRailOpen, setRailOpen] = useState(false)
 
     useEffect(() => {
         if (!session.isRestoring && token === undefined) router.replace("/authentication")
     }, [router, session.isRestoring, token])
 
+    useEffect(() => {
+        if (!isCompactRail && isRailOpen) setRailOpen(false)
+    }, [isCompactRail, isRailOpen])
+
+    useEffect(() => {
+        setRailOpen(false)
+    }, [selectedTab])
+
     if (session.isRestoring || token === undefined) return null
 
     return (
         <DashboardPageBase
-            props={{ selectedTab, unavailableMessage: t("unavailable") }}
+            props={{
+                selectedTab,
+                unavailableMessage: t("unavailable"),
+                railLabel: t("railHeading"),
+                railPresentation: isCompactRail ? "drawer" : "inline",
+                railOpenLabel: t("openRail"),
+                railCloseLabel: t("closeRail"),
+                backLabel: t("back"),
+                isRailOpen,
+            }}
+            on={{ setRailOpen, goBack: () => router.back() }}
         />
     )
 }

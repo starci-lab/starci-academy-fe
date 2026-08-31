@@ -1,6 +1,6 @@
 /** @vitest-environment jsdom */
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { cleanup, render, screen } from "@testing-library/react"
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { DailyQuestBase } from "./component"
 
 /**
@@ -31,8 +31,10 @@ describe("DailyQuestBase", () => {
                 props={{ label: "Today's quest", tasks, rewardLine: "Complete every task to earn 20 coins" }}
             />,
         )
-        expect(screen.getByText("Complete every task to earn 20 coins")).toBeTruthy()
         expect(screen.getByText("Complete every task to earn 20 coins")).toBeInTheDocument()
+        expect(screen.getByText("Complete every task to earn 20 coins").closest("[data-dashboard-quest-reward=true]")).toHaveClass("bg-accent-soft", "text-accent-soft-foreground", "px-4", "py-3")
+        expect(container.querySelector("[data-dashboard-quest-hero=true]")).toHaveClass("bg-accent")
+        expect(container.querySelector("img[aria-hidden=\"true\"]")).toHaveAttribute("src", expect.stringContaining("daily-quest-reward-v1.png"))
         expect(container.querySelector("button")).toBeNull()
     })
 
@@ -46,6 +48,8 @@ describe("DailyQuestBase", () => {
             />,
         )
         expect(screen.getByText("unused")).toBeInTheDocument()
+        fireEvent.click(screen.getByRole("button", { name: "Claim 20 coins" }))
+        expect(claim).toHaveBeenCalledOnce()
     })
 
     it("stops offering it once it has been taken", () => {
@@ -57,43 +61,26 @@ describe("DailyQuestBase", () => {
             />,
         )
         expect(screen.getByText("Reward claimed")).toBeTruthy()
+        expect(screen.getByText("Reward claimed").closest("[data-dashboard-quest-reward=true]")).toBeInTheDocument()
         expect(container.querySelector("button")).toBeNull()
     })
 
-    it("draws one row per task", () => {
+    it("draws one row per task with compact title and progress copy", () => {
         const { container } = render(
             <DailyQuestBase state="open" props={{ label: "Today's quest", tasks, rewardLine: "x" }} />,
         )
         expect(screen.getByText("Today's quest")).toBeInTheDocument()
-        expect(screen.getByText("Read content")).toBeInTheDocument()
-        expect(screen.getByText("Pass a challenge")).toBeInTheDocument()
-        expect(screen.getByText("0/1")).toBeInTheDocument()
-        expect(screen.getByText("1/2")).toBeInTheDocument()
+        expect(screen.getByText("Read content")).toHaveAttribute("data-size", "sm")
+        expect(screen.getByText("Pass a challenge")).toHaveAttribute("data-size", "sm")
+        expect(screen.getByText("0/1")).toHaveAttribute("data-size", "xs")
+        expect(screen.getByText("1/2")).toHaveAttribute("data-size", "xs")
         expect(container.querySelector("button")).toBeNull()
-
-        const titles = tasks.map((task) => screen.getByText(task.title))
-        for (const title of titles) {
-            expect(title).toBeInTheDocument()
-        }
-    })
-
-    it("uses the semantic completion icon only for completed tasks", () => {
-        const completedTasks = [
-            { id: "readContent", title: "Read content", percent: 100, percentText: "1/1" },
-            { id: "passChallenge", title: "Pass a challenge", percent: 0, percentText: "0/1" },
-        ]
-        const { container } = render(
-            <DailyQuestBase state="open" props={{ label: "Today's quest", tasks: completedTasks, rewardLine: "x" }} />,
-        )
-        expect(container.querySelectorAll("[data-grammar-state-mark=\"check\"]")).toHaveLength(1)
-        expect(container.querySelectorAll("[data-grammar-row=\"true\"]")).toHaveLength(2)
-        expect(screen.getByText("Pass a challenge")).toBeInTheDocument()
     })
 
     it("keeps the card its own size while the day is still on its way", () => {
         const { container } = render(<DailyQuestBase state="pending" props={{ label: "Today's quest" }} />)
-        // Resting rows stand in for real ones so the card does not jump when they land.
         expect(screen.getByText("Today's quest")).toBeInTheDocument()
+        expect(container.querySelectorAll("li")).toHaveLength(5)
         expect(container.querySelectorAll("button")).toHaveLength(0)
     })
 

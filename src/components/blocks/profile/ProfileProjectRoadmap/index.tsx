@@ -18,7 +18,7 @@ export const ProfileProjectRoadmap = (props: ProfileProjectRoadmapProps) => {
     const profile = useQueryUserProfileSwr(username)
     const query = useQueryProfileEvidenceSwr<ReadonlyArray<ProfileCapstone>>("capstones", profile.data?.id)
     const project = query.data?.find((item) => item.courseGlobalId === params.courseId)
-    return <ProfileProjectRoadmapBase state={query.error ? "error" : query.isLoading || profile.isLoading ? "pending" : "ready"} project={project} onBack={() => router.push(`/profile/${username}/projects`)} />
+    return <ProfileProjectRoadmapBase state={query.error ? "error" : query.isLoading || profile.isLoading ? "pending" : "ready"} project={project} onBack={() => router.push(`/profile/${username}/projects`)} onRetry={() => { void query.mutate() }} />
 }
 
 export { ProfileProjectRoadmapBase } from "./component"

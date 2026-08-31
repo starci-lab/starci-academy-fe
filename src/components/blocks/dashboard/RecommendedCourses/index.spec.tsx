@@ -80,11 +80,11 @@ describe("RecommendedCourses", () => {
         expect(screen.getByText("heading")).toBeInTheDocument()
     })
 
-    it("draws no card at all when there is nothing to suggest", () => {
+    it("keeps a list surface when there is nothing to suggest", () => {
         vi.mocked(useQueryRecommendedCoursesSwr).mockReturnValue(answer({ data: [] }))
 
-        const { container } = render(<RecommendedCourses />)
-        expect(container).toBeEmptyDOMElement()
+        render(<RecommendedCourses />)
+        expect(screen.getByText("empty")).toBeInTheDocument()
     })
 
     it("prices a discounted course three ways and says why it is being suggested", () => {

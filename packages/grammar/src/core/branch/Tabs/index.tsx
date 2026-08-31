@@ -52,7 +52,6 @@ export const Tabs = (props: TabsProps) => {
                                 id={item.id}
                                 aria-label={item.label}
                                 aria-controls={props.panelId?.(item.id)}
-                                style={{ paddingInline: "clamp(0.5rem, 3vw, 1rem)" }}
                             >
                                 <span className={tabContentClassName}>
                                     {item.leading}

@@ -101,5 +101,5 @@ export const ActivityFeed = (props: ActivityFeedProps) => {
         }
         return [...groups.values()]
     }, [props.items, props.reactingId, locale, t])
-    return <ActivityFeedBase {...{ state: props.state, props: { days, message: props.message, description: props.description, actionLabel: props.actionLabel }, on: props.on }} />
+    return <ActivityFeedBase {...{ state: props.state, props: { label: t("scopeLabel"), days, message: props.message, description: props.description, actionLabel: props.actionLabel }, on: props.on }} />
 }

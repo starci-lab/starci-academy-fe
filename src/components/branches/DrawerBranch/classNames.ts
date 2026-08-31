@@ -10,14 +10,21 @@ export const drawerCloseTriggerClassName = cn("size-10!", "rounded-full!", "bord
 export const drawerContentClassName = cn("absolute!")
 /** Keep side drawers on one explicit width when the document scrollbar is locked or restored. */
 export const drawerSideContentClassName = cn("w-[min(24rem,calc(100dvw-2rem))]!", "max-w-[calc(100dvw-2rem)]!")
+/** Focused setup work owns the phone viewport and gains one wider decision rail on desktop. */
+export const drawerWorkspaceContentClassName = cn("w-dvw!", "max-w-none!", "sm:w-[26.25rem]!", "sm:max-w-[calc(100dvw-2rem)]!")
+/** Remove the vendor's compact dialog cap when the workspace itself owns the viewport width. */
+export const drawerWorkspaceDialogClassName = cn("w-full!", "max-w-none!")
 /** A bounded side drawer must name its physical edge; vendor inset sets both sides in this host. */
 export const drawerRightContentClassName = cn("left-auto!", "right-0!")
 /** Keep a left side drawer physically anchored despite the vendor's bidirectional inset. */
 export const drawerLeftContentClassName = cn("left-0!", "right-auto!")
 /** Resolve the portal class without constraining the mobile bottom sheet. */
-export const getDrawerContentClassName = (placement: "left" | "right" | "bottom") => cn(
+export const getDrawerContentClassName = (placement: "left" | "right" | "bottom", size: "default" | "workspace" = "default") => cn(
     drawerContentClassName,
-    placement === "bottom" ? undefined : drawerSideContentClassName,
+    placement === "bottom" ? undefined : size === "workspace" ? drawerWorkspaceContentClassName : drawerSideContentClassName,
+    placement === "bottom" ? "[[data-dashboard-ai-open=true]_&]:h-dvh!" : undefined,
+    placement === "bottom" ? "[[data-dashboard-ai-open=true]_&]:max-h-dvh!" : undefined,
+    placement === "bottom" ? "[[data-dashboard-ai-open=true]_&]:rounded-none!" : undefined,
     placement === "right" ? drawerRightContentClassName : undefined,
     placement === "left" ? drawerLeftContentClassName : undefined,
 )

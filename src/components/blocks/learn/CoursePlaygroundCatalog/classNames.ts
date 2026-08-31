@@ -1,38 +1,46 @@
 import { cn } from "@heroui/react"
 
-/** Catalog page identity and bounded page inset. */
-export const playgroundCatalogClassName = cn("flex", "w-full", "min-w-0", "flex-col", "gap-8", "px-4", "py-6", "sm:px-6", "sm:py-8", "lg:px-8", "xl:px-10")
-/** Hero composition pairs the user promise with course-owned preview media. */
-export const playgroundCatalogHeroClassName = cn("grid", "min-w-0", "overflow-hidden", "bg-accent-soft", "lg:grid-cols-2")
-/** Primary hero copy owns the task and the first action. */
+/** Page-local catalog frame; ancestor shell geometry remains untouched. */
+export const playgroundCatalogClassName = cn("flex", "w-full", "min-w-0", "flex-col", "gap-6", "px-4", "py-5", "sm:gap-8", "sm:px-6", "sm:py-8", "lg:px-8", "xl:px-10")
+/** Compact technical hero using one primary and one supporting owner. */
+export const playgroundCatalogHeroClassName = cn("grid", "min-w-0", "overflow-hidden", "bg-accent-soft", "lg:grid-cols-[5fr_3fr]")
+/** Hero copy column. */
 export const playgroundCatalogHeroContentClassName = cn("flex", "min-w-0", "flex-col", "justify-center", "gap-5", "p-6", "sm:p-8", "lg:p-10")
-/** Compact product promise above the page title. */
+/** Compact Playground identity label. */
 export const playgroundCatalogEyebrowClassName = cn("inline-flex", "w-fit", "items-center", "gap-2", "rounded-full", "border", "border-accent/20", "bg-background/80", "px-3", "py-2", "text-accent-soft-foreground")
-/** Keep the hero explanation readable at every responsive width. */
+/** Bounded hero heading and description. */
 export const playgroundCatalogHeroCopyClassName = cn("flex", "max-w-2xl", "flex-col", "gap-3")
-/** Derived catalog facts sit below the promise without pretending to be progress. */
-export const playgroundCatalogFactsClassName = cn("grid", "grid-cols-2", "gap-4", "border-y", "border-accent/15", "py-4")
-/** One compact fact keeps its label visibly subordinate. */
-export const playgroundCatalogFactClassName = cn("flex", "min-w-0", "flex-col", "gap-1")
-/** Keep the primary action aligned to its content instead of stretching across the hero. */
+/** One readable sentence replaces an unsupported repeated metric group. */
+export const playgroundCatalogFactsClassName = cn("flex", "min-w-0", "flex-wrap", "items-center", "gap-x-3", "gap-y-2", "text-sm")
+/** One compact catalog fact. */
+export const playgroundCatalogFactClassName = cn("inline-flex", "items-baseline", "gap-1.5", "rounded-full", "border", "border-accent/15", "bg-background/70", "px-3", "py-2")
+/** Hero catalog action owner. */
 export const playgroundCatalogActionClassName = cn("flex", "w-fit")
-/** Course preview is informative media and therefore contained rather than cropped. */
-export const playgroundCatalogPreviewClassName = cn("relative", "flex", "min-h-64", "items-center", "justify-center", "overflow-hidden", "border-t", "border-accent/15", "bg-accent/10", "p-5", "sm:min-h-80", "sm:p-7", "lg:min-h-full", "lg:border-t-0", "lg:border-l")
-/** Preserve the complete authored preview at wide, intermediate, and compact widths. */
-export const playgroundCatalogPreviewImageClassName = cn("aspect-[4/3]", "max-h-[30rem]", "w-full", "rounded-2xl", "bg-background", "object-contain", "shadow-xl", "ring-1", "ring-accent/15")
-/** Verification ownership remains explicit on the preview rather than inferred from color. */
-export const playgroundCatalogVerificationClassName = cn("absolute", "right-7", "top-7", "rounded-full", "bg-success-soft", "px-3", "py-2", "text-success-soft-foreground", "shadow-sm")
-/** Section copy introduces the multi-lab decision below the hero. */
+/** Purposeful process preview shown when no authored media exists. */
+export const playgroundCatalogPreviewClassName = cn("relative", "flex", "min-w-0", "flex-col", "justify-center", "gap-5", "border-t", "border-accent/15", "bg-background/55", "p-6", "sm:p-8", "lg:border-l", "lg:border-t-0")
+/** Authored preview image frame. */
+export const playgroundCatalogPreviewImageClassName = cn("aspect-[4/3]", "max-h-80", "w-full", "rounded-2xl", "bg-background", "object-contain", "shadow-lg", "ring-1", "ring-accent/15")
+/** Server-verification promise chip. */
+export const playgroundCatalogVerificationClassName = cn("inline-flex", "w-fit", "items-center", "gap-2", "rounded-full", "bg-success-soft", "px-3", "py-2", "text-success-soft-foreground")
+/** Three-step process preview stack. */
+export const playgroundCatalogProcessClassName = cn("flex", "flex-col", "gap-3")
+/** One process preview row. */
+export const playgroundCatalogProcessStepClassName = cn("grid", "grid-cols-[2rem_1fr]", "items-center", "gap-3", "rounded-xl", "border", "border-divider", "bg-background/85", "p-3")
+/** Process preview ordinal. */
+export const playgroundCatalogProcessNumberClassName = cn("flex", "size-8", "items-center", "justify-center", "rounded-lg", "bg-accent-soft", "text-sm", "font-semibold", "text-accent-soft-foreground")
+/** Catalog list heading. */
 export const playgroundCatalogHeaderClassName = cn("flex", "max-w-3xl", "flex-col", "gap-2")
-/** Reflow lab choices from one scan column into a balanced route map. */
-export const playgroundCatalogGridClassName = cn("grid", "w-full", "min-w-0", "grid-cols-1", "gap-4", "md:grid-cols-2", "2xl:grid-cols-3")
-/** Each lab is a compact stage with identity, verified-step fact, and one action. */
-export const playgroundCatalogCardClassName = cn("flex", "min-h-56", "min-w-0", "flex-col", "justify-between", "gap-6", "p-5", "sm:p-6")
-/** Sequence and backend icon make each stage easy to scan. */
+/** Responsive Playground card grid. */
+export const playgroundCatalogGridClassName = cn("grid", "w-full", "min-w-0", "grid-cols-1", "gap-4", "md:grid-cols-2")
+/** One selectable Playground card. */
+export const playgroundCatalogCardClassName = cn("flex", "min-h-52", "min-w-0", "flex-col", "justify-between", "gap-5", "p-5", "sm:p-6")
+/** Card identity row. */
 export const playgroundCatalogCardTopClassName = cn("flex", "items-start", "justify-between", "gap-4")
-/** Large icon tile gives the backend-authored lab identity a useful visual job. */
-export const playgroundCatalogIconClassName = cn("flex", "size-12", "shrink-0", "items-center", "justify-center", "rounded-2xl", "bg-accent-soft", "text-2xl", "text-accent-soft-foreground")
-/** Lab identity and step fact form one compact reading group. */
-export const playgroundCatalogCardBodyClassName = cn("flex", "min-w-0", "flex-col", "gap-3")
-/** Anchor step count and entry action at the card boundary. */
-export const playgroundCatalogMetaClassName = cn("flex", "flex-col", "items-start", "gap-4", "border-t", "border-divider", "pt-4", "sm:flex-row", "sm:items-center", "sm:justify-between")
+/** Card technology icon frame. */
+export const playgroundCatalogIconClassName = cn("flex", "size-11", "shrink-0", "items-center", "justify-center", "rounded-xl", "bg-accent-soft", "text-accent-soft-foreground")
+/** Card title and description stack. */
+export const playgroundCatalogCardBodyClassName = cn("flex", "min-w-0", "flex-col", "gap-2")
+/** Card metadata and action row. */
+export const playgroundCatalogMetaClassName = cn("flex", "items-center", "justify-between", "gap-4", "border-t", "border-divider", "pt-4")
+/** Catalog loading, empty, or error notice inset. */
+export const playgroundCatalogNoticeClassName = cn("p-5", "sm:p-6")

@@ -55,10 +55,14 @@ describe("PersonalProjectGradingSettingsBlock", () => {
     })
 
     it("persists the live repository draft together with the grading settings", async () => {
+        const onApplied = vi.fn()
         render(<PersonalProjectGradingSettingsBlock
             courseId="course-1"
             taskId="task-1"
             repositoryUrl="https://github.com/starci/live-draft"
+            initialLanguage="typescript"
+            initialModelId="openai:gpt-5"
+            onApplied={onApplied}
         />)
 
         expect(mocks.input?.props.saveDisabled).toBe(false)
@@ -70,5 +74,6 @@ describe("PersonalProjectGradingSettingsBlock", () => {
             githubToken: undefined,
         }))
         await waitFor(() => expect(mocks.workspace.mutate).toHaveBeenCalledOnce())
+        await waitFor(() => expect(onApplied).toHaveBeenCalledWith({ language: "typescript", modelId: "openai:gpt-5" }))
     })
 })

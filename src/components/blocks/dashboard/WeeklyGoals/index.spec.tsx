@@ -153,7 +153,7 @@ describe("WeeklyGoals", () => {
         stub({ data: { items: [], composite: null, resetAt: null } })
 
         render(<WeeklyGoals />)
-        fireEvent.click(screen.getByRole("link", { name: "edit" }))
+        fireEvent.click(screen.getByRole("button", { name: "edit" }))
         expect(push).toHaveBeenCalledExactlyOnceWith("/kpi")
     })
 

@@ -1,5 +1,6 @@
 import { CourseMockInterviewResultBlock } from "@/components/blocks/learn/CourseMockInterviewResultBlock"
 import { Breadcrumbs } from "@/components/leaves/Breadcrumbs"
+import { mockInterviewResultBreadcrumbClassName, mockInterviewResultPageClassName } from "./classNames"
 
 /** Route identity passed to the connected block. */
 export type CourseMockInterviewResultPageProps = {
@@ -15,11 +16,12 @@ export type CourseMockInterviewResultPageProps = {
 
 /** Route shell composed from the connected block. */
 export const CourseMockInterviewResultPageBase = (props: CourseMockInterviewResultPageProps) => (
-    <>
-        <Breadcrumbs
+    <div className={mockInterviewResultPageClassName}>
+        <div className={mockInterviewResultBreadcrumbClassName}><Breadcrumbs
             props={{
                 label: props.breadcrumbLabel ?? "Course path",
-                showFullTrail: true,
+                showFullTrail: false,
+                backLabel: props.mockInterviewLabel ?? "Mock interview",
                 steps: [
                     { id: "course", label: props.courseTitle ?? props.displayId },
                     { id: "mock-interview", label: props.mockInterviewLabel ?? "Mock interview" },
@@ -27,7 +29,7 @@ export const CourseMockInterviewResultPageBase = (props: CourseMockInterviewResu
                 ],
             }}
             on={{ course: props.onCourse, "mock-interview": props.onMockInterview }}
-        />
+        /></div>
         <CourseMockInterviewResultBlock {...props} />
-    </>
+    </div>
 )

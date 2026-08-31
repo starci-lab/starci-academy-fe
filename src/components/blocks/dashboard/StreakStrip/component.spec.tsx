@@ -7,7 +7,7 @@ import { StreakStripBase } from "./component"
 afterEach(cleanup)
 
 describe("StreakStripBase", () => {
-    it("keeps the seven-day run beside the production prompt when activity is zero", () => {
+    it("separates the week summary from the production prompt when activity is zero", () => {
         const learn = vi.fn()
         const days = Array.from({ length: 7 }, (_unused, index) => ({
             id: `2026-08-${index + 1}`,
@@ -33,8 +33,10 @@ describe("StreakStripBase", () => {
         )
 
         expect(container.querySelectorAll("li")).toHaveLength(7)
-        expect(container.querySelector("[data-part=\"streak-primary\"]")).toHaveClass("flex", "sm:flex-row", "sm:justify-between")
+        expect(container.querySelector("[data-part=\"streak-summary\"]")).toHaveClass("flex", "p-4", "pb-3", "sm:justify-between")
         expect(container.querySelector("[data-part=\"streak-week-run\"]")).toHaveClass("flex", "gap-3")
+        expect(container.querySelector("[data-part=\"streak-prompt\"]")).toHaveClass("px-4", "pb-4", "pt-3")
+        expect(container.querySelector(".border-t.border-separator")).toBeInTheDocument()
         expect(container.querySelector("[role=\"row\"]")).toBeNull()
         expect(container.textContent).toContain("Read content to start your streak")
         fireEvent.click(container.querySelector("button")!)
@@ -77,5 +79,6 @@ describe("StreakStripBase", () => {
 
         expect(container.querySelectorAll("li")).toHaveLength(7)
         expect(container.querySelectorAll("[data-loading=\"true\"]").length).toBeGreaterThan(0)
+        expect(container.querySelector(".border-t.border-separator")).toBeInTheDocument()
     })
 })

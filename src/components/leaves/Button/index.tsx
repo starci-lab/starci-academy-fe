@@ -42,17 +42,13 @@ export type ButtonData = {
     readonly size?: ButtonSize
     /** Form semantics. Defaults to `button` so a stray control cannot submit by accident. */
     readonly type?: ButtonType
-    /** The meaning drawn beside the label. It inherits the label's colour, never its own. */
+    /**
+     * Compatibility input for existing callers. The leaf renders only `next` as a trailing
+     * directional affordance; named/action glyphs belong in IconButton instead.
+     */
     readonly icon?: IconName
     /**
-     * Which side the glyph sits on. `leading` is the default and stays the default: a glyph that
-     * NAMES the action belongs before the words, the way a provider mark or a retry arrow does.
-     *
-     * `trailing` is for a glyph that points at the CONSEQUENCE rather than naming the action - the
-     * forward arrow on "continue", which is about where the press takes you. Putting that one in
-     * front makes it read as decoration on the verb; putting it last makes it the direction the
-     * sentence ends in, which is why every call-to-action in the product's own catalogue draws it
-     * that way.
+     * Compatibility placement input. The only rendered combination is `next` + `trailing`.
      */
     readonly iconPlacement?: "leading" | "trailing"
     /** Blocks the press because the action is unavailable before it starts. */
@@ -106,15 +102,13 @@ export const Button = (props: ButtonProps) => {
     const size = data.size ?? "md"
     const isPending = data.isPending === true
     const placement = data.iconPlacement ?? "leading"
-    const glyph = isLoading || isPending || data.icon === undefined
+    const glyph = isLoading || isPending || data.icon !== "next" || placement !== "trailing"
         ? null
-        : placement === "trailing"
-            ? (
-                <span className={buttonTrailingGlyphClassName}>
-                    <Icon props={{ name: data.icon, role: "chip" }} />
-                </span>
-            )
-            : <Icon props={{ name: data.icon, role: "chip" }} />
+        : (
+            <span className={buttonTrailingGlyphClassName}>
+                <Icon props={{ name: "next", role: "chip" }} />
+            </span>
+        )
     return (
         <HeroButton
             data-variant={variant}
@@ -133,9 +127,8 @@ export const Button = (props: ButtonProps) => {
             className={isLoading ? buttonLoadingClassName : buttonActiveClassName}
         >
             {isPending ? <Spinner size="sm" color="current" aria-hidden="true" /> : null}
-            {placement === "leading" ? glyph : null}
             <span>{data.label}</span>
-            {placement === "trailing" ? glyph : null}
+            {glyph}
         </HeroButton>
     )
 }

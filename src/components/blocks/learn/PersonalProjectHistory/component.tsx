@@ -1,4 +1,5 @@
 import { Button } from "@/components/leaves/Button"
+import { Badge } from "@/components/leaves/Badge"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { Text } from "@/components/leaves/Text"
 import {
@@ -16,6 +17,7 @@ export type PersonalProjectHistoryAttempt = {
     readonly passed: boolean
     readonly processedAt?: string
     readonly servedModel?: string
+    readonly servedProvider?: string
 }
 
 /** Copy resolved by the connected history owner. */
@@ -24,6 +26,7 @@ export type PersonalProjectHistoryLabels = {
     readonly selectAttempt: (number: number, score: number) => string
     readonly passed: string
     readonly needsWork: string
+    readonly selected: string
     readonly previous: string
     readonly next: string
     readonly pending: string
@@ -67,28 +70,32 @@ export const PersonalProjectHistoryBase = (props: PersonalProjectHistoryProps) =
             <Text props={{ content: props.props.labels.summary(props.props.attemptCount), size: "sm", tone: "muted" }} isLoading={loading} />
             {props.state === "ready" && props.props.attempts.length > 0 ? (
                 <ul className={personalProjectHistoryListClassName} aria-label={props.props.labels.summary(props.props.attemptCount)}>
-                    {props.props.attempts.map((attempt) => (
-                        <li className={personalProjectHistoryRowClassName} key={attempt.id}>
-                            <Button
-                                props={{
-                                    label: props.props.labels.selectAttempt(attempt.attemptNumber, attempt.score),
-                                    variant: attempt.id === props.props.selectedAttemptId ? "primary" : "secondary",
-                                    size: "sm",
-                                }}
-                                on={{ press: () => props.on?.select?.(attempt) }}
-                                isLoading={loading}
-                            />
-                            <Text
-                                props={{
-                                    content: [attempt.passed ? props.props.labels.passed : props.props.labels.needsWork, attempt.servedModel, attempt.processedAt]
-                                        .filter(Boolean).join(" · "),
-                                    size: "xs",
-                                    tone: "muted",
-                                }}
-                                isLoading={loading}
-                            />
-                        </li>
-                    ))}
+                    {props.props.attempts.map((attempt) => {
+                        const selected = attempt.id === props.props.selectedAttemptId
+                        return (
+                            <li className={personalProjectHistoryRowClassName} key={attempt.id}>
+                                {selected ? <Badge props={{ content: props.props.labels.selected, tone: "accent" }} /> : null}
+                                {selected ? <Text props={{ content: props.props.labels.selectAttempt(attempt.attemptNumber, attempt.score), weight: "semibold" }} /> : <Button
+                                    props={{
+                                        label: props.props.labels.selectAttempt(attempt.attemptNumber, attempt.score),
+                                        variant: "outline",
+                                        size: "sm",
+                                    }}
+                                    on={{ press: () => props.on?.select?.(attempt) }}
+                                    isLoading={loading}
+                                />}
+                                <Text
+                                    props={{
+                                        content: [attempt.passed ? props.props.labels.passed : props.props.labels.needsWork, attempt.servedProvider, attempt.servedModel, attempt.processedAt]
+                                            .filter(Boolean).join(" · "),
+                                        size: "xs",
+                                        tone: "muted",
+                                    }}
+                                    isLoading={loading}
+                                />
+                            </li>
+                        )
+                    })}
                 </ul>
             ) : props.state === "pending" ? (
                 <Text props={{ content: notice, live: "polite" }} isLoading />

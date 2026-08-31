@@ -33,6 +33,7 @@ const row = {
     cover: null,
     percent: 45,
     percentLabel: "45%",
+    actionLabel: "Continue",
     isTrial: false,
     trialLabel: "Trial",
     dimensions,
@@ -53,6 +54,7 @@ describe("MyCoursesProgressBase", () => {
         expect(screen.getByText("Content · 4/8")).toBeInTheDocument()
         expect(screen.getByText("Challenges · 1/2")).toBeInTheDocument()
         expect(screen.getByText("Milestones · 1/4")).toBeInTheDocument()
+        expect(screen.getByText("Continue")).toHaveAttribute("data-tone", "accent")
         fireEvent.click(screen.getByRole("button", { name: "Rust basics" }))
         expect(open).toHaveBeenCalledOnce()
     })

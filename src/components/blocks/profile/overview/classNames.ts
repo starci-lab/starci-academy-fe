@@ -2,12 +2,16 @@ import { cn } from "@heroui/react"
 
 /** Joined course evidence rows. */
 export const profileEvidenceListClassName = cn("flex", "flex-col", "divide-y", "divide-separator", "p-0")
+/** Keep a native press target inside the measured list surface on compact widths. */
+export const profileCoursePressableClassName = cn("block", "min-w-0", "max-w-full", "overflow-hidden", "break-words", "[overflow-wrap:anywhere]")
 /** One joined course row led by its course artwork. */
-export const profileCourseRowClassName = cn("flex", "w-full", "flex-row", "items-center", "gap-4", "p-4")
+export const profileCourseRowClassName = cn("flex", "min-w-0", "max-w-full", "w-full", "flex-row", "items-center", "gap-4", "p-4")
 /** Course identity and progress qualifiers beside the artwork. */
-export const profileCourseIdentityClassName = cn("flex", "min-w-0", "grow", "flex-col", "gap-1")
+export const profileCourseIdentityClassName = cn("flex", "min-w-0", "max-w-full", "grow", "flex-col", "gap-1", "break-words", "[overflow-wrap:anywhere]")
+/** Qualifier copy is explicitly allowed to wrap inside the compact course row. */
+export const profileCourseQualifierClassName = cn("min-w-0", "max-w-full", "whitespace-normal", "break-words", "[overflow-wrap:anywhere]", "[&>div]:whitespace-normal", "[&>div]:break-words", "[&>div]:[overflow-wrap:anywhere]")
 /** Course title and compact completion fact share one scan line. */
-export const profileCourseHeadingClassName = cn("flex", "min-w-0", "flex-row", "items-center", "justify-between", "gap-3")
+export const profileCourseHeadingClassName = cn("flex", "min-w-0", "max-w-full", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-3")
 /** Readiness content flow; the owning SurfaceCard supplies the single compact inset. */
 export const profileReadinessCardClassName = cn("flex", "flex-col", "gap-3")
 /** Readiness summary remains left aligned while its band settles at the far edge. */
@@ -17,6 +21,6 @@ export const profileReadinessTrackClassName = cn("flex", "min-w-0", "flex-row", 
 /** Joined readiness metrics inside the nested list surface. */
 export const profileReadinessListClassName = cn("flex", "flex-col", "divide-y", "divide-separator")
 /** Skill snapshot controls sharing one width. */
-export const skillSnapshotClassName = cn("flex", "flex-col", "gap-4", "[&>*]:w-full")
+export const skillSnapshotClassName = cn("flex", "min-w-0", "max-w-full", "flex-col", "gap-4", "[&>*]:w-full")
 /** Count-only skill evidence is a joined nested list, never a progress visualization. */
 export const profileSkillListClassName = cn("flex", "flex-col", "divide-y", "divide-separator")

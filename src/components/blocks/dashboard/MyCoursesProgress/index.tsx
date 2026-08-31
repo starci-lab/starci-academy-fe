@@ -18,6 +18,8 @@ type CourseProgressLabels = {
     readonly challenge: string
     readonly milestone: string
     readonly trial: string
+    readonly resume: string
+    readonly view: string
 }
 
 /** Resolve one full dashboard course payload into its pure row. */
@@ -36,6 +38,7 @@ const toRow = (course: MyCourseRow, labels: CourseProgressLabels): CourseProgres
         percent: completion,
         percentLabel: `${completion}%`,
         isTrial: course.isEnrolled === false,
+        actionLabel: course.isEnrolled === false ? labels.view : labels.resume,
         trialLabel: labels.trial,
         dimensions: [
             { id: "content", label: labels.content, completed: contentCompleted, total: contentTotal, percent: percent(contentCompleted, contentTotal), tone: "accent" },
@@ -59,7 +62,7 @@ export const MyCoursesProgress = (props: MyCoursesProgressProps) => {
     const [pendingId, setPendingId] = useState<string>()
     const retry = () => { void query.mutate() }
     const rows = (query.data ?? []).map((course) => ({
-        ...toRow(course, { content: t("progress.content"), challenge: t("progress.challenge"), milestone: t("progress.milestone"), trial: t("trial") }),
+        ...toRow(course, { content: t("progress.content"), challenge: t("progress.challenge"), milestone: t("progress.milestone"), trial: t("trial"), resume: t("catalog.resume"), view: t("catalog.view") }),
         isPending: pendingId === course.globalId,
     }))
     const viewProps = { label: t("heading"), rows, emptyMessage: t("empty"), errorMessage: t("failed"), retryLabel: t("retry") }

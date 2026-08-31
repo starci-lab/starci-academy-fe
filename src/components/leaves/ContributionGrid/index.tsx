@@ -2,7 +2,7 @@
 
 import { useRef } from "react"
 import { motion } from "framer-motion"
-import { contributionGridClassName, contributionMonthClassName, contributionViewportClassName, contributionWeekClassName, contributionWeekdayClassName, contributionWeekdayColumnClassName, getContributionCellClassName } from "./classNames"
+import { contributionGridClassName, contributionMonthClassName, contributionMonthCompactClassName, contributionMonthSpacerClassName, contributionMonthWideClassName, contributionViewportClassName, contributionWeekClassName, contributionWeekdayClassName, contributionWeekdayColumnClassName, getContributionCellClassName } from "./classNames"
 
 /** One contribution day with its already-resolved accessible description. */
 export type ContributionGridDay = {
@@ -23,7 +23,7 @@ export type ContributionGridData = {
 export type ContributionGridProps = { readonly props: ContributionGridData; readonly isLoading?: boolean }
 
 type CalendarCell = ContributionGridDay & { readonly inYear: boolean }
-type CalendarWeek = { readonly id: string; readonly monthLabel?: string; readonly cells: ReadonlyArray<CalendarCell> }
+type CalendarWeek = { readonly id: string; readonly monthLabel?: string; readonly monthNumber?: number; readonly cells: ReadonlyArray<CalendarCell> }
 
 const levelOf = (count: number) => count <= 0 ? 0 : count <= 2 ? 1 : count <= 5 ? 2 : count <= 9 ? 3 : 4
 
@@ -43,6 +43,7 @@ const makeWeeks = (
     while (cursor <= last) {
         const cells: Array<CalendarCell> = []
         let monthLabel: string | undefined
+        let monthNumber: number | undefined
         for (let dayIndex = 0; dayIndex < 7; dayIndex += 1) {
             const date = cursor.toISOString().slice(0, 10)
             const inYear = cursor.getUTCFullYear() === year
@@ -50,12 +51,13 @@ const makeWeeks = (
             if (inYear && cursor.getUTCMonth() !== previousMonth) {
                 previousMonth = cursor.getUTCMonth()
                 monthLabel = monthLabels[previousMonth]
+                monthNumber = previousMonth + 1
             }
             cells.push({ date, count: source?.count ?? 0, label: source?.label ?? date, inYear })
             cursor.setUTCDate(cursor.getUTCDate() + 1)
         }
         // The inner loop runs seven times unconditionally, so a week always opens on a dated cell.
-        weeks.push({ id: cells[0].date, monthLabel, cells })
+        weeks.push({ id: cells[0].date, monthLabel, monthNumber, cells })
     }
     return weeks
 }
@@ -77,13 +79,17 @@ export const ContributionGrid = (props: ContributionGridProps) => {
                 data-part="calendar-grid"
             >
                 <span className={contributionWeekdayColumnClassName} aria-hidden="true">
+                    <span className={contributionMonthSpacerClassName} />
                     {props.props.weekdayLabels.map((label) => (
                         <span key={label} className={contributionWeekdayClassName}>{label}</span>
                     ))}
                 </span>
                 {weeks.map((week) => (
                     <span key={week.id} className={contributionWeekClassName} data-part="calendar-week">
-                        <span className={contributionMonthClassName} aria-hidden="true">{week.monthLabel ?? ""}</span>
+                        <span className={contributionMonthClassName} aria-hidden="true">
+                            <span className={contributionMonthWideClassName}>{week.monthLabel ?? ""}</span>
+                            <span className={contributionMonthCompactClassName}>{week.monthNumber ?? ""}</span>
+                        </span>
                         {week.cells.map((cell) => (
                             <span
                                 key={cell.date}

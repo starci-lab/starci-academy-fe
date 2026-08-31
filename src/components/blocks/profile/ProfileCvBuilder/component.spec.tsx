@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import type { CvDocument } from "@/modules/types/cv"
-import { ProfileCvBuilderBase } from "./component"
+import { ProfileCvBuilderBase, type ProfileCvBuilderEmptyCopy, type ProfileCvBuilderRecoveryCopy } from "./component"
 
 const document: CvDocument = {
     id: "cv-1",
@@ -16,25 +16,54 @@ const document: CvDocument = {
     ],
     style: { font: "inter", accent: "#7547FF", language: "vi", template: "classic" },
     pdfCdnKey: null,
-    texSource: null,
-    isPublic: false,
     createdAt: "2026-08-30T00:00:00.000Z",
     updatedAt: "2026-08-30T00:00:00.000Z",
 }
 
-const data = { document, mode: "blocks" as const, texDraft: "\\documentclass{article}", saveState: "saved" as const, completeness: 63, isCreating: false, isCompiling: false, isRewriting: false, isPublishing: false }
+const data = { document, mode: "blocks" as const, texDraft: "\\documentclass{article}", saveState: "saved" as const, completeness: 63, isCreating: false, isCompiling: false, isRewriting: false }
+const recovery: ProfileCvBuilderRecoveryCopy = {
+    loading: "Loading CV builder…",
+    errorTitle: "The CV could not be loaded",
+    errorDescription: "Your saved content is safe. Try again or return to your profile overview.",
+    retry: "Try again",
+    overview: "Go to overview",
+}
+const empty: ProfileCvBuilderEmptyCopy = {
+    title: "Create your CV with LaTeX",
+    description: "Enter your details by section, use AI to refine the wording, and compile an ATS-friendly PDF.",
+    create: "Create your first CV",
+}
 
 describe("ProfileCvBuilderBase", () => {
+    it("renders the locale-selected empty CV copy without Vietnamese leakage", () => {
+        render(<ProfileCvBuilderBase props={{ ...data, document: undefined }} recovery={recovery} empty={empty} />)
+
+        expect(screen.getByRole("heading", { name: "Create your CV with LaTeX" })).toBeInTheDocument()
+        expect(screen.getByText("Enter your details by section, use AI to refine the wording, and compile an ATS-friendly PDF.")).toBeInTheDocument()
+        expect(screen.getByRole("button", { name: "Create your first CV" })).toBeInTheDocument()
+        expect(screen.queryByText("Tạo CV bằng LaTeX")).not.toBeInTheDocument()
+    })
+
+    it("keeps CV recovery copy locale-consistent and exposes retry progress", () => {
+        const retry = vi.fn()
+        render(<ProfileCvBuilderBase props={{ ...data, situation: "error" }} recovery={recovery} empty={empty} retryPending on={{ retry }} />)
+
+        expect(screen.getByRole("heading", { name: "The CV could not be loaded" })).toBeInTheDocument()
+        expect(screen.getByText("Your saved content is safe. Try again or return to your profile overview.")).toBeInTheDocument()
+        expect(screen.queryByText("Chưa tải được dữ liệu CV")).not.toBeInTheDocument()
+        expect(screen.getByRole("button", { name: "Try again" })).toHaveAttribute("data-action-pending", "true")
+    })
+
     it("offers an honest first-document action", () => {
         const create = vi.fn()
-        render(<ProfileCvBuilderBase props={{ ...data, document: undefined }} on={{ create }} />)
-        fireEvent.click(screen.getByRole("button", { name: "Tạo CV đầu tiên" }))
+        render(<ProfileCvBuilderBase props={{ ...data, document: undefined }} recovery={recovery} empty={empty} on={{ create }} />)
+        fireEvent.click(screen.getByRole("button", { name: "Create your first CV" }))
         expect(create).toHaveBeenCalledOnce()
     })
 
     it("renders the legacy field workflow and reports field changes", () => {
         const field = vi.fn()
-        render(<ProfileCvBuilderBase props={data} on={{ field }} />)
+        render(<ProfileCvBuilderBase props={data} recovery={recovery} empty={empty} on={{ field }} />)
         expect(screen.getByRole("heading", { name: "Thông tin cá nhân" })).toBeInTheDocument()
         expect(screen.getByRole("heading", { name: "Điểm khác biệt" })).toBeInTheDocument()
         expect(screen.getByRole("progressbar", { name: "Mức hoàn thiện CV" })).toHaveAttribute("aria-valuenow", "63")
@@ -45,10 +74,10 @@ describe("ProfileCvBuilderBase", () => {
     it("switches to LaTeX and exposes the compile outcome", () => {
         const mode = vi.fn()
         const compile = vi.fn()
-        const { rerender } = render(<ProfileCvBuilderBase props={data} on={{ mode, compile }} />)
+        const { rerender } = render(<ProfileCvBuilderBase props={data} recovery={recovery} empty={empty} on={{ mode, compile }} />)
         fireEvent.click(screen.getByRole("tab", { name: "Mã LaTeX" }))
         expect(mode).toHaveBeenCalledWith("latex")
-        rerender(<ProfileCvBuilderBase props={{ ...data, mode: "latex", previewUrl: "https://example.test/cv.pdf" }} on={{ mode, compile }} />)
+        rerender(<ProfileCvBuilderBase props={{ ...data, mode: "latex", previewUrl: "https://example.test/cv.pdf" }} recovery={recovery} empty={empty} on={{ mode, compile }} />)
         expect(screen.getByRole("textbox", { name: "Mã nguồn LaTeX" })).toHaveValue("\\documentclass{article}")
         expect(screen.getByRole("link", { name: /Mở PDF/ })).toHaveAttribute("href", "https://example.test/cv.pdf")
         fireEvent.click(screen.getByRole("button", { name: "Biên dịch PDF" }))

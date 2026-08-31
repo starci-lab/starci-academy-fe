@@ -6,18 +6,21 @@ import { useSearchParams } from "next/navigation"
 import { useQueryCoursePersonalProjectSwr } from "@/hooks/swr/useQueryCoursePersonalProjectSwr"
 import { useQueryPersonalTaskAttemptFeedbacksSwr } from "@/hooks/swr/useQueryPersonalTaskAttemptFeedbacksSwr"
 import { useQueryPersonalTaskAttemptsSwr } from "@/hooks/swr/useQueryPersonalTaskAttemptsSwr"
+import { useQueryJobStatusSwr } from "@/hooks/swr/useQueryJobStatusSwr"
 import { PersonalProjectResult } from "./index"
 
 const push = vi.fn()
+const replace = vi.fn()
 const laterAttempt = { id: "attempt-21", attemptNumber: 21, score: 19, passed: true }
 type HistoryDrawerProps = { readonly isOpen: boolean; readonly onSelect?: (attempt: typeof laterAttempt) => void }
 
 vi.mock("next-intl", () => ({ useLocale: vi.fn() }))
 vi.mock("next/navigation", () => ({ useSearchParams: vi.fn() }))
-vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push }) }))
+vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push, replace }) }))
 vi.mock("@/hooks/swr/useQueryCoursePersonalProjectSwr", () => ({ useQueryCoursePersonalProjectSwr: vi.fn() }))
 vi.mock("@/hooks/swr/useQueryPersonalTaskAttemptsSwr", () => ({ useQueryPersonalTaskAttemptsSwr: vi.fn() }))
 vi.mock("@/hooks/swr/useQueryPersonalTaskAttemptFeedbacksSwr", () => ({ useQueryPersonalTaskAttemptFeedbacksSwr: vi.fn() }))
+vi.mock("@/hooks/swr/useQueryJobStatusSwr", () => ({ useQueryJobStatusSwr: vi.fn() }))
 vi.mock("@/components/overlays/learn/PersonalProjectHistoryDrawer", () => ({
     PersonalProjectHistoryDrawer: (props: HistoryDrawerProps) => props.isOpen
         ? <button type="button" onClick={() => props.onSelect?.(laterAttempt)}>Choose page 2 attempt</button>
@@ -34,6 +37,7 @@ describe("PersonalProjectResult", () => {
     it("uses feedback keyed by an attempt selected from a later history page", async () => {
         vi.mocked(useLocale).mockReturnValue("en")
         vi.mocked(useSearchParams).mockReturnValue({ get: () => null } as never)
+        vi.mocked(useQueryJobStatusSwr).mockReturnValue(answer(undefined))
         vi.mocked(useQueryCoursePersonalProjectSwr).mockReturnValue(answer({
             course: { id: "course-1", title: "Capstone", displayId: "capstone" },
             milestones: [{ id: "milestone-1", title: "Ship", orderIndex: 0, tasks: [{ id: "task-1", title: "Build", type: "code", maxScore: 20, completed: true, lastScore: 18, numAttempts: 21 }] }],
@@ -48,5 +52,6 @@ describe("PersonalProjectResult", () => {
 
         await waitFor(() => expect(screen.getByText("feedback for attempt-21")).toBeInTheDocument())
         expect(useQueryPersonalTaskAttemptFeedbacksSwr).toHaveBeenLastCalledWith("attempt-21")
+        expect(replace).toHaveBeenCalledWith("/courses/capstone/learn/personal-project/tasks/task-1/result?attempt=attempt-21")
     })
 })

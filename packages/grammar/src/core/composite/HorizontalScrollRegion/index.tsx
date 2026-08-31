@@ -8,8 +8,9 @@ export type HorizontalScrollRegionProps = Omit<ComponentProps<"div">, "children"
 }
 
 /** Preserve intrinsic inline content and expose HeroUI's horizontal overflow affordance. */
-export const HorizontalScrollRegion = forwardRef<HTMLDivElement, HorizontalScrollRegionProps>((props, ref) => (
-    <ScrollShadow {...props} ref={ref} orientation="horizontal" />
-))
+export const HorizontalScrollRegion = forwardRef<HTMLDivElement, HorizontalScrollRegionProps>((props, ref) => {
+    const { hideScrollBar = true, ...regionProps } = props
+    return <ScrollShadow {...regionProps} ref={ref} hideScrollBar={hideScrollBar} orientation="horizontal" />
+})
 
 HorizontalScrollRegion.displayName = "HorizontalScrollRegion"

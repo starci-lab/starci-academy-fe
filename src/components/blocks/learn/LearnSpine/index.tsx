@@ -10,7 +10,7 @@ import { LearnSpineBase } from "./component"
 import type { IconName } from "@/components/leaves/Icon"
 
 /** Course route identity required by the connected navigation spine. */
-export type LearnSpineProps = { readonly displayId: string; readonly presentation?: "rail" | "drawer"; readonly onNavigate?: () => void }
+export type LearnSpineProps = { readonly displayId: string; readonly presentation?: "rail" | "drawer"; readonly onNavigate?: () => void; readonly isCollapsed?: boolean; readonly onCollapsedChange?: (collapsed: boolean) => void }
 
 type SpineRoute = { readonly id: string; readonly icon: IconName; readonly at: string; readonly requiresEnrollment?: boolean }
 const GROUPS: ReadonlyArray<{ id: string; rows: ReadonlyArray<SpineRoute> }> = [
@@ -18,7 +18,8 @@ const GROUPS: ReadonlyArray<{ id: string; rows: ReadonlyArray<SpineRoute> }> = [
     { id: "practice", rows: [{ id: "flashcards", icon: "flashcards", at: "/learn/flashcards" }, { id: "mockInterview", icon: "mockInterview", at: "/learn/mock-interview", requiresEnrollment: true }, { id: "foundations", icon: "foundations", at: "/learn/foundations" }, { id: "playground", icon: "playground", at: "/learn/playground" }] },
     { id: "track", rows: [{ id: "mindMap", icon: "mindMap", at: "/learn/mind-map" }, { id: "leaderboard", icon: "courseLeaderboard", at: "/learn/leaderboard" }, { id: "qa", icon: "courseQa", at: "/learn/qa" }] },
 ]
-const LEARN_RAIL_COLLAPSED_KEY = "starci.learn.sidebar.collapsed"
+/** Shared persistence key that keeps the shell width and the spine presentation in lockstep. */
+export const LEARN_RAIL_COLLAPSED_KEY = "starci.learn.sidebar.collapsed"
 
 /** Connected owner for course navigation data, collapse state and route actions. */
 export const LearnSpine = (props: LearnSpineProps) => {
@@ -30,10 +31,11 @@ export const LearnSpine = (props: LearnSpineProps) => {
     const course = useQueryCourseSwr({ displayId })
     const enrolledCourses = useQueryMyCoursesSwr()
     const leaderboard = useQueryGlobalLeaderboardSwr()
-    const [isCollapsed, setIsCollapsed] = useState(false)
+    const [localIsCollapsed, setLocalIsCollapsed] = useState(false)
     useEffect(() => {
-        if (typeof window.localStorage.getItem === "function") setIsCollapsed(window.localStorage.getItem(LEARN_RAIL_COLLAPSED_KEY) === "true")
-    }, [])
+        if (props.isCollapsed === undefined && typeof window.localStorage.getItem === "function") setLocalIsCollapsed(window.localStorage.getItem(LEARN_RAIL_COLLAPSED_KEY) === "true")
+    }, [props.isCollapsed])
+    const isCollapsed = presentation === "drawer" ? false : props.isCollapsed ?? localIsCollapsed
     const enrolledCourse = enrolledCourses.data?.find((candidate) => candidate.globalId === course.data?.id)
     const enrollmentKnown = course.data !== undefined
     const viewerRank = leaderboard.data?.myRank
@@ -62,7 +64,12 @@ export const LearnSpine = (props: LearnSpineProps) => {
             if (row !== undefined) { router.push(`${base}${row.at}`); onNavigate?.() }
         },
         resume: () => { router.push(`${base}/learn/content`); onNavigate?.() },
-        toggleCollapse: () => setIsCollapsed((current) => { const next = !current; if (typeof window.localStorage.setItem === "function") window.localStorage.setItem(LEARN_RAIL_COLLAPSED_KEY, String(next)); return next }),
+        toggleCollapse: () => {
+            const next = !isCollapsed
+            if (typeof window.localStorage.setItem === "function") window.localStorage.setItem(LEARN_RAIL_COLLAPSED_KEY, String(next))
+            if (props.onCollapsedChange !== undefined) props.onCollapsedChange(next)
+            else setLocalIsCollapsed(next)
+        },
     }
     return <LearnSpineBase isCollapsed={isCollapsed} presentation={presentation} props={viewProps} on={on} />
 }

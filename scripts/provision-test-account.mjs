@@ -21,7 +21,7 @@
  */
 
 /** Where the local Keycloak lives. Overridable only within localhost - see the guard below. */
-const KEYCLOAK_URL = process.env.KEYCLOAK_URL ?? "http://localhost:8089"
+const KEYCLOAK_URL = process.env.KEYCLOAK_URL ?? "http://localhost:8080"
 
 /** The realm the back end authenticates against. */
 const REALM = process.env.KEYCLOAK_REALM ?? "master"
@@ -47,15 +47,15 @@ const TEST_PASSWORD = process.env.DEV_TEST_ACCOUNT_PASSWORD
 const ACCESS_TOKEN_LIFESPAN_SECONDS = 28800
 
 /**
- * Refuse anything that is not a loopback host.
+ * Refuse anything that is not the canonical local hostname.
  *
  * A hostname check rather than a flag: a flag is something somebody can pass by accident at 2am,
  * and the failure mode here is a published account whose password is in this file.
  */
 const assertLocal = () => {
     const { hostname } = new URL(KEYCLOAK_URL)
-    if (hostname !== "localhost" && hostname !== "127.0.0.1" && hostname !== "::1") {
-        throw new Error(`refusing to seed a test account on a non-local Keycloak: ${hostname}`)
+    if (hostname !== "localhost") {
+        throw new Error(`refusing to seed a test account outside canonical localhost: ${hostname}`)
     }
 }
 

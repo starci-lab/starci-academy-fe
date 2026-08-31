@@ -93,5 +93,6 @@ export const queryMockInterviewAttemptBySession = async ({
     return apollo.query<QueryMockInterviewAttemptBySessionResponse>({
         query: queryMockInterviewAttemptBySessionMap[query],
         variables: { courseId: request.courseId, sessionId: request.sessionId },
+        fetchPolicy: "network-only",
     })
 }

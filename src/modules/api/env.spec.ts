@@ -23,11 +23,18 @@ describe("apiEnv", () => {
         expect(apiEnv().graphql.url).toBe("https://api.example.com/graphql")
     })
 
-    it("aligns loopback API cookies with the host spelling used by the browser", () => {
+    it("keeps the API on canonical localhost when the page used a numeric loopback host", () => {
         vi.stubEnv("NEXT_PUBLIC_API_GRAPHQL_BASE_URL", "http://localhost:3001/graphql")
         vi.stubGlobal("window", { location: { hostname: "127.0.0.1" } })
 
-        expect(apiEnv().graphql.url).toBe("http://127.0.0.1:3001/graphql")
+        expect(apiEnv().graphql.url).toBe("http://localhost:3001/graphql")
+    })
+
+    it("normalizes a numeric loopback API configuration to canonical localhost", () => {
+        vi.stubEnv("NEXT_PUBLIC_API_GRAPHQL_BASE_URL", "http://127.0.0.1:3001/graphql")
+        vi.stubGlobal("window", { location: { hostname: "localhost" } })
+
+        expect(apiEnv().graphql.url).toBe("http://localhost:3001/graphql")
     })
 
     it("aligns each lvh.me UAT case to its own cookie host", () => {

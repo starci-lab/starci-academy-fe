@@ -30,9 +30,6 @@ export type RewriteCvBlockRequest = {
     readonly instruction?: string
 }
 
-/** Selects the one CV visible on the public profile. */
-export type SetCvBlocksPublicRequest = { readonly id: string; readonly isPublic: boolean }
-
 /** CV create response. */
 export type MutateCreateCvBlocksResponse = { readonly createCvBlocks: GraphQLResponse<CvDocument> }
 /** CV update response. */
@@ -41,5 +38,3 @@ export type MutateUpdateCvBlocksResponse = { readonly updateCvBlocks: GraphQLRes
 export type MutateRenderCvBlocksResponse = { readonly renderCvBlocks: GraphQLResponse<{ readonly url: string; readonly cdnKey: string; readonly format: "pdf" }> }
 /** CV AI rewrite response. */
 export type MutateRewriteCvBlockResponse = { readonly rewriteCvBlock: GraphQLResponse<{ readonly block: CvBlock }> }
-/** CV public-state response. */
-export type MutateSetCvBlocksPublicResponse = { readonly setCvBlocksPublic: GraphQLResponse<{ readonly id: string; readonly isPublic: boolean }> }

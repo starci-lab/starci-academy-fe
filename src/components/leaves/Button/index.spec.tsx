@@ -25,4 +25,15 @@ describe("Button", () => {
         expect(screen.getByText("Sign In")).toBeVisible()
         expect(screen.getByText("Sign In").className).not.toContain("invisible")
     })
+
+    it("draws no named action icon and reserves motion for a trailing forward arrow", () => {
+        const { container, rerender } = render(<Button props={{ label: "Retry", icon: "retry" }} />)
+
+        expect(screen.getByRole("button", { name: "Retry" }).querySelector("svg")).toBeNull()
+
+        rerender(<Button props={{ label: "Continue", icon: "next", iconPlacement: "trailing" }} />)
+
+        expect(screen.getByRole("button", { name: "Continue" }).querySelector("svg")).not.toBeNull()
+        expect(container.querySelector(".group-hover\\:translate-x-1")).not.toBeNull()
+    })
 })

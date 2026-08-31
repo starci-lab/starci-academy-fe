@@ -50,9 +50,24 @@ describe("Core capability styles", () => {
     it("keeps canonical surface, collection and rail selectors", () => {
         expect(css).toContain("[data-grammar-scroll=\"contained\"]")
         expect(css).toContain(".starci-core-surface.starci-core-frameless-surface")
+        expect(css).toContain(".starci-core-surface-highlight-sweep")
+        expect(css).toContain(".starci-core-label")
+        expect(css).toContain(".starci-core-tooltip")
+        expect(css).toMatch(/\.starci-core-tooltip:hover > \.starci-core-tooltip-content,[\s\S]*?opacity: 1;/)
+        expect(css).toContain("animation: starci-core-highlight-spin 3s linear infinite")
+        const highlightRule = css.match(/\.starci-core-surface-highlight-sweep\s*\{([\s\S]*?)\}/)?.[1] ?? ""
+        expect(highlightRule).toContain("inset: var(--starci-core-highlight-inset, 0)")
+        expect(highlightRule).toContain("padding: 2px")
+        expect(highlightRule).toContain("mask-composite: exclude")
+        expect(highlightRule).not.toContain("inset: -")
         expect(css).toContain(".starci-core-owned-collection")
         expect(css).toContain("[data-grammar-collapse=\"collapsed\"]")
         expect(css).toContain(".starci-core-surface-accordion-card")
+    })
+
+    it("hides scrollbar chrome by default without disabling overflow", () => {
+        expect(css).toMatch(/\.starci-core-root,\s*\.starci-core-root \*\s*\{[\s\S]*?scrollbar-width: none;/)
+        expect(css).toMatch(/\.starci-core-root::-webkit-scrollbar,[\s\S]*?display: none;[\s\S]*?width: 0;[\s\S]*?height: 0;/)
     })
 
     it("keeps disclosure geometry full-width, full-bleed and hover-invariant", () => {
@@ -99,5 +114,11 @@ describe("Core capability styles", () => {
     it("retains narrow-viewport and reduced-motion safeguards", () => {
         expect(css).toContain("@media (max-width: 47.999rem)")
         expect(css).toContain("@media (prefers-reduced-motion: reduce)")
+    })
+
+    it("supports a leading dashboard rail with a vertical separator", () => {
+        expect(css).toMatch(/data-grammar-dashboard-rail-position="leading"\]\[data-grammar-dashboard-navigation="absent"\]\[data-grammar-dashboard-rail="present"\][\s\S]*?grid-template-areas: "rail rule primary"/)
+        expect(css).toContain(".starci-core-dashboard-shell-leading-rule")
+        expect(css).toMatch(/\.starci-core-dashboard-shell-leading-rule[\s\S]*?align-self: stretch/)
     })
 })

@@ -26,16 +26,3 @@ export type UserProfileData = {
 export type QueryUserProfileResponse = {
     readonly userProfile: GraphQLResponse<UserProfileData | null>
 }
-
-/** One public CV summary; `pdfUrl` stays null until compilation succeeds. */
-export type PublicUserCvData = {
-    readonly id: string
-    readonly label?: string | null
-    readonly pdfUrl?: string | null
-    readonly updatedAt: string
-}
-
-/** Public CV GraphQL envelope. */
-export type QueryPublicUserCvResponse = {
-    readonly publicUserCv: GraphQLResponse<PublicUserCvData | null>
-}

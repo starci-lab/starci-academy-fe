@@ -16,6 +16,7 @@ export type PersonalProjectHistoryDrawerProps = {
 export const PersonalProjectHistoryDrawerBase = (props: PersonalProjectHistoryDrawerProps) => (
     <DrawerBranch
         isOpen={props.isOpen}
+        size="workspace"
         title={props.title}
         onDismiss={props.onDismiss}
     >

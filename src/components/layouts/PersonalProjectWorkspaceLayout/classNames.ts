@@ -36,6 +36,9 @@ export const personalProjectWorkspaceRailClassName = cn(
     "2xl:sticky",
     "2xl:top-16",
     "2xl:block",
+    "[&_[data-variant=outline]_[data-slot=label]]:line-clamp-2",
+    "[&_[data-variant=outline]_[data-slot=label]]:text-sm",
+    "[&_[data-variant=outline]_[data-slot=label]]:leading-5",
 )
 
 /** Routed project surface keeps the remaining width and may never force horizontal overflow. */

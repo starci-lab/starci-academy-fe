@@ -14,4 +14,4 @@ export const profileOverviewMainClassName = cn("flex", "min-w-0", "flex-col", "g
 /** Readiness is supporting evidence on wide screens and the final block on narrow screens. */
 export const profileOverviewSupportingClassName = cn("min-w-0")
 /** Peer skill snapshots that stack while narrow. */
-export const profileOverviewSkillGridClassName = cn("grid", "grid-cols-1", "gap-4", "@app-sm:grid-cols-2")
+export const profileOverviewSkillGridClassName = cn("grid", "min-w-0", "max-w-full", "grid-cols-1", "gap-4", "@app-sm:grid-cols-2")

@@ -1,7 +1,8 @@
 import { useId, type ReactNode } from "react"
 import { assertPresentationState, treatmentFor, type PresentationState } from "../../state.js"
 import { VerticalScrollRegion } from "../../composite/VerticalScrollRegion/index.js"
-import { getSurfaceFrameClassName, surfaceCardClassName, surfaceContentClassName, surfaceLabelClassName } from "./classNames.js"
+import { Label } from "../../primitive/Label/index.js"
+import { getSurfaceFrameClassName, surfaceCardClassName, surfaceContentClassName, surfaceHighlightClassName, surfaceHighlightSweepClassName, surfaceLabelClassName } from "./classNames.js"
 
 export type WholeCardAction =
     | {
@@ -39,6 +40,8 @@ export type SurfaceCardProps = (LabelledSurfaceCard | SelfNamedSurfaceCard) & {
     readonly scroll?: "page" | "contained"
     /** Convenience capability: make the content region a HeroUI Vertical ScrollShadow. */
     readonly isScrollable?: boolean
+    /** Draw one legacy accent sweep behind this surface; use for one featured card only. */
+    readonly isHighlight?: boolean
 }
 
 export const SurfaceCard = (props: SurfaceCardProps) => {
@@ -54,6 +57,7 @@ export const SurfaceCard = (props: SurfaceCardProps) => {
         frame = "bounded",
         scroll = "page",
         isScrollable = false,
+        isHighlight = false,
     } = props
     assertPresentationState(state)
     const headingId = useId()
@@ -97,6 +101,12 @@ export const SurfaceCard = (props: SurfaceCardProps) => {
             {action}
         </div>
     )
+    const highlightedSurface = isHighlight && state !== "pending" ? (
+        <div className={surfaceHighlightClassName} data-grammar-highlight="true">
+            <div aria-hidden className={surfaceHighlightSweepClassName} />
+            {surface}
+        </div>
+    ) : surface
 
     return (
         <section
@@ -107,11 +117,11 @@ export const SurfaceCard = (props: SurfaceCardProps) => {
         >
             {label === undefined ? null : (
                 <div className={surfaceLabelClassName} data-grammar-surface-label="true">
-                    <h3 id={headingId}>{label}</h3>
+                    <Label id={headingId}>{label}</Label>
                     {labelEnd ?? (fact === undefined ? null : <span>{fact}</span>)}
                 </div>
             )}
-            {surface}
+            {highlightedSurface}
         </section>
     )
 }

@@ -32,6 +32,7 @@ export const PersonalProjectHistory = (props: PersonalProjectHistoryProps) => {
         score: attempt.score,
         passed: attempt.passed,
         servedModel: attempt.servedModel ?? undefined,
+        servedProvider: attempt.servedProvider ?? undefined,
         processedAt: attempt.processedAt === null || attempt.processedAt === undefined
             ? undefined
             : dateFormat.format(new Date(attempt.processedAt)),
@@ -40,13 +41,13 @@ export const PersonalProjectHistory = (props: PersonalProjectHistoryProps) => {
         ? {
             summary: (count: number) => `${count} lần chấm, mới nhất trước`, // vn-ok: localized Vietnamese runtime copy.
             selectAttempt: (number: number, score: number) => `Lần ${number} · ${score} điểm`, // vn-ok: localized Vietnamese runtime copy.
-            passed: "Đạt", needsWork: "Cần làm lại", previous: "Trang trước", next: "Trang sau", // vn-ok: localized Vietnamese runtime copy.
+            passed: "Đạt", needsWork: "Cần làm lại", selected: "Đang xem", previous: "Trang trước", next: "Trang sau", // vn-ok: localized Vietnamese runtime copy.
             pending: "Đang tải lịch sử chấm...", empty: "Chưa có lần chấm nào.", failed: "Không thể tải lịch sử chấm.", retry: "Thử tải lại", // vn-ok: localized Vietnamese runtime copy.
         }
         : {
             summary: (count: number) => `${count} grading attempts, newest first`,
             selectAttempt: (number: number, score: number) => `Attempt ${number} · ${score} points`,
-            passed: "Passed", needsWork: "Needs another pass", previous: "Previous page", next: "Next page",
+            passed: "Passed", needsWork: "Needs another pass", selected: "Viewing", previous: "Previous page", next: "Next page",
             pending: "Loading grading history...", empty: "No grading attempts yet.", failed: "Grading history could not be loaded.", retry: "Try again",
         }
     const state = attempts.error !== undefined

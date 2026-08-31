@@ -72,3 +72,5 @@ export const cvBuilderPaperSectionClassName = cn("mt-5", "flex", "flex-col", "ga
 export const cvBuilderPaperHeadingClassName = cn("border-b", "border-accent", "pb-1", "text-sm", "font-semibold", "text-accent")
 /** Initial empty/error builder keeps one useful decision. */
 export const cvBuilderSituationClassName = cn("mx-auto", "flex", "max-w-form", "flex-col", "items-center", "gap-4", "py-12", "text-center")
+/** Wide initial/error surface keeps its decision cluster intentionally compact. */
+export const cvBuilderSituationSurfaceClassName = cn("w-full", "@app-lg:mx-auto", "@app-lg:max-w-3xl")

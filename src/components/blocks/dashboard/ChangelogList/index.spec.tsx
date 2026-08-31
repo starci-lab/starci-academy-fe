@@ -27,6 +27,7 @@ const stub = (over: Record<string, unknown>) => {
     vi.mocked(useQueryChangelogEntriesSwr).mockReturnValue({
         data: undefined,
         error: undefined,
+        mutate: vi.fn(),
         ...over,
     } as never)
 }
@@ -73,21 +74,23 @@ describe("ChangelogList", () => {
     it("goes nowhere for an entry the server sent with no destination field at all", () => {
         stub({ data: [entry({ linkUrl: undefined })] })
         render(<ChangelogList />)
-        fireEvent.click(screen.getByRole("link", { name: "Shipped the catalog" }))
+        expect(screen.queryByRole("link", { name: "Shipped the catalog" })).toBeNull()
         expect(push).not.toHaveBeenCalled()
     })
 
-    it("draws nothing at all once a settled changelog turns out to be empty", () => {
+    it("keeps a visible list surface once a settled changelog turns out to be empty", () => {
         stub({ data: [] })
-        const { container } = render(<ChangelogList />)
-        expect(container.firstElementChild).toBeNull()
+        render(<ChangelogList />)
+        expect(screen.getByText("empty")).toBeInTheDocument()
     })
 
-    it("says the request failed instead of drawing a history it does not have", () => {
-        stub({ error: new Error("down") })
-        const { container } = render(<ChangelogList />)
-        expect(container.textContent).toContain("failed")
-        expect(container.textContent).toContain("failed")
+    it("says the request failed and offers the existing query retry", () => {
+        const mutate = vi.fn()
+        stub({ error: new Error("down"), mutate })
+        render(<ChangelogList />)
+        expect(screen.getByText("failed")).toBeInTheDocument()
+        fireEvent.click(screen.getByRole("button", { name: "retry" }))
+        expect(mutate).toHaveBeenCalledOnce()
     })
 
     it("keeps the settled history on screen when a revalidation fails behind it", () => {

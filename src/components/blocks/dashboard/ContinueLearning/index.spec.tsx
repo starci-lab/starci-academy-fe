@@ -83,7 +83,7 @@ describe("ContinueLearning", () => {
         wire(lessons, challenges)
 
         const { container } = render(<ContinueLearning />)
-        expect(container.querySelectorAll("section[data-grammar-surface-card=\"true\"] section[data-grammar-surface-card=\"true\"]")).toHaveLength(3)
+        expect(container.querySelectorAll("[data-dashboard-resume-item]")).toHaveLength(3)
         expect(screen.queryByText("continueLearning.empty")).toBeNull()
     })
 
@@ -91,7 +91,7 @@ describe("ContinueLearning", () => {
         wire({ data: [] }, { data: [] }, { data: undefined })
 
         const { container } = render(<ContinueLearning />)
-        expect(container.querySelectorAll("section[data-grammar-surface-card=\"true\"] section[data-grammar-surface-card=\"true\"]")).toHaveLength(3)
+        expect(container.querySelectorAll("[data-dashboard-resume-item]")).toHaveLength(3)
         expect(screen.queryByText("continueLearning.onboarding")).toBeNull()
         expect(screen.queryByText("continueLearning.empty")).toBeNull()
     })
@@ -126,7 +126,7 @@ describe("ContinueLearning", () => {
         )
 
         const { container } = render(<ContinueLearning />)
-        expect(container.querySelectorAll("section[data-grammar-surface-card=\"true\"] section[data-grammar-surface-card=\"true\"]")).toHaveLength(3)
+        expect(container.querySelectorAll("[data-dashboard-resume-item]")).toHaveLength(3)
         expect(screen.getByText("Ownership")).toBeInTheDocument()
         expect(screen.getByText("Lifetimes")).toBeInTheDocument()
         expect(screen.queryByText("Traits")).toBeNull()
@@ -138,7 +138,7 @@ describe("ContinueLearning", () => {
         wire({ data: [ref("same", "Ownership")] }, { data: [ref("same", "Ownership")] })
 
         const { container } = render(<ContinueLearning />)
-        expect(container.querySelectorAll("section[data-grammar-surface-card=\"true\"] section[data-grammar-surface-card=\"true\"]")).toHaveLength(1)
+        expect(container.querySelectorAll("[data-dashboard-resume-item]")).toHaveLength(1)
         expect(screen.getAllByText("Ownership")).toHaveLength(1)
         expect(screen.getByText("continueLearning.kind.content")).toBeInTheDocument()
     })

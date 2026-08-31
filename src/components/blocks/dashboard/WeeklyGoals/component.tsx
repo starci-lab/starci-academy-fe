@@ -2,7 +2,17 @@ import { DashboardSurfaceCard as SurfaceCard } from "@/components/blocks/dashboa
 import { LabelledProgressRow } from "@/components/composites/LabelledProgressRow"
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { Text } from "@/components/leaves/Text"
+import { Button } from "@/components/leaves/Button"
 import type { LabelledProgressRowData } from "@/components/composites/LabelledProgressRow"
+import {
+    weeklyGoalsCardClassName,
+    weeklyGoalsCellClassName,
+    weeklyGoalsFooterClassName,
+    weeklyGoalsGridClassName,
+    weeklyGoalsSeparatorClassName,
+    weeklyGoalsSummaryBandClassName,
+    weeklyGoalsSurfaceClassName,
+} from "./classNames"
 
 /**
  * BLOCK - `WeeklyGoals`, presentational half.
@@ -78,27 +88,41 @@ export const WeeklyGoalsBase = (props: WeeklyGoalsProps) => {
     }
 
     const isLoading = props.state === "pending"
+    const rows = props.state === "ready" ? props.props.rows : RESTING_ROWS
+    const edit = props.state === "ready" && props.on?.edit !== undefined
+        ? <div className={weeklyGoalsFooterClassName}><Button props={{ label: props.props.editLabel, variant: "secondary", size: "sm" }} on={{ press: props.on.edit }} /></div>
+        : null
 
     return (
-        <SurfaceCard
-            props={{
-                label: props.props.label,
-                // While resting there is nothing to lead anywhere yet, so the way out is withheld
-                // rather than drawn dead - a control that does nothing is worse than one not there.
-                seeMoreLabel: props.state === "ready" ? props.props.editLabel : undefined,
-            }}
-            on={{ seeMore: props.on?.edit }}
-            isLoading={isLoading}
-        >
-            <Text
-                props={{
-                    content: props.state === "ready" ? props.props.summary : undefined,
-                    size: "sm",
-                    weight: "medium",
-                }}
-                isLoading={isLoading}
-            />
-            {(props.state === "ready" ? props.props.rows : RESTING_ROWS).map((row) => <LabelledProgressRow key={row.id} props={row} isLoading={isLoading} />)}
-        </SurfaceCard>
+        <div className={weeklyGoalsSurfaceClassName}>
+            <SurfaceCard props={{ label: props.props.label }} isLoading={isLoading}>
+                <div className={weeklyGoalsCardClassName}>
+                    <div className={weeklyGoalsSummaryBandClassName} data-part="weekly-goals-summary">
+                        <Text
+                            props={{
+                                content: props.state === "ready" ? props.props.summary : undefined,
+                                size: "sm",
+                                weight: "medium",
+                            }}
+                            isLoading={isLoading}
+                        />
+                    </div>
+                    <div aria-hidden className={weeklyGoalsSeparatorClassName} />
+                    <div className={weeklyGoalsGridClassName} data-part="weekly-goals-grid">
+                        {rows.map((row) => (
+                            <div className={weeklyGoalsCellClassName} key={row.id}>
+                                <LabelledProgressRow props={row} titleWeight="normal" isLoading={isLoading} />
+                            </div>
+                        ))}
+                    </div>
+                    {edit === null ? null : (
+                        <>
+                            <div aria-hidden className={weeklyGoalsSeparatorClassName} />
+                            {edit}
+                        </>
+                    )}
+                </div>
+            </SurfaceCard>
+        </div>
     )
 }

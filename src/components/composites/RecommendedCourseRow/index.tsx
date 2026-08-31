@@ -3,6 +3,7 @@ import { Badge } from "@/components/leaves/Badge"
 import { IconTile } from "@/components/leaves/IconTile"
 import { Text } from "@/components/leaves/Text"
 import { TextLink } from "@/components/leaves/TextLink"
+import { recommendedCourseBodyClassName, recommendedCourseDetailsClassName, recommendedCoursePriceClassName, recommendedCourseRowClassName } from "./classNames"
 
 /**
  * COMPOSITE - `RecommendedCourseRow`: one suggested course, priced.
@@ -23,6 +24,8 @@ export type RecommendedCourseRowData = {
     /** The course artwork drawn on the mark, when the course has any. */
     readonly cover?: string | null
     readonly price?: string
+    /** Visible task closure for the row's primary destination. */
+    readonly actionLabel?: string
     readonly originalPrice?: string
     readonly discount?: string
     /** What this price saves against the list price, already phrased. */
@@ -57,20 +60,21 @@ export const RecommendedCourseRow = (props: RecommendedCourseRowProps) => {
     const on = props.on
     const isLoading = props.isLoading ?? false
     const priceDetailLabel = data.priceDetailLabel
-    return <PressableSurface hover="label" label={data.title ?? "Course"} press={on?.open} disabled={isLoading}>
+    return <PressableSurface hover="label" label={data.title ?? "Course"} press={on?.open} disabled={isLoading}><div className={recommendedCourseRowClassName}>
         <IconTile props={{ icon: "course", image: data.cover, tone: "accent", size: "md" }} isLoading={isLoading} />
-        <div>
+        <div className={recommendedCourseBodyClassName}>
             <Text props={{ content: data.title, size: "md", weight: "semibold", isPressLabel: true }} isLoading={isLoading} />
-            <div>
-                <Text props={{ content: data.price, size: "sm", weight: "semibold" }} isLoading={isLoading} />
-                {data.originalPrice === undefined ? null : <Text props={{ content: data.originalPrice, size: "xs", tone: "muted", isSuperseded: true }} isLoading={isLoading} />}
+            <div className={recommendedCoursePriceClassName}>
+                <Text props={{ content: data.price, size: "md", weight: "semibold" }} isLoading={isLoading} />
+                {data.originalPrice === undefined ? null : <Text props={{ content: data.originalPrice, size: "md", tone: "muted", isSuperseded: true }} isLoading={isLoading} />}
                 {data.discount === undefined ? null : <Badge props={{ content: data.discount, tone: "success" }} />}
             </div>
-            {priceDetailLabel === undefined ? null : <div>
-                {data.savings === undefined ? null : <Text props={{ content: data.savings, size: "xs", tone: "muted" }} isLoading={isLoading} />}
-                <TextLink props={{ label: priceDetailLabel, size: "xs" }} on={{ press: on?.openPriceDetail }} />
+            {priceDetailLabel === undefined ? null : <div className={recommendedCourseDetailsClassName}>
+                {data.savings === undefined ? null : <Text props={{ content: data.savings, size: "sm" }} isLoading={isLoading} />}
+                <TextLink props={{ label: priceDetailLabel, size: "sm" }} on={{ press: on?.openPriceDetail }} />
             </div>}
-            {data.reason === undefined ? null : <Text props={{ content: data.reason, size: "xs", tone: "muted" }} />}
+            {data.reason === undefined ? null : <Text props={{ content: data.reason, size: "sm" }} />}
+            {data.actionLabel === undefined ? null : <Text props={{ content: data.actionLabel, size: "sm", tone: "accent", weight: "semibold", icon: "next" }} isLoading={isLoading} />}
         </div>
-    </PressableSurface>
+    </div></PressableSurface>
 }

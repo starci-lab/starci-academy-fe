@@ -44,8 +44,18 @@ export const mutationSyncMockInterviewSessionTurns = async (
     options: MockInterviewMutationOptions = {},
 ) => {
     const apollo = createApolloClient({ withAuth: true, ...options })
+    const serializedRequest: SyncMockInterviewSessionTurnsRequest = {
+        ...request,
+        turns: request.turns.map(({ role, phase, content, questionIndex, artifactHint }) => ({
+            role,
+            phase,
+            content,
+            questionIndex,
+            artifactHint,
+        })),
+    }
     return apollo.mutate<MutationSyncMockInterviewSessionTurnsResponse>({
         mutation: syncMockInterviewSessionTurnsDocument,
-        variables: { request },
+        variables: { request: serializedRequest },
     })
 }

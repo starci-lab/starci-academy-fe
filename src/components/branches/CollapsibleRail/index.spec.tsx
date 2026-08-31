@@ -7,8 +7,9 @@ vi.mock("framer-motion", () => ({ motion: { div: (props: ComponentProps<"div">) 
 
 describe("CollapsibleRail", () => {
     it("keeps expanded navigation mounted", () => {
-        const { getByRole } = render(<CollapsibleRail isCollapsed={false} expanded={<nav>Expanded</nav>} collapsed={<nav>Collapsed</nav>} />)
+        const { container, getByRole } = render(<CollapsibleRail isCollapsed={false} expanded={<nav>Expanded</nav>} collapsed={<nav>Collapsed</nav>} />)
         expect(getByRole("navigation")).toHaveTextContent("Expanded")
+        expect(container.firstElementChild).toHaveClass("h-full", "min-h-0")
     })
     it("switches to compact destinations", () => {
         const { getByRole } = render(<CollapsibleRail isCollapsed expanded={<nav>Expanded</nav>} collapsed={<nav>Collapsed</nav>} />)

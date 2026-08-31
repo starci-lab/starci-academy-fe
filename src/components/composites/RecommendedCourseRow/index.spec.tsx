@@ -6,12 +6,13 @@ describe("RecommendedCourseRow", () => {
     it("draws the whole row as one destination named after the course", () => {
         const open = vi.fn()
         render(<RecommendedCourseRow
-            props={{ id: "one", title: "Backend basics", price: "990.000 ₫" }}
+            props={{ id: "one", title: "Backend basics", price: "990.000 ₫", actionLabel: "View course" }}
             on={{ open }}
         />)
         const surface = screen.getByRole("button", { name: "Backend basics" })
         expect(screen.getByText("Backend basics")).toBeInTheDocument()
         expect(screen.getByText("990.000 ₫")).toBeInTheDocument()
+        expect(screen.getByText("View course")).toHaveAttribute("data-tone", "accent")
         fireEvent.click(surface)
         expect(open).toHaveBeenCalledOnce()
     })
@@ -70,7 +71,7 @@ describe("RecommendedCourseRow", () => {
             price: "690.000 ₫",
             reason: "Because you finished Node fundamentals",
         }} />)
-        expect(screen.getByText("Because you finished Node fundamentals")).toBeInTheDocument()
+        expect(screen.getByText("Because you finished Node fundamentals")).toHaveAttribute("data-tone", "default")
     })
 
     it("draws the course artwork on the mark when the course has any", () => {

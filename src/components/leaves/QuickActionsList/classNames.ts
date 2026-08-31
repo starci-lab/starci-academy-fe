@@ -1,18 +1,17 @@
 import { cn } from "@heroui/react"
+import {
+    dashboardRailRowItemClassName,
+    dashboardRailRowStackClassName,
+} from "@/components/blocks/dashboard/classNames"
 
-/** Removes default list padding while retaining compact spacing between actions. */
-export const quickActionsListClassName = cn("gap-1", "p-0")
+/** ListBox stack spacing aligned with the shared dashboard rail row rhythm. */
+export const quickActionsListClassName = cn(dashboardRailRowStackClassName)
 
 /** Interactive visual treatment shared by every quick-action option. */
 export const quickActionsListItemClassName = cn(
+    dashboardRailRowItemClassName,
     "group",
-    "flex",
     "cursor-pointer",
-    "items-center",
-    "gap-2",
-    "rounded-large",
-    "px-2",
-    "py-2",
     "text-foreground",
     "outline-none",
     "data-[focus-visible=true]:ring-2",

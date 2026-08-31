@@ -10,6 +10,7 @@ import { useQueryMyInProgressMockInterviewSessionSwr } from "@/hooks/swr/useQuer
 import { useMutateStartMockInterviewSessionSwr } from "@/hooks/swr/useMutateStartMockInterviewSessionSwr"
 import { useQueryMyMockInterviewAttemptsSwr } from "@/hooks/swr/useQueryMyMockInterviewAttemptsSwr"
 import { useQueryMyMockInterviewStatsSwr } from "@/hooks/swr/useQueryMyMockInterviewStatsSwr"
+import { mockInterviewVerdictLabel } from "../CourseMockInterviewResultBlock/verdict"
 import { CourseMockInterviewSetupBlockBase, type CourseMockInterviewSetupState } from "./component"
 
 /** Route-owned input for the connected setup page. */
@@ -61,6 +62,14 @@ const COPY = {
     en: {
         title: "Mock interview",
         description: "Practise a technical interview grounded in this course, then receive detailed feedback.",
+        heroEyebrow: "Course-grounded practice",
+        heroAction: "Set up your interview",
+        mediaAlt: "A learner practising a technical interview with an interviewer",
+        heroFacts: [
+            { label: "Formats", value: "2 options" },
+            { label: "Seniority", value: "3 levels" },
+            { label: "Session limit", value: "Up to 60 minutes" },
+        ],
         level: "Seniority",
         mode: "Interview format",
         start: "Start interview",
@@ -85,7 +94,7 @@ const COPY = {
         historyTitle: "Interview history",
         statsTitle: "Interview statistics",
         historyEmpty: "Completed interview history will appear here.",
-        statsEmpty: "Interview statistics will appear after your first completed session.",
+        statsEmpty: "Interview statistics will appear after at least 3 comparable sessions with the same format, seniority and rubric.",
         historyFailed: "Completed interviews could not be loaded.",
         statsFailed: "Interview statistics could not be loaded.",
         recentHistoryTitle: "Recent interviews",
@@ -95,8 +104,9 @@ const COPY = {
         historyAction: "View result",
         completedCount: (count: number) => `${count} completed`,
         newSessionEyebrow: "New practice session",
+        newSessionLabel: "Practise a new interview",
         preflightTitle: "Review before starting",
-        returnToBegin: "Prepare an interview",
+        returnToBegin: "Back to overview",
         resumeTitle: "Your latest session is still active",
         readiness: { level: "Readiness", mode: "Format", focus: "Focus" },
         levels: {
@@ -112,6 +122,14 @@ const COPY = {
     vi: {
         title: "Phỏng vấn thử", // vn-ok: approved Vietnamese runtime copy
         description: "Luyện phỏng vấn kỹ thuật theo nội dung khóa học và nhận phản hồi chi tiết.", // vn-ok: approved Vietnamese runtime copy
+        heroEyebrow: "Luyện theo khóa học", // vn-ok: approved Vietnamese runtime copy
+        heroAction: "Thiết lập phiên", // vn-ok: approved Vietnamese runtime copy
+        mediaAlt: "Học viên luyện phỏng vấn kỹ thuật cùng người phỏng vấn", // vn-ok: approved Vietnamese runtime copy
+        heroFacts: [ // vn-ok: approved Vietnamese runtime copy
+            { label: "Hình thức", value: "2 lựa chọn" }, // vn-ok: approved Vietnamese runtime copy
+            { label: "Cấp độ", value: "3 mức" }, // vn-ok: approved Vietnamese runtime copy
+            { label: "Thời hạn phiên", value: "Tối đa 60 phút" }, // vn-ok: approved Vietnamese runtime copy
+        ],
         level: "Cấp độ", // vn-ok: approved Vietnamese runtime copy
         mode: "Hình thức phỏng vấn", // vn-ok: approved Vietnamese runtime copy
         start: "Bắt đầu phỏng vấn", // vn-ok: approved Vietnamese runtime copy
@@ -136,7 +154,7 @@ const COPY = {
         historyTitle: "Lịch sử phỏng vấn", // vn-ok: approved Vietnamese runtime copy
         statsTitle: "Thống kê phỏng vấn", // vn-ok: approved Vietnamese runtime copy
         historyEmpty: "Lịch sử phỏng vấn đã hoàn thành sẽ xuất hiện tại đây.", // vn-ok: approved Vietnamese runtime copy
-        statsEmpty: "Thống kê sẽ xuất hiện sau buổi phỏng vấn hoàn thành đầu tiên.", // vn-ok: approved Vietnamese runtime copy
+        statsEmpty: "Thống kê sẽ xuất hiện sau ít nhất 3 phiên có cùng hình thức, cấp độ và bộ tiêu chí.", // vn-ok: approved Vietnamese runtime copy
         historyFailed: "Không tải được lịch sử phỏng vấn.", // vn-ok: approved Vietnamese runtime copy
         statsFailed: "Không tải được thống kê phỏng vấn.", // vn-ok: approved Vietnamese runtime copy
         recentHistoryTitle: "Lịch sử gần nhất", // vn-ok: approved Vietnamese runtime copy
@@ -146,8 +164,9 @@ const COPY = {
         historyAction: "Xem kết quả", // vn-ok: approved Vietnamese runtime copy
         completedCount: (count: number) => `${count} phiên hoàn thành`, // vn-ok: approved Vietnamese runtime copy
         newSessionEyebrow: "Phiên luyện mới", // vn-ok: approved Vietnamese runtime copy
+        newSessionLabel: "Luyện phiên mới", // vn-ok: approved Vietnamese runtime copy
         preflightTitle: "Kiểm tra trước khi bắt đầu", // vn-ok: approved Vietnamese runtime copy
-        returnToBegin: "Chuẩn bị phỏng vấn", // vn-ok: approved Vietnamese runtime copy
+        returnToBegin: "Quay lại tổng quan", // vn-ok: approved Vietnamese runtime copy
         resumeTitle: "Buổi gần nhất vẫn còn hiệu lực", // vn-ok: approved Vietnamese runtime copy
         readiness: { level: "Độ sẵn sàng", mode: "Định dạng", focus: "Trọng tâm" }, // vn-ok: approved Vietnamese runtime copy
         levels: { // vn-ok: approved Vietnamese runtime copy
@@ -244,6 +263,10 @@ export const CourseMockInterviewSetupBlock = (props: CourseMockInterviewSetupBlo
             props={{
                 title: copy.title,
                 description: copy.description,
+                heroEyebrow: copy.heroEyebrow,
+                heroActionLabel: copy.heroAction,
+                mediaAlt: copy.mediaAlt,
+                heroFacts: copy.heroFacts,
                 status: startError ? copy.startFailed : setupStatusOf(state, copy),
                 levelLabel: copy.level,
                 modeLabel: copy.mode,
@@ -277,7 +300,7 @@ export const CourseMockInterviewSetupBlock = (props: CourseMockInterviewSetupBlo
                 historyRows: (attempts.data?.items ?? []).map((attempt) => ({
                     id: attempt.sessionId,
                     title: attempt.name ?? attempt.promptTitle,
-                    fact: `${formatAttemptDate(attempt.createdAt, locale)} · ${attempt.overallScore}/100 · ${attempt.verdict}`,
+                    fact: `${formatAttemptDate(attempt.createdAt, locale)} · ${attempt.overallScore}/100 · ${mockInterviewVerdictLabel(attempt.verdict, locale) ?? attempt.verdict}`,
                 })),
                 statsRows: (stats.data?.byPhase ?? []).map((row) => ({
                     id: row.key,
@@ -292,6 +315,7 @@ export const CourseMockInterviewSetupBlock = (props: CourseMockInterviewSetupBlo
                 viewStatsLabel: copy.viewStats,
                 historyActionLabel: copy.historyAction,
                 newSessionEyebrow: copy.newSessionEyebrow,
+                newSessionLabel: copy.newSessionLabel,
                 preflightTitle: copy.preflightTitle,
                 returnToBegin: copy.returnToBegin,
                 resumeTitle: copy.resumeTitle,
@@ -312,6 +336,11 @@ export const CourseMockInterviewSetupBlock = (props: CourseMockInterviewSetupBlo
                 },
                 access: () => router.push(`/courses/${displayId}`),
                 openHistory: (sessionId) => openSession(sessionId, "completed"),
+                prepare: () => {
+                    const target = document.getElementById("mock-interview-new-session")
+                    target?.scrollIntoView({ block: "center", behavior: "smooth" })
+                    target?.focus({ preventScroll: true })
+                },
             }}
         />
     )

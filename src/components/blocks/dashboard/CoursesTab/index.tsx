@@ -3,8 +3,8 @@
 import { useState } from "react"
 import { MyCoursesProgress } from "@/components/blocks/dashboard/MyCoursesProgress"
 import { RecommendedCourses } from "@/components/blocks/dashboard/RecommendedCourses"
-import { UpcomingLivestreamCard } from "@/components/blocks/dashboard/UpcomingLivestreamCard"
 import { CoursePriceOverlay } from "@/components/overlays/courses/CoursePriceOverlay"
+import { coursesLeadClassName, coursesRecommendationClassName, coursesTabClassName } from "./classNames"
 
 /**
  * Orchestrate the three legacy learning blocks in fixed order.
@@ -24,10 +24,9 @@ export const CoursesTab = (props: CoursesTabProps) => {
 
     return (
         <>
-            <div>
-                <MyCoursesProgress />
-                <RecommendedCourses onOpenPriceDetail={setPricedCourseId} />
-                <UpcomingLivestreamCard />
+            <div className={coursesTabClassName}>
+                <div className={coursesLeadClassName}><MyCoursesProgress /></div>
+                <div className={coursesRecommendationClassName}><RecommendedCourses onOpenPriceDetail={setPricedCourseId} /></div>
             </div>
             <CoursePriceOverlay
                 courseId={pricedCourseId}

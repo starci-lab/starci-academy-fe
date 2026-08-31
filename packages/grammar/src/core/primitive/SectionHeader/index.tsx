@@ -8,6 +8,9 @@ export type SectionHeaderProps = {
     readonly action?: ReactNode
     readonly level?: 1 | 2 | 3 | 4
     readonly className?: string
+    readonly id?: string
+    /** Closed semantic anatomy; ContextIntro requires eyebrow, title and description. */
+    readonly composition?: "section-header" | "context-intro"
 }
 
 /** Reusable title-copy-action hierarchy shared by StarCi product sections. */
@@ -18,11 +21,13 @@ export const SectionHeader = ({
     action,
     level = 2,
     className,
+    id,
+    composition = "section-header",
 }: SectionHeaderProps) => (
-    <header className={cn("starci-core-section-header", className)} data-grammar-section-header="true">
+    <header className={cn("starci-core-section-header", className)} data-grammar-section-header="true" data-grammar-composition={composition}>
         <div className="starci-core-section-header-copy">
             {eyebrow === undefined ? null : <div className="starci-core-section-eyebrow">{eyebrow}</div>}
-            {createElement(`h${level}`, { className: "starci-core-section-title" }, title)}
+            {createElement(`h${level}`, { className: "starci-core-section-title", id }, title)}
             {description === undefined ? null : <div className="starci-core-section-description">{description}</div>}
         </div>
         {action === undefined ? null : <div className="starci-core-section-action">{action}</div>}

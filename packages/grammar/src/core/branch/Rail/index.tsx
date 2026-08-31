@@ -1,3 +1,4 @@
+import { cn } from "@heroui/react"
 import { useId, type ReactNode } from "react"
 import { assertPresentationState, treatmentFor, type PresentationState } from "../../state.js"
 import { railBodyClassName, railClassName, railFooterClassName, railFrameClassName } from "./classNames.js"
@@ -23,6 +24,10 @@ export type RailProps = (ComplementaryRailProps | ContentNavigationRailProps) & 
     readonly state?: PresentationState
     readonly collapse?: "expanded" | "collapsed"
     readonly motion?: "static" | "animated" | "reduced"
+    /** Visually hide the landmark label when children already expose visible headings. */
+    readonly isLabelHidden?: boolean
+    /** Grammar-owned content inset. `content` is exactly px-3 py-6. */
+    readonly inset?: "none" | "content"
 }
 
 export const Rail = (props: RailProps) => {
@@ -37,6 +42,8 @@ export const Rail = (props: RailProps) => {
         state = "neutral",
         collapse = "expanded",
         motion = "static",
+        isLabelHidden = false,
+        inset = "none",
     } = props
     assertPresentationState(state)
     const headingId = useId()
@@ -44,8 +51,8 @@ export const Rail = (props: RailProps) => {
 
     const frame = (
         <div className={railFrameClassName} data-grammar-rail-frame="true">
-            {landmark === "content-navigation" ? null : <h2 data-grammar-rail-heading="true" id={headingId}>{label}</h2>}
-            <div className={railBodyClassName} data-grammar-rail-body="true">{children}</div>
+            {landmark === "content-navigation" ? null : <h2 className={isLabelHidden ? "starci-core-visually-hidden" : undefined} data-grammar-rail-heading="true" id={headingId}>{label}</h2>}
+            <div className={cn(railBodyClassName, inset === "content" && "px-3 py-6")} data-grammar-rail-body="true" data-grammar-rail-inset={inset}>{children}</div>
             {footer === undefined ? null : (
                 <div className={railFooterClassName} data-grammar-rail-footer="true">{footer}</div>
             )}

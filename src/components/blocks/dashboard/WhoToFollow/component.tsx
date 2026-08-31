@@ -1,14 +1,15 @@
 import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
 import { SuggestedUserRow, type SuggestedUserRowData } from "@/components/composites/SuggestedUserRow"
+import { EmptyNotice } from "@/components/composites/EmptyNotice"
 /** Resolved suggestion list data. */
-export type WhoToFollowData = { readonly label: string; readonly users: ReadonlyArray<SuggestedUserRowData> }
+export type WhoToFollowData = { readonly label: string; readonly users: ReadonlyArray<SuggestedUserRowData>; readonly emptyMessage?: string; readonly errorMessage?: string; readonly retryLabel?: string }
 /** Per-user suggestion actions. */
 export type WhoToFollowActions = { readonly [key: string]: (() => void) | undefined }
 /** State, data and actions for the suggestions block. */
-export type WhoToFollowProps = { readonly state: "pending" | "hidden" | "ready"; readonly props: WhoToFollowData; readonly on?: WhoToFollowActions }
+export type WhoToFollowProps = { readonly state: "pending" | "empty" | "failed" | "ready"; readonly props: WhoToFollowData; readonly on?: WhoToFollowActions }
 /** Draw suggested profiles as a joined semantic list. */
 export const WhoToFollowBase = (props: WhoToFollowProps) => {
-    if (props.state === "hidden") return null
+    if (props.state === "empty" || props.state === "failed") return <SurfaceListCard props={{ label: props.props.label }}><EmptyNotice props={{ icon: "community", message: props.state === "empty" ? props.props.emptyMessage ?? "" : props.props.errorMessage ?? "", actionLabel: props.state === "failed" ? props.props.retryLabel : undefined }} on={{ act: props.state === "failed" ? props.on?.retry : undefined }} /></SurfaceListCard>
     const users = props.state === "pending" ? Array.from({ length: 4 }, (_, index) => ({ id: `resting-${index}`, followLabel: "", followingLabel: "" })) : props.props.users
     return <SurfaceListCard props={{ label: props.props.label }}>{users.map((user) => <SuggestedUserRow key={user.id} props={user} on={{ open: props.on?.[`open:${user.id}`], follow: props.on?.[`follow:${user.id}`] }} isLoading={props.state === "pending"} />)}</SurfaceListCard>
 }

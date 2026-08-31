@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState, type ReactNode } from "react"
+import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react"
 import { usePathname } from "@/i18n/navigation"
 import { useSessionToken } from "@/hooks/auth/useSessionToken"
 import { StarCiAiFab } from "@/components/blocks/ai/StarCiAiFab/component"
@@ -31,10 +31,20 @@ export const GlobalAiChatLayout = (props: GlobalAiChatLayoutProps) => {
         || anchor.scope === "challenge"
         || anchor.path.includes("/learn/flashcards")
         || /\/learn\/mock-interview$/u.test(anchor.path)
+    const usesDashboardClearance = anchor.path === "/dashboard"
+    const usesProfileClearance = anchor.path.startsWith("/profile")
+    const aiHostStyle = { display: "contents" } as CSSProperties
 
     useEffect(() => {
         setCodeContext(undefined)
     }, [anchor.path])
+
+    useEffect(() => {
+        if (!usesDashboardClearance || !isOpen) return
+        const root = document.documentElement
+        root.dataset.dashboardAiOpen = "true"
+        return () => { delete root.dataset.dashboardAiOpen }
+    }, [isOpen, usesDashboardClearance])
 
     const value = useMemo<GlobalAiChatContextValue>(() => ({
         anchor,
@@ -62,10 +72,12 @@ export const GlobalAiChatLayout = (props: GlobalAiChatLayoutProps) => {
 
     return (
         <GlobalAiChatContext.Provider value={value}>
-            {surface}
-            <StarCiAiSelectionAsk />
-            {hidesFloatingTrigger ? null : <StarCiAiFab props={{ label: "StarCi AI", isOpen }} on={{ press: value.open }} />}
-            <StarCiAiDrawer {...{}} />
+            <div data-ai-clearance={usesDashboardClearance ? "dashboard" : usesProfileClearance ? "profile" : "default"} style={aiHostStyle}>
+                {surface}
+                <StarCiAiSelectionAsk />
+                {hidesFloatingTrigger ? null : <StarCiAiFab props={{ label: "StarCi AI", isOpen }} on={{ press: value.open }} />}
+                <StarCiAiDrawer {...{}} />
+            </div>
         </GlobalAiChatContext.Provider>
     )
 }

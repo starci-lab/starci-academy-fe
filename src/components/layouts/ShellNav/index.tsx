@@ -7,10 +7,11 @@ import { usePathname, useRouter } from "@/i18n/navigation"
 import { SignInOverlay } from "@/components/overlays/auth/SignInOverlay"
 import { CartDrawer } from "@/components/overlays/commerce/CartDrawer"
 import { GlobalSearchOverlay, type GlobalSearchOpenIntent } from "@/components/overlays/search/GlobalSearchOverlay"
+import { DrawerBranch } from "@/components/branches/DrawerBranch"
 import { useSessionToken } from "@/hooks/auth/useSessionToken"
 import { useSessionRefresh } from "@/hooks/auth/useSessionRefresh"
 import { useStarCiTheme } from "@/modules/theme/theme-context"
-import { ShellNavBase, type ShellNavRoute, type ShellNavTab } from "./component"
+import { ShellNavBase, ShellNavigationDrawerBase, type ShellNavData, type ShellNavRoute, type ShellNavTab } from "./component"
 import type { IconName } from "@/components/leaves/Icon"
 import type { AuthMode } from "@/components/blocks/auth/AuthenticationPanel/component"
 
@@ -28,10 +29,10 @@ import type { AuthMode } from "@/components/blocks/auth/AuthenticationPanel/comp
 export type ShellNavProps = Record<never, never>
 
 /** The routes the bar offers, as ids the catalogue names. */
-const ROUTES: ReadonlyArray<{ id: string, path: string }> = [
-    { id: "dashboard", path: "/dashboard" },
-    { id: "courses", path: "/courses" },
-    { id: "contact", path: "/contact" },
+const ROUTES: ReadonlyArray<{ id: string, path: string, icon: IconName }> = [
+    { id: "dashboard", path: "/dashboard", icon: "home" },
+    { id: "courses", path: "/courses", icon: "course" },
+    { id: "contact", path: "/contact", icon: "email" },
 ]
 
 /** Dashboard tabs registered as the navbar's bottom layer. */
@@ -56,6 +57,7 @@ export const ShellNav = (props: ShellNavProps) => {
     const { resolvedTheme, setTheme } = useStarCiTheme()
     const [isOpen, setIsOpen] = useState(false)
     const [isCartOpen, setIsCartOpen] = useState(false)
+    const [isNavigationOpen, setIsNavigationOpen] = useState(false)
     const [searchIntent, setSearchIntent] = useState<GlobalSearchOpenIntent>()
     const [authMode, setAuthMode] = useState<AuthMode>("signIn")
     const sessionToken = useSessionToken()
@@ -117,6 +119,7 @@ export const ShellNav = (props: ShellNavProps) => {
     const routes: ReadonlyArray<ShellNavRoute> = ROUTES.map((route) => ({
         id: route.id,
         label: t(`routes.${route.id}`),
+        icon: route.icon,
         // A route is current on its own path AND anywhere beneath it: a course detail page is
         // still somewhere inside Courses, and a navbar that forgets that leaves the reader with
         // no lit destination at all. The trailing slash is what keeps `/contact` from lighting up
@@ -135,43 +138,68 @@ export const ShellNav = (props: ShellNavProps) => {
     }, [router])
 
     const navigate = useCallback((id: string) => {
+        setIsNavigationOpen(false)
         const destination = ROUTES.find((route) => route.id === id)
         if (destination !== undefined) router.push(destination.path)
     }, [router])
 
+    const shellNavData: ShellNavData = {
+        brand: t("brand"),
+        routes,
+        tabs: dashboardTabs,
+        themeLabel: isDark ? t("themeLight") : t("themeDark"),
+        utilitiesLabel: t("navigationOverflow"),
+        actionsLabel: t("accountActions"),
+        localeActionLabel: t(`localeOptions.${locale === "vi" ? "en" : "vi"}`),
+        isDark,
+        searchPlaceholder: t("searchPlaceholder"),
+        searchLabel: t("search"),
+        searchShortcut: t("searchShortcut"),
+        cartLabel: t("cart"),
+        notificationLabel: t("notifications"),
+        isSignedIn: isMounted && sessionToken !== undefined,
+    }
+
+    const openSearchFromNavigation = () => {
+        setIsNavigationOpen(false)
+        openSearch("navbar")
+    }
+    const toggleThemeFromNavigation = () => {
+        setIsNavigationOpen(false)
+        setTheme(isDark ? "light" : "dark")
+    }
+    const toggleLocaleFromNavigation = () => {
+        setIsNavigationOpen(false)
+        router.replace(pathname, { locale: locale === "vi" ? "en" : "vi" })
+    }
+
     return (
         <>
             <ShellNavBase
-                props={{
-                    brand: t("brand"),
-                    routes,
-                    tabs: dashboardTabs,
-                    themeLabel: isDark ? t("themeLight") : t("themeDark"),
-                    utilitiesLabel: t("utilities"),
-                    localeActionLabel: t(`localeOptions.${locale === "vi" ? "en" : "vi"}`),
-                    isDark,
-                    searchPlaceholder: t("searchPlaceholder"),
-                    searchLabel: t("search"),
-                    searchShortcut: t("searchShortcut"),
-                    cartLabel: t("cart"),
-                    notificationLabel: t("notifications"),
-                    // The server cannot see the browser session store. Keep the first client tree
-                    // identical to the server, then reveal signed-in tools after mount; otherwise
-                    // AccountMenu is replaced by notification/account controls during hydration
-                    // and every React-Aria id below this row shifts.
-                    isSignedIn: isMounted && sessionToken !== undefined,
-                }}
+                props={shellNavData}
                 on={{
                     openSignIn,
                     openSignUp,
                     navigate,
                     selectTab,
                     openSearch: () => openSearch("navbar"),
+                    openNavigation: () => setIsNavigationOpen(true),
                     toggleTheme: () => setTheme(isDark ? "light" : "dark"),
                     toggleLocale: () => router.replace(pathname, { locale: locale === "vi" ? "en" : "vi" }),
                     openCart: () => setIsCartOpen(true),
                 }}
             />
+            <DrawerBranch isOpen={isNavigationOpen} placement="right" title={shellNavData.brand} onDismiss={() => setIsNavigationOpen(false)}>
+                <ShellNavigationDrawerBase
+                    props={shellNavData}
+                    on={{
+                        navigate,
+                        openSearch: openSearchFromNavigation,
+                        toggleTheme: toggleThemeFromNavigation,
+                        toggleLocale: toggleLocaleFromNavigation,
+                    }}
+                />
+            </DrawerBranch>
             <SignInOverlay isOpen={isOpen} initialMode={authMode} onDismiss={dismiss} />
             {/*
               * THE DRAWER IS MOUNTED HERE, once, beside the navbar that opens it - not on each

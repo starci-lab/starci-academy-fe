@@ -48,7 +48,7 @@ export type IconTileProps = { readonly props: IconTileData; readonly isLoading?:
  * @param input - {@link IconTileProps}
  */
 export const IconTile = (props: IconTileProps) => {
-    const tone = props.props.tone ?? "neutral"
+    const tone = props.props.tone ?? "accent"
     const size = props.props.size ?? "sm"
     const isLoading = props.isLoading === true
     // The artwork replaces the fill as well as the glyph: a soft plate behind a photograph is a

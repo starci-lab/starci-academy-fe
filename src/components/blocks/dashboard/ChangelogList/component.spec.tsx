@@ -39,8 +39,16 @@ describe("ChangelogListBase", () => {
         expect(container.textContent).toContain("\u00a0")
     })
 
-    it("hides the whole settled empty block", () => {
-        const { container } = render(<ChangelogListBase state="empty" props={props} />)
-        expect(container).toBeEmptyDOMElement()
+    it("keeps the settled empty list visible with its empty-state copy", () => {
+        render(<ChangelogListBase state="empty" props={props} />)
+        expect(screen.getByText("Nothing new")).toBeInTheDocument()
+    })
+
+    it("keeps the failed list visible and retryable", () => {
+        const retry = vi.fn()
+        render(<ChangelogListBase state="failed" props={{ ...props, retryLabel: "Retry" }} on={{ retry }} />)
+        expect(screen.getByText("Could not load updates")).toBeInTheDocument()
+        fireEvent.click(screen.getByRole("button", { name: "Retry" }))
+        expect(retry).toHaveBeenCalledOnce()
     })
 })

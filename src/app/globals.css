@@ -10,6 +10,7 @@
 @import "tailwindcss" source("../");
 @import "@heroui/styles/css";
 
+
 /*
  * The ONLY stylesheet in the app, and the ONLY place a colour is written down.
  *
@@ -102,19 +103,70 @@ html {
 }
 
 /* Original StarCi secondary-tab skin: the navbar owns the only baseline. */
-.extended-tabs .tabs__list {
+.extended-tabs .tabs__list,
+.extended-tabs .tabs__list-container {
     border-bottom-width: 0 !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+.extended-tabs .tabs__list {
+    align-items: flex-end !important;
+}
+
+.extended-tabs .starci-core-tabs-frame {
+    margin-bottom: 0;
+    padding-bottom: 0;
 }
 
 .extended-tabs .tabs__tab {
+    position: relative;
     width: fit-content !important;
-    padding-left: 0.75rem !important;
-    padding-right: 0.75rem !important;
+    padding-inline: 0.75rem !important;
+    padding-block-end: 0 !important;
 }
 
-/* Active underline is 2px; the navbar's separate border remains the 1px separator. */
+.extended-tabs .tabs__tab:first-child {
+    padding-inline-start: 0.75rem !important;
+}
+
+.starci-core-navigation-feature-nav-primary.starci-core-page-container,
+.starci-core-navigation-feature-nav-feature.starci-core-page-container {
+    padding-inline: 0.75rem !important;
+}
+
+/* Keep nested link content geometrically centred in the compact subnav row. */
+.starci-core-subnav-title {
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* Navbar feature tabs: kill disabled scroll chrome that eats the left inset. */
+.starci-core-navigation-feature-nav-feature .tabs__list-container__scroll-prev[disabled],
+.starci-core-navigation-feature-nav-feature .tabs__list-container__scroll-prev[tabindex="-1"] {
+    width: 0 !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+.starci-core-navigation-feature-nav-feature .starci-core-tabs-scroll {
+    padding-block: 0 !important;
+}
+
+.starci-core-navigation-feature-nav-feature .extended-tabs .tabs__indicator {
+    bottom: 0 !important;
+    inset-block-end: 0 !important;
+}
+
+/* Active underline is 2px; pin it flush to the navbar's bottom seam. */
 .extended-tabs .tabs__indicator {
+    bottom: 0 !important;
     height: 2px !important;
+    margin-block-end: 0 !important;
 }
 
 /* Ported verbatim from the legacy Academy stylesheet. */
@@ -336,6 +388,18 @@ body {
     ::before,
     ::after {
         border-color: var(--border);
+    }
+
+    /* The app keeps wheel, touch and keyboard scrolling while omitting persistent scrollbar chrome. */
+    * {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    *::-webkit-scrollbar {
+        display: none;
+        width: 0;
+        height: 0;
     }
 
     /*

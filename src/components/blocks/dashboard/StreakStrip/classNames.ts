@@ -1,7 +1,19 @@
 import { cn } from "@heroui/react"
+import {
+    dashboardBandSeparatorClassName,
+    dashboardCardFooterClassName,
+    dashboardFlushCardClassName,
+    dashboardFlushSurfaceClassName,
+    dashboardMetricCellPaddingClassName,
+} from "../classNames"
 
-/** The week run and its current facts form one responsive summary row. */
-export const streakPrimaryClassName = cn(
+export const streakSurfaceClassName = dashboardFlushSurfaceClassName
+export const streakCardClassName = dashboardFlushCardClassName
+export const streakSeparatorClassName = dashboardBandSeparatorClassName
+
+/** The week run and streak facts share one summary band. */
+export const streakSummaryClassName = cn(
+    dashboardMetricCellPaddingClassName,
     "flex",
     "min-w-0",
     "flex-col",
@@ -12,21 +24,12 @@ export const streakPrimaryClassName = cn(
     "sm:gap-4",
 )
 
-/** Current streak and record are peer facts, not separate rows. */
-export const streakFactClassName = cn("flex", "min-w-0", "items-center", "gap-3")
+/** Current streak and record are peer facts beside the week run. */
+export const streakFactClassName = cn("flex", "min-w-0", "shrink-0", "items-center", "gap-3")
 
-/** Empty guidance keeps its message and action together. */
-export const streakPromptClassName = cn(
-    "flex",
-    "min-w-0",
-    "flex-col",
-    "gap-3",
-    "sm:flex-row",
-    "sm:items-center",
-)
-
-/** The daily nudge owns one message/action split. */
-export const streakNudgeClassName = cn(
+/** Empty guidance or daily nudge sits below the separator. */
+export const streakActionClassName = cn(
+    dashboardCardFooterClassName,
     "flex",
     "min-w-0",
     "flex-col",

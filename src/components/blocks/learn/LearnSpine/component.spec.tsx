@@ -55,12 +55,18 @@ describe("learnSpine", () => {
         expect(screen.getByText("Leaderboard")).toBeInTheDocument()
         const navigation = screen.getByRole("navigation", { name: "Home" })
         expect(navigation).toHaveClass(
-            "border-separator",
             "px-3",
             "py-6",
-            "md:border-r",
         )
+        expect(navigation).not.toHaveClass("border-separator", "md:border-r")
         expect(navigation).not.toHaveClass("p-4")
+        const scrollViewport = container.querySelector("[data-orientation='vertical']")
+        expect(scrollViewport).not.toBeNull()
+        expect(scrollViewport).toHaveAttribute("data-learn-navigation-scroll", "true")
+        expect(scrollViewport).toHaveClass("h-0", "overflow-y-auto", "overscroll-contain")
+        expect(scrollViewport).toContainElement(screen.getByRole("option", { name: "Home" }))
+        expect(scrollViewport).toContainElement(screen.getByRole("option", { name: "Modules" }))
+        expect(scrollViewport).not.toContainElement(screen.getByRole("button", { name: "Collapse" }))
         expect(container.querySelectorAll("[role=option]")).toHaveLength(5)
     })
 
@@ -83,12 +89,13 @@ describe("learnSpine", () => {
         expect(screen.getByRole("option", { name: "Home" })).toBeInTheDocument()
         expect(screen.getByRole("option", { name: "Modules" })).toBeInTheDocument()
         expect(screen.getByRole("navigation", { name: "Home" })).toHaveClass(
-            "border-separator",
             "px-3",
             "py-6",
-            "md:border-r",
         )
-        expect(screen.getByRole("navigation", { name: "Home" })).not.toHaveClass("p-2", "px-2")
+        expect(screen.getByRole("navigation", { name: "Home" })).not.toHaveClass("p-2", "px-2", "border-separator", "md:border-r")
+        const collapsedScrollViewport = screen.getByRole("option", { name: "Home" }).closest("[data-orientation='vertical']")
+        expect(collapsedScrollViewport).not.toBeNull()
+        expect(collapsedScrollViewport).not.toContainElement(screen.getByRole("button", { name: "Expand" }))
     })
 
     it("stays inert rather than throwing when the frame reported no handlers", () => {

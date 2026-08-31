@@ -6,13 +6,7 @@ export const surfaceListClassName = cn("starci-core-surface-list", "flex", "min-
 export const surfaceLabelClassName = cn(
     "starci-core-surface-label",
 )
-/** Selects a heading level that recedes when the list is nested in another surface. */
-export const getSurfaceHeadingClassName = (depth: "top" | "nested") => cn(
-    "m-0",
-    "font-medium",
-    depth === "nested" ? "text-xs leading-4" : "text-sm leading-5",
-)
-/** Keeps the peer fact at the same visual level as its owning heading. */
+/** Keeps the peer fact at the same visual level as its owning label. */
 export const getSurfaceFactClassName = (depth: "top" | "nested") => cn(
     "text-muted",
     depth === "nested" ? "text-xs leading-4" : "text-sm leading-5",

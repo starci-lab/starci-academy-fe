@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
-import { ShellNavBase } from "./component"
+import { ShellNavBase, ShellNavigationDrawerBase } from "./component"
 
 vi.mock("@/components/blocks/locale/LanguageMenu", () => ({
     LanguageMenu: () => <button type="button" aria-label="Language menu" />,
@@ -29,10 +29,11 @@ afterEach(cleanup)
 
 const props = {
     brand: "StarCi Academy",
-    routes: [{ id: "home", label: "Home", isCurrent: true }],
+    routes: [{ id: "home", label: "Home", icon: "home" as const, isCurrent: true }],
     tabs: [{ id: "overview", label: "Overview", icon: "home" as const, isCurrent: true }],
     themeLabel: "Switch theme",
     utilitiesLabel: "Display utilities",
+    actionsLabel: "Account and commerce",
     localeActionLabel: "Tiếng Việt",
     isDark: false,
     searchPlaceholder: "Search",
@@ -66,22 +67,32 @@ describe("ShellNavBase", () => {
         expect(openSearch).toHaveBeenCalledOnce()
     })
 
-    it("keeps compact search, locale and theme actions inside one utility disclosure", () => {
+    it("uses the compact overflow as one drawer trigger rather than a cramped popover", () => {
+        const openNavigation = vi.fn()
+        render(<ShellNavBase props={props} on={{ openNavigation }} />)
+
+        fireEvent.click(screen.getByRole("button", { name: "Display utilities" }))
+        expect(openNavigation).toHaveBeenCalledOnce()
+        expect(screen.queryByRole("menu")).toBeNull()
+    })
+
+    it("renders the complete compact navigation and utilities inside the drawer body", () => {
+        const navigate = vi.fn()
         const openSearch = vi.fn()
         const toggleLocale = vi.fn()
         const toggleTheme = vi.fn()
-        render(<ShellNavBase props={props} on={{ openSearch, toggleLocale, toggleTheme }} />)
+        render(<ShellNavigationDrawerBase props={props} on={{ navigate, openSearch, toggleLocale, toggleTheme }} />)
 
-        fireEvent.click(screen.getByRole("button", { name: "Display utilities" }))
-        fireEvent.click(screen.getByRole("menuitem", { name: "Open search" }))
+        fireEvent.click(screen.getByRole("link", { name: "Home" }))
+        expect(navigate).toHaveBeenCalledWith("home")
+
+        fireEvent.click(screen.getByRole("button", { name: "Open search" }))
         expect(openSearch).toHaveBeenCalledOnce()
 
-        fireEvent.click(screen.getByRole("button", { name: "Display utilities" }))
-        fireEvent.click(screen.getByRole("menuitem", { name: "Tiếng Việt" }))
+        fireEvent.click(screen.getByRole("button", { name: "Tiếng Việt" }))
         expect(toggleLocale).toHaveBeenCalledOnce()
 
-        fireEvent.click(screen.getByRole("button", { name: "Display utilities" }))
-        fireEvent.click(screen.getByRole("menuitem", { name: "Switch theme" }))
+        fireEvent.click(screen.getByRole("button", { name: "Switch theme" }))
         expect(toggleTheme).toHaveBeenCalledOnce()
     })
 

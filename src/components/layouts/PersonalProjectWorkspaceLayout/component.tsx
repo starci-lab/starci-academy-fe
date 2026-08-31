@@ -31,6 +31,8 @@ import {
 export type PersonalProjectWorkspaceLayoutProps = {
     /** The routed surface - the one thing the frame does not decide. */
     readonly surface: ReactNode
+    /** Client-only connected roadmap; omission keeps the pure renderer directly testable. */
+    readonly roadmap?: ReactNode
     /** The accessible name of the separator the reader drags to rewidth the rail. */
     readonly resizeLabel: string
     /** Compact entry into the project roadmap when the persistent rail is not viable. */
@@ -45,13 +47,14 @@ export type PersonalProjectWorkspaceLayoutProps = {
 /** Keeps the shared course map mounted around dashboard, task and result surfaces. */
 export const PersonalProjectWorkspaceLayoutBase = (props: PersonalProjectWorkspaceLayoutProps) => {
     const showRoadmapNavigation = props.showRoadmapNavigation !== false
+    const roadmap = props.roadmap ?? <PersonalProjectContentMap />
     return (
         <div className={personalProjectWorkspaceClassName} data-roadmap-navigation={showRoadmapNavigation ? "visible" : "owned-by-surface"}>
             {showRoadmapNavigation ? <>
                 <div className={personalProjectWorkspaceMobileBarClassName}>
                     <Button props={{ label: props.roadmapLabel ?? "Project roadmap", variant: "outline", size: "sm", icon: "personalProject" }} on={{ press: props.onOpenRoadmap }} />
                 </div>
-                <aside className={personalProjectWorkspaceRailClassName}><PersonalProjectContentMap /></aside>
+                <aside className={personalProjectWorkspaceRailClassName}>{props.isRoadmapOpen === true ? null : roadmap}</aside>
                 {/* Milestone labels are authored content, so this route rail resizes instead of
                         collapsing them into an icon-only state that cannot preserve their meaning. */}
                 <div className={personalProjectWorkspaceDividerClassName}>
@@ -66,9 +69,9 @@ export const PersonalProjectWorkspaceLayoutBase = (props: PersonalProjectWorkspa
                     />
                 </div>
             </> : null}
-            <main className={personalProjectWorkspaceSurfaceClassName}>{props.surface}</main>
+            <div className={personalProjectWorkspaceSurfaceClassName}>{props.surface}</div>
             {showRoadmapNavigation ? <DrawerBranch isOpen={props.isRoadmapOpen === true} placement="left" title={props.roadmapLabel ?? "Project roadmap"} onDismiss={() => props.onCloseRoadmap?.()}>
-                <PersonalProjectContentMap />
+                {props.isRoadmapOpen === true ? roadmap : null}
             </DrawerBranch> : null}
         </div>
     )

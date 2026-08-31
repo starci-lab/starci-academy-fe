@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { print } from "graphql"
 import { queryUserProfile, queryUserProfileMap, QueryUserProfile } from "./query-user-profile"
-import { queryPublicUserCv, queryPublicUserCvMap, QueryPublicUserCv } from "./query-public-user-cv"
 import { queryProfileEvidence } from "./query-profile-evidence"
 import type { ProfileEvidenceKind } from "./types/profile-evidence"
 
@@ -58,53 +57,6 @@ describe("queryUserProfile", () => {
     it("propagates a transport failure to the caller", async () => {
         mocks.query.mockRejectedValue(new Error("profile offline"))
         await expect(queryUserProfile({ request: { username: "linh" } })).rejects.toThrow("profile offline")
-    })
-})
-
-describe("queryPublicUserCv", () => {
-    it("selects the single downloadable CV row", () => {
-        expect(print(queryPublicUserCvMap[QueryPublicUserCv.Query1])).toContain("pdfUrl")
-    })
-
-    it("reads anonymously and sends the request as the variables themselves", async () => {
-        const request = { username: "linh" }
-        const result = { data: { publicUserCv: { success: true, message: "ok", data: null } } }
-        mocks.query.mockResolvedValue(result)
-        await expect(queryPublicUserCv({ request })).resolves.toBe(result)
-        expect(mocks.createApolloClient).toHaveBeenCalledWith({
-            withAuth: false,
-            headers: undefined,
-            signal: undefined,
-            debug: undefined,
-        })
-        expect(mocks.query).toHaveBeenCalledWith({
-            query: queryPublicUserCvMap[QueryPublicUserCv.Query1],
-            variables: request,
-            fetchPolicy: "no-cache",
-        })
-    })
-
-    it("forwards an explicit variant with its transport options", async () => {
-        const signal = new AbortController().signal
-        await queryPublicUserCv({
-            query: QueryPublicUserCv.Query1,
-            request: { username: "khoa" },
-            headers: { "x-trace-id": "trace-en" },
-            signal,
-            debug: false,
-        })
-        expect(mocks.createApolloClient).toHaveBeenCalledWith({
-            withAuth: false,
-            headers: { "x-trace-id": "trace-en" },
-            signal,
-            debug: false,
-        })
-        expect(mocks.query.mock.calls[0][0].variables).toEqual({ username: "khoa" })
-    })
-
-    it("propagates a transport failure to the caller", async () => {
-        mocks.query.mockRejectedValue(new Error("cv offline"))
-        await expect(queryPublicUserCv({ request: { username: "linh" } })).rejects.toThrow("cv offline")
     })
 })
 

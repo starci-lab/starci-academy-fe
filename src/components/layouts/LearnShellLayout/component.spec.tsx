@@ -13,32 +13,45 @@ describe("LearnShellLayoutBase", () => {
         const { container } = render(<LearnShellLayoutBase displayId="course" isFullBleed={false} surface={<div>Reader surface</div>} />)
         expect(screen.getByText("Reader surface")).toBeInTheDocument()
         expect(screen.getByTestId("learn-spine")).toBeInTheDocument()
-        expect(container.querySelector("main")).not.toBeNull()
+        expect(container.querySelector("[data-learn-shell-body='true']")).not.toBeNull()
+        expect(container.querySelector("main")).toBeNull()
+    })
+
+    it("shrinks the shell owner when the course spine is collapsed", () => {
+        const { container } = render(<LearnShellLayoutBase displayId="course" isFullBleed={false} isRailCollapsed surface={<div>Reader surface</div>} />)
+        const rail = container.querySelector("aside")
+        expect(rail?.className).toContain("min-[1120px]:w-20")
+        expect(rail?.className).toContain("min-[1120px]:border-r")
+        expect(rail?.className).toContain("min-[1120px]:sticky")
+        expect(rail?.className).toContain("min-[1120px]:top-16")
+        expect(rail?.className).toContain("min-[1120px]:h-[calc(100dvh-4rem)]")
+        expect(rail?.className).toContain("min-[1120px]:max-h-[calc(100dvh-4rem)]")
+        expect(rail?.className).not.toContain("min-[1120px]:w-64")
+        expect(rail?.className).not.toContain("px-3")
+        expect(rail?.className).not.toContain("py-6")
     })
 
     it("removes course furniture for a focused full-bleed session", () => {
         const { container } = render(<LearnShellLayoutBase displayId="course" isFullBleed surface={<div>Reader surface</div>} />)
         expect(screen.getByText("Reader surface")).toBeInTheDocument()
         expect(screen.queryByTestId("learn-spine")).toBeNull()
-        expect(container.querySelector("main")).not.toBeNull()
+        expect(container.querySelector("[data-learn-shell-body='true']")).not.toBeNull()
+        expect(container.querySelector("main")).toBeNull()
     })
 
     it("opens the shared course navigation from a compact current-location row", () => {
         const openCourseNavigation = vi.fn()
         const closeCourseNavigation = vi.fn()
-        const { rerender } = render(<LearnShellLayoutBase displayId="course" isFullBleed={false} mobileCourseNavigation={{ label: "Course navigation", currentLabel: "Review", isOpen: false }} on={{ openCourseNavigation, closeCourseNavigation }} surface={<div>Review surface</div>} />)
+        const { rerender } = render(<LearnShellLayoutBase displayId="course" isFullBleed={false} mobileCourseNavigation={{ label: "Course navigation", closeLabel: "Close course navigation", courseTitle: "Fullstack Mastery", isOpen: false }} on={{ openCourseNavigation, closeCourseNavigation }} surface={<div>Review surface</div>} />)
 
         expect(screen.getByRole("button", { name: "Course navigation" })).toBeTruthy()
-        const currentLocation = screen.getByText("Review")
-        expect(currentLocation).toBeInTheDocument()
-        expect(currentLocation.parentElement?.className).toContain("[&>*]:truncate")
-        expect(currentLocation.parentElement?.className).toContain("w-full")
-        expect(screen.getByRole("button", { name: "Course navigation" }).parentElement?.className).toContain("flex-col")
-        expect(screen.getByRole("button", { name: "Course navigation" }).parentElement?.className).toContain("sm:flex-row")
+        expect(screen.getByText("Fullstack Mastery")).toBeInTheDocument()
+        expect(screen.getByRole("button", { name: "Course navigation" })).toHaveAttribute("aria-expanded", "false")
         fireEvent.click(screen.getByRole("button", { name: "Course navigation" }))
         expect(openCourseNavigation).toHaveBeenCalledOnce()
 
-        rerender(<LearnShellLayoutBase displayId="course" isFullBleed={false} mobileCourseNavigation={{ label: "Course navigation", currentLabel: "Review", isOpen: true }} on={{ openCourseNavigation, closeCourseNavigation }} surface={<div>Review surface</div>} />)
+        rerender(<LearnShellLayoutBase displayId="course" isFullBleed={false} mobileCourseNavigation={{ label: "Course navigation", closeLabel: "Close course navigation", courseTitle: "Fullstack Mastery", isOpen: true }} on={{ openCourseNavigation, closeCourseNavigation }} surface={<div>Review surface</div>} />)
+        expect(screen.getByRole("button", { name: "Close course navigation" })).toHaveAttribute("aria-expanded", "true")
         expect(screen.getByTestId("course-drawer")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "dismiss drawer" }))
         expect(closeCourseNavigation).toHaveBeenCalledOnce()
@@ -61,13 +74,13 @@ describe("LearnShellLayoutBase", () => {
         const { container } = render(<LearnShellLayoutBase
             displayId="course"
             isFullBleed={false}
-            mobileCourseNavigation={{ label: "Course navigation", currentLabel: "Personal project", isOpen: false }}
+            mobileCourseNavigation={{ label: "Course navigation", closeLabel: "Close course navigation", courseTitle: "Fullstack Mastery", isOpen: false }}
             surface={<div>Task workbench</div>}
         />)
 
         const rail = container.querySelector("aside")
         expect(rail?.className).toContain("min-[1120px]:flex")
         expect(rail?.className).not.toContain("md:flex")
-        expect(screen.getByRole("button", { name: "Course navigation" }).parentElement?.className).toContain("min-[1120px]:hidden")
+        expect(container.querySelector("[data-grammar-subnav='true']")).not.toBeNull()
     })
 })

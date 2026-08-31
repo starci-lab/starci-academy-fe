@@ -7,7 +7,7 @@ const query1 = gql`
     query MyCvBlocks {
         myCvBlocks {
             success message error
-            data { id label blocks style pdfCdnKey texSource isPublic createdAt updatedAt }
+            data { id label blocks style pdfCdnKey createdAt updatedAt }
         }
     }
 `

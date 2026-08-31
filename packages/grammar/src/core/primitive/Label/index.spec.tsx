@@ -1,0 +1,20 @@
+import { renderToStaticMarkup } from "react-dom/server"
+import { describe, expect, it } from "vitest"
+import { Label } from "./index.js"
+
+describe("Label", () => {
+    it("names a top surface without emitting a heading element", () => {
+        const markup = renderToStaticMarkup(<Label id="weekly-goals">Weekly goals</Label>)
+        expect(markup).toContain("data-grammar-label=\"true\"")
+        expect(markup).toContain("data-grammar-label-depth=\"top\"")
+        expect(markup).toContain("starci-core-label")
+        expect(markup).not.toContain("<h3")
+        expect(markup).toContain(">Weekly goals</span>")
+    })
+
+    it("recedes when the owning surface is nested", () => {
+        const markup = renderToStaticMarkup(<Label depth="nested">Nested metric</Label>)
+        expect(markup).toContain("data-grammar-label-depth=\"nested\"")
+        expect(markup).toContain("text-xs")
+    })
+})

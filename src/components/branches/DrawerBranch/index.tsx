@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react"
 import { Drawer } from "@heroui/react"
-import { drawerBodyClassName, drawerCloseTriggerClassName, drawerControlledTriggerClassName, getDrawerContentClassName } from "./classNames"
+import { drawerBodyClassName, drawerCloseTriggerClassName, drawerControlledTriggerClassName, drawerWorkspaceDialogClassName, getDrawerContentClassName } from "./classNames"
 
 /**
  * BRANCH - `DrawerBranch`: the vendor's edge-anchored mechanics around typed children.
@@ -33,6 +33,8 @@ export type DrawerBranchProps = {
     readonly isOpen: boolean
     /** The edge it opens from. Absent is `right`, which is where this product's basket lives. */
     readonly placement?: DrawerBranchPlacement
+    /** A focused workspace fills compact screens and uses a wider decision rail on larger ones. */
+    readonly size?: "default" | "workspace"
     /** The already-resolved title. A drawer names itself; the interior does not repeat it. */
     readonly title: string
     /** Every way out: the close control, Escape, and the backdrop. */
@@ -103,10 +105,10 @@ export const DrawerBranch = (props: DrawerBranchProps) => {
             <Drawer.Backdrop>
                 <Drawer.Content
                     key={viewportEpoch}
-                    className={getDrawerContentClassName(props.placement ?? "right")}
+                    className={getDrawerContentClassName(props.placement ?? "right", props.size)}
                     placement={props.placement ?? "right"}
                 >
-                    <Drawer.Dialog>
+                    <Drawer.Dialog className={props.size === "workspace" ? drawerWorkspaceDialogClassName : undefined}>
                         <Drawer.Header>
                             <Drawer.Heading>{props.title}</Drawer.Heading>
                         </Drawer.Header>

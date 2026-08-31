@@ -3,6 +3,7 @@
 import { motion, useReducedMotion } from "framer-motion"
 import type { ReactNode } from "react"
 import { Rail } from "@starci/grammar/core"
+import { collapsibleRailMotionClassName } from "./classNames"
 
 /** Expanded learn-navigation width, kept equal to the frame's `w-64`. */
 const EXPANDED_WIDTH = 256
@@ -34,6 +35,7 @@ export const CollapsibleRail = (props: CollapsibleRailProps) => {
     const reduceMotion = useReducedMotion()
     return (
         <motion.div
+            className={collapsibleRailMotionClassName}
             initial={false}
             animate={{ width: isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH }}
             transition={reduceMotion ? INSTANT_TRANSITION : SPRING_TRANSITION}

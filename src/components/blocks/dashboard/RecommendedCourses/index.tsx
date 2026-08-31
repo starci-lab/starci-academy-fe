@@ -36,6 +36,7 @@ export const RecommendedCourses = (props: RecommendedCoursesProps) => {
     const rows = items.map((item) => ({
         id: item.displayId,
         title: item.title,
+        actionLabel: tCatalog("view"),
         // The artwork identifies the course faster than its title does, which is what the mark is
         // for. The description it replaces was a paragraph inside a row nobody stops to read.
         cover: item.thumbnailUrl ?? null,
@@ -53,13 +54,13 @@ export const RecommendedCourses = (props: RecommendedCoursesProps) => {
         reason: item.discountReason === "none" ? undefined : t("reason", { count: item.enrolledCount }),
     }))
 
-    const viewProps = { label: t("heading"), rows, errorMessage: t("failed"), retryLabel: t("retry") }
+    const viewProps = { label: t("heading"), rows, emptyMessage: tCatalog("empty"), errorMessage: t("failed"), retryLabel: t("retry") }
 
     if (query.error !== undefined && query.data === undefined) {
         return <RecommendedCoursesBase state="failed" props={viewProps} on={{ retry: () => { void query.mutate() } }} />
     }
     if (query.data === undefined) return <RecommendedCoursesBase state="pending" props={viewProps} />
-    if (rows.length === 0) return <RecommendedCoursesBase state="hidden" props={viewProps} />
+    if (rows.length === 0) return <RecommendedCoursesBase state="empty" props={viewProps} />
 
     return (
         <RecommendedCoursesBase

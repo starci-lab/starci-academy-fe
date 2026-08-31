@@ -101,6 +101,20 @@
         box-sizing: border-box;
     }
 
+    /* Grammar scroll remains operable without adding persistent chrome to a composition. */
+    .starci-core-root,
+    .starci-core-root * {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .starci-core-root::-webkit-scrollbar,
+    .starci-core-root *::-webkit-scrollbar {
+        display: none;
+        width: 0;
+        height: 0;
+    }
+
     .starci-core-page-container {
         width: min(100%, var(--starci-core-page-measure, 80rem));
         min-width: 0;
@@ -134,11 +148,13 @@
 
     .starci-core-section-title {
         margin: 0;
+        max-width: 100%;
         color: var(--starci-core-foreground, var(--foreground, CanvasText));
         font-size: clamp(1.25rem, 1rem + 0.75cqi, 1.75rem);
         font-weight: 700;
         letter-spacing: -0.025em;
         line-height: 1.2;
+        overflow-wrap: anywhere;
         text-wrap: balance;
     }
 
@@ -156,10 +172,23 @@
         color: var(--starci-core-muted, var(--muted, GrayText));
         font-size: 0.875rem;
         line-height: 1.5;
+        overflow-wrap: anywhere;
     }
 
     .starci-core-section-action {
         flex: none;
+    }
+
+    .starci-core-visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
     }
 
     .starci-core-surface-copy-group {
@@ -343,6 +372,59 @@
         margin: 0;
     }
 
+    .starci-core-label {
+        min-width: 0;
+        margin: 0;
+    }
+
+    .starci-core-tooltip {
+        position: relative;
+        max-width: fit-content;
+    }
+
+    .starci-core-tooltip-content {
+        position: absolute;
+        z-index: 20;
+        pointer-events: none;
+        white-space: nowrap;
+        border-radius: var(--starci-core-control-radius, 0.75rem);
+        background: var(--starci-core-foreground, var(--foreground, CanvasText));
+        color: var(--starci-core-canvas, var(--background, Canvas));
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        line-height: 1rem;
+        font-weight: 500;
+        opacity: 0;
+        transition:
+            opacity var(--starci-core-motion-duration, 180ms) var(--starci-core-motion-easing, cubic-bezier(0.2, 0, 0, 1)),
+            visibility var(--starci-core-motion-duration, 180ms) var(--starci-core-motion-easing, cubic-bezier(0.2, 0, 0, 1));
+        visibility: hidden;
+    }
+
+    .starci-core-tooltip:hover > .starci-core-tooltip-content,
+    .starci-core-tooltip:focus-within > .starci-core-tooltip-content {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .starci-core-tooltip[data-grammar-tooltip-placement="top"] > .starci-core-tooltip-content {
+        bottom: calc(100% + 0.375rem);
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .starci-core-tooltip[data-grammar-tooltip-placement="bottom"] > .starci-core-tooltip-content {
+        top: calc(100% + 0.375rem);
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .starci-core-tooltip-content {
+            transition: none;
+        }
+    }
+
     .starci-core-surface {
         position: relative;
         min-width: 0;
@@ -350,6 +432,55 @@
         border-radius: var(--starci-core-surface-radius, 1rem);
         background: var(--surface, Canvas);
         color: var(--surface-foreground, CanvasText);
+    }
+
+    @property --starci-core-highlight-angle {
+        syntax: "<angle>";
+        initial-value: 0deg;
+        inherits: false;
+    }
+
+    @keyframes starci-core-highlight-spin {
+        to {
+            --starci-core-highlight-angle: 360deg;
+        }
+    }
+
+    .starci-core-surface-highlight {
+        border-radius: var(--starci-core-surface-radius, 1rem);
+        overflow: visible;
+    }
+
+    .starci-core-surface-highlight-sweep {
+        position: absolute;
+        z-index: 1;
+        inset: var(--starci-core-highlight-inset, 0);
+        box-sizing: border-box;
+        border-radius: inherit;
+        padding: 2px;
+        background: conic-gradient(
+            from var(--starci-core-highlight-angle),
+            transparent 0%,
+            transparent 82%,
+            var(--starci-core-accent, var(--accent, Highlight)) 92%,
+            transparent 100%
+        );
+        -webkit-mask:
+            linear-gradient(#000 0 0) content-box,
+            linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask:
+            linear-gradient(#000 0 0) content-box,
+            linear-gradient(#000 0 0);
+        mask-composite: exclude;
+        animation: starci-core-highlight-spin 3s linear infinite;
+        pointer-events: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .starci-core-surface-highlight-sweep {
+            animation: none;
+        }
     }
 
     .starci-core-surface[data-grammar-surface-depth="top"] {
@@ -469,6 +600,10 @@
         width: max-content;
         min-width: 100%;
         white-space: nowrap;
+    }
+
+    .starci-core-tabs .tabs__tab {
+        padding-inline: clamp(0.5rem, 3vw, 1rem);
     }
 
     .starci-core-tab-content {
@@ -879,6 +1014,502 @@
     @media (min-width: 48rem) {
         .starci-core-tab-label {
             display: inline;
+        }
+    }
+
+    .starci-core-navigation-feature-nav {
+        width: 100%;
+        border-bottom: 1px solid var(--separator, var(--starci-core-separator, GrayText));
+        background: var(--background, var(--starci-core-canvas, Canvas));
+        color: var(--foreground, var(--starci-core-foreground, CanvasText));
+    }
+
+    .starci-core-navigation-feature-nav[data-grammar-navigation-feature-nav-position="sticky"] {
+        position: sticky;
+        z-index: var(--starci-core-navbar-z, 50);
+        top: 0;
+    }
+
+    .starci-core-navigation-feature-nav-primary {
+        display: grid !important;
+        min-height: 4rem;
+        grid-template-columns: minmax(0, 1fr) auto auto !important;
+        align-items: center;
+        gap: var(--starci-core-row-gap, 0.75rem);
+        padding-block: var(--starci-core-inline-gap, 0.5rem);
+    }
+
+    .starci-core-navigation-feature-nav-primary.starci-core-page-container {
+        padding-inline: 0.75rem;
+    }
+
+    .starci-core-navigation-feature-nav-identity,
+    .starci-core-navigation-feature-nav-navigation,
+    .starci-core-navigation-feature-nav-compact-navigation,
+    .starci-core-navigation-feature-nav-actions,
+    .starci-core-navigation-feature-nav-feature {
+        min-width: 0;
+    }
+
+    .starci-core-navigation-feature-nav-navigation {
+        display: none !important;
+    }
+
+    .starci-core-navigation-feature-nav-compact-navigation {
+        display: block !important;
+    }
+
+    .starci-core-navigation-feature-nav-actions {
+        display: flex;
+        align-items: center;
+        justify-content: end;
+        gap: var(--starci-core-inline-gap, 0.5rem);
+    }
+
+    .starci-core-navigation-feature-nav-feature {
+        padding: 0;
+    }
+
+    .starci-core-navigation-feature-nav-feature.starci-core-page-container {
+        padding-inline: 0.75rem;
+    }
+
+    .starci-core-course-section-navigation {
+        padding-inline-start: 0.75rem;
+        padding-inline-end: 0.75rem;
+    }
+
+    /* The navbar owns the only outer separator; HeroUI's secondary tab rail must not add a twin. */
+    .starci-core-navigation-feature-nav-feature .tabs__list-container {
+        border-bottom-width: 0 !important;
+    }
+
+    /* Feature tabs share the dashboard rail's left inset; scroll chrome must not reclaim it. */
+    .starci-core-navigation-feature-nav-feature .starci-core-tabs-scroll {
+        padding-block: 0;
+        padding-inline-start: 0;
+    }
+
+    .starci-core-navigation-feature-nav-feature .tabs__list-container__scroll-prev[disabled],
+    .starci-core-navigation-feature-nav-feature .tabs__list-container__scroll-prev[tabindex="-1"] {
+        width: 0;
+        min-width: 0;
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .starci-core-navigation-feature-nav-feature .extended-tabs .tabs__indicator {
+        bottom: 0 !important;
+        inset-block-end: 0 !important;
+    }
+
+    .starci-core-course-section-navigation .tabs__list-container {
+        border-bottom-width: 0 !important;
+    }
+
+    .starci-core-subnav {
+        display: flex;
+        width: 100%;
+        min-width: 0;
+        min-height: 3.25rem;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--starci-core-row-gap, 0.75rem);
+        padding-inline: 0.75rem;
+        border-bottom: 1px solid var(--separator, var(--starci-core-separator, GrayText));
+        background: var(--background, var(--starci-core-canvas, Canvas));
+        color: var(--foreground, var(--starci-core-foreground, CanvasText));
+    }
+
+    .starci-core-subnav[data-grammar-subnav-position="sticky"] {
+        position: sticky;
+        z-index: var(--starci-core-subnav-z, 40);
+        top: var(--starci-core-subnav-offset, 4rem);
+    }
+
+    .starci-core-subnav-identity {
+        display: flex;
+        min-width: 0;
+        align-items: center;
+        gap: var(--starci-core-inline-gap, 0.5rem);
+    }
+
+    .starci-core-subnav-leading,
+    .starci-core-subnav-toggle {
+        flex: none;
+    }
+
+    .starci-core-subnav-title {
+        display: flex;
+        min-width: 0;
+        overflow: hidden;
+        align-items: center;
+        font-weight: 600;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .starci-core-subnav-toggle {
+        display: inline-flex;
+        width: 2.75rem;
+        height: 2.75rem;
+        align-items: center;
+        justify-content: center;
+        border: 0;
+        border-radius: var(--starci-core-control-radius, 0.75rem);
+        background: transparent;
+        color: inherit;
+        cursor: pointer;
+    }
+
+    .starci-core-subnav-toggle:hover {
+        background: var(--surface-secondary, var(--starci-core-surface-secondary, Canvas));
+    }
+
+    .starci-core-subnav-toggle:focus-visible {
+        outline: 2px solid var(--focus, var(--starci-core-focus, Highlight));
+        outline-offset: 2px;
+    }
+
+    @media (min-width: 48rem) {
+        .starci-core-navigation-feature-nav-primary {
+            grid-template-columns: auto minmax(0, 1fr) auto !important;
+        }
+
+        .starci-core-navigation-feature-nav-navigation {
+            display: block !important;
+        }
+
+        .starci-core-navigation-feature-nav-compact-navigation {
+            display: none !important;
+        }
+    }
+
+    @media (min-width: 70rem) {
+        .starci-core-subnav[data-grammar-subnav-visibility="compact"] {
+            display: none;
+        }
+    }
+
+    .starci-core-dashboard-shell {
+        position: relative;
+        min-width: 0;
+        container: starci-core-dashboard-shell / inline-size;
+    }
+
+    .starci-core-dashboard-shell-header {
+        min-width: 0;
+        margin-block-end: var(--starci-core-region-gap, 1.5rem);
+    }
+
+    .starci-core-dashboard-shell-layout {
+        --starci-core-dashboard-rail-track: minmax(16rem, var(--starci-core-rail-standard, 20rem));
+        display: grid;
+        min-width: 0;
+        grid-template-areas: "navigation primary rail";
+        grid-template-columns:
+            minmax(14rem, var(--starci-core-dashboard-navigation-width, 18rem))
+            minmax(0, 1fr)
+            var(--starci-core-dashboard-rail-track);
+        gap: var(--starci-core-region-gap, 1.5rem);
+    }
+
+    .starci-core-dashboard-shell-layout[data-grammar-dashboard-navigation="absent"][data-grammar-dashboard-rail="present"] {
+        grid-template-areas: "primary rail";
+        grid-template-columns: minmax(0, 1fr) var(--starci-core-dashboard-rail-track);
+    }
+
+    .starci-core-dashboard-shell-layout[data-grammar-dashboard-rail-position="leading"][data-grammar-dashboard-navigation="absent"][data-grammar-dashboard-rail="present"] {
+        grid-template-areas: "rail rule primary";
+        grid-template-columns: var(--starci-core-dashboard-rail-track) 1px minmax(0, 1fr);
+        column-gap: 0;
+    }
+
+    .starci-core-dashboard-shell-layout[data-grammar-dashboard-rail-position="leading"][data-grammar-dashboard-navigation="present"][data-grammar-dashboard-rail="present"] {
+        grid-template-areas: "navigation rail rule primary";
+        grid-template-columns:
+            minmax(14rem, var(--starci-core-dashboard-navigation-width, 18rem))
+            var(--starci-core-dashboard-rail-track)
+            1px
+            minmax(0, 1fr);
+        column-gap: 0;
+    }
+
+    .starci-core-dashboard-shell-leading-rule {
+        display: none;
+        grid-area: rule;
+        width: 1px;
+        align-self: stretch;
+        justify-self: stretch;
+        background: var(--separator, var(--starci-core-separator, GrayText));
+    }
+
+    .starci-core-dashboard-shell-layout[data-grammar-dashboard-rail-position="leading"] .starci-core-dashboard-shell-leading-rule {
+        display: block;
+    }
+
+    .starci-core-dashboard-shell-layout[data-grammar-dashboard-rail-position="leading"] .starci-core-dashboard-shell-primary {
+        padding-inline-start: var(--starci-core-dashboard-leading-seam, 2rem);
+    }
+
+    .starci-core-dashboard-shell-layout[data-grammar-dashboard-navigation="present"][data-grammar-dashboard-rail="absent"] {
+        grid-template-areas: "navigation primary";
+        grid-template-columns: minmax(14rem, var(--starci-core-dashboard-navigation-width, 18rem)) minmax(0, 1fr);
+    }
+
+    .starci-core-dashboard-shell-layout[data-grammar-dashboard-navigation="absent"][data-grammar-dashboard-rail="absent"] {
+        grid-template-areas: "primary";
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .starci-core-dashboard-shell-layout[data-grammar-dashboard-rail-width="compact"] {
+        --starci-core-dashboard-rail-track: minmax(14rem, var(--starci-core-rail-compact, 16rem));
+    }
+
+    .starci-core-dashboard-shell-layout[data-grammar-dashboard-rail-width="wide"] {
+        --starci-core-dashboard-rail-track: minmax(20rem, var(--starci-core-rail-wide, 24rem));
+    }
+
+    .starci-core-dashboard-shell-layout[data-grammar-dashboard-align="start"] { align-items: start; }
+    .starci-core-dashboard-shell-layout[data-grammar-dashboard-align="stretch"] { align-items: stretch; }
+    .starci-core-dashboard-shell-navigation { grid-area: navigation; }
+    .starci-core-dashboard-shell-primary { grid-area: primary; }
+    .starci-core-dashboard-shell-rail { grid-area: rail; }
+
+    .starci-core-dashboard-shell-navigation,
+    .starci-core-dashboard-shell-primary,
+    .starci-core-dashboard-shell-rail {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .starci-core-dashboard-shell-primary {
+        display: flex;
+        flex-direction: column;
+        gap: var(--starci-core-region-gap, 1.5rem);
+        outline: none;
+    }
+
+    .starci-core-dashboard-shell-floating-layer {
+        position: fixed;
+        z-index: var(--starci-core-dashboard-floating-z, 40);
+        inset-inline-end: var(--starci-core-dashboard-floating-inset, 1rem);
+        inset-block-end: max(var(--starci-core-dashboard-floating-inset, 1rem), env(safe-area-inset-bottom));
+        max-inline-size: min(var(--starci-core-dashboard-floating-max, 22rem), calc(100vw - 2 * var(--starci-core-dashboard-floating-inset, 1rem)));
+        max-block-size: calc(100dvh - 2 * var(--starci-core-dashboard-floating-inset, 1rem));
+        overflow: auto;
+        overscroll-behavior: contain;
+    }
+
+    .starci-core-chat-workspace {
+        display: flex;
+        height: 100%;
+        min-height: 0;
+        min-width: 0;
+        flex-direction: column;
+        overflow: hidden;
+        background: var(--background, var(--starci-core-canvas, Canvas));
+    }
+
+    .starci-core-chat-workspace-header,
+    .starci-core-chat-workspace-composer,
+    .starci-core-chat-workspace-rail-trigger-boundary {
+        min-width: 0;
+        flex: none;
+    }
+
+    .starci-core-chat-workspace-rail-trigger-boundary {
+        display: flex;
+        justify-content: flex-end;
+        padding: 0.5rem 1rem;
+        border-bottom: 1px solid var(--separator, var(--starci-core-separator, GrayText));
+    }
+
+    .starci-core-chat-workspace-rail-trigger {
+        display: inline-flex;
+        min-width: 2.75rem;
+        min-height: 2.75rem;
+        align-items: center;
+        justify-content: center;
+        padding-inline: 0.75rem;
+        border: 1px solid var(--separator, var(--starci-core-separator, GrayText));
+        border-radius: var(--starci-core-control-radius, 0.75rem);
+        background: var(--surface, var(--starci-core-surface, Canvas));
+        color: var(--foreground, var(--starci-core-foreground, CanvasText));
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .starci-core-chat-workspace-rail-trigger:focus-visible,
+    .starci-core-chat-workspace-conversation:focus-visible,
+    .starci-core-chat-workspace-overlay-rail:focus-visible {
+        outline: 2px solid var(--focus, var(--starci-core-focus, Highlight));
+        outline-offset: -2px;
+    }
+
+    .starci-core-chat-workspace-layout {
+        display: grid;
+        min-height: 0;
+        min-width: 0;
+        flex: 1;
+        grid-template-columns: minmax(0, 1fr);
+        gap: var(--starci-core-region-gap, 1.5rem);
+    }
+
+    .starci-core-chat-workspace-layout-without-rail {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .starci-core-chat-workspace-primary {
+        display: flex;
+        min-height: 0;
+        min-width: 0;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .starci-core-chat-workspace-conversation {
+        min-height: 0;
+        min-width: 0;
+        flex: 1;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scroll-behavior: smooth;
+    }
+
+    .starci-core-chat-workspace-composer {
+        border-top: 1px solid var(--separator, var(--starci-core-separator, GrayText));
+        background: var(--background, var(--starci-core-canvas, Canvas));
+    }
+
+    .starci-core-chat-workspace-inline-rail { display: none; }
+
+    .starci-core-chat-workspace-drawer-content {
+        right: 0 !important;
+        left: auto !important;
+        width: min(24rem, calc(100dvw - 1rem)) !important;
+        max-width: calc(100dvw - 1rem) !important;
+    }
+
+    .starci-core-chat-workspace-drawer-dialog {
+        width: 100% !important;
+        height: 100% !important;
+        min-height: 0 !important;
+        max-width: none !important;
+    }
+
+    .starci-core-chat-workspace-drawer-body {
+        min-height: 0;
+        min-width: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .starci-core-chat-workspace-overlay-rail {
+        height: 100%;
+        min-height: 0;
+        min-width: 0;
+        padding: 1rem;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    .starci-core-chat-workspace-drawer-close {
+        width: 2.5rem !important;
+        height: 2.5rem !important;
+        border: 1px solid var(--separator, var(--starci-core-separator, GrayText)) !important;
+        border-radius: 999px !important;
+        background: var(--surface, var(--starci-core-surface, Canvas)) !important;
+        color: var(--foreground, var(--starci-core-foreground, CanvasText)) !important;
+    }
+
+    @container starci-core-dashboard-shell (max-width: 72rem) {
+        .starci-core-dashboard-shell-layout[data-grammar-dashboard-navigation="present"][data-grammar-dashboard-rail="present"] {
+            grid-template-areas: "navigation primary" "navigation rail";
+            grid-template-columns: minmax(14rem, var(--starci-core-dashboard-navigation-width, 18rem)) minmax(0, 1fr);
+        }
+
+        .starci-core-dashboard-shell-layout[data-grammar-dashboard-rail-position="leading"][data-grammar-dashboard-navigation="present"][data-grammar-dashboard-rail="present"] {
+            grid-template-areas: "navigation rail rule primary";
+            grid-template-columns:
+                minmax(14rem, var(--starci-core-dashboard-navigation-width, 18rem))
+                var(--starci-core-dashboard-rail-track)
+                1px
+                minmax(0, 1fr);
+        }
+
+        .starci-core-dashboard-shell-rail .starci-core-rail {
+            max-width: none;
+        }
+    }
+
+    @container starci-core-dashboard-shell (max-width: 56rem) {
+        .starci-core-dashboard-shell-layout,
+        .starci-core-dashboard-shell-layout[data-grammar-dashboard-navigation="absent"][data-grammar-dashboard-rail="present"],
+        .starci-core-dashboard-shell-layout[data-grammar-dashboard-navigation="present"][data-grammar-dashboard-rail="absent"],
+        .starci-core-dashboard-shell-layout[data-grammar-dashboard-navigation="absent"][data-grammar-dashboard-rail="absent"] {
+            grid-template-areas: "navigation" "primary" "rail";
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .starci-core-dashboard-shell-layout[data-grammar-dashboard-rail-position="leading"][data-grammar-dashboard-navigation="absent"][data-grammar-dashboard-rail="present"] {
+            grid-template-areas: "rail" "primary";
+        }
+
+        .starci-core-dashboard-shell-layout[data-grammar-dashboard-navigation="absent"] {
+            grid-template-areas: "primary" "rail";
+        }
+
+        .starci-core-dashboard-shell-layout[data-grammar-dashboard-rail-position="leading"][data-grammar-dashboard-navigation="absent"] {
+            grid-template-areas: "rail" "primary";
+        }
+
+        .starci-core-dashboard-shell-layout[data-grammar-dashboard-rail-position="leading"] .starci-core-dashboard-shell-leading-rule {
+            display: none;
+        }
+
+        .starci-core-dashboard-shell-layout[data-grammar-dashboard-rail-position="leading"] .starci-core-dashboard-shell-primary {
+            padding-inline-start: 0;
+        }
+
+        .starci-core-dashboard-shell-layout[data-grammar-dashboard-rail="absent"] {
+            grid-template-areas: "navigation" "primary";
+        }
+
+        .starci-core-dashboard-shell-layout[data-grammar-dashboard-navigation="absent"][data-grammar-dashboard-rail="absent"] {
+            grid-template-areas: "primary";
+        }
+
+        .starci-core-dashboard-shell-rail .starci-core-rail-frame {
+            position: static;
+            max-height: none;
+        }
+
+        .starci-core-dashboard-shell-rail .starci-core-rail-body {
+            overflow-y: visible;
+        }
+    }
+
+    @media (min-width: 48rem) {
+        .starci-core-chat-workspace-layout[data-grammar-chat-workspace-rail-width="compact"] {
+            grid-template-columns: minmax(0, 1fr) minmax(14rem, var(--starci-core-rail-compact, 16rem));
+        }
+
+        .starci-core-chat-workspace-layout[data-grammar-chat-workspace-rail-width="standard"] {
+            grid-template-columns: minmax(0, 1fr) minmax(16rem, var(--starci-core-rail-standard, 20rem));
+        }
+
+        .starci-core-chat-workspace-layout[data-grammar-chat-workspace-rail-width="wide"] {
+            grid-template-columns: minmax(0, 1fr) minmax(20rem, var(--starci-core-rail-wide, 24rem));
+        }
+
+        .starci-core-chat-workspace-inline-rail {
+            display: block;
+            min-height: 0;
+            min-width: 0;
         }
     }
 

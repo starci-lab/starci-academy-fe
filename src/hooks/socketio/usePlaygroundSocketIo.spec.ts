@@ -32,6 +32,7 @@ describe("usePlaygroundSocketIo", () => {
         relay.socket.connect.mockClear()
         relay.socket.disconnect.mockClear()
         relay.io.mockClear()
+        window.sessionStorage.clear()
     })
 
     it("authenticates the browser relay and advances progress only from step:verified", () => {
@@ -150,10 +151,48 @@ describe("usePlaygroundSocketIo", () => {
         expect(relay.socket.emit).toHaveBeenCalledWith("browser:subscribe", { sessionId: "session-2" })
     })
 
+    it("restores only server-verified steps when the same browser resumes a session", () => {
+        const first = renderHook(() => usePlaygroundSocketIo())
+        act(() => first.result.current.subscribe("session-resume"))
+        act(() => relay.handlers.get("step:verified")?.({ data: { stepIndex: 1 } }))
+        expect(first.result.current.passedStepIndexes).toEqual([1])
+        first.unmount()
+
+        const resumed = renderHook(() => usePlaygroundSocketIo())
+        act(() => resumed.result.current.subscribe("session-resume"))
+
+        expect(resumed.result.current.verifiedStepIndex).toBeNull()
+        expect(resumed.result.current.passedStepIndexes).toEqual([1])
+    })
+
+    it("reconciles stale browser progress from the authoritative server snapshot", () => {
+        window.sessionStorage.setItem("starci:playground-progress:v1:session-resume", JSON.stringify([0]))
+        const hook = renderHook(() => usePlaygroundSocketIo())
+        act(() => hook.result.current.subscribe("session-resume"))
+        expect(hook.result.current.passedStepIndexes).toEqual([0])
+
+        act(() => relay.handlers.get("session:progress")?.({
+            currentStepIndex: 3,
+            passedStepIndexes: [2, 0, 1, 2],
+        }))
+
+        expect(hook.result.current.verifiedStepIndex).toBeNull()
+        expect(hook.result.current.passedStepIndexes).toEqual([0, 1, 2])
+        expect(window.sessionStorage.getItem("starci:playground-progress:v1:session-resume")).toBe("[0,1,2]")
+    })
+
+    it("ignores an invalid server progress snapshot", () => {
+        const hook = renderHook(() => usePlaygroundSocketIo())
+        act(() => hook.result.current.subscribe("session-1"))
+        act(() => relay.handlers.get("session:progress")?.({ passedStepIndexes: [0, -1] }))
+        expect(hook.result.current.passedStepIndexes).toEqual([])
+    })
+
     it("stops listening and closes the relay when the layout goes away", () => {
         const hook = renderHook(() => usePlaygroundSocketIo())
         hook.unmount()
         expect(relay.socket.off).toHaveBeenCalledWith("step:verified", expect.any(Function))
+        expect(relay.socket.off).toHaveBeenCalledWith("session:progress", expect.any(Function))
         expect(relay.socket.disconnect).toHaveBeenCalledTimes(1)
     })
 })

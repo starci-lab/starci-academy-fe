@@ -42,11 +42,12 @@ export const PlaygroundSession = (props: PlaygroundSessionProps) => {
     let state: CoursePlaygroundSessionState = "live"
     if (session.failed || session.startFailed) state = "failed"
     else if (completed) state = "completed"
-    else if (session.hasPaired && (session.socketState === "reconnecting" || session.socketState === "failed")) state = "reconnecting"
+    else if (session.hasPaired && session.socketState === "failed") state = "recovery-failed"
+    else if (session.hasPaired && (session.socketState === "reconnecting" || !session.agentConnected)) state = "reconnecting"
     else if (session.socketState !== "connected" || !session.agentConnected) state = "connecting"
     const connectionTextByState: Record<CoursePlaygroundSessionState, string> = {
         connecting: t("session.waiting"), live: t("session.agentConnected"), reconnecting: t("session.reconnecting"),
-        completed: t("session.completed"), failed: t("session.waiting"),
+        "recovery-failed": t("session.recoveryFailed"), completed: t("session.completed"), failed: t("session.failedStatus"),
     }
     const connectionText = connectionTextByState[state]
 
@@ -74,6 +75,15 @@ export const PlaygroundSession = (props: PlaygroundSessionProps) => {
                 outputWaiting: t("session.outputWaiting"),
                 verifyingLabel: t("session.verifying"),
                 isVerifying,
+                progressLabel: t("session.progressLabel"),
+                progressText: t("session.progressText", { passed: session.passedStepIndexes.length, total: steps.length }),
+                stepsTitle: t("session.stepsTitle"),
+                reconnectText: t("session.reconnectText"),
+                recoveryFailedTitle: t("session.recoveryFailedTitle"),
+                recoveryFailedText: t("session.recoveryFailedText"),
+                exitLabel: t("session.exitToCatalog"),
+                currentStepLabel: t("session.currentStep"),
+                lockedLabel: t("session.locked"),
             }}
             on={{
                 step: (index) => setSelectedOverride(index),
@@ -84,6 +94,7 @@ export const PlaygroundSession = (props: PlaygroundSessionProps) => {
                 },
                 leave: () => router.push(`/courses/${displayId}/learn/playground/${slug}`),
                 retry: session.retry,
+                exit: () => router.push(`/courses/${displayId}/learn/playground`),
             }}
         />
     )

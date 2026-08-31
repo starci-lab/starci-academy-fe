@@ -32,6 +32,8 @@ vi.mock("./component", () => ({
             <output data-testid="props">{JSON.stringify(props)}</output>
             <button onClick={on.retry}>retry</button>
             <button onClick={on.abandon}>abandon</button>
+            <button onClick={on.openTranscript}>open transcript</button>
+            <button onClick={on.closeTranscript}>close transcript</button>
             <button onClick={on.openHistory}>history</button>
             <button onClick={on.returnToCourse}>course</button>
         </>
@@ -59,7 +61,7 @@ describe("CourseMockInterviewResultBlock", () => {
         expect(screen.getByTestId("state")).toHaveTextContent("grading")
     })
 
-    it("exposes the authoritative failure and retries the same revision", async () => {
+    it("keeps the technical failure private and retries the same revision", async () => {
         mocks.session.data = {
             sessionId: "session-1",
             status: "grading_failed",
@@ -71,7 +73,8 @@ describe("CourseMockInterviewResultBlock", () => {
         render(<CourseMockInterviewResultBlock displayId="course" sessionId="session-1" />)
 
         expect(screen.getByTestId("state")).toHaveTextContent("gradingFailed")
-        expect(screen.getByTestId("props")).toHaveTextContent("MODEL_UNAVAILABLE")
+        expect(screen.getByTestId("props")).not.toHaveTextContent("MODEL_UNAVAILABLE")
+        expect(screen.getByTestId("props")).toHaveTextContent("Retry the same grading job")
         fireEvent.click(screen.getByText("retry"))
 
         await waitFor(() => expect(mocks.retry.trigger).toHaveBeenCalledWith({
@@ -89,6 +92,20 @@ describe("CourseMockInterviewResultBlock", () => {
         await waitFor(() => expect(mocks.router.replace).toHaveBeenCalledWith("/courses/course/learn/mock-interview"))
     })
 
+    it("stops promising retry after the grading attempt budget is exhausted", () => {
+        mocks.session.data = {
+            sessionId: "session-1",
+            status: "grading_failed",
+            revision: 8,
+            gradingAttemptCount: 3,
+            gradingMaxAttempts: 3,
+        }
+        render(<CourseMockInterviewResultBlock displayId="course" sessionId="session-1" />)
+
+        expect(screen.getByTestId("props")).toHaveTextContent("All grading attempts were used")
+        expect(screen.getByTestId("props")).toHaveTextContent("\"canRetryGrading\":false")
+    })
+
     it("exposes the approved report navigation consequences", () => {
         mocks.attempt.data = { overallScore: 80, phaseScores: [], strengths: [], gaps: [], questionReviews: [], matchedContentIds: [] }
         mocks.session.data = null
@@ -99,5 +116,17 @@ describe("CourseMockInterviewResultBlock", () => {
 
         expect(mocks.router.push).toHaveBeenCalledWith("/courses/course/learn/mock-interview?tab=history")
         expect(mocks.router.push).toHaveBeenCalledWith("/courses/course/learn")
+    })
+
+    it("owns transcript disclosure as local result-page state", () => {
+        mocks.attempt.data = { overallScore: 80, phaseScores: [], strengths: [], gaps: [], questionReviews: [], matchedContentIds: [] }
+        mocks.session.data = null
+        render(<CourseMockInterviewResultBlock displayId="course" sessionId="session-1" />)
+
+        expect(screen.getByTestId("props")).toHaveTextContent("\"transcriptOpen\":false")
+        fireEvent.click(screen.getByText("open transcript"))
+        expect(screen.getByTestId("props")).toHaveTextContent("\"transcriptOpen\":true")
+        fireEvent.click(screen.getByText("close transcript"))
+        expect(screen.getByTestId("props")).toHaveTextContent("\"transcriptOpen\":false")
     })
 })

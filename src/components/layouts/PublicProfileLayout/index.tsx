@@ -5,7 +5,6 @@ import { useParams } from "next/navigation"
 import { usePathname, useRouter } from "@/i18n/navigation"
 import { useTranslations } from "next-intl"
 import { useQueryMeSwr } from "@/hooks/swr/useQueryMeSwr"
-import { useQueryPublicUserCvSwr } from "@/hooks/swr/useQueryPublicUserCvSwr"
 import { useQueryUserProfileSwr } from "@/hooks/swr/useQueryUserProfileSwr"
 import type { ExtendedTab } from "@/components/leaves/ExtendedTabs"
 import { PublicProfileLayoutBase } from "./component"
@@ -39,11 +38,11 @@ export const PublicProfileLayout = (props: PublicProfileLayoutProps) => {
     const router = useRouter()
     const username = params?.username ? String(params.username) : undefined
     const profile = useQueryUserProfileSwr(username)
-    const publicCv = useQueryPublicUserCvSwr(username)
     const viewer = useQueryMeSwr()
     const isSelf = profile.data?.id !== undefined && viewer.data?.id === profile.data.id
+    const cvVisibilityPending = profile.data === undefined || viewer.data === undefined
     const visibleTabs = PROFILE_TABS
-        .filter((tab) => tab.id !== "cv" || isSelf || Boolean(publicCv.data))
+        .filter((tab) => tab.id !== "cv" || cvVisibilityPending || isSelf)
         .map((tab) => ({ ...tab, label: tabsT(tab.id) }))
     const selectedTab = PROFILE_TABS.find((tab) => tab.id !== "overview" && pathname.startsWith(`/profile/${username}/${tab.id}`))?.id ?? "overview"
     const state = profileLayoutStateOf(
@@ -71,7 +70,7 @@ export const PublicProfileLayout = (props: PublicProfileLayoutProps) => {
                 retryLabel: t("actions.retry"),
                 retryPending: profile.isValidating,
                 browseLabel: t("actions.browse"),
-                tabs: { label: tabsT("label"), selectedKey: selectedTab, tabs: visibleTabs },
+                tabs: { label: tabsT("label"), selectedKey: selectedTab, tabs: visibleTabs, labelVisibility: "always" },
             }}
             on={{
                 browse: () => router.push("/courses"),

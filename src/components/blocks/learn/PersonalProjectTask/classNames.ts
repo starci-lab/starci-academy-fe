@@ -26,9 +26,13 @@ export const personalProjectTaskStepClassName = cn("flex", "min-w-0", "items-sta
 export const personalProjectTaskStepNumberClassName = cn("flex", "size-7", "shrink-0", "items-center", "justify-center", "rounded-full", "bg-default-100", "text-xs", "font-semibold", "text-foreground")
 /** Stacks the labels, guidance, inputs, and actions belonging to one grading step. */
 export const personalProjectTaskStepBodyClassName = cn("flex", "min-w-0", "flex-1", "flex-col", "gap-2")
+/** Preserve a visible continuation cue for long repository values on narrow canvases. */
+export const personalProjectTaskRepositoryFieldClassName = cn("min-w-0", "[&_input]:text-ellipsis")
 /** Wraps history and feedback actions without forcing overflow. */
 export const personalProjectTaskActionClassName = cn("flex", "flex-wrap", "gap-2", "pt-1")
 /** Separates the latest immutable result from the current review action. */
 export const personalProjectTaskLatestClassName = cn("flex", "flex-col", "gap-2", "rounded-medium", "bg-default-50", "p-3")
 /** Gives authored peer-list bodies the same internal inset as every other bounded brief surface. */
 export const personalProjectTaskPeerItemClassName = cn("min-w-0", "p-4", "[&+&]:border-t", "[&+&]:border-separator")
+/** Ends compact authored guidance with one explicit handoff into the grading workflow. */
+export const personalProjectTaskTerminalClassName = cn("flex", "w-full", "justify-end", "border-t", "border-separator", "pt-5", "2xl:hidden")

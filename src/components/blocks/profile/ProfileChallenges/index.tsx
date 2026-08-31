@@ -49,6 +49,11 @@ export const ProfileChallenges = (props: ProfileChallengesProps) => {
             on={{
                 openCourse: (id) =>
                     router.push(`/profile/${username}/challenges/${id}`),
+                browseCourses: () => router.push("/courses"),
+                retry: () => {
+                    void strength.mutate()
+                    void submissions.mutate()
+                },
             }}
         />
     )

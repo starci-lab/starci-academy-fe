@@ -18,7 +18,7 @@ describe("CourseMockInterviewResultBlockBase", () => {
 
     it("shows a running grading notice without a finished score", () => {
         render(<CourseMockInterviewResultBlockBase state="grading" props={copy} />)
-        expect(screen.getByText("Grading your answers")).toBeInTheDocument()
+        expect(screen.getAllByText("Grading your answers")).toHaveLength(2)
         expect(screen.queryByText("82/100")).toBeNull()
     })
 

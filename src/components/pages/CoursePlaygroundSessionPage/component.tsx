@@ -1,5 +1,4 @@
 import { PlaygroundSession } from "@/components/blocks/learn/PlaygroundSession"
-import { Progress } from "@/components/leaves/Progress"
 import { PlaygroundSessionBase } from "@/components/blocks/learn/PlaygroundSession/component"
 /** Route identity required by the session shell. */
 export type CoursePlaygroundSessionBlockProps = import("@/components/blocks/learn/PlaygroundSession/component").PlaygroundSessionProps
@@ -10,10 +9,5 @@ export { PlaygroundSessionBase as CoursePlaygroundSessionPageBase }
 /** Page-owned main landmark composed with the connected session block. */
 export const CoursePlaygroundSessionPageShell = (props: CoursePlaygroundSessionPageShellProps) => {
     const { displayId, slug } = props
-    return (
-        <>
-            <Progress props={{ label: "Playground journey", value: 100 }} />
-            <PlaygroundSession displayId={displayId} slug={slug} />
-        </>
-    )
+    return <PlaygroundSession displayId={displayId} slug={slug} />
 }

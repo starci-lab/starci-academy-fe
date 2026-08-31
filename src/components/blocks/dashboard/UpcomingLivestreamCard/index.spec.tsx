@@ -9,7 +9,7 @@ import { UpcomingLivestreamCard } from "./index"
  *
  * The server is free to send them in any order and to send more than fit, so the ordering and the
  * cut are the block's own claim and are asserted against what a reader sees. The card also has to
- * disappear rather than draw an empty frame once there is nothing scheduled.
+ * remain a visible list surface once there is nothing scheduled.
  */
 
 const push = vi.fn()
@@ -81,12 +81,12 @@ describe("UpcomingLivestreamCard", () => {
         expect(screen.getByText("heading")).toBeInTheDocument()
     })
 
-    it("draws no card at all when nothing is scheduled", () => {
+    it("keeps a list surface when nothing is scheduled", () => {
         vi.mocked(useQueryMyUpcomingLivestreamsSwr).mockReturnValue(answer({ data: [] }))
         vi.mocked(useQueryResolveRouteSwr).mockReturnValue(resolver("/x"))
 
-        const { container } = render(<UpcomingLivestreamCard />)
-        expect(container).toBeEmptyDOMElement()
+        render(<UpcomingLivestreamCard />)
+        expect(screen.getByText("empty")).toBeInTheDocument()
     })
 
     it("shows the three soonest sessions in time order, whatever order they arrived in", () => {

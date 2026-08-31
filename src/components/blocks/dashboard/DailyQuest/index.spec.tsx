@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { useQueryMyDailyQuestSwr } from "@/hooks"
 import { DailyQuest } from "./index"
 
+
 /**
  * What these tests guard - that the connected half settles exactly ONE situation per payload.
  *
@@ -70,7 +71,7 @@ describe("DailyQuest", () => {
         expect(screen.getByText("empty")).toBeInTheDocument()
     })
 
-    it("counts an unfinished day in whole things done and offers nothing to press", () => {
+    it("counts an unfinished day in whole things done without duplicating the page recovery action", () => {
         vi.mocked(useQueryMyDailyQuestSwr).mockReturnValue(answer({
             data: {
                 tasks: [
@@ -103,9 +104,7 @@ describe("DailyQuest", () => {
 
         const { container } = render(<DailyQuest />)
         expect(screen.getByText("3/0")).toBeInTheDocument()
-        // A zero target cannot reach 100, so the row keeps its unfinished mark rather than
-        // reporting a task nobody completed as done.
-        expect(container.querySelectorAll("svg.text-success-soft-foreground")).toHaveLength(0)
+        expect(container.querySelector("button")).toBeNull()
     })
 
     it("drops the reward sentence once every task is done", () => {
@@ -119,12 +118,11 @@ describe("DailyQuest", () => {
         }))
 
         const { container } = render(<DailyQuest />)
-        // A finished, uncollected day stops explaining what the day is worth and stops saying it
-        // has been taken. NOTE - it also draws no claim control, because this connected half never
-        // passes a `claim` action and `SurfaceListCard` hides an action label with no handler.
+        // A finished, uncollected day keeps the reward line visible and offers the claim control.
         expect(screen.getByText("reward:20")).toBeInTheDocument()
         expect(screen.queryByText("claimed")).toBeNull()
-        expect(container.querySelectorAll("[data-grammar-state-mark=\"check\"]")).toHaveLength(1)
+        expect(screen.getByRole("button", { name: "claim" })).toBeInTheDocument()
+        expect(container.querySelectorAll("li")).toHaveLength(1)
     })
 
     it("stops offering the reward once it has been taken", () => {

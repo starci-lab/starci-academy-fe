@@ -12,6 +12,7 @@ import {
     learnSpineGroupsClassName,
     learnSpineHomeClassName,
     learnSpineResumeClassName,
+    learnSpineScrollableContentClassName,
     getLearnSpineToggleClassName,
 } from "./classNames"
 
@@ -133,8 +134,12 @@ const selectionItemsOf = (
  */
 export const learnSpineCollapsed = (props: LearnSpineProps) => <nav className={getLearnSpineNavigationClassName(true, false)} aria-label={props.props.home.label}>
     <div className={getLearnSpineToggleClassName(true)}><IconButton props={{ icon: "collapseRail", label: props.props.expandLabel, isActive: true }} on={{ press: props.on?.toggleCollapse }} /></div>
-    <div className={learnSpineHomeClassName}><SelectionList props={{ label: props.props.home.label, items: selectionItemsOf([props.props.home], props.props.lockedLabel), selectedKey: props.props.home.isCurrent === true ? props.props.home.id : undefined, variant: "navigation-collapsed" }} on={{ activate: props.on?.openRow }} /></div>
-    <ScrollViewport boundary="learn-navigation-groups"><div className={learnSpineGroupsClassName}>{props.props.groups.map((group) => <div key={group.id} className={learnSpineGroupClassName}><SelectionList props={{ label: group.label, items: selectionItemsOf(group.rows, props.props.lockedLabel), selectedKey: group.rows.find((row) => row.isCurrent === true)?.id, variant: "navigation-collapsed" }} on={{ activate: props.on?.openRow }} /></div>)}</div></ScrollViewport>
+    <ScrollViewport boundary="learn-navigation-groups">
+        <div className={learnSpineScrollableContentClassName} data-learn-spine-scroll-content="true">
+            <div className={learnSpineHomeClassName}><SelectionList props={{ label: props.props.home.label, items: selectionItemsOf([props.props.home], props.props.lockedLabel), selectedKey: props.props.home.isCurrent === true ? props.props.home.id : undefined, variant: "navigation-collapsed" }} on={{ activate: props.on?.openRow }} /></div>
+            <div className={learnSpineGroupsClassName}>{props.props.groups.map((group) => <div key={group.id} className={learnSpineGroupClassName}><SelectionList props={{ label: group.label, items: selectionItemsOf(group.rows, props.props.lockedLabel), selectedKey: group.rows.find((row) => row.isCurrent === true)?.id, variant: "navigation-collapsed" }} on={{ activate: props.on?.openRow }} /></div>)}</div>
+        </div>
+    </ScrollViewport>
 </nav>
 
 /**
@@ -147,8 +152,12 @@ export const learnSpine = (props: LearnSpineProps) => {
     return <nav className={getLearnSpineNavigationClassName(false, props.presentation === "drawer")} aria-label={props.props.home.label}>
         {props.presentation === "drawer" ? null : <div className={getLearnSpineToggleClassName(false)}><IconButton props={{ icon: "collapseRail", label: props.props.collapseLabel }} on={{ press: props.on?.toggleCollapse }} /></div>}
         {resume === undefined ? null : <PressableSurface label={resume.title} press={props.on?.resume} isRaised><div className={learnSpineResumeClassName}><Text props={{ content: resume.label, size: "xs" }} /><LabelledProgressRow props={{ id: "resume", title: resume.title, percent: resume.percent, percentText: resume.percentText }} isLoading={props.isLoading} /></div></PressableSurface>}
-        <div className={learnSpineHomeClassName}><SelectionList props={{ label: props.props.home.label, items: selectionItemsOf([props.props.home], props.props.lockedLabel), selectedKey: props.props.home.isCurrent === true ? props.props.home.id : undefined, variant: "navigation" }} on={{ activate: props.on?.openRow }} /></div>
-        <ScrollViewport boundary="learn-navigation-groups"><div className={learnSpineGroupsClassName}>{props.props.groups.map((group) => <div key={group.id} className={learnSpineGroupClassName}><Text props={{ content: group.label, size: "xs" }} /><SelectionList props={{ label: group.label, items: selectionItemsOf(group.rows, props.props.lockedLabel), selectedKey: group.rows.find((row) => row.isCurrent === true)?.id, variant: "navigation" }} on={{ activate: props.on?.openRow }} /></div>)}</div></ScrollViewport>
+        <ScrollViewport boundary="learn-navigation-groups">
+            <div className={learnSpineScrollableContentClassName} data-learn-spine-scroll-content="true">
+                <div className={learnSpineHomeClassName}><SelectionList props={{ label: props.props.home.label, items: selectionItemsOf([props.props.home], props.props.lockedLabel), selectedKey: props.props.home.isCurrent === true ? props.props.home.id : undefined, variant: "navigation" }} on={{ activate: props.on?.openRow }} /></div>
+                <div className={learnSpineGroupsClassName}>{props.props.groups.map((group) => <div key={group.id} className={learnSpineGroupClassName}><Text props={{ content: group.label, size: "xs" }} /><SelectionList props={{ label: group.label, items: selectionItemsOf(group.rows, props.props.lockedLabel), selectedKey: group.rows.find((row) => row.isCurrent === true)?.id, variant: "navigation" }} on={{ activate: props.on?.openRow }} /></div>)}</div>
+            </div>
+        </ScrollViewport>
     </nav>
 }
 

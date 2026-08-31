@@ -81,7 +81,8 @@ describe("StreakStrip", () => {
             "Aug 19, 2026",
         ])
         expect(container.textContent).toContain("empty")
-        expect(screen.queryByText("current:0")).toBeNull()
+        expect(screen.getByText("current:0")).toBeInTheDocument()
+        expect(container.querySelector(".border-t.border-separator")).toBeInTheDocument()
         expect(container.textContent).not.toContain("failed")
     })
 

@@ -38,6 +38,7 @@ describe("queryMockInterviewAttemptBySession", () => {
         expect(mocks.query).toHaveBeenCalledWith({
             query: queryMockInterviewAttemptBySessionMap[QueryMockInterviewAttemptBySession.Query1],
             variables: { courseId: "course-1", sessionId: "session-9" },
+            fetchPolicy: "network-only",
         })
         expect(mocks.query.mock.calls[0][0].variables).not.toHaveProperty("request")
     })

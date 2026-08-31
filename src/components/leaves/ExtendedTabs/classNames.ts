@@ -2,6 +2,7 @@ import { cn } from "@heroui/react"
 
 /** Extended tab strip layout; page chrome may opt out when its parent already owns the inset. */
 export const getExtendedTabsRootClassName = (inset: "page" | "none" | undefined) => cn(
+    "extended-tabs",
     "w-full",
     "max-w-full",
     "min-w-0",

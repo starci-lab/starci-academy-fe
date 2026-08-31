@@ -27,7 +27,13 @@ export const EmptyNotice = (props: EmptyNoticeProps) => {
             {data.icon === undefined ? null : <IconTile props={{ icon: data.icon, tone: "neutral", size: "md" }} />}
             <Text props={{ content: data.message, tone: "muted", size: "sm" }} />
             {data.description === undefined ? null : <Text props={{ content: data.description, tone: "muted", size: "xs" }} />}
-            {data.actionLabel === undefined ? null : <Button props={{ label: data.actionLabel, variant: "secondary", size: "sm", icon: data.actionIcon ?? "retry", isPending: data.isPending }} on={{ press: on?.act }} />}
+            {data.actionLabel === undefined ? null : <Button props={{
+                label: data.actionLabel,
+                variant: "secondary",
+                size: "sm",
+                ...(data.actionIcon === undefined ? {} : { icon: data.actionIcon }),
+                isPending: data.isPending,
+            }} on={{ press: on?.act }} />}
         </div>
     )
 }

@@ -1,4 +1,5 @@
 import { cn } from "@heroui/react"
+import { dashboardFlushListEntryClassName } from "@/components/blocks/dashboard/classNames"
 
 /** One padded, divided record inside the joined changelog surface. */
 export const changelogEntryRowClassName = cn(
@@ -6,10 +7,7 @@ export const changelogEntryRowClassName = cn(
     "min-w-0",
     "flex-col",
     "gap-2",
-    "border-b",
-    "border-separator",
-    "p-3",
-    "last:border-b-0",
+    dashboardFlushListEntryClassName,
 )
 
 /** Date and category form one compact metadata line above the entry title. */

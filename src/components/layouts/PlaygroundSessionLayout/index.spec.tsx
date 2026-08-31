@@ -168,7 +168,7 @@ describe("PlaygroundSessionLayout", () => {
         await waitFor(() => expect(mocks.replace).toHaveBeenCalledWith("/courses/system-design/learn/playground/k8s-basics"))
     })
 
-    it("keeps a previously paired learner in the live session while the relay reconnects", async () => {
+    it("keeps a previously paired learner in the live session with explicit recovery after the relay fails", async () => {
         window.sessionStorage.setItem(
             "starci:playground-session:v1:system-design/k8s-basics",
             JSON.stringify({ id: "session-restored", pairingCode: "ABC123", steps: [] }),
@@ -183,7 +183,7 @@ describe("PlaygroundSessionLayout", () => {
             />,
         )
 
-        await waitFor(() => expect(screen.getByText("session.reconnecting")).toBeInTheDocument())
+        await waitFor(() => expect(screen.getByText("session.recoveryFailed")).toBeInTheDocument())
         expect(mocks.replace).not.toHaveBeenCalled()
     })
 

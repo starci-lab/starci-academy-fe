@@ -16,6 +16,14 @@ import {
 const copy: CourseMockInterviewSetupData = {
     title: "Mock interview",
     description: "Course-grounded practice",
+    heroEyebrow: "Guided mission",
+    heroActionLabel: "Prepare a session",
+    mediaAlt: "Learner practising an interview",
+    heroFacts: [
+        { label: "Formats", value: "2" },
+        { label: "Levels", value: "3" },
+        { label: "Duration", value: "Up to 60 minutes" },
+    ],
     levelLabel: "Seniority",
     modeLabel: "Format",
     levels: [
@@ -64,6 +72,7 @@ const copy: CourseMockInterviewSetupData = {
     viewStatsLabel: "View statistics",
     historyActionLabel: "View result",
     newSessionEyebrow: "New practice session",
+    newSessionLabel: "Practise a new interview",
     preflightTitle: "Review before starting",
     returnToBegin: "Prepare an interview",
     resumeTitle: "Latest session",
@@ -80,7 +89,7 @@ const draw = (
 describe("CourseMockInterviewSetupPageBase", () => {
     it("assigns every destination to its approved surface owner", () => {
         const begin = draw("ready")
-        expect(screen.getByRole("heading", { name: "Interview room" })).toBeInTheDocument()
+        expect(screen.getByRole("heading", { name: "Session setup" })).toBeInTheDocument()
         begin.unmount()
 
         const history = draw("history", { historyState: "ready", historyRows: [{ id: "one", title: "Attempt", fact: "82/100" }] })
@@ -139,6 +148,15 @@ describe("CourseMockInterviewSetupPageBase", () => {
 
         fireEvent.click(screen.getByRole("button", { name: "Start interview" }))
         expect(start).toHaveBeenCalledTimes(1)
+    })
+
+    it("moves focus to the inline setup from the hero action", () => {
+        const prepare = vi.fn()
+        draw("ready", {}, { prepare })
+
+        fireEvent.click(screen.getByRole("button", { name: "Prepare a session" }))
+        expect(prepare).toHaveBeenCalledOnce()
+        expect(screen.getByRole("heading", { name: "Session setup" })).toBeInTheDocument()
     })
 
     it("offers the persisted session beside a fresh start and resumes it on request", () => {

@@ -18,7 +18,7 @@ type DashboardLayoutProps = {
 const DashboardLayout = ({ children }: DashboardLayoutProps) => (
     <>
         <ShellNav {...{}} />
-        <main className="mx-auto w-full max-w-7xl p-6 pb-28 lg:pb-6">{children}</main>
+        <main className="w-full overflow-x-clip pt-0 pb-16 lg:pb-0 lg:pl-0">{children}</main>
     </>
 )
 

@@ -30,12 +30,16 @@ describe("WeeklyChallengeCardBase", () => {
         expect(screen.getByText("12 learners passed")).toBeInTheDocument()
         expect(screen.getByText("Ada")).toBeInTheDocument()
         expect(screen.getByText("2h ago")).toBeInTheDocument()
-        expect(container.querySelector("[data-part=\"challenge-heading\"]")).toHaveClass("flex", "items-start", "gap-3")
-        expect(container.querySelector("[data-part=\"challenge-action\"]")).toHaveClass("flex", "sm:justify-between")
+        expect(container.querySelector("[data-part=\"challenge-countdown\"]")).toHaveClass("bg-accent-soft", "px-4", "pt-3", "pb-3")
+        expect(container.querySelector("[data-part=\"challenge-heading\"]")).toHaveClass("flex", "items-start", "gap-3", "p-4", "pb-3")
+        expect(container.querySelector("[data-part=\"challenge-footer\"]")).toHaveClass("px-4", "pb-4", "pt-3")
+        expect(container.querySelector("[data-part=\"challenge-countdown\"]")?.compareDocumentPosition(
+            container.querySelector("[data-part=\"challenge-heading\"]") as Node,
+        ) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
         expect(container.querySelectorAll("[data-part=\"challenge-finisher\"]")).toHaveLength(2)
         expect(container.querySelector("[data-part=\"challenge-finisher\"]")).toHaveClass("grid", "items-center", "gap-3")
         expect(container.querySelector(".starci-core-surface")).toBeInTheDocument()
-        expect(container.querySelector(".starci-core-list-shell")).toBeInTheDocument()
+        expect(container.querySelector(".starci-core-list-shell")).toBeNull()
         expect(container.querySelectorAll("img[alt]")).toHaveLength(2)
         expect(screen.queryByRole("table")).toBeNull()
         fireEvent.click(screen.getByRole("button", { name: "Try now" }))
@@ -47,6 +51,7 @@ describe("WeeklyChallengeCardBase", () => {
         expect(container.querySelectorAll("[data-loading=\"true\"]").length).toBeGreaterThan(0)
         expect(screen.queryByRole("table")).toBeNull()
         expect(container.querySelector("[data-loading=\"true\"]")).toBeInTheDocument()
+        expect(container.querySelectorAll("[data-part=\"challenge-finisher\"]")).toHaveLength(3)
     })
 
     it("keeps the labelled slot mounted when no event is active", () => {
@@ -62,15 +67,16 @@ describe("WeeklyChallengeCardBase", () => {
         expect(retry).toHaveBeenCalledOnce()
     })
 
-    it("drops the nested finisher surface when the challenge reports no finishers at all", () => {
-        render(<WeeklyChallengeCardBase state="ready" props={{
+    it("keeps the finisher count visible when no finishers are reported", () => {
+        const { container } = render(<WeeklyChallengeCardBase state="ready" props={{
             ...frame,
             title: "Build an event store",
             actionLabel: "Try now",
             passedCountLabel: "0 learners passed",
         }} />)
-        // Without a list to bound, the passed count is a plain line rather than a card label.
-        expect(screen.getByText("0 learners passed")).toBeInTheDocument()
+        expect(screen.getAllByText("0 learners passed").length).toBeGreaterThan(0)
+        expect(container.querySelector("[data-part=\"challenge-finishers\"]")).toBeInTheDocument()
+        expect(container.querySelectorAll("[data-part=\"challenge-finisher\"]")).toHaveLength(0)
     })
 
     /*
@@ -89,7 +95,7 @@ describe("WeeklyChallengeCardBase", () => {
         expect(badge).toBeInTheDocument()
         expect(badge).toHaveTextContent("")
         expect(screen.queryByText("undefined")).toBeNull()
-        expect(container.querySelector("[data-slot=\"button\"]")).toBeNull()
+        expect(container.querySelector("[data-part=\"challenge-footer\"] [data-slot=\"button\"]")).toBeNull()
     })
 
     it("draws a nameless action rather than the word undefined while the reward is unclaimed", () => {
@@ -101,7 +107,7 @@ describe("WeeklyChallengeCardBase", () => {
             claimed: false,
             isClaiming: false,
         }} on={{ act }} />)
-        const action = container.querySelector("[data-slot=\"button\"]")
+        const action = container.querySelector("[data-part=\"challenge-footer\"] [data-slot=\"button\"]")
         expect(action).toBeInTheDocument()
         expect(screen.queryByText("undefined")).toBeNull()
         fireEvent.click(action as HTMLElement)
@@ -118,7 +124,7 @@ describe("WeeklyChallengeCardBase", () => {
             claimed: false,
             isClaiming: true,
         }} on={{ act }} />)
-        const action = container.querySelector("[data-slot=\"button\"]")
+        const action = container.querySelector("[data-part=\"challenge-footer\"] [data-slot=\"button\"]")
         expect(action).toHaveAttribute("data-action-pending", "true")
         expect(action).toBeDisabled()
         fireEvent.click(action as HTMLElement)
@@ -127,8 +133,7 @@ describe("WeeklyChallengeCardBase", () => {
 
     it("names its resting action when the caller resolved one, and nothing when it did not", () => {
         const { container } = render(<WeeklyChallengeCardBase state="pending" props={{ ...frame, actionLabel: "Try now" }} />)
-        expect(container.querySelector("[data-slot=\"button\"][data-loading=\"true\"]")).toHaveTextContent("Try now")
-        // The resting card names nothing that is not yet known, so it carries no glyph either.
-        expect(container.querySelector("svg")).toBeInTheDocument()
+        expect(container.querySelector("[data-part=\"challenge-footer\"] [data-slot=\"button\"][data-loading=\"true\"]")).toHaveTextContent("Try now")
+        expect(container.querySelector("[data-part=\"challenge-heading\"] [data-loading=\"true\"]")).toBeInTheDocument()
     })
 })

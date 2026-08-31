@@ -14,6 +14,8 @@ import { clamp, number, text } from "./shared"
 import {
     profileCourseHeadingClassName,
     profileCourseIdentityClassName,
+    profileCoursePressableClassName,
+    profileCourseQualifierClassName,
     profileCourseRowClassName,
     profileEvidenceListClassName,
 } from "./classNames"
@@ -74,40 +76,41 @@ export const OverviewCourses = (props: OverviewCoursesProps) => {
                 ).map((course) => course.globalId === "state" ? (
                     <EvidenceRow key={course.globalId} props={{ title: text(course.label) }} />
                 ) : (
-                    <PressableSurface
-                        key={course.globalId}
-                        href={request.isLoading ? undefined : getPathname({ locale, href: course.path })}
-                        label={text(course.label) ?? courseT("heading")}
-                        disabled={request.isLoading}
-                        hover="label"
-                    >
-                        <div className={profileCourseRowClassName}>
-                            <IconTile
-                                props={{ icon: "course", image: course.thumbnailUrl, tone: "accent", size: "md" }}
-                                isLoading={request.isLoading}
-                            />
-                            <div className={profileCourseIdentityClassName}>
-                                <div className={profileCourseHeadingClassName}>
-                                    <Text props={{ content: text(course.label), size: "sm", weight: "semibold", isPressLabel: true }} isLoading={request.isLoading} />
-                                    {request.isLoading ? null : <Badge props={{ content: `${clamp(course.completionPercent)}%` }} />}
-                                </div>
-                                {request.isLoading ? null : <Text
-                                    props={{
-                                        content: `${courseT("progress.content")} ${number(course.contentCompleted)}/${number(course.contentTotal)} · ${courseT("progress.challenge")} ${number(course.challengeCompleted)}/${number(course.challengeTotal)}`,
-                                        size: "xs",
-                                        tone: "muted",
-                                    }}
-                                />}
-                                <Progress
-                                    props={{
-                                        value: clamp(course.completionPercent),
-                                        label: courseT("catalog.progressAria", { title: text(course.label) ?? "" }),
-                                    }}
+                    <div className={profileCoursePressableClassName} key={course.globalId}>
+                        <PressableSurface
+                            href={request.isLoading ? undefined : getPathname({ locale, href: course.path })}
+                            label={text(course.label) ?? courseT("heading")}
+                            disabled={request.isLoading}
+                            hover="label"
+                        >
+                            <div className={profileCourseRowClassName}>
+                                <IconTile
+                                    props={{ icon: "course", image: course.thumbnailUrl, tone: "accent", size: "md" }}
                                     isLoading={request.isLoading}
                                 />
+                                <div className={profileCourseIdentityClassName}>
+                                    <div className={profileCourseHeadingClassName}>
+                                        <Text props={{ content: text(course.label), size: "sm", weight: "semibold", isPressLabel: true }} isLoading={request.isLoading} />
+                                        {request.isLoading ? null : <Badge props={{ content: `${clamp(course.completionPercent)}%` }} />}
+                                    </div>
+                                    {request.isLoading ? null : <div className={profileCourseQualifierClassName}><Text
+                                        props={{
+                                            content: `${courseT("progress.content")} ${number(course.contentCompleted)}/${number(course.contentTotal)} · ${courseT("progress.challenge")} ${number(course.challengeCompleted)}/${number(course.challengeTotal)}`,
+                                            size: "xs",
+                                            tone: "muted",
+                                        }}
+                                    /></div>}
+                                    <Progress
+                                        props={{
+                                            value: clamp(course.completionPercent),
+                                            label: courseT("catalog.progressAria", { title: text(course.label) ?? "" }),
+                                        }}
+                                        isLoading={request.isLoading}
+                                    />
+                                </div>
                             </div>
-                        </div>
-                    </PressableSurface>
+                        </PressableSurface>
+                    </div>
                 ))}
             </div>
         </SurfaceListCard>

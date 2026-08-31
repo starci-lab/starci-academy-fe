@@ -13,6 +13,8 @@ export type DashboardSurfaceCardData = DashboardSurfaceIdentity & {
     readonly fact?: string
     readonly seeMoreLabel?: string
     readonly isFrameless?: boolean
+    /** Draw the one animated continuation boundary used by the legacy Academy surface. */
+    readonly isHighlight?: boolean
 }
 
 /** Content and optional action used to draw one dashboard surface. */
@@ -34,6 +36,7 @@ export const DashboardSurfaceCard = (props: DashboardSurfaceCardProps) => {
     const shared = {
         children: content,
         frame: data.isFrameless === true ? "frameless" as const : "bounded" as const,
+        isHighlight: data.isHighlight,
         labelEnd,
         state: isLoading ? "pending" as const : "neutral" as const,
     }

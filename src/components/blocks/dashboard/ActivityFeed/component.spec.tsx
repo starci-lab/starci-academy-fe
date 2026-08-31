@@ -79,7 +79,7 @@ describe("ActivityFeedBase", () => {
         />)
         expect(screen.getByText("Nothing to show")).toBeInTheDocument()
         expect(screen.getByText("Try something else")).toBeInTheDocument()
-        expect(container.querySelectorAll("section:not([data-grammar-surface-card])")).toHaveLength(0)
+        expect(container.querySelectorAll("section[data-grammar-surface-list=\"true\"]")).toHaveLength(1)
         fireEvent.click(screen.getByRole("button", { name: "Go" }))
         expect(resultAction).toHaveBeenCalledOnce()
     })

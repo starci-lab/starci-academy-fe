@@ -4,16 +4,16 @@ import { describe, expect, it, vi } from "vitest"
 import { CourseMockInterviewSessionBlockBase, type CourseMockInterviewSessionData } from "@/components/blocks/learn/CourseMockInterviewSessionBlock/component"
 
 const props: CourseMockInterviewSessionData = {
-    title: "Mock interview", promptTitle: "Distributed cache", stateLabel: "Connected", counterLabel: "2/5", progressLabel: "Interview progress", progress: 40,
-    turns: [{ id: "turn-1", role: "interviewer", label: "Interviewer", content: "How would you invalidate stale entries?" }], interviewerPendingLabel: "Waiting", answerLabel: "Your response", answerPlaceholder: "Answer here", answer: "Use versioned keys", submitLabel: "Answer and continue", abortLabel: "Stop response", leaveLabel: "Leave interview", finishLabel: "Finish and grade", retryLabel: "Try again", workspaceLabel: "Question workspace", workspaceEmptyLabel: "No code is attached.", turnsLabel: "Completed turns", turnsEmptyLabel: "Completed answers will collect here.", syncStatusLabel: "Answers saved", revisionLabel: "v3", finishConfirmationOpen: false, finishConfirmationTitle: "Finish?", finishConfirmationDescription: "Saved", abandonConfirmationOpen: false, abandonConfirmationTitle: "Discard?", abandonConfirmationDescription: "Cannot resume", confirmLabel: "Confirm", abandonLabel: "Discard", cancelLabel: "Cancel",
+    title: "Mock interview", promptTitle: "Distributed cache", currentQuestionLabel: "Current question", currentQuestion: "How would you invalidate stale entries?", stateLabel: "Connected", counterLabel: "2/5", progressLabel: "Interview progress", progress: 40,
+    turns: [{ id: "turn-1", role: "interviewer", label: "Interviewer", content: "How would you invalidate stale entries?" }], transcriptOpenLabel: "Open transcript", transcriptCloseLabel: "Close transcript", isTranscriptOpen: false, interviewerPendingLabel: "Waiting", answerLabel: "Your response", answerPlaceholder: "Answer here", answer: "Use versioned keys", submitLabel: "Answer and continue", abortLabel: "Stop response", leaveLabel: "Leave interview", finishLabel: "Finish and grade", retryLabel: "Try again", workspaceLabel: "Question workspace", workspaceEmptyLabel: "No code is attached.", turnsLabel: "Completed turns", turnsEmptyLabel: "Completed answers will collect here.", syncStatusLabel: "Answers saved", revisionLabel: "v3", finishConfirmationOpen: false, finishConfirmationTitle: "Finish?", finishConfirmationDescription: "Saved", abandonConfirmationOpen: false, abandonConfirmationTitle: "Discard?", abandonConfirmationDescription: "Cannot resume", confirmLabel: "Confirm", abandonLabel: "Discard", cancelLabel: "Cancel",
 }
 
 describe("CourseMockInterviewSessionBlockBase", () => {
     it("renders the live room, restored turn and answer controls", () => {
         render(<CourseMockInterviewSessionBlockBase state="live" props={props} />)
         expect(screen.getByRole("main", { name: "Mock interview" })).toBeInTheDocument()
-        expect(screen.getByRole("heading", { name: "Distributed cache" })).toBeInTheDocument()
-        expect(screen.getByText("How would you invalidate stale entries?")).toBeInTheDocument()
+        expect(screen.getByText("Distributed cache")).toBeInTheDocument()
+        expect(screen.getByRole("heading", { name: "How would you invalidate stale entries?" })).toBeInTheDocument()
         expect(screen.getByPlaceholderText("Answer here")).toHaveValue("Use versioned keys")
     })
 
@@ -24,6 +24,15 @@ describe("CourseMockInterviewSessionBlockBase", () => {
         fireEvent.click(screen.getByRole("button", { name: "Finish and grade" }))
         expect(answer).toHaveBeenCalledWith("New answer")
         expect(finish).toHaveBeenCalledOnce()
+    })
+
+    it("clears the uncontrolled answer field when the interview advances", () => {
+        const { rerender } = render(<CourseMockInterviewSessionBlockBase state="live" props={props} />)
+        fireEvent.change(screen.getByPlaceholderText("Answer here"), { target: { value: "Submitted answer" } })
+
+        rerender(<CourseMockInterviewSessionBlockBase state="live" props={{ ...props, counterLabel: "3/5", answer: "", currentQuestion: "What comes next?" }} />)
+
+        expect(screen.getByPlaceholderText("Answer here")).toHaveValue("")
     })
 
     it("disables submission while connecting", () => {
@@ -38,7 +47,7 @@ describe("CourseMockInterviewSessionBlockBase", () => {
         expect(screen.getByText("Connection dropped")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Try again" }))
         expect(retry).toHaveBeenCalledOnce()
-        expect(screen.queryByRole("main")).toBeNull()
+        expect(screen.getByRole("main", { name: "Mock interview" })).toBeInTheDocument()
     })
 
     it("shows streaming text and stop action", () => {

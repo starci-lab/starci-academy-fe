@@ -4,6 +4,8 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import { useTranslations } from "next-intl"
 import { usePathname } from "@/i18n/navigation"
 import { isLiveAssessmentRoute } from "@/modules/learn/is-live-assessment-route"
+import { LEARN_RAIL_COLLAPSED_KEY } from "@/components/blocks/learn/LearnSpine"
+import { useQueryCourseSwr } from "@/hooks/swr/useQueryCourseSwr"
 import { LearnShellLayoutBase, type LearnMobileTab, type LearnMobileView } from "./component"
 
 type LearnMobileViewContextValue = { readonly view: LearnMobileView; readonly openView: (view: LearnMobileView) => void }
@@ -25,16 +27,11 @@ const TODAY_TABS: ReadonlyArray<{ id: LearnMobileView; icon: LearnMobileTab["ico
 const READER_TABS: ReadonlyArray<{ id: LearnMobileView; icon: LearnMobileTab["icon"] }> = [
     { id: "contents", icon: "explore" }, { id: "lesson", icon: "course" }, { id: "outline", icon: "blog" },
 ]
-const MOBILE_SECTION_ROUTES = [
-    ["/learn/flashcards", "flashcards"], ["/learn/personal-project", "personalProject"], ["/learn/mock-interview", "mockInterview"],
-    ["/learn/foundations", "foundations"], ["/learn/playground", "playground"], ["/learn/mind-map", "mindMap"],
-    ["/learn/leaderboard", "leaderboard"], ["/learn/qa", "qa"], ["/learn/content", "content"],
-] as const
-
 /** Draw the learn frame while its connected navigation block owns course data and rail state. */
 export const LearnShellLayout = (props: LearnShellLayoutProps) => {
     const t = useTranslations("learn.shell")
     const pathname = usePathname()
+    const course = useQueryCourseSwr({ displayId: props.displayId })
     const base = `/courses/${props.displayId}`
     const isReader = pathname.includes("/learn/content/modules/") && pathname.includes("/contents/") && !pathname.includes("/challenges/")
     const isToday = pathname === `${base}/learn`
@@ -42,21 +39,31 @@ export const LearnShellLayout = (props: LearnShellLayoutProps) => {
     const validViews = useMemo<ReadonlyArray<LearnMobileView>>(() => isToday ? TODAY_TABS.map((tab) => tab.id) : isReader ? READER_TABS.map((tab) => tab.id) : [routeDefault], [isReader, isToday, routeDefault])
     const [mobileView, setMobileView] = useState<LearnMobileView>(routeDefault)
     const [isCourseNavigationOpen, setIsCourseNavigationOpen] = useState(false)
+    const [isRailCollapsed, setIsRailCollapsed] = useState(false)
+    useEffect(() => {
+        if (typeof window.localStorage.getItem === "function") setIsRailCollapsed(window.localStorage.getItem(LEARN_RAIL_COLLAPSED_KEY) === "true")
+    }, [])
     useEffect(() => { if (!validViews.includes(mobileView)) setMobileView(routeDefault) }, [mobileView, routeDefault, validViews])
     useEffect(() => { setIsCourseNavigationOpen(false) }, [pathname])
     const tabs = isToday ? TODAY_TABS : isReader ? READER_TABS : undefined
     const fullBleed = isLiveAssessmentRoute(pathname)
-    const currentSection = MOBILE_SECTION_ROUTES.find(([at]) => pathname.includes(at))?.[1]
     return <LearnMobileViewContext.Provider value={{ view: mobileView, openView: setMobileView }}>
         <LearnShellLayoutBase
             displayId={props.displayId}
             mobileTabs={tabs?.map((tab) => ({ id: tab.id, label: t(`tabs.${tab.id}`), icon: tab.icon, isCurrent: tab.id === mobileView }))}
-            mobileCourseNavigation={tabs !== undefined || fullBleed ? undefined : { label: t("mobileCourseNavigation"), currentLabel: currentSection === undefined ? t("tabs.course") : t(`rows.${currentSection}`), isOpen: isCourseNavigationOpen }}
+            mobileCourseNavigation={tabs !== undefined || fullBleed ? undefined : {
+                label: t("mobileCourseNavigation"),
+                closeLabel: t("closeMobileCourseNavigation"),
+                courseTitle: course.data?.title ?? props.displayId,
+                isOpen: isCourseNavigationOpen,
+            }}
             isFullBleed={fullBleed}
+            isRailCollapsed={isRailCollapsed}
             on={{
                 openMobileTab: (id) => { const next = validViews.find((view) => view === id); if (next !== undefined) setMobileView(next) },
                 openCourseNavigation: () => setIsCourseNavigationOpen(true),
                 closeCourseNavigation: () => setIsCourseNavigationOpen(false),
+                setRailCollapsed: setIsRailCollapsed,
             }}
             surface={props.surface}
         />

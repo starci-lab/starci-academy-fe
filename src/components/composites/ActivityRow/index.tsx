@@ -3,7 +3,7 @@ import { ReactionPicker, type ReactionLabels } from "@/components/leaves/Reactio
 import { Text } from "@/components/leaves/Text"
 import { TextLink } from "@/components/leaves/TextLink"
 import type { ReactionType } from "@/modules/api/graphql/queries/types/reactions"
-import { activityBodyClassName, activityRowClassName, activitySentenceClassName } from "./classNames"
+import { activityBodyClassName, activityContentClassName, activityRowClassName, activitySentenceClassName, activityTimeClassName } from "./classNames"
 
 /** Resolved actor, event and reaction state for one activity row. */
 export type ActivityRowData = { readonly id: string; readonly actor?: string; readonly avatar?: string; readonly action?: string; readonly target?: string; readonly time?: string; readonly reactionLabel?: string; readonly reactionCount?: number; readonly selectedReaction?: ReactionType | null; readonly reactionLabels?: ReactionLabels; readonly isMine?: boolean; readonly isReacting?: boolean }
@@ -21,14 +21,16 @@ export const ActivityRow = (props: ActivityRowProps) => {
         <div className={activityRowClassName}>
             <Avatar props={{ name: data.actor, src: data.avatar, size: "sm" }} isLoading={isLoading} />
             <div className={activityBodyClassName}>
-                <div className={activitySentenceClassName}>
-                    <TextLink props={{ label: data.actor ?? "", size: "sm" }} on={{ press: on?.openActor }} />
-                    <Text props={{ content: data.action, size: "sm" }} isLoading={isLoading} />
-                    {data.target === undefined ? null : <TextLink props={{ label: data.target, size: "sm" }} on={{ press: on?.openTarget }} />}
+                <div className={activityContentClassName}>
+                    <div className={activitySentenceClassName}>
+                        <TextLink props={{ label: data.actor ?? "", size: "sm" }} on={{ press: on?.openActor }} />
+                        <Text props={{ content: data.action, size: "sm" }} isLoading={isLoading} />
+                        {data.target === undefined ? null : <TextLink props={{ label: data.target, size: "sm" }} on={{ press: on?.openTarget }} />}
+                    </div>
+                    <div className={activityTimeClassName}><Text props={{ content: data.time, size: "xs", tone: "muted" }} isLoading={isLoading} /></div>
                 </div>
                 {data.reactionLabel === undefined || data.reactionLabels === undefined ? null : <ReactionPicker props={{ label: data.reactionLabel, count: data.reactionCount ?? 0, selected: data.selectedReaction, labels: data.reactionLabels, isPending: data.isReacting }} on={data.isMine === true ? undefined : { select: on?.react }} />}
             </div>
-            <Text props={{ content: data.time, size: "xs", tone: "muted" }} isLoading={isLoading} />
         </div>
     )
 }

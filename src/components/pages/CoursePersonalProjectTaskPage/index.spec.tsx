@@ -3,7 +3,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { CombinedGraphQLErrors } from "@apollo/client/errors"
 import { CoursePersonalProjectTaskPage } from "./index"
 
-type BaseProps = { state: string; on?: Record<string, (...args: Array<never>) => void> }
+type BaseProps = {
+    state: string
+    on?: Record<string, (...args: Array<never>) => void>
+    settingsOverlayProps?: { readonly onApplied?: (selection: { readonly language: string; readonly modelId: string }) => void }
+}
 const mocks = vi.hoisted(() => ({
     project: vi.fn(), workspace: vi.fn(), attempts: vi.fn(), submit: vi.fn(), settings: vi.fn(), push: vi.fn(), denied: vi.fn(),
 }))
@@ -19,11 +23,12 @@ vi.mock("@/hooks/swr/useMutateSyncPersonalProjectGithubSwr", () => ({ useMutateS
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
 vi.mock("next-intl", () => ({ useLocale: () => "en" }))
 vi.mock("@/components/blocks/learn/PersonalProjectTask/component", () => ({
-    PersonalProjectTaskBase: ({ state, on }: BaseProps) => <>
+    PersonalProjectTaskBase: ({ state, on, settingsOverlayProps }: BaseProps) => <>
         <div data-testid="state">{state}</div>
         <button onClick={on?.submit}>submit</button>
         <button onClick={on?.retry}>retry</button>
         <button onClick={on?.back}>back</button>
+        <button onClick={() => settingsOverlayProps?.onApplied?.({ language: "typescript", modelId: "openai:gpt-5" })}>apply settings</button>
     </>,
 }))
 
@@ -100,7 +105,7 @@ describe("CoursePersonalProjectTaskPage", () => {
     })
 
     it("submits the repository and routes to the accepted result page", async () => {
-        const trigger = vi.fn().mockResolvedValue({})
+        const trigger = vi.fn().mockResolvedValue({ jobId: "job-1" })
         mocks.submit.mockReturnValue({ error: undefined, isMutating: false, trigger })
         render(<CoursePersonalProjectTaskPage displayId="course" taskId="task-1" />)
 
@@ -108,6 +113,21 @@ describe("CoursePersonalProjectTaskPage", () => {
         await waitFor(() => expect(trigger).toHaveBeenCalledWith(expect.objectContaining({
             courseId: "course-1", taskId: "task-1", githubUrl: "https://github.com/starci/demo", branch: "main",
         })))
-        await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/courses/course/learn/personal-project/tasks/task-1/result"))
+        await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/courses/course/learn/personal-project/tasks/task-1/result?job=job-1"))
+    })
+
+    it("binds the applied language, model and provider into the submitted review intent", async () => {
+        const trigger = vi.fn().mockResolvedValue({})
+        mocks.submit.mockReturnValue({ error: undefined, isMutating: false, trigger })
+        render(<CoursePersonalProjectTaskPage displayId="course" taskId="task-1" />)
+
+        fireEvent.click(screen.getByText("apply settings"))
+        fireEvent.click(screen.getByText("submit"))
+
+        await waitFor(() => expect(trigger).toHaveBeenCalledWith(expect.objectContaining({
+            lang: "typescript",
+            selectedModel: "gpt-5",
+            selectedModelProvider: "openai",
+        })))
     })
 })

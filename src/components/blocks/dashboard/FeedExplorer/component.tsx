@@ -1,8 +1,10 @@
 import { ActivityFeed, type ActivityFeedProps } from "@/components/blocks/dashboard/ActivityFeed"
 import { TrendingContents } from "@/components/blocks/dashboard/TrendingContents"
 import { Button } from "@/components/leaves/Button"
+import { ChoiceTabs } from "@/components/leaves/ChoiceTabs"
 import { Text } from "@/components/leaves/Text"
-import { DualTabsToolbar, type DualTabsToolbarProps } from "@/components/composites/DualTabsToolbar"
+import type { DualTabsToolbarProps } from "@/components/composites/DualTabsToolbar"
+import { feedExplorerAxisClassName, feedExplorerStackClassName, feedExplorerToolbarClassName, feedExplorerToolbarViewportClassName } from "./classNames"
 
 /** Settled controls, feed state and pagination state for Explore. */
 export type FeedExplorerData = {
@@ -27,11 +29,17 @@ export type FeedExplorerProps = { readonly props: FeedExplorerData; readonly on?
 
 /** Pure Explore feed arrangement. Requests and navigation stay in the connected half. */
 export const FeedExplorerBase = (props: FeedExplorerProps) => (
-    <div><TrendingContents /><div>
-        <DualTabsToolbar props={props.props.filters} on={{
-            selectLeading: props.on?.selectScope,
-            selectTrailing: props.on?.selectCategory,
-        }} />
+    <div className={feedExplorerStackClassName}><TrendingContents /><div className={feedExplorerStackClassName}>
+        <div className={feedExplorerToolbarViewportClassName}><div className={feedExplorerToolbarClassName}>
+            <section className={feedExplorerAxisClassName} aria-label={props.props.filters.leading.label}>
+                <Text props={{ content: props.props.filters.leading.label, size: "xs", tone: "muted", weight: "semibold" }} />
+                <ChoiceTabs props={{ ...props.props.filters.leading, variant: "primary" }} on={{ select: props.on?.selectScope }} />
+            </section>
+            <section className={feedExplorerAxisClassName} aria-label={props.props.filters.trailing.label}>
+                <Text props={{ content: props.props.filters.trailing.label, size: "xs", tone: "muted", weight: "semibold" }} />
+                <ChoiceTabs props={{ ...props.props.filters.trailing, variant: "primary" }} on={{ select: props.on?.selectCategory }} />
+            </section>
+        </div></div>
         <ActivityFeed {...props.props.feed} on={props.on?.feed} />
         {props.props.loadMoreError === undefined ? null : <Text props={{ content: props.props.loadMoreError, size: "xs", tone: "muted" }} />}
         {props.props.canLoadMore || props.props.loadMoreError !== undefined ? <Button

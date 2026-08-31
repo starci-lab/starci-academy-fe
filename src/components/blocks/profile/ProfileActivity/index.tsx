@@ -1,6 +1,8 @@
 "use client"
 import { useMemo } from "react"
 import { useParams } from "next/navigation"
+import { useLocale, useTranslations } from "next-intl"
+import { useRouter } from "@/i18n/navigation"
 import { useQueryProfileEvidenceSwr } from "@/hooks/swr/useQueryProfileEvidenceSwr"
 import { useQueryUserProfileSwr } from "@/hooks/swr/useQueryUserProfileSwr"
 import type {
@@ -8,12 +10,17 @@ import type {
     ProfileActivity as ProfileActivityItem,
 } from "@/modules/api/graphql/queries/types/profile-evidence"
 import type { ActivityDayData } from "@/components/blocks/dashboard/ActivityFeed/component"
-import { ProfileActivityBase } from "./component"
-const actionLabel = (type: string) => type.replaceAll("_", " ").toLowerCase()
-const dayLabel = (at: string) =>
-    new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(
-        new Date(at),
-    )
+import { ProfileActivityBase, profileActivityDayLabel, profileActivityTimeLabel } from "./component"
+type ActivityTranslator = (key: string) => string
+const actionLabel = (type: string, t: ActivityTranslator) => {
+    const normalized = type
+        .replaceAll("_", " ")
+        .replace(/([a-z])([A-Z])/g, "$1 $2")
+        .replace(/^(lesson)(read)$/i, "$1 $2")
+        .toLowerCase()
+    const key = ({ "lesson read": "contentRead", "coding solved": "codingSolved", "challenge passed": "challengePassed" } as Readonly<Record<string, string>>)[normalized]
+    return key === undefined ? normalized : t(key)
+}
 /** Connected activity block; owns achievement/timeline queries and retry action. */
 /** Props for the connected profile activity block. */
 export type ProfileActivityProps = Record<never, never>
@@ -21,6 +28,11 @@ export type ProfileActivityProps = Record<never, never>
 export const ProfileActivity = (props: ProfileActivityProps) => {
     void props
     const params = useParams<{ username?: string }>()
+    const router = useRouter()
+    const locale = useLocale()
+    const t = useTranslations("profile")
+    const exploreT = useTranslations("dashboard.explore")
+    const activityT = useTranslations("dashboard.explore.activity")
     const username = String(params.username ?? "")
     const profile = useQueryUserProfileSwr(username)
     const achievements = useQueryProfileEvidenceSwr<
@@ -33,7 +45,7 @@ export const ProfileActivity = (props: ProfileActivityProps) => {
     const days = useMemo(() => {
         const groups = new Map<string, ActivityDayData>()
         for (const item of activity.data?.items ?? []) {
-            const label = dayLabel(item.at)
+            const label = profileActivityDayLabel(item.at, locale)
             const current = groups.get(label) ?? { id: label, label, rows: [] }
             groups.set(label, {
                 ...current,
@@ -43,11 +55,9 @@ export const ProfileActivity = (props: ProfileActivityProps) => {
                         id: item.id,
                         actor: item.actorUsername,
                         avatar: item.actorAvatar ?? undefined,
-                        action: actionLabel(item.type),
+                        action: actionLabel(item.type, activityT),
                         target: item.targetLabel ?? undefined,
-                        time: new Intl.DateTimeFormat(undefined, {
-                            timeStyle: "short",
-                        }).format(new Date(item.at)),
+                        time: profileActivityTimeLabel(item.at, locale),
                         reactionCount: item.reactionCount,
                         isMine: item.isMine,
                     },
@@ -55,7 +65,7 @@ export const ProfileActivity = (props: ProfileActivityProps) => {
             })
         }
         return Array.from(groups.values())
-    }, [activity.data])
+    }, [activity.data, activityT, locale])
     return (
         <ProfileActivityBase
             achievementState={
@@ -66,6 +76,7 @@ export const ProfileActivity = (props: ProfileActivityProps) => {
                         : "ready"
             }
             achievements={achievements.data ?? []}
+            labels={{ heading: t("tabs.activity"), recentActivity: t("evidence.activity.label"), achievements: t("evidence.achievements.label"), achievementTier: t("evidence.achievements.tier"), achievementRarity: t("evidence.achievements.rarity"), achievementsEmpty: t("evidence.achievements.empty"), achievementsError: t("evidence.error"), timeline: t("evidence.activity.label"), timelineStatus: t("evidence.activity.label") }}
             feed={{
                 state: activity.error
                     ? "failed"
@@ -77,16 +88,17 @@ export const ProfileActivity = (props: ProfileActivityProps) => {
                 props: {
                     days,
                     message: activity.error
-                        ? "Activity couldn't be loaded."
-                        : "No public activity yet.",
+                        ? t("evidence.error")
+                        : t("evidence.activity.empty"),
                     description: activity.error
-                        ? "Try again to load this timeline."
+                        ? exploreT("feedFailed")
                         : undefined,
-                    actionLabel: activity.error ? "Try again" : undefined,
+                    actionLabel: activity.error ? exploreT("retry") : exploreT("browseCourses"),
                 },
                 on: {
                     resultAction: () => {
-                        void activity.mutate()
+                        if (activity.error) void activity.mutate()
+                        else router.push("/courses")
                     },
                 },
             }}

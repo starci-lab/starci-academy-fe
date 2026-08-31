@@ -1,6 +1,7 @@
 import { useId, type ReactNode } from "react"
 import { VerticalScrollRegion } from "../../composite/VerticalScrollRegion/index.js"
-import { getCollectionClassName, getSurfaceFactClassName, getSurfaceHeadingClassName, listShellClassName, surfaceFooterClassName, surfaceLabelClassName, surfaceListClassName } from "./classNames.js"
+import { Label } from "../../primitive/Label/index.js"
+import { getCollectionClassName, getSurfaceFactClassName, listShellClassName, surfaceFooterClassName, surfaceLabelClassName, surfaceListClassName } from "./classNames.js"
 
 type LabelledSurfaceList = {
     readonly label: string
@@ -43,7 +44,6 @@ export const SurfaceListCard = (props: SurfaceListCardProps) => {
     } = props
     const headingId = useId()
     const accessibleName = ariaLabel ?? label
-    const HeadingTag = depth === "nested" ? "h4" : "h3"
 
     return (
         <section
@@ -54,7 +54,7 @@ export const SurfaceListCard = (props: SurfaceListCardProps) => {
         >
             {label === undefined || labelHidden ? null : (
                 <div className={surfaceLabelClassName} data-grammar-surface-label="true">
-                    <HeadingTag className={getSurfaceHeadingClassName(depth)} id={headingId}>{label}</HeadingTag>
+                    <Label id={headingId} depth={depth}>{label}</Label>
                     {labelEnd ?? (fact === undefined ? null : <span className={getSurfaceFactClassName(depth)}>{fact}</span>)}
                 </div>
             )}

@@ -13,6 +13,8 @@ export type PersonalProjectGradingSettingsLabels = {
     readonly settingsSaved: string; readonly saveSettings: string
     readonly description?: string; readonly sourceSection?: string; readonly analysisSection?: string
     readonly branchHelp?: string; readonly tokenHelp?: string; readonly privacy?: string; readonly clearToken?: string
+    readonly revealToken?: string; readonly hideToken?: string
+    readonly unavailableModels?: (models: string) => string
 }
 /** Transport and mutation conditions owned by the settings block. */
 export type PersonalProjectGradingSettingsState = "ready" | "saving" | "saved" | "failed"
@@ -24,6 +26,7 @@ export type PersonalProjectGradingSettingsBlockProps = {
         readonly languageOptions: ReadonlyArray<PersonalProjectGradingSettingsOption>
         readonly selectedLanguage?: string
         readonly modelOptions: ReadonlyArray<PersonalProjectGradingSettingsOption>
+        readonly unavailableModelLabels?: ReadonlyArray<string>
         readonly selectedModel?: string
         readonly branch?: string
         readonly tokenLast4?: string
@@ -49,7 +52,7 @@ export const PersonalProjectGradingSettingsBlockBase = (props: PersonalProjectGr
         <section className={personalProjectGradingSettingsSectionClassName}>
             <Text props={{ content: props.props.labels.sourceSection ?? props.props.labels.branch, weight: "semibold" }} />
             <Field props={{ id: "personal-project-branch", name: "personal-project-branch", label: props.props.labels.branch, description: props.props.labels.branchHelp, placeholder: props.props.labels.branchPlaceholder, defaultValue: props.props.branch, disabled }} on={{ change: props.on?.changeBranch }} />
-            <Field props={{ id: "personal-project-token", name: "personal-project-token", label: props.props.labels.token, kind: "newPassword", description: props.props.labels.tokenHelp, placeholder: props.props.labels.tokenPlaceholder, disabled, revealLabel: props.props.labels.token, hideLabel: props.props.labels.token }} on={{ change: props.on?.changeToken }} />
+            <Field props={{ id: "personal-project-token", name: "personal-project-token", label: props.props.labels.token, kind: "newPassword", description: props.props.labels.tokenHelp, placeholder: props.props.labels.tokenPlaceholder, disabled, revealLabel: props.props.labels.revealToken ?? props.props.labels.token, hideLabel: props.props.labels.hideToken ?? props.props.labels.token }} on={{ change: props.on?.changeToken }} />
             {props.props.tokenLast4 === undefined ? null : <><Text props={{ content: props.props.labels.tokenStored(props.props.tokenLast4), size: "xs", tone: "muted" }} /><Button props={{ label: props.props.labels.clearToken ?? "Remove token", variant: "ghost", size: "sm", disabled }} on={{ press: props.on?.clearToken }} /></>}
             <Text props={{ content: props.props.labels.privacy, size: "xs", tone: "muted" }} />
         </section>
@@ -57,9 +60,10 @@ export const PersonalProjectGradingSettingsBlockBase = (props: PersonalProjectGr
             <Text props={{ content: props.props.labels.analysisSection ?? props.props.labels.model, weight: "semibold" }} />
             <Select props={{ id: "personal-project-language", name: "personal-project-language", label: props.props.labels.language, options: props.props.languageOptions, selectedKey: props.props.selectedLanguage, disabled }} on={{ select: props.on?.selectLanguage }} />
             <Select props={{ id: "personal-project-model", name: "personal-project-model", label: props.props.labels.model, options: props.props.modelOptions.filter((option) => option.disabled !== true), selectedKey: props.props.selectedModel, disabled }} on={{ select: props.on?.selectModel }} />
+            {props.props.unavailableModelLabels === undefined || props.props.unavailableModelLabels.length === 0 ? null : <Text props={{ content: props.props.labels.unavailableModels?.(props.props.unavailableModelLabels.join(", ")) ?? `Unavailable models: ${props.props.unavailableModelLabels.join(", ")}`, size: "xs", tone: "muted" }} />}
         </section>
         {props.props.validationNotice === undefined ? null : <Text props={{ content: props.props.validationNotice, size: "sm", tone: "muted", live: "polite" }} />}
         {props.state === "ready" ? null : <Text props={{ content: props.state === "saved" ? props.props.labels.settingsSaved : props.props.notice, size: "sm", tone: "muted", live: props.state === "failed" ? "assertive" : "polite" }} />}
-        <div className={personalProjectGradingSettingsActionsClassName}><Button props={{ label: props.props.labels.saveSettings, variant: "primary", icon: "saved", isPending: disabled, disabled: disabled || props.props.saveDisabled === true }} on={{ press: props.on?.saveSettings }} /></div>
+        <div className={personalProjectGradingSettingsActionsClassName}><Button props={{ label: props.props.labels.saveSettings, variant: "primary", isPending: disabled, disabled: disabled || props.props.saveDisabled === true }} on={{ press: props.on?.saveSettings }} /></div>
     </div>
 }

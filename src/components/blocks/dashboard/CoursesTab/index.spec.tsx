@@ -4,7 +4,6 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import {
     useQueryCoursePricePreviewSwr,
     useQueryMyCoursesSwr,
-    useQueryMyUpcomingLivestreamsSwr,
     useQueryRecommendedCoursesSwr,
     useQueryResolveRouteSwr,
 } from "@/hooks"
@@ -28,7 +27,6 @@ vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }))
 vi.mock("@/hooks", () => ({
     useQueryMyCoursesSwr: vi.fn(),
     useQueryRecommendedCoursesSwr: vi.fn(),
-    useQueryMyUpcomingLivestreamsSwr: vi.fn(),
     useQueryResolveRouteSwr: vi.fn(),
     useQueryCoursePricePreviewSwr: vi.fn(),
 }))
@@ -54,7 +52,7 @@ const course = {
     enrolledCount: 42,
 }
 
-/** Wire every request the three blocks and the price surface make. */
+/** Wire every request the two primary blocks and the price surface make. */
 const wire = () => {
     vi.mocked(useQueryMyCoursesSwr).mockReturnValue(answer({
         data: [{
@@ -72,14 +70,6 @@ const wire = () => {
         }],
     }))
     vi.mocked(useQueryRecommendedCoursesSwr).mockReturnValue(answer({ data: [course] }))
-    vi.mocked(useQueryMyUpcomingLivestreamsSwr).mockReturnValue(answer({
-        data: [{
-            courseGlobalId: "course-1",
-            nextStartAt: "2026-09-12T10:00:00.000Z",
-            sessionTitle: "Kickoff",
-            courseTitle: "Ownership in depth",
-        }],
-    }))
     vi.mocked(useQueryResolveRouteSwr).mockReturnValue({ trigger: vi.fn() } as never)
     vi.mocked(useQueryCoursePricePreviewSwr).mockReturnValue(answer({ data: undefined }))
 }
@@ -90,15 +80,15 @@ afterEach(() => {
 })
 
 describe("CoursesTab", () => {
-    it("arranges the three learning blocks in one fixed order", () => {
+    it("arranges the two primary learning blocks in one fixed order", () => {
         wire()
 
         const { container } = render(<CoursesTab />)
         const content = container.textContent ?? ""
         expect(content).toContain("Ownership in depth")
-        // Progress first, then what to buy next, then what is happening live.
+        // Progress first, then what to buy next. Livestream context belongs to the page rail.
         expect(content.indexOf("Ownership in depth")).toBeLessThan(content.indexOf("Rust basics"))
-        expect(content.indexOf("Rust basics")).toBeLessThan(content.indexOf("Kickoff"))
+        expect(content).not.toContain("Kickoff")
     })
 
     it("mounts no price surface until a row asks about its price", () => {

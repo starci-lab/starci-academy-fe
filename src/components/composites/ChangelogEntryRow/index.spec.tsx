@@ -19,7 +19,7 @@ describe("ChangelogEntryRow", () => {
 
         const row = container.querySelector("[data-part=\"changelog-entry\"]")
         const meta = container.querySelector("[data-part=\"changelog-meta\"]")
-        expect(row).toHaveClass("flex", "min-w-0", "flex-col", "gap-2", "border-b", "border-separator", "p-3", "last:border-b-0")
+        expect(row).toHaveClass("flex", "min-w-0", "flex-col", "gap-2", "px-4", "pt-3", "pb-3", "last:pb-4")
         expect(meta).toHaveClass("flex", "min-w-0", "flex-wrap", "items-center", "gap-2")
     })
 

@@ -1,11 +1,13 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useParams } from "next/navigation"
+import { useLocale, useTranslations } from "next-intl"
+import { useRouter } from "@/i18n/navigation"
 import {
     useMutateCreateCvBlocksSwr,
     useMutateRenderCvBlocksSwr,
     useMutateRewriteCvBlockSwr,
-    useMutateSetCvBlocksPublicSwr,
     useMutateUpdateCvBlocksSwr,
 } from "@/hooks/swr/useMutateCvBlocksSwr"
 import { useQueryMyCvBlocksSwr } from "@/hooks/swr/useQueryMyCvBlocksSwr"
@@ -16,6 +18,10 @@ import { ProfileCvBuilderBase } from "./component"
 
 type Mode = "blocks" | "latex"
 type SaveState = "saved" | "saving" | "error"
+
+const emptyCopyOf = (locale: string) => locale.startsWith("en")
+    ? { title: "Create your CV with LaTeX", description: "Enter your details by section, use AI to refine the wording, and compile an ATS-friendly PDF.", create: "Create your first CV" }
+    : { title: "Tạo CV bằng LaTeX", description: "Nhập dữ liệu theo từng mục, dùng AI để chỉnh câu chữ và biên dịch thành PDF ATS-friendly.", create: "Tạo CV đầu tiên" } // vn-ok: localized Vietnamese CV-builder empty state.
 
 const titles: Record<CvBlockType, string> = {
     personal: "Thông tin cá nhân", summary: "Tóm tắt", experience: "Kinh nghiệm", education: "Học vấn", // vn-ok: localized Vietnamese CV schema titles.
@@ -61,13 +67,18 @@ const completenessOf = (document: CvDocument | undefined) => {
 export type ProfileCvBuilderProps = { readonly enabled?: boolean }
 /** Resolve the signed-in learner's editable CV document and every server outcome. */
 export const ProfileCvBuilder = (props: ProfileCvBuilderProps) => {
+    const tCv = useTranslations("profile.cv")
+    const tProfile = useTranslations("profile")
+    const locale = useLocale()
+    const params = useParams<{ username?: string }>()
+    const router = useRouter()
+    const username = params?.username ? String(params.username) : undefined
     const enabled = props.enabled ?? true
     const query = useQueryMyCvBlocksSwr(enabled)
     const create = useMutateCreateCvBlocksSwr()
     const update = useMutateUpdateCvBlocksSwr()
     const render = useMutateRenderCvBlocksSwr()
     const rewrite = useMutateRewriteCvBlockSwr()
-    const publish = useMutateSetCvBlocksPublicSwr()
     const [document, setDocument] = useState<CvDocument>()
     const [mode, setMode] = useState<Mode>("blocks")
     const [texDraft, setTexDraft] = useState("")
@@ -79,9 +90,9 @@ export const ProfileCvBuilder = (props: ProfileCvBuilderProps) => {
 
     useEffect(() => {
         if (hydrated.current || query.data === undefined) return
-        const selected = query.data.find((candidate) => candidate.isPublic) ?? query.data[0]
+        const selected = query.data[0]
         setDocument(selected)
-        setTexDraft(selected?.texSource ?? (selected ? buildCvTexSource(selected) : ""))
+        setTexDraft(selected ? buildCvTexSource(selected) : "")
         hydrated.current = true
     }, [query.data])
 
@@ -114,7 +125,7 @@ export const ProfileCvBuilder = (props: ProfileCvBuilderProps) => {
             const response = result.data?.createCvBlocks
             if (response?.success !== true || !response.data) throw new Error(response?.message)
             setDocument(response.data)
-            setTexDraft(response.data.texSource ?? buildCvTexSource(response.data))
+            setTexDraft(buildCvTexSource(response.data))
             hydrated.current = true
             void query.mutate()
         } catch { setMessage("Không thể tạo CV lúc này. Hãy thử lại.") } // vn-ok: localized Vietnamese recovery copy.
@@ -161,19 +172,6 @@ export const ProfileCvBuilder = (props: ProfileCvBuilderProps) => {
         } catch { setMessage("AI chưa thể viết lại mục này. Nội dung gốc không bị thay đổi.") } // vn-ok: localized Vietnamese recovery copy.
     }
 
-    const setPublic = async () => {
-        if (!document) return
-        setMessage(undefined)
-        try {
-            const result = await publish.trigger({ id: document.id, isPublic: !document.isPublic })
-            const response = result.data?.setCvBlocksPublic
-            if (response?.success !== true || !response.data) throw new Error(response?.message)
-            setDocument({ ...document, isPublic: response.data.isPublic })
-            setMessage(response.data.isPublic ? "CV này đang hiển thị trên hồ sơ công khai." : "CV đã được chuyển về riêng tư.") // vn-ok: localized Vietnamese outcome copy.
-            void query.mutate()
-        } catch { setMessage("Không thể đổi trạng thái công khai lúc này.") } // vn-ok: localized Vietnamese recovery copy.
-    }
-
     const actions = useMemo(() => ({
         create: () => { void createDocument() },
         mode: (next: Mode) => { if (next === "latex" && document && texDraft.trim() === "") setTexDraft(buildCvTexSource(document)); setMode(next) },
@@ -186,11 +184,10 @@ export const ProfileCvBuilder = (props: ProfileCvBuilderProps) => {
         tex: (value: string) => setTexDraft(value),
         rewrite: (type: CvBlockType) => { void rewriteBlock(type) },
         compile: () => { void compileDocument() },
-        publish: () => { void setPublic() },
     }), [document, markChanged, texDraft])
 
     const situation = query.error !== undefined && query.data === undefined ? "error" as const : query.data === undefined ? "loading" as const : "ready" as const
-    return <ProfileCvBuilderBase props={{ situation, document, mode, texDraft, previewUrl, saveState, completeness: completenessOf(document), isCreating: create.isMutating, isCompiling: render.isMutating, isRewriting: rewrite.isMutating, isPublishing: publish.isMutating, mutationMessage: message }} on={{ ...actions, retry: () => { void query.mutate() } }} />
+    return <ProfileCvBuilderBase props={{ situation, document, mode, texDraft, previewUrl, saveState, completeness: completenessOf(document), isCreating: create.isMutating, isCompiling: render.isMutating, isRewriting: rewrite.isMutating, mutationMessage: message }} recovery={{ loading: tCv("status.loading"), errorTitle: tCv("states.error.title"), errorDescription: tCv("states.error.description"), retry: tCv("retry"), overview: tProfile("actions.home") }} empty={emptyCopyOf(locale)} retryPending={query.isValidating} on={{ ...actions, retry: () => { void query.mutate() }, overview: () => router.push(`/profile/${username ?? ""}`) }} />
 }
 
 export * from "./component"

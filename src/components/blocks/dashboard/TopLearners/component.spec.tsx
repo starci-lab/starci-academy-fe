@@ -17,11 +17,12 @@ describe("TopLearnersBase", () => {
         render(<TopLearnersBase state="ready" props={{
             ...frame,
             rows: [
-                { id: "one", rank: 1, rankLabel: "Rank 1", name: "Ada", points: "480 XP", followLabel: "Follow" },
+                { id: "one", rank: 1, rankLabel: "Rank 1", name: "Ada with a deliberately long learner name", subtitle: "A supporting learner subtitle that must wrap", points: "480 XP", followLabel: "Follow" },
                 { id: "self", rank: 4, rankLabel: "Rank 4", name: "Learner · You", points: "105 XP", followLabel: "Follow", isMe: true },
             ],
         }} on={{ "follow:one": follow }} />)
-        expect(screen.getByText("Ada")).toBeInTheDocument()
+        expect(screen.getByText("Ada with a deliberately long learner name")).toBeInTheDocument()
+        expect(screen.getByText("Ada with a deliberately long learner name").closest("[data-dashboard-community-ranked-row]")).toBeInTheDocument()
         expect(screen.getByText("Learner · You")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Follow" }))
         expect(follow).toHaveBeenCalledOnce()

@@ -10,6 +10,7 @@ const tabs: ProfileTabsData = {
         { id: "courses", label: "Courses", icon: "course" },
         { id: "challenges", label: "Challenges", icon: "practice" },
     ],
+    labelVisibility: "always",
 }
 
 describe("ProfileTabsBase", () => {
@@ -24,6 +25,16 @@ describe("ProfileTabsBase", () => {
         ])
         expect(screen.getByRole("tab", { name: "Overview" })).toHaveAttribute("aria-selected", "true")
         expect(screen.getByRole("tab", { name: "Courses" })).toHaveAttribute("aria-selected", "false")
+        expect(document.querySelector("[data-grammar-tab-labels='always']")).not.toBeNull()
+        expect(document.querySelector("[class*='scroll-pe-6']")).toHaveClass(
+            "w-full",
+            "min-w-0",
+            "[&_[data-grammar-tabs-overflow=scroll]]:pe-6",
+            "[&_[data-grammar-tabs-overflow=scroll]]:scroll-pe-6",
+        )
+        expect(document.querySelector("[data-profile-tabs-overflow='discoverable']")).not.toBeNull()
+        expect(document.querySelector("[data-profile-tabs-overflow='discoverable']")?.textContent).toContain("‹")
+        expect(document.querySelector("[data-profile-tabs-overflow='discoverable']")?.textContent).toContain("›")
     })
 
     it("reports the pressed destination key to its owner", () => {

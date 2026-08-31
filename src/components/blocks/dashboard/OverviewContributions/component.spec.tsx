@@ -18,10 +18,12 @@ const props = {
 } as const
 
 describe("OverviewContributionsBase", () => {
-    it("keeps selector, full calendar, intensity legend and streak in one surface", () => {
+    it("keeps selector, full calendar, intensity legend and streak in one flush surface", () => {
         const { container } = render(<OverviewContributionsBase state="ready" props={props} />)
         expect(screen.getByText("16 activities in 2026")).toBeInTheDocument()
         expect(screen.getByText("3 current, 8 longest")).toBeInTheDocument()
+        expect(container.querySelector("[data-part=\"contribution-header\"]")).toHaveClass("p-4", "pb-3")
+        expect(container.querySelector("[data-part=\"contribution-footer\"]")).toHaveClass("px-4", "pb-4", "pt-3")
         expect(container.querySelectorAll("[data-part=\"calendar-day\"]").length).toBeGreaterThanOrEqual(365)
         expect(container.querySelector("[data-date=\"2026-08-12\"]")).toHaveAccessibleName("12 Aug, 2 activities")
         expect(container.querySelectorAll("[data-part=\"intensity-legend\"] [data-level]")).toHaveLength(5)

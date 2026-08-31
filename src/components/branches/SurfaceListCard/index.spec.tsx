@@ -9,11 +9,12 @@ describe("SurfaceListCard", () => {
         render(
             <SurfaceListCard props={{ label: "Results", isNested: true, isVerdict: true }}>{rows}</SurfaceListCard>,
         )
-        const heading = screen.getByRole("heading", { name: "Results" })
-        expect(heading.tagName).toBe("H4")
-        expect(heading).toHaveClass("text-xs", "font-medium", "leading-4")
+        const label = screen.getByText("Results")
+        expect(label).toHaveAttribute("data-grammar-label", "true")
+        expect(label).toHaveAttribute("data-grammar-label-depth", "nested")
+        expect(label).toHaveClass("text-xs", "font-medium", "leading-4")
         expect(screen.getByText("Alpha")).toBeInTheDocument()
-        expect(heading.closest("section")).toHaveAttribute("data-grammar-surface-depth", "nested")
+        expect(label.closest("section")).toHaveAttribute("data-grammar-surface-depth", "nested")
     })
 
     it("renders an action footer or description, never both", () => {
@@ -25,9 +26,9 @@ describe("SurfaceListCard", () => {
     it("keeps label controls outside a bounded list frame", () => {
         render(<SurfaceListCard props={{ label: "Roadmap", fact: "9 stages", isScrollable: true }} labelEnd={<button type="button">Search</button>}>{rows}</SurfaceListCard>)
 
-        const heading = screen.getByRole("heading", { name: "Roadmap" })
+        const label = screen.getByText("Roadmap")
         const search = screen.getByRole("button", { name: "Search" })
-        const frame = heading.closest("section")?.querySelector("[data-grammar-surface='true']")
+        const frame = label.closest("section")?.querySelector("[data-grammar-surface='true']")
         expect(search.closest("[data-grammar-surface-label='true']")).not.toBeNull()
         expect(search.closest("[data-grammar-surface='true']")).toBeNull()
         expect(frame).toHaveAttribute("data-grammar-scroll", "contained")

@@ -11,7 +11,7 @@ import { RecommendedCoursesBase } from "./component"
  * renders an empty line with a way out beside it.
  */
 
-const frame = { label: "Recommended", errorMessage: "Could not load suggestions", retryLabel: "Retry" } as const
+const frame = { label: "Recommended", emptyMessage: "No recommendations yet", errorMessage: "Could not load suggestions", retryLabel: "Retry" } as const
 
 /** One resolved recommendation row. */
 const row = {
@@ -27,9 +27,9 @@ const row = {
 afterEach(cleanup)
 
 describe("RecommendedCoursesBase", () => {
-    it("draws nothing when the situation is settled absence", () => {
-        const { container } = render(<RecommendedCoursesBase state="hidden" props={{ ...frame, rows: [] }} />)
-        expect(container).toBeEmptyDOMElement()
+    it("keeps a settled empty list surface with an honest next-state message", () => {
+        render(<RecommendedCoursesBase state="empty" props={{ ...frame, rows: [] }} />)
+        expect(screen.getByText("No recommendations yet")).toBeInTheDocument()
     })
 
     it("says what went wrong and offers the request again", () => {
@@ -71,5 +71,15 @@ describe("RecommendedCoursesBase", () => {
 
         fireEvent.click(screen.getByRole("button", { name: "Rust basics" }))
         expect(open).toHaveBeenCalledOnce()
+    })
+
+    it("keeps every recommendation in one joined full-width list", () => {
+        const rows = [row, { ...row, id: "typescript" }, { ...row, id: "systems" }]
+        render(<RecommendedCoursesBase state="ready" props={{ ...frame, rows }} />)
+
+        const items = screen.getAllByRole("listitem")
+        expect(items).toHaveLength(3)
+        for (const item of items) expect(item).not.toHaveClass("sm:w-1/2")
+        expect(items.at(-1)).toHaveClass("last:border-b-0")
     })
 })

@@ -15,6 +15,7 @@ export type ChangelogListProps = Record<string, never>
 export const ChangelogList = (props: ChangelogListProps) => {
     void props
     const t = useTranslations("changelog")
+    const tCourses = useTranslations("courses.catalog")
     const locale = useLocale()
     const router = useRouter()
     const changelog = useQueryChangelogEntriesSwr()
@@ -29,7 +30,7 @@ export const ChangelogList = (props: ChangelogListProps) => {
     const byId = new Map(entries.map((entry) => [entry.id, entry]))
 
     const viewProps = { state, props: {
-        label: t("title"), emptyMessage: t("empty"), errorMessage: t("failed"), entries: entries.map((entry) => {
+        label: t("title"), emptyMessage: t("empty"), errorMessage: t("failed"), retryLabel: tCourses("retry"), entries: entries.map((entry) => {
             const category = isCategory(entry.category) ? entry.category : undefined
             return {
                 id: entry.id,
@@ -38,12 +39,12 @@ export const ChangelogList = (props: ChangelogListProps) => {
                 categoryLabel: category === undefined ? undefined : t(`category.${category}`),
                 title: entry.title,
                 body: entry.body,
-                isAction: entry.linkUrl !== null,
+                isAction: typeof entry.linkUrl === "string" && entry.linkUrl.length > 0,
             }
         }) }, on: { open: (id: string) => {
         const destination = byId.get(id)?.linkUrl
-        if (destination !== null && destination !== undefined) router.push(destination)
-    } }}
+        if (destination !== null && destination !== undefined && destination.length > 0) router.push(destination)
+    }, retry: () => { void changelog.mutate() } }}
     return <ChangelogListBase {...viewProps} />
 }
 

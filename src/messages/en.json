@@ -32,6 +32,8 @@
         "themeLight": "Switch to light",
         "themeDark": "Switch to dark",
         "utilities": "Display utilities",
+        "navigationOverflow": "Navigation and utilities",
+        "accountActions": "Account and commerce",
         "locale": "Change language",
         "localeOptions": {
             "en": "English",
@@ -73,6 +75,9 @@
         "title": "Dashboard",
         "progressHeading": "Your progress",
         "railHeading": "Your standing",
+        "back": "Back",
+        "openRail": "Open stats and quick access",
+        "closeRail": "Close stats and quick access",
         "unavailable": "This dashboard section is not available yet.",
         "continueLearning": {
             "heading": "Continue learning",
@@ -163,7 +168,7 @@
             "heading": "Courses for you",
             "failed": "Could not load course recommendations",
             "retry": "Try again",
-            "reason": "Recommended because you already joined {count} courses"
+            "reason": "Recommended because you already joined {count, plural, one {# course} other {# courses}}"
         },
         "upcoming": {
             "heading": "Upcoming livestreams",
@@ -696,16 +701,25 @@
                 "label": "Solved problems",
                 "empty": "No solved problems yet."
             },
-            "achievements": {
-                "label": "Achievements",
-                "empty": "No achievements yet."
-            },
+        "achievements": {
+          "label": "Achievements",
+          "empty": "No achievements yet.",
+          "tier": "Tier",
+          "rarity": "Rarity"
+        },
             "activity": {
                 "label": "Recent activity",
                 "empty": "No public activity yet."
             }
+      },
+      "projects": {
+        "kind": {
+          "course": "Course",
+          "external": "External project"
         },
-        "overview": {
+        "open": "Open project"
+      },
+      "overview": {
             "challengeSkills": "Skills from challenges",
             "codeSkills": "Skills from practice",
             "passed": "Passed",
@@ -1053,6 +1067,10 @@
             "eyebrow": "Learn by building",
             "verifiedLabel": "Server-verified",
             "previewAlt": "DevOps Playground learning path preview",
+            "processTitle": "From your machine to a verified result",
+            "processChoose": "Choose a guided lab and review the environment checks",
+            "processPair": "Pair the local agent with the session created for you",
+            "processVerify": "Verify each checkpoint explicitly when your work is ready",
             "startLabel": "Start the first lab",
             "labsTitle": "Build the production path",
             "labsDescription": "Choose a guided lab, work through its checkpoints in order, and let the server confirm each completed step.",
@@ -1076,8 +1094,16 @@
                 "waiting": "Waiting for the agent on your machine to connect.",
                 "ready": "Agent connected. Your workspace is ready.",
                 "enter": "Enter workspace",
-                "failed": "The playground session could not be prepared."
-                ,"notFound": "This playground could not be found. Return to the catalog or try again."
+                "failed": "The playground session could not be prepared.",
+                "notFound": "This playground could not be found. Return to the catalog or try again.",
+                "backToCatalog": "Back to playgrounds",
+                "sessionTitle": "Local lab session",
+                "createDescription": "Create a dedicated session first. The pairing code appears in the next step.",
+                "stageCreate": "Create session",
+                "stagePair": "Pair machine",
+                "stageEnter": "Enter workspace",
+                "copyCode": "Copy pairing code",
+                "codeCopied": "Pairing code copied"
             },
             "session": {
                 "agentConnected": "Agent connected",
@@ -1090,12 +1116,23 @@
                 "completedText": "Every guided step reached a verified state in this playground.",
                 "failed": "This playground session is unavailable. Return to setup and create a new session.",
                 "step": "Step",
-                "passed": "Passed"
-                ,"scratchpadTitle": "Command scratchpad"
-                ,"scratchpadDescription": "Edit commands here before running them on your machine. This browser does not execute the command."
-                ,"outputTitle": "Verification activity"
-                ,"outputWaiting": "Server verification events will appear here after you run the task on your machine."
-                ,"verifying": "Waiting for verification..."
+                "passed": "Passed",
+                "scratchpadTitle": "Command scratchpad",
+                "scratchpadDescription": "Edit commands here before running them on your machine. This browser does not execute the command.",
+                "outputTitle": "Verification activity",
+                "outputWaiting": "Server verification events will appear here after you run the task on your machine.",
+                "verifying": "Waiting for verification...",
+                "progressLabel": "Verified playground progress",
+                "progressText": "{passed} of {total} verified",
+                "stepsTitle": "Guided lab steps",
+                "reconnectText": "Keep the local agent running. We will reconnect this session without discarding your verified progress.",
+                "recoveryFailed": "Connection needs attention",
+                "recoveryFailedTitle": "The local agent could not reconnect",
+                "recoveryFailedText": "Restart the local agent with this session, then try the connection again or return to setup.",
+                "failedStatus": "Session unavailable",
+                "exitToCatalog": "Back to playgrounds",
+                "currentStep": "Current guided task",
+                "locked": "Locked"
             }
         },
         "mindMap": {
@@ -1138,6 +1175,7 @@
                 "outline": "This page"
             },
             "mobileCourseNavigation": "Course navigation",
+            "closeMobileCourseNavigation": "Close course navigation",
             "locked": "Locked",
             "collapse": "Collapse",
             "expand": "Expand",

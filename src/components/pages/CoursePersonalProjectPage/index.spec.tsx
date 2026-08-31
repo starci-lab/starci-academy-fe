@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react"
+import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { CoursePersonalProject } from "@/components/blocks/learn/CoursePersonalProject"
 import type { CoursePersonalProjectProps } from "@/components/blocks/learn/CoursePersonalProject/component"
@@ -48,7 +48,7 @@ const data = {
             { id: "task-2", title: "Code", type: null, maxScore: 20, completed: false, lastScore: 10, numAttempts: 1 },
         ] },
     ],
-    progress: { tasksCompleted: 1, tasksTotal: 3, completionPercent: 33 },
+    progress: { tasksCompleted: 1, tasksTotal: 3, completionPercent: 67 },
     currentTask: { kind: "milestoneTask", id: "task-2", milestoneId: "milestone-1" },
 }
 
@@ -61,6 +61,8 @@ describe("CoursePersonalProjectPage", () => {
         mocks.error = undefined
         mocks.repositoryData = { githubUrl: "https://github.com/starci/shop", branch: "main", tokenLast4: "1234" }
         mocks.repositoryError = undefined
+        document.documentElement.scrollTop = 240
+        document.body.scrollTop = 240
         vi.clearAllMocks()
     })
 
@@ -69,16 +71,33 @@ describe("CoursePersonalProjectPage", () => {
 
         expect(screen.getByTestId("state")).toHaveTextContent("ready")
         expect(props().nextTask).toEqual({ id: "task-2", milestone: "Build", title: "Code", evidence: "10/20 · 1 submission", href: "/en/courses/system-design/learn/personal-project/tasks/task-2" })
-        expect(props().continueLabel).toBe("Continue: Code")
+        expect(props().continueLabel).toBe("Continue project")
         expect(props().milestones.map((milestone) => milestone.id)).toEqual(["milestone-1", "milestone-2"])
-        expect(props().milestones[0]).toMatchObject({ status: "In progress", progress: "1/2", completionPercent: 50, href: "/en/courses/system-design/learn/personal-project/tasks/task-2", tone: "accent" })
-        expect(props().milestones[1]).toMatchObject({ status: "Upcoming", progress: "0/1", completionPercent: 0, tone: "neutral" })
+        expect(props().milestones[0]).toMatchObject({ position: 1, status: "In progress", progress: "1/2", targetTaskId: "task-2", tone: "accent" })
+        expect(props().milestones[1]).toMatchObject({ position: 2, status: "Upcoming", progress: "0/1", tone: "neutral" })
         expect(props().completionFacts).toEqual([
             { label: "Tasks", value: "1/3" },
             { label: "Submissions", value: "3" },
             { label: "Average score", value: "13/20" },
         ])
+        expect(props().completionPercent).toBe(33)
+        expect(props().completionPercentLabel).toBe("33%")
+        expect(props().projectRailLabel).toBe("Project evidence")
         expect(props().repository).toMatchObject({ state: "ready", branch: "main", url: "https://github.com/starci/shop" })
+    })
+
+    it("restores the overview to the page start when the course changes", () => {
+        const view = render(<CoursePersonalProject displayId="system-design" />)
+
+        expect(document.documentElement.scrollTop).toBe(0)
+        expect(document.body.scrollTop).toBe(0)
+
+        document.documentElement.scrollTop = 180
+        document.body.scrollTop = 180
+        view.rerender(<CoursePersonalProject displayId="distributed-systems" />)
+
+        expect(document.documentElement.scrollTop).toBe(0)
+        expect(document.body.scrollTop).toBe(0)
     })
 
     it("keeps pending, empty and failed outcomes distinct", () => {
@@ -97,6 +116,31 @@ describe("CoursePersonalProjectPage", () => {
         mocks.error = new Error("network")
         render(<CoursePersonalProject displayId="system-design" />)
         expect(screen.getByTestId("state")).toHaveTextContent("failed")
+    })
+
+    it("recovers one transient null response instead of presenting it as an empty project", async () => {
+        mocks.data = null
+        mocks.repositoryData = undefined
+        mocks.mutate.mockResolvedValueOnce(data)
+        const view = render(<CoursePersonalProject displayId="system-design" />)
+
+        expect(screen.getByTestId("state")).toHaveTextContent("pending")
+        await waitFor(() => expect(mocks.mutate).toHaveBeenCalledTimes(1))
+
+        mocks.data = data
+        view.rerender(<CoursePersonalProject displayId="system-design" />)
+        expect(screen.getByTestId("state")).toHaveTextContent("ready")
+    })
+
+    it("fails visibly when the one-shot null recovery still cannot resolve a project", async () => {
+        mocks.data = null
+        mocks.repositoryData = undefined
+        mocks.mutate.mockResolvedValueOnce(null)
+        render(<CoursePersonalProject displayId="system-design" />)
+
+        expect(screen.getByTestId("state")).toHaveTextContent("pending")
+        await waitFor(() => expect(screen.getByTestId("state")).toHaveTextContent("failed"))
+        expect(mocks.mutate).toHaveBeenCalledTimes(1)
     })
 
     it("routes owned actions and retries primary and ancillary queries independently", () => {
@@ -125,5 +169,20 @@ describe("CoursePersonalProjectPage", () => {
 
         expect(props().roadmapCountLabel).toBe("2 stages")
         expect(props().roadmapCountLabel).not.toContain("2/2")
+    })
+
+    it("does not claim project completion when an incomplete learner has no current task", () => {
+        mocks.data = { ...data, currentTask: null, progress: { tasksCompleted: 0, tasksTotal: 3, completionPercent: 0 } }
+        render(<CoursePersonalProject displayId="system-design" />)
+
+        expect(props().nextTask).toBeUndefined()
+        expect(props().nextTaskFallbackLabel).toBe("No personal-project task is currently available to continue.")
+    })
+
+    it("uses completion copy only when every project task is complete", () => {
+        mocks.data = { ...data, currentTask: null, progress: { tasksCompleted: 3, tasksTotal: 3, completionPercent: 100 } }
+        render(<CoursePersonalProject displayId="system-design" />)
+
+        expect(props().nextTaskFallbackLabel).toBe("You've completed every task in your personal project.")
     })
 })

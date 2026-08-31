@@ -21,7 +21,7 @@ describe("WeeklyGoalsBase", () => {
     })
 
     it("draws the summary above the legacy two-column bordered grid", () => {
-        render(
+        const { container } = render(
             <WeeklyGoalsBase
                 state="ready"
                 props={{
@@ -39,8 +39,12 @@ describe("WeeklyGoalsBase", () => {
             />,
         )
         expect(screen.getByText("40% this week")).toBeTruthy()
+        expect(screen.getByText("40% this week").closest("[data-part=weekly-goals-summary]")).toHaveClass("bg-accent-soft", "px-4", "pt-3", "pb-3")
         expect(screen.getByText("Metric 0")).toBeInTheDocument()
         expect(screen.getAllByRole("progressbar")).toHaveLength(6)
+        expect(container.querySelector("[data-part=weekly-goals-grid]")).toHaveClass("grid", "sm:grid-cols-2")
+        expect(screen.getByRole("button", { name: "Edit" })).toBeInTheDocument()
+        expect(container.querySelectorAll("[data-part=weekly-goals-grid] svg")).toHaveLength(0)
     })
 
     it("offers a way back when the week could not be read", () => {

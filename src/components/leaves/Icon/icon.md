@@ -77,19 +77,21 @@ icon leaf selects the outline or micro drawing from the role.
 | `talents` | Talent discovery | `SparklesIcon` | Sparkles name exceptional ability without reusing account creation |
 | `jobs` | IT jobs | `BriefcaseIcon` | A briefcase names employment and vacancies |
 | `practice` | Programming/code practice | `CodeBracketIcon` | Code brackets name programming without reusing verification code |
+| `menu` | Open contextual navigation drawer | `Bars3Icon` | Three horizontal lines are the established disclosure for a hidden navigation collection |
+| `navigationOverflow` | Reveal compact global navigation and utilities | `EllipsisHorizontalIcon` | A horizontal ellipsis means additional peer-level destinations without implying a second navigation row |
 | `viewGrid` | Lay a collection out as a card grid | `Squares2X2Icon` | Four equal panes name an arrangement rather than the content being arranged |
 | `viewList` | Lay a collection out as compact rows | `ListBulletIcon` | A bulleted run of lines names row layout without borrowing the review clipboard |
-| `collapseRail` | Collapse or restore the persistent course rail | `CourseRailIcon` | The two persistent panes reproduce the course-outline control and name changing the rail width without implying route navigation |
-| `learnHome` | Course learning overview | `CourseOverviewIcon` | A home held inside the learning surface distinguishes the course overview from both the global dashboard and a generic grid layout |
-| `courseContent` | Course lesson content | `CourseContentIcon` | An open text with lesson lines names the curriculum the learner reads rather than the wider course catalogue |
-| `personalProject` | Personal course project | `PersonalProjectIcon` | A bounded authored code artifact names the learner's deliverable rather than generic code practice |
-| `flashcards` | Course flashcard review | `FlashcardsIcon` | Overlapping study cards with a forward cue name moving through a review deck rather than checking assigned work |
-| `mindMap` | Course mind map | `MindMapIcon` | A central concept joined to independent branches names the spatial knowledge map rather than editorial content |
-| `mockInterview` | Course mock interview | `MockInterviewIcon` | A live microphone names spoken interview practice rather than generic talent discovery |
-| `foundations` | Course foundations | `FoundationsIcon` | One block supported by two lower prerequisite blocks names a foundation rather than generic layers |
-| `playground` | Executable course playground | `PlaygroundIcon` | A bounded terminal prompt names a runnable learning environment rather than credential verification |
-| `courseLeaderboard` | Course leaderboard | `CourseLeaderboardIcon` | A three-place podium names ordered course standing directly instead of generic competitive achievement |
-| `courseQa` | Course questions and answers | `CourseQaIcon` | A question bubble paired with its response names learner Q&A rather than the whole learner community |
+| `collapseRail` | Collapse or restore the persistent course rail | `CourseRailIcon` | The original two-pane StarCi control names changing rail width rather than navigating to a destination |
+| `learnHome` | Course learning overview | Heroicons `Squares2X2Icon` | The approved four-cell grid identifies the course learning overview without repeating the global-home glyph |
+| `courseContent` | Course lesson content | Heroicons `BookOpenIcon` | The open book directly names readable curriculum content; a custom book adds no semantic value |
+| `personalProject` | Personal course project | Heroicons `CodeBracketSquareIcon` | Code enclosed as an artifact distinguishes a deliverable from unbounded code practice |
+| `flashcards` | Course flashcard review | Heroicons `RectangleStackIcon` | A stacked-card silhouette names a review deck without a bespoke drawing |
+| `mindMap` | Course mind map | Heroicons `ShareIcon` | Connected nodes communicate a branching knowledge relation at navigation size |
+| `mockInterview` | Course mock interview | Heroicons `MicrophoneIcon` | Spoken interview practice has an exact upstream glyph |
+| `foundations` | Course foundations | Heroicons `BuildingLibraryIcon` | A stable learning institution/base communicates durable foundations without improvised blocks |
+| `playground` | Executable course playground | Heroicons `CommandLineIcon` | A command surface directly names a runnable developer environment |
+| `courseLeaderboard` | Course leaderboard | Heroicons `TrophyIcon` | The standard trophy communicates ranked achievement without a fragile miniature podium |
+| `courseQa` | Course questions and answers | Heroicons `ChatBubbleLeftRightIcon` | Paired conversation bubbles express question-and-answer exchange clearly at 20px |
 | `rankFirst` | First leaderboard place | `FirstPlaceMedalIcon` | The authored numeral keeps first place distinct without another artwork vendor |
 | `rankSecond` | Second leaderboard place | `SecondPlaceMedalIcon` | The authored numeral keeps second place distinct without another artwork vendor |
 | `rankThird` | Third leaderboard place | `ThirdPlaceMedalIcon` | The authored numeral keeps third place distinct without another artwork vendor |

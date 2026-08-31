@@ -73,6 +73,20 @@ describe("ProfileChallengesBase", () => {
         expect(screen.getByText("Passed graded challenges appear here.")).toBeInTheDocument()
     })
 
+    it("offers a course-discovery action when no challenges have been passed", () => {
+        const browseCourses = vi.fn()
+        render(
+            <ProfileChallengesBase
+                strength={{ state: "ready", data: {} }}
+                submissions={{ state: "ready", data: [] }}
+                on={{ openCourse: vi.fn(), browseCourses }}
+            />,
+        )
+
+        screen.getByRole("button", { name: "Browse courses" }).click()
+        expect(browseCourses).toHaveBeenCalledOnce()
+    })
+
     it("opens the owning course from a proof row that carries only a slug", () => {
         const openCourse = vi.fn()
         render(

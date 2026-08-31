@@ -1,29 +1,48 @@
 import { cn } from "@heroui/react"
+import {
+    dashboardAccentBandTopClassName,
+    dashboardBandSeparatorClassName,
+    dashboardCardFooterClassName,
+    dashboardFlushCardClassName,
+    dashboardFlushListEntryClassName,
+    dashboardFlushSurfaceClassName,
+    dashboardMetricCellPaddingClassName,
+} from "../classNames"
 
-/** Challenge identity stays on one icon/title row. */
-export const challengeHeadingClassName = cn("flex", "min-w-0", "items-start", "gap-3")
+export const challengeSurfaceClassName = dashboardFlushSurfaceClassName
+export const challengeCardClassName = dashboardFlushCardClassName
+export const challengeSeparatorClassName = dashboardBandSeparatorClassName
+export const challengeFooterClassName = dashboardCardFooterClassName
 
-/** Countdown and viewer action form one responsive decision row. */
-export const challengeActionClassName = cn(
+/** Countdown urgency sits on the first accent band at the card top. */
+export const challengeCountdownClassName = dashboardAccentBandTopClassName
+
+/** Challenge identity: icon beside a title and muted description stack. */
+export const challengeHeadingClassName = cn(
+    dashboardMetricCellPaddingClassName,
     "flex",
     "min-w-0",
-    "flex-col",
     "items-start",
     "gap-3",
-    "sm:flex-row",
-    "sm:items-center",
-    "sm:justify-between",
+)
+
+export const challengeIdentityClassName = cn("flex", "min-w-0", "flex-1", "flex-col", "gap-0.5")
+
+/** Full-bleed joined finisher rows inside the flush card body. */
+export const challengeFinisherListClassName = cn(
+    "m-0",
+    "list-none",
+    "p-0",
+    "divide-y",
+    "divide-separator",
 )
 
 /** One compact finisher row: avatar, flexible identity, trailing time. */
-export const challengeFinisherClassName = `${cn(
+export const challengeFinisherClassName = cn(
+    dashboardFlushListEntryClassName,
     "grid",
     "min-w-0",
     "items-center",
     "gap-3",
-    "border-b",
-    "border-separator",
-    "px-3",
-    "py-2",
-    "last:border-b-0",
-)} grid-cols-[auto_minmax(0,1fr)_auto]`
+    "grid-cols-[auto_minmax(0,1fr)_auto]",
+)
