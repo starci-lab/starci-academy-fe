@@ -3,8 +3,8 @@ import { cn } from "@heroui/react"
 
 /** Link emphasis recipes. */
 export const linkEmphasisClassNames = {
-    default: cn("inline-flex", "items-center", "gap-2", "text-sm"),
-    muted: cn("inline-flex", "items-center", "gap-2", "text-sm", "text-muted"),
+    default: cn("inline-flex", "items-center", "gap-2", "text-sm", "leading-5", "font-medium", "text-foreground", "no-underline", "underline-offset-4", "hover:underline"),
+    muted: cn("inline-flex", "items-center", "gap-2", "text-sm", "leading-5", "font-normal", "text-muted", "no-underline", "underline-offset-4", "hover:underline"),
     brand: cn("inline-flex", "items-center", "gap-2", "text-foreground", "no-underline"),
 } as const
 /** Brand mark dimensions. */

@@ -52,6 +52,8 @@ describe("ActivityFeedBase", () => {
         expect(screen.getAllByRole("button", { name: "React" })).toHaveLength(3)
         expect(screen.getByText("Today")).toBeInTheDocument()
         expect(screen.getByText("Yesterday")).toBeInTheDocument()
+        expect(screen.getByText("Today")).toHaveAttribute("data-size", "xs")
+        expect(screen.getByText("Today")).toHaveAttribute("data-weight", "medium")
         expect(container.querySelectorAll("section[data-grammar-surface-list='true']")).toHaveLength(1)
         // Each day divider names its own following rows, so the collection label stays hidden.
         expect(screen.getAllByText("Today")).toHaveLength(1)

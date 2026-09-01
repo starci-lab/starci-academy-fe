@@ -39,7 +39,7 @@ describe("ContinueLearningBase", () => {
         )
 
         const kind = screen.getByText("Lesson")
-        expect(kind).toHaveAttribute("data-size", "sm")
+        expect(kind).toHaveAttribute("data-size", "xs")
         expect(kind.querySelector("svg")).toBeNull()
     })
 
@@ -69,7 +69,7 @@ describe("ContinueLearningBase", () => {
         expect(container.querySelector("[data-dashboard-resume-item=featured] [data-tone=accent]")).toHaveClass("bg-accent-soft", "text-accent-soft-foreground")
     })
 
-    it("keeps long titles compact and their supporting content plain", () => {
+    it("gives the destination title one clear step above its supporting kind", () => {
         render(
             <ContinueLearningBase
                 state="ready"
@@ -86,11 +86,11 @@ describe("ContinueLearningBase", () => {
         )
 
         const title = screen.getByText("The document model and ODM: embedding versus referencing")
-        expect(title).toHaveAttribute("data-size", "sm")
-        expect(title).toHaveAttribute("data-weight", "medium")
+        expect(title).toHaveAttribute("data-size", "md")
+        expect(title).toHaveAttribute("data-weight", "semibold")
 
         const content = screen.getByText("Content")
-        expect(content).toHaveAttribute("data-size", "sm")
+        expect(content).toHaveAttribute("data-size", "xs")
         expect(content).toHaveAttribute("data-weight", "normal")
     })
 })

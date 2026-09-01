@@ -40,8 +40,8 @@ export const ContinueLearningBase = (props: ContinueLearningProps) => {
                                 <div className={index === 0 ? continueLearningFeaturedContentClassName : continueLearningCompactContentClassName}>
                                     <IconTile props={{ icon: "course", size: "md" }} />
                                     <div className={continueLearningCopyClassName}>
-                                        <Text props={{ content: item.kindLabel, size: "sm", tone: "muted" }} isLoading={loading} />
-                                        <Text props={{ content: item.title, size: "sm", weight: "medium" }} isLoading={loading} />
+                                        <Text props={{ content: item.kindLabel, size: "xs", tone: "muted" }} isLoading={loading} />
+                                        <Text props={{ content: item.title, size: "md", weight: "semibold" }} isLoading={loading} />
                                         {loading || props.props.resumeLabel === undefined ? null : <SeeMoreLink props={{ label: props.props.resumeLabel }} on={{ press: () => props.on?.resume?.(item.id) }} />}
                                     </div>
                                 </div>

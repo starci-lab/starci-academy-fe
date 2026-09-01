@@ -11,6 +11,9 @@ describe("TextLink", () => {
 
         const link = screen.getByRole("link", { name: "Sign up" })
         expect(link.className).toContain("text-sm")
+        expect(link.className).toContain("leading-5")
+        expect(link.className).toContain("font-medium")
+        expect(link.className).toContain("hover:underline")
         expect(link.getAttribute("data-size")).toBe("sm")
     })
 
@@ -20,6 +23,7 @@ describe("TextLink", () => {
         expect(link).toHaveAttribute("data-selected", "true")
         expect(link.className).toContain("text-sm")
         expect(link.className).toContain("px-2")
+        expect(link.className).not.toContain("hover:underline")
 
         rerender(<TextLink props={{ label: "2026", size: "sm", isSelected: false }} />)
         expect(link).toHaveAttribute("data-selected", "false")

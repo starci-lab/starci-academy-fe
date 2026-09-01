@@ -23,7 +23,7 @@ export const ActivityFeedBase = (props: ActivityFeedProps) => {
         : <div className={activityFeedClassName}>{days.map((day) => {
             const rows = props.state === "pending" ? Array.from({ length: 4 }, (_, index) => ({ id: `${day.id}-${index}` })) : day.rows
             return <section className={activityDayClassName} key={day.id}>
-                <div className={activityDayLabelClassName}><Text props={{ content: day.label, size: "sm", tone: "muted", weight: "semibold" }} isLoading={props.state === "pending"} /></div>
+                <div className={activityDayLabelClassName}><Text props={{ content: day.label, size: "xs", tone: "muted", weight: "medium" }} isLoading={props.state === "pending"} /></div>
                 <div className={activityDayRowsClassName}>{rows.map((row) => <ActivityRow key={row.id} props={row} on={{ openActor: props.on?.[`actor:${row.id}`], openTarget: props.on?.[`target:${row.id}`], react: (type) => props.on?.[`react:${row.id}`]?.(type) }} isLoading={props.state === "pending"} />)}</div>
             </section>
         })}</div>
