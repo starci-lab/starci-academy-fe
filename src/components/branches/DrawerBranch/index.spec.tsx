@@ -4,7 +4,7 @@ import type { PropsWithChildren } from "react"
 import type * as HeroUi from "@heroui/react"
 import { DrawerBranch } from "./index"
 
-type VendorPartProps = PropsWithChildren
+type VendorPartProps = PropsWithChildren<{ readonly className?: string }>
 type VendorContentProps = PropsWithChildren<{ readonly placement?: string }>
 type VendorRootProps = PropsWithChildren<{ readonly onOpenChange: (open: boolean) => void }>
 
@@ -29,12 +29,12 @@ vi.mock("@heroui/react", () => {
     DrawerRoot.Content = (input: VendorContentProps) => (
         <div data-testid="drawer-content" data-placement={input.placement}>{input.children}</div>
     )
-    DrawerRoot.Dialog = (input: VendorPartProps) => <div>{input.children}</div>
-    DrawerRoot.Header = (input: VendorPartProps) => <div>{input.children}</div>
+    DrawerRoot.Dialog = (input: VendorPartProps) => <div data-class-name={input.className}>{input.children}</div>
+    DrawerRoot.Header = (input: VendorPartProps) => <div data-class-name={input.className}>{input.children}</div>
     DrawerRoot.Heading = (input: VendorPartProps) => <h2>{input.children}</h2>
-    DrawerRoot.CloseTrigger = () => <button type="button" onClick={() => mocks.openChange?.(false)}>Close</button>
+    DrawerRoot.CloseTrigger = (input: VendorPartProps) => <button data-class-name={input.className} type="button" onClick={() => mocks.openChange?.(false)}>Close</button>
     DrawerRoot.Body = (input: VendorPartProps) => <div>{input.children}</div>
-    return { cn: (...tokens: Array<string>) => tokens.join(" "), Drawer: DrawerRoot }
+    return { cn: (...tokens: Array<string | undefined>) => tokens.filter(Boolean).join(" "), Drawer: DrawerRoot }
 })
 
 const drawerBody = (content: string) => <>{content}</>
@@ -91,6 +91,27 @@ describe("DrawerBranch", () => {
 
         expect(getByRole("heading", { name: resolvedCopy.aiTitle })).toBeInTheDocument()
         expect(getByText(resolvedCopy.aiBody)).toBeInTheDocument()
+    })
+
+    it("can keep an empty vendor title row while preserving its accessible heading", () => {
+        const { getByRole } = render(
+            <DrawerBranch isOpen isTitleEmpty title={resolvedCopy.cartTitle} onDismiss={() => undefined}>
+                {drawerBody(resolvedCopy.cartBody)}
+            </DrawerBranch>,
+        )
+
+        expect(getByRole("heading", { name: resolvedCopy.cartTitle })).toBeInTheDocument()
+        expect(getByRole("button", { name: "Close" })).not.toHaveAttribute("data-class-name")
+    })
+
+    it("can remove only the outer dialog inset while the child owns its padding", () => {
+        const { getByText } = render(
+            <DrawerBranch inset="none" isOpen title={resolvedCopy.cartTitle} onDismiss={() => undefined}>
+                {drawerBody(resolvedCopy.cartBody)}
+            </DrawerBranch>,
+        )
+
+        expect(getByText(resolvedCopy.cartBody).closest("[data-class-name]")).toHaveAttribute("data-class-name", "p-0!")
     })
 
     it("locks the page at the viewport origin while open and restores its scroll position", async () => {

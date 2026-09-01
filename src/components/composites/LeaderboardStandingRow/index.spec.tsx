@@ -4,10 +4,11 @@ import { LeaderboardStandingRow } from "./index"
 import { RankMarkIconId } from "@/components/leaves/RankMark"
 
 describe("LeaderboardStandingRow", () => {
-    it("leads the standing sentence with rank artwork and keeps the short fact trailing", () => {
+    it("threads explicit cup artwork while keeping the short fact trailing", () => {
         const { container } = render(<LeaderboardStandingRow props={{
             rank: 4,
             rankLabel: "Rank 4",
+            artwork: "cup",
             title: "Rank #4 globally",
             subtitle: "105 XP",
             fact: "4 days left",
@@ -17,7 +18,15 @@ describe("LeaderboardStandingRow", () => {
         expect(screen.getByText("4 days left")).toBeInTheDocument()
         expect(container.querySelector("[data-placement=\"standing\"]")).toHaveAttribute(
             "data-icon",
-            RankMarkIconId(4),
+            RankMarkIconId(4, "cup"),
+        )
+    })
+
+    it("keeps weekly standing on the place-based rank default", () => {
+        const { container } = render(<LeaderboardStandingRow props={{ rank: 2, rankLabel: "Rank 2" }} />)
+        expect(container.querySelector("[data-placement=\"standing\"]")).toHaveAttribute(
+            "data-icon",
+            RankMarkIconId(2),
         )
     })
 })

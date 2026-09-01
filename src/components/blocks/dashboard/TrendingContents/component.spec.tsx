@@ -16,6 +16,9 @@ describe("TrendingContentsBase", () => {
         />)
 
         const row = container.querySelector("[data-dashboard-trending-row='true']")
+        expect(container.querySelectorAll("section[data-grammar-surface-card='true']")).toHaveLength(1)
+        expect(container.querySelector("section[data-grammar-surface-list='true']")).toBeNull()
+        expect(screen.getAllByText("Trending")).toHaveLength(1)
         expect(row).toBeInTheDocument()
         expect(screen.getByText("1")).toBeInTheDocument()
         expect(screen.getByText("A long trending course title that can wrap")).toBeInTheDocument()

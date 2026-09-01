@@ -41,8 +41,8 @@ const activityRow = (id: string, actor: string) => ({
 afterEach(cleanup)
 
 describe("ActivityFeedBase", () => {
-    it("draws one joined list per day, labelled by the day it names", () => {
-        render(<ActivityFeedBase state="ready" props={{
+    it("draws every labelled day inside one continuous joined list", () => {
+        const { container } = render(<ActivityFeedBase state="ready" props={{
             message: "",
             days: [
                 { id: "1", label: "Today", rows: [activityRow("a1", "Ada")] },
@@ -52,7 +52,8 @@ describe("ActivityFeedBase", () => {
         expect(screen.getAllByRole("button", { name: "React" })).toHaveLength(3)
         expect(screen.getByText("Today")).toBeInTheDocument()
         expect(screen.getByText("Yesterday")).toBeInTheDocument()
-        // The day heading already names the list, so the surface does not repeat it.
+        expect(container.querySelectorAll("section[data-grammar-surface-list='true']")).toHaveLength(1)
+        // Each day divider names its own following rows, so the collection label stays hidden.
         expect(screen.getAllByText("Today")).toHaveLength(1)
     })
 

@@ -13,7 +13,9 @@ describe("RankedUserRow", () => {
             movementLabel: "Up 1",
             verdict: "success",
         }} />)
-        expect(success.getByText("Ada")).toBeInTheDocument()
+        const successRow = success.getByText("Ada").closest("[data-verdict=success]")
+        expect(successRow).toHaveClass("pl-4", "inset-shadow-[2px_0_0_0_var(--success)]")
+        expect(successRow).not.toHaveClass("border")
         success.unmount()
 
         const danger = render(<RankedUserRow props={{
@@ -25,7 +27,9 @@ describe("RankedUserRow", () => {
             movementLabel: "Down 2",
             verdict: "danger",
         }} />)
-        expect(danger.getByText("Grace")).toBeInTheDocument()
+        const dangerRow = danger.getByText("Grace").closest("[data-verdict=danger]")
+        expect(dangerRow).toHaveClass("pl-4", "inset-shadow-[2px_0_0_0_var(--danger)]")
+        expect(dangerRow).not.toHaveClass("border")
     })
 
     it("keeps the viewer accented and removes the follow action", () => {

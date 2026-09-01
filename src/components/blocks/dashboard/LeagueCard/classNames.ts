@@ -1,4 +1,5 @@
 export {
+    communityEmptyNoticeClassName as leagueEmptyNoticeClassName,
     communityRankedRowClassName as leagueRankedRowClassName,
-    communityStandingClassName as leagueStandingClassName,
+    communityLeagueStandingClassName as leagueStandingClassName,
 } from "../CommunityTab/classNames"

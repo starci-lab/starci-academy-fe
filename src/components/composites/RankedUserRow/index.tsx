@@ -4,6 +4,7 @@ import { RankDeltaCaret } from "@/components/leaves/RankDeltaCaret"
 import { RankMark } from "@/components/leaves/RankMark"
 import { Text } from "@/components/leaves/Text"
 import { TextLink } from "@/components/leaves/TextLink"
+import { getRankedUserVerdictClassName } from "./classNames"
 
 /** Semantic movement verdict carried by leaderboard data. */
 export type RankedUserVerdict = "success" | "danger"
@@ -90,7 +91,7 @@ export const RankedUserRow = (props: RankedUserRowProps) => {
         />
         : undefined
     return (
-        <div><RankMark
+        <div className={getRankedUserVerdictClassName(data.verdict)} data-verdict={data.verdict}><RankMark
             props={{ rank: data.rank, placement: "row", accessibleLabel: data.rankLabel }}
             isLoading={isLoading}
         /><Avatar props={{ name: data.name, src: data.avatar ?? undefined, size: "sm" }} isLoading={isLoading} /><div>{name}{data.subtitle === undefined && !isLoading ? null : <Text props={{ content: data.subtitle, size: "xs", tone: "muted" }} isLoading={isLoading} />}</div><Text props={{ content: data.points, size: "xs", tone: "muted" }} isLoading={isLoading} />{movement}{follow}</div>

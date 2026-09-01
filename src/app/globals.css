@@ -127,10 +127,13 @@ html {
 }
 
 .extended-tabs .tabs__tab:first-child {
-    padding-inline-start: 0.75rem !important;
+    padding-inline-start: 0 !important;
 }
 
-.starci-core-navigation-feature-nav-primary.starci-core-page-container,
+.starci-core-navigation-feature-nav-primary.starci-core-page-container {
+    padding-inline: 0.75rem !important;
+}
+
 .starci-core-navigation-feature-nav-feature.starci-core-page-container {
     padding-inline: 0.75rem !important;
 }

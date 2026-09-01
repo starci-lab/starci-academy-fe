@@ -2,10 +2,10 @@ import { cn } from "@heroui/react"
 
 /** Zero-padding body so drawer content owns its inset. */
 export const drawerBodyClassName = cn("max-w-full", "min-w-0", "overflow-x-hidden", "p-0")
+/** Keep the real dialog name available while a navigation drawer presents an empty title row. */
+export const drawerHiddenHeadingLabelClassName = cn("sr-only")
 /** Complete the controlled vendor root without creating a second visible drawer opener. */
 export const drawerControlledTriggerClassName = cn("sr-only", "pointer-events-none")
-/** The overlay exit must read as a control, not a low-contrast decorative glyph. */
-export const drawerCloseTriggerClassName = cn("size-10!", "rounded-full!", "border!", "border-separator!", "bg-surface!", "text-foreground!", "shadow-sm!", "hover:bg-default-100!")
 /** Anchor the portal at the locked document origin instead of a stale embedded-browser fixed layer. */
 export const drawerContentClassName = cn("absolute!")
 /** Keep side drawers on one explicit width when the document scrollbar is locked or restored. */
@@ -14,6 +14,13 @@ export const drawerSideContentClassName = cn("w-[min(24rem,calc(100dvw-2rem))]!"
 export const drawerWorkspaceContentClassName = cn("w-dvw!", "max-w-none!", "sm:w-[26.25rem]!", "sm:max-w-[calc(100dvw-2rem)]!")
 /** Remove the vendor's compact dialog cap when the workspace itself owns the viewport width. */
 export const drawerWorkspaceDialogClassName = cn("w-full!", "max-w-none!")
+/** Let navigation content own its own px-3/py-6 inset without a second vendor dialog inset. */
+export const drawerFlushDialogClassName = cn("p-0!")
+/** Compose workspace sizing and optional vendor-inset removal outside the JSX owner. */
+export const getDrawerDialogClassName = (size: "default" | "workspace" = "default", inset: "default" | "none" = "default") => cn(
+    size === "workspace" ? drawerWorkspaceDialogClassName : undefined,
+    inset === "none" ? drawerFlushDialogClassName : undefined,
+)
 /** A bounded side drawer must name its physical edge; vendor inset sets both sides in this host. */
 export const drawerRightContentClassName = cn("left-auto!", "right-0!")
 /** Keep a left side drawer physically anchored despite the vendor's bidirectional inset. */

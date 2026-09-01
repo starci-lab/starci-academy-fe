@@ -5,7 +5,7 @@ import { RecommendedCourseRow } from "./index"
 describe("RecommendedCourseRow", () => {
     it("draws the whole row as one destination named after the course", () => {
         const open = vi.fn()
-        render(<RecommendedCourseRow
+        const { container } = render(<RecommendedCourseRow
             props={{ id: "one", title: "Backend basics", price: "990.000 ₫", actionLabel: "View course" }}
             on={{ open }}
         />)
@@ -13,6 +13,13 @@ describe("RecommendedCourseRow", () => {
         expect(screen.getByText("Backend basics")).toBeInTheDocument()
         expect(screen.getByText("990.000 ₫")).toBeInTheDocument()
         expect(screen.getByText("View course")).toHaveAttribute("data-tone", "accent")
+        const action = container.querySelector("[data-destination-cue='true']")
+        const caret = container.querySelector("[data-destination-cue-caret='true']")
+        expect(action?.firstElementChild).toHaveTextContent("View course")
+        expect(action?.lastElementChild).toBe(caret)
+        expect(caret).toHaveClass("group-hover:translate-x-1")
+        expect(container.querySelector("[data-recommended-course-body='true']")).toHaveClass("gap-2")
+        expect(container.querySelector("[data-recommended-course-body='true']")).not.toHaveClass("gap-1")
         fireEvent.click(surface)
         expect(open).toHaveBeenCalledOnce()
     })

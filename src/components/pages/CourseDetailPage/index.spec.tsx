@@ -51,7 +51,6 @@ const mocks = vi.hoisted(() => ({
     isTrialing: false,
     isAdding: false,
     isRemoving: false,
-    sectionCount: 5,
 }))
 
 vi.mock("next-intl", () => ({
@@ -96,7 +95,6 @@ vi.mock("./component", () => {
         readonly on?: ConnectedActions
     }
     const intents = ["act", "trial", "addToCart", "openPriceDetail", "navigateHome", "navigateCourses", "retry"]
-    const sections = ["overview", "curriculum", "reviews", "faq"]
     return {
         CourseDetailPageBase: (input: ConnectedProps) => (
             <>
@@ -107,18 +105,6 @@ vi.mock("./component", () => {
                         {`${intent} intent`}
                     </button>
                 ))}
-                {sections.map((section) => (
-                    <button
-                        key={section}
-                        type="button"
-                        onClick={() => (input.on?.selectSection as ((value: string) => void) | undefined)?.(section)}
-                    >
-                        {`select ${section}`}
-                    </button>
-                ))}
-                {sections.slice(0, mocks.sectionCount).map((section) => (
-                    <div key={section} id={`course-detail-${section}`} />
-                ))}
             </>
         ),
     }
@@ -127,7 +113,6 @@ vi.mock("./component", () => {
 /** Read the settled props the connected half handed across. */
 const resolved = () => JSON.parse(screen.getByTestId("resolved").textContent ?? "{}") as Readonly<Record<string, never>>
 
-const scrollIntoView = vi.fn()
 const locationStub = { href: "http://localhost/courses/system-design-mastery", assign: vi.fn() }
 
 beforeEach(() => {
@@ -142,15 +127,12 @@ beforeEach(() => {
     mocks.isTrialing = false
     mocks.isAdding = false
     mocks.isRemoving = false
-    mocks.sectionCount = 5
     vi.clearAllMocks()
     mocks.checkout.mockResolvedValue({})
     mocks.trial.mockResolvedValue({})
     mocks.add.mockResolvedValue({})
     mocks.remove.mockResolvedValue({})
-    scrollIntoView.mockClear()
     locationStub.assign.mockClear()
-    Element.prototype.scrollIntoView = scrollIntoView
     Object.defineProperty(window, "location", { configurable: true, value: locationStub })
 })
 
@@ -634,30 +616,4 @@ describe("CourseDetailPage navigation", () => {
         expect(mocks.push).toHaveBeenCalledWith("/courses")
     })
 
-    it("scrolls to the hero for overview and to the matching section for every other tab", () => {
-        render(<CourseDetailPage displayId="system-design-mastery" />)
-        fireEvent.click(screen.getByRole("button", { name: "select overview" }))
-        expect(scrollIntoView).toHaveBeenCalledTimes(1)
-        expect(scrollIntoView.mock.instances[0]).toBe(document.getElementById("course-detail-overview"))
-        expect(scrollIntoView).toHaveBeenCalledWith({ behavior: "smooth", block: "start" })
-
-        fireEvent.click(screen.getByRole("button", { name: "select curriculum" }))
-        expect(scrollIntoView.mock.instances[1]).toBe(document.getElementById("course-detail-curriculum"))
-
-        fireEvent.click(screen.getByRole("button", { name: "select reviews" }))
-        expect(scrollIntoView.mock.instances[2]).toBe(document.getElementById("course-detail-reviews"))
-
-        fireEvent.click(screen.getByRole("button", { name: "select faq" }))
-        expect(scrollIntoView.mock.instances[3]).toBe(document.getElementById("course-detail-faq"))
-        expect(resolved()).toMatchObject({ selectedSection: "faq" })
-    })
-
-    it("selects a section without scrolling when the page drew no such section", () => {
-        mocks.sectionCount = 3
-        render(<CourseDetailPage displayId="system-design-mastery" />)
-
-        fireEvent.click(screen.getByRole("button", { name: "select faq" }))
-        expect(scrollIntoView).not.toHaveBeenCalled()
-        expect(resolved()).toMatchObject({ selectedSection: "faq" })
-    })
 })

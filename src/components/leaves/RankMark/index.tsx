@@ -1,8 +1,14 @@
-import { Icon, type IconName } from "@/components/leaves/Icon"
-import { rankLoadingClassNames, rankPlacementClassNames } from "./classNames"
+import { RankArtwork, type RankArtworkKind } from "@starci/grammar/core"
+import { rankArtworkClassName, rankLoadingClassNames, rankPlacementClassNames } from "./classNames"
 
 /** Where the closed rank artwork is being used. */
 export type RankMarkPlacement = "standing" | "row"
+
+/** Which ranking meaning the caller needs: a place or the platform cup. */
+export type RankMarkArtwork = "rank" | "cup"
+
+/** The semantic artwork that survives after a place is resolved. */
+export type RankMarkResolvedArtwork = RankArtworkKind | "number"
 
 /** Resolved rank artwork data. */
 export type RankMarkData = {
@@ -10,6 +16,8 @@ export type RankMarkData = {
     readonly rank?: number
     /** The fixed visual slot occupied by the artwork. */
     readonly placement: RankMarkPlacement
+    /** An explicit cup is independent from the viewer's numeric place. */
+    readonly artwork?: RankMarkArtwork
     /** Resolved accessible label retaining the numeric rank. */
     readonly accessibleLabel?: string
 }
@@ -17,21 +25,23 @@ export type RankMarkData = {
 /** Props accepted by the closed rank-artwork leaf. */
 export type RankMarkProps = { readonly props: RankMarkData; readonly isLoading?: boolean }
 
-const PLACE_MEDALS: Readonly<Record<number, IconName>> = {
-    1: "rankFirst",
-    2: "rankSecond",
-    3: "rankThird",
+const PLACE_MEDALS: Readonly<Record<number, RankArtworkKind>> = {
+    1: "first",
+    2: "second",
+    3: "third",
 }
 
-
-/** Resolve the exact Fluent Emoji Flat artwork ID for a one-based rank. */
-export const RankMarkIconId = (rank: number): IconName =>
-    PLACE_MEDALS[rank] ?? "rankOther"
+/** Resolve a place to Grammar artwork, keeping ordinary places as readable numbers. */
+export const RankMarkIconId = (
+    rank: number | undefined,
+    artwork: RankMarkArtwork = "rank",
+): RankMarkResolvedArtwork => artwork === "cup" ? "cup" : rank === undefined ? "number" : PLACE_MEDALS[rank] ?? "number"
 
 /** Draw one closed rank artwork mark without exposing Iconify IDs to callers. */
 export const RankMark = (props: RankMarkProps) => {
     const placement = props.props.placement
-    if (props.isLoading === true || props.props.rank === undefined) {
+    const artwork = props.props.artwork ?? "rank"
+    if (props.isLoading === true || (props.props.rank === undefined && artwork === "rank")) {
         return (
             <span
                 data-placement={placement}
@@ -41,15 +51,22 @@ export const RankMark = (props: RankMarkProps) => {
             />
         )
     }
+    const resolvedArtwork = RankMarkIconId(props.props.rank, artwork)
+    const accessibleLabel = props.props.accessibleLabel
     return (
         <span
             data-placement={placement}
             data-loading="false"
-            data-icon={RankMarkIconId(props.props.rank)}
-            aria-label={props.props.accessibleLabel}
+            data-icon={resolvedArtwork}
+            data-artwork={resolvedArtwork}
+            role={accessibleLabel === undefined ? undefined : "img"}
+            aria-label={accessibleLabel}
+            aria-hidden={accessibleLabel === undefined ? true : undefined}
             className={rankPlacementClassNames[placement]}
         >
-            <Icon props={{ name: RankMarkIconId(props.props.rank), role: placement === "standing" ? "heading" : "leading" }} />
+            {resolvedArtwork === "number"
+                ? <span aria-hidden="true">{props.props.rank}</span>
+                : <RankArtwork kind={resolvedArtwork} aria-hidden="true" className={rankArtworkClassName} />}
         </span>
     )
 }

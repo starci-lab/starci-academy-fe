@@ -30,7 +30,7 @@ afterEach(cleanup)
 const props = {
     brand: "StarCi Academy",
     routes: [{ id: "home", label: "Home", icon: "home" as const, isCurrent: true }],
-    tabs: [{ id: "overview", label: "Overview", icon: "home" as const, isCurrent: true }],
+    featureTabs: [{ id: "overview", label: "Overview", icon: "home" as const, isCurrent: true }],
     themeLabel: "Switch theme",
     utilitiesLabel: "Display utilities",
     actionsLabel: "Account and commerce",
@@ -137,7 +137,7 @@ describe("ShellNavBase", () => {
     })
 
     it("drops the whole bottom layer for a page that owns no tabs", () => {
-        render(<ShellNavBase props={{ ...props, tabs: undefined }} />)
+        render(<ShellNavBase props={{ ...props, featureTabs: undefined }} />)
         expect(screen.queryByRole("tablist")).toBeNull()
     })
 
@@ -145,8 +145,8 @@ describe("ShellNavBase", () => {
         const selectTab = vi.fn()
         render(
             <ShellNavBase
-                props={{ ...props, tabs: [{ id: "overview", label: "Overview", icon: "home" }, { id: "courses", label: "Courses", icon: "course" }] }}
-                on={{ selectTab }}
+                props={{ ...props, featureTabs: [{ id: "overview", label: "Overview", icon: "home" }, { id: "courses", label: "Courses", icon: "course" }] }}
+                on={{ selectFeatureTab: selectTab }}
             />,
         )
 

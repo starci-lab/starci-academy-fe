@@ -17,11 +17,6 @@ const labels = {
     breadcrumbLabel: "Course path",
     breadcrumbHome: "Home",
     breadcrumbCourses: "Courses",
-    sectionTabsLabel: "Course sections",
-    overviewTab: "Explore the course",
-    curriculumTab: "Content",
-    reviewsTab: "Learner outcomes",
-    faqTab: "FAQ",
     valuePropsTitle: "What you will learn",
     curriculumTitle: "Course content",
     prerequisitesTitle: "What you need first",
@@ -34,7 +29,6 @@ const labels = {
 
 const props: CourseDetailPageData = {
     labels,
-    selectedSection: "overview",
     title: "Fullstack Mastery",
     tagline: "One structured path into production engineering.",
     stats: [
@@ -67,14 +61,10 @@ const props: CourseDetailPageData = {
 }
 
 describe("CourseDetailPageBase", () => {
-    it("renders direction C hierarchy and reports a real section selection", () => {
-        const selectSection = vi.fn()
-        render(<CourseDetailPageBase state="ready" props={props} on={{ selectSection }} />)
+    it("renders the course hierarchy below the navbar-owned feature tabs", () => {
+        render(<CourseDetailPageBase state="ready" props={props} />)
 
-        expect(screen.getByRole("tab", { name: "Explore the course" })).toContainHTML("svg")
-        expect(screen.getByRole("tab", { name: "Content" })).toContainHTML("svg")
-        expect(screen.getByRole("tab", { name: "Learner outcomes" })).toContainHTML("svg")
-        expect(screen.getByRole("tab", { name: "FAQ" })).toContainHTML("svg")
+        expect(screen.queryByRole("tablist")).toBeNull()
         expect(screen.getByRole("list", { name: "Course path" })).toHaveTextContent("HomeCoursesFullstack Mastery")
         expect(screen.getByText("Learning alongside you")).toBeInTheDocument()
         expect(screen.getByText("13 learners")).toBeInTheDocument()
@@ -83,7 +73,6 @@ describe("CourseDetailPageBase", () => {
         // The rating package also emits one off-screen status value for assistive technology;
         // the page still owns exactly two VISIBLE numeric facts (signal board + review summary).
         expect(screen.getAllByText("4.8").filter((node) => node.getAttribute("role") !== "status")).toHaveLength(2)
-        expect(screen.getByRole("tab", { name: "FAQ" })).toBeInTheDocument()
         expect(screen.getByText("Can I learn with another backend stack?")).toBeInTheDocument()
         expect(screen.getByText("Yes. The course teaches transferable system thinking.")).not.toBeVisible()
         expect(screen.getByText("What you will learn")).toBeInTheDocument()
@@ -93,7 +82,7 @@ describe("CourseDetailPageBase", () => {
         expect(document.getElementById("course-detail-curriculum")).toHaveClass("scroll-mt-28")
         expect(document.getElementById("course-detail-reviews")).toHaveClass("scroll-mt-28")
         expect(document.getElementById("course-detail-faq")).toHaveClass("scroll-mt-28")
-        const body = screen.getByRole("navigation", { name: "Course sections" }).nextElementSibling
+        const body = document.querySelector("[data-course-detail-body='true']")
         expect(body).toHaveClass("pb-6", "pt-6", "lg:pt-0")
         expect(body?.firstElementChild).toHaveClass("lg:pt-6")
         expect(screen.getByRole("complementary")).toHaveClass("lg:pt-6")
@@ -109,10 +98,6 @@ describe("CourseDetailPageBase", () => {
         fireEvent.click(screen.getByText("Can I learn with another backend stack?"))
         expect(screen.getByText("Yes. The course teaches transferable system thinking.")).toBeVisible()
 
-        fireEvent.click(screen.getByRole("tab", { name: "Content" }))
-        expect(selectSection).toHaveBeenCalledWith("curriculum")
-        fireEvent.click(screen.getByRole("tab", { name: "FAQ" }))
-        expect(selectSection).toHaveBeenCalledWith("faq")
     })
 
     it("reports the current course breadcrumb and disables its link", () => {
@@ -120,14 +105,14 @@ describe("CourseDetailPageBase", () => {
         const navigateCourses = vi.fn()
         render(<CourseDetailPageBase state="ready" props={props} on={{ navigateHome, navigateCourses }} />)
 
-        expect(screen.getByRole("tab", { name: "Explore the course" })).toBeInTheDocument()
+        expect(screen.queryByRole("tablist")).toBeNull()
         expect(navigateHome).not.toHaveBeenCalled()
         expect(navigateCourses).not.toHaveBeenCalled()
     })
 
     it("keeps one six-cell signal ribbon while course data is pending", () => {
-        render(<CourseDetailPageBase state="pending" props={{ labels, selectedSection: "overview" }} />)
-        expect(screen.getByRole("tab", { name: "Learner outcomes" })).toBeInTheDocument()
+        render(<CourseDetailPageBase state="pending" props={{ labels }} />)
+        expect(screen.queryByRole("tablist")).toBeNull()
     })
 
     it("does not turn an unrated course into a zero-score verdict", () => {
@@ -138,7 +123,6 @@ describe("CourseDetailPageBase", () => {
 
     it("keeps the FAQ anchor real when a course has no authored rows", () => {
         render(<CourseDetailPageBase state="ready" props={{ ...props, faqs: [] }} />)
-        expect(screen.getByRole("tab", { name: "FAQ" })).toBeInTheDocument()
         expect(screen.getByText("No FAQs yet")).toBeInTheDocument()
     })
 
@@ -149,7 +133,7 @@ describe("CourseDetailPageBase", () => {
         />)
         expect(screen.getByText("No such course")).toBeInTheDocument()
         expect(screen.queryByRole("button", { name: "Try again" })).not.toBeInTheDocument()
-        expect(screen.queryByRole("tab", { name: "FAQ" })).not.toBeInTheDocument()
+        expect(screen.queryByRole("tablist")).toBeNull()
     })
 
     it("offers the one way out of a failed request and reports the press", () => {
@@ -172,7 +156,7 @@ describe("CourseDetailPageBase", () => {
     it("draws a course whose every optional region came back empty", () => {
         render(<CourseDetailPageBase state="ready" props={{ labels }} />)
 
-        expect(screen.getByRole("tab", { name: "Explore the course", selected: true })).toBeInTheDocument()
+        expect(screen.queryByRole("tablist")).toBeNull()
         expect(screen.getByText("No reviews yet")).toBeInTheDocument()
         expect(screen.getByText("No FAQs yet")).toBeInTheDocument()
         expect(screen.getByRole("heading", { name: "Course content" })).toBeInTheDocument()

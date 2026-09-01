@@ -16,7 +16,7 @@ import { DashboardPageBase } from "./component"
  */
 
 /** The sections of the dashboard, in reading order. */
-const TAB_IDS = ["overview", "explore", "courses", "community"] as const
+const TAB_IDS = ["overview", "explore", "bulletin", "courses", "community"] as const
 const compactDashboardRailQuery = "(max-width: 69.999rem)"
 
 const subscribeToCompactDashboardRail = (onStoreChange: () => void) => {

@@ -225,16 +225,4 @@ describe("LeagueCard", () => {
         expect(push).toHaveBeenCalledWith("/profile/ada")
     })
 
-    it("sends the reader to the full board", () => {
-        wire({
-            data: {
-                weekEndAt: "2026-09-12T15:00:00.000Z",
-                entries: [entry({ userGlobalId: "u1", username: "ada", rank: 1 })],
-            },
-        })
-
-        render(<LeagueCard />)
-        fireEvent.click(screen.getByText("seeMore"))
-        expect(push).toHaveBeenCalledWith("/league")
-    })
 })

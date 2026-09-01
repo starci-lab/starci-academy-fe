@@ -107,7 +107,7 @@ describe("TopLearners", () => {
             },
         })
 
-        render(<TopLearners />)
+        const { container } = render(<TopLearners />)
         expect(screen.getByText("learner-4")).toBeInTheDocument()
         expect(screen.getByText("learner-4")).toBeInTheDocument()
         expect(screen.queryByText("learner-5")).toBeNull()
@@ -115,6 +115,7 @@ describe("TopLearners", () => {
         // Once in the standing line above the list, once on the appended row itself.
         expect(screen.getAllByText("points:12")).toHaveLength(2)
         expect(screen.getByText("top.rankLine:41")).toBeInTheDocument()
+        expect(container.querySelector("[data-placement=\"standing\"]")).toHaveAttribute("data-artwork", "cup")
     })
 
     it("appends nothing extra when the reader is already inside the cut", () => {
@@ -178,16 +179,6 @@ describe("TopLearners", () => {
         render(<TopLearners />)
         fireEvent.click(screen.getByText("anonymous"))
         expect(push).not.toHaveBeenCalled()
-    })
-
-    it("sends the reader to the full board", () => {
-        wire({
-            data: { entries: [entry()], myPoints: 0, myRank: 99 },
-        })
-
-        render(<TopLearners />)
-        fireEvent.click(screen.getByText("seeMore"))
-        expect(push).toHaveBeenCalledWith("/league")
     })
 
     it("draws no follow control, because this card is a preview and not the board", () => {

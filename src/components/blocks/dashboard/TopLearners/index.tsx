@@ -58,6 +58,7 @@ export const TopLearners = (props: TopLearnersProps) => {
         standing: {
             rank: data?.myRank,
             rankLabel: data ? t("top.rankLine", { rank: data.myRank }) : undefined,
+            artwork: "cup" as const,
             title: t("top.rankLine", { rank: data?.myRank ?? 0 }),
             subtitle: t("points", { count: data?.myPoints ?? 0 }),
         },

@@ -5,7 +5,7 @@ import { dashboardFlushSurfaceClassName } from "../classNames"
 export const continueLearningSurfaceClassName = cn(dashboardFlushSurfaceClassName)
 
 /** Arrange resumable learning cards without constraining their content width. */
-export const continueLearningGridClassName = cn("grid", "min-w-0", "items-stretch", "gap-6", "md:grid-cols-2", "xl:grid-cols-3")
+export const continueLearningGridClassName = cn("grid", "min-w-0", "items-stretch", "gap-2", "md:grid-cols-2", "xl:grid-cols-3")
 
 /** The first resumable item is the focal task; later items remain useful but quieter. */
 export const continueLearningItemClassName = cn(

@@ -12,14 +12,29 @@ describe("StarCiAiFab", () => {
         expect(trigger).toHaveAttribute("draggable", "false")
         expect(trigger).toHaveAttribute("data-slot", "starci-ai-mascot")
         const boundary = document.querySelector("[data-slot=\"starci-ai-drag-boundary\"]")
-        expect(boundary).toHaveClass("bottom-20", "lg:bottom-4", "max-lg:[[data-ai-clearance=profile]_&]:hidden")
-        expect(boundary).toHaveClass("[[data-ai-clearance=dashboard]_&]:left-[calc(100vw-4.25rem)]", "[[data-ai-clearance=dashboard]_&]:right-4")
-        expect(boundary).not.toHaveClass("[[data-ai-clearance=dashboard]_&]:top-2", "[[data-ai-clearance=dashboard]_&]:bottom-[calc(100dvh-3.75rem)]")
+        expect(boundary).toHaveClass(
+            "fixed",
+            "left-4",
+            "right-4",
+            "top-32",
+            "bottom-20",
+            "lg:bottom-4",
+            "max-lg:[[data-ai-clearance=dashboard]_&]:top-40",
+            "max-lg:[[data-ai-clearance=profile]_&]:top-40",
+        )
+        expect(boundary).not.toHaveClass(
+            "[[data-ai-clearance=dashboard]_&]:left-[calc(100vw-4.25rem)]",
+            "[[data-ai-clearance=profile]_&]:left-[calc(100vw-3.75rem)]",
+            "[[data-ai-clearance=profile]_&]:bottom-[calc(100dvh-3.75rem)]",
+            "max-lg:[[data-ai-clearance=profile]_&]:hidden",
+        )
         expect(trigger).toHaveClass("bottom-0")
         expect(trigger).not.toHaveClass("bottom-20")
         expect(trigger.querySelector("img")).toBeInTheDocument()
         expect(trigger.querySelector("img")?.getAttribute("src")).toContain("starci-ai-teacher-v1.png")
         expect(trigger.querySelector("[data-slot=\"starci-ai-teacher\"]")).toHaveClass("rounded-full")
+        expect(trigger.querySelector("[data-slot=\"starci-ai-drag-handle-art\"]")).toHaveClass("pointer-events-none")
+        expect(trigger.querySelector("[data-slot=\"starci-ai-drag-handle-art\"]")).toHaveAttribute("aria-hidden", "true")
         fireEvent.click(trigger)
         expect(press).toHaveBeenCalledTimes(1)
     })

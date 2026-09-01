@@ -1128,6 +1128,9 @@
         position: sticky;
         z-index: var(--starci-core-subnav-z, 40);
         top: var(--starci-core-subnav-offset, 4rem);
+        backface-visibility: hidden;
+        transform: translateZ(0);
+        will-change: transform;
     }
 
     .starci-core-subnav-identity {
@@ -1158,20 +1161,9 @@
         height: 2.75rem;
         align-items: center;
         justify-content: center;
-        border: 0;
-        border-radius: var(--starci-core-control-radius, 0.75rem);
-        background: transparent;
+        border-radius: 9999px;
         color: inherit;
         cursor: pointer;
-    }
-
-    .starci-core-subnav-toggle:hover {
-        background: var(--surface-secondary, var(--starci-core-surface-secondary, Canvas));
-    }
-
-    .starci-core-subnav-toggle:focus-visible {
-        outline: 2px solid var(--focus, var(--starci-core-focus, Highlight));
-        outline-offset: 2px;
     }
 
     @media (min-width: 48rem) {

@@ -5,9 +5,8 @@ import {
     useMutateReactActivitySwr,
     useQueryMyFeedSwr,
     useQueryResolveRouteSwr,
-    useQueryTrendingContentsSwr,
 } from "@/hooks"
-import { ActivityType, MyFeedCategory, type QueryMyFeedItemData } from "@/modules/api/graphql/queries/types/my-feed"
+import { ActivityType, MyFeedCategory, MyFeedTab, type QueryMyFeedItemData } from "@/modules/api/graphql/queries/types/my-feed"
 import { ReactionType } from "@/modules/api/graphql/queries/types/reactions"
 import { FeedExplorer } from "./index"
 
@@ -35,7 +34,6 @@ vi.mock("@/hooks", () => ({
     useQueryMyFeedSwr: vi.fn(),
     useMutateReactActivitySwr: vi.fn(),
     useQueryResolveRouteSwr: vi.fn(),
-    useQueryTrendingContentsSwr: vi.fn(),
 }))
 
 /** Local noon, so the relative times in the feed stay inside one local day. */
@@ -73,12 +71,11 @@ const resolver = (path: string | null) => ({
     trigger: vi.fn().mockResolvedValue({ data: { resolveRoute: { data: path === null ? null : { path } } } }),
 }) as never
 
-/** Wire the whole block; the trending rail is settled-empty so it draws nothing of its own. */
+/** Wire the Bulletin destination around one settled feed answer. */
 const wire = (query: unknown, over: { route?: unknown, reaction?: unknown } = {}) => {
     vi.mocked(useQueryMyFeedSwr).mockReturnValue(query as never)
     vi.mocked(useQueryResolveRouteSwr).mockReturnValue((over.route ?? resolver("/x")) as never)
     vi.mocked(useMutateReactActivitySwr).mockReturnValue((over.reaction ?? { trigger: vi.fn() }) as never)
-    vi.mocked(useQueryTrendingContentsSwr).mockReturnValue(feed({ data: [] }))
 }
 
 beforeEach(() => {
@@ -96,7 +93,9 @@ describe("FeedExplorer", () => {
     it("rests the feed, and offers no second page, while the first one is on its way", () => {
         wire(feed({ data: undefined }))
 
-        render(<FeedExplorer />)
+        const { container } = render(<FeedExplorer />)
+        expect(container.querySelectorAll("section[data-grammar-surface-card='true']")).toHaveLength(1)
+        expect(useQueryMyFeedSwr).toHaveBeenCalledWith(MyFeedTab.ForYou, MyFeedCategory.All)
         expect(screen.queryByRole("button", { name: "loadMore" })).toBeNull()
         expect(screen.queryByText("feedFailed")).toBeNull()
     })
@@ -119,45 +118,6 @@ describe("FeedExplorer", () => {
         expect(screen.getByText("feedEmptyPlatformDescription")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "browseCourses" }))
         expect(push).toHaveBeenCalledWith("/courses")
-    })
-
-    it("clears the filter, rather than the platform, when a category empties the feed", () => {
-        vi.mocked(useQueryMyFeedSwr).mockImplementation(((_scope: unknown, category: unknown) =>
-            category === MyFeedCategory.All
-                ? feed({ data: [{ items: [item()], nextCursor: null }] })
-                : feed({ data: [{ items: [], nextCursor: null }] })) as never)
-        vi.mocked(useQueryResolveRouteSwr).mockReturnValue(resolver("/x"))
-        vi.mocked(useMutateReactActivitySwr).mockReturnValue({ trigger: vi.fn() } as never)
-        vi.mocked(useQueryTrendingContentsSwr).mockReturnValue(feed({ data: [] }))
-
-        render(<FeedExplorer />)
-        expect(screen.getByText("ada")).toBeInTheDocument()
-
-        fireEvent.click(screen.getByRole("tab", { name: "achievements" }))
-        expect(screen.getByText("feedEmptyFiltered")).toBeInTheDocument()
-        expect(screen.queryByText("feedEmptyPlatform")).toBeNull()
-
-        fireEvent.click(screen.getByRole("button", { name: "resetFilter" }))
-        expect(screen.getByText("ada")).toBeInTheDocument()
-        expect(push).not.toHaveBeenCalled()
-    })
-
-    it("re-reads the feed under the scope the reader switched to", () => {
-        const seen: Array<unknown> = []
-        vi.mocked(useQueryMyFeedSwr).mockImplementation(((scope: unknown) => {
-            seen.push(scope)
-            return feed({ data: [{ items: [item()], nextCursor: null }] })
-        }) as never)
-        vi.mocked(useQueryResolveRouteSwr).mockReturnValue(resolver("/x"))
-        vi.mocked(useMutateReactActivitySwr).mockReturnValue({ trigger: vi.fn() } as never)
-        vi.mocked(useQueryTrendingContentsSwr).mockReturnValue(feed({ data: [] }))
-
-        render(<FeedExplorer />)
-        expect(seen.at(-1)).toBe("forYou")
-
-        fireEvent.click(screen.getByRole("tab", { name: "following" }))
-        expect(seen.at(-1)).toBe("following")
-        expect(screen.getByRole("tab", { name: "following" })).toHaveAttribute("aria-selected", "true")
     })
 
     it("asks for the next page only while there is one", () => {

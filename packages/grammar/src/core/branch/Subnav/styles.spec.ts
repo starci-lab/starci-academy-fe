@@ -7,4 +7,13 @@ describe("Core Subnav styles", () => {
     it("centres title content within the subnav row", () => {
         expect(css).toMatch(/\.starci-core-subnav-title\s*\{[\s\S]*?display: flex;[\s\S]*?align-items: center;/)
     })
+
+    it("keeps sticky subnav text on one compositor layer while the page scrolls", () => {
+        expect(css).toMatch(/data-grammar-subnav-position="sticky"[\s\S]*?backface-visibility: hidden;[\s\S]*?transform: translateZ\(0\);[\s\S]*?will-change: transform;/)
+    })
+
+    it("keeps the tertiary icon trigger circular with a 44px touch target", () => {
+        expect(css).toMatch(/\.starci-core-subnav-toggle\s*\{[\s\S]*?width: 2\.75rem;[\s\S]*?height: 2\.75rem;[\s\S]*?border-radius: 9999px;/)
+        expect(css).not.toMatch(/\.starci-core-subnav-toggle:hover/)
+    })
 })

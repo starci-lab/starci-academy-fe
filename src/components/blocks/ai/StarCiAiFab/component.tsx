@@ -5,7 +5,7 @@ import { motion, useReducedMotion } from "framer-motion"
 import { Badge } from "@/components/leaves/Badge"
 import { StarCiAiTeacher } from "@/components/leaves/StarCiAiTeacher"
 import { Text } from "@/components/leaves/Text"
-import { starCiAiDragBoundaryClassName, starCiAiFabClassName, starCiAiLabelClassName } from "./classNames"
+import { starCiAiDragBoundaryClassName, starCiAiDragHandleArtClassName, starCiAiFabClassName, starCiAiLabelClassName } from "./classNames"
 
 /** Closed semantic data for the one global AI trigger. */
 export type StarCiAiFabData = {
@@ -68,7 +68,13 @@ export const StarCiAiFab = (props: StarCiAiFabProps) => {
                     props.on?.press?.()
                 }}
             >
-                <StarCiAiTeacher props={{ size: "md", isOnline: true }} isLoading={props.isLoading} />
+                <span
+                    className={starCiAiDragHandleArtClassName}
+                    data-slot="starci-ai-drag-handle-art"
+                    aria-hidden="true"
+                >
+                    <StarCiAiTeacher props={{ size: "md", isOnline: true }} isLoading={props.isLoading} />
+                </span>
                 <span className={starCiAiLabelClassName} aria-hidden="true">
                     <Text props={{ content: props.props.label, size: "sm", weight: "semibold" }} isLoading={props.isLoading} />
                 </span>

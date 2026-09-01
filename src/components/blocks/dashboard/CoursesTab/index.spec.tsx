@@ -86,7 +86,7 @@ describe("CoursesTab", () => {
         const { container } = render(<CoursesTab />)
         const content = container.textContent ?? ""
         expect(content).toContain("Ownership in depth")
-        // Progress first, then what to buy next. Livestream context belongs to the page rail.
+        // Progress first, then what to buy next. Supporting rail suggestions are outside this surface.
         expect(content.indexOf("Ownership in depth")).toBeLessThan(content.indexOf("Rust basics"))
         expect(content).not.toContain("Kickoff")
     })

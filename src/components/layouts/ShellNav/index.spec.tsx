@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import type { ReactNode } from "react"
 import type { AuthMode } from "@/components/blocks/auth/AuthenticationPanel/component"
-import type { ShellNavRoute, ShellNavTab } from "./component"
+import type { ShellNavFeatureTab, ShellNavRoute } from "./component"
 import { ShellNav } from "."
 
 /**
@@ -17,7 +17,7 @@ import { ShellNav } from "."
 type ShellNavMockInput = {
     readonly props: {
         readonly routes: ReadonlyArray<ShellNavRoute>
-        readonly tabs?: ReadonlyArray<ShellNavTab>
+        readonly featureTabs?: ReadonlyArray<ShellNavFeatureTab>
         readonly themeLabel: string
         readonly isDark: boolean
         readonly isSignedIn: boolean
@@ -26,7 +26,7 @@ type ShellNavMockInput = {
         readonly openSignIn: () => void
         readonly openSignUp: () => void
         readonly navigate: (id: string) => void
-        readonly selectTab: (key: string) => void
+        readonly selectFeatureTab: (key: string) => void
         readonly openSearch: () => void
         readonly openNavigation: () => void
         readonly toggleTheme: () => void
@@ -99,9 +99,14 @@ vi.mock("./component", () => ({
                 {input.props.routes.filter((route) => route.isCurrent === true).map((route) => route.id).join(",")}
             </span>
             <span data-testid="tabs">
-                {input.props.tabs === undefined
+                {input.props.featureTabs === undefined
                     ? "none"
-                    : input.props.tabs.map((tab) => `${tab.id}${tab.isCurrent === true ? "*" : ""}`).join(",")}
+                    : input.props.featureTabs.map((tab) => `${tab.id}${tab.isCurrent === true ? "*" : ""}`).join(",")}
+            </span>
+            <span data-testid="tab-icons">
+                {input.props.featureTabs === undefined
+                    ? "none"
+                    : input.props.featureTabs.map((tab) => `${tab.id}:${tab.icon}`).join(",")}
             </span>
             <button type="button" onClick={input.on.openSearch}>Open search</button>
             <button type="button" onClick={input.on.openNavigation}>Open navigation</button>
@@ -111,8 +116,10 @@ vi.mock("./component", () => ({
             <button type="button" onClick={input.on.openCart}>Open cart</button>
             <button type="button" onClick={() => input.on.navigate("contact")}>Go contact</button>
             <button type="button" onClick={() => input.on.navigate("nowhere")}>Go nowhere</button>
-            <button type="button" onClick={() => input.on.selectTab("overview")}>Tab overview</button>
-            <button type="button" onClick={() => input.on.selectTab("explore")}>Tab explore</button>
+            <button type="button" onClick={() => input.on.selectFeatureTab("overview")}>Tab overview</button>
+            <button type="button" onClick={() => input.on.selectFeatureTab("explore")}>Tab explore</button>
+            <button type="button" onClick={() => input.on.selectFeatureTab("bulletin")}>Tab bulletin</button>
+            <button type="button" onClick={() => input.on.selectFeatureTab("faq")}>Tab faq</button>
         </div>
     ),
     ShellNavigationDrawerBase: (input: ShellNavMockInput) => (
@@ -200,7 +207,7 @@ describe("ShellNav route lighting", () => {
     })
 })
 
-describe("ShellNav dashboard tabs", () => {
+describe("ShellNav feature tabs", () => {
     it("registers no tab layer away from the dashboard", () => {
         render(<ShellNav />)
         expect(screen.getByTestId("tabs")).toHaveTextContent("none")
@@ -209,14 +216,14 @@ describe("ShellNav dashboard tabs", () => {
     it("treats a dashboard with no tab parameter as Overview", () => {
         mocks.pathname = "/dashboard"
         render(<ShellNav />)
-        expect(screen.getByTestId("tabs")).toHaveTextContent("overview*,explore,courses,community")
+        expect(screen.getByTestId("tabs")).toHaveTextContent("overview*,explore,bulletin,courses,community")
     })
 
     it("follows the tab parameter the address actually carries", () => {
         mocks.pathname = "/dashboard"
         mocks.searchParams = "tab=community"
         render(<ShellNav />)
-        expect(screen.getByTestId("tabs")).toHaveTextContent("overview,explore,courses,community*")
+        expect(screen.getByTestId("tabs")).toHaveTextContent("overview,explore,bulletin,courses,community*")
     })
 
     it("replaces rather than pushes, and spells Overview as the bare dashboard", () => {
@@ -227,6 +234,34 @@ describe("ShellNav dashboard tabs", () => {
 
         fireEvent.click(screen.getByRole("button", { name: "Tab explore" }))
         expect(mocks.replace).toHaveBeenLastCalledWith("/dashboard?tab=explore")
+
+        fireEvent.click(screen.getByRole("button", { name: "Tab bulletin" }))
+        expect(mocks.replace).toHaveBeenLastCalledWith("/dashboard?tab=bulletin")
+    })
+
+    it("owns Course Details tabs in the same feature layer and scrolls to its section", () => {
+        mocks.pathname = "/courses/fullstack-mastery"
+        const scrollIntoView = vi.fn()
+        const target = document.createElement("section")
+        target.id = "course-detail-faq"
+        target.scrollIntoView = scrollIntoView
+        document.body.append(target)
+
+        render(<ShellNav />)
+        expect(screen.getByTestId("tabs")).toHaveTextContent("overview*,curriculum,reviews,faq")
+        expect(screen.getByTestId("tab-icons")).toHaveTextContent("reviews:ratingStarEmpty")
+        expect(screen.getByTestId("tab-icons")).not.toHaveTextContent("ratingStarFilled")
+        fireEvent.click(screen.getByRole("button", { name: "Tab faq" }))
+
+        expect(scrollIntoView).toHaveBeenCalledWith({ behavior: "smooth", block: "start" })
+        expect(screen.getByTestId("tabs")).toHaveTextContent("overview,curriculum,reviews,faq*")
+        target.remove()
+    })
+
+    it("does not project Course Details tabs into the learning workspace", () => {
+        mocks.pathname = "/courses/fullstack-mastery/learn/content"
+        render(<ShellNav />)
+        expect(screen.getByTestId("tabs")).toHaveTextContent("none")
     })
 })
 

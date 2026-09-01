@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react"
 import { Drawer } from "@heroui/react"
-import { drawerBodyClassName, drawerCloseTriggerClassName, drawerControlledTriggerClassName, drawerWorkspaceDialogClassName, getDrawerContentClassName } from "./classNames"
+import { drawerBodyClassName, drawerControlledTriggerClassName, drawerHiddenHeadingLabelClassName, getDrawerContentClassName, getDrawerDialogClassName } from "./classNames"
 
 /**
  * BRANCH - `DrawerBranch`: the vendor's edge-anchored mechanics around typed children.
@@ -35,8 +35,12 @@ export type DrawerBranchProps = {
     readonly placement?: DrawerBranchPlacement
     /** A focused workspace fills compact screens and uses a wider decision rail on larger ones. */
     readonly size?: "default" | "workspace"
+    /** Remove the vendor dialog inset when the child owns its own padding. */
+    readonly inset?: "default" | "none"
     /** The already-resolved title. A drawer names itself; the interior does not repeat it. */
     readonly title: string
+    /** Keep the vendor title row but render no visible words in navigation-only drawers. */
+    readonly isTitleEmpty?: boolean
     /** Every way out: the close control, Escape, and the backdrop. */
     readonly onDismiss: () => void
     readonly children: ReactNode
@@ -108,11 +112,18 @@ export const DrawerBranch = (props: DrawerBranchProps) => {
                     className={getDrawerContentClassName(props.placement ?? "right", props.size)}
                     placement={props.placement ?? "right"}
                 >
-                    <Drawer.Dialog className={props.size === "workspace" ? drawerWorkspaceDialogClassName : undefined}>
+                    <Drawer.Dialog className={getDrawerDialogClassName(props.size, props.inset)}>
                         <Drawer.Header>
-                            <Drawer.Heading>{props.title}</Drawer.Heading>
+                            <Drawer.Heading>
+                                {props.isTitleEmpty === true ? (
+                                    <>
+                                        <span className={drawerHiddenHeadingLabelClassName}>{props.title}</span>
+                                        <span aria-hidden>&nbsp;</span>
+                                    </>
+                                ) : props.title}
+                            </Drawer.Heading>
                         </Drawer.Header>
-                        <Drawer.CloseTrigger className={drawerCloseTriggerClassName} />
+                        <Drawer.CloseTrigger />
                         {/*
                          * The vendor inset is zeroed for the same reason `ModalBranch` zeroes it: the
                          * interior owns its own padding, so a branch that also padded would inset the

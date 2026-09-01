@@ -1,4 +1,4 @@
-import { cn } from "@heroui/react"
+import { Button as HeroButton, cn } from "@heroui/react"
 import type { ComponentPropsWithoutRef, ReactNode } from "react"
 import {
     subnavClassName,
@@ -51,16 +51,17 @@ export const Subnav = ({
             {leading === undefined ? null : <span className={subnavLeadingClassName} data-grammar-subnav-leading="true">{leading}</span>}
             <span className={subnavTitleClassName} data-grammar-subnav-title="true">{title}</span>
         </div>
-        <button
+        <HeroButton
             aria-expanded={isMenuOpen}
             aria-label={isMenuOpen ? closeMenuLabel : openMenuLabel}
-            className={subnavToggleClassName}
+            className={subnavToggleClassName ?? ""}
             data-grammar-subnav-toggle="true"
-            onClick={() => onMenuOpenChange?.(!isMenuOpen)}
+            isIconOnly
+            onPress={() => onMenuOpenChange?.(!isMenuOpen)}
             type="button"
+            variant="tertiary"
         >
             {menuIcon}
-        </button>
+        </HeroButton>
     </nav>
 )
-

@@ -7,8 +7,6 @@ import { TitleDescriptionAccordion, type TitleDescriptionAccordionItem } from "@
 import { EmptyNotice } from "@/components/composites/EmptyNotice"
 import { SurfaceCard } from "@/components/branches/SurfaceCard"
 import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
-import { ExtendedTabs } from "@/components/leaves/ExtendedTabs"
-import type { IconName } from "@/components/leaves/Icon"
 import { Breadcrumbs } from "@/components/leaves/Breadcrumbs"
 import { Heading } from "@/components/leaves/Heading"
 import { Text } from "@/components/leaves/Text"
@@ -16,7 +14,6 @@ import {
     courseDetailBodyClassName,
     courseDetailContentClassName,
     courseDetailHeroClassName,
-    courseDetailNavigationClassName,
     courseDetailOverviewClassName,
     courseDetailPageClassName,
     courseDetailRailClassName,
@@ -24,13 +21,10 @@ import {
     courseDetailStateClassName,
     courseDetailStatClassName,
     courseDetailStatsClassName,
-    courseDetailTabsClassName,
 } from "./classNames"
 
 /** One trust statistic shown in the course hero. */
 export type CourseStat = { readonly id: string; readonly label: string; readonly value: string }
-/** Sections reachable from the course navigation. */
-export type CourseDetailSection = "overview" | "curriculum" | "reviews" | "faq"
 /** One authored FAQ item. */
 export type CourseFaq = TitleDescriptionAccordionItem
 /** One curriculum module. */
@@ -38,20 +32,19 @@ export type CourseModule = CourseCurriculumModule
 /** Resolved labels used by the course surface. */
 export type CourseDetailLabels = {
     readonly breadcrumbLabel: string; readonly breadcrumbHome: string; readonly breadcrumbCourses: string
-    readonly sectionTabsLabel: string; readonly overviewTab: string; readonly curriculumTab: string
-    readonly reviewsTab: string; readonly faqTab: string; readonly valuePropsTitle: string
+    readonly valuePropsTitle: string
     readonly curriculumTitle: string; readonly prerequisitesTitle: string; readonly reviewsTitle: string
     readonly reviewsEmpty: string; readonly faqTitle: string; readonly faqEmpty: string; readonly reviewCount: string
 }
 /** Resolved course detail data. */
 export type CourseDetailPageData = {
-    readonly labels: CourseDetailLabels; readonly selectedSection?: CourseDetailSection; readonly title?: string; readonly tagline?: string
+    readonly labels: CourseDetailLabels; readonly title?: string; readonly tagline?: string
     readonly stats?: ReadonlyArray<CourseStat>; readonly valueProps?: ReadonlyArray<string>; readonly prerequisites?: ReadonlyArray<CoursePrerequisite>
     readonly reviews?: ReadonlyArray<CourseReview>; readonly faqs?: ReadonlyArray<CourseFaq>; readonly averageScore?: number; readonly reviewTotal?: number
     readonly modules?: ReadonlyArray<CourseModule>; readonly noticeMessage?: string; readonly noticeActionLabel?: string
 }
 /** Course page actions. */
-export type CourseDetailPageActions = { readonly navigateHome?: () => void; readonly navigateCourses?: () => void; readonly selectSection?: (section: CourseDetailSection) => void; readonly retry?: () => void }
+export type CourseDetailPageActions = { readonly navigateHome?: () => void; readonly navigateCourses?: () => void; readonly retry?: () => void }
 /** Course page state. */
 export type CourseDetailPageState = "pending" | "ready" | "not-found" | "failed"
 /** Props for the course detail surface. */
@@ -59,13 +52,6 @@ export type CourseDetailPageProps = { readonly displayId: string; readonly pageS
 
 const RESTING_COUNTS = { stats: 5, promises: 4, modules: 3, prerequisites: 3, faqs: 3 } as const
 const reviewStateOf = (total: number | undefined): "unrated" | "rated" => (total ?? 0) === 0 ? "unrated" : "rated"
-
-const COURSE_SECTION_TAB_ICONS = {
-    overview: "explore",
-    curriculum: "courseContent",
-    reviews: "ratingStarFilled",
-    faq: "courseQa",
-} as const satisfies Record<CourseDetailSection, IconName>
 
 /** Draw the course detail page with ordinary React composition. */
 export const CourseDetailPageBase = (props: CourseDetailPageProps) => {
@@ -78,26 +64,7 @@ export const CourseDetailPageBase = (props: CourseDetailPageProps) => {
     const reviews = isLoading ? [] : props.props.reviews ?? []
     const faqs = isLoading ? Array.from({ length: RESTING_COUNTS.faqs }, (_, index) => ({ id: `resting-faq-${index}`, title: "", description: "" })) : props.props.faqs ?? []
     return <div className={courseDetailPageClassName}>
-        <nav className={courseDetailNavigationClassName} aria-label={props.props.labels.sectionTabsLabel}>
-            <div className={courseDetailTabsClassName}>
-                <ExtendedTabs
-                    props={{
-                        label: props.props.labels.sectionTabsLabel,
-                        selectedKey: props.props.selectedSection ?? "overview",
-                        inset: "none",
-                        labelVisibility: "responsive",
-                        tabs: [
-                            { id: "overview", label: props.props.labels.overviewTab, icon: COURSE_SECTION_TAB_ICONS.overview },
-                            { id: "curriculum", label: props.props.labels.curriculumTab, icon: COURSE_SECTION_TAB_ICONS.curriculum },
-                            { id: "reviews", label: props.props.labels.reviewsTab, icon: COURSE_SECTION_TAB_ICONS.reviews },
-                            { id: "faq", label: props.props.labels.faqTab, icon: COURSE_SECTION_TAB_ICONS.faq },
-                        ],
-                    }}
-                    on={{ select: (key) => props.on?.selectSection?.(key as CourseDetailSection) }}
-                />
-            </div>
-        </nav>
-        <div className={courseDetailBodyClassName}>
+        <div className={courseDetailBodyClassName} data-course-detail-body="true">
             <div className={courseDetailContentClassName}>
                 <Breadcrumbs props={{ label: props.props.labels.breadcrumbLabel, steps: [{ id: "home", label: props.props.labels.breadcrumbHome }, { id: "courses", label: props.props.labels.breadcrumbCourses }, { id: "course", label: props.props.title ?? "" }] }} on={{ home: props.on?.navigateHome, courses: props.on?.navigateCourses }} isLoading={isLoading} />
                 <header className={courseDetailHeroClassName} id="course-detail-overview">

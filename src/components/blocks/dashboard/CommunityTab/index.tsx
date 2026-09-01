@@ -1,8 +1,21 @@
-import { LeagueCard } from "@/components/blocks/dashboard/LeagueCard"
-import { TopLearners } from "@/components/blocks/dashboard/TopLearners"
-import { communityTabClassName } from "./classNames"
-/** Orchestrate weekly and global competition blocks in legacy order. */
-/** Props for the community tab composition. */
+"use client"
+
+import { useTranslations } from "next-intl"
+import { useRouter } from "@/i18n/navigation"
+import { CommunityTabBase } from "./component"
+
+/** Props for the connected Community destination. */
 export type CommunityTabProps = Record<string, never>
-/** Connect the community tab's competition blocks. */
-export const CommunityTab = (props: CommunityTabProps) => { void props; return <div className={communityTabClassName}><LeagueCard /><TopLearners /></div> }
+
+/** Connect the leaderboard destination. */
+export const CommunityTab = (props: CommunityTabProps) => {
+    void props
+    const t = useTranslations("community")
+    const router = useRouter()
+    return (
+        <CommunityTabBase
+            props={{ seeMoreLabel: t("seeMore") }}
+            on={{ seeMore: () => router.push("/league") }}
+        />
+    )
+}

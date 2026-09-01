@@ -1,4 +1,4 @@
-import { RankMark } from "@/components/leaves/RankMark"
+import { RankMark, type RankMarkArtwork } from "@/components/leaves/RankMark"
 import { leagueTileClassName, leagueTileLoadingClassName } from "./classNames"
 
 /**
@@ -14,16 +14,17 @@ import { leagueTileClassName, leagueTileLoadingClassName } from "./classNames"
  * and it is `RankMark` - that is what `rank-artwork-is-a-closed-set` holds. This leaf owns the
  * plate: the step, the radius and the frame. It never learns which medal belongs to which rank.
  *
- * THE PLATE IS A FILL, NOT AN OUTLINE. `bg-default` is the same ground `IconTile` rests a neutral
- * mark on, so the standing sits on the surface the product already uses for a plate rather than
- * introducing a second convention. What separates this tile from a row mark is its SIZE, and only
- * its size - a border would have added a second signal saying the same thing twice.
+ * THE PLATE IS A FILL, NOT AN OUTLINE. The standing is an accent-owned summary, so its soft accent
+ * fill and matching foreground travel together just as they do in `IconTile`. Size establishes the
+ * standing hierarchy; a border would add a second frame without adding meaning.
  */
 
 /** What this leaf draws. A `type`, not an `interface` - only an alias satisfies the data fence. */
 export type LeagueTileData = {
     /** One-based leaderboard rank; the artwork is resolved by {@link RankMark}. */
     readonly rank?: number
+    /** The platform standing can explicitly use its cup instead of a place medal. */
+    readonly artwork?: RankMarkArtwork
     /** Resolved accessible label retaining the numeric rank. */
     readonly accessibleLabel?: string
 }
@@ -56,7 +57,7 @@ export const LeagueTile = (props: LeagueTileProps) => {
             data-loading="false"
             className={leagueTileClassName}
         >
-            <RankMark props={{ rank: props.props.rank, placement: "standing", accessibleLabel: props.props.accessibleLabel }} />
+            <RankMark props={{ rank: props.props.rank, placement: "standing", artwork: props.props.artwork, accessibleLabel: props.props.accessibleLabel }} />
         </span>
     )
 }

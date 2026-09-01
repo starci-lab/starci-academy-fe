@@ -26,13 +26,14 @@ vi.mock("@/components/blocks/dashboard/WeeklyChallengeCard", () => stub("WeeklyC
 vi.mock("@/components/blocks/dashboard/OverviewContributions", () => stub("OverviewContributions"))
 vi.mock("@/components/blocks/dashboard/ChangelogList", () => stub("ChangelogList"))
 vi.mock("@/components/blocks/dashboard/ExploreTab", () => stub("ExploreTab"))
+vi.mock("@/components/blocks/dashboard/FeedExplorer", () => stub("FeedExplorer"))
 vi.mock("@/components/blocks/dashboard/CoursesTab", () => stub("CoursesTab"))
 vi.mock("@/components/blocks/dashboard/CommunityTab", () => stub("CommunityTab"))
 vi.mock("@/components/blocks/dashboard/WhoToFollow", () => stub("WhoToFollow"))
 vi.mock("@/components/blocks/dashboard/UpcomingLivestreamCard", () => stub("UpcomingLivestreamCard"))
-type DrawerStubProps = { readonly isOpen: boolean; readonly title: string; readonly onDismiss: () => void; readonly children: ReactNode }
+type DrawerStubProps = { readonly inset?: "default" | "none"; readonly isOpen: boolean; readonly isTitleEmpty?: boolean; readonly title: string; readonly onDismiss: () => void; readonly children: ReactNode }
 vi.mock("@/components/branches/DrawerBranch", () => ({
-    DrawerBranch: (input: DrawerStubProps) => input.isOpen ? <aside data-testid="dashboard-rail-drawer"><span>{input.title}</span>{input.children}<button onClick={input.onDismiss}>dismiss drawer</button></aside> : null,
+    DrawerBranch: (input: DrawerStubProps) => input.isOpen ? <aside data-inset={input.inset} data-testid="dashboard-rail-drawer">{input.isTitleEmpty === true ? null : <span>{input.title}</span>}{input.children}<button onClick={input.onDismiss}>dismiss drawer</button></aside> : null,
 }))
 
 const unavailableMessage = "That dashboard panel is not available."
@@ -68,14 +69,25 @@ describe("DashboardPageBase", () => {
         const rail = container.querySelector("[data-dashboard-rail=\"true\"]")
         const railOrder = Array.from(rail?.querySelectorAll("[data-testid]") ?? []).map((node) => node.getAttribute("data-testid"))
         expect(railOrder).toEqual(["IdentityRail", "QuickActions"])
+        expect(container.querySelector("[data-dashboard-overview-metrics='true']")).toHaveClass("gap-3")
+        expect(container.querySelector("[data-dashboard-overview='true']")).toHaveClass("gap-6")
     })
 
     it("reaches the explore panel and nothing else", () => {
         render(<DashboardPageBase props={{ selectedTab: "explore", unavailableMessage, railLabel }} />)
 
         expect(screen.getByTestId("ExploreTab")).toBeInTheDocument()
-        expect(screen.getByTestId("WhoToFollow")).toBeInTheDocument()
+        expect(screen.queryByTestId("WhoToFollow")).not.toBeInTheDocument()
         expect(screen.queryByTestId("ContinueLearning")).not.toBeInTheDocument()
+        expect(screen.queryByText(unavailableMessage)).not.toBeInTheDocument()
+    })
+
+    it("reaches the bulletin panel as a separate dashboard destination", () => {
+        render(<DashboardPageBase props={{ selectedTab: "bulletin", unavailableMessage, railLabel }} />)
+
+        expect(screen.getByTestId("FeedExplorer")).toBeInTheDocument()
+        expect(screen.queryByTestId("ExploreTab")).not.toBeInTheDocument()
+        expect(screen.queryByTestId("WhoToFollow")).not.toBeInTheDocument()
         expect(screen.queryByText(unavailableMessage)).not.toBeInTheDocument()
     })
 
@@ -83,8 +95,16 @@ describe("DashboardPageBase", () => {
         render(<DashboardPageBase props={{ selectedTab: "courses", unavailableMessage, railLabel }} />)
 
         expect(screen.getByTestId("CoursesTab")).toBeInTheDocument()
-        expect(screen.getByTestId("UpcomingLivestreamCard")).toBeInTheDocument()
+        expect(screen.queryByTestId("UpcomingLivestreamCard")).not.toBeInTheDocument()
         expect(screen.queryByTestId("ExploreTab")).not.toBeInTheDocument()
+    })
+
+    it.each(["explore", "courses"])("keeps the %s rail limited to standing and quick access", (selectedTab) => {
+        const { container } = render(<DashboardPageBase props={{ selectedTab, unavailableMessage, railLabel }} />)
+
+        const rail = container.querySelector("[data-dashboard-rail='true']")
+        const railOrder = Array.from(rail?.querySelectorAll("[data-testid]") ?? []).map((node) => node.getAttribute("data-testid"))
+        expect(railOrder).toEqual(["IdentityRail", "QuickActions"])
     })
 
     it("reaches the community panel and nothing else", () => {
@@ -160,9 +180,11 @@ describe("DashboardPageBase", () => {
 
         rerender(<DashboardPageBase props={{ ...compactProps, isRailOpen: true }} on={{ setRailOpen }} />)
         expect(screen.getByRole("button", { name: "Close stats and quick access" })).toHaveAttribute("aria-expanded", "true")
-        expect(screen.getByTestId("dashboard-rail-drawer")).toBeInTheDocument()
+        expect(screen.getByTestId("dashboard-rail-drawer")).toHaveAttribute("data-inset", "none")
+        expect(screen.queryByText(railLabel)).toBeNull()
         expect(screen.getAllByTestId("IdentityRail")).toHaveLength(1)
         expect(screen.getAllByTestId("QuickActions")).toHaveLength(1)
+        expect(container.querySelector("[data-dashboard-rail='true']")).toHaveClass("px-3", "py-6")
         expect(container.querySelector("[data-dashboard-rail-presentation='drawer']")).toBeInTheDocument()
 
         fireEvent.click(screen.getByRole("button", { name: "dismiss drawer" }))

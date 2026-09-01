@@ -1,5 +1,6 @@
 import { PressableSurface } from "@/components/branches/PressableSurface"
 import { Badge } from "@/components/leaves/Badge"
+import { DestinationCue } from "@/components/leaves/DestinationCue"
 import { IconTile } from "@/components/leaves/IconTile"
 import { Text } from "@/components/leaves/Text"
 import { TextLink } from "@/components/leaves/TextLink"
@@ -62,7 +63,7 @@ export const RecommendedCourseRow = (props: RecommendedCourseRowProps) => {
     const priceDetailLabel = data.priceDetailLabel
     return <PressableSurface hover="label" label={data.title ?? "Course"} press={on?.open} disabled={isLoading}><div className={recommendedCourseRowClassName}>
         <IconTile props={{ icon: "course", image: data.cover, tone: "accent", size: "md" }} isLoading={isLoading} />
-        <div className={recommendedCourseBodyClassName}>
+        <div className={recommendedCourseBodyClassName} data-recommended-course-body="true">
             <Text props={{ content: data.title, size: "md", weight: "semibold", isPressLabel: true }} isLoading={isLoading} />
             <div className={recommendedCoursePriceClassName}>
                 <Text props={{ content: data.price, size: "md", weight: "semibold" }} isLoading={isLoading} />
@@ -74,7 +75,7 @@ export const RecommendedCourseRow = (props: RecommendedCourseRowProps) => {
                 <TextLink props={{ label: priceDetailLabel, size: "sm" }} on={{ press: on?.openPriceDetail }} />
             </div>}
             {data.reason === undefined ? null : <Text props={{ content: data.reason, size: "sm" }} />}
-            {data.actionLabel === undefined ? null : <Text props={{ content: data.actionLabel, size: "sm", tone: "accent", weight: "semibold", icon: "next" }} isLoading={isLoading} />}
+            {data.actionLabel === undefined ? null : <DestinationCue props={{ label: data.actionLabel }} isLoading={isLoading} />}
         </div>
     </div></PressableSurface>
 }

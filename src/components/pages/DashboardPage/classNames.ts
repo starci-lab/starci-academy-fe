@@ -18,7 +18,17 @@ export const dashboardFrameClassName = cn(
 )
 
 /** Pin compact rail controls immediately below the two-layer application navigation. */
-export const dashboardCompactSubnavClassName = cn("!top-[calc(6rem+1px)]", "[--starci-core-subnav-offset:calc(6rem+1px)]")
+export const dashboardCompactSubnavClassName = cn(
+    "!top-[calc(6rem+1px)]",
+    "[--starci-core-subnav-offset:calc(6rem+1px)]",
+    "transform-gpu",
+    "will-change-transform",
+    "[backface-visibility:hidden]",
+    "[&_[data-grammar-subnav-toggle=true]]:!size-11",
+    "[&_[data-grammar-subnav-toggle=true]]:!rounded-full",
+    "[&_[data-grammar-subnav-toggle=true]]:!bg-default",
+    "[&_[data-grammar-subnav-toggle=true]]:hover:!bg-default",
+)
 
 /** Identity and shortcuts stay pinned flush left with an independent scroll lane. */
 export const dashboardLeadingRailRegionClassName = cn(
@@ -125,15 +135,6 @@ export const dashboardRailScrollContentClassName = cn(
 /** Bound the shortcut list as a flush rail band instead of a nested card. */
 export const dashboardRailActionsClassName = cn("min-w-0")
 
-/** Streak's empty guidance must stack inside the compact rail even above the global sm breakpoint. */
-export const dashboardRailContextClassName = cn(
-    "min-w-0",
-    "[&_[data-part=streak-primary]]:!flex-col",
-    "[&_[data-part=streak-primary]]:!items-stretch",
-    "[&_[data-part=streak-prompt]]:!flex-col",
-    "[&_[data-part=streak-prompt]]:!items-stretch",
-)
-
 /** Let the selected dashboard panel consume the remaining width inside the main track. */
 export const dashboardPanelClassName = cn("flex", "w-full", "max-w-none", "min-w-0", "flex-1", "flex-col", "gap-6")
 
@@ -170,7 +171,7 @@ export const dashboardOverviewMetricsClassName = cn(
     "grid",
     "min-w-0",
     "items-stretch",
-    "gap-6",
+    "gap-3",
     "lg:grid-cols-2",
     "[&>.starci-core-surface-card]:h-full",
     "[&>.starci-core-surface-card_.starci-core-surface]:h-full",

@@ -4,27 +4,6 @@ import { cn } from "@heroui/react"
 export const courseDetailPageClassName = cn("flex", "min-w-0", "flex-col")
 /** Keep a terminal request state inside the same measure as settled content. */
 export const courseDetailStateClassName = cn("mx-auto", "w-full", "max-w-6xl", "px-6", "py-6")
-/** `course-section-navigation` from the contract registry. */
-export const courseDetailNavigationClassName = cn(
-    "starci-core-course-section-navigation",
-    "sticky",
-    "top-16",
-    "z-50",
-    "-mt-px",
-    "flex",
-    "w-full",
-    "min-w-0",
-    "overflow-x-hidden",
-    "border-b",
-    "border-separator",
-    "bg-background",
-    "[&>*]:w-full",
-    "sm:[&>*]:w-auto",
-    "[&>*]:min-w-0",
-)
-
-/** Course section tabs consume the same flush strip rhythm as the dashboard feature layer. */
-export const courseDetailTabsClassName = cn("w-full", "min-w-0")
 /** Give the title one strong, bounded reading measure. */
 export const courseDetailHeroClassName = cn("flex", "min-w-0", "grow", "scroll-mt-28", "flex-col", "gap-2")
 /** Present trust signals as one ribbon rather than loose paragraphs. */

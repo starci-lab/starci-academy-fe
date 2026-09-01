@@ -11,7 +11,7 @@ import { DrawerBranch } from "@/components/branches/DrawerBranch"
 import { useSessionToken } from "@/hooks/auth/useSessionToken"
 import { useSessionRefresh } from "@/hooks/auth/useSessionRefresh"
 import { useStarCiTheme } from "@/modules/theme/theme-context"
-import { ShellNavBase, ShellNavigationDrawerBase, type ShellNavData, type ShellNavRoute, type ShellNavTab } from "./component"
+import { ShellNavBase, ShellNavigationDrawerBase, type ShellNavData, type ShellNavFeatureTab, type ShellNavRoute } from "./component"
 import type { IconName } from "@/components/leaves/Icon"
 import type { AuthMode } from "@/components/blocks/auth/AuthenticationPanel/component"
 
@@ -39,9 +39,20 @@ const ROUTES: ReadonlyArray<{ id: string, path: string, icon: IconName }> = [
 const DASHBOARD_TABS: ReadonlyArray<{ id: string, icon: IconName }> = [
     { id: "overview", icon: "home" },
     { id: "explore", icon: "explore" },
+    { id: "bulletin", icon: "blog" },
     { id: "courses", icon: "course" },
     { id: "community", icon: "community" },
 ]
+
+/** Course details reuse the same navbar feature layer instead of drawing a second local rail. */
+const COURSE_DETAIL_TABS: ReadonlyArray<{ id: string, icon: IconName }> = [
+    { id: "overview", icon: "explore" },
+    { id: "curriculum", icon: "courseContent" },
+    { id: "reviews", icon: "ratingStarEmpty" },
+    { id: "faq", icon: "courseQa" },
+]
+
+const isCourseDetailPath = (pathname: string) => /^\/courses\/[^/]+$/.test(pathname)
 
 /**
  * Resolve the route, the theme and the language, and draw the bar.
@@ -50,6 +61,7 @@ export const ShellNav = (props: ShellNavProps) => {
     void props
     useSessionRefresh()
     const t = useTranslations("shell")
+    const courseDetailT = useTranslations("courses.detail")
     const locale = useLocale()
     const pathname = usePathname()
     const router = useRouter()
@@ -60,6 +72,7 @@ export const ShellNav = (props: ShellNavProps) => {
     const [isNavigationOpen, setIsNavigationOpen] = useState(false)
     const [searchIntent, setSearchIntent] = useState<GlobalSearchOpenIntent>()
     const [authMode, setAuthMode] = useState<AuthMode>("signIn")
+    const [courseFeatureSelection, setCourseFeatureSelection] = useState({ pathname: "", id: "overview" })
     const sessionToken = useSessionToken()
 
     const openSearch = useCallback((source: GlobalSearchOpenIntent["source"]) => {
@@ -126,16 +139,30 @@ export const ShellNav = (props: ShellNavProps) => {
         // for a hypothetical `/contacts`.
         isCurrent: pathname === route.path || pathname.startsWith(`${route.path}/`),
     }))
-    const dashboardTabs: ReadonlyArray<ShellNavTab> | undefined = pathname.startsWith("/dashboard")
+    const dashboardTabs: ReadonlyArray<ShellNavFeatureTab> | undefined = pathname.startsWith("/dashboard")
         ? DASHBOARD_TABS.map((tab) => ({
             ...tab,
             label: t(`tabs.${tab.id}`),
             isCurrent: tab.id === (searchParams.get("tab") ?? "overview"),
         }))
         : undefined
-    const selectTab = useCallback((key: string) => {
-        router.replace(key === "overview" ? "/dashboard" : `/dashboard?tab=${key}`)
-    }, [router])
+    const courseDetailTabs: ReadonlyArray<ShellNavFeatureTab> | undefined = isCourseDetailPath(pathname)
+        ? COURSE_DETAIL_TABS.map((tab) => ({
+            ...tab,
+            label: courseDetailT(`${tab.id}Tab`),
+            isCurrent: tab.id === (courseFeatureSelection.pathname === pathname ? courseFeatureSelection.id : "overview"),
+        }))
+        : undefined
+    const featureTabs = dashboardTabs ?? courseDetailTabs
+    const selectFeatureTab = useCallback((key: string) => {
+        if (pathname.startsWith("/dashboard")) {
+            router.replace(key === "overview" ? "/dashboard" : `/dashboard?tab=${key}`)
+            return
+        }
+        if (!isCourseDetailPath(pathname) || !COURSE_DETAIL_TABS.some((tab) => tab.id === key)) return
+        setCourseFeatureSelection({ pathname, id: key })
+        document.getElementById(`course-detail-${key}`)?.scrollIntoView({ behavior: "smooth", block: "start" })
+    }, [pathname, router])
 
     const navigate = useCallback((id: string) => {
         setIsNavigationOpen(false)
@@ -146,7 +173,7 @@ export const ShellNav = (props: ShellNavProps) => {
     const shellNavData: ShellNavData = {
         brand: t("brand"),
         routes,
-        tabs: dashboardTabs,
+        featureTabs,
         themeLabel: isDark ? t("themeLight") : t("themeDark"),
         utilitiesLabel: t("navigationOverflow"),
         actionsLabel: t("accountActions"),
@@ -181,7 +208,7 @@ export const ShellNav = (props: ShellNavProps) => {
                     openSignIn,
                     openSignUp,
                     navigate,
-                    selectTab,
+                    selectFeatureTab,
                     openSearch: () => openSearch("navbar"),
                     openNavigation: () => setIsNavigationOpen(true),
                     toggleTheme: () => setTheme(isDark ? "light" : "dark"),

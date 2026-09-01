@@ -11,10 +11,9 @@ import { WeeklyChallengeCard } from "@/components/blocks/dashboard/WeeklyChallen
 import { OverviewContributions } from "@/components/blocks/dashboard/OverviewContributions"
 import { ChangelogList } from "@/components/blocks/dashboard/ChangelogList"
 import { ExploreTab } from "@/components/blocks/dashboard/ExploreTab"
+import { FeedExplorer } from "@/components/blocks/dashboard/FeedExplorer"
 import { CoursesTab } from "@/components/blocks/dashboard/CoursesTab"
 import { CommunityTab } from "@/components/blocks/dashboard/CommunityTab"
-import { WhoToFollow } from "@/components/blocks/dashboard/WhoToFollow"
-import { UpcomingLivestreamCard } from "@/components/blocks/dashboard/UpcomingLivestreamCard"
 import { Icon } from "@/components/leaves/Icon"
 import { Link } from "@/components/leaves/Link"
 import { Subnav, VerticalScrollRegion } from "@starci/grammar/core"
@@ -33,7 +32,6 @@ import {
     dashboardOverviewUpdatesClassName,
     dashboardPanelClassName,
     dashboardRailActionsClassName,
-    dashboardRailContextClassName,
     dashboardRailDrawerViewportClassName,
     getDashboardRailClassName,
     getDashboardRailScrollRegionClassName,
@@ -118,11 +116,6 @@ export const DashboardPageBase = (props: DashboardPageProps) => {
     const railLabel = props.props.railLabel ?? "Dashboard"
     const railPresentation = props.props.railPresentation ?? "inline"
     const isRailOpen = props.props.isRailOpen ?? false
-    const railExtra = props.props.selectedTab === "explore"
-        ? <WhoToFollow />
-        : props.props.selectedTab === "courses"
-            ? <UpcomingLivestreamCard />
-            : null
     /**
      * WHO THE READER IS COMES FIRST, WHERE THEY MIGHT GO COMES LAST. The rail is read top-down on
      * arrival, and standing is the thing a reader checks every visit; the shortcuts are the thing
@@ -131,13 +124,15 @@ export const DashboardPageBase = (props: DashboardPageProps) => {
      */
     const main = props.props.selectedTab === "explore"
         ? <ExploreTab />
-        : props.props.selectedTab === "courses"
-            ? <CoursesTab />
-            : props.props.selectedTab === "community"
-                ? <CommunityTab />
-                : props.props.selectedTab === "overview"
-                    ? <OverviewTab />
-                    : <EmptyNotice props={{ icon: props.props.selectedTab === "community" ? "community" : "explore", message: props.props.unavailableMessage }} />
+        : props.props.selectedTab === "bulletin"
+            ? <FeedExplorer />
+            : props.props.selectedTab === "courses"
+                ? <CoursesTab />
+                : props.props.selectedTab === "community"
+                    ? <CommunityTab />
+                    : props.props.selectedTab === "overview"
+                        ? <OverviewTab />
+                        : <EmptyNotice props={{ icon: props.props.selectedTab === "community" ? "community" : "explore", message: props.props.unavailableMessage }} />
 
     const rail = (presentation: "inline" | "drawer") => (
         <div className={getDashboardRailClassName(presentation)} data-dashboard-rail-presentation={presentation}>
@@ -151,7 +146,6 @@ export const DashboardPageBase = (props: DashboardPageProps) => {
                     {props.props.selectedTab === "community" ? null : (
                         <div className={dashboardRailActionsClassName}><QuickActions /></div>
                     )}
-                    {railExtra === null ? null : <div className={dashboardRailContextClassName}>{railExtra}</div>}
                 </div>
             </VerticalScrollRegion>
         </div>
@@ -189,7 +183,9 @@ export const DashboardPageBase = (props: DashboardPageProps) => {
             </div>
             {railPresentation === "drawer" ? (
                 <DrawerBranch
+                    inset="none"
                     isOpen={isRailOpen}
+                    isTitleEmpty
                     placement="left"
                     title={railLabel}
                     onDismiss={() => props.on?.setRailOpen?.(false)}

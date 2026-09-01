@@ -4,7 +4,7 @@ import { cn } from "@heroui/react"
 export const recommendedCourseRowClassName = cn("grid", "min-w-0", "grid-cols-[3rem_1fr]", "items-start", "gap-3")
 
 /** Stack the recommendation's facts without turning captions into empty vertical bands. */
-export const recommendedCourseBodyClassName = cn("flex", "min-w-0", "flex-col", "gap-1")
+export const recommendedCourseBodyClassName = cn("flex", "min-w-0", "flex-col", "gap-2")
 
 /** Keep current, superseded, and discount facts together as one price hierarchy. */
 export const recommendedCoursePriceClassName = cn("flex", "min-w-0", "flex-wrap", "items-baseline", "gap-x-2", "gap-y-1")

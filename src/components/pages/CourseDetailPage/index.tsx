@@ -1,12 +1,11 @@
 "use client"
-import { useState } from "react"
 import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import {
     useQueryCourseReviewsSwr,
     useQueryCourseSwr,
 } from "@/hooks"
-import { CourseDetailPageBase, type CourseDetailSection } from "./component"
+import { CourseDetailPageBase } from "./component"
 import type { CourseDetail, CourseModule } from "@/modules/api/graphql/queries/types/course"
 
 
@@ -34,9 +33,6 @@ export interface CourseDetailPageProps {
     displayId: string
 }
 
-const sectionTargetOf = (section: CourseDetailSection) =>
-    document.getElementById(`course-detail-${section}`)
-
 /** Sum a number across every content of every module. */
 const sumContents = (modules: ReadonlyArray<CourseModule>, read: (content: { minutesRead: number, numChallenges: number }) => number): number =>
     modules.reduce((total, module) => total + (module.contents ?? []).reduce((inner, content) => inner + read(content), 0), 0)
@@ -53,7 +49,6 @@ const byOrder = <T extends { orderIndex: number }>(rows: ReadonlyArray<T>) =>
 export const CourseDetailPage = (props: CourseDetailPageProps) => {
     const t = useTranslations("courses.detail")
     const router = useRouter()
-    const [selectedSection, setSelectedSection] = useState<CourseDetailSection>("overview")
     const query = useQueryCourseSwr({ displayId: props.displayId })
     // The rating is a second request on purpose: it is public, shared by every reader and
     // invalidated by a different event than the course itself, so folding it into the course
@@ -64,11 +59,6 @@ export const CourseDetailPage = (props: CourseDetailPageProps) => {
         breadcrumbLabel: t("breadcrumbLabel"),
         breadcrumbHome: t("breadcrumbHome"),
         breadcrumbCourses: t("breadcrumbCourses"),
-        sectionTabsLabel: t("sectionTabsLabel"),
-        overviewTab: t("overviewTab"),
-        curriculumTab: t("curriculumTab"),
-        reviewsTab: t("reviewsTab"),
-        faqTab: t("faqTab"),
         valuePropsTitle: t("valuePropsTitle"),
         curriculumTitle: t("curriculumTitle"),
         prerequisitesTitle: t("prerequisitesTitle"),
@@ -93,19 +83,12 @@ export const CourseDetailPage = (props: CourseDetailPageProps) => {
 
     const course: CourseDetail = query.data
     const modules = byOrder(course.modules ?? [])
-    const selectSection = (section: CourseDetailSection) => {
-        setSelectedSection(section)
-        const target = sectionTargetOf(section)
-        target?.scrollIntoView({ behavior: "smooth", block: "start" })
-    }
-
     return (
         <>
             <CourseDetailPageBase
                 displayId={props.displayId}
                 pageState="ready" props={{
                     labels,
-                    selectedSection,
                     title: course.title,
                     tagline: course.description,
                     stats: [
@@ -192,7 +175,6 @@ export const CourseDetailPage = (props: CourseDetailPageProps) => {
                 on={{
                     navigateHome: () => { router.push("/") },
                     navigateCourses: () => { router.push("/courses") },
-                    selectSection,
                 }}
             />
         </>

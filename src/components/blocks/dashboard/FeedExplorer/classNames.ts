@@ -1,24 +1,32 @@
 import { cn } from "@heroui/react"
+import { dashboardFlushSurfaceClassName } from "@/components/blocks/dashboard/classNames"
 
-/** Keep the dual feed controls inside the viewport instead of creating a hidden horizontal trap. */
-export const feedExplorerToolbarViewportClassName = cn("w-full", "min-w-0", "overflow-visible")
+/** Remove Grammar content padding so the two internal bands meet the card edges. */
+export const feedExplorerSurfaceClassName = cn(dashboardFlushSurfaceClassName, "w-full", "min-w-0")
 
-/** Stack the two axes when compact widths need room for every selected target. */
-export const feedExplorerToolbarClassName = cn(
-    "grid",
-    "w-full",
+/** Keep the two-tab control at the head of the Bulletin card at every width. */
+export const feedExplorerClassName = cn(
+    "flex",
     "min-w-0",
-    "gap-3",
-    "rounded-2xl",
-    "border",
-    "border-separator",
-    "bg-surface/75",
-    "p-3",
-    "md:grid-cols-2",
+    "flex-col",
 )
 
-/** Bind one visible axis label to one independently selected ChoiceTabs group. */
-export const feedExplorerAxisClassName = cn("flex", "min-w-0", "flex-col", "items-start", "gap-2")
+/** Fill the narrow card, then shrink the same two-tab control to its content on wider screens. */
+export const feedExplorerNavigationClassName = cn(
+    "min-w-0",
+    "p-4",
+    "[&>[data-slot=tabs]]:w-full",
+    "md:[&>[data-slot=tabs]]:w-fit",
+)
 
-/** Stack the Explore feed surfaces without allowing them to collapse horizontally. */
-export const feedExplorerStackClassName = cn("flex", "min-w-0", "flex-col", "gap-6")
+/** The dated feed and its continuation state share the card without a second tab layer. */
+export const feedExplorerActivityClassName = cn(
+    "flex",
+    "min-w-0",
+    "flex-col",
+    "border-t",
+    "border-separator",
+)
+
+/** Separate pagination and recovery from the final dated row inside the same card. */
+export const feedExplorerContinuationClassName = cn("flex", "items-center", "justify-between", "gap-3", "border-t", "border-separator", "p-4")

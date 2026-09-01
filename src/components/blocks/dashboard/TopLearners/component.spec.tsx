@@ -61,14 +61,15 @@ describe("TopLearnersBase", () => {
         expect(failed.queryByText("undefined")).toBeNull()
     })
 
-    it("reports the way through to the full board", () => {
-        const seeMore = vi.fn()
+    it("owns one joined list card while destination navigation remains tab-owned", () => {
         render(<TopLearnersBase
             state="ready"
             props={{ ...frame, rows: [{ id: "one", rank: 1, name: "Ada", points: "480 XP" }] }}
-            on={{ seeMore }}
         />)
-        fireEvent.click(screen.getByText("View leaderboard"))
-        expect(seeMore).toHaveBeenCalledOnce()
+        expect(screen.queryByText("View leaderboard")).toBeNull()
+        const card = screen.getByText("Top learners").closest("[data-grammar-surface-list=true]")
+        expect(card).toBeInTheDocument()
+        expect(card?.querySelectorAll("[data-grammar-surface=true]")).toHaveLength(1)
+        expect(card?.querySelector("[data-grammar-surface-depth=nested]")).toBeNull()
     })
 })

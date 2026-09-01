@@ -27,8 +27,8 @@ export type ShellNavRoute = {
     readonly isCurrent?: boolean
 }
 
-/** One destination in the page-owned bottom navbar layer. */
-export type ShellNavTab = ShellNavRoute & {
+/** One destination in the page-owned feature layer below the primary navbar. */
+export type ShellNavFeatureTab = ShellNavRoute & {
     readonly icon: IconName
 }
 
@@ -36,7 +36,7 @@ export type ShellNavTab = ShellNavRoute & {
 export type ShellNavData = {
     readonly brand: string
     readonly routes: ReadonlyArray<ShellNavRoute>
-    readonly tabs?: ReadonlyArray<ShellNavTab>
+    readonly featureTabs?: ReadonlyArray<ShellNavFeatureTab>
     readonly themeLabel: string
     readonly utilitiesLabel: string
     readonly actionsLabel: string
@@ -55,7 +55,7 @@ export type ShellNavActions = {
     readonly openSignIn?: () => void
     readonly openSignUp?: () => void
     readonly navigate?: (id: string) => void
-    readonly selectTab?: (key: string) => void
+    readonly selectFeatureTab?: (key: string) => void
     readonly openSearch?: () => void
     readonly toggleTheme?: () => void
     readonly toggleLocale?: () => void
@@ -76,7 +76,7 @@ export type ShellNavigationDrawerProps = ShellNavProps
 
 /** Draw the primary navbar and its optional page-tab bottom layer as one landmark. */
 export const ShellNavBase = (props: ShellNavProps) => {
-    const tabs = props.props.tabs
+    const featureTabs = props.props.featureTabs
     return (
         <NavigationFeatureNav
             identity={<Link props={{ label: props.props.brand, emphasis: "brand" }} on={{ press: () => props.on?.navigate?.("dashboard") }} />}
@@ -84,7 +84,7 @@ export const ShellNavBase = (props: ShellNavProps) => {
                 {props.props.routes.map((route) => (
                     <NavLink
                         key={route.id}
-                        props={{ label: route.label, isCurrent: tabs === undefined ? route.isCurrent : false, kind: "route" }}
+                        props={{ label: route.label, isCurrent: featureTabs === undefined ? route.isCurrent : false, kind: "route" }}
                         on={{ press: () => props.on?.navigate?.(route.id) }}
                     />
                 ))}
@@ -106,10 +106,10 @@ export const ShellNavBase = (props: ShellNavProps) => {
                 <AccountMenu on={{ signIn: props.on?.openSignIn, signUp: props.on?.openSignUp }} />
             </div>}
             actionsLabel={props.props.actionsLabel}
-            featureNavigation={tabs === undefined ? undefined : <div className={shellNavTabsClassName}>
-                <ExtendedTabs props={{ label: props.props.brand, selectedKey: tabs.find((tab) => tab.isCurrent)?.id ?? "overview", tabs, inset: "none", labelVisibility: "responsive" }} on={{ select: props.on?.selectTab }} />
+            featureNavigation={featureTabs === undefined ? undefined : <div className={shellNavTabsClassName}>
+                <ExtendedTabs props={{ label: props.props.brand, selectedKey: featureTabs.find((tab) => tab.isCurrent)?.id ?? featureTabs[0]?.id ?? "overview", tabs: featureTabs, inset: "none", labelVisibility: "responsive" }} on={{ select: props.on?.selectFeatureTab }} />
             </div>}
-            featureNavigationLabel={tabs === undefined ? undefined : props.props.brand}
+            featureNavigationLabel={featureTabs === undefined ? undefined : props.props.brand}
         />
     )
 }

@@ -17,22 +17,18 @@ describe("LeagueTile", () => {
         const tile = container.firstElementChild
         expect(tile).not.toBeNull()
         expect(tile?.className).toContain("size-12")
-        expect(tile?.className).toContain("bg-default")
-        // Size is the only thing separating this plate from a row mark; a border would say the
-        // same thing a second time.
+        expect(tile?.className).toContain("bg-accent-soft")
+        expect(tile?.className).toContain("text-accent-soft-foreground")
+        // The soft accent fill already frames the standing; a border would repeat that boundary.
         expect(tile?.className).not.toContain("border")
         expect(tile?.getAttribute("data-loading")).toBe("false")
     })
 
-    it("delegates the artwork instead of naming it", () => {
-        // The artwork itself cannot be asserted here: `RankMark` draws through Iconify, which
-        // resolves its glyph over the network and therefore renders nothing under jsdom. What IS
-        // assertable is the ownership boundary this leaf exists to respect - the tile hands the
-        // rank onward and never writes an artwork identity of its own.
-        const { container } = render(<LeagueTile props={{ rank: 2, accessibleLabel: "Rank #2" }} />)
+    it("threads the explicit cup meaning to the closed rank artwork leaf", () => {
+        const { container } = render(<LeagueTile props={{ rank: 2, artwork: "cup", accessibleLabel: "Rank #2" }} />)
         const tile = container.firstElementChild
         expect(tile).not.toBeNull()
-        expect(tile?.innerHTML).not.toContain("fluent-emoji-flat")
+        expect(tile?.querySelector("[data-artwork=\"cup\"] svg")).toBeInTheDocument()
     })
 
     it("rests at the plate's real size so the row does not reflow when the rank arrives", () => {

@@ -15,6 +15,7 @@ test("exports traditional React components without metadata registries", () => {
     assert.equal(typeof core.SectionHeader, "function")
     assert.equal(typeof core.MediaFrame, "function")
     assert.equal(typeof core.IncludedMark, "function")
+    assert.equal(typeof core.RankArtwork, "function")
     assert.equal(typeof core.SurfaceCopyGroup, "function")
     assert.equal(typeof core.PrimaryRailLayout, "function")
     assert.equal(typeof core.NavigationFeatureNav, "function")
@@ -59,6 +60,11 @@ test("binds DNA, responsive composition and media through concrete Core componen
     const included = core.IncludedMark({})
     assert.equal(included.props.viewBox, "0 0 20 20")
     assert.match(included.props.className, /starci-core-included-mark/)
+
+    const rankArtwork = core.RankArtwork({ kind: "cup" })
+    assert.equal(rankArtwork.props.viewBox, "0 0 32 32")
+    assert.equal(rankArtwork.props["data-grammar-rank-artwork"], "cup")
+    assert.match(rankArtwork.props.className, /starci-core-rank-artwork/)
 
     const copyGroup = core.SurfaceCopyGroup({ children: "copy" })
     assert.equal(copyGroup.props["data-grammar-copy-density"], "compact")

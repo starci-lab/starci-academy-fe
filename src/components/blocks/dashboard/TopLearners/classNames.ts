@@ -1,4 +1,5 @@
 export {
+    communityEmptyNoticeClassName as topLearnerEmptyNoticeClassName,
     communityRankedRowClassName as topLearnerRowClassName,
-    communityStandingClassName as topLearnerStandingClassName,
+    communityTopStandingClassName as topLearnerStandingClassName,
 } from "../CommunityTab/classNames"

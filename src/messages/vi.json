@@ -48,8 +48,9 @@
         "tabs": {
             "overview": "Tổng quan",
             "explore": "Khám phá",
+            "bulletin": "Bảng tin",
             "courses": "Khóa học",
-            "community": "Cộng đồng"
+            "community": "Bảng xếp hạng"
         },
         "quickActions": "Truy cập nhanh",
         "actions": {

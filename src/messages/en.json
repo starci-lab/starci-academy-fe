@@ -48,8 +48,9 @@
         "tabs": {
             "overview": "Overview",
             "explore": "Explore",
+            "bulletin": "Bulletin",
             "courses": "Courses",
-            "community": "Community"
+            "community": "Leaderboard"
         },
         "quickActions": "Quick access",
         "actions": {
