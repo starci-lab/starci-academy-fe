@@ -300,9 +300,9 @@ export const AuthenticationPanelBase = (props: AuthenticationPanelProps) => {
             <div className={authenticationSecondaryClassName}>
                 <Text size={"sm"} tone={"muted"}>{props.props.promptQuestion}</Text>
                 <TextAction size={"sm"} appearance="inline" onPress={() =>
-                            props.on?.changeMode?.(
-                                props.props.mode === "signIn" ? "signUp" : "signIn",
-                            )}>{props.props.promptAction}</TextAction>
+                    props.on?.changeMode?.(
+                        props.props.mode === "signIn" ? "signUp" : "signIn",
+                    )}>{props.props.promptAction}</TextAction>
             </div>
         </div>
     )

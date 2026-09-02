@@ -29,7 +29,7 @@ export const ContinueLearningBase = (props: ContinueLearningProps) => {
     const loading = props.state === "pending"
     const items = loading ? Array.from({ length: 3 }, (_, index) => ({ id: `resting-${index}`, title: "", kindLabel: "" })) : props.props.items ?? []
     return (
-        <SurfaceCard label={props.props.label} frame={true ? "frameless" : "bounded"} composition={"joined"} state={loading ? "pending" : "neutral"}>
+        <SurfaceCard label={props.props.label} frame={"frameless"} composition={"joined"} state={loading ? "pending" : "neutral"}>
             <div className={continueLearningGridClassName}>
                 {items.map((item, index) => (
                     <div className={continueLearningItemClassName} data-dashboard-resume-item={index === 0 ? "featured" : "supporting"} key={item.id}>

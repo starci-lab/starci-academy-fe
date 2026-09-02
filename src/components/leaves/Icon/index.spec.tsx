@@ -3,7 +3,12 @@ import { describe, expect, it } from "vitest"
 import { Icon } from "@starci/grammar/common"
 import { iconSourceFor } from "./index"
 
-const Subject = ({ name, role }: { name: Parameters<typeof iconSourceFor>[0], role: Parameters<typeof iconSourceFor>[1] }) => (
+type SubjectProps = {
+    readonly name: Parameters<typeof iconSourceFor>[0]
+    readonly role: Parameters<typeof iconSourceFor>[1]
+}
+
+const Subject = ({ name, role }: SubjectProps) => (
     <Icon source={iconSourceFor(name, role)} role={role} />
 )
 

@@ -164,7 +164,7 @@ export const CoursePersonalProjectBase = (props: CoursePersonalProjectProps) => 
     const repository = props.data.repository
     const nextTask = props.data.nextTask
     const nextTaskAction = loading
-        ? <Button variant={"primary"} size={"md"} isSkeleton endContent={"next" === "next" && "trailing" === "trailing" ? <Icon source={iconSourceFor("next", "chip")} role="chip" /> : undefined}>{props.data.continueLabel}</Button>
+        ? <Button variant={"primary"} size={"md"} isSkeleton endContent={<Icon source={iconSourceFor("next", "chip")} role="chip" />}>{props.data.continueLabel}</Button>
         : nextTask === undefined
             ? null
             : <NextLink href={nextTask.href} className={projectPrimaryActionLinkClassName} aria-label={props.data.continueLabel}>

@@ -29,5 +29,5 @@ export const ActivityFeedBase = (props: ActivityFeedProps) => {
             </section>
         })}</div>
     if (props.isFrameless === true) return <section aria-label={label}>{content}</section>
-    return <SurfaceListCard label={label} labelHidden={true} depth={true ? "nested" : "top"} isLoading={props.state === "pending"}>{content}</SurfaceListCard>
+    return <SurfaceListCard label={label} labelHidden={true} depth={"nested"} isLoading={props.state === "pending"}>{content}</SurfaceListCard>
 }

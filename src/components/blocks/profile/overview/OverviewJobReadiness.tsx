@@ -118,7 +118,7 @@ export const OverviewJobReadiness = (props: OverviewJobReadinessProps) => {
                     </div>
                     <Text size={"xs"} tone={"muted"} isSkeleton={loading}>{loading ? undefined : t(`jobReadiness.band.${trackBand}`)}</Text>
                 </div>
-                <SurfaceListCard label={common.label} labelHidden={true} depth={true ? "nested" : "top"} isLoading={loading}>
+                <SurfaceListCard label={common.label} labelHidden={true} depth={"nested"} isLoading={loading}>
                     <div className={profileReadinessListClassName}>
                         {settledMetrics.map((metric) => <EvidenceRow
                             key={metric.id}

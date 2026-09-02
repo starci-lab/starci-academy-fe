@@ -69,7 +69,7 @@ export const CourseMockInterviewResultBlockBase = (props: CourseMockInterviewRes
     </div>
 
     const readyActions = <div className={mockInterviewResultReadyActionsClassName}>
-        <Button variant={"primary"} onPress={({ press: props.on?.newSession })?.press} endContent={"next" === "next" && "trailing" === "trailing" ? <Icon source={iconSourceFor("next", "chip")} role="chip" /> : undefined}>{data.newSessionLabel}</Button>
+        <Button variant={"primary"} onPress={({ press: props.on?.newSession })?.press} endContent={<Icon source={iconSourceFor("next", "chip")} role="chip" />}>{data.newSessionLabel}</Button>
         <Button variant="outline" onPress={props.on?.openHistory}>{data.openHistoryLabel}</Button>
         <Button variant="outline" onPress={props.on?.returnToCourse}>{data.returnToCourseLabel}</Button>
         <Button variant="outline" onPress={props.on?.openTranscript}>{data.openTranscriptLabel}</Button>

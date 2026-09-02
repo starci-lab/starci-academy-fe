@@ -14,8 +14,8 @@ export const COMMON_UI_RULE_IDS = Object.freeze(
 
 export type GrammarRuleConformance = {
     readonly familyId: string
-    readonly inheritedCommonRules: readonly string[]
-    readonly familyEvidence: Readonly<Record<string, readonly string[]>>
+    readonly inheritedCommonRules: ReadonlyArray<string>
+    readonly familyEvidence: Readonly<Record<string, ReadonlyArray<string>>>
 }
 
 /** Machine-checkable family coverage against the canonical knowledge/ui X-n catalog. */

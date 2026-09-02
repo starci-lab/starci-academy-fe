@@ -111,10 +111,10 @@ export const SourceFileTree = (props: SourceFileTreeProps) => {
                         : `Open ${node.path}`
                     return <li key={node.id}>
                         <IconButton source={iconSourceFor(node.kind === "folder" ? "disclosure" : "code", "leading")} label={controlLabel} isSkeleton={isLoading} onPress={({
-                                press: node.kind === "folder"
-                                    ? () => toggleFolder(node.path)
-                                    : () => on?.activate?.(node.path),
-                            })?.press} />
+                            press: node.kind === "folder"
+                                ? () => toggleFolder(node.path)
+                                : () => on?.activate?.(node.path),
+                        })?.press} />
                         <Text size={"sm"} tone={isActive ? "accent" : "default"} weight={isActive ? "semibold" : "normal"} isSkeleton={isLoading}>{node.label}</Text>
                         {node.isEdited ? <StatusDot
                             props={{ tone: "warning", label: data.editedLabel ?? "Locally edited" }}

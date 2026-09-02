@@ -29,7 +29,7 @@ const PinnedProjectsList = (props: ProfileProjectsProps) => {
     const projects = loading
         ? Array.from({ length: 2 }, (_, index) => ({ id: `resting-${index}`, type: "", title: "", description: null, techStack: [], isVerified: false, url: null }))
         : props.pinned.data
-    return <SurfaceCard label={props.labels.pinned} fact={loading ? undefined : String(projects.length)} frame={true ? "frameless" : "bounded"} composition="joined" state={loading ? "pending" : "neutral"}>
+    return <SurfaceCard label={props.labels.pinned} fact={loading ? undefined : String(projects.length)} frame={"frameless"} composition="joined" state={loading ? "pending" : "neutral"}>
         <div className={profileProjectCardGridClassName}>{projects.map((project) => <ProfileProjectCard key={project.id} props={{ title: project.title, description: project.description ?? undefined, kind: project.type === "course" ? props.labels.courseKind : props.labels.externalKind, technologies: project.techStack?.slice(0, 3) ?? [], verified: project.isVerified, actionLabel: props.labels.openProject }} on={project.url ? { press: () => props.on.openPinned(project.url as string) } : undefined} isLoading={loading} />)}</div>
     </SurfaceCard>
 }

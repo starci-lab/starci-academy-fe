@@ -22,7 +22,7 @@ const Achievements = (props: ProfileActivityProps) => {
     const labels = props.labels ?? defaultLabels
     const loading = props.achievementState === "pending"
     const items = loading ? Array.from({ length: 3 }, (_, index): ProfileAchievementData => ({ slug: String(index), name: "", earned: true, currentValue: 0, threshold: 0 })) : props.achievements.filter((item) => item.earned)
-    return <SurfaceCard label={labels.achievements} frame={true ? "frameless" : "bounded"} composition="joined"><div className={profileAchievementGridClassName}>{!loading && items.length === 0 ? <EmptyNotice message={props.achievementState === "error" ? labels.achievementsError : labels.achievementsEmpty} iconSource={iconSourceFor(props.achievementState === "error" ? "retry" : "complete", "leading")} /> : items.map((item) => <ProfileAchievement key={item.slug} props={{ name: item.name, rarity: [item.tierReached == null ? undefined : `${labels.achievementTier} ${item.tierReached}`, item.rarityPercent == null ? undefined : `${labels.achievementRarity} ${item.rarityPercent}%`].filter(Boolean).join(" · ") || labels.achievements }} isLoading={loading} />)}</div></SurfaceCard>
+    return <SurfaceCard label={labels.achievements} frame={"frameless"} composition="joined"><div className={profileAchievementGridClassName}>{!loading && items.length === 0 ? <EmptyNotice message={props.achievementState === "error" ? labels.achievementsError : labels.achievementsEmpty} iconSource={iconSourceFor(props.achievementState === "error" ? "retry" : "complete", "leading")} /> : items.map((item) => <ProfileAchievement key={item.slug} props={{ name: item.name, rarity: [item.tierReached == null ? undefined : `${labels.achievementTier} ${item.tierReached}`, item.rarityPercent == null ? undefined : `${labels.achievementRarity} ${item.rarityPercent}%`].filter(Boolean).join(" · ") || labels.achievements }} isLoading={loading} />)}</div></SurfaceCard>
 }
 const ActivitySummary = (props: ProfileActivityProps) => {
     const labels = props.labels ?? defaultLabels
@@ -33,7 +33,7 @@ const ActivitySummary = (props: ProfileActivityProps) => {
 }
 const Activity = (props: ProfileActivityProps) => {
     const labels = props.labels ?? defaultLabels
-    return <SurfaceCard label={props.feed.state === "ready" || props.feed.state === "pending" ? labels.timeline : undefined} frame={true ? "frameless" : "bounded"} composition="joined"><div className={activityFeedResultClassName}><ActivityFeedBase {...props.feed} props={{ ...props.feed.props, label: props.feed.state === "ready" || props.feed.state === "pending" ? props.feed.props.label : labels.timelineStatus }} /></div></SurfaceCard>
+    return <SurfaceCard label={props.feed.state === "ready" || props.feed.state === "pending" ? labels.timeline : undefined} frame={"frameless"} composition="joined"><div className={activityFeedResultClassName}><ActivityFeedBase {...props.feed} props={{ ...props.feed.props, label: props.feed.state === "ready" || props.feed.state === "pending" ? props.feed.props.label : labels.timelineStatus }} /></div></SurfaceCard>
 }
 /** Draw earned achievement proof before the grouped public timeline. */
 export const ProfileActivityBase = (props: ProfileActivityProps) => {

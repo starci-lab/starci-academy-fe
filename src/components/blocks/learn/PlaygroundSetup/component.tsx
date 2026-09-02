@@ -153,7 +153,7 @@ export const PlaygroundSetupBase = (props: PlaygroundSetupProps) => {
                     </div>
 
                     <div className={playgroundActionsClassName}>
-                    <Button variant="primary" isDisabled={paired && props.state !== "ready"} isPending={props.state === "starting"} isSkeleton={loading} onPress={paired ? props.on.enter : props.on.start} endContent={paired ? <Icon source={iconSourceFor("next", "chip")} role="chip" /> : undefined}>{paired ? props.props.enterLabel : props.state === "starting" ? props.props.startingLabel : props.props.startLabel}</Button>
+                        <Button variant="primary" isDisabled={paired && props.state !== "ready"} isPending={props.state === "starting"} isSkeleton={loading} onPress={paired ? props.on.enter : props.on.start} endContent={paired ? <Icon source={iconSourceFor("next", "chip")} role="chip" /> : undefined}>{paired ? props.props.enterLabel : props.state === "starting" ? props.props.startingLabel : props.props.startLabel}</Button>
                     </div>
                 </aside></SurfaceCard>
             </div>

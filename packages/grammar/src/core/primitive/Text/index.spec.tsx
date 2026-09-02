@@ -11,29 +11,29 @@ describe("Core Text", () => {
         )
 
         expect(markup).toMatch(/^<div /)
-        expect(markup).toContain('id="save-status"')
-        expect(markup).toContain('data-size="sm"')
-        expect(markup).toContain('data-tone="accent"')
-        expect(markup).toContain('role="status"')
-        expect(markup).toContain('aria-live="polite"')
+        expect(markup).toContain("id=\"save-status\"")
+        expect(markup).toContain("data-size=\"sm\"")
+        expect(markup).toContain("data-tone=\"accent\"")
+        expect(markup).toContain("role=\"status\"")
+        expect(markup).toContain("aria-live=\"polite\"")
     })
 
     it("accepts app-owned leading content without owning product glyph names", () => {
         const markup = renderToStaticMarkup(<Text as="span" startContent={<i data-glyph />}>Fact</Text>)
 
         expect(markup).toMatch(/^<span /)
-        expect(markup).toContain('data-start-content="true"')
-        expect(markup).toContain('data-glyph="true"')
+        expect(markup).toContain("data-start-content=\"true\"")
+        expect(markup).toContain("data-glyph=\"true\"")
         expect(markup.indexOf("data-glyph")).toBeLessThan(markup.indexOf("Fact"))
     })
 
     it("keeps inert size-specific geometry while initially unresolved", () => {
         const markup = renderToStaticMarkup(<Text size="metric-lead" live="assertive" isSkeleton />)
 
-        expect(markup).toContain('data-loading="true"')
-        expect(markup).toContain('aria-hidden="true"')
+        expect(markup).toContain("data-loading=\"true\"")
+        expect(markup).toContain("aria-hidden=\"true\"")
         expect(markup).toContain("text-3xl")
-        expect(markup).not.toContain('role="alert"')
+        expect(markup).not.toContain("role=\"alert\"")
         expect(markup).not.toContain("aria-live")
     })
 
@@ -42,9 +42,9 @@ describe("Core Text", () => {
             <Text size="xs" tone="accent" isPressLabel isSuperseded parentEmphasis="accent-soft">Old price</Text>,
         )
 
-        expect(markup).toContain('data-tone="muted"')
-        expect(markup).toContain('data-press-label="true"')
-        expect(markup).toContain('data-superseded="true"')
-        expect(markup).toContain('data-parent-emphasis="accent-soft"')
+        expect(markup).toContain("data-tone=\"muted\"")
+        expect(markup).toContain("data-press-label=\"true\"")
+        expect(markup).toContain("data-superseded=\"true\"")
+        expect(markup).toContain("data-parent-emphasis=\"accent-soft\"")
     })
 })

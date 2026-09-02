@@ -1,9 +1,9 @@
 import { cn } from "@heroui/react"
 
-/** Vertical route inset for the Pro decision surface. */
+/** Vertical route inset for the Pro decision surface; one scale step at the wider breakpoint. */
 export const proPageClassName = cn(
-    "py-8",
-    "sm:py-12",
+    "py-6",
+    "sm:py-8",
 )
 /** Breadcrumb and offer introduction share one compact orientation stack. */
 export const proHeroClassName = cn("flex", "max-w-3xl", "min-w-0", "flex-col", "gap-3")
@@ -88,16 +88,6 @@ export const proPlanDetailsClassName = cn(
 )
 /** Alignment boundary for plan identity and access badge. */
 export const proPlanHeadingClassName = cn("flex", "items-center", "justify-between", "gap-3")
-/** Restrained access marker using the existing accent-soft tokens. */
-export const proPlanBadgeClassName = cn(
-    "rounded-full",
-    "bg-accent-soft",
-    "px-3",
-    "py-1",
-    "text-xs",
-    "font-semibold",
-    "text-accent-soft-foreground",
-)
 /** Price and billing period share one accessible fact. */
 export const proPriceClassName = cn("flex", "flex-wrap", "items-end", "gap-x-2", "gap-y-1")
 /** Dominant monetary figure in the decision rail. */
@@ -129,6 +119,6 @@ export const proActionsClassName = cn(
     "max-[399px]:[&>button>span]:leading-tight",
 )
 /** Failed-offer notice inset. */
-export const proNoticeClassName = cn("flex", "min-w-0", "flex-col", "gap-4", "p-5")
+export const proNoticeClassName = cn("flex", "min-w-0", "flex-col", "gap-4", "p-4")
 /** Compact recovery action that does not overpower a short error explanation. */
 export const proRetryActionsClassName = cn("flex", "justify-start")

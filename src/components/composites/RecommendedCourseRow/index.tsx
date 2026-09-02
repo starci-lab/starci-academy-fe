@@ -4,7 +4,7 @@ import { DestinationCue } from "@/components/leaves/DestinationCue"
 import { IconTile } from "@starci/grammar/common"
 import { iconSourceFor } from "@/components/leaves/Icon"
 import { Text } from "@starci/grammar/common"
-import { recommendedCourseBodyClassName, recommendedCourseDetailsClassName, recommendedCourseEvidenceClassName, recommendedCoursePriceClassName, recommendedCourseRowClassName } from "./classNames"
+import { recommendedCourseBodyClassName, recommendedCourseDetailsClassName, recommendedCourseEvidenceClassName, recommendedCoursePriceClassName, recommendedCourseRowClassName, recommendedCourseCoverClassName } from "./classNames"
 import { TextAction } from "@starci/grammar/common"
 
 
@@ -64,7 +64,7 @@ export const RecommendedCourseRow = (props: RecommendedCourseRowProps) => {
     const isLoading = props.isLoading ?? false
     const priceDetailLabel = data.priceDetailLabel
     return <PressableSurface hover="label" label={data.title ?? "Course"} press={on?.open} disabled={isLoading}><div className={recommendedCourseRowClassName}>
-        <IconTile source={iconSourceFor("course", "leading")} artwork={data.cover ? <img src={data.cover} alt="" className="size-full object-cover" /> : undefined} tone={"accent"} size={"md"} isSkeleton={isLoading} />
+        <IconTile source={iconSourceFor("course", "leading")} artwork={data.cover ? <img src={data.cover} alt="" className={recommendedCourseCoverClassName} /> : undefined} tone={"accent"} size={"md"} isSkeleton={isLoading} />
         <div className={recommendedCourseBodyClassName} data-recommended-course-body="true">
             <div className={recommendedCourseEvidenceClassName} data-recommended-course-evidence="true">
                 <Text size={"md"} weight={"semibold"} isPressLabel={true} isSkeleton={isLoading}>{data.title}</Text>

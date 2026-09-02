@@ -14,3 +14,5 @@ export const recommendedCoursePriceClassName = cn("flex", "min-w-0", "flex-wrap"
 
 /** Pair the saving with its explanation affordance on one readable line. */
 export const recommendedCourseDetailsClassName = cn("flex", "min-w-0", "flex-wrap", "items-baseline", "gap-x-2", "gap-y-1")
+/** The cover fills the tile it is dropped into, cropping rather than letterboxing. */
+export const recommendedCourseCoverClassName = cn("size-full", "object-cover")

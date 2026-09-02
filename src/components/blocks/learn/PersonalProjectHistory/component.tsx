@@ -79,7 +79,7 @@ export const PersonalProjectHistoryBase = (props: PersonalProjectHistoryProps) =
                                 {selected ? <Badge tone={"accent"}>{props.props.labels.selected}</Badge> : null}
                                 {selected ? <Text weight={"semibold"}>{props.props.labels.selectAttempt(attempt.attemptNumber, attempt.score)}</Text> : <Button variant={"outline"} size={"sm"} isSkeleton={loading} onPress={({ press: () => props.on?.select?.(attempt) })?.press}>{props.props.labels.selectAttempt(attempt.attemptNumber, attempt.score)}</Button>}
                                 <Text size={"xs"} tone={"muted"} isSkeleton={loading}>{[attempt.passed ? props.props.labels.passed : props.props.labels.needsWork, attempt.servedProvider, attempt.servedModel, attempt.processedAt]
-                                            .filter(Boolean).join(" · ")}</Text>
+                                    .filter(Boolean).join(" · ")}</Text>
                             </li>
                         )
                     })}

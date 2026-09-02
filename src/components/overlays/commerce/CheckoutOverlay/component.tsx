@@ -130,7 +130,7 @@ export const CheckoutOverlayBase = (props: CheckoutOverlayProps) => {
                     ) : null}
 
                     <div className={checkoutActionsClassName}>
-                        <Button variant={"primary"} isPending={data.isPaying === true} onPress={({ press: props.on?.pay })?.press} endContent={"next" === "next" && "trailing" === "trailing" ? <Icon source={iconSourceFor("next", "chip")} role="chip" /> : undefined}>{labels.action}</Button>
+                        <Button variant={"primary"} isPending={data.isPaying === true} onPress={({ press: props.on?.pay })?.press} endContent={<Icon source={iconSourceFor("next", "chip")} role="chip" />}>{labels.action}</Button>
                         <Button variant="ghost" isDisabled={data.isPaying === true} onPress={props.on?.dismiss}>{labels.cancel}</Button>
                     </div>
                 </div>

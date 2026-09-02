@@ -12,3 +12,5 @@ export const courseProgressTrackClassName = cn("flex", "w-full", "flex-row", "it
 export const courseProgressLegendClassName = cn("flex", "flex-row", "flex-wrap", "items-center", "gap-3")
 /** `status-dot-with-label` from the contract registry. */
 export const courseProgressLegendItemClassName = cn("flex", "flex-row", "items-center", "gap-2")
+/** The cover fills the tile it is dropped into, cropping rather than letterboxing. */
+export const courseProgressCoverClassName = cn("size-full", "object-cover")

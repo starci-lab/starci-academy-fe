@@ -100,7 +100,7 @@ export const CourseMockInterviewSessionBlockBase = (props: CourseMockInterviewSe
                 : <div className={mockInterviewNoticeClassName}><Text size={"sm"} weight={"semibold"} live={"assertive"}>{data.notice}</Text></div>}
             <div className={mockInterviewComposerButtonsClassName}>
                 {data.operation === "streaming" ? <Button variant="outline" onPress={props.on?.abort}>{data.abortLabel}</Button> : null}
-                <Button variant={"primary"} isDisabled={busy || data.answer.trim() === ""} onPress={({ press: props.on?.ask })?.press} endContent={"next" === "next" && "trailing" === "trailing" ? <Icon source={iconSourceFor("next", "chip")} role="chip" /> : undefined}>{data.submitLabel}</Button>
+                <Button variant={"primary"} isDisabled={busy || data.answer.trim() === ""} onPress={({ press: props.on?.ask })?.press} endContent={<Icon source={iconSourceFor("next", "chip")} role="chip" />}>{data.submitLabel}</Button>
             </div>
         </div>
     </section>

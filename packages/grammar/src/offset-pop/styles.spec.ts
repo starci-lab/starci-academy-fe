@@ -68,8 +68,8 @@ describe("Offset Pop family CSS", () => {
         expect(rendererSource).toContain("<Card.Root")
         expect(rendererSource).toContain("<Card.Header")
         expect(rendererSource).toContain("<Card.Content")
-        expect(css).toContain('[data-grammar-surface-card][data-slot="card"]')
-        expect(css).toContain('[data-grammar-frame="bounded"][data-slot="card-content"]')
+        expect(css).toContain("[data-grammar-surface-card][data-slot=\"card\"]")
+        expect(css).toContain("[data-grammar-frame=\"bounded\"][data-slot=\"card-content\"]")
     })
 
     it("uses invariant spacing for focus, press, responsive, and reduced-motion vectors", () => {
@@ -86,7 +86,7 @@ describe("Offset Pop family CSS", () => {
         expect(css).toContain("@media (forced-colors: active)")
 
         for (const state of ["affirmative", "informative", "cautionary", "negative", "pending", "unavailable"]) {
-            expect(css).toContain(`data-grammar-state=\"${state}\"`)
+            expect(css).toContain(`data-grammar-state="${state}"`)
         }
     })
 

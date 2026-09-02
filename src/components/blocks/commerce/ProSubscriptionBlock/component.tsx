@@ -1,6 +1,6 @@
 import Image from "next/image"
 import { useState } from "react"
-import { IncludedMark, PageContainer, PrimaryRailLayout, SectionHeader, SurfaceAccordionCard, SurfaceCopyGroup, Button } from "@starci/grammar/common"
+import { Badge, IncludedMark, PageContainer, PrimaryRailLayout, SectionHeader, SurfaceAccordionCard, SurfaceCopyGroup, Button } from "@starci/grammar/common"
 import { SurfaceCard } from "@starci/grammar/common"
 import { CheckoutOverlayBase, type CheckoutOverlayData } from "@/components/overlays/commerce/CheckoutOverlay/component"
 import { Breadcrumbs } from "@/components/leaves/Breadcrumbs"
@@ -24,7 +24,6 @@ import {
     proMainClassName,
     proNoticeClassName,
     proPageClassName,
-    proPlanBadgeClassName,
     proPlanClassName,
     proPlanDetailsClassName,
     proPlanHeadingClassName,
@@ -161,7 +160,7 @@ export const ProSubscriptionBlockBase = (props: ProSubscriptionBlockProps) => {
                     <div className={proPlanDetailsClassName} data-has-actions={hasPurchaseAction ? "true" : "false"}>
                         <div className={proPlanHeadingClassName}>
                             <Heading level={2} isSkeleton={isLoading}>{data.planName}</Heading>
-                            <span className={proPlanBadgeClassName}>{labels.planBadge}</span>
+                            <Badge tone="accent">{labels.planBadge}</Badge>
                         </div>
                         <div className={proPriceClassName} aria-label={isLoading ? undefined : `${data.price ?? ""} ${labels.period}`}>
                             <span className={proPriceValueClassName}>{isLoading ? "—" : data.price}</span>

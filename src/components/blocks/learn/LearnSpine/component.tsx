@@ -4,6 +4,7 @@ import { PressableSurface } from "@/components/branches/PressableSurface"
 import { iconSourceFor, type IconName } from "@/components/leaves/Icon"
 import { learnSpineResumeClassName } from "./classNames"
 
+/** One reachable place in the course, and what the rail says about it before you go. */
 export type LearnSpineRow = {
     readonly id: string
     readonly label: string
@@ -13,7 +14,9 @@ export type LearnSpineRow = {
     readonly isLocked?: boolean
 }
 
+/** A titled run of rows - the course's own sectioning, carried into the rail. */
 export type LearnSpineGroup = { readonly id: string; readonly label: string; readonly rows: ReadonlyArray<LearnSpineRow> }
+/** The whole rail as data: where you are, where you left off, and everywhere you may go. */
 export type LearnSpineData = {
     readonly lockedLabel: string
     readonly collapseLabel: string
@@ -23,8 +26,11 @@ export type LearnSpineData = {
     readonly resume?: { readonly label: string; readonly title: string; readonly percent: number; readonly percentText: string }
     readonly groups: ReadonlyArray<LearnSpineGroup>
 }
+/** What the rail reports when a learner picks a row, resumes, or narrows the rail. */
 export type LearnSpineActions = { readonly openRow?: (id: string) => void; readonly resume?: () => void; readonly toggleCollapse?: () => void }
+/** One rail call: its data, its callbacks, and the width and loading state it is asked for. */
 export type LearnSpineProps = { readonly props: LearnSpineData; readonly on?: LearnSpineActions; readonly isLoading?: boolean; readonly isCollapsed?: boolean; readonly presentation?: "rail" | "drawer" }
+/** The collapsed rail takes the same call as the expanded one; only the projection differs. */
 export type LearnSpineCollapsedProps = LearnSpineProps
 
 const sidebarItemOf = (row: LearnSpineRow, lockedLabel: string): SidebarItem => ({
@@ -70,6 +76,7 @@ const renderSidebar = (input: LearnSpineProps, collapsed: boolean, presentation:
 export const learnSpine = (props: LearnSpineProps) => renderSidebar(props, false, props.presentation === "drawer" ? "drawer" : "rail")
 /** Collapsed projection of the same course-specific data. */
 export const learnSpineCollapsed = (props: LearnSpineProps) => renderSidebar(props, true, "rail")
+/** The same data projected for the compact drawer, which is never collapsed. */
 export const learnSpineDrawer = (props: LearnSpineProps) => renderSidebar(props, false, "drawer")
 
 /** Product route adapter; Grammar owns every sidebar DOM and geometry decision. */
@@ -77,4 +84,5 @@ export const LearnSpineBase = (props: LearnSpineProps) => props.presentation ===
     ? learnSpineDrawer(props)
     : renderSidebar(props, props.isCollapsed ?? props.props.isCollapsed, "rail")
 
+/** Route adapter for the narrow rail; the caller has already decided it should be narrow. */
 export const LearnSpineCollapsedBase = (props: LearnSpineCollapsedProps) => learnSpineCollapsed(props)

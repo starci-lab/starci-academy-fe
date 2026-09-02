@@ -12,8 +12,10 @@ export interface LearnMobileTab {
     readonly isCurrent?: boolean
 }
 
+/** The set of panes compact learn can show one at a time, since it has no room for two. */
 export type LearnMobileView = "today" | "course" | "progress" | "contents" | "lesson" | "outline"
 
+/** Everything the learn shell renders from: its copy, its compact affordances, and its bleed. */
 export type LearnShellLayoutData = {
     readonly navigationLabel: string
     readonly mobileTabs?: ReadonlyArray<LearnMobileTab>
@@ -21,6 +23,7 @@ export type LearnShellLayoutData = {
     readonly isFullBleed: boolean
 }
 
+/** The navigation moves the shell reports upward; the product, not the shell, owns the state. */
 export type LearnShellLayoutActions = {
     readonly openMobileTab?: (id: string) => void
     readonly openCourseNavigation?: () => void
@@ -28,6 +31,7 @@ export type LearnShellLayoutActions = {
     readonly setRailCollapsed?: (collapsed: boolean) => void
 }
 
+/** The full call: what to render, which lesson surface sits inside it, and where to report back. */
 export type LearnShellLayoutProps = LearnShellLayoutData & {
     readonly displayId: string
     readonly isRailCollapsed?: boolean

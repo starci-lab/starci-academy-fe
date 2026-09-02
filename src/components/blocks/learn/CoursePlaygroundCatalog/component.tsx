@@ -94,7 +94,7 @@ export const CoursePlaygroundCatalogBase = (props: CoursePlaygroundCatalogProps)
                         </div>
                     </div>}
                     {firstPlayground === undefined || loading || isSettledNotice ? null : <div className={playgroundCatalogActionClassName}>
-                        <Button variant={"primary"} onPress={({ press: () => props.on.openSetup(firstPlayground.slug) })?.press} endContent={"next" === "next" && "trailing" === "trailing" ? <Icon source={iconSourceFor("next", "chip")} role="chip" /> : undefined}>{props.props.startLabel}</Button>
+                        <Button variant={"primary"} onPress={({ press: () => props.on.openSetup(firstPlayground.slug) })?.press} endContent={<Icon source={iconSourceFor("next", "chip")} role="chip" />}>{props.props.startLabel}</Button>
                     </div>}
                 </div>
                 <div className={playgroundCatalogPreviewClassName}>
@@ -146,7 +146,7 @@ export const CoursePlaygroundCatalogBase = (props: CoursePlaygroundCatalogProps)
                             <Icon source={iconSourceFor("complete", "chip")} role={"chip"} isSkeleton={loading} />
                             <Text size={"xs"} tone={"muted"} isSkeleton={loading}>{props.props.verifiedLabel}</Text>
                         </span>
-                        {loading ? null : <Button variant={"ghost"} size={"sm"} onPress={({ press: () => props.on.openSetup(playground.slug) })?.press} endContent={"next" === "next" && "trailing" === "trailing" ? <Icon source={iconSourceFor("next", "chip")} role="chip" /> : undefined}>{props.props.openLabel}</Button>}
+                        {loading ? null : <Button variant={"ghost"} size={"sm"} onPress={({ press: () => props.on.openSetup(playground.slug) })?.press} endContent={<Icon source={iconSourceFor("next", "chip")} role="chip" />}>{props.props.openLabel}</Button>}
                     </div>
                 </article>
             </SurfaceCard>

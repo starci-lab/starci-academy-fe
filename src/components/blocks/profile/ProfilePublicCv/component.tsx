@@ -89,7 +89,7 @@ export const ProfilePublicCvBase = (props: ProfilePublicCvProps) => {
     if (props.isSelf) return <ProfileCvBuilder />
     const loading = props.state === "pending"
     return (
-        <SurfaceCard label={props.label} frame={true ? "frameless" : "bounded"} composition="joined">
+        <SurfaceCard label={props.label} frame={"frameless"} composition="joined">
             <section className={publicCvWorkspaceClassName} aria-label={props.label} data-state={props.state}>
                 <header className={publicCvHeaderClassName}>
                     <div className={publicCvIdentityClassName}>

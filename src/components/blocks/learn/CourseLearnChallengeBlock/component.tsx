@@ -281,8 +281,8 @@ export const CourseLearnChallengeBlockBase = (
                 <Heading level={1} isSkeleton={loading}>{props.props.title}</Heading>
                 <Text size={"sm"} tone={"muted"} isSkeleton={loading}>{props.props.description}</Text>
                 <div className={challengeMetaClassName}><Badge isSkeleton={loading}>{props.props.difficultyLabel}</Badge>
-                <Badge tone={passed ? "success" : "neutral"} isSkeleton={loading}>{props.props.statusLabel}</Badge>
-                <Badge isSkeleton={loading}>{labels.points(props.props.maximumScore)}</Badge></div>
+                    <Badge tone={passed ? "success" : "neutral"} isSkeleton={loading}>{props.props.statusLabel}</Badge>
+                    <Badge isSkeleton={loading}>{labels.points(props.props.maximumScore)}</Badge></div>
                 {props.props.languageOptions === undefined ? null : <Select props={{ id: "challenge-language", name: "challenge-language", label: labels.language ?? "Language", options: props.props.languageOptions, selectedKey: props.props.selectedLanguage }} on={{ select: props.on?.selectLanguage }} />}
             </header>
             <div className={challengeSubmissionLauncherClassName}><ExtendedTabs props={{ label: labels.workspaceLabel ?? labels.deliverables, selectedKey: activeView, labelVisibility: "always", inset: "none", tabs: [
@@ -329,14 +329,14 @@ export const CourseLearnChallengeBlockBase = (
             </SurfaceCard>
             {hasBlockingNotice ? null : <SurfaceCard label={labels.readinessTitle ?? labels.deliverables} measure={"form"} composition="single">
                 <Text size={"sm"} tone={"muted"} live={"polite"}>{labels.readinessIncomplete?.(
-                  completed,
-                  props.props.deliverables.length,
-              ) ?? ""}</Text>
+                    completed,
+                    props.props.deliverables.length,
+                ) ?? ""}</Text>
                 <Progress label={labels.readinessTitle ?? labels.deliverables} value={props.props.deliverables.length === 0
-                  ? 0
-                  : Math.round(
-                      (completed / props.props.deliverables.length) * 100,
-                  )} isSkeleton={loading} />
+                    ? 0
+                    : Math.round(
+                        (completed / props.props.deliverables.length) * 100,
+                    )} isSkeleton={loading} />
                 {props.props.draftStatus === undefined ? null : <Text size={"sm"} tone={"muted"} live={"polite"}>{props.props.draftStatus}</Text>}
                 <Text size={"xs"} tone={"muted"}>{labels.cachePolicy}</Text>
                 {props.props.isReviewing ? <section><Heading level={2}>{labels.reviewTitle ?? labels.submitAttempt}</Heading><Text size={"sm"} tone={"muted"}>{labels.reviewDescription ?? labels.confirmDescription}</Text>{deliverables.map((item) => <Text key={item.id} size={"sm"}>{`${item.title}: ${item.url ?? ""}`}</Text>)}<Button variant="outline" onPress={props.on?.returnToEdit}>{labels.returnToEdit ?? labels.cancel}</Button><Button variant="primary" onPress={props.on?.submitAttempt}>{labels.submitAttempt}</Button></section> : <><Button variant="outline" isDisabled={loading || busy} isPending={props.blockState === "saving"} onPress={passed ? () => props.on?.openResult?.(deliverables[0]?.id ?? "") : props.on?.saveDraft}>{passed ? labels.result : labels.saveDraft}</Button><Button variant="primary" isDisabled={loading || busy || !props.props.allDraftsComplete} onPress={passed

@@ -48,7 +48,7 @@ export const ChallengeAttemptHistoryBase = (props: ChallengeAttemptHistoryProps)
                 <div key={attempt.id} className={challengeAttemptHistoryRowClassName}>
                     <Button variant={attempt.id === props.selectedAttemptId ? "primary" : "outline"} size="sm" onPress={() => props.onSelect?.(attempt)}>{props.labels.attempt(attempt.attemptNumber, attempt.score)}</Button>
                     <Text size={"xs"} tone={"muted"}>{[props.labels.outcome[attempt.outcome], attempt.servedModel, attempt.processedAt]
-                                .filter(Boolean).join(" · ")}</Text>
+                        .filter(Boolean).join(" · ")}</Text>
                 </div>
             )) : (
                 <Text live={props.state === "failed" ? "assertive" : "polite"}>{notice}</Text>

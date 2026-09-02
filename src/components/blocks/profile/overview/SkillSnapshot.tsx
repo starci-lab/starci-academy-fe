@@ -49,7 +49,7 @@ export const SkillSnapshot = (props: SkillSnapshotProps) => {
                                 recipe: "label-led",
                             }}
                         />
-                        <SurfaceListCard label={props.label} labelHidden={true} depth={true ? "nested" : "top"} isLoading={props.isLoading}>
+                        <SurfaceListCard label={props.label} labelHidden={true} depth={"nested"} isLoading={props.isLoading}>
                             <div className={profileSkillListClassName}>
                                 {props.rows.map((row) => <EvidenceRow
                                     key={row.id}

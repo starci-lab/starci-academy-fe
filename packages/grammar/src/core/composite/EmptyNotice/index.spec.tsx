@@ -17,7 +17,7 @@ describe("Core EmptyNotice", () => {
             />,
         )
 
-        expect(markup).toContain('data-component="EmptyNotice"')
+        expect(markup).toContain("data-component=\"EmptyNotice\"")
         expect(markup).toContain("No results")
         expect(markup).toContain("Try a different filter.")
         expect(markup).toContain("<svg")
@@ -30,8 +30,8 @@ describe("Core EmptyNotice", () => {
             <EmptyNotice message="Could not load" actionLabel="Retry" isActionPending />,
         )
 
-        expect(markup).toContain('data-action-pending="true"')
-        expect(markup).toContain('aria-busy="true"')
+        expect(markup).toContain("data-action-pending=\"true\"")
+        expect(markup).toContain("aria-busy=\"true\"")
         expect(markup).toContain("Retry")
     })
 })

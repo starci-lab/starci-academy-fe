@@ -10,8 +10,11 @@ export const shellNavActionsClassName = cn("flex", "min-w-0", "items-center", "j
 export const shellNavTabsClassName = cn("w-full", "min-w-0", "shell-nav-feature-tabs")
 /** Product brand lockup; Grammar TextAction owns the enclosing interaction. */
 export const shellNavBrandMarkClassName = cn("h-10", "w-auto", "shrink-0")
+/** Stacks the wordmark's two lines beside the logo mark, tight enough to read as one lockup. */
 export const shellNavBrandTextClassName = cn("flex", "flex-col", "leading-none")
+/** The product name itself - the louder of the wordmark's two lines. */
 export const shellNavBrandNameClassName = cn("text-sm", "font-semibold", "leading-none", "text-foreground")
+/** The qualifier under the name, sized to label the product without competing with it. */
 export const shellNavBrandSuffixClassName = cn("text-[8px]", "uppercase", "leading-none", "text-muted")
 
 /** Full-height compact navigation body; DrawerBranch owns the outer frame and close action. */

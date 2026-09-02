@@ -79,8 +79,8 @@ export const RankedUserRow = (props: RankedUserRowProps) => {
     const movement = <RankedMovement props={data} isLoading={isLoading} />
     const follow = showsFollow
         ? <Button variant={data.isFollowing === true ? "secondary" : "primary"} size={"sm"} isPending={data.isPending} isSkeleton={isLoading} onPress={({ press: on?.follow })?.press}>{data.isFollowing === true
-                    ? data.followingLabel ?? ""
-                    : followLabel}</Button>
+            ? data.followingLabel ?? ""
+            : followLabel}</Button>
         : undefined
     return (
         <div className={getRankedUserVerdictClassName(data.verdict)} data-verdict={data.verdict}><RankMark

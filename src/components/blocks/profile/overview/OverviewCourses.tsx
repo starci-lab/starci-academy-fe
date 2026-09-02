@@ -19,6 +19,7 @@ import {
     profileCourseQualifierClassName,
     profileCourseRowClassName,
     profileEvidenceListClassName,
+    overviewCourseCoverClassName,
 } from "./classNames"
 
 type Course = {
@@ -85,7 +86,7 @@ export const OverviewCourses = (props: OverviewCoursesProps) => {
                             hover="label"
                         >
                             <div className={profileCourseRowClassName}>
-                                <IconTile source={iconSourceFor("course", "leading")} artwork={course.thumbnailUrl ? <img src={course.thumbnailUrl} alt="" className="size-full object-cover" /> : undefined} tone={"accent"} size={"md"} isSkeleton={request.isLoading} />
+                                <IconTile source={iconSourceFor("course", "leading")} artwork={course.thumbnailUrl ? <img src={course.thumbnailUrl} alt="" className={overviewCourseCoverClassName} /> : undefined} tone={"accent"} size={"md"} isSkeleton={request.isLoading} />
                                 <div className={profileCourseIdentityClassName}>
                                     <div className={profileCourseHeadingClassName}>
                                         <Text size={"sm"} weight={"semibold"} isPressLabel={true} isSkeleton={request.isLoading}>{text(course.label)}</Text>

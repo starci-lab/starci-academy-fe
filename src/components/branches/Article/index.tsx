@@ -229,7 +229,6 @@ const block = (node: MarkdownNode, key: string, context: BlockContext): ReactNod
         // a lesson that should have been two.
         const heading = plainText(node)
         const id = slugify(heading)
-        const level = (node.depth ?? 2) <= 2 ? 2 : 3
         /*
          * THE ANCHOR IS NAMED BY ITS OWN HEADING, not by a sentence written here. `aria-label="Link
          * to this section"` was copy hardcoded in a tier that receives every word it renders, and it

@@ -24,3 +24,5 @@ export const profileReadinessListClassName = cn("flex", "flex-col", "divide-y", 
 export const skillSnapshotClassName = cn("flex", "min-w-0", "max-w-full", "flex-col", "gap-4", "[&>*]:w-full")
 /** Count-only skill evidence is a joined nested list, never a progress visualization. */
 export const profileSkillListClassName = cn("flex", "flex-col", "divide-y", "divide-separator")
+/** The cover fills the tile it is dropped into, cropping rather than letterboxing. */
+export const overviewCourseCoverClassName = cn("size-full", "object-cover")

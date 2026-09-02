@@ -34,7 +34,7 @@ export type CourseAdvisorRecommendationCardProps = {
 
 /** Render one evidence-backed fit; course truth and navigation are supplied by the connected owner. */
 export const CourseAdvisorRecommendationCardBase = (props: CourseAdvisorRecommendationCardProps) => (
-    <SurfaceCard frame={true ? "frameless" : "bounded"} composition="joined">
+    <SurfaceCard frame={"frameless"} composition="joined">
         <article className={recommendationCardClassNames.root} data-course-recommendation={props.props.courseDisplayId}>
             <div className={recommendationCardClassNames.identity}>
                 <div className={recommendationCardClassNames.copy}>

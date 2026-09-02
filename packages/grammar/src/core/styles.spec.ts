@@ -8,11 +8,11 @@ const css = `${coreCss}\n${commonCss}`
 
 describe("Core capability styles", () => {
     it("packages the StarCi DNA behind one explicit root boundary", () => {
-        expect(coreCss).toContain('@import "../common/styles.css"')
+        expect(coreCss).toContain("@import \"../common/styles.css\"")
         expect(coreCss).toMatch(/\.grammar-common-root\[data-grammar-family="core"\]\s*\{[\s\S]*?--starci-core-accent: #7547ff;/)
         expect(coreCss).toMatch(/\.grammar-common-root\[data-grammar-family="core"\]\s*\{[\s\S]*?--starci-core-surface-radius: 1rem;/)
         expect(coreCss).toMatch(/\.grammar-common-root\[data-grammar-family="core"\]\[data-grammar-theme="dark"\]\s*\{[\s\S]*?color-scheme: dark;/)
-        expect(coreCss).toContain('.grammar-common-root[data-grammar-family="core"][data-grammar-theme="system"]')
+        expect(coreCss).toContain(".grammar-common-root[data-grammar-family=\"core\"][data-grammar-theme=\"system\"]")
         expect(coreCss).not.toContain(".starci-core-page-container")
         expect(commonCss).toContain(".starci-core-page-container")
         expect(css).toContain("@media (forced-colors: active)")
