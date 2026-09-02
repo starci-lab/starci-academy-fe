@@ -1,6 +1,5 @@
 import { Button, Kbd } from "@heroui/react"
-import { Icon } from "@starci/grammar/common"
-import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon, iconSourceFor } from "@/components/leaves/Icon"
 import { pressableInputLikeClassName, pressableInputLikeContentClassName, pressableInputLikePlaceholderClassName } from "./classNames"
 
 /** Copy shown by the navbar's input-looking press target. */

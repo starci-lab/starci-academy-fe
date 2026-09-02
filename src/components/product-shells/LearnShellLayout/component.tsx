@@ -1,8 +1,8 @@
-import { Icon, Subnav, Tabs, WorkspaceShell } from "@starci/grammar/common"
+import { Subnav, Tabs, WorkspaceShell } from "@starci/grammar/common"
 import type { ReactNode } from "react"
 import { DrawerBranch } from "@/components/branches/DrawerBranch"
 import { LearnSpine } from "@/components/blocks/learn/LearnSpine"
-import { iconSourceFor, type IconName } from "@/components/leaves/Icon"
+import { Icon, iconSourceFor, type IconName } from "@/components/leaves/Icon"
 
 /** One product-owned mobile view projected through Grammar Tabs. */
 export interface LearnMobileTab {

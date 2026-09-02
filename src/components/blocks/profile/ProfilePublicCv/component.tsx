@@ -1,12 +1,11 @@
 import type { IconName } from "@/components/leaves/Icon"
 import { SurfaceCard } from "@starci/grammar/common"
-import { Icon } from "@starci/grammar/common"
 import { Badge } from "@starci/grammar/common"
 import { Button } from "@starci/grammar/common"
 
 import { Heading } from "@starci/grammar/common"
 import { IconTile } from "@starci/grammar/common"
-import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon, iconSourceFor } from "@/components/leaves/Icon"
 import { ProfileCvDocument } from "@/components/leaves/ProfileCvDocument"
 import { Text } from "@starci/grammar/common"
 import { ProfileCvBuilder } from "../ProfileCvBuilder"

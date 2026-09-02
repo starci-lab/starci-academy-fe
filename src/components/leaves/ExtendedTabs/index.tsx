@@ -1,8 +1,7 @@
 "use client"
 
 import { Tabs } from "@starci/grammar/common"
-import { Icon } from "@starci/grammar/common"
-import { iconSourceFor, type IconName } from "@/components/leaves/Icon"
+import { Icon, iconSourceFor, type IconName } from "@/components/leaves/Icon"
 
 /** One tab in the legacy dashboard strip. */
 export type ExtendedTab = {

@@ -1,6 +1,5 @@
 import { SurfaceCard } from "@starci/grammar/common"
-import { Icon } from "@starci/grammar/common"
-import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon, iconSourceFor } from "@/components/leaves/Icon"
 import { EmptyNotice } from "@starci/grammar/common"
 import { Text } from "@starci/grammar/common"
 import { profileRedirectStateClassName } from "./classNames"

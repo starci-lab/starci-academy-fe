@@ -1,8 +1,7 @@
 import { SurfaceCard } from "@starci/grammar/common"
 
 import { Heading } from "@starci/grammar/common"
-import { Icon } from "@starci/grammar/common"
-import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon, iconSourceFor } from "@/components/leaves/Icon"
 import { Text } from "@starci/grammar/common"
 import { LeadingNumber, Button } from "@starci/grammar/common"
 import type { Playground } from "@/modules/api/graphql/queries/query-playground"

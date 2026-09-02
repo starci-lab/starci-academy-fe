@@ -1,6 +1,5 @@
 import { Switch } from "@heroui/react"
-import { Icon } from "@starci/grammar/common"
-import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon, iconSourceFor } from "@/components/leaves/Icon"
 
 /** Current appearance and accessible copy for the navbar switch. */
 export type ThemeSwitchData = {

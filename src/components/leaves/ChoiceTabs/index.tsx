@@ -1,8 +1,7 @@
 "use client"
 
 import { Tabs } from "@heroui/react"
-import { Icon } from "@starci/grammar/common"
-import { iconSourceFor, type IconName } from "@/components/leaves/Icon"
+import { Icon, iconSourceFor, type IconName } from "@/components/leaves/Icon"
 import { choiceTabContentClassName, getChoiceTabClassName, getChoiceTabsListClassName } from "./classNames"
 
 /** One peer choice, optionally led by a glyph naming the shape it selects. */

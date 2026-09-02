@@ -17,8 +17,8 @@ import {
     profileProfessionalStackClassName,
     profileProofRowClassName,
 } from "./classNames"
-import { Icon, TextAction } from "@starci/grammar/common"
-import { iconSourceFor } from "@/components/leaves/Icon"
+import { TextAction } from "@starci/grammar/common"
+import { Icon, iconSourceFor } from "@/components/leaves/Icon"
 
 /** Resolved public identity drawn by the profile rail. */
 export type ProfileHeroData = {

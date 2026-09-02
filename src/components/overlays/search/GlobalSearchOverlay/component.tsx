@@ -5,8 +5,7 @@ import { SelectionList } from "@/components/leaves/SelectionList"
 import { Text } from "@starci/grammar/common"
 import { Badge } from "@starci/grammar/common"
 import { Button } from "@starci/grammar/common"
-import { iconSourceFor } from "@/components/leaves/Icon"
-import { Icon } from "@starci/grammar/common"
+import { Icon, iconSourceFor } from "@/components/leaves/Icon"
 
 import type { IconName } from "@/components/leaves/Icon"
 

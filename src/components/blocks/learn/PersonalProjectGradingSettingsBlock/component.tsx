@@ -1,6 +1,5 @@
 import { Input, Button } from "@starci/grammar/common"
-import { Icon } from "@starci/grammar/common"
-import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon, iconSourceFor } from "@/components/leaves/Icon"
 import { Select } from "@/components/leaves/Select"
 import { Text } from "@starci/grammar/common"
 import { personalProjectGradingSettingsActionsClassName, personalProjectGradingSettingsClassName, personalProjectGradingSettingsSectionClassName } from "./classNames"

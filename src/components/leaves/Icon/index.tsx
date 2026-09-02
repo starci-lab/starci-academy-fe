@@ -142,6 +142,15 @@ import { GithubMark, GoogleMark } from "./brands"
  * node above carries and can never disagree with the label beside it.
  */
 
+/**
+ * The carrier itself is Grammar's, and it is re-exported here rather than imported from the
+ * package at every call site. One door means the meaning (`iconSourceFor`) and the thing that
+ * draws it (`Icon`) arrive from the same import, which is what makes "ask for a meaning" the
+ * path of least resistance instead of an instruction. Grammar keeps ownership of the usage
+ * geometry and the accessibility contract; nothing about the component is redefined here.
+ */
+export { Icon, type IconProps, type IconUsage, type IconSource } from "@starci/grammar/common"
+
 /** What an icon MEANS on these screens. The glyph that draws it is this file's business. */
 export type IconName =
     | "brand" | "aiChatbot" | "streak" | "credit" | "reward" | "course"

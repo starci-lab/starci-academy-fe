@@ -1,5 +1,5 @@
 import Image from "next/image"
-import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon, iconSourceFor } from "@/components/leaves/Icon"
 import { IconButton } from "@starci/grammar/common"
 import { AccountMenu } from "@/components/blocks/auth/AccountMenu"
 import { LanguageMenu } from "@/components/blocks/locale/LanguageMenu"
@@ -21,7 +21,7 @@ import {
     shellNavRoutesClassName,
     shellNavTabsClassName,
 } from "./classNames"
-import { Icon, TextAction } from "@starci/grammar/common"
+import { TextAction } from "@starci/grammar/common"
 
 
 /** One destination in the primary navbar row. */

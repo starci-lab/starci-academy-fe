@@ -1,5 +1,4 @@
-import { Icon } from "@starci/grammar/common"
-import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon, iconSourceFor } from "@/components/leaves/Icon"
 import { getDisclosureIndicatorClassName } from "./classNames"
 
 /** Visual state for the native disclosure indicator. */

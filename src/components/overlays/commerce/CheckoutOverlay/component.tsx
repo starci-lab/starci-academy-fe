@@ -1,6 +1,5 @@
 import { Button } from "@starci/grammar/common"
-import { iconSourceFor } from "@/components/leaves/Icon"
-import { Icon } from "@starci/grammar/common"
+import { Icon, iconSourceFor } from "@/components/leaves/Icon"
 
 import { Heading } from "@starci/grammar/common"
 import { Text } from "@starci/grammar/common"

@@ -1,7 +1,6 @@
 import { SurfaceListCard } from "@starci/grammar/common"
 import { Input, Button } from "@starci/grammar/common"
-import { Icon } from "@starci/grammar/common"
-import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon, iconSourceFor } from "@/components/leaves/Icon"
 import { EmptyNotice } from "@starci/grammar/common"
 import { EvidenceRow } from "@/components/composites/EvidenceRow"
 import { Heading } from "@starci/grammar/common"

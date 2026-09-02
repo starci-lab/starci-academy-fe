@@ -2,7 +2,7 @@ import { SurfaceCard } from "@starci/grammar/common"
 import { EmptyNotice } from "@starci/grammar/common"
 import { Text } from "@starci/grammar/common"
 import { IconTile } from "@starci/grammar/common"
-import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon, iconSourceFor } from "@/components/leaves/Icon"
 import {
     continueLearningCompactContentClassName,
     continueLearningCopyClassName,
@@ -11,7 +11,7 @@ import {
     continueLearningIdentityClassName,
     continueLearningItemClassName,
 } from "./classNames"
-import { Icon, TextAction } from "@starci/grammar/common"
+import { TextAction } from "@starci/grammar/common"
 
 /** One resumable learning item. */
 export type ResumeItem = { readonly id: string; readonly title: string; readonly kindLabel: string }

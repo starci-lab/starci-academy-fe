@@ -1,7 +1,6 @@
 import type { ReactNode } from "react"
 import { Dropdown, Header } from "@heroui/react"
-import { Icon } from "@starci/grammar/common"
-import { iconSourceFor, type IconName } from "@/components/leaves/Icon"
+import { Icon, iconSourceFor, type IconName } from "@/components/leaves/Icon"
 import { dropdownDangerItemClassName, dropdownHeaderClassName, dropdownTriggerClassName } from "./classNames"
 
 /** Placement choices exposed without leaking the vendor vocabulary beyond the branch. */

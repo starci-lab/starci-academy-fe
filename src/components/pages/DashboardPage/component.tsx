@@ -14,8 +14,7 @@ import { ExploreTab } from "@/components/blocks/dashboard/ExploreTab"
 import { FeedExplorer } from "@/components/blocks/dashboard/FeedExplorer"
 import { CoursesTab } from "@/components/blocks/dashboard/CoursesTab"
 import { CommunityTab } from "@/components/blocks/dashboard/CommunityTab"
-import { Icon } from "@starci/grammar/common"
-import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon, iconSourceFor } from "@/components/leaves/Icon"
 import { Subnav, VerticalScrollRegion } from "@starci/grammar/common"
 import {
     dashboardFrameClassName,

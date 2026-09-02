@@ -1,6 +1,5 @@
 import { EmptyNotice } from "@starci/grammar/common"
-import { Icon } from "@starci/grammar/common"
-import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon, iconSourceFor } from "@/components/leaves/Icon"
 import { Text } from "@starci/grammar/common"
 /** Problem list lifecycle state. */
 export type CodingProblemListState = "pending" | "ready" | "empty" | "all-solved" | "failed"

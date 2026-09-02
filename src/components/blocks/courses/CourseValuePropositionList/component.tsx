@@ -1,5 +1,4 @@
-import { Icon } from "@starci/grammar/common"
-import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon, iconSourceFor } from "@/components/leaves/Icon"
 import { Text } from "@starci/grammar/common"
 import { courseValueListClassName, courseValueRowClassName } from "./classNames"
 

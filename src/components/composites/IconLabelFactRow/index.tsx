@@ -1,6 +1,5 @@
 import type { ReactNode } from "react"
-import { Icon } from "@starci/grammar/common"
-import { iconSourceFor, type IconName } from "@/components/leaves/Icon"
+import { Icon, iconSourceFor, type IconName } from "@/components/leaves/Icon"
 import { Badge, type BadgeTone } from "@starci/grammar/common"
 import { Text } from "@starci/grammar/common"
 import { iconLabelFactLabelClassName, iconLabelFactRowClassName } from "./classNames"

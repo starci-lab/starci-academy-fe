@@ -1,7 +1,6 @@
 import type { ComponentType } from "react"
 import { SurfaceCard } from "@starci/grammar/common"
-import { Icon } from "@starci/grammar/common"
-import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon, iconSourceFor } from "@/components/leaves/Icon"
 import { EmptyNotice } from "@starci/grammar/common"
 import { ProfileHero } from "@/components/blocks/profile/ProfileHero"
 import { ProfileTabsBase, type ProfileTabsData } from "@/components/blocks/profile/ProfileTabs"

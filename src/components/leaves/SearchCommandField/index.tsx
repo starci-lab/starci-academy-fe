@@ -1,8 +1,7 @@
 "use client"
 
 import { Input as HeroInput, Kbd, Spinner } from "@heroui/react"
-import { Icon } from "@starci/grammar/common"
-import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon, iconSourceFor } from "@/components/leaves/Icon"
 import { searchCommandFieldActionsClassName, searchCommandFieldClassName, searchCommandFieldIconClassName, searchCommandFieldInputClassName } from "./classNames"
 
 /** Resolved controlled value and accessible command-field copy. */

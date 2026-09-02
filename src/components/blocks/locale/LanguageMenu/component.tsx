@@ -1,5 +1,4 @@
-import { Icon } from "@starci/grammar/common"
-import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon, iconSourceFor } from "@/components/leaves/Icon"
 import { DropdownBranch } from "@/components/branches/DropdownBranch"
 import type { Locale } from "@/i18n/config"
 

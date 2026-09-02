@@ -1,9 +1,9 @@
 import { SurfaceCard } from "@starci/grammar/common"
 import { SurfaceListCard } from "@starci/grammar/common"
-import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon, iconSourceFor } from "@/components/leaves/Icon"
 import { EmptyNotice } from "@starci/grammar/common"
 import { Text } from "@starci/grammar/common"
-import { Icon, TextAction } from "@starci/grammar/common"
+import { TextAction } from "@starci/grammar/common"
 
 /** One prioritized course destination. */
 /**

@@ -1,5 +1,4 @@
-import { Icon } from "@starci/grammar/common"
-import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon, iconSourceFor } from "@/components/leaves/Icon"
 import { destinationCueCaretClassName, destinationCueClassName, destinationCueLoadingClassName } from "./classNames"
 
 /** Resolved copy for a destination already owned by a surrounding press target. */

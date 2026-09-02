@@ -3,14 +3,14 @@ import { CourseLearningSignalDetail, type CourseLearningSignalDetailProps } from
 import { CourseLearningSignals, type CourseLearningSignalsProps } from "@/components/blocks/learn/CourseLearningSignals"
 import { CourseNextActions, type CourseNextActionsProps } from "@/components/blocks/learn/CourseNextActions"
 import { CourseProgressOverview, type CourseProgressOverviewProps } from "@/components/blocks/learn/CourseProgressOverview"
-import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon, iconSourceFor } from "@/components/leaves/Icon"
 import { EmptyNotice } from "@starci/grammar/common"
 import { Heading } from "@starci/grammar/common"
 import { Progress } from "@starci/grammar/common"
 import { Text } from "@starci/grammar/common"
 import type { LearnMobileView } from "@/components/product-shells/LearnShellLayout/component"
 import { courseLearnTodayHostClassName } from "./classNames"
-import { Icon, TextAction } from "@starci/grammar/common"
+import { TextAction } from "@starci/grammar/common"
 
 
 /** The settled route-level situation of the course dashboard. */

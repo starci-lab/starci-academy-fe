@@ -1,6 +1,5 @@
 import { Breadcrumbs as HeroBreadcrumbs, Link as HeroLink } from "@heroui/react"
-import { Icon } from "@starci/grammar/common"
-import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon, iconSourceFor } from "@/components/leaves/Icon"
 import { breadcrumbsBackLinkClassName, breadcrumbsLoadingClassName, breadcrumbsTrailClassName } from "./classNames"
 
 /**

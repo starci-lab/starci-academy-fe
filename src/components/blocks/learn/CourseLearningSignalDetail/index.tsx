@@ -1,10 +1,10 @@
 import { SurfaceCard } from "@starci/grammar/common"
 import { EmptyNotice } from "@starci/grammar/common"
-import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon, iconSourceFor } from "@/components/leaves/Icon"
 import { Heading } from "@starci/grammar/common"
 import { Text } from "@starci/grammar/common"
 import { courseLearningSignalDetailClassName } from "./classNames"
-import { Icon, TextAction } from "@starci/grammar/common"
+import { TextAction } from "@starci/grammar/common"
 
 
 /** The selected signal and the evidence explaining its consequence. */

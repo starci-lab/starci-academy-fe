@@ -2,8 +2,7 @@
 
 import { useRef, useState } from "react"
 import { InputGroup } from "@heroui/react"
-import { Icon } from "@starci/grammar/common"
-import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon, iconSourceFor } from "@/components/leaves/Icon"
 import { searchBoxClassName, searchBoxClearClassName, searchBoxShortcutClassName } from "./classNames"
 
 /**

@@ -1,8 +1,7 @@
 import { SurfaceCard } from "@starci/grammar/common"
 import { Badge } from "@starci/grammar/common"
 import { Button } from "@starci/grammar/common"
-import { iconSourceFor } from "@/components/leaves/Icon"
-import { Icon } from "@starci/grammar/common"
+import { Icon, iconSourceFor } from "@/components/leaves/Icon"
 
 import { CoverImage } from "@/components/leaves/CoverImage"
 import { Heading } from "@starci/grammar/common"

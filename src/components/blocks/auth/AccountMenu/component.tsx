@@ -1,6 +1,5 @@
 import { Avatar } from "@/components/leaves/Avatar"
-import { Icon } from "@starci/grammar/common"
-import { iconSourceFor, type IconName } from "@/components/leaves/Icon"
+import { Icon, iconSourceFor, type IconName } from "@/components/leaves/Icon"
 import { Text } from "@starci/grammar/common"
 import { DropdownBranch } from "@/components/branches/DropdownBranch"
 

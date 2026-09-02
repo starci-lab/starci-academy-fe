@@ -1,5 +1,5 @@
-import { Badge, Icon, Text, type BadgeTone } from "@starci/grammar/common"
-import { iconSourceFor, type IconName } from "@/components/leaves/Icon"
+import { Badge, Text, type BadgeTone } from "@starci/grammar/common"
+import { Icon, iconSourceFor, type IconName } from "@/components/leaves/Icon"
 
 /** Optional status chip data. */
 export type StatusMetadataLineStatus = { readonly content: string; readonly tone: BadgeTone; readonly icon?: IconName }

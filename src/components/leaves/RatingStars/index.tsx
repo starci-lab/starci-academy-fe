@@ -1,8 +1,7 @@
 "use client"
 
 import ReactStars from "react-rating-stars-component"
-import { Icon } from "@starci/grammar/common"
-import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon, iconSourceFor } from "@/components/leaves/Icon"
 import { ratingHalfClipClassName, ratingHalfEmptyClassName, ratingHalfFilledClassName, ratingHalfRootClassName, ratingLoadingClassName, ratingStarsClassName } from "./classNames"
 
 /** The fixed rating scale used by course reviews. */

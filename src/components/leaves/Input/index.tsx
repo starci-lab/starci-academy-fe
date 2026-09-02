@@ -3,8 +3,7 @@
 import { useState } from "react"
 import { Input as HeroInput } from "@heroui/react"
 import { OtpInput } from "@starci/grammar/common"
-import { Icon } from "@starci/grammar/common"
-import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon, iconSourceFor } from "@/components/leaves/Icon"
 import { inputBoxClassName, inputLoadingClassName, inputRevealClassName } from "./classNames"
 
 /**
