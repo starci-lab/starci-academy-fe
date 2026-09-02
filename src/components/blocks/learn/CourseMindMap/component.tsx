@@ -1,9 +1,10 @@
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
-import { Button } from "@/components/leaves/Button"
-import { Heading } from "@/components/leaves/Heading"
-import { NavLink } from "@/components/leaves/NavLink"
+import { EmptyNotice } from "@starci/grammar/common"
+import { Button } from "@starci/grammar/common"
+import { Heading } from "@starci/grammar/common"
 import { SearchBox } from "@/components/leaves/SearchBox"
-import { Text } from "@/components/leaves/Text"
+import { Text } from "@starci/grammar/common"
+import { TextAction } from "@starci/grammar/common"
+
 /** Graph query states. */
 export type CourseMindMapBlockState = "pending" | "ready" | "empty" | "failed"
 /** Normalized node view. */
@@ -15,6 +16,6 @@ export const CourseMindMapBase = (props: CourseMindMapProps) => {
     const loading = props.blockState === "pending"
     const selected = props.props.nodes.find((node) => node.id === props.props.selectedId)
     const noResults = props.blockState === "ready" && props.props.nodes.length === 0
-    if (props.blockState === "empty" || props.blockState === "failed" || noResults) return <EmptyNotice props={{ message: props.blockState === "failed" ? props.props.failedText : noResults ? props.props.noResultsText : props.props.emptyText, actionLabel: props.blockState === "failed" ? props.props.retryLabel : undefined }} on={{ act: props.on.retry }} />
-    return <div><Heading props={{ content: props.props.title, level: 1 }} isLoading={loading} /><Text props={{ content: props.props.description, size: "sm", tone: "muted" }} isLoading={loading} /><SearchBox props={{ label: props.props.searchLabel, placeholder: props.props.searchPlaceholder, clearLabel: props.props.clearSearchLabel }} on={{ search: props.on.search }} /><Text props={{ content: props.props.graphFact, size: "xs", tone: "muted" }} isLoading={loading} />{props.props.nodes.map((node) => <NavLink key={node.id} props={{ label: node.detail === undefined ? node.label : `${node.label} · ${node.detail}`, kind: "section", isCurrent: node.id === props.props.selectedId }} on={{ press: () => props.on.select(node.id) }} isLoading={loading} />)}{selected?.detail === undefined ? null : <Text props={{ content: selected.detail, size: "sm", tone: "muted" }} />}{selected?.canOpen === true ? <Button props={{ label: props.props.openLabel, variant: "primary" }} on={{ press: () => props.on.openContent(selected.id) }} /> : null}</div>
+    if (props.blockState === "empty" || props.blockState === "failed" || noResults) return <EmptyNotice message={props.blockState === "failed" ? props.props.failedText : noResults ? props.props.noResultsText : props.props.emptyText} actionLabel={props.blockState === "failed" ? props.props.retryLabel : undefined} onAction={({ act: props.on.retry })?.act} />
+    return <div><Heading level={1} isSkeleton={loading}>{props.props.title}</Heading><Text size={"sm"} tone={"muted"} isSkeleton={loading}>{props.props.description}</Text><SearchBox props={{ label: props.props.searchLabel, placeholder: props.props.searchPlaceholder, clearLabel: props.props.clearSearchLabel }} on={{ search: props.on.search }} /><Text size={"xs"} tone={"muted"} isSkeleton={loading}>{props.props.graphFact}</Text>{props.props.nodes.map((node) => <TextAction key={node.id} appearance={"section"} isCurrent={node.id === props.props.selectedId} isSkeleton={loading} onPress={() => props.on.select(node.id)}>{node.detail === undefined ? node.label : `${node.label} · ${node.detail}`}</TextAction>)}{selected?.detail === undefined ? null : <Text size={"sm"} tone={"muted"}>{selected.detail}</Text>}{selected?.canOpen === true ? <Button variant="primary" onPress={() => props.on.openContent(selected.id)}>{props.props.openLabel}</Button> : null}</div>
 }

@@ -1,7 +1,8 @@
 "use client"
 
 import { Input as HeroInput, Kbd, Spinner } from "@heroui/react"
-import { Icon } from "@/components/leaves/Icon"
+import { Icon } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
 import { searchCommandFieldActionsClassName, searchCommandFieldClassName, searchCommandFieldIconClassName, searchCommandFieldInputClassName } from "./classNames"
 
 /** Resolved controlled value and accessible command-field copy. */
@@ -35,7 +36,7 @@ export const SearchCommandField = (props: SearchCommandFieldProps) => {
     return (
         <span className={searchCommandFieldClassName}>
             <span className={searchCommandFieldIconClassName}>
-                <Icon props={{ name: "search", role: "leading" }} />
+                <Icon source={iconSourceFor("search", "leading")} role={"leading"} />
             </span>
             <HeroInput
                 id={data.id}
@@ -69,7 +70,7 @@ export const SearchCommandField = (props: SearchCommandFieldProps) => {
                     : data.value.length > 0
                         ? (
                             <button type="button" aria-label={data.clearLabel} onClick={on?.clear}>
-                                <Icon props={{ name: "close", role: "chip" }} />
+                                <Icon source={iconSourceFor("close", "chip")} role={"chip"} />
                             </button>
                         )
                         : data.shortcut === undefined ? null : <Kbd>{data.shortcut}</Kbd>}

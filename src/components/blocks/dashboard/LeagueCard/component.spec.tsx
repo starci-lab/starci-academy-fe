@@ -1,10 +1,9 @@
 import { cleanup, render, screen } from "@testing-library/react"
-import { describe, expect, it, vi } from "vitest"
+import { describe, expect, it } from "vitest"
 import { LeagueCardBase } from "./component"
 
 const frame = {
     label: "Weekly league",
-    seeMoreLabel: "View leaderboard",
     standing: { rank: 1, rankLabel: "Rank 1", title: "Rank #1", subtitle: "13 XP", fact: "4 days left" },
     emptyMessage: "No weekly rank",
     errorMessage: "Could not load weekly rank",
@@ -25,7 +24,7 @@ describe("LeagueCardBase", () => {
                 verdict: "success",
                 isMe: true,
             }],
-        }} on={{ seeMore: vi.fn() }} />)
+        }} />)
         expect(screen.getByText("Rank #1")).toBeInTheDocument()
         expect(screen.getByText("Learner · You")).toBeInTheDocument()
     })

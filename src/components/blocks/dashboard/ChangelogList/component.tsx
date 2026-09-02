@@ -1,7 +1,8 @@
-import { DashboardSurfaceCard as SurfaceCard } from "@/components/blocks/dashboard/DashboardSurfaceCard"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { SurfaceCard } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { EmptyNotice } from "@starci/grammar/common"
 import { ChangelogEntryRow } from "@/components/composites/ChangelogEntryRow"
-import { changelogListClassName, changelogSurfaceClassName } from "./classNames"
+import { changelogListClassName } from "./classNames"
 
 /** Supported changelog categories. */
 export type ChangelogCategory = "feature" | "fix" | "announcement"
@@ -14,21 +15,12 @@ export type ChangelogListActions = { readonly open?: (id: string) => void; reado
 /** State, data and actions accepted by the changelog block. */
 export type ChangelogListProps = { readonly state: "pending" | "empty" | "failed" | "ready"; readonly props: ChangelogListData; readonly on?: ChangelogListActions }
 
-const categoryTone = (category: ChangelogCategory | undefined) => category === "feature" ? "success" as const : category === "fix" ? "warning" as const : category === "announcement" ? "accent" as const : undefined
-
 /** Draw the product changelog as a semantic joined history. */
 export const ChangelogListBase = (props: ChangelogListProps) => {
     if (props.state === "empty" || props.state === "failed") {
         return (
-            <SurfaceCard props={{ label: props.props.label }}>
-                <EmptyNotice
-                    props={{
-                        icon: "notification",
-                        message: props.state === "empty" ? props.props.emptyMessage : props.props.errorMessage,
-                        actionLabel: props.state === "failed" ? props.props.retryLabel : undefined,
-                    }}
-                    on={{ act: props.state === "failed" ? props.on?.retry : undefined }}
-                />
+            <SurfaceCard label={props.props.label} composition={"single"}>
+                <EmptyNotice message={props.state === "empty" ? props.props.emptyMessage : props.props.errorMessage} actionLabel={props.state === "failed" ? props.props.retryLabel : undefined} iconSource={iconSourceFor("notification", "leading")} onAction={({ act: props.state === "failed" ? props.on?.retry : undefined })?.act} />
             </SurfaceCard>
         )
     }
@@ -39,20 +31,18 @@ export const ChangelogListBase = (props: ChangelogListProps) => {
         : props.props.entries ?? []
 
     return (
-        <div className={changelogSurfaceClassName}>
-            <SurfaceCard props={{ label: props.props.label }} isLoading={loading}>
-                <ul className={changelogListClassName}>
-                    {entries.map((entry) => (
-                        <li key={entry.id}>
-                            <ChangelogEntryRow
-                                props={{ ...entry, categoryTone: categoryTone(entry.category) }}
-                                on={{ open: props.on?.open === undefined ? undefined : () => props.on?.open?.(entry.id) }}
-                                isLoading={loading}
-                            />
-                        </li>
-                    ))}
-                </ul>
-            </SurfaceCard>
-        </div>
+        <SurfaceCard label={props.props.label} composition={"joined"} state={loading ? "pending" : "neutral"}>
+            <ul className={changelogListClassName}>
+                {entries.map((entry) => (
+                    <li key={entry.id}>
+                        <ChangelogEntryRow
+                            props={{ ...entry, categoryTone: "neutral" }}
+                            on={{ open: props.on?.open === undefined ? undefined : () => props.on?.open?.(entry.id) }}
+                            isLoading={loading}
+                        />
+                    </li>
+                ))}
+            </ul>
+        </SurfaceCard>
     )
 }

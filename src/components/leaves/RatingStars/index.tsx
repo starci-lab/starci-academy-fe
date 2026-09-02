@@ -1,17 +1,18 @@
 "use client"
 
 import ReactStars from "react-rating-stars-component"
-import { Icon } from "@/components/leaves/Icon"
+import { Icon } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
 import { ratingHalfClipClassName, ratingHalfEmptyClassName, ratingHalfFilledClassName, ratingHalfRootClassName, ratingLoadingClassName, ratingStarsClassName } from "./classNames"
 
 /** The fixed rating scale used by course reviews. */
 const SCORE_SCALE = 5
 
 /** Outline used by the package for an unfilled position. */
-const EMPTY_STAR = <Icon props={{ name: "ratingStarEmpty", role: "leading" }} />
+const EMPTY_STAR = <Icon source={iconSourceFor("ratingStarEmpty", "leading")} role={"leading"} />
 
 /** Solid mark used by the package for a filled position. */
-const FILLED_STAR = <Icon props={{ name: "ratingStarFilled", role: "leading" }} />
+const FILLED_STAR = <Icon source={iconSourceFor("ratingStarFilled", "leading")} role={"leading"} />
 
 /**
  * The package accepts a dedicated half icon rather than clipping a supplied full icon. Keep the
@@ -20,11 +21,11 @@ const FILLED_STAR = <Icon props={{ name: "ratingStarFilled", role: "leading" }} 
 const HALF_STAR = (
     <span aria-hidden="true" className={ratingHalfRootClassName}>
         <span className={ratingHalfEmptyClassName}>
-            <Icon props={{ name: "ratingStarEmpty", role: "leading" }} />
+            <Icon source={iconSourceFor("ratingStarEmpty", "leading")} role={"leading"} />
         </span>
         <span className={ratingHalfClipClassName}>
             <span className={ratingHalfFilledClassName}>
-                <Icon props={{ name: "ratingStarFilled", role: "leading" }} />
+                <Icon source={iconSourceFor("ratingStarFilled", "leading")} role={"leading"} />
             </span>
         </span>
     </span>

@@ -28,8 +28,8 @@ vi.mock("@/hooks/swr/useMutateReactContentSwr", () => ({ useMutateReactContentSw
 vi.mock("@/hooks/swr/useQueryContentCommentsSwr", () => ({ useQueryContentCommentsSwr: () => mocks.comments }))
 vi.mock("@/hooks/swr/useMutateSubmitContentCommentSwr", () => ({ useMutateSubmitContentCommentSwr: () => mocks.submit }))
 vi.mock("@/hooks/swr/useRepoSandpackFiles", () => ({ useRepoSandpackFiles: () => mocks.source }))
-vi.mock("@/components/layouts/LearnShellLayout", () => ({ useLearnMobileView: () => ({ view: mocks.view }) }))
-vi.mock("@/components/layouts/GlobalAiChatLayout", () => ({ useGlobalAiChat: () => mocks.ai }))
+vi.mock("@/components/product-shells/LearnShellLayout", () => ({ useLearnMobileView: () => ({ view: mocks.view }) }))
+vi.mock("@/components/product-shells/GlobalAiChatLayout", () => ({ useGlobalAiChat: () => mocks.ai }))
 
 type MockBlockActions = {
     readonly goCourse: () => void

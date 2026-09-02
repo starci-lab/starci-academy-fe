@@ -1,7 +1,7 @@
-import { Badge } from "@/components/leaves/Badge"
+import { Badge } from "@starci/grammar/common"
 import { LeagueTile } from "@/components/leaves/LeagueTile"
 import type { RankMarkArtwork } from "@/components/leaves/RankMark"
-import { Text } from "@/components/leaves/Text"
+import { Text } from "@starci/grammar/common"
 
 /** Resolved viewer-standing summary. */
 export type LeaderboardStandingRowData = {
@@ -26,5 +26,5 @@ export type LeaderboardStandingRowProps = { readonly props: LeaderboardStandingR
 /** Draw the viewer's standing summary above a ranked list. */
 export const LeaderboardStandingRow = (props: LeaderboardStandingRowProps) => {
     const { props: data, isLoading = false } = props
-    return <div><LeagueTile props={{ rank: data.rank, artwork: data.artwork, accessibleLabel: data.rankLabel }} isLoading={isLoading} /><div><Text props={{ content: data.title, size: "sm", weight: "semibold" }} isLoading={isLoading} /><Text props={{ content: data.subtitle, size: "xs", tone: "muted" }} isLoading={isLoading} /></div>{data.fact === undefined ? null : <Badge props={{ content: data.fact, tone: "warning" }} />}</div>
+    return <div><LeagueTile props={{ rank: data.rank, artwork: data.artwork, accessibleLabel: data.rankLabel }} isLoading={isLoading} /><div><Text size={"sm"} weight={"semibold"} isSkeleton={isLoading}>{data.title}</Text><Text size={"xs"} tone={"muted"} isSkeleton={isLoading}>{data.subtitle}</Text></div>{data.fact === undefined ? null : <Badge tone={"warning"}>{data.fact}</Badge>}</div>
 }

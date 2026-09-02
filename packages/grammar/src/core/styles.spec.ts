@@ -2,20 +2,29 @@ import { readFileSync } from "node:fs"
 import { describe, expect, it } from "vitest"
 import { STARCI_CORE_TOKEN_DEFAULTS, STARCI_CORE_TOKEN_NAMES } from "./dna.js"
 
-const css = readFileSync(new URL("./styles.css", import.meta.url), "utf8")
+const coreCss = readFileSync(new URL("./styles.css", import.meta.url), "utf8")
+const commonCss = readFileSync(new URL("../common/styles.css", import.meta.url), "utf8")
+const css = `${coreCss}\n${commonCss}`
 
 describe("Core capability styles", () => {
     it("packages the StarCi DNA behind one explicit root boundary", () => {
-        expect(css).toMatch(/\.starci-core-root\s*\{[\s\S]*?--starci-core-accent: #7547ff;/)
-        expect(css).toMatch(/\.starci-core-root\s*\{[\s\S]*?--starci-core-surface-radius: 1rem;/)
-        expect(css).toMatch(/\.starci-core-root\[data-grammar-theme="dark"\]\s*\{[\s\S]*?color-scheme: dark;/)
-        expect(css).toContain(".starci-core-root[data-grammar-theme=\"system\"]")
+        expect(coreCss).toContain('@import "../common/styles.css"')
+        expect(coreCss).toMatch(/\.grammar-common-root\[data-grammar-family="core"\]\s*\{[\s\S]*?--starci-core-accent: #7547ff;/)
+        expect(coreCss).toMatch(/\.grammar-common-root\[data-grammar-family="core"\]\s*\{[\s\S]*?--starci-core-surface-radius: 1rem;/)
+        expect(coreCss).toMatch(/\.grammar-common-root\[data-grammar-family="core"\]\[data-grammar-theme="dark"\]\s*\{[\s\S]*?color-scheme: dark;/)
+        expect(coreCss).toContain('.grammar-common-root[data-grammar-family="core"][data-grammar-theme="system"]')
+        expect(coreCss).not.toContain(".starci-core-page-container")
+        expect(commonCss).toContain(".starci-core-page-container")
         expect(css).toContain("@media (forced-colors: active)")
         for (const tokenName of Object.values(STARCI_CORE_TOKEN_NAMES)) {
-            expect(css, `missing CSS definition for ${tokenName}`).toContain(`${tokenName}:`)
+            expect(coreCss, `missing CSS definition for ${tokenName}`).toContain(`${tokenName}:`)
         }
         for (const [tokenName, value] of Object.entries(STARCI_CORE_TOKEN_DEFAULTS)) {
-            expect(css, `CSS default drifted from ${tokenName}`).toContain(`${tokenName}: ${value};`)
+            if (["--starci-core-page-inset", "--starci-core-region-gap", "--starci-core-section-gap", "--starci-core-inline-gap", "--starci-core-row-gap"].includes(tokenName)) {
+                expect(coreCss, `legacy alias missing for ${tokenName}`).toContain(`${tokenName}: var(--grammar-`)
+            } else {
+                expect(coreCss, `CSS default drifted from ${tokenName}`).toContain(`${tokenName}: ${value};`)
+            }
         }
     })
 
@@ -23,6 +32,10 @@ describe("Core capability styles", () => {
         expect(css).toContain(".starci-core-page-container")
         expect(css).toContain(".starci-core-section-header")
         expect(css).toContain(".starci-core-media-viewport")
+        expect(css).toMatch(/data-grammar-media-treatment="plain"[\s\S]*?border-color: transparent;[\s\S]*?background: transparent;/)
+        expect(css).toMatch(/data-grammar-tabs-inset="page"[\s\S]*?padding-inline: 1\.5rem;/)
+        expect(css).toMatch(/\.starci-core-tabs \.tabs__tab\s*\{[\s\S]*?position: relative;[\s\S]*?width: auto !important;[\s\S]*?flex: 0 0 auto !important;[\s\S]*?padding-inline: 0\.75rem !important;[\s\S]*?padding-block-end: 0 !important;/)
+        expect(css).toMatch(/\.starci-core-tabs \.tabs__indicator\s*\{[\s\S]*?bottom: 0 !important;[\s\S]*?height: 2px !important;/)
         expect(css).toMatch(/\.starci-core-primary-rail-container\s*\{[\s\S]*?container: starci-core-primary-rail \/ inline-size;/)
         expect(css).toContain("@container starci-core-primary-rail (max-width: 56rem)")
     })
@@ -40,7 +53,9 @@ describe("Core capability styles", () => {
         expect(css.match(/\.starci-core-form-scroll-viewport\s*\{[\s\S]*?\}/)?.[0]).not.toContain("overflow-y")
         expect(css).toMatch(/\.starci-core-form-surface\s*\{[\s\S]*?width: min\(100%, var\(--starci-core-form-measure, 30rem\)\);/)
         expect(css).toMatch(/\.starci-core-form-surface--compact\s*\{[\s\S]*?width: min\(100%, var\(--starci-core-form-compact-measure, 28rem\)\);/)
-        expect(css).toMatch(/\.starci-core-form-surface > \.card\s*\{[\s\S]*?max-height: calc\(100dvh - 3rem\);[\s\S]*?overflow: hidden !important;[\s\S]*?padding: 0 !important;/)
+        expect(css).toMatch(/\.starci-core-form-surface > \.card,[\s\S]*?\.starci-core-form-surface > \.starci-core-surface[\s\S]*?\{[\s\S]*?max-height: calc\(100dvh - 3rem\);[\s\S]*?overflow: hidden !important;[\s\S]*?padding: 0 !important;/)
+        expect(css).toMatch(/data-grammar-surface-composition="joined"[\s\S]*?padding: 0;/)
+        expect(css).toMatch(/data-grammar-surface-height="fill"[\s\S]*?height: 100%;/)
         expect(css).toMatch(/\.starci-core-form-field\s*\{[\s\S]*?flex-direction: column;[\s\S]*?gap: var\(--starci-core-field-gap, 0\.5rem\);/)
         expect(css).toMatch(/\.starci-core-form-label--screen-reader\s*\{[\s\S]*?position: absolute;[\s\S]*?clip: rect\(0, 0, 0, 0\);/)
         expect(css).toMatch(/\.starci-core-horizontal-scroll-region\s*\{[\s\S]*?overscroll-behavior-inline: contain;/)
@@ -66,15 +81,34 @@ describe("Core capability styles", () => {
     })
 
     it("hides scrollbar chrome by default without disabling overflow", () => {
-        expect(css).toMatch(/\.starci-core-root,\s*\.starci-core-root \*\s*\{[\s\S]*?scrollbar-width: none;/)
-        expect(css).toMatch(/\.starci-core-root::-webkit-scrollbar,[\s\S]*?display: none;[\s\S]*?width: 0;[\s\S]*?height: 0;/)
+        expect(commonCss).toMatch(/\.grammar-common-root,\s*\.grammar-common-root \*\s*\{[\s\S]*?scrollbar-width: none;/)
+        expect(commonCss).toMatch(/\.grammar-common-root::-webkit-scrollbar,[\s\S]*?display: none;[\s\S]*?width: 0;[\s\S]*?height: 0;/)
     })
 
-    it("keeps disclosure geometry full-width, full-bleed and hover-invariant", () => {
+    it("keeps disclosure geometry full-width while accordion hover and pressed states stay visually invariant", () => {
         expect(css).toMatch(/\.starci-core-accordion-shell\s*\{[\s\S]*?width: 100%/)
+        expect(css).toMatch(/\.starci-core-surface\s*\{[\s\S]*?border-radius:[\s\S]*?background:/)
+        expect(css).toMatch(/\.starci-core-surface\[data-grammar-surface-depth="top"\]\s*\{[\s\S]*?box-shadow:/)
+        expect(css).toMatch(/\.starci-core-surface\[data-grammar-surface-depth="nested"\]\s*\{[\s\S]*?border: 1px solid/)
+        expect(css).not.toContain(".starci-core-accordion-shell-frameless")
         expect(css).toMatch(/\.starci-core-accordion-row \+ \.starci-core-accordion-row\s*\{[\s\S]*?border-top:/)
         expect(css).toMatch(/\.starci-core-accordion-trigger\s*\{[\s\S]*?padding:/)
-        expect(css).toMatch(/\.starci-core-accordion-trigger:hover,[\s\S]*?background: transparent;[\s\S]*?box-shadow: none;[\s\S]*?transform: none;/)
+        expect(css).toMatch(/\.starci-core-accordion-trigger:hover,[\s\S]*?\.starci-core-accordion-trigger:active,[\s\S]*?\[aria-expanded="true"\][\s\S]*?background: transparent;[\s\S]*?transform: none;/)
+        expect(css).toMatch(/\.starci-core-accordion-trigger:focus-visible,[\s\S]*?outline: 2px solid var\(--focus,/)
+        expect(css).not.toMatch(/\.starci-core-accordion-trigger:hover,[\s\S]*?background: var\(--accent-soft,/)
+    })
+
+    it("paints a labelled Core SurfaceCard as one label-inside material box", () => {
+        expect(coreCss).toMatch(/data-grammar-surface-labelled="true"\]\[data-grammar-frame="bounded"\][\s\S]*?background: var\(--starci-core-surface,[\s\S]*?box-shadow:/)
+        expect(coreCss).toMatch(/> \[data-grammar-surface-label\][\s\S]*?padding:/)
+        expect(coreCss).toMatch(/> \[data-grammar-frame="bounded"\][\s\S]*?background: transparent;[\s\S]*?box-shadow: none;/)
+    })
+
+    it("gives Grammar whole-card actions hover, focus, active and reduced-motion parity", () => {
+        expect(css).toContain(".starci-core-surface-card[data-grammar-interaction=\"whole-action\"]")
+        expect(css).toContain("[data-grammar-whole-action]:hover")
+        expect(css).toContain("[data-grammar-whole-action]:focus-visible")
+        expect(css).toContain("[data-grammar-whole-action]:active")
     })
 
     it("keeps static joined lists full-bleed and hover-invariant", () => {
@@ -116,9 +150,15 @@ describe("Core capability styles", () => {
         expect(css).toContain("@media (prefers-reduced-motion: reduce)")
     })
 
-    it("supports a leading dashboard rail with a vertical separator", () => {
-        expect(css).toMatch(/data-grammar-dashboard-rail-position="leading"\]\[data-grammar-dashboard-navigation="absent"\]\[data-grammar-dashboard-rail="present"\][\s\S]*?grid-template-areas: "rail rule primary"/)
-        expect(css).toContain(".starci-core-dashboard-shell-leading-rule")
-        expect(css).toMatch(/\.starci-core-dashboard-shell-leading-rule[\s\S]*?align-self: stretch/)
+    it("supports a leading workspace rail with a vertical separator", () => {
+        expect(css).toMatch(/data-grammar-workspace-rail-position="leading"\]\[data-grammar-workspace-navigation="absent"\]\[data-grammar-workspace-rail="present"\][\s\S]*?grid-template-areas: "rail rule primary"/)
+        expect(css).toContain(".starci-core-workspace-shell-leading-rule")
+        expect(css).toMatch(/\.starci-core-workspace-shell-leading-rule[\s\S]*?align-self: stretch/)
+    })
+
+    it("owns intrinsic navigation tracks and desktop-only navigation reflow", () => {
+        expect(css).toMatch(/data-grammar-workspace-navigation-track="intrinsic"[\s\S]*?--starci-core-workspace-navigation-track: max-content;/)
+        expect(css).toMatch(/data-grammar-workspace-navigation-visibility="wide"[\s\S]*?\.starci-core-workspace-shell-navigation[\s\S]*?display: none;/)
+        expect(css).toMatch(/data-grammar-workspace-navigation-visibility="wide"\]\[data-grammar-workspace-rail="absent"\][\s\S]*?grid-template-areas: "primary";/)
     })
 })

@@ -1,4 +1,4 @@
-import { Text } from "@/components/leaves/Text"
+import { Text } from "@starci/grammar/common"
 import { orderSummaryClassName, orderSummaryRowClassName, orderSummaryTotalClassName } from "./classNames"
 
 /**
@@ -82,8 +82,8 @@ export const OrderSummaryBase = (props: OrderSummaryProps) => {
     /** One muted component of the total: what it is called, and how much of it there is. */
     const componentRow = (label: string, value?: string) => (
         <div className={orderSummaryRowClassName}>
-            <Text props={{ content: label, size: "sm", weight: "semibold" }} />
-            <Text props={{ content: figure(value), size: "sm", tone: "muted" }} isLoading={isLoading} />
+            <Text size={"sm"} weight={"semibold"}>{label}</Text>
+            <Text size={"sm"} tone={"muted"} isSkeleton={isLoading}>{figure(value)}</Text>
         </div>
     )
 
@@ -93,8 +93,8 @@ export const OrderSummaryBase = (props: OrderSummaryProps) => {
             {props.props.savings === undefined ? null : componentRow(labels.savings, props.props.savings)}
             {props.props.surcharge === undefined ? null : componentRow(labels.surcharge, props.props.surcharge)}
             <div className={orderSummaryTotalClassName}>
-                <Text props={{ content: labels.total, size: "sm", weight: "semibold" }} />
-                <Text props={{ content: figure(props.props.total), size: "md", weight: "semibold" }} isLoading={isLoading} />
+                <Text size={"sm"} weight={"semibold"}>{labels.total}</Text>
+                <Text size={"md"} weight={"semibold"} isSkeleton={isLoading}>{figure(props.props.total)}</Text>
             </div>
         </div>
     )

@@ -1,9 +1,9 @@
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
-import { Button } from "@/components/leaves/Button"
-import { Heading } from "@/components/leaves/Heading"
-import { NavLink } from "@/components/leaves/NavLink"
-import { Text } from "@/components/leaves/Text"
+import { SurfaceCard } from "@starci/grammar/common"
+import { SurfaceListCard } from "@starci/grammar/common"
+import { Button } from "@starci/grammar/common"
+
+import { Heading } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import {
     quizActionRowClassName, quizChoiceRowClassName, quizEvidenceListClassName, quizEvidenceRowClassName,
     quizStatsGridClassName, quizStatsPrimaryCardClassName, quizStatsRowClassName,
@@ -12,6 +12,8 @@ import {
     quizWorkflowClassName, quizWorkflowStepClassName,
     quizStateClassName, quizWorkspaceClassName,
 } from "./classNames"
+import { TextAction } from "@starci/grammar/common"
+
 
 /** Secondary surface shown within the Quick quiz route. */
 export type FlashcardQuizView = "setup" | "history" | "stats"
@@ -53,39 +55,39 @@ export const CourseFlashcardsQuizBlockBase = (props: CourseFlashcardsQuizBlockPr
     const eligible = data.cardCount >= requiredCount
     const stateTitle = props.pageState === "setup" ? data.configurationTitle : data.evidenceTitle
     const emptyMessage = props.pageState === "history" ? data.historyEmptyText ?? data.emptyText : props.pageState === "stats" ? data.statsEmptyText ?? data.emptyText : data.emptyText
-    const renderState = (message: string, failed: boolean) => <SurfaceCard><section className={quizStateClassName} aria-live={failed ? "assertive" : "polite"}>
-        <Heading props={{ content: stateTitle, level: 2 }} />
-        <Text props={{ content: message, size: "sm", tone: "muted" }} />
+    const renderState = (message: string, failed: boolean) => <SurfaceCard composition="joined"><section className={quizStateClassName} aria-live={failed ? "assertive" : "polite"}>
+        <Heading level={2}>{stateTitle}</Heading>
+        <Text size={"sm"} tone={"muted"}>{message}</Text>
         <div className={quizActionRowClassName}>
             {failed
-                ? <Button props={{ label: data.retryLabel, variant: "primary" }} on={{ press: props.on.retry }} />
+                ? <Button variant="primary" onPress={props.on.retry}>{data.retryLabel}</Button>
                 : props.pageState === "setup"
-                    ? <Button props={{ label: data.exitLabel ?? data.reviewLabel, variant: "outline" }} on={{ press: props.on.openReview }} />
-                    : <Button props={{ label: data.setupLabel, variant: "primary" }} on={{ press: () => props.on.selectView("setup") }} />}
+                    ? <Button variant="outline" onPress={props.on.openReview}>{data.exitLabel ?? data.reviewLabel}</Button>
+                    : <Button variant="primary" onPress={() => props.on.selectView("setup")}>{data.setupLabel}</Button>}
         </div>
     </section></SurfaceCard>
-    const resumeSurface = data.resumeSessionId === undefined ? null : <SurfaceCard><section className={quizResumeClassName} aria-label={data.resumeLabel}>
-        <div><Heading props={{ content: data.resumeLabel, level: 3 }} /><Text props={{ content: `${data.cardCount} ${data.cardsLabel}`, size: "sm", tone: "muted" }} /></div>
-        <Button props={{ label: data.resumeLabel, variant: "primary" }} on={{ press: () => props.on.resume(data.resumeSessionId!) }} />
+    const resumeSurface = data.resumeSessionId === undefined ? null : <SurfaceCard composition="joined"><section className={quizResumeClassName} aria-label={data.resumeLabel}>
+        <div><Heading level={3}>{data.resumeLabel}</Heading><Text size={"sm"} tone={"muted"}>{`${data.cardCount} ${data.cardsLabel}`}</Text></div>
+        <Button variant="primary" onPress={() => props.on.resume(data.resumeSessionId!)}>{data.resumeLabel}</Button>
     </section></SurfaceCard>
     const setupSurface = <div className={quizSetupGridClassName}>
-        <SurfaceCard props={{ label: data.configurationTitle }} isLoading={loading}><section className={quizFormClassName}>
-            <Text props={{ content: data.serverDrawDescription, size: "sm", tone: "muted" }} isLoading={loading} />
-            <div className={quizFieldGroupClassName}><Text props={{ content: data.modeLabel, size: "sm", weight: "semibold" }} /><div className={quizChoiceRowClassName}>{(["quick", "deep"] as const).map((mode) => <Button key={mode} props={{ label: mode === "quick" ? data.quickLabel : data.deepLabel, size: "sm", variant: data.selectedMode === mode ? "primary" : "outline", disabled: data.resumeSessionId !== undefined }} on={{ press: () => props.on.selectMode(mode) }} />)}</div></div>
+        <SurfaceCard label={data.configurationTitle} composition="joined" state={loading ? "pending" : "neutral"}><section className={quizFormClassName}>
+            <Text size={"sm"} tone={"muted"} isSkeleton={loading}>{data.serverDrawDescription}</Text>
+            <div className={quizFieldGroupClassName}><Text size={"sm"} weight={"semibold"}>{data.modeLabel}</Text><div className={quizChoiceRowClassName}>{(["quick", "deep"] as const).map((mode) => <Button key={mode} variant={data.selectedMode === mode ? "primary" : "outline"} size="sm" isDisabled={data.resumeSessionId !== undefined} onPress={() => props.on.selectMode(mode)}>{mode === "quick" ? data.quickLabel : data.deepLabel}</Button>)}</div></div>
         </section></SurfaceCard>
-        <SurfaceCard props={{ label: data.eligibilityTitle ?? data.quizLabel }} isLoading={loading}><aside className={quizPreflightClassName}>
+        <SurfaceCard label={data.eligibilityTitle ?? data.quizLabel} composition="joined" state={loading ? "pending" : "neutral"}><aside className={quizPreflightClassName}>
             <div className={quizPreflightStatusClassName} aria-live="polite">
-                <Heading props={{ content: data.resumeSessionId !== undefined ? data.activeSessionText ?? data.resumeLabel : eligible ? data.eligibilityReadyText ?? data.startLabel : data.eligibilityBlockedText ?? data.emptyText, level: 3 }} isLoading={loading} />
-                <Text props={{ content: `${data.cardCount} ${data.cardsLabel} · ${data.requiredCardsLabel ?? "minimum"} ${requiredCount}`, size: "sm", weight: "medium" }} isLoading={loading} />
+                <Heading level={3} isSkeleton={loading}>{data.resumeSessionId !== undefined ? data.activeSessionText ?? data.resumeLabel : eligible ? data.eligibilityReadyText ?? data.startLabel : data.eligibilityBlockedText ?? data.emptyText}</Heading>
+                <Text size={"sm"} weight={"medium"} isSkeleton={loading}>{`${data.cardCount} ${data.cardsLabel} · ${data.requiredCardsLabel ?? "minimum"} ${requiredCount}`}</Text>
             </div>
-            {data.startErrorText === undefined ? null : <Text props={{ content: data.startErrorText, size: "sm", weight: "semibold" }} />}
-            <Button props={{ label: data.startLabel, variant: "primary", disabled: !eligible || data.resumeSessionId !== undefined, isPending: data.startPending }} on={{ press: props.on.start }} isLoading={loading} />
+            {data.startErrorText === undefined ? null : <Text size={"sm"} weight={"semibold"}>{data.startErrorText}</Text>}
+            <Button variant={"primary"} isDisabled={!eligible || data.resumeSessionId !== undefined} isPending={data.startPending} isSkeleton={loading} onPress={({ press: props.on.start })?.press}>{data.startLabel}</Button>
         </aside></SurfaceCard>
     </div>
-    const workflowSurface = <SurfaceCard props={{ label: data.workflowTitle }}><ol className={quizWorkflowClassName}>
+    const workflowSurface = <SurfaceCard label={data.workflowTitle} composition="joined"><ol className={quizWorkflowClassName}>
         {data.workflowSteps.map((step, index) => <li className={quizWorkflowStepClassName} key={step}>
-            <Text props={{ content: String(index + 1).padStart(2, "0"), size: "sm", tone: "accent", weight: "semibold" }} />
-            <Text props={{ content: step, size: "sm" }} />
+            <Text size={"sm"} tone={"accent"} weight={"semibold"}>{String(index + 1).padStart(2, "0")}</Text>
+            <Text size={"sm"}>{step}</Text>
         </li>)}
     </ol></SurfaceCard>
     const body = props.blockState === "failed"
@@ -94,14 +96,14 @@ export const CourseFlashcardsQuizBlockBase = (props: CourseFlashcardsQuizBlockPr
             ? <>{resumeSurface}{renderState(emptyMessage, false)}</>
             : props.pageState === "setup"
                 ? <section className={quizSetupRegionClassName} aria-label={data.configurationTitle}>{resumeSurface}{setupSurface}{workflowSurface}</section>
-                : <>{resumeSurface}<SurfaceListCard props={{ label: data.evidenceTitle }} isLoading={loading}><ul className={props.pageState === "stats" ? quizStatsGridClassName : quizEvidenceListClassName}>{data.evidenceRows.map((row) => <li className={props.pageState === "stats" ? row.id === "concept-coverage" ? quizStatsPrimaryCardClassName : quizStatsRowClassName : quizEvidenceRowClassName} key={row.id}><Text props={{ content: row.title, size: "sm", weight: "medium" }} /><Text props={{ content: row.description, size: "sm", tone: "muted" }} /><Text props={{ content: row.fact, size: props.pageState === "stats" ? "md" : "xs", weight: props.pageState === "stats" ? "semibold" : undefined, tone: props.pageState === "stats" ? undefined : "muted" }} /></li>)}</ul></SurfaceListCard></>
+                : <>{resumeSurface}<SurfaceListCard label={data.evidenceTitle} isLoading={loading}><ul className={props.pageState === "stats" ? quizStatsGridClassName : quizEvidenceListClassName}>{data.evidenceRows.map((row) => <li className={props.pageState === "stats" ? row.id === "concept-coverage" ? quizStatsPrimaryCardClassName : quizStatsRowClassName : quizEvidenceRowClassName} key={row.id}><Text size={"sm"} weight={"medium"}>{row.title}</Text><Text size={"sm"} tone={"muted"}>{row.description}</Text><Text size={props.pageState === "stats" ? "md" : "xs"} tone={props.pageState === "stats" ? undefined : "muted"} weight={props.pageState === "stats" ? "semibold" : undefined}>{row.fact}</Text></li>)}</ul></SurfaceListCard></>
 
     return <main className={quizWorkspaceClassName} aria-label={data.title}>
-        <header className={quizHeaderClassName}><Heading props={{ content: data.title, level: 1 }} /><Text props={{ content: data.subtitle, size: "sm", tone: "muted" }} /></header>
+        <header className={quizHeaderClassName}><Heading level={1}>{data.title}</Heading><Text size={"sm"} tone={"muted"}>{data.subtitle}</Text></header>
         <nav className={quizNavClassName} aria-label={data.title}>
-            <NavLink props={{ label: data.reviewLabel, kind: "route" }} on={{ press: props.on.openReview }} />
+            <TextAction appearance={"route"} onPress={props.on.openReview}>{data.reviewLabel}</TextAction>
             <div className={quizViewTabsClassName} role="tablist" aria-label={data.quizLabel}>
-                {(["setup", "history", "stats"] as const).map((view) => <NavLink key={view} props={{ label: view === "setup" ? data.setupLabel : view === "history" ? data.historyLabel : data.statsLabel, kind: "tab", isCurrent: props.pageState === view }} on={{ press: () => props.on.selectView(view) }} />)}
+                {(["setup", "history", "stats"] as const).map((view) => <TextAction key={view} appearance={"tab"} isCurrent={props.pageState === view} onPress={() => props.on.selectView(view)}>{view === "setup" ? data.setupLabel : view === "history" ? data.historyLabel : data.statsLabel}</TextAction>)}
             </div>
         </nav>
 

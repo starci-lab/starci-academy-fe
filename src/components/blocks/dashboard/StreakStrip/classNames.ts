@@ -3,13 +3,13 @@ import {
     dashboardBandSeparatorClassName,
     dashboardCardFooterClassName,
     dashboardFlushCardClassName,
-    dashboardFlushSurfaceClassName,
     dashboardMetricCellPaddingClassName,
 } from "../classNames"
 
-export const streakSurfaceClassName = dashboardFlushSurfaceClassName
-export const streakCardClassName = dashboardFlushCardClassName
-export const streakSeparatorClassName = dashboardBandSeparatorClassName
+/** Stack streak bands without inserting space around their divider. */
+export const streakCardClassName = cn(dashboardFlushCardClassName)
+/** Separate the streak summary from its daily action. */
+export const streakSeparatorClassName = cn(dashboardBandSeparatorClassName)
 
 /** The week run and streak facts share one summary band. */
 export const streakSummaryClassName = cn(

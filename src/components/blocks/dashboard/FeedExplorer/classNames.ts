@@ -1,8 +1,4 @@
 import { cn } from "@heroui/react"
-import { dashboardFlushSurfaceClassName } from "@/components/blocks/dashboard/classNames"
-
-/** Remove Grammar content padding so the two internal bands meet the card edges. */
-export const feedExplorerSurfaceClassName = cn(dashboardFlushSurfaceClassName, "w-full", "min-w-0")
 
 /** Keep the two-tab control at the head of the Bulletin card at every width. */
 export const feedExplorerClassName = cn(
@@ -14,7 +10,9 @@ export const feedExplorerClassName = cn(
 /** Fill the narrow card, then shrink the same two-tab control to its content on wider screens. */
 export const feedExplorerNavigationClassName = cn(
     "min-w-0",
-    "p-4",
+    "px-4",
+    "pt-4",
+    "pb-3",
     "[&>[data-slot=tabs]]:w-full",
     "md:[&>[data-slot=tabs]]:w-fit",
 )
@@ -29,4 +27,4 @@ export const feedExplorerActivityClassName = cn(
 )
 
 /** Separate pagination and recovery from the final dated row inside the same card. */
-export const feedExplorerContinuationClassName = cn("flex", "items-center", "justify-between", "gap-3", "border-t", "border-separator", "p-4")
+export const feedExplorerContinuationClassName = cn("flex", "items-center", "justify-between", "gap-3", "border-t", "border-separator", "px-4", "pt-3", "pb-4")

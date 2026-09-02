@@ -4,9 +4,10 @@ import { ListBox } from "@heroui/react"
 import { useEffect } from "react"
 import type { Key } from "react"
 import { selectionListBadgeClassName, selectionListCollapsedClassName, selectionListCompactIconClassName, selectionListDescriptionClassName, selectionListItemClassNames, selectionListLabelClassName, selectionListMetaClassName, selectionListOutlineContentClassName, selectionListResultContentClassName, selectionListResultLabelClassName, selectionListResultTextClassName } from "./classNames"
-import { Icon, type IconName } from "@/components/leaves/Icon"
+import { Icon } from "@starci/grammar/common"
+import { iconSourceFor, type IconName } from "@/components/leaves/Icon"
 import { IconLabelFactRow } from "@/components/composites/IconLabelFactRow"
-import type { BadgeTone } from "@/components/leaves/Badge"
+import type { BadgeTone } from "@starci/grammar/common"
 
 /** One closed row accepted by the reusable search selection list. */
 export type SelectionListItem = {
@@ -100,7 +101,7 @@ export const SelectionList = (props: SelectionListProps) => {
                 >
                     {data.variant === "outline" ? (
                         <span className={selectionListOutlineContentClassName}>
-                            <Icon props={{ name: item.icon ?? "pending", role: "leading" }} />
+                            <Icon source={iconSourceFor(item.icon ?? "pending", "leading")} role={"leading"} />
                             <span data-slot="label" className={selectionListLabelClassName}>
                                 {item.title}
                             </span>
@@ -113,7 +114,7 @@ export const SelectionList = (props: SelectionListProps) => {
                             data-slot="compact-icon"
                             className={selectionListCompactIconClassName}
                         >
-                            <Icon props={{ name: item.icon ?? "pending", role: "leading" }} />
+                            <Icon source={iconSourceFor(item.icon ?? "pending", "leading")} role={"leading"} />
                         </span>
                     ) : data.variant === "scopes" || data.variant === "navigation" ? (
                         <IconLabelFactRow props={{

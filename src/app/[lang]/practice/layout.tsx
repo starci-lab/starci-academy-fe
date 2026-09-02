@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import { ShellNav } from "@/components/layouts/ShellNav"
+import { ShellNav } from "@/components/product-shells/ShellNav"
 
 /** Props for the practice route family layout. */
 type PracticeLayoutProps = {

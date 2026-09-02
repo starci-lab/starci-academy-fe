@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
-import { ScrollShadow } from "@heroui/react"
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
+import { VerticalScrollRegion } from "@starci/grammar/common"
+import { SurfaceCard } from "@starci/grammar/common"
 import { aiTranscriptScrollViewportClassName, authenticationFormScrollViewportClassName, learnNavigationGroupsScrollViewportClassName, pricingRailScrollViewportClassName } from "./classNames"
 
 /** Approved bounded region whose content owns its internal scrolling. */
@@ -13,18 +13,14 @@ export const ScrollViewport = (props: ScrollViewportProps) => {
     const { boundary, children } = props
     if (boundary === "form-surface") {
         return (
-            <ScrollShadow
-                className={authenticationFormScrollViewportClassName}
-                hideScrollBar
-                orientation="vertical"
-            >
+            <VerticalScrollRegion className={authenticationFormScrollViewportClassName} isScrollable>
                 {children}
-            </ScrollShadow>
+            </VerticalScrollRegion>
         )
     }
-    if (boundary === "ai-transcript") return <ScrollShadow className={aiTranscriptScrollViewportClassName} hideScrollBar orientation="vertical">{children}</ScrollShadow>
-    if (boundary === "learn-navigation-groups") return <ScrollShadow className={learnNavigationGroupsScrollViewportClassName} data-learn-navigation-scroll="true" hideScrollBar orientation="vertical">{children}</ScrollShadow>
+    if (boundary === "ai-transcript") return <VerticalScrollRegion className={aiTranscriptScrollViewportClassName} isScrollable>{children}</VerticalScrollRegion>
+    if (boundary === "learn-navigation-groups") return <VerticalScrollRegion className={learnNavigationGroupsScrollViewportClassName} data-learn-navigation-scroll="true" isScrollable>{children}</VerticalScrollRegion>
     return boundary === "pricing-rail"
-        ? <SurfaceCard><ScrollShadow className={pricingRailScrollViewportClassName} hideScrollBar orientation="vertical">{children}</ScrollShadow></SurfaceCard>
+        ? <SurfaceCard composition="joined"><VerticalScrollRegion className={pricingRailScrollViewportClassName} isScrollable>{children}</VerticalScrollRegion></SurfaceCard>
         : children
 }

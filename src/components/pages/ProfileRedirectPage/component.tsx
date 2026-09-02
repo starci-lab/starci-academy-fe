@@ -1,6 +1,8 @@
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
-import { Text } from "@/components/leaves/Text"
+import { SurfaceCard } from "@starci/grammar/common"
+import { Icon } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { EmptyNotice } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import { profileRedirectStateClassName } from "./classNames"
 
 /** Visible lifecycle while the canonical self-profile destination resolves. */
@@ -13,7 +15,7 @@ export type ProfileRedirectPageProps = {
 /** Keep Profile entry observable instead of handing the host an unexplained blank body. */
 export const ProfileRedirectPageBase = (props: ProfileRedirectPageProps) => {
     if (props.state === "error") {
-        return <div className={profileRedirectStateClassName}><SurfaceCard><EmptyNotice props={{ icon: "retry", message: "Chưa mở được hồ sơ của bạn.", description: "Kiểm tra kết nối rồi thử lại. Dữ liệu hồ sơ đã lưu không bị thay đổi.", actionLabel: "Thử lại", actionIcon: "retry", isPending: props.retryPending }} on={{ act: props.on.retry }} /></SurfaceCard></div> // vn-ok: localized Profile-entry recovery state.
+        return <div className={profileRedirectStateClassName}><SurfaceCard composition="joined"><EmptyNotice message={"Chưa mở được hồ sơ của bạn."} description={"Kiểm tra kết nối rồi thử lại. Dữ liệu hồ sơ đã lưu không bị thay đổi."} actionLabel={"Thử lại"} isActionPending={props.retryPending} iconSource={iconSourceFor("retry", "leading")} actionStartContent={<Icon source={iconSourceFor("retry", "chip")} role="chip" />} onAction={({ act: props.on.retry })?.act} /></SurfaceCard></div> // vn-ok: localized Profile-entry recovery state.
     }
-    return <div className={profileRedirectStateClassName} role="status" aria-live="polite" aria-busy="true"><SurfaceCard isLoading><Text props={{ content: "Đang mở hồ sơ của bạn…", tone: "muted", live: "polite" }} isLoading /></SurfaceCard></div> // vn-ok: localized Profile-entry pending state.
+    return <div className={profileRedirectStateClassName} role="status" aria-live="polite" aria-busy="true"><SurfaceCard composition="joined" state="pending"><Text tone={"muted"} live={"polite"} isSkeleton>{"Đang mở hồ sơ của bạn…"}</Text></SurfaceCard></div> // vn-ok: localized Profile-entry pending state.
 }

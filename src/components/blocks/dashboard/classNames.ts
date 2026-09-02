@@ -17,15 +17,6 @@ export const dashboardRailRowItemClassName = cn(
     "[&>[data-part=icon-label-fact-row]]:flex-1",
 )
 
-/** Keep the content inside a dashboard surface in one bounded reading stack. */
-export const dashboardSurfaceContentClassName = cn("flex", "min-w-0", "flex-col", "gap-3")
-
-/** Flush grammar surface padding so a dashboard card can own full-bleed internal bands. */
-export const dashboardFlushSurfaceClassName = cn(
-    "[&_.starci-core-surface-content]:p-0",
-    "[&_.starci-core-surface-content>div]:gap-0",
-)
-
 /** Stack full-bleed bands inside one bounded dashboard surface. */
 export const dashboardFlushCardClassName = cn("flex", "min-w-0", "flex-col")
 
@@ -36,15 +27,31 @@ export const dashboardBandSeparatorClassName = cn("border-t", "border-separator"
 export const dashboardAccentBandClassName = cn(
     "bg-accent-soft",
     "text-accent-soft-foreground",
-    "[&_[data-size=sm]]:!text-accent-soft-foreground",
-    "[&_[data-size=xs]]:!text-accent-soft-foreground",
 )
 
-/** First accent band in a flush card: px-4 always; p-3 on separator sides vertically. */
+/** Neutral summary treatment; copy inside keeps its own foreground or muted semantic tone. */
+export const dashboardNeutralBandClassName = cn("bg-surface-secondary", "text-foreground")
+
+/** First neutral band in a flush card: outer top edge 16px, separator edge 12px. */
+export const dashboardNeutralBandTopClassName = cn(
+    dashboardNeutralBandClassName,
+    "px-4",
+    "pt-4",
+    "pb-3",
+)
+
+/** Neutral band between separators: px-4 always; p-3 on both separator sides vertically. */
+export const dashboardNeutralBandMiddleClassName = cn(
+    dashboardNeutralBandClassName,
+    "px-4",
+    "py-3",
+)
+
+/** First accent band in a flush card: outer top edge 16px, separator edge 12px. */
 export const dashboardAccentBandTopClassName = cn(
     dashboardAccentBandClassName,
     "px-4",
-    "pt-3",
+    "pt-4",
     "pb-3",
 )
 

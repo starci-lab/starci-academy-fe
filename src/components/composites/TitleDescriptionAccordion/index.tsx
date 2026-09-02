@@ -1,10 +1,10 @@
 "use client"
 import { useState } from "react"
-import { SurfaceAccordionCard } from "@starci/grammar/core"
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
+import { SurfaceAccordionCard } from "@starci/grammar/common"
+import { SurfaceCard } from "@starci/grammar/common"
 import { DisclosureIndicator } from "@/components/leaves/DisclosureIndicator"
-import { Heading } from "@/components/leaves/Heading"
-import { Text } from "@/components/leaves/Text"
+import { Heading } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import { titleDescriptionBodyClassName, titleDescriptionClassName, titleDescriptionSummaryClassName } from "./classNames"
 
 /** One title/description disclosure row. */
@@ -18,6 +18,6 @@ export type TitleDescriptionAccordionProps = { readonly props: TitleDescriptionA
 export const TitleDescriptionAccordion = (props: TitleDescriptionAccordionProps) => {
     const [expandedIds, setExpandedIds] = useState<ReadonlySet<string>>(new Set())
     const sourceItems = props.props.items.length === 0 && props.props.emptyLabel !== undefined ? [{ id: "empty", title: props.props.emptyLabel, description: "" }] : props.props.items
-    const items = sourceItems.map((item) => ({ id: item.id, isOpen: expandedIds.has(item.id), isDisabled: props.isLoading === true || item.description.trim() === "", summaryRender: <div className={titleDescriptionSummaryClassName}><Text props={{ content: item.title, size: "sm", weight: "medium" }} isLoading={props.isLoading} />{item.description.trim() === "" ? null : <DisclosureIndicator props={{ isOpen: expandedIds.has(item.id) }} />}</div>, bodyRender: <div className={titleDescriptionBodyClassName}><Text props={{ content: item.description, size: "sm" }} /></div> }))
-    return <div className={titleDescriptionClassName}><Heading props={{ content: props.props.label, level: 3 }} /><SurfaceCard props={{ inset: "none" }}><SurfaceAccordionCard items={items} renderSummary={(summary) => <>{summary}</>} renderBody={(body) => <>{body}</>} onItemOpenChange={(id, isOpen) => setExpandedIds((current) => { const next = new Set(current); if (isOpen) next.add(id); else next.delete(id); return next })} /></SurfaceCard></div>
+    const items = sourceItems.map((item) => ({ id: item.id, isOpen: expandedIds.has(item.id), isDisabled: props.isLoading === true || item.description.trim() === "", summaryRender: <div className={titleDescriptionSummaryClassName}><Text size={"sm"} weight={"medium"} isSkeleton={props.isLoading}>{item.title}</Text>{item.description.trim() === "" ? null : <DisclosureIndicator props={{ isOpen: expandedIds.has(item.id) }} />}</div>, bodyRender: <div className={titleDescriptionBodyClassName}><Text size={"sm"}>{item.description}</Text></div> }))
+    return <div className={titleDescriptionClassName}><Heading level={3}>{props.props.label}</Heading><SurfaceCard composition="joined"><SurfaceAccordionCard items={items} renderSummary={(summary) => <>{summary}</>} renderBody={(body) => <>{body}</>} onItemOpenChange={(id, isOpen) => setExpandedIds((current) => { const next = new Set(current); if (isOpen) next.add(id); else next.delete(id); return next })} /></SurfaceCard></div>
 }

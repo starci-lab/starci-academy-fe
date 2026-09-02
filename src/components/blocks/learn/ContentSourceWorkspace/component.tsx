@@ -1,8 +1,9 @@
 import { SandpackWorkspace, type SandpackWorkspaceData } from "@/components/branches/SandpackWorkspace"
 import { CodeReaderWorkspace } from "@/components/branches/CodeReaderWorkspace"
-import { Button } from "@/components/leaves/Button"
+import { Button } from "@starci/grammar/common"
+
 import { StatusDot } from "@/components/leaves/StatusDot"
-import { Text } from "@/components/leaves/Text"
+import { Text } from "@starci/grammar/common"
 import type { SandboxCodeSelection } from "@/modules/code/sandbox-repo"
 import { sourceWorkspaceClassName, sourceWorkspaceToolbarClassName } from "./classNames"
 
@@ -51,27 +52,15 @@ const SourceWorkspaceToolbar = (props: SourceWorkspaceToolbarProps) => {
         : props.state === "failed" ? props.props.failedLabel : props.props.identity
 
     return <div className={sourceWorkspaceToolbarClassName}>
-        <Text
-            props={{ content: identity, size: "sm", weight: "semibold" }}
-            isLoading={props.state === "pending"}
-        />
+        <Text size={"sm"} weight={"semibold"} isSkeleton={props.state === "pending"}>{identity}</Text>
         {props.state === "failed" ? (
-            <Button
-                props={{ label: props.props.retryLabel, variant: "primary", size: "sm" }}
-                on={{ press: props.on?.retry }}
-            />
+            <Button variant="primary" size="sm" onPress={props.on?.retry}>{props.props.retryLabel}</Button>
         ) : props.state === "pending" ? (
-            <Button props={{ label: props.props.resetLabel, size: "sm" }} isLoading />
+            <Button size={"sm"} isSkeleton>{props.props.resetLabel}</Button>
         ) : props.props.mode === "reader" ? null : <>
-            <Button
-                props={{ label: props.props.resetLabel, size: "sm", disabled: !hasEdits }}
-                on={{ press: props.on?.reset }}
-            />
+            <Button size="sm" isDisabled={!hasEdits} onPress={props.on?.reset}>{props.props.resetLabel}</Button>
             {props.props.runtimeError === undefined ? null : (
-                <Button
-                    props={{ label: props.props.askErrorLabel, size: "sm", variant: "primary" }}
-                    on={{ press: props.on?.askError }}
-                />
+                <Button variant="primary" size="sm" onPress={props.on?.askError}>{props.props.askErrorLabel}</Button>
             )}
         </>}
         {props.state === "ready" && (hasEdits || props.props.runtimeError !== undefined) ? (

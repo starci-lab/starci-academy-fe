@@ -25,9 +25,6 @@ export const dashboardCompactSubnavClassName = cn(
     "will-change-transform",
     "[backface-visibility:hidden]",
     "[&_[data-grammar-subnav-toggle=true]]:!size-11",
-    "[&_[data-grammar-subnav-toggle=true]]:!rounded-full",
-    "[&_[data-grammar-subnav-toggle=true]]:!bg-default",
-    "[&_[data-grammar-subnav-toggle=true]]:hover:!bg-default",
 )
 
 /** Identity and shortcuts stay pinned flush left with an independent scroll lane. */
@@ -173,10 +170,6 @@ export const dashboardOverviewMetricsClassName = cn(
     "items-stretch",
     "gap-3",
     "lg:grid-cols-2",
-    "[&>.starci-core-surface-card]:h-full",
-    "[&>.starci-core-surface-card_.starci-core-surface]:h-full",
-    "[&>.starci-core-surface-card_.starci-core-surface-content]:h-full",
-    "[&>.starci-core-surface-card_.starci-core-surface-content>div]:h-full",
 )
 
 /** Stack the weekly challenge and learning-activity cards as one vertical evidence column. */

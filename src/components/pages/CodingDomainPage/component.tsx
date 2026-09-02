@@ -1,5 +1,5 @@
 import { Breadcrumbs } from "@/components/leaves/Breadcrumbs"
-import { Heading } from "@/components/leaves/Heading"
+import { Heading } from "@starci/grammar/common"
 import { CodingDomainStanding } from "@/components/blocks/coding/CodingDomainStanding"
 import { CodingProblemList } from "@/components/blocks/coding/CodingProblemList"
 
@@ -15,7 +15,7 @@ export type CodingDomainPageProps = {
 /** Keep topic anatomy in the page and compose connected standing and problem blocks directly. */
 export const CodingDomainPageBase = (props: CodingDomainPageProps) => <>
     <Breadcrumbs props={{ label: props.title, steps: [{ id: "home", label: props.navHome }, { id: "practice", label: props.navPractice }, { id: "domain", label: props.title }] }} on={{ home: props.on?.goHome, practice: props.on?.goPractice }} />
-    <Heading props={{ content: props.title, level: 1 }} />
+    <Heading level={1}>{props.title}</Heading>
     <CodingDomainStanding domain={props.domain} />
     <CodingProblemList domain={props.domain} />
 </>

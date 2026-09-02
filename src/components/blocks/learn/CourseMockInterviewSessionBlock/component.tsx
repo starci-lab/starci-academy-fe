@@ -1,12 +1,14 @@
-import { ChatWorkspace } from "@starci/grammar/core"
+import { ChatWorkspace, Button } from "@starci/grammar/common"
 import { ModalBranch } from "@/components/branches/ModalBranch"
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
-import { Button } from "@/components/leaves/Button"
+import { SurfaceCard } from "@starci/grammar/common"
+import { EmptyNotice } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon } from "@starci/grammar/common"
+
 import { CodeBlock } from "@/components/leaves/CodeBlock"
-import { Heading } from "@/components/leaves/Heading"
-import { Progress } from "@/components/leaves/Progress"
-import { Text } from "@/components/leaves/Text"
+import { Heading } from "@starci/grammar/common"
+import { Progress } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import { Textarea } from "@/components/leaves/Textarea"
 import {
     mockInterviewComposerActionsClassName,
@@ -56,35 +58,35 @@ export type CourseMockInterviewSessionBlockProps = { readonly state: CourseMockI
 export const CourseMockInterviewSessionBlockBase = (props: CourseMockInterviewSessionBlockProps) => {
     const data = props.props
     const state = data.sessionState ?? props.state
-    if (state === "failed" || state === "expired") return <main className={mockInterviewStateClassName} aria-label={data.title}><SurfaceCard><EmptyNotice props={{ message: data.notice ?? data.retryLabel, actionLabel: data.retryLabel }} on={{ act: props.on?.retry }} /></SurfaceCard></main>
+    if (state === "failed" || state === "expired") return <main className={mockInterviewStateClassName} aria-label={data.title}><SurfaceCard composition="joined"><EmptyNotice message={data.notice ?? data.retryLabel} actionLabel={data.retryLabel} onAction={({ act: props.on?.retry })?.act} /></SurfaceCard></main>
     const busy = state === "connecting" || state === "syncing" || data.operation !== undefined
 
     const header = <div className={mockInterviewHeaderClassName}>
         <div className={mockInterviewHeaderCopyClassName}>
-            <Text props={{ content: data.promptTitle, size: "xs", weight: "semibold" }} />
-            <Heading props={{ content: data.title, level: 1 }} />
-            <Text props={{ content: data.stateLabel, size: "sm", tone: "muted", live: "polite" }} />
+            <Text size={"xs"} weight={"semibold"}>{data.promptTitle}</Text>
+            <Heading level={1}>{data.title}</Heading>
+            <Text size={"sm"} tone={"muted"} live={"polite"}>{data.stateLabel}</Text>
         </div>
         <div className={mockInterviewHeaderActionsClassName}>
-            <Button props={{ label: data.finishLabel, variant: "outline", size: "sm", disabled: busy }} on={{ press: props.on?.finish }} />
-            <Button props={{ label: data.leaveLabel, variant: "ghost", size: "sm", disabled: busy }} on={{ press: props.on?.leave }} />
+            <Button variant="outline" size="sm" isDisabled={busy} onPress={props.on?.finish}>{data.finishLabel}</Button>
+            <Button variant="ghost" size="sm" isDisabled={busy} onPress={props.on?.leave}>{data.leaveLabel}</Button>
         </div>
         <div className={mockInterviewHeaderFactsClassName}>
-            <Text props={{ content: data.counterLabel, size: "sm", weight: "semibold" }} />
-            <Progress props={{ label: data.progressLabel, value: Math.round(data.progress) }} />
-            {data.remainingLabel === undefined ? null : <Text props={{ content: data.remainingLabel, size: "sm", tone: "muted" }} />}
+            <Text size={"sm"} weight={"semibold"}>{data.counterLabel}</Text>
+            <Progress label={data.progressLabel} value={Math.round(data.progress)} />
+            {data.remainingLabel === undefined ? null : <Text size={"sm"} tone={"muted"}>{data.remainingLabel}</Text>}
         </div>
     </div>
 
     const conversation = <section className={mockInterviewConversationClassName} aria-labelledby="mock-interview-current-question">
-        <SurfaceCard>
+        <SurfaceCard composition="joined">
             <article className={mockInterviewQuestionClassName}>
                 <div className={mockInterviewQuestionMetaClassName}>
-                    <Text props={{ id: "mock-interview-current-question", content: data.currentQuestionLabel, size: "xs", weight: "semibold" }} />
-                    <Text props={{ content: data.counterLabel, size: "xs", tone: "muted" }} />
+                    <Text id={"mock-interview-current-question"} size={"xs"} weight={"semibold"}>{data.currentQuestionLabel}</Text>
+                    <Text size={"xs"} tone={"muted"}>{data.counterLabel}</Text>
                 </div>
-                <Heading props={{ content: data.currentQuestion, level: 2 }} />
-                {data.streamingText === undefined ? null : <Text props={{ content: data.streamingText, size: "sm", live: "polite" }} />}
+                <Heading level={2}>{data.currentQuestion}</Heading>
+                {data.streamingText === undefined ? null : <Text size={"sm"} live={"polite"}>{data.streamingText}</Text>}
                 {data.workspaceCode === undefined ? null : <CodeBlock props={{ code: data.workspaceCode, language: "text" }} />}
             </article>
         </SurfaceCard>
@@ -94,19 +96,19 @@ export const CourseMockInterviewSessionBlockBase = (props: CourseMockInterviewSe
         <Textarea key={data.counterLabel} props={{ id: "interview-answer", name: "answer", label: data.answerLabel, placeholder: data.answerPlaceholder, defaultValue: data.answer, rows: 4, disabled: busy }} on={{ change: props.on?.answer }} />
         <div className={mockInterviewComposerActionsClassName}>
             {data.notice === undefined
-                ? <Text props={{ content: data.syncStatusLabel, size: "xs", tone: "muted", live: "polite" }} />
-                : <div className={mockInterviewNoticeClassName}><Text props={{ content: data.notice, size: "sm", weight: "semibold", live: "assertive" }} /></div>}
+                ? <Text size={"xs"} tone={"muted"} live={"polite"}>{data.syncStatusLabel}</Text>
+                : <div className={mockInterviewNoticeClassName}><Text size={"sm"} weight={"semibold"} live={"assertive"}>{data.notice}</Text></div>}
             <div className={mockInterviewComposerButtonsClassName}>
-                {data.operation === "streaming" ? <Button props={{ label: data.abortLabel, variant: "outline" }} on={{ press: props.on?.abort }} /> : null}
-                <Button props={{ label: data.submitLabel, variant: "primary", disabled: busy || data.answer.trim() === "", icon: "next", iconPlacement: "trailing" }} on={{ press: props.on?.ask }} />
+                {data.operation === "streaming" ? <Button variant="outline" onPress={props.on?.abort}>{data.abortLabel}</Button> : null}
+                <Button variant={"primary"} isDisabled={busy || data.answer.trim() === ""} onPress={({ press: props.on?.ask })?.press} endContent={"next" === "next" && "trailing" === "trailing" ? <Icon source={iconSourceFor("next", "chip")} role="chip" /> : undefined}>{data.submitLabel}</Button>
             </div>
         </div>
     </section>
 
     const transcript = <aside className={mockInterviewTranscriptClassName} aria-label={data.turnsLabel}>
-        <Heading props={{ content: data.turnsLabel, level: 2 }} />
+        <Heading level={2}>{data.turnsLabel}</Heading>
         <ol className={mockInterviewTranscriptListClassName}>
-            {data.turns.length === 0 ? <li className={mockInterviewTranscriptItemClassName}><Text props={{ content: data.turnsEmptyLabel, size: "sm", tone: "muted" }} /></li> : data.turns.map((turn) => <li className={mockInterviewTranscriptItemClassName} data-role={turn.role} key={turn.id}><Text props={{ content: turn.label, size: "xs", tone: "muted", weight: "semibold" }} /><Text props={{ content: turn.content, size: "sm" }} /></li>)}
+            {data.turns.length === 0 ? <li className={mockInterviewTranscriptItemClassName}><Text size={"sm"} tone={"muted"}>{data.turnsEmptyLabel}</Text></li> : data.turns.map((turn) => <li className={mockInterviewTranscriptItemClassName} data-role={turn.role} key={turn.id}><Text size={"xs"} tone={"muted"} weight={"semibold"}>{turn.label}</Text><Text size={"sm"}>{turn.content}</Text></li>)}
         </ol>
     </aside>
 
@@ -114,11 +116,11 @@ export const CourseMockInterviewSessionBlockBase = (props: CourseMockInterviewSe
         <main className={mockInterviewRoomClassName} aria-label={data.title}><ChatWorkspace className={mockInterviewRoomClassName} label={data.title} header={header} conversation={conversation} conversationLabel={data.currentQuestionLabel} composer={composer} rail={transcript} railLabel={data.turnsLabel} railOpenLabel={data.transcriptOpenLabel} railCloseLabel={data.transcriptCloseLabel} railWidth="standard" isRailOpen={data.isTranscriptOpen} onRailOpenChange={(isOpen) => props.on?.setTranscriptOpen?.(isOpen)} /></main>
         <ModalBranch isOpen={data.finishConfirmationOpen || data.abandonConfirmationOpen} onDismiss={props.on?.dismissConfirmation ?? (() => undefined)}>
             <section className={mockInterviewConfirmationClassName}>
-                <Heading props={{ content: data.finishConfirmationOpen ? data.finishConfirmationTitle : data.abandonConfirmationTitle, level: 2 }} />
-                <Text props={{ content: data.finishConfirmationOpen ? data.finishConfirmationDescription : data.abandonConfirmationDescription }} />
+                <Heading level={2}>{data.finishConfirmationOpen ? data.finishConfirmationTitle : data.abandonConfirmationTitle}</Heading>
+                <Text>{data.finishConfirmationOpen ? data.finishConfirmationDescription : data.abandonConfirmationDescription}</Text>
                 <div className={mockInterviewConfirmationActionsClassName}>
-                    <Button props={{ label: data.cancelLabel, variant: "outline" }} on={{ press: props.on?.dismissConfirmation }} />
-                    <Button props={{ label: data.finishConfirmationOpen ? data.confirmLabel : data.abandonLabel, variant: "primary" }} on={{ press: data.finishConfirmationOpen ? props.on?.confirmFinish : props.on?.confirmAbandon }} />
+                    <Button variant="outline" onPress={props.on?.dismissConfirmation}>{data.cancelLabel}</Button>
+                    <Button variant="primary" onPress={data.finishConfirmationOpen ? props.on?.confirmFinish : props.on?.confirmAbandon}>{data.finishConfirmationOpen ? data.confirmLabel : data.abandonLabel}</Button>
                 </div>
             </section>
         </ModalBranch>

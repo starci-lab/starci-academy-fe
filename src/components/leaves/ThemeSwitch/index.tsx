@@ -1,5 +1,6 @@
 import { Switch } from "@heroui/react"
-import { Icon } from "@/components/leaves/Icon"
+import { Icon } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
 
 /** Current appearance and accessible copy for the navbar switch. */
 export type ThemeSwitchData = {
@@ -30,7 +31,7 @@ export const ThemeSwitch = (props: ThemeSwitchProps) => {
                     <Switch.Control>
                         <Switch.Thumb>
                             <Switch.Icon>
-                                <Icon props={{ name: isSelected ? "dark" : "light", role: "leading" }} />
+                                <Icon source={iconSourceFor(isSelected ? "dark" : "light", "leading")} role={"leading"} />
                             </Switch.Icon>
                         </Switch.Thumb>
                     </Switch.Control>

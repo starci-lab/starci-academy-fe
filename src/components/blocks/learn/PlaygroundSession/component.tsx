@@ -1,10 +1,11 @@
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
+import { SurfaceCard } from "@starci/grammar/common"
 import { Article } from "@/components/branches/Article"
-import { Button } from "@/components/leaves/Button"
-import { Heading } from "@/components/leaves/Heading"
-import { Icon } from "@/components/leaves/Icon"
-import { Progress } from "@/components/leaves/Progress"
-import { Text } from "@/components/leaves/Text"
+import { Button } from "@starci/grammar/common"
+import { Heading } from "@starci/grammar/common"
+import { Icon } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { Progress } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import { Textarea } from "@/components/leaves/Textarea"
 import type { PlaygroundStep } from "@/modules/api/graphql/queries/query-playground"
 import {
@@ -95,13 +96,13 @@ export const PlaygroundSessionBase = (props: PlaygroundSessionProps) => {
     const connectionIcon = sessionState === "live" || sessionState === "completed" ? "complete" : sessionState === "recovery-failed" ? "incomplete" : "pending"
 
     return <section className={playgroundSessionClassName}>
-        <SurfaceCard><header className={playgroundIdentityClassName}>
+        <SurfaceCard composition="joined"><header className={playgroundIdentityClassName}>
             <div className={playgroundIdentityTopClassName}>
                 <div className={playgroundIdentityCopyClassName}>
-                    <div className={playgroundIdentityIconClassName}><Icon props={{ name: "playground", role: "heading" }} /></div>
+                    <div className={playgroundIdentityIconClassName}><Icon source={iconSourceFor("playground", "heading")} role={"heading"} /></div>
                     <div>
-                        {props.props.currentStepLabel === undefined ? null : <Text props={{ content: props.props.currentStepLabel, size: "xs", tone: "muted", weight: "semibold" }} />}
-                        <Heading props={{ content: props.props.title, level: 1 }} />
+                        {props.props.currentStepLabel === undefined ? null : <Text size={"xs"} tone={"muted"} weight={"semibold"}>{props.props.currentStepLabel}</Text>}
+                        <Heading level={1}>{props.props.title}</Heading>
                     </div>
                 </div>
                 <div className={playgroundConnectionStateClassName(
@@ -111,39 +112,39 @@ export const PlaygroundSessionBase = (props: PlaygroundSessionProps) => {
                             ? "problem"
                             : "neutral",
                 )}>
-                    <Icon props={{ name: connectionIcon, role: "chip" }} />
-                    <Text props={{ content: props.props.connectionText, size: "xs", weight: "semibold", live: "polite" }} />
+                    <Icon source={iconSourceFor(connectionIcon, "chip")} role={"chip"} />
+                    <Text size={"xs"} weight={"semibold"} live={"polite"}>{props.props.connectionText}</Text>
                 </div>
             </div>
             <div className={playgroundProgressClassName}>
                 <div className={playgroundProgressCopyClassName}>
-                    <Text props={{ content: props.props.progressLabel ?? props.props.title, size: "xs", tone: "muted", weight: "semibold" }} />
-                    <Text props={{ content: progressText, size: "xs", weight: "semibold" }} />
+                    <Text size={"xs"} tone={"muted"} weight={"semibold"}>{props.props.progressLabel ?? props.props.title}</Text>
+                    <Text size={"xs"} weight={"semibold"}>{progressText}</Text>
                 </div>
-                <Progress props={{ label: props.props.progressLabel ?? props.props.title, value: progressValue }} />
+                <Progress label={props.props.progressLabel ?? props.props.title} value={progressValue} />
             </div>
         </header></SurfaceCard>
 
-        {settled ? <SurfaceCard props={{ measure: "form" }}><div className={playgroundSettledClassName}>
+        {settled ? <SurfaceCard measure={"form"} composition="joined"><div className={playgroundSettledClassName}>
             <div className={sessionState === "completed" ? playgroundSettledIconClassName : playgroundSettledProblemIconClassName}>
-                <Icon props={{ name: sessionState === "completed" ? "complete" : "incomplete", role: "heading" }} />
+                <Icon source={iconSourceFor(sessionState === "completed" ? "complete" : "incomplete", "heading")} role={"heading"} />
             </div>
             <div>
-                <Heading props={{ content: sessionState === "completed" ? props.props.completedTitle : sessionState === "recovery-failed" ? props.props.recoveryFailedTitle ?? props.props.failedText : props.props.failedText, level: 2 }} />
+                <Heading level={2}>{sessionState === "completed" ? props.props.completedTitle : sessionState === "recovery-failed" ? props.props.recoveryFailedTitle ?? props.props.failedText : props.props.failedText}</Heading>
                 {sessionState === "completed"
-                    ? <Text props={{ content: props.props.completedText, size: "sm", tone: "muted" }} />
+                    ? <Text size={"sm"} tone={"muted"}>{props.props.completedText}</Text>
                     : sessionState === "recovery-failed" && props.props.recoveryFailedText !== undefined
-                        ? <Text props={{ content: props.props.recoveryFailedText, size: "sm", tone: "muted" }} />
+                        ? <Text size={"sm"} tone={"muted"}>{props.props.recoveryFailedText}</Text>
                         : null}
             </div>
             <div className={playgroundSettledActionsClassName}>
                 {sessionState === "completed"
-                    ? <Button props={{ label: props.props.exitLabel ?? props.props.leaveLabel, variant: "primary", icon: "back" }} on={{ press: props.on.exit ?? props.on.leave }} />
-                    : <Button props={{ label: props.props.retryLabel, variant: "primary", icon: "retry" }} on={{ press: props.on.retry }} />}
-                <Button props={{ label: props.props.leaveLabel, variant: "secondary", icon: "back" }} on={{ press: props.on.leave }} />
+                    ? <Button variant="primary" onPress={props.on.exit ?? props.on.leave}>{props.props.exitLabel ?? props.props.leaveLabel}</Button>
+                    : <Button variant="primary" onPress={props.on.retry}>{props.props.retryLabel}</Button>}
+                <Button variant="secondary" onPress={props.on.leave}>{props.props.leaveLabel}</Button>
             </div>
         </div></SurfaceCard> : <>
-            <SurfaceCard><nav aria-label={props.props.stepsTitle ?? props.props.stepLabel} className={playgroundStepRailClassName}>
+            <SurfaceCard composition="joined"><nav aria-label={props.props.stepsTitle ?? props.props.stepLabel} className={playgroundStepRailClassName}>
                 {props.props.steps.map((step, index) => {
                     const passed = props.props.passedStepIndexes.includes(index)
                     const available = passed || index <= Math.max(0, props.props.passedStepIndexes.length)
@@ -159,46 +160,46 @@ export const PlaygroundSessionBase = (props: PlaygroundSessionProps) => {
                     >
                         <span className={playgroundStepNumberClassName}>{String(index + 1).padStart(2, "0")}</span>
                         <span className={playgroundStepCopyClassName}>
-                            <Text props={{ content: passed ? props.props.passedLabel : available ? props.props.stepLabel : props.props.lockedLabel ?? props.props.stepLabel, size: "xs", tone: "muted", weight: "semibold" }} />
-                            <Text props={{ content: step.title, size: "sm", weight: currentStep ? "semibold" : undefined }} />
+                            <Text size={"xs"} tone={"muted"} weight={"semibold"}>{passed ? props.props.passedLabel : available ? props.props.stepLabel : props.props.lockedLabel ?? props.props.stepLabel}</Text>
+                            <Text size={"sm"} weight={currentStep ? "semibold" : undefined}>{step.title}</Text>
                         </span>
                     </button>
                 })}
             </nav></SurfaceCard>
 
             <div className={playgroundSplitClassName}>
-                <SurfaceCard><section className={playgroundTaskClassName}>
+                <SurfaceCard composition="joined"><section className={playgroundTaskClassName}>
                     {current === undefined ? null : <><header className={playgroundTaskHeaderClassName}>
-                        <Text props={{ content: `${props.props.stepLabel} ${props.props.selectedStepIndex + 1}`, size: "xs", tone: "muted", weight: "semibold" }} />
-                        <Heading props={{ content: current.title, level: 2 }} />
+                        <Text size={"xs"} tone={"muted"} weight={"semibold"}>{`${props.props.stepLabel} ${props.props.selectedStepIndex + 1}`}</Text>
+                        <Heading level={2}>{current.title}</Heading>
                     </header>
                     <Article props={{ body: current.body }} /></>}
-                    {actionHint === undefined ? null : <div className={playgroundHintClassName}><Text props={{ content: actionHint, size: "sm" }} /></div>}
+                    {actionHint === undefined ? null : <div className={playgroundHintClassName}><Text size={"sm"}>{actionHint}</Text></div>}
                     <div className={playgroundWorkbenchClassName}>
-                        <Heading props={{ content: scratchpadTitle, level: 3 }} />
-                        {props.props.scratchpadDescription === undefined ? null : <Text props={{ content: props.props.scratchpadDescription, size: "xs", tone: "muted" }} />}
+                        <Heading level={3}>{scratchpadTitle}</Heading>
+                        {props.props.scratchpadDescription === undefined ? null : <Text size={"xs"} tone={"muted"}>{props.props.scratchpadDescription}</Text>}
                         <Textarea key={current?.id ?? "empty"} props={{ id: "playground-command-scratchpad", name: "playground-command-scratchpad", label: scratchpadTitle, defaultValue: commandHint, rows: 6, disabled: sessionState !== "live" }} />
                         <div className={playgroundVerifyActionClassName}>
-                            {sessionState !== "live" || current === undefined || props.props.passedStepIndexes.includes(props.props.selectedStepIndex) ? null : <Button props={{ label: props.props.isVerifying ? props.props.verifyingLabel ?? props.props.submitLabel : props.props.submitLabel, variant: "primary", icon: "complete", disabled: props.props.isVerifying, isPending: props.props.isVerifying }} on={{ press: props.on.submit }} />}
-                            <Button props={{ label: props.props.leaveLabel, variant: "ghost", size: "sm", icon: "back" }} on={{ press: props.on.leave }} />
+                            {sessionState !== "live" || current === undefined || props.props.passedStepIndexes.includes(props.props.selectedStepIndex) ? null : <Button variant="primary" isDisabled={props.props.isVerifying} isPending={props.props.isVerifying} onPress={props.on.submit}>{props.props.isVerifying ? props.props.verifyingLabel ?? props.props.submitLabel : props.props.submitLabel}</Button>}
+                            <Button variant="ghost" size="sm" onPress={props.on.leave}>{props.props.leaveLabel}</Button>
                         </div>
                     </div>
                 </section></SurfaceCard>
 
-                <SurfaceCard><aside className={playgroundActivityClassName}>
+                <SurfaceCard composition="joined"><aside className={playgroundActivityClassName}>
                     <div className={playgroundActivityHeaderClassName}>
-                        {props.props.outputTitle === undefined ? null : <Heading props={{ content: props.props.outputTitle, level: 2 }} />}
-                        {sessionState === "reconnecting" && props.props.reconnectText !== undefined ? <Text props={{ content: props.props.reconnectText, size: "sm", tone: "muted" }} /> : null}
-                        {sessionState === "reconnecting" ? <Button props={{ label: props.props.retryLabel, variant: "secondary", size: "sm", icon: "retry" }} on={{ press: props.on.retry }} /> : null}
+                        {props.props.outputTitle === undefined ? null : <Heading level={2}>{props.props.outputTitle}</Heading>}
+                        {sessionState === "reconnecting" && props.props.reconnectText !== undefined ? <Text size={"sm"} tone={"muted"}>{props.props.reconnectText}</Text> : null}
+                        {sessionState === "reconnecting" ? <Button variant="secondary" size="sm" onPress={props.on.retry}>{props.props.retryLabel}</Button> : null}
                     </div>
                     <div className={playgroundActivityListClassName}>
                         {props.props.passedStepIndexes.length === 0
-                            ? props.props.outputWaiting === undefined ? null : <Text props={{ content: props.props.outputWaiting, size: "sm", tone: "muted" }} />
+                            ? props.props.outputWaiting === undefined ? null : <Text size={"sm"} tone={"muted"}>{props.props.outputWaiting}</Text>
                             : props.props.passedStepIndexes.map((index) => <div className={playgroundActivityRowClassName} key={index}>
-                                <Icon props={{ name: "complete", role: "leading" }} />
+                                <Icon source={iconSourceFor("complete", "leading")} role={"leading"} />
                                 <div className={playgroundStepCopyClassName}>
-                                    <Text props={{ content: props.props.steps[index]?.title ?? `${props.props.stepLabel} ${index + 1}`, size: "sm", weight: "semibold" }} />
-                                    <Text props={{ content: props.props.passedLabel, size: "xs", tone: "muted" }} />
+                                    <Text size={"sm"} weight={"semibold"}>{props.props.steps[index]?.title ?? `${props.props.stepLabel} ${index + 1}`}</Text>
+                                    <Text size={"xs"} tone={"muted"}>{props.props.passedLabel}</Text>
                                 </div>
                             </div>)}
                     </div>

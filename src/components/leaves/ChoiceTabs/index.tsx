@@ -1,7 +1,8 @@
 "use client"
 
 import { Tabs } from "@heroui/react"
-import { Icon, type IconName } from "@/components/leaves/Icon"
+import { Icon } from "@starci/grammar/common"
+import { iconSourceFor, type IconName } from "@/components/leaves/Icon"
 import { choiceTabContentClassName, getChoiceTabClassName, getChoiceTabsListClassName } from "./classNames"
 
 /** One peer choice, optionally led by a glyph naming the shape it selects. */
@@ -83,7 +84,7 @@ export const ChoiceTabs = (props: ChoiceTabsProps) => {
                           * first letter.
                           */}
                             <span className={choiceTabContentClassName}>
-                                {tab.icon === undefined ? null : <Icon props={{ name: tab.icon, role: "leading" }} />}
+                                {tab.icon === undefined ? null : <Icon source={iconSourceFor(tab.icon, "leading")} role={"leading"} />}
                                 {tab.label}
                             </span>
                         </Tabs.Tab>

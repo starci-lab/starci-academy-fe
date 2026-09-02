@@ -70,6 +70,27 @@ export const STARCI_CORE_DNA = Object.freeze({
     }),
 } as const)
 
+/** Canonical 4px spacing scale shared by Core components and host composition. */
+export const STARCI_CORE_SPACING_SCALE = Object.freeze({
+    "0": "0rem",
+    "0.5": "0.125rem",
+    "1": "0.25rem",
+    "1.5": "0.375rem",
+    "2": "0.5rem",
+    "2.5": "0.625rem",
+    "3": "0.75rem",
+    "4": "1rem",
+    "5": "1.25rem",
+    "6": "1.5rem",
+    "8": "2rem",
+    "10": "2.5rem",
+    "12": "3rem",
+    "16": "4rem",
+} as const)
+
+export type StarCiCoreSpacingStep = keyof typeof STARCI_CORE_SPACING_SCALE
+export type StarCiCoreSpacingValue = (typeof STARCI_CORE_SPACING_SCALE)[StarCiCoreSpacingStep]
+
 /** CSS custom-property contract for adapting Core without renaming its anatomy. */
 export const STARCI_CORE_TOKEN_NAMES = Object.freeze({
     accent: "--starci-core-accent",
@@ -96,6 +117,9 @@ export const STARCI_CORE_TOKEN_NAMES = Object.freeze({
     controlRadius: "--starci-core-control-radius",
     pillRadius: "--starci-core-pill-radius",
     pageInset: "--starci-core-page-inset",
+    inlineGap: "--starci-core-inline-gap",
+    rowGap: "--starci-core-row-gap",
+    sectionGap: "--starci-core-section-gap",
     regionGap: "--starci-core-region-gap",
     elevation: "--starci-core-surface-shadow",
     motionDuration: "--starci-core-motion-duration",
@@ -131,6 +155,9 @@ export const STARCI_CORE_TOKEN_DEFAULTS = Object.freeze({
     "--starci-core-control-radius": STARCI_CORE_DNA.geometry.controlRadius,
     "--starci-core-pill-radius": STARCI_CORE_DNA.geometry.pillRadius,
     "--starci-core-page-inset": STARCI_CORE_DNA.rhythm.pageInset,
+    "--starci-core-inline-gap": STARCI_CORE_DNA.rhythm.inlineGap,
+    "--starci-core-row-gap": STARCI_CORE_DNA.rhythm.rowGap,
+    "--starci-core-section-gap": STARCI_CORE_DNA.rhythm.sectionGap,
     "--starci-core-region-gap": STARCI_CORE_DNA.rhythm.regionGap,
     "--starci-core-surface-shadow": STARCI_CORE_DNA.elevation.surface,
     "--starci-core-motion-duration": STARCI_CORE_DNA.motion.duration,

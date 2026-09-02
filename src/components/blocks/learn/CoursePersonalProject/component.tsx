@@ -1,20 +1,20 @@
 import Image from "next/image"
 import NextLink from "next/link"
-import { PrimaryRailLayout, Rail, SectionHeader } from "@starci/grammar/core"
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
+import { PrimaryRailLayout, Rail, SectionHeader } from "@starci/grammar/common"
+import { SurfaceCard } from "@starci/grammar/common"
+import { SurfaceListCard } from "@starci/grammar/common"
 import { PressableSurface } from "@/components/branches/PressableSurface"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { EmptyNotice } from "@starci/grammar/common"
 import { EvidenceRow } from "@/components/composites/EvidenceRow"
-import { Badge } from "@/components/leaves/Badge"
+import { Badge } from "@starci/grammar/common"
 import { Breadcrumbs } from "@/components/leaves/Breadcrumbs"
-import { Button } from "@/components/leaves/Button"
-import { Heading } from "@/components/leaves/Heading"
-import { Icon } from "@/components/leaves/Icon"
-import { Link } from "@/components/leaves/Link"
-import { Progress } from "@/components/leaves/Progress"
+import { Button } from "@starci/grammar/common"
+import { Heading } from "@starci/grammar/common"
+import { Icon } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { Progress } from "@starci/grammar/common"
 import { SearchBox } from "@/components/leaves/SearchBox"
-import { Text } from "@/components/leaves/Text"
+import { Text } from "@starci/grammar/common"
 import {
     coursePersonalProjectClassName,
     projectBodyClassName,
@@ -45,6 +45,8 @@ import {
     projectSidebarClassName,
     projectStackClassName,
 } from "./classNames"
+import { Link } from "@starci/grammar/common"
+
 
 /** One milestone summary in the whole-project roadmap. */
 export type CoursePersonalProjectMilestoneRow = {
@@ -136,18 +138,18 @@ type ProjectMilestoneRowInput = {
 
 const ProjectMilestoneRow = (input: ProjectMilestoneRowInput) => {
     const marker = input.milestone.tone === "success"
-        ? <span className={projectMilestoneMarkerCompleteClassName}><Icon props={{ name: "complete", role: "chip" }} /></span>
+        ? <span className={projectMilestoneMarkerCompleteClassName}><Icon source={iconSourceFor("complete", "chip")} role={"chip"} /></span>
         : <span className={projectMilestoneMarkerClassName}>{input.loading ? "" : String(input.milestone.position ?? input.position).padStart(2, "0")}</span>
     const content = <div className={projectMilestoneRowClassName} data-state={input.milestone.tone ?? "neutral"}>
         <div className={projectMilestoneIdentityClassName}>
             {marker}
             <div className={projectMilestoneTextClassName}>
-                <Text props={{ content: input.milestone.title, size: "sm", weight: "semibold" }} isLoading={input.loading} />
-                <Text props={{ content: input.milestone.status, size: "sm" }} isLoading={input.loading} />
+                <Text size={"sm"} weight={"semibold"} isSkeleton={input.loading}>{input.milestone.title}</Text>
+                <Text size={"sm"} isSkeleton={input.loading}>{input.milestone.status}</Text>
             </div>
         </div>
-        <Badge props={{ content: input.milestone.progress, tone: input.milestone.tone }} isLoading={input.loading} />
-        {input.milestone.targetTaskId === undefined ? null : <Icon props={{ name: "disclosure", role: "chip" }} />}
+        <Badge tone={input.milestone.tone} isSkeleton={input.loading}>{input.milestone.progress}</Badge>
+        {input.milestone.targetTaskId === undefined ? null : <Icon source={iconSourceFor("disclosure", "chip")} role={"chip"} />}
     </div>
 
     return input.milestone.targetTaskId === undefined
@@ -162,7 +164,7 @@ export const CoursePersonalProjectBase = (props: CoursePersonalProjectProps) => 
     const repository = props.data.repository
     const nextTask = props.data.nextTask
     const nextTaskAction = loading
-        ? <Button props={{ label: props.data.continueLabel, variant: "primary", size: "md", icon: "next", iconPlacement: "trailing" }} isLoading />
+        ? <Button variant={"primary"} size={"md"} isSkeleton endContent={"next" === "next" && "trailing" === "trailing" ? <Icon source={iconSourceFor("next", "chip")} role="chip" /> : undefined}>{props.data.continueLabel}</Button>
         : nextTask === undefined
             ? null
             : <NextLink href={nextTask.href} className={projectPrimaryActionLinkClassName} aria-label={props.data.continueLabel}>
@@ -181,7 +183,7 @@ export const CoursePersonalProjectBase = (props: CoursePersonalProjectProps) => 
             /> : null}
         </div>
 
-        {props.data.notice === undefined ? null : <EmptyNotice props={{ message: props.data.notice, actionLabel: props.state === "failed" ? props.data.retryLabel : undefined }} on={{ act: props.on?.retry }} />}
+        {props.data.notice === undefined ? null : <EmptyNotice message={props.data.notice} actionLabel={props.state === "failed" ? props.data.retryLabel : undefined} onAction={({ act: props.on?.retry })?.act} />}
 
         {props.state === "empty" || props.state === "failed" ? null : <>
             <section className={projectHeroClassName} aria-labelledby="personal-project-heading">
@@ -196,12 +198,12 @@ export const CoursePersonalProjectBase = (props: CoursePersonalProjectProps) => 
                         composition="context-intro"
                     />
                     <div className={projectHeroTaskClassName}>
-                        {props.data.nextTask === undefined ? null : <Text props={{ content: props.data.nextTask.milestone, size: "sm", weight: "semibold" }} isLoading={loading} />}
-                        {props.data.nextTask === undefined && !loading ? null : <Heading props={{ content: props.data.nextTask?.title, level: 2 }} isLoading={loading} />}
+                        {props.data.nextTask === undefined ? null : <Text size={"sm"} weight={"semibold"} isSkeleton={loading}>{props.data.nextTask.milestone}</Text>}
+                        {props.data.nextTask === undefined && !loading ? null : <Heading level={2} isSkeleton={loading}>{props.data.nextTask?.title}</Heading>}
                         {props.data.nextTask === undefined
-                            ? <Text props={{ content: props.data.nextTaskFallbackLabel, size: "sm", tone: "muted" }} isLoading={loading} />
+                            ? <Text size={"sm"} tone={"muted"} isSkeleton={loading}>{props.data.nextTaskFallbackLabel}</Text>
                             : <div className={projectHeroTaskMetaClassName}>
-                                <Text props={{ content: props.data.nextTask.evidence, size: "sm" }} isLoading={loading} />
+                                <Text size={"sm"} isSkeleton={loading}>{props.data.nextTask.evidence}</Text>
                             </div>}
                         {nextTaskAction}
                     </div>
@@ -225,18 +227,15 @@ export const CoursePersonalProjectBase = (props: CoursePersonalProjectProps) => 
                 primary={<div className={projectStackClassName}>
                     <div className={projectRoadmapClassName}>
                         <div className={projectRoadmapHeaderClassName}>
-                            <Heading props={{ content: props.data.roadmapLabel, level: 2 }} isLoading={loading} />
+                            <Heading level={2} isSkeleton={loading}>{props.data.roadmapLabel}</Heading>
                             <div className={projectRoadmapControlsClassName}>
-                                <Text props={{ content: loading ? props.data.roadmapLoadingLabel : props.data.roadmapCountLabel, size: "sm", tone: loading ? "muted" : undefined }} />
+                                <Text size={"sm"} tone={loading ? "muted" : undefined}>{loading ? props.data.roadmapLoadingLabel : props.data.roadmapCountLabel}</Text>
                                 {loading ? null : <SearchBox props={{ placeholder: props.data.roadmapSearchLabel, label: props.data.roadmapSearchLabel, clearLabel: props.data.roadmapSearchClearLabel }} on={{ search: props.on?.searchRoadmap }} />}
                             </div>
                         </div>
-                        <SurfaceListCard
-                            props={{ label: props.data.roadmapLabel, isLabelHidden: true, isScrollable: true }}
-                            isLoading={loading}
-                        >
+                        <SurfaceListCard label={props.data.roadmapLabel} labelHidden={true} isScrollable={true} isLoading={loading}>
                             {milestones.length === 0 && !loading
-                                ? <EmptyNotice props={{ message: props.data.roadmapEmptyLabel }} />
+                                ? <EmptyNotice message={props.data.roadmapEmptyLabel} />
                                 : <ol className={projectRoadmapRowsClassName} data-project-roadmap="true">{milestones.map((milestone, index) => <li key={milestone.id}><ProjectMilestoneRow
                                     milestone={milestone}
                                     position={index + 1}
@@ -248,24 +247,24 @@ export const CoursePersonalProjectBase = (props: CoursePersonalProjectProps) => 
                 </div>}
                 rail={<Rail label={props.data.projectRailLabel} mode="sticky" inset="content" isLabelHidden>
                     <div className={projectSidebarClassName}>
-                        <SurfaceCard props={{ label: props.data.completionLabel, fact: props.data.completionPercentLabel }} isLoading={loading}>
+                        <SurfaceCard label={props.data.completionLabel} fact={props.data.completionPercentLabel} composition="joined" state={loading ? "pending" : "neutral"}>
                             <div className={projectNextTaskClassName}>
-                                <Progress props={{ value: props.data.completionPercent, label: props.data.completionLabel }} isLoading={loading} />
+                                <Progress label={props.data.completionLabel} value={props.data.completionPercent} isSkeleton={loading} />
                                 <div className={projectMetricGridClassName}>
                                     {props.data.completionFacts.map((fact) => <div key={fact.label} className={projectMetricItemClassName}>
-                                        <Text props={{ content: fact.label, size: "xs", tone: "muted" }} isLoading={loading} />
-                                        <Text props={{ content: fact.value, size: "md", weight: "semibold" }} isLoading={loading} />
+                                        <Text size={"xs"} tone={"muted"} isSkeleton={loading}>{fact.label}</Text>
+                                        <Text size={"md"} weight={"semibold"} isSkeleton={loading}>{fact.value}</Text>
                                     </div>)}
                                 </div>
                             </div>
                         </SurfaceCard>
 
-                        <SurfaceCard props={{ label: repository.label }} isLoading={repository.state === "pending"}>
+                        <SurfaceCard label={repository.label} composition="joined" state={repository.state === "pending" ? "pending" : "neutral"}>
                             <div className={projectRepositoryClassName}>
                                 {repository.state === "failed"
-                                    ? <EmptyNotice props={{ message: repository.failedLabel, actionLabel: repository.retryLabel }} on={{ act: props.on?.retryRepository }} />
+                                    ? <EmptyNotice message={repository.failedLabel} actionLabel={repository.retryLabel} onAction={({ act: props.on?.retryRepository })?.act} />
                                     : <>
-                                        <Text props={{ content: repository.url === undefined ? repository.emptyLabel : repository.connectedLabel, size: "sm", weight: repository.url === undefined ? "normal" : "medium" }} isLoading={repository.state === "pending"} />
+                                        <Text size={"sm"} weight={repository.url === undefined ? "normal" : "medium"} isSkeleton={repository.state === "pending"}>{repository.url === undefined ? repository.emptyLabel : repository.connectedLabel}</Text>
                                         {repository.branch === undefined ? null : <EvidenceRow props={{ title: repository.branchLabel, fact: repository.branch }} />}
                                         {repository.url === undefined
                                             ? repository.state === "ready" && props.data.nextTask !== undefined
@@ -273,7 +272,7 @@ export const CoursePersonalProjectBase = (props: CoursePersonalProjectProps) => 
                                                     <span>{repository.continueLabel}</span><span className={projectActionGlyphClassName} aria-hidden="true">→</span>
                                                 </NextLink>
                                                 : null
-                                            : <Link props={{ label: repository.openLabel, externalHref: repository.url, icon: "github" }} />}
+                                            : <Link href={repository.url} startContent={<Icon source={iconSourceFor("github", "chip")} role="chip" />}>{repository.openLabel}</Link>}
                                     </>}
                             </div>
                         </SurfaceCard>

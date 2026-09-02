@@ -1,5 +1,6 @@
 import { Button, Kbd } from "@heroui/react"
-import { Icon } from "@/components/leaves/Icon"
+import { Icon } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
 import { pressableInputLikeClassName, pressableInputLikeContentClassName, pressableInputLikePlaceholderClassName } from "./classNames"
 
 /** Copy shown by the navbar's input-looking press target. */
@@ -32,7 +33,7 @@ export const PressableInputLike = (props: PressableInputLikeProps) => {
             className={pressableInputLikeClassName}
         >
             <span className={pressableInputLikeContentClassName}>
-                <Icon props={{ name: "search", role: "leading" }} />
+                <Icon source={iconSourceFor("search", "leading")} role={"leading"} />
                 <span className={pressableInputLikePlaceholderClassName}>{data.placeholder}</span>
             </span>
             {data.shortcut === undefined ? null : <Kbd>{data.shortcut}</Kbd>}

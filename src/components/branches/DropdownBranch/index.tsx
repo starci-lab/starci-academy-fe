@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
 import { Dropdown, Header } from "@heroui/react"
-import { Icon, type IconName } from "@/components/leaves/Icon"
+import { Icon } from "@starci/grammar/common"
+import { iconSourceFor, type IconName } from "@/components/leaves/Icon"
 import { dropdownDangerItemClassName, dropdownHeaderClassName, dropdownTriggerClassName } from "./classNames"
 
 /** Placement choices exposed without leaking the vendor vocabulary beyond the branch. */
@@ -82,7 +83,7 @@ export const DropdownBranch = <const I extends string>(props: DropdownBranchProp
                                 onAction={() => props.on?.action?.(item.id)}
                             >
                                 {item.showsIndicator === true ? <Dropdown.ItemIndicator /> : null}
-                                {item.icon === undefined ? null : <Icon props={{ name: item.icon, role: "leading" }} />}
+                                {item.icon === undefined ? null : <Icon source={iconSourceFor(item.icon, "leading")} role={"leading"} />}
                                 {item.label}
                             </Dropdown.Item>
                         ))}

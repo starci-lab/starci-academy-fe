@@ -1,16 +1,20 @@
 "use client"
 import { useState } from "react"
 import { ScrollViewport } from "@/components/branches/ScrollViewport"
-import { Badge } from "@/components/leaves/Badge"
-import { Button } from "@/components/leaves/Button"
+import { Badge } from "@starci/grammar/common"
+import { Button } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon } from "@starci/grammar/common"
+
 import { ChoiceTabs } from "@/components/leaves/ChoiceTabs"
 import { CoverImage } from "@/components/leaves/CoverImage"
 import { PricingPhaseComparisonCard } from "@/components/composites/PricingPhaseComparisonCard"
-import { Text } from "@/components/leaves/Text"
-import { TextLink } from "@/components/leaves/TextLink"
+import { Text } from "@starci/grammar/common"
 import { CoursePriceOverlay } from "@/components/overlays/courses/CoursePriceOverlay"
 import { CourseMobileEnrollBarBase } from "../CourseMobileEnrollBar/component"
 import { pricingRailActionsClassName, pricingRailClassName, pricingRailIntentClassName, pricingRailIntentCopyClassName, pricingRailPriceClassName, pricingRailPriceEvidenceClassName, pricingRailPriceNoteClassName, pricingRailSurfaceStackClassName } from "./classNames"
+import { TextAction } from "@starci/grammar/common"
+
 
 /** One phase in the pricing ladder. */
 export type PricingPhase = { readonly id: string; readonly name: string; readonly value: string; readonly isActive?: boolean }
@@ -38,15 +42,15 @@ export const CoursePricingRailBase = (props: CoursePricingRailProps) => {
         <div className={pricingRailSurfaceStackClassName}>
             <ScrollViewport boundary="pricing-rail"><div className={pricingRailClassName}>
                 <CoverImage props={{ src: data.coverUrl ?? null, alt: data.title, ratio: "wide" }} />
-                {phases.find((phase) => phase.isActive) && <Badge props={{ content: phases.find((phase) => phase.isActive)?.name, tone: "accent" }} />}
+                {phases.find((phase) => phase.isActive) && <Badge tone={"accent"}>{phases.find((phase) => phase.isActive)?.name}</Badge>}
                 <div className={pricingRailPriceEvidenceClassName}>
-                    <div className={pricingRailPriceClassName}><Text props={{ content: data.price, size: "sm", weight: "semibold" }} isLoading={pending} />{data.originalPrice === undefined || pending ? null : <Text props={{ content: data.originalPrice, size: "xs", tone: "muted", isSuperseded: true }} />}{data.discountLabel === undefined || pending ? null : <Badge props={{ content: data.discountLabel, tone: "success" }} />}</div>
-                    {data.priceDetailLabel === undefined || pending ? null : <div className={pricingRailPriceNoteClassName}>{data.savingsLabel && <Text props={{ content: data.savingsLabel, size: "xs", tone: "muted" }} />}<TextLink props={{ label: data.priceDetailLabel, size: "xs" }} on={{ press: props.on?.openPriceDetail }} /></div>}
+                    <div className={pricingRailPriceClassName}><Text size={"sm"} weight={"semibold"} isSkeleton={pending}>{data.price}</Text>{data.originalPrice === undefined || pending ? null : <Text size={"xs"} tone={"muted"} isSuperseded={true}>{data.originalPrice}</Text>}{data.discountLabel === undefined || pending ? null : <Badge tone={"success"}>{data.discountLabel}</Badge>}</div>
+                    {data.priceDetailLabel === undefined || pending ? null : <div className={pricingRailPriceNoteClassName}>{data.savingsLabel && <Text size={"xs"} tone={"muted"}>{data.savingsLabel}</Text>}<TextAction size={"xs"} appearance="inline" onPress={props.on?.openPriceDetail}>{data.priceDetailLabel}</TextAction></div>}
                 </div>
                 {canTrial && <ChoiceTabs props={{ label: data.intent.intentTabsLabel, selectedKey: visible, variant: "primary", tabs: [{ id: "purchase", label: data.intent.purchaseModeLabel }, { id: "trial", label: data.intent.trialModeLabel }] }} on={{ select: (key) => { if (key === "purchase" || key === "trial") setIntent(key) } }} />}
-                {visible === "purchase" ? <div className={pricingRailIntentClassName}>{data.intent && <div className={pricingRailIntentCopyClassName}><Text props={{ content: data.intent.purchaseTitle, size: "sm", weight: "medium" }} /><Text props={{ content: data.intent.purchaseDescription, size: "sm" }} /></div>}<div className={pricingRailActionsClassName}><Button props={{ label: data.ctaLabel, variant: "primary", size: "md", icon: "next", iconPlacement: "trailing", isPending: props.state === "checking-out" }} on={{ press: props.on?.act }} />{data.cartLabel && <Button props={{ label: data.cartLabel, variant: "secondary", size: "md", isPending: props.state === "adding", disabled: data.isInCart }} on={{ press: props.on?.addToCart }} />}</div></div> : <div className={pricingRailIntentClassName}><div className={pricingRailIntentCopyClassName}><Text props={{ content: data.intent?.trialTitle ?? data.trialLabel, size: "sm", weight: "medium" }} />{data.intent && <Text props={{ content: data.intent.trialDescription, size: "sm" }} />}</div><Button props={{ label: data.trialLabel!, variant: "tertiary", size: "md", isPending: props.state === "trialing" }} on={{ press: props.on?.trial }} /></div>}
-                {data.scarcityLabel && <Badge props={{ content: data.scarcityLabel, tone: "warning" }} />}
-                {data.enrolmentLabel && <Text props={{ content: data.enrolmentLabel, size: "xs" }} />}
+                {visible === "purchase" ? <div className={pricingRailIntentClassName}>{data.intent && <div className={pricingRailIntentCopyClassName}><Text size={"sm"} weight={"medium"}>{data.intent.purchaseTitle}</Text><Text size={"sm"}>{data.intent.purchaseDescription}</Text></div>}<div className={pricingRailActionsClassName}><Button variant={"primary"} size={"md"} isPending={props.state === "checking-out"} onPress={({ press: props.on?.act })?.press} endContent={"next" === "next" && "trailing" === "trailing" ? <Icon source={iconSourceFor("next", "chip")} role="chip" /> : undefined}>{data.ctaLabel}</Button>{data.cartLabel && <Button variant="secondary" size="md" isDisabled={data.isInCart} isPending={props.state === "adding"} onPress={props.on?.addToCart}>{data.cartLabel}</Button>}</div></div> : <div className={pricingRailIntentClassName}><div className={pricingRailIntentCopyClassName}><Text size={"sm"} weight={"medium"}>{data.intent?.trialTitle ?? data.trialLabel}</Text>{data.intent && <Text size={"sm"}>{data.intent.trialDescription}</Text>}</div><Button variant="tertiary" size="md" isPending={props.state === "trialing"} onPress={props.on?.trial}>{data.trialLabel!}</Button></div>}
+                {data.scarcityLabel && <Badge tone={"warning"}>{data.scarcityLabel}</Badge>}
+                {data.enrolmentLabel && <Text size={"xs"}>{data.enrolmentLabel}</Text>}
             </div></ScrollViewport>
             {phases.length > 0 && <PricingPhaseComparisonCard props={{ label: data.intent?.phaseDisclosureLabel ?? data.title, phases }} />}
         </div>

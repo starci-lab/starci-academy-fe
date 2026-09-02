@@ -1,4 +1,4 @@
-import { Text } from "@/components/leaves/Text"
+import { Text } from "@starci/grammar/common"
 import { profileSegmentPieceClassName } from "./classNames"
 
 /** Resolved caption for one distribution segment. */
@@ -10,5 +10,5 @@ export type ProfileSegmentProps = { readonly props: ProfileSegmentData; readonly
 export const ProfileSegment = (props: ProfileSegmentProps) => {
     const data = props.props
     const isLoading = props.isLoading ?? false
-    return <div className={profileSegmentPieceClassName}><Text props={{ content: data.label, size: "xs", tone: "muted" }} isLoading={isLoading} /></div>
+    return <div className={profileSegmentPieceClassName}><Text size={"xs"} tone={"muted"} isSkeleton={isLoading}>{data.label}</Text></div>
 }

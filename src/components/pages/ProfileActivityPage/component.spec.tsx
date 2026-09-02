@@ -26,7 +26,7 @@ describe("ProfileActivityBase", () => {
         render(<ProfileActivityBase achievementState="ready" achievements={[]} feed={{ state: "platformEmpty", props: { label: "Activity", message: "No public activity yet.", actionLabel: "Browse courses", days: [] }, on: { resultAction: browseCourses } }} />)
 
         expect(screen.getAllByText("Activity")).toHaveLength(1)
-        expect(screen.getByText("Timeline status")).toBeInTheDocument()
+        expect(screen.queryByText("Timeline status")).toBeNull()
         expect(screen.getByText("Recent activity").previousSibling).toHaveTextContent("0")
         fireEvent.click(screen.getByRole("button", { name: "Browse courses" }))
         expect(browseCourses).toHaveBeenCalledOnce()

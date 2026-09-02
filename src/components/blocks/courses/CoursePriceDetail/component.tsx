@@ -1,6 +1,6 @@
-import { Heading } from "@/components/leaves/Heading"
+import { Heading } from "@starci/grammar/common"
 import { IconLabelFactRow } from "@/components/composites/IconLabelFactRow"
-import { Text } from "@/components/leaves/Text"
+import { Text } from "@starci/grammar/common"
 
 /**
  * BLOCK - `CoursePriceDetail`: why this course costs this learner this much.
@@ -71,11 +71,11 @@ export const CoursePriceDetailBase = (props: CoursePriceDetailProps) => {
     const lines = props.props.lines ?? []
 
     return <div>
-        <Heading props={{ content: props.props.title, level: 2 }} isLoading={isLoading} />
-        {props.state === "unavailable" ? <Text props={{ content: props.props.unavailableMessage, size: "sm", tone: "muted" }} /> : (
+        <Heading level={2} isSkeleton={isLoading}>{props.props.title}</Heading>
+        {props.state === "unavailable" ? <Text size={"sm"} tone={"muted"}>{props.props.unavailableMessage}</Text> : (
             <div>{lines.map((line) => <IconLabelFactRow key={line.id} props={{ icon: LINE_ICONS[line.id] ?? "cart", label: line.label, endText: line.value, recipe: "label-led" }} isLoading={isLoading} />)}</div>
         )}
-        {props.props.reason === undefined ? null : <Text props={{ content: props.props.reason, size: "sm", tone: "muted" }} isLoading={isLoading} />}
-        {props.props.forwardLook === undefined ? null : <Text props={{ content: props.props.forwardLook, size: "sm", tone: "muted" }} isLoading={isLoading} />}
+        {props.props.reason === undefined ? null : <Text size={"sm"} tone={"muted"} isSkeleton={isLoading}>{props.props.reason}</Text>}
+        {props.props.forwardLook === undefined ? null : <Text size={"sm"} tone={"muted"} isSkeleton={isLoading}>{props.props.forwardLook}</Text>}
     </div>
 }

@@ -1,8 +1,9 @@
 import Image from "next/image"
-import { DashboardSurfaceCard as SurfaceCard } from "@/components/blocks/dashboard/DashboardSurfaceCard"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
-import { Text } from "@/components/leaves/Text"
-import { Button } from "@/components/leaves/Button"
+import { SurfaceCard } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { EmptyNotice } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
+import { Button } from "@starci/grammar/common"
 import type { LabelledProgressRowData } from "@/components/composites/LabelledProgressRow"
 import {
     dailyQuestCardClassName,
@@ -10,7 +11,6 @@ import {
     dailyQuestHeroImageClassName,
     dailyQuestRewardBandClassName,
     dailyQuestSeparatorClassName,
-    dailyQuestSurfaceClassName,
     dailyQuestTaskCellClassName,
     dailyQuestTasksClassName,
 } from "./classNames"
@@ -22,36 +22,34 @@ export type DailyQuestBody = { readonly tasks: ReadonlyArray<LabelledProgressRow
 export type DailyQuestProps = { readonly state: "pending" | "empty" | "failed" | "open" | "claimable" | "claimed"; readonly props: DailyQuestFrame & Partial<DailyQuestBody> & { readonly message?: string; readonly retryLabel?: string; readonly claimLabel?: string; readonly claimedLine?: string }; readonly on?: { readonly retry?: () => void; readonly claim?: () => void } }
 /** Draw daily tasks and their reward state. */
 export const DailyQuestBase = (props: DailyQuestProps) => {
-    if (props.state === "empty" || props.state === "failed") return <SurfaceCard props={{ label: props.props.label }}><EmptyNotice props={{ icon: "review", message: props.props.message ?? "", actionLabel: props.state === "failed" ? props.props.retryLabel : undefined }} on={{ act: props.state === "failed" ? props.on?.retry : undefined }} /></SurfaceCard>
+    if (props.state === "empty" || props.state === "failed") return <SurfaceCard label={props.props.label} composition={"single"}><EmptyNotice message={props.props.message ?? ""} actionLabel={props.state === "failed" ? props.props.retryLabel : undefined} iconSource={iconSourceFor("review", "leading")} onAction={({ act: props.state === "failed" ? props.on?.retry : undefined })?.act} /></SurfaceCard>
     const loading = props.state === "pending"
     const tasks = loading ? Array.from({ length: 5 }, (_, index) => ({ id: `resting-${index}`, title: "", percentText: "", percent: 0 })) : props.props.tasks ?? []
     const rewardLine = props.state === "claimed" ? props.props.claimedLine : props.props.rewardLine
     const claim = props.state === "claimable" && props.props.claimLabel !== undefined
-        ? <Button props={{ label: props.props.claimLabel, variant: "secondary", size: "sm", icon: "reward" }} on={{ press: props.on?.claim }} />
+        ? <Button variant="secondary" size="sm" onPress={props.on?.claim}>{props.props.claimLabel}</Button>
         : null
     return (
-        <div className={dailyQuestSurfaceClassName}>
-            <SurfaceCard props={{ label: props.props.label }} isLoading={loading}>
-                <div className={dailyQuestCardClassName}>
-                    <div className={dailyQuestHeroClassName} data-dashboard-quest-hero="true">
-                        <Image alt="" aria-hidden className={dailyQuestHeroImageClassName} height={176} priority={false} src="/images/dashboard/daily-quest-reward-v1.png" width={176} />
-                    </div>
-                    <div aria-hidden className={dailyQuestSeparatorClassName} />
-                    <div className={dailyQuestRewardBandClassName} data-dashboard-quest-reward="true">
-                        <Text props={{ content: rewardLine, size: "sm" }} isLoading={loading} />
-                        {claim}
-                    </div>
-                    <div aria-hidden className={dailyQuestSeparatorClassName} />
-                    <ul className={dailyQuestTasksClassName}>
-                        {tasks.map((task) => (
-                            <li className={dailyQuestTaskCellClassName} key={task.id}>
-                                <Text props={{ content: task.title, size: "sm", weight: "normal" }} isLoading={loading} />
-                                <Text props={{ content: task.percentText, size: "xs", tone: "muted" }} isLoading={loading} />
-                            </li>
-                        ))}
-                    </ul>
+        <SurfaceCard label={props.props.label} composition={"joined"} state={loading ? "pending" : "neutral"}>
+            <div className={dailyQuestCardClassName}>
+                <div className={dailyQuestHeroClassName} data-dashboard-quest-hero="true">
+                    <Image alt="" aria-hidden className={dailyQuestHeroImageClassName} height={176} priority={false} src="/images/dashboard/daily-quest-reward-v1.png" width={176} />
                 </div>
-            </SurfaceCard>
-        </div>
+                <div aria-hidden className={dailyQuestSeparatorClassName} />
+                <div className={dailyQuestRewardBandClassName(props.state === "claimed")} data-dashboard-quest-reward="true">
+                    <Text size={"sm"} tone={props.state === "claimed" ? "default" : "muted"} isSkeleton={loading}>{rewardLine}</Text>
+                    {claim}
+                </div>
+                <div aria-hidden className={dailyQuestSeparatorClassName} />
+                <ul className={dailyQuestTasksClassName}>
+                    {tasks.map((task) => (
+                        <li className={dailyQuestTaskCellClassName} key={task.id}>
+                            <Text size={"sm"} weight={"normal"} isSkeleton={loading}>{task.title}</Text>
+                            <Text size={"xs"} tone={"muted"} isSkeleton={loading}>{task.percentText}</Text>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        </SurfaceCard>
     )
 }

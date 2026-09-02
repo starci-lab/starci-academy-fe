@@ -1,17 +1,19 @@
 import { cn } from "@heroui/react"
 import {
-    dashboardAccentBandTopClassName,
     dashboardBandSeparatorClassName,
     dashboardCardFooterClassName,
     dashboardFlushCardClassName,
-    dashboardFlushSurfaceClassName,
+    dashboardNeutralBandTopClassName,
 } from "../classNames"
 
-export const weeklyGoalsSurfaceClassName = dashboardFlushSurfaceClassName
-export const weeklyGoalsCardClassName = dashboardFlushCardClassName
-export const weeklyGoalsSeparatorClassName = dashboardBandSeparatorClassName
-export const weeklyGoalsSummaryBandClassName = dashboardAccentBandTopClassName
-export const weeklyGoalsFooterClassName = dashboardCardFooterClassName
+/** Stack the goals summary, evidence grid and exit without synthetic gaps. */
+export const weeklyGoalsCardClassName = cn(dashboardFlushCardClassName)
+/** Separate adjacent goal bands with the shared dashboard rule. */
+export const weeklyGoalsSeparatorClassName = cn(dashboardBandSeparatorClassName)
+/** Present weekly progress as a neutral summary rather than a state outcome. */
+export const weeklyGoalsSummaryBandClassName = cn(dashboardNeutralBandTopClassName)
+/** Close the optional edit action against the card's bottom edge. */
+export const weeklyGoalsFooterClassName = cn(dashboardCardFooterClassName)
 
 /** Present the six fixed weekly targets as one full-bleed two-column evidence board. */
 export const weeklyGoalsGridClassName = cn(

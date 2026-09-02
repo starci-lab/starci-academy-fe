@@ -1,7 +1,8 @@
-import { Badge, type BadgeTone } from "@/components/leaves/Badge"
-import { Text } from "@/components/leaves/Text"
-import { TextLink } from "@/components/leaves/TextLink"
+import { Badge, type BadgeTone } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import { changelogEntryMetaClassName, changelogEntryRowClassName } from "./classNames"
+import { TextAction } from "@starci/grammar/common"
+
 
 /** One dated product update rendered inside a joined changelog list. */
 export type ChangelogEntryRowData = {
@@ -30,18 +31,18 @@ export const ChangelogEntryRow = (props: ChangelogEntryRowProps) => {
     return (
         <div className={changelogEntryRowClassName} data-part="changelog-entry">
             <div className={changelogEntryMetaClassName} data-part="changelog-meta">
-                <Text props={{ content: data.dateLabel, size: "xs", tone: "muted" }} isLoading={isLoading} />
+                <Text size={"xs"} tone={"muted"} isSkeleton={isLoading}>{data.dateLabel}</Text>
                 {data.categoryLabel === undefined ? null : (
-                    <Badge props={{ content: data.categoryLabel, tone: data.categoryTone }} isLoading={isLoading} />
+                    <Badge tone={data.categoryTone} isSkeleton={isLoading}>{data.categoryLabel}</Badge>
                 )}
             </div>
             {data.isAction === true && on?.open !== undefined ? (
-                <TextLink props={{ label: data.title ?? "", size: "sm" }} on={{ press: on.open }} />
+                <TextAction size={"sm"} appearance="inline" onPress={on.open}>{data.title ?? ""}</TextAction>
             ) : (
-                <Text props={{ content: data.title, size: "sm", weight: "normal" }} isLoading={isLoading} />
+                <Text size={"sm"} weight={"normal"} isSkeleton={isLoading}>{data.title}</Text>
             )}
             {data.body === undefined && !isLoading ? null : (
-                <Text props={{ content: data.body, size: "xs", tone: "muted" }} isLoading={isLoading} />
+                <Text size={"xs"} tone={"muted"} isSkeleton={isLoading}>{data.body}</Text>
             )}
         </div>
     )

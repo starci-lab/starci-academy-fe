@@ -321,6 +321,83 @@
         "signedOutMessage": "Sign in to see your basket.",
         "signedOutAction": "Sign in"
     },
+    "toast": {
+        "successTitle": "Success",
+        "errorTitle": "Error",
+        "unauthorizedTitle": "Unauthorized",
+        "unauthorizedDescription": "You are not authorized to access this resource.",
+        "defaultSuccess": "Operation completed.",
+        "defaultError": "Something went wrong."
+    },
+    "proSubscription": {
+        "breadcrumbLabel": "Pro subscription path",
+        "breadcrumbHome": "Home",
+        "breadcrumbCurrent": "StarCi Pro",
+        "title": "Unlock your complete learning journey with StarCi Pro",
+        "description": "Get full access to every published learner-facing learning, practice, community, and career capability.",
+        "planName": "StarCi Pro",
+        "planBadge": "Full access",
+        "period": "for 1 month",
+        "benefitsTitle": "What you get",
+        "benefitsDescription": "One continuous access path instead of separate purchases.",
+        "journeyAlt": "The StarCi Pro journey from learning, practice, and community to a career goal",
+        "disclosuresTitle": "Before you subscribe",
+        "benefits": {
+            "learning": {
+                "title": "Learning",
+                "description": "Every published course, lesson, and learning resource"
+            },
+            "practice": {
+                "title": "Practice",
+                "description": "Coding, Playgrounds, challenges, and mock interviews"
+            },
+            "community": {
+                "title": "Community",
+                "description": "Course discussions, the Pro community, and Global Chat"
+            },
+            "career": {
+                "title": "Career",
+                "description": "Personal projects, AI grading, and career discovery"
+            }
+        },
+        "aiTitle": "How is AI usage counted?",
+        "aiDescription": "AI features use the published Pro limits for each usage window; this is not unlimited AI use.",
+        "activationTitle": "Payment and activation",
+        "activationDescription": "StarCi Pro is activated only after the system verifies the transaction. Returning in the browser does not mean payment has been confirmed.",
+        "renewalNote": "Every repeat purchase or renewal requires your explicit payment confirmation.",
+        "signedOutAction": "Sign in to buy StarCi Pro",
+        "signedOutHelper": "You need to sign in before continuing to payment.",
+        "purchaseAction": "Buy StarCi Pro – {price}",
+        "pendingTitle": "Verifying payment",
+        "pendingDescription": "Please wait while the system verifies the transaction. Do not start another purchase while this status is being processed.",
+        "activeTitle": "StarCi Pro is active",
+        "activeDescription": "You currently have StarCi Pro access.",
+        "activeUntil": "Your Pro access is active until {date}.",
+        "cancelledMessage": "You returned from the payment step",
+        "failedTitle": "We could not load this plan",
+        "failedDescription": "The system has not returned the plan details yet. Please try again in a few minutes.",
+        "retry": "Try again",
+        "payment": {
+            "title": "Review your StarCi Pro purchase",
+            "subtitle": "Pay for one month of StarCi Pro access.",
+            "methodTitle": "Payment method",
+            "provider": "Bank transfer via PayOS",
+            "providerDescription": "You will complete the transfer on the PayOS payment page.",
+            "subtotal": "StarCi Pro plan",
+            "savings": "Savings",
+            "surcharge": "Surcharge",
+            "total": "Total",
+            "processTitle": "What happens next",
+            "handoffStep": "Continue to PayOS and complete the bank transfer.",
+            "verificationStep": "The transaction stays pending until the backend verifies payment.",
+            "accessStep": "StarCi activates Pro access only after that confirmation.",
+            "trustNote": "A browser return alone never marks the subscription as paid.",
+            "action": "Continue to PayOS",
+            "cancel": "Go back",
+            "close": "Close",
+            "failedMessage": "We could not open the payment page. If you already paid, do not start another purchase while verification is pending."
+        }
+    },
     "community": {
         "anonymous": "Anonymous learner",
         "you": "You",

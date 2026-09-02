@@ -1,4 +1,4 @@
-import { LearnShellLayout } from "@/components/layouts/LearnShellLayout"
+import { LearnShellLayout } from "@/components/product-shells/LearnShellLayout"
 import type { ReactNode } from "react"
 
 /**

@@ -20,6 +20,7 @@
 - Current shared-owner aggregate: sha256:0221bced928cc01f930a4067f7dcc09403dbafadf6c299eafbd42803009edf3b
 - Remaining debt: minor intentional long-name truncation and occasional dense small text; neither blocks task completion or responsive use.
 - Remaining gaps: fresh whole-route coverage for all tabs and required compact/wide states before any new PASS or 9+ claim.
+- Latest interaction repair: Explore ranked rows now expose one whole-row native press target with whole-action hover/focus/active feedback. Focused component tests pass, but the current in-app browser session redirects Dashboard to authentication, so no latest-source authenticated Dashboard raster is claimed.
 
 - Evidence qualification: Fresh normalized CSS-pixel rasters establish visual quality; focused tests, shared-consumer tests, typecheck, and lint establish implementation fitness.
 
@@ -32,6 +33,8 @@
 - Consistency and accessibility cues: N/A
 
 ## Immutable audit history
+
+- 2026-09-02 — Interaction-state repair, verdict remains STALE — Replaced the mixed signal where a row background hovered but only its title activated. The whole ranked row is now one press target using the shared whole-action material response. Static/type/unit evidence is green; fresh authenticated Dashboard visual evidence is unavailable in the current browser session.
 
 - Round 1 — FAIL — 4/10 — The route's Dashboard surface exposed direct composition failures while shared ShellNav active-state and compact-label findings remained outside this owner ceiling. Source `sha256:f6c6482c5debe5968c2d3f133f0f3433e4e9783b9f52601b91cece6584419109`; evidence `sha256:cb2770db20eb6b70db1f3d0abb5413dca14457ad2eae483fa4730d3bd4ab1f7b`; findings `sha256:9df3ac6803b0cd599f40f9ec40d87d541b9990927798fa9e7dddaf9a3439b896`.
 - Round 2 — FAIL — 4/10 (target 9) — The direct Dashboard route lacked visible learning/course task closure, compact terminal/support proof, dense recommendation composition, and strong price/supporting hierarchy; shared two-tier navigation, page-frame width, compact nav labels, and AI launcher overlap remain outside the route owner ceiling. Source `sha256:806d258be0c583bc506d4591b69b9767f65c3fb5013aa7d4f58e7d95ca865937`; evidence `sha256:960970ea760bc5424c594ca71960c94e23d9e71cc24f43a1423228c112280173`; findings `sha256:26aea86e8c280d008bb15c867399147a14939a7c8751537599e3807e0051a781`.

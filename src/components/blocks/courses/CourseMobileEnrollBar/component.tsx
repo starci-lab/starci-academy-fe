@@ -1,5 +1,5 @@
-import { Button } from "@/components/leaves/Button"
-import { Text } from "@/components/leaves/Text"
+import { Button } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import { mobileEnrollBarClassName, mobileEnrollPriceClassName } from "./classNames"
 
 /**
@@ -64,10 +64,10 @@ export const CourseMobileEnrollBarBase = (props: CourseMobileEnrollBarProps) => 
     const isPricePending = props.state === "price-pending"
     return <div className={mobileEnrollBarClassName}>
         <div className={mobileEnrollPriceClassName}>
-            <Text props={{ content: props.props.price, size: "sm", weight: "semibold" }} isLoading={isPricePending} />
-            {props.props.originalPrice === undefined || isPricePending ? null : <Text props={{ content: props.props.originalPrice, size: "xs", tone: "muted", isSuperseded: true }} />}
+            <Text size={"sm"} weight={"semibold"} isSkeleton={isPricePending}>{props.props.price}</Text>
+            {props.props.originalPrice === undefined || isPricePending ? null : <Text size={"xs"} tone={"muted"} isSuperseded={true}>{props.props.originalPrice}</Text>}
         </div>
-        <Button props={{ label: props.props.ctaLabel, variant: "primary", size: "sm" }} on={{ press: props.on?.act }} />
+        <Button variant="primary" size="sm" onPress={props.on?.act}>{props.props.ctaLabel}</Button>
     </div>
 }
 

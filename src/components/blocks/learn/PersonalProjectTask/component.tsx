@@ -1,17 +1,17 @@
 import type { ComponentType } from "react"
 import type { PersonalProjectHistoryAttempt } from "@/components/blocks/learn/PersonalProjectHistory"
-import { SurfaceAccordionCard } from "@starci/grammar/core"
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
-import { Field } from "@/components/composites/Field"
+import { Input, SurfaceAccordionCard, Button } from "@starci/grammar/common"
+import { SurfaceCard } from "@starci/grammar/common"
+import { SurfaceListCard } from "@starci/grammar/common"
 import { ExtendedTabs } from "@/components/leaves/ExtendedTabs"
 import { Article, segmentArticleSurfaces } from "@/components/branches/Article"
-import { Badge } from "@/components/leaves/Badge"
-import { Button } from "@/components/leaves/Button"
+import { Badge } from "@starci/grammar/common"
+
 import { DisclosureIndicator } from "@/components/leaves/DisclosureIndicator"
-import { Heading } from "@/components/leaves/Heading"
-import { Link } from "@/components/leaves/Link"
-import { Text } from "@/components/leaves/Text"
+import { Heading } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import {
     personalProjectTaskActionClassName,
     personalProjectTaskBriefClassName,
@@ -30,6 +30,8 @@ import {
     personalProjectTaskStepNumberClassName,
     personalProjectTaskTerminalClassName,
 } from "./classNames"
+import { TextAction } from "@starci/grammar/common"
+
 
 /** One scored requirement authored for a personal-project task. */
 export type PersonalProjectCriterion = { readonly id: string; readonly text: string; readonly score: number }
@@ -50,19 +52,19 @@ export const PersonalProjectTaskBase = (props: PersonalProjectTaskProps) => {
     const sourceSections = segmentArticleSurfaces(props.props.brief)
     const sections = sourceSections.length > 0 ? sourceSections : [{ id: "section-0", kind: "body" as const, body: props.props.brief ?? "", items: [] }]
     const brief = sections.map((section, index) => {
-        if (section.kind === "peer-list") return <SurfaceListCard key={section.id} props={{ label: section.label ?? props.props.labels.guidance, isLabelHidden: section.label === undefined }} isLoading={isLoading}>{section.items.map((item) => <div className={personalProjectTaskPeerItemClassName} key={item.id}><Article props={{ body: item.body }} isLoading={isLoading} /></div>)}</SurfaceListCard>
-        if (section.kind === "accordion") return <div key={section.id}><Heading props={{ content: section.label ?? props.props.labels.guidance, level: 3 }} /><SurfaceAccordionCard depth="top" items={section.items.map((item) => ({ id: item.id, isOpen: props.props.expandedBriefSectionIds.includes(item.id), summaryRender: <><Text props={{ content: item.title, weight: "semibold" }} isLoading={isLoading} /><DisclosureIndicator props={{ isOpen: props.props.expandedBriefSectionIds.includes(item.id) }} /></>, bodyRender: <Article props={{ body: item.body }} isLoading={isLoading} />}))} renderSummary={(summary) => <>{summary}</>} renderBody={(body) => <>{body}</>} onItemOpenChange={(id, open) => props.on?.toggleBriefSection?.(id, open)} /></div>
+        if (section.kind === "peer-list") return <SurfaceListCard key={section.id} label={section.label ?? props.props.labels.guidance} labelHidden={section.label === undefined} isLoading={isLoading}>{section.items.map((item) => <div className={personalProjectTaskPeerItemClassName} key={item.id}><Article props={{ body: item.body }} isLoading={isLoading} /></div>)}</SurfaceListCard>
+        if (section.kind === "accordion") return <div key={section.id}><Heading level={3}>{section.label ?? props.props.labels.guidance}</Heading><SurfaceAccordionCard depth="top" items={section.items.map((item) => ({ id: item.id, isOpen: props.props.expandedBriefSectionIds.includes(item.id), summaryRender: <><Text weight={"semibold"} isSkeleton={isLoading}>{item.title}</Text><DisclosureIndicator props={{ isOpen: props.props.expandedBriefSectionIds.includes(item.id) }} /></>, bodyRender: <Article props={{ body: item.body }} isLoading={isLoading} />}))} renderSummary={(summary) => <>{summary}</>} renderBody={(body) => <>{body}</>} onItemOpenChange={(id, open) => props.on?.toggleBriefSection?.(id, open)} /></div>
         const visibleHint = props.props.hint?.trim()
-        return <SurfaceCard key={section.id} props={{ label: section.label, inset: "compact" }} isLoading={isLoading}><Article props={{ body: section.body }} isLoading={isLoading} />{index === 0 && visibleHint ? <Text props={{ content: visibleHint, size: "sm", tone: "muted", icon: "review" }} /> : null}</SurfaceCard>
+        return <SurfaceCard key={section.id} label={section.label} composition="single" state={isLoading ? "pending" : "neutral"}><Article props={{ body: section.body }} isLoading={isLoading} />{index === 0 && visibleHint ? <Text size={"sm"} tone={"muted"} startContent={<Icon source={iconSourceFor("review", "chip")} role="chip" />}>{visibleHint}</Text> : null}</SurfaceCard>
     })
-    const implementation = props.props.implementation === undefined ? null : <SurfaceCard props={{ label: props.props.labels.implementation, inset: "compact" }}><Article props={{ body: props.props.implementation }} /></SurfaceCard>
-    const criteria = props.props.criteria.length === 0 && !isLoading ? null : <SurfaceListCard props={{ label: props.props.labels.criteria }} isLoading={isLoading}>{props.props.criteria.map((criterion) => <div className={personalProjectTaskPeerItemClassName} key={criterion.id}><Text props={{ content: criterion.text, size: "sm" }} isLoading={isLoading} /><Badge props={{ content: props.props.labels.points(criterion.score) }} isLoading={isLoading} /></div>)}</SurfaceListCard>
-    const status = props.props.notice === undefined ? null : <Text props={{ content: props.props.notice, size: "sm", tone: "muted", live: "assertive" }} />
-    const briefContent = props.state === "forbidden" ? <SurfaceCard props={{ label: props.props.labels.lockedTitle, inset: "compact" }}>{status}<Link props={{ label: props.props.labels.back, icon: "back" }} on={{ press: props.on?.back }} /></SurfaceCard> : props.state === "task-error" ? <SurfaceCard props={{ inset: "compact" }}>{status}<Button props={{ label: props.props.labels.retry, variant: "primary" }} on={{ press: props.on?.retry }} /></SurfaceCard> : <>{brief}{implementation}{criteria}</>
-    const submission = <SurfaceCard props={{ label: props.props.labels.submission, inset: "compact", measure: "form" }}><div className={personalProjectTaskConsoleBodyClassName}>
-        <div className={personalProjectTaskStepClassName}><span className={personalProjectTaskStepNumberClassName}>1</span><div className={personalProjectTaskStepBodyClassName}><Text props={{ content: props.props.labels.sourceStep ?? props.props.labels.repository, weight: "semibold" }} /><div className={personalProjectTaskRepositoryFieldClassName}><Field props={{ id: "personal-project-repository", name: "personal-project-repository", label: props.props.labels.repository, description: props.props.labels.repositoryDescription, placeholder: props.props.labels.repositoryPlaceholder, defaultValue: props.props.repositoryDraft ?? props.props.repositoryUrl, disabled, isInvalid: repositoryInvalid, hint: repositoryInvalid ? props.props.notice : undefined }} on={{ change: props.on?.changeRepository }} isLoading={isLoading} /></div>{repositoryInvalid ? null : status}</div></div>
-        <div className={personalProjectTaskStepClassName}><span className={personalProjectTaskStepNumberClassName}>2</span><div className={personalProjectTaskStepBodyClassName}><Text props={{ content: props.props.labels.analysisStep ?? props.props.labels.settings, weight: "semibold" }} /><Text props={{ content: props.props.labels.analysisDescription, size: "sm", tone: "muted" }} />{props.props.repositoryBranch === undefined ? null : <Text props={{ content: props.props.labels.branchFact?.(props.props.repositoryBranch) ?? `${props.props.labels.branch}: ${props.props.repositoryBranch}`, size: "xs", tone: "muted" }} />}{props.props.reviewLanguage === undefined ? null : <Text props={{ content: props.props.labels.languageFact?.(props.props.reviewLanguage) ?? `${props.props.labels.language}: ${props.props.reviewLanguage}`, size: "xs", tone: "muted" }} />}{props.props.reviewModelLabel === undefined ? null : <Text props={{ content: props.props.labels.modelFact?.(props.props.reviewModelLabel) ?? `${props.props.labels.model}: ${props.props.reviewModelLabel}`, size: "xs", tone: "muted" }} />}{props.props.tokenLast4 === undefined ? <Text props={{ content: props.props.labels.tokenMissing, size: "xs", tone: "muted" }} /> : <Text props={{ content: props.props.labels.tokenReady?.(props.props.tokenLast4) ?? props.props.labels.tokenStored(props.props.tokenLast4), size: "xs", tone: "muted" }} />}<Text props={{ content: props.props.labels.promptCache, size: "xs", tone: "muted" }} /><Button props={{ label: props.props.labels.settings, size: "sm", variant: "outline", icon: "settings", disabled }} on={{ press: props.on?.openSettings }} /></div></div>
-        <div className={personalProjectTaskStepClassName}><span className={personalProjectTaskStepNumberClassName}>3</span><div className={personalProjectTaskStepBodyClassName}><Text props={{ content: props.props.labels.reviewStep ?? props.props.labels.evaluate, weight: "semibold" }} />{props.props.latestAttempt === undefined ? null : <div className={personalProjectTaskLatestClassName}><Text props={{ content: props.props.labels.latest, size: "xs", tone: "muted" }} /><Text props={{ content: `${props.props.latestAttempt.passed ? props.props.labels.passed : props.props.labels.needsWork} · ${props.props.labels.points(props.props.latestAttempt.score)}`, weight: "semibold" }} /></div>}{recovery ? <Button props={{ label: props.props.labels.retry, variant: "primary", icon: "retry" }} on={{ press: props.on?.retry }} /> : <Button props={{ label: props.props.labels.evaluate, variant: "primary", icon: "review", isPending: props.state === "submitting", disabled: disabled || repositoryInvalid || (props.props.repositoryDraft ?? props.props.repositoryUrl ?? "").trim() === "" }} on={{ press: props.on?.submit }} isLoading={isLoading} />}<div className={personalProjectTaskActionClassName}><Button props={{ label: props.props.labels.history, size: "sm", variant: "ghost", icon: "saved", disabled: isLoading }} on={{ press: props.on?.openHistory }} />{props.props.latestAttempt === undefined ? null : <Button props={{ label: props.props.labels.feedback, size: "sm", variant: "ghost", icon: "review" }} on={{ press: props.on?.openFeedback }} />}</div></div></div>
+    const implementation = props.props.implementation === undefined ? null : <SurfaceCard label={props.props.labels.implementation} composition="single"><Article props={{ body: props.props.implementation }} /></SurfaceCard>
+    const criteria = props.props.criteria.length === 0 && !isLoading ? null : <SurfaceListCard label={props.props.labels.criteria} isLoading={isLoading}>{props.props.criteria.map((criterion) => <div className={personalProjectTaskPeerItemClassName} key={criterion.id}><Text size={"sm"} isSkeleton={isLoading}>{criterion.text}</Text><Badge isSkeleton={isLoading}>{props.props.labels.points(criterion.score)}</Badge></div>)}</SurfaceListCard>
+    const status = props.props.notice === undefined ? null : <Text size={"sm"} tone={"muted"} live={"assertive"}>{props.props.notice}</Text>
+    const briefContent = props.state === "forbidden" ? <SurfaceCard label={props.props.labels.lockedTitle} composition="single">{status}<TextAction startContent={<Icon source={iconSourceFor("back", "chip")} role="chip" />} onPress={props.on?.back}>{props.props.labels.back}</TextAction></SurfaceCard> : props.state === "task-error" ? <SurfaceCard composition="single">{status}<Button variant="primary" onPress={props.on?.retry}>{props.props.labels.retry}</Button></SurfaceCard> : <>{brief}{implementation}{criteria}</>
+    const submission = <SurfaceCard label={props.props.labels.submission} measure={"form"} composition="single"><div className={personalProjectTaskConsoleBodyClassName}>
+        <div className={personalProjectTaskStepClassName}><span className={personalProjectTaskStepNumberClassName}>1</span><div className={personalProjectTaskStepBodyClassName}><Text weight={"semibold"}>{props.props.labels.sourceStep ?? props.props.labels.repository}</Text><div className={personalProjectTaskRepositoryFieldClassName}><Input id="personal-project-repository" name="personal-project-repository" label={props.props.labels.repository} hint={props.props.labels.repositoryDescription} placeholder={props.props.labels.repositoryPlaceholder} value={props.props.repositoryDraft ?? props.props.repositoryUrl} variant="secondary" isDisabled={disabled || isLoading} isError={repositoryInvalid} errorMessage={repositoryInvalid ? props.props.notice : undefined} onValueChange={props.on?.changeRepository} /></div>{repositoryInvalid ? null : status}</div></div>
+        <div className={personalProjectTaskStepClassName}><span className={personalProjectTaskStepNumberClassName}>2</span><div className={personalProjectTaskStepBodyClassName}><Text weight={"semibold"}>{props.props.labels.analysisStep ?? props.props.labels.settings}</Text><Text size={"sm"} tone={"muted"}>{props.props.labels.analysisDescription}</Text>{props.props.repositoryBranch === undefined ? null : <Text size={"xs"} tone={"muted"}>{props.props.labels.branchFact?.(props.props.repositoryBranch) ?? `${props.props.labels.branch}: ${props.props.repositoryBranch}`}</Text>}{props.props.reviewLanguage === undefined ? null : <Text size={"xs"} tone={"muted"}>{props.props.labels.languageFact?.(props.props.reviewLanguage) ?? `${props.props.labels.language}: ${props.props.reviewLanguage}`}</Text>}{props.props.reviewModelLabel === undefined ? null : <Text size={"xs"} tone={"muted"}>{props.props.labels.modelFact?.(props.props.reviewModelLabel) ?? `${props.props.labels.model}: ${props.props.reviewModelLabel}`}</Text>}{props.props.tokenLast4 === undefined ? <Text size={"xs"} tone={"muted"}>{props.props.labels.tokenMissing}</Text> : <Text size={"xs"} tone={"muted"}>{props.props.labels.tokenReady?.(props.props.tokenLast4) ?? props.props.labels.tokenStored(props.props.tokenLast4)}</Text>}<Text size={"xs"} tone={"muted"}>{props.props.labels.promptCache}</Text><Button variant="outline" size="sm" isDisabled={disabled} onPress={props.on?.openSettings}>{props.props.labels.settings}</Button></div></div>
+        <div className={personalProjectTaskStepClassName}><span className={personalProjectTaskStepNumberClassName}>3</span><div className={personalProjectTaskStepBodyClassName}><Text weight={"semibold"}>{props.props.labels.reviewStep ?? props.props.labels.evaluate}</Text>{props.props.latestAttempt === undefined ? null : <div className={personalProjectTaskLatestClassName}><Text size={"xs"} tone={"muted"}>{props.props.labels.latest}</Text><Text weight={"semibold"}>{`${props.props.latestAttempt.passed ? props.props.labels.passed : props.props.labels.needsWork} · ${props.props.labels.points(props.props.latestAttempt.score)}`}</Text></div>}{recovery ? <Button variant="primary" onPress={props.on?.retry}>{props.props.labels.retry}</Button> : <Button variant={"primary"} isDisabled={disabled || repositoryInvalid || (props.props.repositoryDraft ?? props.props.repositoryUrl ?? "").trim() === ""} isPending={props.state === "submitting"} isSkeleton={isLoading} onPress={({ press: props.on?.submit })?.press}>{props.props.labels.evaluate}</Button>}<div className={personalProjectTaskActionClassName}><Button variant="ghost" size="sm" isDisabled={isLoading} onPress={props.on?.openHistory}>{props.props.labels.history}</Button>{props.props.latestAttempt === undefined ? null : <Button variant="ghost" size="sm" onPress={props.on?.openFeedback}>{props.props.labels.feedback}</Button>}</div></div></div>
     </div></SurfaceCard>
     const activeView = props.props.isSubmissionOpen === true ? "submission" : "content"
     const selectView = (key: string) => {
@@ -71,13 +73,13 @@ export const PersonalProjectTaskBase = (props: PersonalProjectTaskProps) => {
     }
     return (
         <div className={personalProjectTaskClassName}>
-            <Link props={{ label: props.props.labels.back, icon: "back", emphasis: "muted" }} on={{ press: props.on?.back }} />
+            <TextAction appearance={"muted"} startContent={<Icon source={iconSourceFor("back", "chip")} role="chip" />} onPress={props.on?.back}>{props.props.labels.back}</TextAction>
             <header className={personalProjectTaskHeaderClassName}>
-                <Heading props={{ content: props.props.title, level: 1 }} isLoading={isLoading} />
-                <Text props={{ content: props.props.description }} isLoading={isLoading} />
+                <Heading level={1} isSkeleton={isLoading}>{props.props.title}</Heading>
+                <Text isSkeleton={isLoading}>{props.props.description}</Text>
                 <div className={personalProjectTaskMetaClassName}>
-                    {props.props.difficulty === undefined ? null : <Badge props={{ content: props.props.difficulty }} isLoading={isLoading} />}
-                    <Badge props={{ content: props.props.labels.points(props.props.maxScore) }} isLoading={isLoading} />
+                    {props.props.difficulty === undefined ? null : <Badge isSkeleton={isLoading}>{props.props.difficulty}</Badge>}
+                    <Badge isSkeleton={isLoading}>{props.props.labels.points(props.props.maxScore)}</Badge>
                 </div>
             </header>
             <div className={personalProjectTaskLauncherClassName}>
@@ -99,7 +101,7 @@ export const PersonalProjectTaskBase = (props: PersonalProjectTaskProps) => {
             <main className={personalProjectTaskGridClassName}>
                 <div className={personalProjectTaskBriefClassName} data-active={activeView === "content"}>{briefContent}
                     {props.state === "forbidden" || props.state === "task-error" ? null : <div className={personalProjectTaskTerminalClassName}>
-                        <Button props={{ label: props.props.labels.openSubmission ?? props.props.labels.submission, variant: "primary", icon: "review", disabled }} on={{ press: props.on?.toggleSubmission }} isLoading={isLoading} />
+                        <Button variant={"primary"} isSkeleton={isLoading} onPress={({ press: props.on?.toggleSubmission })?.press}>{props.props.labels.openSubmission ?? props.props.labels.submission}</Button>
                     </div>}
                 </div>
                 <aside className={personalProjectTaskConsoleClassName} data-active={activeView === "submission"}>{submission}</aside>

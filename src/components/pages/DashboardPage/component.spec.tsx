@@ -175,6 +175,8 @@ describe("DashboardPageBase", () => {
         expect(screen.getByRole("link", { name: "Back" })).toHaveAttribute("data-emphasis", "muted")
         const openButton = screen.getByRole("button", { name: "Open stats and quick access" })
         expect(openButton).toHaveAttribute("aria-expanded", "false")
+        expect(openButton).toHaveClass("rounded-none", "bg-transparent", "shadow-none")
+        expect(openButton).not.toHaveClass("rounded-full", "bg-default")
         fireEvent.click(openButton)
         expect(setRailOpen).toHaveBeenCalledWith(true)
 

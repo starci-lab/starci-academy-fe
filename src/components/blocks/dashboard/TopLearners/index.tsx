@@ -54,7 +54,6 @@ export const TopLearners = (props: TopLearnersProps) => {
     })
     const viewProps = {
         label: t("top.heading"),
-        seeMoreLabel: t("seeMore"),
         standing: {
             rank: data?.myRank,
             rankLabel: data ? t("top.rankLine", { rank: data.myRank }) : undefined,
@@ -104,7 +103,7 @@ export const TopLearners = (props: TopLearnersProps) => {
         <TopLearnersBase
             state="ready"
             props={viewProps}
-            on={{ seeMore: () => router.push("/league"), ...on }}
+            on={on}
         />
     )
 }

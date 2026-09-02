@@ -121,9 +121,9 @@ import {
     CircleIcon as CircleSolidIcon,
     CourseRailIcon as CourseRailSolidIcon,
 } from "@starci/heroicons/16/solid"
-import type { ComponentType, SVGProps } from "react"
+import type { IconRole, IconSource } from "@starci/grammar/common"
+import type { SVGProps } from "react"
 import { GithubMark, GoogleMark } from "./brands"
-import { getIconClassName, iconLoadingClassName } from "./classNames"
 
 /**
  * LEAF - `Icon`: the picture a word needs when the word alone is slower to find.
@@ -157,27 +157,13 @@ export type IconName =
     | "star" | "ratingStarEmpty" | "ratingStarFilled"
     | "rankFirst" | "rankSecond" | "rankThird" | "rankOther"
 
-/** The two native Heroicon roles used by the product. */
-export type IconRole = "heading" | "leading" | "chip"
-
-/** What this leaf draws. A `type`, not an `interface` - only an alias satisfies the data fence. */
-export type IconData = {
-    /** What this icon means. The glyph follows from it. */
-    readonly name: IconName
-    /** `heading` is 24px outline; `leading` is 20px outline; `chip` is 16px micro. */
-    readonly role?: IconRole
-}
-
-/** Props for {@link Icon}. */
-export type IconProps = { readonly props: IconData; readonly isLoading?: boolean }
-
 /**
  * The meaning-to-glyph map. The only file in the repository that names a Heroicon.
  *
  * Two entries are NOT Heroicons: a provider mark has to be the provider own, in its own colours,
  * because that is what a reader recognises before they read anything.
  */
-type GlyphComponent = ComponentType<SVGProps<SVGSVGElement>>
+type GlyphComponent = IconSource
 
 /**
  * StarCi AI's own mark: one chat silhouette around code chevrons and a small assistant spark.
@@ -289,21 +275,5 @@ const GLYPHS: Record<IconName, GlyphCuts> = {
     github: cuts(GithubMark, GithubMark),
 }
 
-/** Each role keeps the diameter its Heroicon drawing was authored for. */
-
-/**
- * Draw one meaning as a glyph.
- *
- * @param input - {@link IconProps}
- */
-export const Icon = (props: IconProps) => {
-    const data = props.props
-    const isLoading = props.isLoading ?? false
-    const glyph = GLYPHS[data.name]
-    const role = data.role ?? "chip"
-    const Glyph = glyph[role]
-    if (isLoading) {
-        return <span aria-hidden="true" className={iconLoadingClassName} />
-    }
-    return <Glyph aria-hidden className={getIconClassName(role, data.name === "complete")} />
-}
+/** Resolve a product-owned semantic glyph name to the source Grammar renders. */
+export const iconSourceFor = (name: IconName, role: IconRole = "chip"): IconSource => GLYPHS[name][role]

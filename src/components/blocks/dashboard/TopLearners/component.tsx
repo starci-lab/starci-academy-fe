@@ -1,10 +1,11 @@
-import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { SurfaceListCard } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { EmptyNotice } from "@starci/grammar/common"
 import { LeaderboardStandingRow, type LeaderboardStandingRowData } from "@/components/composites/LeaderboardStandingRow"
 import { RankedUserRow, type RankedUserRowData } from "@/components/composites/RankedUserRow"
 import { topLearnerEmptyNoticeClassName, topLearnerRowClassName, topLearnerStandingClassName } from "./classNames"
 /** Leaderboard data. */
-export type TopLearnersData = { readonly label: string; readonly seeMoreLabel?: string; readonly standing: LeaderboardStandingRowData; readonly rows: ReadonlyArray<RankedUserRowData>; readonly emptyMessage?: string; readonly errorMessage?: string; readonly retryLabel?: string }
+export type TopLearnersData = { readonly label: string; readonly standing: LeaderboardStandingRowData; readonly rows: ReadonlyArray<RankedUserRowData>; readonly emptyMessage?: string; readonly errorMessage?: string; readonly retryLabel?: string }
 /** Leaderboard actions. */
 export type TopLearnersActions = { readonly [key: string]: (() => void) | undefined }
 /** Leaderboard state and data. */
@@ -16,8 +17,8 @@ export const TopLearnersBase = (props: TopLearnersProps) => {
     const rows: ReadonlyArray<RankedUserRowData> = loading
         ? Array.from({ length: 5 }, (_, index) => ({ id: `resting-${index}` }))
         : settledEmpty ? [] : props.props.rows
-    return <SurfaceListCard props={{ label: props.props.label }} isLoading={loading}>
+    return <SurfaceListCard label={props.props.label} isLoading={loading}>
         <div className={topLearnerStandingClassName}><LeaderboardStandingRow props={props.props.standing} isLoading={loading} /></div>
-        {settledEmpty ? <div className={topLearnerEmptyNoticeClassName}><EmptyNotice props={{ icon: "league", message: props.state === "empty" ? props.props.emptyMessage ?? "" : props.props.errorMessage ?? "", actionLabel: props.state === "failed" ? props.props.retryLabel : undefined }} on={{ act: props.state === "failed" ? props.on?.retry : undefined }} /></div> : rows.map((row) => <div className={topLearnerRowClassName} data-dashboard-community-ranked-row="true" data-dashboard-community-viewer-row={row.isMe === true} key={row.id}><RankedUserRow props={row} on={{ open: props.on?.[`open:${row.id}`], follow: props.on?.[`follow:${row.id}`] }} isLoading={loading} /></div>)}
+        {settledEmpty ? <div className={topLearnerEmptyNoticeClassName}><EmptyNotice message={props.state === "empty" ? props.props.emptyMessage ?? "" : props.props.errorMessage ?? ""} actionLabel={props.state === "failed" ? props.props.retryLabel : undefined} iconSource={iconSourceFor("league", "leading")} onAction={({ act: props.state === "failed" ? props.on?.retry : undefined })?.act} /></div> : rows.map((row) => <div className={topLearnerRowClassName} data-dashboard-community-ranked-row="true" data-dashboard-community-viewer-row={row.isMe === true} key={row.id}><RankedUserRow props={row} on={{ open: props.on?.[`open:${row.id}`], follow: props.on?.[`follow:${row.id}`] }} isLoading={loading} /></div>)}
     </SurfaceListCard>
 }

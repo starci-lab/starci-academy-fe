@@ -1,7 +1,7 @@
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { Badge } from "@/components/leaves/Badge"
-import { Heading } from "@/components/leaves/Heading"
-import { Text } from "@/components/leaves/Text"
+import { SurfaceCard } from "@starci/grammar/common"
+import { Badge } from "@starci/grammar/common"
+import { Heading } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import type { CourseAdvisorRecommendation } from "@/modules/ai/course-advisor-response"
 import { recommendationCardClassNames } from "./classNames"
 
@@ -34,30 +34,27 @@ export type CourseAdvisorRecommendationCardProps = {
 
 /** Render one evidence-backed fit; course truth and navigation are supplied by the connected owner. */
 export const CourseAdvisorRecommendationCardBase = (props: CourseAdvisorRecommendationCardProps) => (
-    <SurfaceCard props={{ isFrameless: true }}>
+    <SurfaceCard frame={true ? "frameless" : "bounded"} composition="joined">
         <article className={recommendationCardClassNames.root} data-course-recommendation={props.props.courseDisplayId}>
             <div className={recommendationCardClassNames.identity}>
                 <div className={recommendationCardClassNames.copy}>
-                    <Text props={{ content: props.props.labels.aiAssessment, size: "xs", weight: "semibold" }} />
-                    <Heading props={{ content: props.props.labels.whyFit, level: 3 }} />
-                    <div className={recommendationCardClassNames.reason}><Text props={{ content: props.props.reason, size: "sm" }} /></div>
+                    <Text size={"xs"} weight={"semibold"}>{props.props.labels.aiAssessment}</Text>
+                    <Heading level={3}>{props.props.labels.whyFit}</Heading>
+                    <div className={recommendationCardClassNames.reason}><Text size={"sm"}>{props.props.reason}</Text></div>
                 </div>
-                <Badge props={{ content: props.props.labels.confidence, tone: "neutral" }} />
+                <Badge tone={"neutral"}>{props.props.labels.confidence}</Badge>
             </div>
             <div className={recommendationCardClassNames.evidence}>
                 {props.props.fitGap === null || props.props.fitGap === undefined || props.props.fitGap === "" ? null : (
                     <div className={recommendationCardClassNames.gap}>
-                        <div className={recommendationCardClassNames.gapCopy}><Text props={{ content: `${props.props.labels.fitGap}: ${props.props.fitGap}`, size: "xs", tone: "muted" }} /></div>
+                        <div className={recommendationCardClassNames.gapCopy}><Text size={"xs"} tone={"muted"}>{`${props.props.labels.fitGap}: ${props.props.fitGap}`}</Text></div>
                     </div>
                 )}
                 <section className={recommendationCardClassNames.platform} aria-label={props.props.labels.courseAction}>
                     <div className={recommendationCardClassNames.platformHeading}>
-                        <Text props={{ content: props.props.labels.courseAction, size: "xs", weight: "semibold", tone: "muted" }} />
-                        <Heading props={{ content: props.props.title ?? props.props.courseDisplayId, level: 3 }} isLoading={props.isLoading} />
-                        <Badge
-                            props={{ content: props.props.isEnrolled === true ? props.props.labels.enrolled : props.props.labels.available, tone: props.props.isEnrolled === true ? "success" : "accent" }}
-                            isLoading={props.isLoading}
-                        />
+                        <Text size={"xs"} tone={"muted"} weight={"semibold"}>{props.props.labels.courseAction}</Text>
+                        <Heading level={3} isSkeleton={props.isLoading}>{props.props.title ?? props.props.courseDisplayId}</Heading>
+                        <Badge tone={props.props.isEnrolled === true ? "success" : "accent"} isSkeleton={props.isLoading}>{props.props.isEnrolled === true ? props.props.labels.enrolled : props.props.labels.available}</Badge>
                     </div>
                     <a href={props.action.href} className={recommendationCardClassNames.cta}>{props.action.label}<span aria-hidden="true">→</span></a>
                 </section>

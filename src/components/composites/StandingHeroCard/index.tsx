@@ -1,8 +1,8 @@
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
+import { SurfaceCard } from "@starci/grammar/common"
 import { LeaderboardStandingRow, type LeaderboardStandingRowData } from "@/components/composites/LeaderboardStandingRow"
-import { Button } from "@/components/leaves/Button"
-import { Progress } from "@/components/leaves/Progress"
-import { Text } from "@/components/leaves/Text"
+import { Button } from "@starci/grammar/common"
+import { Progress } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 
 /**
  * COMPOSITE - `StandingHeroCard`: the viewer's place, the distance to the next one, and the one
@@ -50,6 +50,6 @@ export const StandingHeroCard = (props: StandingHeroCardProps) => {
     const isLoading = props.isLoading ?? false
     const progress = data.progress
     return (
-        <SurfaceCard><LeaderboardStandingRow props={data.standing} isLoading={isLoading} />{progress === undefined ? null : <div><Text props={{ content: progress.label, size: "xs", tone: "muted" }} isLoading={isLoading} /><Progress props={{ value: Math.round(progress.ratio * 100), label: data.progressAccessibleLabel }} isLoading={isLoading} /></div>}<Button props={{ label: data.ctaLabel, variant: "primary", size: "md" }} on={{ press: on?.cta }} isLoading={isLoading} /></SurfaceCard>
+        <SurfaceCard composition="joined"><LeaderboardStandingRow props={data.standing} isLoading={isLoading} />{progress === undefined ? null : <div><Text size={"xs"} tone={"muted"} isSkeleton={isLoading}>{progress.label}</Text><Progress label={data.progressAccessibleLabel} value={Math.round(progress.ratio * 100)} isSkeleton={isLoading} /></div>}<Button variant={"primary"} size={"md"} isSkeleton={isLoading} onPress={({ press: on?.cta })?.press}>{data.ctaLabel}</Button></SurfaceCard>
     )
 }

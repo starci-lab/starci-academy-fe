@@ -13,7 +13,7 @@ import { useQueryMyInProgressMockInterviewSessionSwr } from "@/hooks/swr/useQuer
 import { useQueryCourseLeaderboardSwr } from "@/hooks/swr/useQueryCourseLeaderboardSwr"
 import { useQueryMyWeeklyStatsSwr } from "@/hooks/swr/useQueryMyWeeklyStatsSwr"
 import { useQueryResolveRouteSwr } from "@/hooks/swr/useQueryResolveRouteSwr"
-import { useLearnMobileView } from "@/components/layouts/LearnShellLayout"
+import { useLearnMobileView } from "@/components/product-shells/LearnShellLayout"
 import type { CourseLearningSignal, CourseLearningSignalsProps } from "@/components/blocks/learn/CourseLearningSignals"
 import type { CourseNextAction, CourseNextActionsProps } from "@/components/blocks/learn/CourseNextActions"
 import type { CourseProgressOverviewProps } from "@/components/blocks/learn/CourseProgressOverview"

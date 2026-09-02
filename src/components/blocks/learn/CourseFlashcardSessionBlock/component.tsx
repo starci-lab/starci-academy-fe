@@ -1,10 +1,11 @@
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
+import { SurfaceCard } from "@starci/grammar/common"
 import { Article } from "@/components/branches/Article"
 import { Breadcrumbs } from "@/components/leaves/Breadcrumbs"
-import { Button } from "@/components/leaves/Button"
-import { Heading } from "@/components/leaves/Heading"
-import { Progress } from "@/components/leaves/Progress"
-import { Text } from "@/components/leaves/Text"
+import { Button } from "@starci/grammar/common"
+
+import { Heading } from "@starci/grammar/common"
+import { Progress } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import type { FlashcardSessionMode } from "@/modules/api/graphql/queries/query-my-in-progress-flashcard-session"
 import {
     sessionActionRowClassName,
@@ -74,10 +75,10 @@ export const CourseFlashcardSessionBlockBase = (props: CourseFlashcardSessionBlo
     const statusText = props.blockState === "syncing" ? data.syncingLabel : props.blockState === "completing" ? data.completingLabel : undefined
 
     if (props.blockState === "failed" || props.blockState === "expired") {
-        return <main aria-label={data.title} className={sessionWorkspaceClassName}><SurfaceCard><section className={sessionRecoveryClassName}>
-            <Heading props={{ content: data.title, level: 1 }} />
-            <Text props={{ content: props.blockState === "failed" ? data.failedText : data.expiredText, size: "md" }} />
-            <div className={sessionActionRowClassName}><Button props={{ label: data.retryLabel, variant: "primary" }} on={{ press: props.on.retry }} /><Button props={{ label: data.leaveLabel, variant: "outline" }} on={{ press: props.on.openMode }} /></div>
+        return <main aria-label={data.title} className={sessionWorkspaceClassName}><SurfaceCard composition="joined"><section className={sessionRecoveryClassName}>
+            <Heading level={1}>{data.title}</Heading>
+            <Text size={"md"}>{props.blockState === "failed" ? data.failedText : data.expiredText}</Text>
+            <div className={sessionActionRowClassName}><Button variant="primary" onPress={props.on.retry}>{data.retryLabel}</Button><Button variant="outline" onPress={props.on.openMode}>{data.leaveLabel}</Button></div>
         </section></SurfaceCard></main>
     }
 
@@ -85,49 +86,49 @@ export const CourseFlashcardSessionBlockBase = (props: CourseFlashcardSessionBlo
         <header className={sessionHeaderClassName}>
             <div className={sessionHeaderCopyClassName}>
                 <Breadcrumbs props={{ label: data.breadcrumbLabel, showFullTrail: true, steps: [{ id: "course", label: data.courseTitle ?? "" }, { id: "mode", label: data.modeBreadcrumbLabel }, { id: "session", label: data.taskBreadcrumbLabel }] }} on={loading ? undefined : { course: props.on.openCourse, mode: props.on.openMode }} isLoading={loading} />
-                <Heading props={{ content: data.title, level: 1 }} isLoading={loading} />
-                <Text props={{ content: data.progressText, size: "sm", tone: "muted" }} isLoading={loading} />
+                <Heading level={1} isSkeleton={loading}>{data.title}</Heading>
+                <Text size={"sm"} tone={"muted"} isSkeleton={loading}>{data.progressText}</Text>
             </div>
-            <div className={sessionHeaderActionsClassName}>{data.focusModeLabel === undefined ? null : <Text props={{ content: data.focusModeLabel, size: "xs", weight: "semibold" }} />}{statusText === undefined ? null : <Text props={{ content: statusText, size: "sm", tone: "accent", live: "polite" }} />}<Button props={{ label: data.leaveLabel, variant: "outline", disabled: workPending }} on={{ press: props.on.leave }} isLoading={loading} /></div>
+            <div className={sessionHeaderActionsClassName}>{data.focusModeLabel === undefined ? null : <Text size={"xs"} weight={"semibold"}>{data.focusModeLabel}</Text>}{statusText === undefined ? null : <Text size={"sm"} tone={"accent"} live={"polite"}>{statusText}</Text>}<Button variant={"outline"} isDisabled={workPending} isSkeleton={loading} onPress={({ press: props.on.leave })?.press}>{data.leaveLabel}</Button></div>
         </header>
-        <Progress props={{ label: data.progressLabel ?? data.progressText, value: data.totalCards === 0 ? 0 : Math.round(data.progressCard / data.totalCards * 100) }} isLoading={loading} />
+        <Progress label={data.progressLabel ?? data.progressText} value={data.totalCards === 0 ? 0 : Math.round(data.progressCard / data.totalCards * 100)} isSkeleton={loading} />
         <div className={sessionGridClassName}>
             <div className={sessionTaskColumnClassName}>
-                <SurfaceCard props={{ label: data.promptLabel }} isLoading={loading}><section className={sessionPromptClassName} aria-label={data.promptLabel}>
+                <SurfaceCard label={data.promptLabel} composition="joined" state={loading ? "pending" : "neutral"}><section className={sessionPromptClassName} aria-label={data.promptLabel}>
                     <div className={sessionMetaClassName}>
-                        <Text props={{ content: `${data.modeLabel}: ${data.modeBreadcrumbLabel}`, size: "xs" }} isLoading={loading} />
-                        {data.deckTitle === undefined ? null : <Text props={{ content: `${data.deckLabel}: ${data.deckTitle}`, size: "xs" }} isLoading={loading} />}
-                        {data.level == null ? null : <Text props={{ content: `${data.levelLabel}: ${data.level}`, size: "xs" }} isLoading={loading} />}
+                        <Text size={"xs"} isSkeleton={loading}>{`${data.modeLabel}: ${data.modeBreadcrumbLabel}`}</Text>
+                        {data.deckTitle === undefined ? null : <Text size={"xs"} isSkeleton={loading}>{`${data.deckLabel}: ${data.deckTitle}`}</Text>}
+                        {data.level == null ? null : <Text size={"xs"} isSkeleton={loading}>{`${data.levelLabel}: ${data.level}`}</Text>}
                     </div>
                     <div className={sessionPromptBodyClassName}>
-                        {data.readOnly ? <div className={sessionReadOnlyNoticeClassName}><Text props={{ content: data.readOnlyLabel, size: "sm", weight: "semibold" }} /><Text props={{ content: data.readOnlyText, size: "sm", tone: "muted" }} /></div> : null}
+                        {data.readOnly ? <div className={sessionReadOnlyNoticeClassName}><Text size={"sm"} weight={"semibold"}>{data.readOnlyLabel}</Text><Text size={"sm"} tone={"muted"}>{data.readOnlyText}</Text></div> : null}
                         {cloze === undefined ? <Article props={{ body: data.prompt, measure: "compact" }} isLoading={loading} /> : null}
                         {cloze === undefined ? null : <>
-                            <Text props={{ content: data.clozeInstructionLabel, size: "sm", tone: "muted" }} />
+                            <Text size={"sm"} tone={"muted"}>{data.clozeInstructionLabel}</Text>
                             <Article props={{ body: cloze.text, measure: "compact" }} />
                             <div className={sessionAnswerClassName}>
                                 {cloze.blanks.map((blank, position) => {
                                     const selection = cloze.selected.find((item) => item.blankId === blank.id)
-                                    return <div key={blank.id} className={sessionBlankClassName}><Button props={{ label: selection?.label ?? `${data.blankLabel} ${position + 1}`, size: "sm", variant: selection === undefined ? "outline" : "secondary", disabled: selection === undefined || data.readOnly || workPending }} on={{ press: selection === undefined ? undefined : () => props.on.selectTerm(selection.tokenId) }} />{blank.hint == null ? null : <Text props={{ content: `${data.hintLabel}: ${readableHint(blank.hint)}`, size: "xs", tone: "muted" }} />}</div>
+                                    return <div key={blank.id} className={sessionBlankClassName}><Button variant={selection === undefined ? "outline" : "secondary"} size="sm" isDisabled={selection === undefined || data.readOnly || workPending} onPress={selection === undefined ? undefined : () => props.on.selectTerm(selection.tokenId)}>{selection?.label ?? `${data.blankLabel} ${position + 1}`}</Button>{blank.hint == null ? null : <Text size={"xs"} tone={"muted"}>{`${data.hintLabel}: ${readableHint(blank.hint)}`}</Text>}</div>
                                 })}
                             </div>
-                            {availableTokens.length === 0 ? null : <><Text props={{ content: data.wordBankLabel, size: "xs" }} /><div className={sessionWordBankClassName}>{availableTokens.map((token) => <Button key={token.id} props={{ label: token.label, size: "sm", variant: "outline", disabled: data.readOnly || workPending }} on={{ press: () => props.on.selectTerm(token.id) }} />)}</div></>}
+                            {availableTokens.length === 0 ? null : <><Text size={"xs"}>{data.wordBankLabel}</Text><div className={sessionWordBankClassName}>{availableTokens.map((token) => <Button key={token.id} variant="outline" size="sm" isDisabled={data.readOnly || workPending} onPress={() => props.on.selectTerm(token.id)}>{token.label}</Button>)}</div></>}
                         </>}
-                        {data.answerVisible ? <div className={sessionAnswerClassName}><Text props={{ content: answerAvailable ? data.answerLabel : data.answerUnavailableLabel, size: "sm", weight: "semibold" }} />{answerAvailable ? <Article props={{ body: data.answer, measure: "compact" }} /> : <Text props={{ content: data.answerUnavailableText, size: "sm" }} />}</div> : null}
+                        {data.answerVisible ? <div className={sessionAnswerClassName}><Text size={"sm"} weight={"semibold"}>{answerAvailable ? data.answerLabel : data.answerUnavailableLabel}</Text>{answerAvailable ? <Article props={{ body: data.answer, measure: "compact" }} /> : <Text size={"sm"}>{data.answerUnavailableText}</Text>}</div> : null}
                     </div>
                     <div className={sessionActionRowClassName}>
-                        {cloze === undefined && !data.answerVisible ? <Button props={{ label: data.revealLabel, variant: "primary", disabled: workPending }} on={{ press: props.on.reveal }} isLoading={loading} /> : null}
-                        {cloze !== undefined && !data.readOnly ? <Button props={{ label: data.checkAnswerLabel, variant: "primary", disabled: cloze.selected.length < cloze.blanks.length || workPending }} on={{ press: props.on.checkQuiz }} isLoading={loading} /> : null}
+                        {cloze === undefined && !data.answerVisible ? <Button variant={"primary"} isDisabled={workPending} isSkeleton={loading} onPress={({ press: props.on.reveal })?.press}>{data.revealLabel}</Button> : null}
+                        {cloze !== undefined && !data.readOnly ? <Button variant={"primary"} isDisabled={cloze.selected.length < cloze.blanks.length || workPending} isSkeleton={loading} onPress={({ press: props.on.checkQuiz })?.press}>{data.checkAnswerLabel}</Button> : null}
                     </div>
                 </section></SurfaceCard>
-                {canRate ? <SurfaceCard props={{ label: data.ratingLabel }}><div className={sessionRatingClassName}>{([data.againLabel, data.hardLabel, data.goodLabel, data.easyLabel] as const).map((label, grade) => <Button key={label} props={{ label, variant: "outline", disabled: workPending, isPending: workPending && data.pendingRating === grade }} on={{ press: () => props.on.rate(grade as 0 | 1 | 2 | 3) }} />)}</div><div className={sessionRatingHintClassName}><Text props={{ content: data.continueHint, size: "xs" }} /></div></SurfaceCard> : null}
+                {canRate ? <SurfaceCard label={data.ratingLabel} composition="joined"><div className={sessionRatingClassName}>{([data.againLabel, data.hardLabel, data.goodLabel, data.easyLabel] as const).map((label, grade) => <Button key={label} variant="outline" isDisabled={workPending} isPending={workPending && data.pendingRating === grade} onPress={() => props.on.rate(grade as 0 | 1 | 2 | 3)}>{label}</Button>)}</div><div className={sessionRatingHintClassName}><Text size={"xs"}>{data.continueHint}</Text></div></SurfaceCard> : null}
             </div>
-            <SurfaceCard props={{ label: data.navigatorTitle }}><aside className={sessionNavigatorClassName} aria-label={data.navigatorTitle}>
-                <Text props={{ content: data.navigatorDescription, size: "sm", tone: "muted" }} />
-                <Text props={{ content: data.navigatorStateLabel, size: "xs" }} />
-                <div className={sessionQuestionGridClassName}>{data.questions.map((question) => <Button key={question.position} props={{ label: String(question.position), size: "sm", variant: question.selected ? "primary" : question.state === "current" ? "secondary" : "outline", disabled: question.disabled || workPending }} on={{ press: () => props.on.selectQuestion(question.position) }} />)}</div>
-                {data.questions.map((question) => question.selected ? <Text key={question.position} props={{ content: `${question.position}: ${stateLabelOf(question, data)}`, size: "xs", live: "polite" }} /> : null)}
-                <div className={sessionNavigationActionsClassName}><Button props={{ label: data.previousLabel, variant: "outline", disabled: data.currentCard <= 1 || workPending }} on={{ press: props.on.previous }} /><Button props={{ label: data.nextLabel, variant: "outline", disabled: data.currentCard >= data.progressCard || workPending }} on={{ press: props.on.next }} /></div>
+            <SurfaceCard label={data.navigatorTitle} composition="joined"><aside className={sessionNavigatorClassName} aria-label={data.navigatorTitle}>
+                <Text size={"sm"} tone={"muted"}>{data.navigatorDescription}</Text>
+                <Text size={"xs"}>{data.navigatorStateLabel}</Text>
+                <div className={sessionQuestionGridClassName}>{data.questions.map((question) => <Button key={question.position} variant={question.selected ? "primary" : question.state === "current" ? "secondary" : "outline"} size="sm" isDisabled={question.disabled || workPending} onPress={() => props.on.selectQuestion(question.position)}>{String(question.position)}</Button>)}</div>
+                {data.questions.map((question) => question.selected ? <Text key={question.position} size={"xs"} live={"polite"}>{`${question.position}: ${stateLabelOf(question, data)}`}</Text> : null)}
+                <div className={sessionNavigationActionsClassName}><Button variant="outline" isDisabled={data.currentCard <= 1 || workPending} onPress={props.on.previous}>{data.previousLabel}</Button><Button variant="outline" isDisabled={data.currentCard >= data.progressCard || workPending} onPress={props.on.next}>{data.nextLabel}</Button></div>
             </aside></SurfaceCard>
         </div>
     </main>

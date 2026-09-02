@@ -104,11 +104,13 @@ describe("MyCoursesProgress", () => {
         vi.mocked(useQueryMyCoursesSwr).mockReturnValue(answer({ data: [enrolled()] }))
         vi.mocked(useQueryResolveRouteSwr).mockReturnValue(resolver("/x"))
 
-        render(<MyCoursesProgress />)
+        const { container } = render(<MyCoursesProgress />)
         expect(screen.getByText("45%")).toBeInTheDocument()
         expect(screen.getByText("progress.content · 4/8")).toBeInTheDocument()
         expect(screen.getByText("progress.challenge · 1/2")).toBeInTheDocument()
         expect(screen.getByText("progress.milestone · 1/4")).toBeInTheDocument()
+        expect(container.querySelectorAll("[data-tone=neutral]")).toHaveLength(3)
+        expect(container.querySelector("[data-tone=success], [data-tone=warning]")).toBeNull()
         expect(screen.queryByText("trial")).toBeNull()
     })
 
@@ -149,7 +151,7 @@ describe("MyCoursesProgress", () => {
         vi.mocked(useQueryResolveRouteSwr).mockReturnValue(resolver("/x"))
 
         render(<MyCoursesProgress />)
-        expect(screen.getByText("trial")).toBeInTheDocument()
+        expect(screen.getByText("trial").closest("[data-tone]")).toHaveAttribute("data-tone", "neutral")
     })
 
     it("shuts the row while its route is resolving, then travels there without doubling the locale", async () => {

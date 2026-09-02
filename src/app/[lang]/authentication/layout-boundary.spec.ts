@@ -21,7 +21,7 @@ describe("authentication layout boundary", () => {
     it("mounts product navigation only inside the route families that own it", () => {
         for (const family of ["dashboard", "league"]) {
             const layout = readAppFile(join(family, "layout.tsx"))
-            expect(layout).toContain("from \"@/components/layouts/ShellNav\"")
+            expect(layout).toContain("from \"@/components/product-shells/ShellNav\"")
             expect(layout).toContain("<ShellNav {...{}} />")
         }
     })

@@ -1,7 +1,8 @@
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
-import { Button } from "@/components/leaves/Button"
-import { Heading } from "@/components/leaves/Heading"
-import { Text } from "@/components/leaves/Text"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { EmptyNotice } from "@starci/grammar/common"
+import { Button } from "@starci/grammar/common"
+import { Heading } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import { Textarea } from "@/components/leaves/Textarea"
 import {
     contentDiscussionCommentClassName,
@@ -68,7 +69,7 @@ export const ContentDiscussionPanelBase = (props: ContentDiscussionPanelProps) =
 
     return (
         <section className={contentDiscussionPanelClassName} aria-label={props.props.labels.title}>
-            <Heading props={{ content: props.props.labels.title, level: 2 }} />
+            <Heading level={2}>{props.props.labels.title}</Heading>
             {canCompose ? <>
                 <Textarea
                     key={props.props.draftKey}
@@ -83,33 +84,17 @@ export const ContentDiscussionPanelBase = (props: ContentDiscussionPanelProps) =
                     }}
                     on={{ change: props.on?.changeDraft }}
                 />
-                <Button
-                    props={{
-                        label: isSubmitting ? props.props.labels.submitting : props.props.labels.submit,
-                        variant: "primary",
-                        icon: "send",
-                        disabled: props.props.draft.trim() === "",
-                        isPending: isSubmitting,
-                    }}
-                    on={{ press: props.on?.submit }}
-                />
+                <Button variant="primary" isDisabled={props.props.draft.trim() === ""} isPending={isSubmitting} onPress={props.on?.submit}>{isSubmitting ? props.props.labels.submitting : props.props.labels.submit}</Button>
             </> : null}
             {props.state === "failed" || props.state === "empty" ? (
-                <EmptyNotice
-                    props={{
-                        icon: props.state === "failed" ? "retry" : "community",
-                        message: props.state === "failed" ? props.props.labels.failed : props.props.labels.empty,
-                        actionLabel: props.state === "failed" ? props.props.labels.retry : undefined,
-                    }}
-                    on={{ act: props.state === "failed" ? props.on?.retry : undefined }}
-                />
+                <EmptyNotice message={props.state === "failed" ? props.props.labels.failed : props.props.labels.empty} actionLabel={props.state === "failed" ? props.props.labels.retry : undefined} iconSource={iconSourceFor(props.state === "failed" ? "retry" : "community", "leading")} onAction={({ act: props.state === "failed" ? props.on?.retry : undefined })?.act} />
             ) : (
                 <ul className={contentDiscussionListClassName}>
                     {comments.map((comment) => (
                         <li key={comment.id} className={contentDiscussionCommentClassName}>
-                            <Text props={{ content: comment.author, size: "sm", weight: "semibold" }} isLoading={isLoading} />
-                            <Text props={{ content: comment.meta, size: "xs", tone: "muted" }} isLoading={isLoading} />
-                            <Text props={{ content: comment.body, size: "sm" }} isLoading={isLoading} />
+                            <Text size={"sm"} weight={"semibold"} isSkeleton={isLoading}>{comment.author}</Text>
+                            <Text size={"xs"} tone={"muted"} isSkeleton={isLoading}>{comment.meta}</Text>
+                            <Text size={"sm"} isSkeleton={isLoading}>{comment.body}</Text>
                         </li>
                     ))}
                 </ul>

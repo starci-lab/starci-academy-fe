@@ -1,5 +1,6 @@
 import { Breadcrumbs as HeroBreadcrumbs, Link as HeroLink } from "@heroui/react"
-import { Icon } from "@/components/leaves/Icon"
+import { Icon } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
 import { breadcrumbsBackLinkClassName, breadcrumbsLoadingClassName, breadcrumbsTrailClassName } from "./classNames"
 
 /**
@@ -78,7 +79,7 @@ export const Breadcrumbs = (props: BreadcrumbsProps) => {
                 onPress={on?.[parent.id]}
                 className={breadcrumbsBackLinkClassName}
             >
-                <Icon props={{ name: "back", role: "chip" }} />
+                <Icon source={iconSourceFor("back", "chip")} role={"chip"} />
                 {data.backLabel ?? BACK_LABEL}
             </HeroLink>
         )

@@ -1,4 +1,4 @@
-import { Text } from "@/components/leaves/Text"
+import { Text } from "@starci/grammar/common"
 import { profileProofMetricClassName } from "./classNames"
 
 /** One public coding-standing figure and its qualifier. */
@@ -10,5 +10,5 @@ export type ProfileMetricProps = { readonly props: ProfileMetricData; readonly i
 export const ProfileMetric = (props: ProfileMetricProps) => {
     const data = props.props
     const isLoading = props.isLoading ?? false
-    return <div className={profileProofMetricClassName}><Text props={{ content: data.value, weight: "semibold" }} isLoading={isLoading} /><Text props={{ content: data.label, size: "xs", tone: "muted" }} isLoading={isLoading} /></div>
+    return <div className={profileProofMetricClassName}><Text weight={"semibold"} isSkeleton={isLoading}>{data.value}</Text><Text size={"xs"} tone={"muted"} isSkeleton={isLoading}>{data.label}</Text></div>
 }

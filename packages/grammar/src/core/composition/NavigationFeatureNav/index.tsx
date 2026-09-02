@@ -80,15 +80,14 @@ export const NavigationFeatureNav = ({
             )}
         </PageContainer>
         {featureNavigation === undefined ? null : (
-            <PageContainer
+            <div
                 aria-label={featureNavigationLabel}
                 className={navigationFeatureNavFeatureClassName}
                 data-grammar-navigation-feature-nav-feature="true"
-                measure={measure}
                 role={featureNavigationLabel === undefined ? undefined : "region"}
             >
                 {featureNavigation}
-            </PageContainer>
+            </div>
         )}
     </header>
 )

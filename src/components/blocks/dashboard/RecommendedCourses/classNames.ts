@@ -30,8 +30,10 @@ export const recommendedCourseItemClassName = (index: number, itemCount: number)
         "min-w-0",
         "border-b",
         "border-separator",
-        "p-3",
-        "sm:p-4",
+        "px-4",
+        "py-3",
+        "first:pt-4",
+        "last:pb-4",
         "last:border-b-0",
         recommendedCourseCompactItemClassName,
     )

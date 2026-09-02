@@ -1,7 +1,8 @@
-import { Badge } from "@/components/leaves/Badge"
+import { Badge } from "@starci/grammar/common"
 import { CoverImage } from "@/components/leaves/CoverImage"
-import { IconButton } from "@/components/leaves/IconButton"
-import { Text } from "@/components/leaves/Text"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { IconButton } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import {
     cartLineClassName,
     cartLineCoverClassName,
@@ -78,16 +79,16 @@ export const CartLineBase = (props: CartLineProps) => {
                 <CoverImage props={{ src: props.props.cover ?? null, alt: "", ratio: "wide" }} isLoading={isLoading} />
             </div>
             <div className={cartLineIdentityClassName}>
-                <Text props={{ content: props.props.title, size: "sm", weight: "semibold" }} isLoading={isLoading} />
-                {props.props.tier === undefined ? null : <Text props={{ content: props.props.tier, size: "xs", tone: "muted" }} isLoading={isLoading} />}
+                <Text size={"sm"} weight={"semibold"} isSkeleton={isLoading}>{props.props.title}</Text>
+                {props.props.tier === undefined ? null : <Text size={"xs"} tone={"muted"} isSkeleton={isLoading}>{props.props.tier}</Text>}
             </div>
             <div className={cartLinePriceClassName}>
-                <Text props={{ content: props.props.price, size: "sm", weight: "semibold" }} isLoading={isLoading} />
-                {props.props.originalPrice === undefined ? null : <Text props={{ content: props.props.originalPrice, size: "xs", tone: "muted", isSuperseded: true }} isLoading={isLoading} />}
-                {props.props.discountLabel === undefined ? null : <Badge props={{ content: props.props.discountLabel, tone: "success" }} isLoading={isLoading} />}
+                <Text size={"sm"} weight={"semibold"} isSkeleton={isLoading}>{props.props.price}</Text>
+                {props.props.originalPrice === undefined ? null : <Text size={"xs"} tone={"muted"} isSuperseded={true} isSkeleton={isLoading}>{props.props.originalPrice}</Text>}
+                {props.props.discountLabel === undefined ? null : <Badge tone={"success"} isSkeleton={isLoading}>{props.props.discountLabel}</Badge>}
             </div>
             <div className={cartLineRemoveClassName}>
-                <IconButton props={{ icon: "close", label: props.props.removeLabel }} on={{ press: props.state === "removing" ? undefined : props.on?.remove }} />
+                <IconButton source={iconSourceFor("close", "leading")} label={props.props.removeLabel} onPress={({ press: props.state === "removing" ? undefined : props.on?.remove })?.press} />
             </div>
         </div>
     )

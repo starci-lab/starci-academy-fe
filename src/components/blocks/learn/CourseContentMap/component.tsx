@@ -1,11 +1,11 @@
 import { ScrollViewport } from "@/components/branches/ScrollViewport"
-import { SurfaceAccordionCard } from "@starci/grammar/core"
+import { SurfaceAccordionCard } from "@starci/grammar/common"
 import { LabelledProgressRow } from "@/components/composites/LabelledProgressRow"
 import { DisclosureIndicator } from "@/components/leaves/DisclosureIndicator"
-import { Progress } from "@/components/leaves/Progress"
+import { Progress } from "@starci/grammar/common"
 import { SearchBox } from "@/components/leaves/SearchBox"
 import { SelectionList } from "@/components/leaves/SelectionList"
-import { Text } from "@/components/leaves/Text"
+import { Text } from "@starci/grammar/common"
 import {
     contentMapModuleBodyClassName,
     contentMapModuleListClassName,
@@ -92,8 +92,8 @@ export const CourseContentMapPanel = (props: CourseContentMapPanelProps) => {
                     key={module.id}
                     isOpen={module.isOpen}
                     summaryRender={<div className={contentMapModuleSummaryClassName}><div className={contentMapModuleSummaryCopyClassName}>
-                        <Text props={{ content: module.title, size: "md", weight: "medium" }} isLoading={isLoading} />
-                        {module.isOpen ? <Progress props={{ value: module.completionPercent, label: module.progressLabel }} isLoading={isLoading} /> : <Text props={{ content: module.countLabel, size: "xs", tone: "muted" }} isLoading={isLoading} />}
+                        <Text size={"md"} weight={"medium"} isSkeleton={isLoading}>{module.title}</Text>
+                        {module.isOpen ? <Progress label={module.progressLabel} value={module.completionPercent} isSkeleton={isLoading} /> : <Text size={"xs"} tone={"muted"} isSkeleton={isLoading}>{module.countLabel}</Text>}
                     </div><DisclosureIndicator props={{ isOpen: module.isOpen }} /></div>}
                     bodyRender={<div className={contentMapModuleBodyClassName}><SelectionList props={{ id: `course-outline-${module.id}`, label: module.title ?? props.props.labels.progress, variant: "outline", selectedKey: module.lessons.find((lesson) => lesson.isCurrent)?.id, items: (module.isOpen ? module.lessons : []).map((lesson) => ({ id: lesson.id, textValue: lesson.title, title: lesson.title, meta: lesson.meta, icon: lesson.isComplete ? "complete" : "pending" })) }} on={{ activate: (id) => props.on?.openLesson?.(id) }} isLoading={isLoading} /></div>}
                     renderSummary={(summary) => summary}

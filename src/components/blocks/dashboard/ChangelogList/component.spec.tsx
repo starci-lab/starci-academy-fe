@@ -22,6 +22,7 @@ describe("ChangelogListBase", () => {
         const { container } = render(<ChangelogListBase state="ready" props={props} />)
         expect(screen.getByText("12/08/2026")).toBeInTheDocument()
         expect(screen.getByText("Feature")).toBeInTheDocument()
+        expect(screen.getByText("Feature").closest("[data-tone]")).toHaveAttribute("data-tone", "neutral")
         expect(screen.getByText("Faster avatars")).toBeInTheDocument()
         expect(screen.getByText("Avatar fallbacks now use Lorelei.")).toBeInTheDocument()
         expect(container.textContent).toContain("Faster avatars")

@@ -1,7 +1,7 @@
 import { Avatar as DiceAvatar, Style } from "@dicebear/core"
 import lorelei from "@dicebear/styles/lorelei.json" with { type: "json" }
 import { Avatar as HeroAvatar } from "@heroui/react"
-import { avatarFallbackClassName, getRestingAvatarClassName } from "./classNames"
+import { avatarFallbackClassName, getAvatarClassName } from "./classNames"
 
 /**
  * LEAF - `Avatar`: the mark that says which person a row is about.
@@ -61,7 +61,7 @@ export const Avatar = (props: AvatarProps) => {
             aria-hidden={isLoading ? true : undefined}
             size={SIZES[size]}
             color="accent"
-            className={isLoading ? getRestingAvatarClassName() : undefined}
+            className={getAvatarClassName(size, isLoading)}
         >
             {!isLoading ? <HeroAvatar.Image src={showsImage ? data.src : fallbackSrc} alt={name} /> : null}
             <HeroAvatar.Fallback>

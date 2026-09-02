@@ -21,5 +21,8 @@ export const subnavLeadingClassName = cn("starci-core-subnav-leading", "shrink-0
 export const subnavTitleClassName = cn("starci-core-subnav-title", "truncate", "font-medium")
 export const subnavToggleClassName = cn(
     "starci-core-subnav-toggle",
-    "rounded-full",
+    "rounded-none",
+    "bg-transparent",
+    "shadow-none",
+    "hover:bg-transparent",
 )

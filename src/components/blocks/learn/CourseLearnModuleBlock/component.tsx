@@ -1,5 +1,5 @@
 import { CurriculumModuleRow } from "@/components/composites/CurriculumModuleRow"
-import { Heading } from "@/components/leaves/Heading"
+import { Heading } from "@starci/grammar/common"
 import type { ModuleDetail } from "@/modules/api/graphql/queries/query-module"
 import { courseLearnModulePageClassName } from "./classNames"
 
@@ -15,7 +15,7 @@ export type CourseLearnModuleBlockProps = {
 /** Draw one selected module and its authored content run. */
 export const CourseLearnModuleBlockBase = (props: CourseLearnModuleBlockProps) => (
     <main className={courseLearnModulePageClassName}>
-        <Heading props={{ content: props.title, level: 1 }} isLoading={props.blockState === "pending"} />
+        <Heading level={1} isSkeleton={props.blockState === "pending"}>{props.title}</Heading>
         <CurriculumModuleRow
             props={{
                 title: props.module?.title ?? props.label,

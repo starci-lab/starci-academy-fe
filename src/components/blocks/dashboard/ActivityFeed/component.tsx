@@ -1,7 +1,8 @@
-import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
+import { SurfaceListCard } from "@starci/grammar/common"
 import { ActivityRow, type ActivityRowData } from "@/components/composites/ActivityRow"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
-import { Text } from "@/components/leaves/Text"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { EmptyNotice } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import type { ReactionType } from "@/modules/api/graphql/queries/types/reactions"
 import { activityDayClassName, activityDayLabelClassName, activityDayRowsClassName, activityFeedClassName } from "./classNames"
 
@@ -12,21 +13,21 @@ export type ActivityFeedData = { readonly label?: string; readonly days: Readonl
 /** Activity row actions keyed by row identity. */
 export type ActivityFeedActions = { readonly [key: string]: ((reaction?: ReactionType | null) => void) | undefined }
 /** State and resolved data accepted by the activity feed. */
-export type ActivityFeedProps = { readonly state: "pending" | "filteredEmpty" | "platformEmpty" | "failed" | "ready"; readonly props: ActivityFeedData; readonly on?: ActivityFeedActions; readonly isFrameless?: boolean }
+export type ActivityFeedProps = { readonly state: "pending" | "filteredEmpty" | "platformEmpty" | "failed" | "ready"; readonly props: ActivityFeedData; readonly on?: ActivityFeedActions; readonly isFrameless?: boolean; readonly hasTrailingContent?: boolean }
 /** Draw activity groups, result notices and reaction-capable rows. */
 export const ActivityFeedBase = (props: ActivityFeedProps) => {
     const label = props.props.label ?? "Activity"
     const isResult = props.state === "filteredEmpty" || props.state === "platformEmpty" || props.state === "failed"
     const days = props.state === "pending" ? Array.from({ length: 2 }, (_, index) => ({ id: `resting-day-${index}`, label: "", rows: [] })) : props.props.days
     const content = isResult
-        ? <EmptyNotice props={{ icon: "explore", message: props.props.message, description: props.props.description, actionLabel: props.props.actionLabel }} on={{ act: props.on?.resultAction }} />
-        : <div className={activityFeedClassName}>{days.map((day) => {
+        ? <EmptyNotice message={props.props.message} description={props.props.description} actionLabel={props.props.actionLabel} iconSource={iconSourceFor("explore", "leading")} onAction={({ act: props.on?.resultAction })?.act} />
+        : <div className={activityFeedClassName}>{days.map((day, dayIndex) => {
             const rows = props.state === "pending" ? Array.from({ length: 4 }, (_, index) => ({ id: `${day.id}-${index}` })) : day.rows
-            return <section className={activityDayClassName} key={day.id}>
-                <div className={activityDayLabelClassName}><Text props={{ content: day.label, size: "xs", tone: "muted", weight: "medium" }} isLoading={props.state === "pending"} /></div>
-                <div className={activityDayRowsClassName}>{rows.map((row) => <ActivityRow key={row.id} props={row} on={{ openActor: props.on?.[`actor:${row.id}`], openTarget: props.on?.[`target:${row.id}`], react: (type) => props.on?.[`react:${row.id}`]?.(type) }} isLoading={props.state === "pending"} />)}</div>
+            return <section className={activityDayClassName} data-dashboard-activity-day="true" key={day.id}>
+                <div className={activityDayLabelClassName}><Text size={"xs"} tone={"muted"} weight={"medium"} isSkeleton={props.state === "pending"}>{day.label}</Text></div>
+                <div className={activityDayRowsClassName}>{rows.map((row, rowIndex) => <ActivityRow key={row.id} props={row} on={{ openActor: props.on?.[`actor:${row.id}`], openTarget: props.on?.[`target:${row.id}`], react: (type) => props.on?.[`react:${row.id}`]?.(type) }} isLoading={props.state === "pending"} isBottomEdge={props.hasTrailingContent !== true && dayIndex === days.length - 1 && rowIndex === rows.length - 1} />)}</div>
             </section>
         })}</div>
     if (props.isFrameless === true) return <section aria-label={label}>{content}</section>
-    return <SurfaceListCard props={{ label, isLabelHidden: true, isNested: true }} isLoading={props.state === "pending"}>{content}</SurfaceListCard>
+    return <SurfaceListCard label={label} labelHidden={true} depth={true ? "nested" : "top"} isLoading={props.state === "pending"}>{content}</SurfaceListCard>
 }

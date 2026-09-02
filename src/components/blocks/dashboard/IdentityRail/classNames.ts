@@ -10,4 +10,4 @@ export const identityRailClassName = cn(
 )
 
 /** Match quick-access row stack rhythm for the three standing figures. */
-export const identityRailStatsClassName = dashboardRailRowStackClassName
+export const identityRailStatsClassName = cn(dashboardRailRowStackClassName)

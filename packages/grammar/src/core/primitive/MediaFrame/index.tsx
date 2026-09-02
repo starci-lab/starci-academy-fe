@@ -6,6 +6,7 @@ export type MediaFrameProps = {
     readonly caption?: ReactNode
     readonly aspect?: "landscape" | "portrait" | "square" | "auto"
     readonly fit?: "cover" | "contain"
+    readonly treatment?: "framed" | "plain"
     readonly className?: string
 }
 
@@ -18,12 +19,14 @@ export const MediaFrame = ({
     caption,
     aspect = "landscape",
     fit = "cover",
+    treatment = "framed",
     className,
 }: MediaFrameProps) => (
     <figure
         className={cn("starci-core-media-frame", className)}
         data-grammar-media-aspect={aspect}
         data-grammar-media-fit={fit}
+        data-grammar-media-treatment={treatment}
     >
         <div className="starci-core-media-viewport" data-grammar-media="true">{children}</div>
         {caption === undefined ? null : <figcaption className="starci-core-media-caption">{caption}</figcaption>}

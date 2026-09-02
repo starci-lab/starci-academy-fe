@@ -1,7 +1,8 @@
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { SurfaceCard } from "@starci/grammar/common"
+import { EmptyNotice } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
 import { LabelledProgressRow } from "@/components/composites/LabelledProgressRow"
-import { Text } from "@/components/leaves/Text"
+import { Text } from "@starci/grammar/common"
 import {
     courseProgressOverviewClassName,
     courseProgressSupportClassName,
@@ -45,22 +46,20 @@ type SupportFactProps = { readonly label?: string; readonly fact?: string; reado
 
 /** Draw one supporting label and muted fact. */
 const SupportFact = (props: SupportFactProps) => <div className={supportFactClassName}>
-    <Text props={{ content: props.label, size: "sm", weight: "semibold" }} isLoading={props.isLoading} />
-    <Text props={{ content: props.fact, size: "xs", tone: "muted" }} isLoading={props.isLoading} />
+    <Text size={"sm"} weight={"semibold"} isSkeleton={props.isLoading}>{props.label}</Text>
+    <Text size={"xs"} tone={"muted"} isSkeleton={props.isLoading}>{props.fact}</Text>
 </div>
 
 /** Draw completion first, with continuity and standing as coordinated supporting evidence. */
 export const CourseProgressOverview = (props: CourseProgressOverviewProps) => {
     if (props.state === "failed" || props.state === "empty") {
         return (
-            <SurfaceCard props={{ label: props.props.label }}>
+            <SurfaceCard label={props.props.label} composition="joined">
                 <EmptyNotice
-                    props={{
-                        icon: "course",
-                        message: props.props.message,
-                        ...(props.state === "failed" ? { actionLabel: props.props.retryLabel } : {}),
-                    }}
-                    on={{ act: props.on?.retry }}
+                    iconSource={iconSourceFor("course", "leading")}
+                    message={props.props.message}
+                    actionLabel={props.state === "failed" ? props.props.retryLabel : undefined}
+                    onAction={props.on?.retry}
                 />
             </SurfaceCard>
         )
@@ -69,7 +68,7 @@ export const CourseProgressOverview = (props: CourseProgressOverviewProps) => {
     const isLoading = props.state === "pending"
     const evidence = props.state === "pending" ? undefined : props.props
     return (
-        <SurfaceCard props={{ label: props.props.label }} isLoading={isLoading}>
+        <SurfaceCard label={props.props.label} composition="joined" state={isLoading ? "pending" : "neutral"}>
             <div className={courseProgressOverviewClassName}>
                 <LabelledProgressRow
                     props={{

@@ -1,4 +1,5 @@
-import { Icon, type IconName } from "@/components/leaves/Icon"
+import { Icon } from "@starci/grammar/common"
+import { iconSourceFor, type IconName } from "@/components/leaves/Icon"
 import { labelClassName, labelScreenReaderClassName } from "./classNames"
 
 /**
@@ -33,7 +34,7 @@ export const Label = (props: LabelProps) => {
     const data = props.props
     return (
         <label htmlFor={data.htmlFor} className={data.visibility === "screenReader" ? labelScreenReaderClassName : labelClassName}>
-            {data.icon === undefined ? null : <Icon props={{ name: data.icon, role: "chip" }} />}
+            {data.icon === undefined ? null : <Icon source={iconSourceFor(data.icon, "chip")} role={"chip"} />}
             {data.content}
         </label>
     )

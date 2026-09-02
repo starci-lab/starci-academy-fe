@@ -1,6 +1,7 @@
 import { Avatar } from "@/components/leaves/Avatar"
-import { Icon } from "@/components/leaves/Icon"
-import { Text } from "@/components/leaves/Text"
+import { Icon } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { Text } from "@starci/grammar/common"
 import { PressableSurface } from "@/components/branches/PressableSurface"
 import { profileRowClassName, profileRowIdentityClassName } from "./classNames"
 
@@ -29,10 +30,10 @@ export const ProfileRow = (props: ProfileRowProps) => {
             <div data-part="profile-row" className={profileRowClassName}>
                 <Avatar props={{ name: data.displayName, src: data.avatar, size: "md" }} isLoading={isLoading} />
                 <div data-part="profile-identity" className={profileRowIdentityClassName}>
-                    <Text props={{ content: data.displayName, size: "sm", weight: "semibold" }} isLoading={isLoading} />
-                    <Text props={{ content: data.username === undefined ? undefined : `@${data.username}`, size: "xs" }} isLoading={isLoading} />
+                    <Text size={"sm"} weight={"semibold"} isSkeleton={isLoading}>{data.displayName}</Text>
+                    <Text size={"xs"} isSkeleton={isLoading}>{data.username === undefined ? undefined : `@${data.username}`}</Text>
                 </div>
-                <Icon props={{ name: "disclosure", role: "chip" }} />
+                <Icon source={iconSourceFor("disclosure", "chip")} role={"chip"} />
             </div>
         </PressableSurface>
     )

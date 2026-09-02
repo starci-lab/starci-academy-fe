@@ -1,7 +1,7 @@
 import { Avatar } from "@/components/leaves/Avatar"
 import { PodiumStep, type PodiumPlace } from "@/components/leaves/PodiumStep"
 import { RankMark } from "@/components/leaves/RankMark"
-import { Text } from "@/components/leaves/Text"
+import { Text } from "@starci/grammar/common"
 
 /**
  * COMPOSITE - `Podium`: the top three, arranged so the ranking is the picture.
@@ -65,16 +65,8 @@ export const Podium = (props: PodiumProps) => {
             props={{ name, src: entry?.avatar ?? undefined, size: rank === 1 ? "lg" : "md" }}
             isLoading={isLoading}
         />
-        <Text
-            props={{
-                content: name,
-                size: "sm",
-                weight: entry?.isMe === true ? "semibold" : undefined,
-                tone: entry?.isMe === true ? "accent" : "default",
-            }}
-            isLoading={isLoading}
-        />
-        <Text props={{ content: entry?.pointsLabel, size: "xs", tone: "muted" }} isLoading={isLoading} /><PodiumStep props={{ place: rank }} isLoading={isLoading} /></div>]
+        <Text size={"sm"} tone={entry?.isMe === true ? "accent" : "default"} weight={entry?.isMe === true ? "semibold" : undefined} isSkeleton={isLoading}>{name}</Text>
+        <Text size={"xs"} tone={"muted"} isSkeleton={isLoading}>{entry?.pointsLabel}</Text><PodiumStep props={{ place: rank }} isLoading={isLoading} /></div>]
     })
     return <div>{place}</div>
 }

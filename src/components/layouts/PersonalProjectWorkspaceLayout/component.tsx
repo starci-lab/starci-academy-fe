@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 import { RailDivider } from "@/components/leaves/RailDivider"
-import { Button } from "@/components/leaves/Button"
+import { Button } from "@starci/grammar/common"
 import { DrawerBranch } from "@/components/branches/DrawerBranch"
 import { PersonalProjectContentMap } from "@/components/blocks/learn/PersonalProjectContentMap"
 import {
@@ -52,7 +52,7 @@ export const PersonalProjectWorkspaceLayoutBase = (props: PersonalProjectWorkspa
         <div className={personalProjectWorkspaceClassName} data-roadmap-navigation={showRoadmapNavigation ? "visible" : "owned-by-surface"}>
             {showRoadmapNavigation ? <>
                 <div className={personalProjectWorkspaceMobileBarClassName}>
-                    <Button props={{ label: props.roadmapLabel ?? "Project roadmap", variant: "outline", size: "sm", icon: "personalProject" }} on={{ press: props.onOpenRoadmap }} />
+                    <Button variant="outline" size="sm" onPress={props.onOpenRoadmap}>{props.roadmapLabel ?? "Project roadmap"}</Button>
                 </div>
                 <aside className={personalProjectWorkspaceRailClassName}>{props.isRoadmapOpen === true ? null : roadmap}</aside>
                 {/* Milestone labels are authored content, so this route rail resizes instead of

@@ -1,4 +1,4 @@
-import { Text } from "@/components/leaves/Text"
+import { Text } from "@starci/grammar/common"
 import { Input, type InputKind } from "@/components/leaves/Input"
 import { Label } from "@/components/leaves/Label"
 import { fieldClassName } from "./classNames"
@@ -19,8 +19,8 @@ export const Field = (props: FieldProps) => {
     const isLoading = props.isLoading ?? false
     const describedBy = [data.description === undefined ? undefined : `${data.id}-description`, data.hint === undefined ? undefined : `${data.id}-hint`].filter((value): value is string => value !== undefined).join(" ")
     return <div className={fieldClassName}>
-        <div><Label props={{ htmlFor: data.id, content: data.label, visibility: data.labelVisibility }} />{data.description === undefined ? null : <Text props={{ id: `${data.id}-description`, content: data.description, size: "xs", tone: "muted" }} />}</div>
+        <div><Label props={{ htmlFor: data.id, content: data.label, visibility: data.labelVisibility }} />{data.description === undefined ? null : <Text id={`${data.id}-description`} size={"xs"} tone={"muted"}>{data.description}</Text>}</div>
         <Input props={{ id: data.id, name: data.name, kind: data.kind, placeholder: data.placeholder, defaultValue: data.defaultValue, disabled: data.disabled, isInvalid: data.isInvalid, describedBy: describedBy === "" ? undefined : describedBy, revealLabel: data.revealLabel, hideLabel: data.hideLabel }} on={{ change: on?.change }} isLoading={isLoading} />
-        {data.hint === undefined ? null : <Text props={{ id: `${data.id}-hint`, content: data.hint, size: "xs", live: data.isInvalid === true ? "assertive" : "off" }} />}
+        {data.hint === undefined ? null : <Text id={`${data.id}-hint`} size={"xs"} live={data.isInvalid === true ? "assertive" : "off"}>{data.hint}</Text>}
     </div>
 }

@@ -1,7 +1,7 @@
-import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
-import { Heading } from "@/components/leaves/Heading"
+import { SurfaceListCard } from "@starci/grammar/common"
+import { Heading } from "@starci/grammar/common"
 import { RatingStars } from "@/components/leaves/RatingStars"
-import { Text } from "@/components/leaves/Text"
+import { Text } from "@starci/grammar/common"
 
 /** A learner review. */
 export type CourseReview = { readonly id: string; readonly author: string; readonly score: number; readonly body?: string }
@@ -16,11 +16,11 @@ export type CourseReviewBlockProps = { readonly state: CourseReviewBlockState; r
 export const CourseReviewBlockBase = (props: CourseReviewBlockProps) => {
     const data = props.props
     const state = props.state
-    if (state === "unrated") return <Text props={{ content: data.emptyLabel, size: "sm", tone: "muted" }} />
+    if (state === "unrated") return <Text size={"sm"} tone={"muted"}>{data.emptyLabel}</Text>
     return <div>
-        <div><Heading props={{ content: data.averageScore.toFixed(1), level: 3 }} /><RatingStars props={{ label: `${data.averageScore.toFixed(1)}/5`, value: data.averageScore }} /><Text props={{ content: data.countLabel, size: "sm", tone: "muted" }} /></div>
-        <SurfaceListCard props={{ label: "", isLabelHidden: true }}>
-            {data.reviews.map((review) => <div key={review.id}><div><Text props={{ content: review.author, size: "sm", weight: "medium" }} /><RatingStars props={{ label: `${review.author}: ${review.score}/5`, value: review.score }} /></div>{review.body === undefined ? null : <Text props={{ content: review.body, size: "sm", tone: "muted" }} />}</div>)}
+        <div><Heading level={3}>{data.averageScore.toFixed(1)}</Heading><RatingStars props={{ label: `${data.averageScore.toFixed(1)}/5`, value: data.averageScore }} /><Text size={"sm"} tone={"muted"}>{data.countLabel}</Text></div>
+        <SurfaceListCard label={""} labelHidden={true}>
+            {data.reviews.map((review) => <div key={review.id}><div><Text size={"sm"} weight={"medium"}>{review.author}</Text><RatingStars props={{ label: `${review.author}: ${review.score}/5`, value: review.score }} /></div>{review.body === undefined ? null : <Text size={"sm"} tone={"muted"}>{review.body}</Text>}</div>)}
         </SurfaceListCard>
     </div>
 }

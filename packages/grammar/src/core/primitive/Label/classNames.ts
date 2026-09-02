@@ -4,6 +4,6 @@ import { cn } from "@heroui/react"
 export const getLabelClassName = (depth: "top" | "nested") => cn(
     "starci-core-label",
     "min-w-0",
-    "font-medium",
+    "font-semibold",
     depth === "nested" ? "text-xs leading-4" : "text-sm leading-5",
 )

@@ -1,7 +1,7 @@
 import { cn } from "@heroui/react"
 
 /** Actor avatar, flexible activity body, and trailing time. */
-export const activityRowClassName = `${cn(
+export const activityRowClassName = (isBottomEdge = false) => `${cn(
     "grid",
     "w-full",
     "min-w-0",
@@ -9,8 +9,9 @@ export const activityRowClassName = `${cn(
     "gap-3",
     "border-t",
     "border-separator",
-    "px-3",
-    "py-3",
+    "px-4",
+    isBottomEdge ? "pt-3" : "py-3",
+    isBottomEdge && "pb-4",
     "first:border-t-0",
     "[&>*:nth-child(2)]:min-w-0",
 )} grid-cols-[auto_minmax(0,1fr)]`

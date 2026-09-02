@@ -1,10 +1,12 @@
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { Badge } from "@/components/leaves/Badge"
-import { Button } from "@/components/leaves/Button"
+import { SurfaceCard } from "@starci/grammar/common"
+import { Badge } from "@starci/grammar/common"
+import { Button } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon } from "@starci/grammar/common"
+
 import { CoverImage } from "@/components/leaves/CoverImage"
-import { Heading } from "@/components/leaves/Heading"
-import { Text } from "@/components/leaves/Text"
-import { TextLink } from "@/components/leaves/TextLink"
+import { Heading } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import { CourseValuePropositionList } from "@/components/blocks/courses/CourseValuePropositionList/component"
 import {
     catalogCardActionsClassName,
@@ -19,6 +21,8 @@ import {
     catalogCardPriceClassName,
     catalogCardPriceNoteClassName,
 } from "./classNames"
+import { TextAction } from "@starci/grammar/common"
+
 
 /** The presentation state of a catalog card. */
 export type CourseCatalogCardState = "pending" | "ready" | "adding"
@@ -34,9 +38,9 @@ export const CourseCatalogCardBase = (props: CourseCatalogCardProps) => {
     const loading = props.state === "pending"
     const data = props.props
     const on = props.on
-    const price = <div className={catalogCardPriceClassName}><Text props={{ content: data.price, size: "sm", weight: "semibold" }} isLoading={loading} />{data.originalPrice === undefined ? null : <Text props={{ content: data.originalPrice, size: "xs", tone: "muted", isSuperseded: true }} isLoading={loading} />}{data.discountLabel === undefined ? null : <Badge props={{ content: data.discountLabel, tone: "success" }} isLoading={loading} />}</div>
-    const priceNote = data.priceDetailLabel === undefined ? null : <div className={catalogCardPriceNoteClassName}>{data.savingsLabel === undefined ? null : <Text props={{ content: data.savingsLabel, size: "xs", tone: "muted" }} isLoading={loading} />}<TextLink props={{ label: data.priceDetailLabel, size: "xs" }} on={{ press: on?.openPriceDetail }} /></div>
-    const actions = <div className={data.layout === "line" ? catalogCardLineActionsClassName : catalogCardActionsClassName}><Button props={{ label: data.cartLabel ?? "", variant: "secondary", size: "sm", disabled: loading || data.isInCart === true, isPending: props.state === "adding" }} on={{ press: on?.addToCart }} /><Button props={{ label: data.viewLabel ?? "", variant: "primary", size: "sm", icon: "next", iconPlacement: "trailing", disabled: loading }} on={{ press: on?.view }} /></div>
-    const content = <><div className={catalogCardCoverClassName}><CoverImage props={{ src: data.cover ?? null, alt: "", ratio: "wide" }} isLoading={loading} /></div><div className={data.layout === "line" ? catalogCardLineBodyClassName : catalogCardBodyClassName}><div className={catalogCardIdentityClassName}><Heading props={{ content: data.title, level: 2 }} isLoading={loading} /><Text props={{ content: data.enrolmentLabel, size: data.layout === "line" ? "sm" : "xs", tone: data.layout === "line" ? "muted" : undefined }} isLoading={loading} /></div><div className={catalogCardCommerceClassName}>{price}{priceNote}</div>{data.layout === "line" ? null : <CourseValuePropositionList props={{ label: data.promisesSummary ?? "", promises: [...(data.promises ?? [])], isNested: true }} isLoading={loading} />}</div>{actions}</>
-    return data.layout === "line" ? <div className={catalogCardLineClassName}>{content}</div> : <SurfaceCard props={{}}><div className={catalogCardGridClassName}>{content}</div></SurfaceCard>
+    const price = <div className={catalogCardPriceClassName}><Text size={"sm"} weight={"semibold"} isSkeleton={loading}>{data.price}</Text>{data.originalPrice === undefined ? null : <Text size={"xs"} tone={"muted"} isSuperseded={true} isSkeleton={loading}>{data.originalPrice}</Text>}{data.discountLabel === undefined ? null : <Badge tone={"success"} isSkeleton={loading}>{data.discountLabel}</Badge>}</div>
+    const priceNote = data.priceDetailLabel === undefined ? null : <div className={catalogCardPriceNoteClassName}>{data.savingsLabel === undefined ? null : <Text size={"xs"} tone={"muted"} isSkeleton={loading}>{data.savingsLabel}</Text>}<TextAction size={"xs"} appearance="inline" onPress={on?.openPriceDetail}>{data.priceDetailLabel}</TextAction></div>
+    const actions = <div className={data.layout === "line" ? catalogCardLineActionsClassName : catalogCardActionsClassName}><Button variant="secondary" size="sm" isDisabled={loading || data.isInCart === true} isPending={props.state === "adding"} onPress={on?.addToCart}>{data.cartLabel ?? ""}</Button><Button variant={"primary"} size={"sm"} isDisabled={loading} onPress={({ press: on?.view })?.press} endContent={"next" === "next" && "trailing" === "trailing" ? <Icon source={iconSourceFor("next", "chip")} role="chip" /> : undefined}>{data.viewLabel ?? ""}</Button></div>
+    const content = <><div className={catalogCardCoverClassName}><CoverImage props={{ src: data.cover ?? null, alt: "", ratio: "wide" }} isLoading={loading} /></div><div className={data.layout === "line" ? catalogCardLineBodyClassName : catalogCardBodyClassName}><div className={catalogCardIdentityClassName}><Heading level={2} isSkeleton={loading}>{data.title}</Heading><Text size={data.layout === "line" ? "sm" : "xs"} tone={data.layout === "line" ? "muted" : undefined} isSkeleton={loading}>{data.enrolmentLabel}</Text></div><div className={catalogCardCommerceClassName}>{price}{priceNote}</div>{data.layout === "line" ? null : <CourseValuePropositionList props={{ promises: [...(data.promises ?? [])] }} isLoading={loading} />}</div>{actions}</>
+    return data.layout === "line" ? <div className={catalogCardLineClassName}>{content}</div> : <SurfaceCard composition="joined"><div className={catalogCardGridClassName}>{content}</div></SurfaceCard>
 }

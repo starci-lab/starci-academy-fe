@@ -1,10 +1,10 @@
-import { SurfaceListCardData } from "@/components/branches/SurfaceListCard"
-import { Icon } from "@/components/leaves/Icon"
-import { Text } from "@/components/leaves/Text"
+import { Icon } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { Text } from "@starci/grammar/common"
 import { courseValueListClassName, courseValueRowClassName } from "./classNames"
 
 /** Resolved course promises plus the frame words SurfaceListCard owns. */
-export type CourseValuePropositionListData = SurfaceListCardData & {
+export type CourseValuePropositionListData = {
     readonly promises: ReadonlyArray<string>
 }
 /** Traditional state and data lanes for the promise list. */
@@ -26,8 +26,8 @@ export const CourseValuePropositionList = (props: CourseValuePropositionListProp
         <ul className={courseValueListClassName}>
             {data.promises.map((promise, index) => (
                 <li className={courseValueRowClassName} key={`promise-${index}`}>
-                    <Icon props={{ name: "included", role: "leading" }} />
-                    <Text props={{ content: promise, size: "md" }} isLoading={isLoading} />
+                    <Icon source={iconSourceFor("included", "leading")} role={"leading"} />
+                    <Text size={"md"} isSkeleton={isLoading}>{promise}</Text>
                 </li>
             ))}
         </ul>

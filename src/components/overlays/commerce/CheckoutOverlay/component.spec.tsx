@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { CheckoutOverlayBase, type CheckoutOverlayLabels } from "./component"
+import { checkoutOverlayClassName } from "./classNames"
 
 const labels: CheckoutOverlayLabels = {
     title: "Review payment",
@@ -22,6 +23,7 @@ const labels: CheckoutOverlayLabels = {
     trustNote: "A browser redirect alone never marks an order as paid.",
     action: "Continue to PayOS · 2,750,000 ₫",
     cancel: "Back to basket",
+    close: "Đóng",
     failedMessage: "Could not open PayOS.",
 }
 
@@ -40,10 +42,17 @@ describe("CheckoutOverlayBase", () => {
         )
 
         expect(screen.getByRole("heading", { name: "Review payment" })).toBeInTheDocument()
+        expect(screen.getByRole("dialog", { name: "Review payment" })).toHaveAttribute("aria-modal", "true")
+        expect(screen.getByRole("button", { name: labels.close })).toBeInTheDocument()
         expect(screen.getByText("Bank transfer via PayOS")).toBeInTheDocument()
         expect(screen.getByText("Payment stays pending until the webhook confirms it.")).toBeInTheDocument()
         expect(screen.getByText("2,750,000 ₫")).toBeInTheDocument()
         expect(screen.queryByText("Instalment fee")).not.toBeInTheDocument()
+    })
+
+    it("leaves compact scrolling to the modal body instead of nesting another scroll owner", () => {
+        expect(checkoutOverlayClassName).not.toContain("overflow-y-auto")
+        expect(checkoutOverlayClassName).not.toContain("max-h-")
     })
 
     it("hands off once and exposes progress on the exact action", () => {

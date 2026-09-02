@@ -2,7 +2,8 @@
 
 import { useRef, useState } from "react"
 import { InputGroup } from "@heroui/react"
-import { Icon } from "@/components/leaves/Icon"
+import { Icon } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
 import { searchBoxClassName, searchBoxClearClassName, searchBoxShortcutClassName } from "./classNames"
 
 /**
@@ -96,7 +97,7 @@ export const SearchBox = (props: SearchBoxProps) => {
         >
             <InputGroup fullWidth>
                 <InputGroup.Prefix>
-                    <Icon props={{ name: "search", role: "chip" }} />
+                    <Icon source={iconSourceFor("search", "chip")} role={"chip"} />
                 </InputGroup.Prefix>
                 <InputGroup.Input
                     name="q"
@@ -135,7 +136,7 @@ export const SearchBox = (props: SearchBoxProps) => {
                                 on?.search?.("")
                             }}
                         >
-                            <Icon props={{ name: "close", role: "chip" }} />
+                            <Icon source={iconSourceFor("close", "chip")} role={"chip"} />
                         </button>
                     </InputGroup.Suffix>
                 ) : data.shortcut === undefined ? null : (

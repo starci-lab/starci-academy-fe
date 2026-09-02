@@ -80,6 +80,7 @@ describe("RecommendedCoursesBase", () => {
         const items = screen.getAllByRole("listitem")
         expect(items).toHaveLength(3)
         for (const item of items) expect(item).not.toHaveClass("sm:w-1/2")
-        expect(items.at(-1)).toHaveClass("last:border-b-0")
+        expect(items[0]).toHaveClass("px-4", "py-3", "first:pt-4")
+        expect(items.at(-1)).toHaveClass("last:border-b-0", "last:pb-4")
     })
 })

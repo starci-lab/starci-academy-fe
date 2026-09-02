@@ -89,7 +89,7 @@ describe("AuthenticationPanel", () => {
         render(<AuthenticationPanel />)
 
         expect(screen.queryByText("status.sending")).toBeNull()
-        expect(screen.getByRole("button", { name: "signIn.submitDetails" })).toHaveAttribute("data-pending", "true")
+        expect(screen.getByRole("button", { name: /signIn\.submitDetails$/ })).toHaveAttribute("data-pending", "true")
     })
 
     it("keeps verification pending feedback inside the action instead of repeating a status line", () => {
@@ -98,7 +98,7 @@ describe("AuthenticationPanel", () => {
         render(<AuthenticationPanel />)
 
         expect(screen.queryByText("status.verifying")).toBeNull()
-        expect(screen.getByRole("button", { name: "signIn.submitCode" })).toHaveAttribute("data-pending", "true")
+        expect(screen.getByRole("button", { name: /signIn\.submitCode$/ })).toHaveAttribute("data-pending", "true")
     })
 
     it("keeps resend pending feedback inside the action instead of a second status line", () => {
@@ -107,7 +107,7 @@ describe("AuthenticationPanel", () => {
         render(<AuthenticationPanel />)
 
         expect(screen.queryByText("status.resending")).toBeNull()
-        expect(screen.getByRole("link", { name: "shared.resend" })).toHaveAttribute(
+        expect(screen.getByRole("button", { name: /shared\.resend$/ })).toHaveAttribute(
             "data-action-pending",
             "true",
         )
@@ -220,7 +220,7 @@ describe("AuthenticationPanel", () => {
         render(<AuthenticationPanel />)
 
         expect(screen.getByRole("alert")).toHaveTextContent("status.accountExists")
-        expect(screen.getByRole("link", { name: "signUp.promptAction" })).toBeInTheDocument()
+        expect(screen.getByRole("button", { name: "signUp.promptAction" })).toBeInTheDocument()
         expect(screen.queryByText("User email is already verified")).toBeNull()
     })
 
@@ -311,7 +311,7 @@ describe("AuthenticationPanel", () => {
         fireEvent.click(screen.getByRole("button", { name: "signIn.submitCode" }))
         expect(code.onSubmitCode).toHaveBeenCalledExactlyOnceWith({ otp: "123456" })
 
-        fireEvent.click(screen.getByRole("link", { name: "shared.resend" }))
+        fireEvent.click(screen.getByRole("button", { name: "shared.resend" }))
         expect(code.onResend).toHaveBeenCalledOnce()
     })
 
@@ -320,10 +320,10 @@ describe("AuthenticationPanel", () => {
 
         render(<AuthenticationPanel />)
 
-        fireEvent.click(screen.getByRole("link", { name: "signIn.promptAction" }))
+        fireEvent.click(screen.getByRole("button", { name: "signIn.promptAction" }))
         expect(on.onChangeMode).toHaveBeenCalledExactlyOnceWith("signUp")
 
-        fireEvent.click(screen.getByRole("link", { name: "shared.forgotPassword" }))
+        fireEvent.click(screen.getByRole("button", { name: "shared.forgotPassword" }))
         expect(on.onChangeMode).toHaveBeenLastCalledWith("forgotPassword")
     })
 

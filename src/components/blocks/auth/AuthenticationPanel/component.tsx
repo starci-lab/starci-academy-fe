@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState, type FormEvent } from "react"
-import { Button } from "@/components/leaves/Button"
+import { Input, OtpInput, Button } from "@starci/grammar/common"
 import { Checkbox } from "@/components/leaves/Checkbox"
-import { Divider } from "@/components/leaves/Divider"
+import { Divider } from "@starci/grammar/common"
 import { ErrorMessage } from "@/components/leaves/ErrorMessage"
-import { Field } from "@/components/composites/Field"
-import { Heading } from "@/components/leaves/Heading"
-import { Text } from "@/components/leaves/Text"
-import { TextLink } from "@/components/leaves/TextLink"
+import { Heading } from "@starci/grammar/common"
+import { Icon } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { Text } from "@starci/grammar/common"
 import { KeycloakIdentityProvider } from "@/modules/api/graphql/mutations/types/auth"
-import { authenticationDoneClassName, authenticationFormClassName, authenticationHeaderClassName, authenticationOauthClassName, authenticationOptionsClassName, authenticationPanelClassName, authenticationSecondaryClassName } from "./classNames"
+import { authenticationCodeFieldClassName, authenticationCodeLabelClassName, authenticationDoneClassName, authenticationFormClassName, authenticationHeaderClassName, authenticationOauthClassName, authenticationOptionsClassName, authenticationPanelClassName, authenticationSecondaryClassName } from "./classNames"
+import { TextAction } from "@starci/grammar/common"
+
 
 /** Auth journey selected by the reader. */
 export type AuthMode = "signIn" | "signUp" | "forgotPassword";
@@ -94,6 +96,8 @@ export type AuthenticationPanelActions = {
 /** Stable heading id used to name the authentication surface. */
 export const AUTHENTICATION_PANEL_TITLE_ID = "authentication-panel-title"
 const EMPTY_VALUES = { email: "", password: "", confirmPassword: "", otp: "" }
+const RevealPasswordIcon = () => <Icon source={iconSourceFor("revealPassword", "chip")} role={"chip"} />
+const HidePasswordIcon = () => <Icon source={iconSourceFor("hidePassword", "chip")} role={"chip"} />
 /** Render the authentication journey from resolved state and callbacks. */
 export const AuthenticationPanelBase = (props: AuthenticationPanelProps) => {
     const values = useRef({ ...EMPTY_VALUES })
@@ -109,23 +113,14 @@ export const AuthenticationPanelBase = (props: AuthenticationPanelProps) => {
         : props.props.isError
             ? <ErrorMessage props={{ content: props.props.statusMessage }} />
             : (
-                <Text
-                    props={{
-                        content: props.props.statusMessage,
-                        tone: "muted",
-                        size: "sm",
-                        live: "polite",
-                    }}
-                />
+                <Text size={"sm"} tone={"muted"} live={"polite"}>{props.props.statusMessage}</Text>
             )
     const header = (
         <>
             <span id={AUTHENTICATION_PANEL_TITLE_ID}>
-                <Heading props={{ content: props.props.title, level: 2 }} />
+                <Heading level={2}>{props.props.title}</Heading>
             </span>
-            <Text
-                props={{ content: props.props.subtitle, size: "sm", tone: "muted" }}
-            />
+            <Text size={"sm"} tone={"muted"}>{props.props.subtitle}</Text>
         </>
     )
     if (props.state === "done")
@@ -133,10 +128,8 @@ export const AuthenticationPanelBase = (props: AuthenticationPanelProps) => {
             <div className={authenticationPanelClassName}>
                 <header className={authenticationHeaderClassName}>{header}</header>
                 <div className={authenticationDoneClassName}>
-                    <Heading props={{ content: props.props.doneTitle, level: 3 }} />
-                    <Text
-                        props={{ content: props.props.doneHint, tone: "muted", size: "sm" }}
-                    />
+                    <Heading level={3}>{props.props.doneTitle}</Heading>
+                    <Text size={"sm"} tone={"muted"}>{props.props.doneHint}</Text>
                     {status}
                 </div>
             </div>
@@ -151,47 +144,25 @@ export const AuthenticationPanelBase = (props: AuthenticationPanelProps) => {
             <div className={authenticationPanelClassName}>
                 <header className={authenticationHeaderClassName}>{header}</header>
                 <form className={authenticationFormClassName} onSubmit={submit}>
-                    <Field
-                        props={{
-                            id: "authentication-code",
-                            name: "otp",
-                            kind: "code",
-                            label: props.props.codeLabel,
-                            labelVisibility: "screenReader",
-                            hint: props.props.codeHint,
-                            disabled: isBusy,
-                        }}
-                        on={{
-                            change: (value: string) => {
+                    <div className={authenticationCodeFieldClassName}>
+                        <label htmlFor="authentication-code" className={authenticationCodeLabelClassName}>{props.props.codeLabel}</label>
+                        <OtpInput
+                            id="authentication-code"
+                            name="otp"
+                            disabled={isBusy}
+                            describedBy="authentication-code-hint"
+                            onChange={(value: string) => {
                                 values.current.otp = value
-                            },
-                        }}
-                    />
+                            }}
+                        />
+                        <Text id={"authentication-code-hint"} size={"xs"}>{props.props.codeHint}</Text>
+                    </div>
                     {status}
-                    <Button
-                        props={{
-                            label: props.props.submitLabel,
-                            variant: "primary",
-                            type: "submit",
-                            disabled: isBusy,
-                            isPending: props.props.isPending,
-                        }}
-                    />
+                    <Button variant="primary" type="submit" isDisabled={isBusy} isPending={props.props.isPending}>{props.props.submitLabel}</Button>
                 </form>
                 <div className={authenticationSecondaryClassName}>
-                    <TextLink
-                        props={{
-                            label: props.props.resendLabel,
-                            size: "sm",
-                            disabled: isBusy,
-                            isPending: props.props.isResending,
-                        }}
-                        on={{ press: props.on?.resend }}
-                    />
-                    <TextLink
-                        props={{ label: props.props.useAnotherEmailLabel, size: "sm", disabled: isBusy }}
-                        on={{ press: () => props.on?.changeMode?.("signIn") }}
-                    />
+                    <TextAction size={"sm"} appearance="inline" isPending={props.props.isResending} isDisabled={isBusy} onPress={props.on?.resend}>{props.props.resendLabel}</TextAction>
+                    <TextAction size={"sm"} appearance="inline" isDisabled={isBusy} onPress={() => props.on?.changeMode?.("signIn")}>{props.props.useAnotherEmailLabel}</TextAction>
                 </div>
             </div>
         )
@@ -219,85 +190,60 @@ export const AuthenticationPanelBase = (props: AuthenticationPanelProps) => {
         <div className={authenticationPanelClassName}>
             <header className={authenticationHeaderClassName}>{header}</header>
             <div className={authenticationOauthClassName}>
-                <Button
-                    props={{
-                        label: props.props.oauthGoogle,
-                        variant: "outline",
-                        icon: "google",
-                        disabled: isBusy,
-                    }}
-                    on={{
-                        press: () =>
-                            props.on?.oauthPress?.(KeycloakIdentityProvider.Google),
-                    }}
-                />
-                <Button
-                    props={{
-                        label: props.props.oauthGithub,
-                        variant: "outline",
-                        icon: "github",
-                        disabled: isBusy,
-                    }}
-                    on={{
-                        press: () =>
-                            props.on?.oauthPress?.(KeycloakIdentityProvider.Github),
-                    }}
-                />
-                <Divider props={{ label: props.props.orLabel }} />
+                <Button variant="outline" isDisabled={isBusy} onPress={() =>
+                    props.on?.oauthPress?.(KeycloakIdentityProvider.Google)}>{props.props.oauthGoogle}</Button>
+                <Button variant="outline" isDisabled={isBusy} onPress={() =>
+                    props.on?.oauthPress?.(KeycloakIdentityProvider.Github)}>{props.props.oauthGithub}</Button>
+                <Divider label={props.props.orLabel} />
             </div>
             <form className={authenticationFormClassName} onSubmit={submit}>
-                <Field
-                    props={{
-                        id: "authentication-email",
-                        name: "email",
-                        kind: "email",
-                        label: props.props.emailLabel,
-                        placeholder: props.props.emailPlaceholder,
-                        disabled: isBusy,
-                    }}
-                    on={{
-                        change: (value: string) => {
-                            values.current.email = value
-                        },
+                <Input
+                    id="authentication-email"
+                    name="email"
+                    kind="email"
+                    label={props.props.emailLabel}
+                    placeholder={props.props.emailPlaceholder}
+                    variant="secondary"
+                    isDisabled={isBusy}
+                    onValueChange={(value: string) => {
+                        values.current.email = value
                     }}
                 />
-                <Field
-                    props={{
-                        id: "authentication-password",
-                        name: "password",
-                        kind: signUp || props.props.mode === "forgotPassword" ? "newPassword" : "password",
-                        label: props.props.passwordLabel,
-                        placeholder: props.props.passwordPlaceholder,
-                        hint: props.props.passwordHint || undefined,
-                        revealLabel: props.props.revealLabel,
-                        hideLabel: props.props.hideLabel,
-                        disabled: isBusy,
-                    }}
-                    on={{
-                        change: (value: string) => {
-                            values.current.password = value
-                        },
+                <Input
+                    id="authentication-password"
+                    name="password"
+                    kind={signUp || props.props.mode === "forgotPassword" ? "newPassword" : "password"}
+                    label={props.props.passwordLabel}
+                    placeholder={props.props.passwordPlaceholder}
+                    hint={props.props.passwordHint || undefined}
+                    revealLabel={props.props.revealLabel}
+                    hideLabel={props.props.hideLabel}
+                    revealIcon={RevealPasswordIcon}
+                    hideIcon={HidePasswordIcon}
+                    variant="secondary"
+                    isDisabled={isBusy}
+                    onValueChange={(value: string) => {
+                        values.current.password = value
                     }}
                 />
                 {signUp ? (
-                    <Field
-                        props={{
-                            id: "authentication-confirm-password",
-                            name: "confirmPassword",
-                            kind: "newPassword",
-                            label: props.props.confirmPasswordLabel,
-                            placeholder: props.props.confirmPasswordPlaceholder,
-                            hint: mismatch ? props.props.confirmPasswordMismatch : undefined,
-                            isInvalid: mismatch,
-                            revealLabel: props.props.revealLabel,
-                            hideLabel: props.props.hideLabel,
-                            disabled: isBusy,
-                        }}
-                        on={{
-                            change: (value: string) => {
-                                values.current.confirmPassword = value
-                                if (mismatch) setMismatch(false)
-                            },
+                    <Input
+                        id="authentication-confirm-password"
+                        name="confirmPassword"
+                        kind="newPassword"
+                        label={props.props.confirmPasswordLabel}
+                        placeholder={props.props.confirmPasswordPlaceholder}
+                        errorMessage={mismatch ? props.props.confirmPasswordMismatch : undefined}
+                        isError={mismatch}
+                        revealLabel={props.props.revealLabel}
+                        hideLabel={props.props.hideLabel}
+                        revealIcon={RevealPasswordIcon}
+                        hideIcon={HidePasswordIcon}
+                        variant="secondary"
+                        isDisabled={isBusy}
+                        onValueChange={(value: string) => {
+                            values.current.confirmPassword = value
+                            if (mismatch) setMismatch(false)
                         }}
                     />
                 ) : null}
@@ -345,40 +291,18 @@ export const AuthenticationPanelBase = (props: AuthenticationPanelProps) => {
                         />
                     )}
                     {signIn ? (
-                        <TextLink
-                            props={{ label: props.props.forgotPassword, size: "sm" }}
-                            on={{ press: () => props.on?.changeMode?.("forgotPassword") }}
-                        />
+                        <TextAction size={"sm"} appearance="inline" onPress={() => props.on?.changeMode?.("forgotPassword")}>{props.props.forgotPassword}</TextAction>
                     ) : null}
                 </div>
                 {status}
-                <Button
-                    props={{
-                        label: props.props.submitLabel,
-                        variant: "primary",
-                        type: "submit",
-                        disabled: isBusy || blocked,
-                        isPending: props.props.isPending,
-                    }}
-                />
+                <Button variant="primary" type="submit" isDisabled={isBusy || blocked} isPending={props.props.isPending}>{props.props.submitLabel}</Button>
             </form>
             <div className={authenticationSecondaryClassName}>
-                <Text
-                    props={{
-                        content: props.props.promptQuestion,
-                        size: "sm",
-                        tone: "muted",
-                    }}
-                />
-                <TextLink
-                    props={{ label: props.props.promptAction, size: "sm" }}
-                    on={{
-                        press: () =>
+                <Text size={"sm"} tone={"muted"}>{props.props.promptQuestion}</Text>
+                <TextAction size={"sm"} appearance="inline" onPress={() =>
                             props.on?.changeMode?.(
                                 props.props.mode === "signIn" ? "signUp" : "signIn",
-                            ),
-                    }}
-                />
+                            )}>{props.props.promptAction}</TextAction>
             </div>
         </div>
     )

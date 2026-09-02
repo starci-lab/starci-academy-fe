@@ -1,6 +1,5 @@
-import { Badge, type BadgeTone } from "@/components/leaves/Badge"
-import { Text } from "@/components/leaves/Text"
-import type { IconName } from "@/components/leaves/Icon"
+import { Badge, Icon, Text, type BadgeTone } from "@starci/grammar/common"
+import { iconSourceFor, type IconName } from "@/components/leaves/Icon"
 
 /** Optional status chip data. */
 export type StatusMetadataLineStatus = { readonly content: string; readonly tone: BadgeTone; readonly icon?: IconName }
@@ -14,5 +13,5 @@ export const StatusMetadataLine = (props: StatusMetadataLineProps) => {
     const data = props.props
     const isLoading = props.isLoading ?? false
     const facts = data.facts.filter((fact) => fact.trim() !== "").join(" · ")
-    return <div>{data.status === undefined ? null : <Badge props={data.status} isLoading={isLoading} />}{facts === "" ? null : <Text props={{ content: facts, size: "sm", tone: "muted" }} isLoading={isLoading} />}</div>
+    return <div>{data.status === undefined ? null : <Badge tone={data.status.tone} startContent={data.status.icon === undefined ? undefined : <Icon source={iconSourceFor(data.status.icon, "chip")} role="chip" />} isSkeleton={isLoading}>{data.status.content}</Badge>}{facts === "" ? null : <Text size={"sm"} tone={"muted"} isSkeleton={isLoading}>{facts}</Text>}</div>
 }

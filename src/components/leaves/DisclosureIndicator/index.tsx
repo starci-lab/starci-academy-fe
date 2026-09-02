@@ -1,4 +1,5 @@
-import { Icon } from "@/components/leaves/Icon"
+import { Icon } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
 import { getDisclosureIndicatorClassName } from "./classNames"
 
 /** Visual state for the native disclosure indicator. */
@@ -14,6 +15,6 @@ export const DisclosureIndicator = (props: DisclosureIndicatorProps) => (
     <span
         className={getDisclosureIndicatorClassName(props.props.isOpen)}
     >
-        <Icon props={{ name: "disclosure", role: "chip" }} />
+        <Icon source={iconSourceFor("disclosure", "chip")} role={"chip"} />
     </span>
 )

@@ -31,8 +31,9 @@ describe("Core Tabs", () => {
         />)
 
         expect(container.querySelector("[data-grammar-tabs='true']")).not.toBeNull()
+        expect(container.querySelector("[data-grammar-tabs-inset='none']")).not.toBeNull()
         expect(container.querySelector("[data-grammar-tabs-overflow='scroll']")?.getAttribute("class")).toContain("scroll-shadow--hide-scrollbar")
-        expect(screen.getByRole("tab", { name: "Overview" }).getAttribute("style")).toContain("padding-inline: clamp(0.5rem, 3vw, 1rem)")
+        expect(screen.getByRole("tab", { name: "Overview" }).getAttribute("class")).toContain("tabs__tab")
         expect(screen.getByRole("tab", { name: "Overview" }).getAttribute("aria-controls")).toBeTruthy()
         fireEvent.click(screen.getByRole("tab", { name: "Community" }))
         expect(onSelect).toHaveBeenCalledWith("community")
@@ -42,5 +43,10 @@ describe("Core Tabs", () => {
         const { container } = render(<Tabs label="Workspace" selectedKey="content" labelVisibility="always" items={[{ id: "content", label: "Task brief" }]} />)
         expect(container.querySelector("[data-grammar-tab-labels='always']")).not.toBeNull()
         expect(screen.getByText("Task brief")).not.toBeNull()
+    })
+
+    it("owns the optional page inset instead of requiring an app wrapper", () => {
+        const { container } = render(<Tabs inset="page" label="Workspace" selectedKey="content" items={[{ id: "content", label: "Task brief" }]} />)
+        expect(container.querySelector("[data-grammar-tabs-inset='page']")).not.toBeNull()
     })
 })

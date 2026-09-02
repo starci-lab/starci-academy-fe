@@ -1,4 +1,4 @@
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
+import { SurfaceCard } from "@starci/grammar/common"
 import type { ReactNode } from "react"
 
 /** The singular persisted-work highlight used by the mock-interview green room. */
@@ -14,6 +14,6 @@ export type ContinuationHighlightCardProps = {
 export const ContinuationHighlightCard = (props: ContinuationHighlightCardProps) => {
     const { children } = props
     return (
-        <SurfaceCard>{children}</SurfaceCard>
+        <SurfaceCard composition="joined">{children}</SurfaceCard>
     )
 }

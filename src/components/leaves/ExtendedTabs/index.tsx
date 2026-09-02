@@ -1,8 +1,8 @@
 "use client"
 
-import { Tabs } from "@starci/grammar/core"
-import { Icon, type IconName } from "@/components/leaves/Icon"
-import { getExtendedTabsRootClassName } from "./classNames"
+import { Tabs } from "@starci/grammar/common"
+import { Icon } from "@starci/grammar/common"
+import { iconSourceFor, type IconName } from "@/components/leaves/Icon"
 
 /** One tab in the legacy dashboard strip. */
 export type ExtendedTab = {
@@ -39,20 +39,17 @@ export type ExtendedTabsProps = { readonly props: ExtendedTabsData; readonly on?
 export const ExtendedTabs = (props: ExtendedTabsProps) => {
     const data = props.props
     const on = props.on
-    return (
-        <div className={getExtendedTabsRootClassName(data.inset)}>
-            <Tabs
-                label={data.label}
-                selectedKey={data.selectedKey}
-                items={data.tabs.map((tab) => ({
-                    id: tab.id,
-                    label: tab.label,
-                    leading: <Icon props={{ name: tab.icon, role: "leading" }} />,
-                }))}
-                onSelect={on?.select}
-                panelId={(key) => `dashboard-panel-${key}`}
-                labelVisibility={data.labelVisibility}
-            />
-        </div>
-    )
+    return <Tabs
+        inset={data.inset ?? "page"}
+        label={data.label}
+        selectedKey={data.selectedKey}
+        items={data.tabs.map((tab) => ({
+            id: tab.id,
+            label: tab.label,
+            leading: <Icon source={iconSourceFor(tab.icon, "leading")} role={"leading"} />,
+        }))}
+        onSelect={on?.select}
+        panelId={(key) => `dashboard-panel-${key}`}
+        labelVisibility={data.labelVisibility}
+    />
 }

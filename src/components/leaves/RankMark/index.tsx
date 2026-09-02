@@ -1,4 +1,4 @@
-import { RankArtwork, type RankArtworkKind } from "@starci/grammar/core"
+import { RankArtwork, type RankArtworkKind } from "@starci/grammar/common"
 import { rankArtworkClassName, rankLoadingClassNames, rankPlacementClassNames } from "./classNames"
 
 /** Where the closed rank artwork is being used. */

@@ -1,5 +1,5 @@
 import { Breadcrumbs } from "@/components/leaves/Breadcrumbs"
-import { Heading } from "@/components/leaves/Heading"
+import { Heading } from "@starci/grammar/common"
 import { DomainMasteryGrid } from "@/components/blocks/coding/DomainMasteryGrid"
 
 /** Page-owned words and route-level navigation for the practice hub shell. */
@@ -13,6 +13,6 @@ export type CodingPracticeHubPageProps = {
 /** Keep the route anatomy here and let the connected domain block own its data and states. */
 export const CodingPracticeHubPageBase = (props: CodingPracticeHubPageProps) => <>
     <Breadcrumbs props={{ label: props.title, steps: [{ id: "home", label: props.navHome }, { id: "practice", label: props.navPractice }] }} on={{ home: props.on?.goHome }} />
-    <Heading props={{ content: props.title, level: 1 }} />
+    <Heading level={1}>{props.title}</Heading>
     <DomainMasteryGrid />
 </>

@@ -1,6 +1,7 @@
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
-import { Icon } from "@/components/leaves/Icon"
-import { Text } from "@/components/leaves/Text"
+import { EmptyNotice } from "@starci/grammar/common"
+import { Icon } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { Text } from "@starci/grammar/common"
 /** Problem list lifecycle state. */
 export type CodingProblemListState = "pending" | "ready" | "empty" | "all-solved" | "failed"
 /** Selectable problem summary. */
@@ -13,7 +14,7 @@ export type CodingProblemListActions = { readonly open?: (slug: string) => void;
 export type CodingProblemListProps = { readonly state: CodingProblemListState; readonly props: CodingProblemListData; readonly on?: CodingProblemListActions }
 /** Draw selectable coding problems and their completion status. */
 export const CodingProblemListBase = (props: CodingProblemListProps) => {
-    if (["empty", "all-solved", "failed"].includes(props.state)) return <EmptyNotice props={{ icon: props.state === "all-solved" ? "complete" : props.state === "failed" ? "retry" : "practice", message: props.props.noticeMessage ?? "", description: props.props.noticeDescription, actionLabel: props.props.noticeActionLabel }} on={{ act: props.on?.recover }} />
+    if (["empty", "all-solved", "failed"].includes(props.state)) return <EmptyNotice message={props.props.noticeMessage ?? ""} description={props.props.noticeDescription} actionLabel={props.props.noticeActionLabel} iconSource={iconSourceFor(props.state === "all-solved" ? "complete" : props.state === "failed" ? "retry" : "practice", "leading")} onAction={({ act: props.on?.recover })?.act} />
     const loading = props.state === "pending"; const rows = loading ? Array.from({ length: 5 }, (_, i) => ({ slug: `resting-${i}`, title: "", fact: "", isSolved: false, label: "" })) : props.props.problems ?? []
-    return <ul>{rows.map((problem) => <li key={problem.slug}><button type="button" aria-label={problem.label} disabled={loading} onClick={() => props.on?.open?.(problem.slug)}><Icon props={{ name: problem.isSolved ? "complete" : "pending", role: "leading" }} isLoading={loading} /><Text props={{ content: problem.title, size: "sm" }} isLoading={loading} /><Text props={{ content: problem.fact, size: "xs", tone: "muted" }} isLoading={loading} /></button></li>)}</ul>
+    return <ul>{rows.map((problem) => <li key={problem.slug}><button type="button" aria-label={problem.label} disabled={loading} onClick={() => props.on?.open?.(problem.slug)}><Icon source={iconSourceFor(problem.isSolved ? "complete" : "pending", "leading")} role={"leading"} isSkeleton={loading} /><Text size={"sm"} isSkeleton={loading}>{problem.title}</Text><Text size={"xs"} tone={"muted"} isSkeleton={loading}>{problem.fact}</Text></button></li>)}</ul>
 }

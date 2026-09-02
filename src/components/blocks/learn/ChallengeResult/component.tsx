@@ -1,7 +1,7 @@
-import { Button } from "@/components/leaves/Button"
+import { Button } from "@starci/grammar/common"
 import { Breadcrumbs } from "@/components/leaves/Breadcrumbs"
-import { Heading } from "@/components/leaves/Heading"
-import { Text } from "@/components/leaves/Text"
+import { Heading } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import { ChallengeAttemptHistoryDrawer } from "@/components/overlays/learn/ChallengeAttemptHistoryDrawer"
 import {
     challengeEvaluationClassName,
@@ -77,21 +77,21 @@ export const ChallengeResultBase = (props: ChallengeResultProps) => {
     if (props.blockState === "pending" || props.blockState === "unavailable") {
         const unavailable = props.blockState === "unavailable"
         return <section className={challengeResultDocumentClassName}>{breadcrumb}<div className={challengeEvaluationClassName}>
-            <Text props={{ content: unavailable ? props.props.unavailableTitle : props.props.evaluationTitle, weight: "semibold", live: "polite" }} />
-            <div className={stackedControlsClassName}><Text props={{ content: unavailable ? props.props.unavailableDetail : props.props.evaluationDetail, size: "sm", tone: "muted" }} />{props.props.realtimeStatus === undefined ? null : <Text props={{ content: props.props.realtimeStatus, size: "sm", tone: "muted", live: "polite" }} />}</div>
-            <Button props={{ label: props.props.reloadLabel, variant: unavailable ? "primary" : "outline", isPending: !unavailable }} on={{ press: props.on?.reload }} />
+            <Text weight={"semibold"} live={"polite"}>{unavailable ? props.props.unavailableTitle : props.props.evaluationTitle}</Text>
+            <div className={stackedControlsClassName}><Text size={"sm"} tone={"muted"}>{unavailable ? props.props.unavailableDetail : props.props.evaluationDetail}</Text>{props.props.realtimeStatus === undefined ? null : <Text size={"sm"} tone={"muted"} live={"polite"}>{props.props.realtimeStatus}</Text>}</div>
+            <Button variant={unavailable ? "primary" : "outline"} isPending={!unavailable} onPress={props.on?.reload}>{props.props.reloadLabel}</Button>
         </div></section>
     }
     return (
         <>
             <section className={challengeResultDocumentClassName}>{breadcrumb}<div className={challengeResultWorkspaceClassName}>
                 <section className={challengeResultSummaryClassName}>
-                    <div className={titlePairClassName}><Heading props={{ content: props.props.title, level: 1 }} isLoading={loading} /><Text props={{ content: props.props.description, size: "sm" }} isLoading={loading} /></div>
-                    <Text props={{ content: props.props.scoreLine, size: "sm", tone: "muted" }} isLoading={loading} />
-                    <div className={stackedControlsClassName}>{props.blockState === "failed" ? <Text props={{ content: props.props.notice, live: "assertive" }} /> : <>{props.props.shortFeedback === undefined ? null : <Text props={{ content: props.props.shortFeedback }} />}{props.props.outcomeLabel === undefined ? null : <Text props={{ content: props.props.outcomeLabel, weight: "semibold" }} />}{props.props.confidenceLine === undefined ? null : <Text props={{ content: props.props.confidenceLine, size: "sm", tone: "muted" }} />}</>}</div>
+                    <div className={titlePairClassName}><Heading level={1} isSkeleton={loading}>{props.props.title}</Heading><Text size={"sm"} isSkeleton={loading}>{props.props.description}</Text></div>
+                    <Text size={"sm"} tone={"muted"} isSkeleton={loading}>{props.props.scoreLine}</Text>
+                    <div className={stackedControlsClassName}>{props.blockState === "failed" ? <Text live={"assertive"}>{props.props.notice}</Text> : <>{props.props.shortFeedback === undefined ? null : <Text>{props.props.shortFeedback}</Text>}{props.props.outcomeLabel === undefined ? null : <Text weight={"semibold"}>{props.props.outcomeLabel}</Text>}{props.props.confidenceLine === undefined ? null : <Text size={"sm"} tone={"muted"}>{props.props.confidenceLine}</Text>}</>}</div>
                 </section>
-                {props.blockState === "failed" ? null : <div className={challengeFeedbackClassName}>{props.props.feedbacks.map((feedback) => <div key={feedback.id} className={challengeFeedbackItemClassName}><Text props={{ content: feedback.message, weight: "semibold" }} /><Text props={{ content: feedback.severity, size: "sm", tone: "muted" }} />{feedback.detail === undefined ? null : <Text props={{ content: feedback.detail }} />}{feedback.location === undefined ? null : <Text props={{ content: feedback.location, size: "sm" }} />}{feedback.suggestion === undefined ? null : <Text props={{ content: feedback.suggestion }} />}</div>)}{props.props.uncertainty === undefined && props.props.nextAction === undefined ? null : <div className={challengeFeedbackItemClassName}>{props.props.uncertainty === undefined ? null : <Text props={{ content: props.props.uncertainty, size: "sm", tone: "muted" }} />}{props.props.nextAction === undefined ? null : <Text props={{ content: props.props.nextAction, weight: "semibold" }} />}</div>}</div>}
-                <div className={challengeResultActionsClassName}>{props.blockState === "failed" ? <Button props={{ label: props.props.reloadLabel }} on={{ press: props.on?.reload }} /> : <><Button props={{ label: props.props.historyLabel ?? "History", variant: "outline" }} on={{ press: props.on?.openHistory }} /><Button props={{ label: props.props.retryLabel }} on={{ press: props.on?.retry }} /><Button props={{ label: props.props.nextLabel, variant: "primary" }} on={{ press: props.on?.next }} /></>}</div>
+                {props.blockState === "failed" ? null : <div className={challengeFeedbackClassName}>{props.props.feedbacks.map((feedback) => <div key={feedback.id} className={challengeFeedbackItemClassName}><Text weight={"semibold"}>{feedback.message}</Text><Text size={"sm"} tone={"muted"}>{feedback.severity}</Text>{feedback.detail === undefined ? null : <Text>{feedback.detail}</Text>}{feedback.location === undefined ? null : <Text size={"sm"}>{feedback.location}</Text>}{feedback.suggestion === undefined ? null : <Text>{feedback.suggestion}</Text>}</div>)}{props.props.uncertainty === undefined && props.props.nextAction === undefined ? null : <div className={challengeFeedbackItemClassName}>{props.props.uncertainty === undefined ? null : <Text size={"sm"} tone={"muted"}>{props.props.uncertainty}</Text>}{props.props.nextAction === undefined ? null : <Text weight={"semibold"}>{props.props.nextAction}</Text>}</div>}</div>}
+                <div className={challengeResultActionsClassName}>{props.blockState === "failed" ? <Button onPress={props.on?.reload}>{props.props.reloadLabel}</Button> : <><Button variant="outline" onPress={props.on?.openHistory}>{props.props.historyLabel ?? "History"}</Button><Button onPress={props.on?.retry}>{props.props.retryLabel}</Button><Button variant="primary" onPress={props.on?.next}>{props.props.nextLabel}</Button></>}</div>
             </div></section>
             {props.props.isHistoryOpen === true ? <ChallengeAttemptHistoryDrawer
                 isOpen

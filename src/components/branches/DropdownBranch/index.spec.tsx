@@ -23,6 +23,21 @@ globalThis.ResizeObserver = TestResizeObserver
 afterEach(cleanup)
 
 describe("DropdownBranch", () => {
+    it("projects the complete tertiary icon-button contract onto compact dropdown triggers", () => {
+        render(
+            <DropdownBranch
+                props={{ label: "Account", sections: [{ items: [{ id: "profile", label: "Profile" }] }] }}
+                trigger={<span>Avatar</span>}
+            />,
+        )
+
+        const trigger = screen.getByRole("button", { name: "Account" })
+        expect(trigger).toHaveClass("button")
+        expect(trigger).toHaveClass("button--icon-only")
+        expect(trigger).toHaveClass("button--md")
+        expect(trigger).toHaveClass("button--tertiary")
+    })
+
     it("keeps a static header outside menu options", async () => {
         render(
             <DropdownBranch

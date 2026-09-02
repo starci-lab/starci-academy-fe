@@ -1,6 +1,7 @@
 import { Link as HeroLink } from "@heroui/react"
-import { Icon } from "@/components/leaves/Icon"
-import { Text } from "@/components/leaves/Text"
+import { Icon } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { Text } from "@starci/grammar/common"
 import { getContentMapRowClassName } from "./classNames"
 
 /**
@@ -56,8 +57,8 @@ export const ContentMapRow = (props: ContentMapRowProps) => (
         onPress={props.on?.press}
         className={getContentMapRowClassName(props.props.isCurrent === true)}
     >
-        <Icon props={{ name: props.props.isComplete === true ? "complete" : "pending", role: "leading" }} />
-        <Text props={{ content: props.props.title, size: "sm" }} isLoading={props.isLoading} />
-        <Text props={{ content: props.props.meta, size: "xs", tone: "muted" }} isLoading={props.isLoading} />
+        <Icon source={iconSourceFor(props.props.isComplete === true ? "complete" : "pending", "leading")} role={"leading"} />
+        <Text size={"sm"} isSkeleton={props.isLoading}>{props.props.title}</Text>
+        <Text size={"xs"} tone={"muted"} isSkeleton={props.isLoading}>{props.props.meta}</Text>
     </HeroLink>
 )

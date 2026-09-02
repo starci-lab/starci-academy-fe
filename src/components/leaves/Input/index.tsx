@@ -2,8 +2,9 @@
 
 import { useState } from "react"
 import { Input as HeroInput } from "@heroui/react"
-import { OtpInput } from "@starci/grammar/core"
-import { Icon } from "@/components/leaves/Icon"
+import { OtpInput } from "@starci/grammar/common"
+import { Icon } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
 import { inputBoxClassName, inputLoadingClassName, inputRevealClassName } from "./classNames"
 
 /**
@@ -112,7 +113,7 @@ export const Input = (props: InputProps) => {
                     className={inputRevealClassName}
                     onClick={() => setIsRevealed(!isRevealed)}
                 >
-                    <Icon props={{ name: isRevealed ? "hidePassword" : "revealPassword", role: "chip" }} />
+                    <Icon source={iconSourceFor(isRevealed ? "hidePassword" : "revealPassword", "chip")} role={"chip"} />
                 </button>
             )}
         </span>

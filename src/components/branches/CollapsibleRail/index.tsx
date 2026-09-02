@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from "framer-motion"
 import type { ReactNode } from "react"
-import { Rail } from "@starci/grammar/core"
+import { Rail } from "@starci/grammar/common"
 import { collapsibleRailMotionClassName } from "./classNames"
 
 /** Expanded learn-navigation width, kept equal to the frame's `w-64`. */

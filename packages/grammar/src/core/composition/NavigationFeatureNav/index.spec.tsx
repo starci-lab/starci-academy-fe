@@ -22,6 +22,7 @@ describe("Core NavigationFeatureNav", () => {
         )
 
         expect(container.querySelector("[data-grammar-navigation-feature-nav='true']")?.getAttribute("data-grammar-navigation-feature-nav-layers")).toBe("two")
+        expect(container.querySelector("[data-grammar-navigation-feature-nav-feature='true']")?.classList.contains("starci-core-page-container")).toBe(false)
         expect(screen.getByRole("navigation", { name: "Global navigation" })).toBeTruthy()
         expect(screen.getByRole("navigation", { name: "Dashboard features" })).toBeTruthy()
         expect(screen.getByRole("group", { name: "Compact navigation" })).toBeTruthy()

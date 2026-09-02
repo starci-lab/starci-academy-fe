@@ -41,9 +41,9 @@ const toRow = (course: MyCourseRow, labels: CourseProgressLabels): CourseProgres
         actionLabel: course.isEnrolled === false ? labels.view : labels.resume,
         trialLabel: labels.trial,
         dimensions: [
-            { id: "content", label: labels.content, completed: contentCompleted, total: contentTotal, percent: percent(contentCompleted, contentTotal), tone: "accent" },
-            { id: "challenge", label: labels.challenge, completed: challengeCompleted, total: challengeTotal, percent: percent(challengeCompleted, challengeTotal), tone: "success" },
-            { id: "milestone", label: labels.milestone, completed: milestoneCompleted, total: milestoneTotal, percent: percent(milestoneCompleted, milestoneTotal), tone: "warning" },
+            { id: "content", label: labels.content, completed: contentCompleted, total: contentTotal, percent: percent(contentCompleted, contentTotal), tone: "neutral" },
+            { id: "challenge", label: labels.challenge, completed: challengeCompleted, total: challengeTotal, percent: percent(challengeCompleted, challengeTotal), tone: "neutral" },
+            { id: "milestone", label: labels.milestone, completed: milestoneCompleted, total: milestoneTotal, percent: percent(milestoneCompleted, milestoneTotal), tone: "neutral" },
         ],
     }
 }

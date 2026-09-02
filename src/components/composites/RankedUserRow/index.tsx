@@ -1,10 +1,11 @@
 import { Avatar } from "@/components/leaves/Avatar"
-import { Button } from "@/components/leaves/Button"
+import { Button } from "@starci/grammar/common"
 import { RankDeltaCaret } from "@/components/leaves/RankDeltaCaret"
 import { RankMark } from "@/components/leaves/RankMark"
-import { Text } from "@/components/leaves/Text"
-import { TextLink } from "@/components/leaves/TextLink"
+import { Text } from "@starci/grammar/common"
 import { getRankedUserVerdictClassName } from "./classNames"
+import { TextAction } from "@starci/grammar/common"
+
 
 /** Semantic movement verdict carried by leaderboard data. */
 export type RankedUserVerdict = "success" | "danger"
@@ -43,12 +44,12 @@ export type RankedUserRowActions = {
 export type RankedUserRowProps = { readonly props: RankedUserRowData; readonly on?: RankedUserRowActions; readonly isLoading?: boolean }
 
 const RankedName = ({ props, on, isLoading }: RankedUserRowProps) => props.isMe === true
-    ? <Text props={{ content: props.name, size: "sm", weight: "semibold", tone: props.isMe === true ? "accent" : "default" }} isLoading={isLoading} />
-    : <TextLink props={{ label: props.name ?? "", size: "sm" }} on={{ press: on?.open }} isLoading={isLoading} />
+    ? <Text size={"sm"} tone={props.isMe === true ? "accent" : "default"} weight={"semibold"} isSkeleton={isLoading}>{props.name}</Text>
+    : <TextAction size={"sm"} appearance="inline" isSkeleton={isLoading} onPress={on?.open}>{props.name ?? ""}</TextAction>
 
 const RankedMovement = ({ props, isLoading }: RankedUserRowProps) => props.rankDelta !== undefined
     ? <RankDeltaCaret props={{ delta: props.rankDelta, accessibleLabel: props.movementLabel }} isLoading={isLoading} />
-    : <Text props={{ content: undefined, size: "sm" }} isLoading={isLoading} />
+    : <Text size={"sm"} isSkeleton={isLoading}>{undefined}</Text>
 
 /**
  * Draw one ranked identity with one mutually exclusive movement or follow outcome.
@@ -77,23 +78,14 @@ export const RankedUserRow = (props: RankedUserRowProps) => {
      */
     const movement = <RankedMovement props={data} isLoading={isLoading} />
     const follow = showsFollow
-        ? <Button
-            props={{
-                label: data.isFollowing === true
+        ? <Button variant={data.isFollowing === true ? "secondary" : "primary"} size={"sm"} isPending={data.isPending} isSkeleton={isLoading} onPress={({ press: on?.follow })?.press}>{data.isFollowing === true
                     ? data.followingLabel ?? ""
-                    : followLabel,
-                size: "sm",
-                variant: data.isFollowing === true ? "secondary" : "primary",
-                isPending: data.isPending,
-            }}
-            on={{ press: on?.follow }}
-            isLoading={isLoading}
-        />
+                    : followLabel}</Button>
         : undefined
     return (
         <div className={getRankedUserVerdictClassName(data.verdict)} data-verdict={data.verdict}><RankMark
             props={{ rank: data.rank, placement: "row", accessibleLabel: data.rankLabel }}
             isLoading={isLoading}
-        /><Avatar props={{ name: data.name, src: data.avatar ?? undefined, size: "sm" }} isLoading={isLoading} /><div>{name}{data.subtitle === undefined && !isLoading ? null : <Text props={{ content: data.subtitle, size: "xs", tone: "muted" }} isLoading={isLoading} />}</div><Text props={{ content: data.points, size: "xs", tone: "muted" }} isLoading={isLoading} />{movement}{follow}</div>
+        /><Avatar props={{ name: data.name, src: data.avatar ?? undefined, size: "sm" }} isLoading={isLoading} /><div>{name}{data.subtitle === undefined && !isLoading ? null : <Text size={"xs"} tone={"muted"} isSkeleton={isLoading}>{data.subtitle}</Text>}</div><Text size={"xs"} tone={"muted"} isSkeleton={isLoading}>{data.points}</Text>{movement}{follow}</div>
     )
 }

@@ -3,12 +3,13 @@
 import { useLocale, useTranslations } from "next-intl"
 import { getPathname } from "@/i18n/navigation"
 import { PressableSurface } from "@/components/branches/PressableSurface"
-import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
+import { SurfaceListCard } from "@starci/grammar/common"
 import { EvidenceRow } from "@/components/composites/EvidenceRow"
-import { Badge } from "@/components/leaves/Badge"
-import { IconTile } from "@/components/leaves/IconTile"
-import { Progress } from "@/components/leaves/Progress"
-import { Text } from "@/components/leaves/Text"
+import { Badge } from "@starci/grammar/common"
+import { IconTile } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { Progress } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import { useOverviewEvidence } from "./useOverviewEvidence"
 import { clamp, number, text } from "./shared"
 import {
@@ -68,7 +69,7 @@ export const OverviewCourses = (props: OverviewCoursesProps) => {
         : t("evidence.courses.empty")
     const hasCourses = courses.length > 0
     return (
-        <SurfaceListCard props={{ label: t("evidence.courses.label") }} isLoading={request.isLoading}>
+        <SurfaceListCard label={t("evidence.courses.label")} isLoading={request.isLoading}>
             <div className={profileEvidenceListClassName}>
                 {(hasCourses
                     ? courses
@@ -84,29 +85,14 @@ export const OverviewCourses = (props: OverviewCoursesProps) => {
                             hover="label"
                         >
                             <div className={profileCourseRowClassName}>
-                                <IconTile
-                                    props={{ icon: "course", image: course.thumbnailUrl, tone: "accent", size: "md" }}
-                                    isLoading={request.isLoading}
-                                />
+                                <IconTile source={iconSourceFor("course", "leading")} artwork={course.thumbnailUrl ? <img src={course.thumbnailUrl} alt="" className="size-full object-cover" /> : undefined} tone={"accent"} size={"md"} isSkeleton={request.isLoading} />
                                 <div className={profileCourseIdentityClassName}>
                                     <div className={profileCourseHeadingClassName}>
-                                        <Text props={{ content: text(course.label), size: "sm", weight: "semibold", isPressLabel: true }} isLoading={request.isLoading} />
-                                        {request.isLoading ? null : <Badge props={{ content: `${clamp(course.completionPercent)}%` }} />}
+                                        <Text size={"sm"} weight={"semibold"} isPressLabel={true} isSkeleton={request.isLoading}>{text(course.label)}</Text>
+                                        {request.isLoading ? null : <Badge>{`${clamp(course.completionPercent)}%`}</Badge>}
                                     </div>
-                                    {request.isLoading ? null : <div className={profileCourseQualifierClassName}><Text
-                                        props={{
-                                            content: `${courseT("progress.content")} ${number(course.contentCompleted)}/${number(course.contentTotal)} · ${courseT("progress.challenge")} ${number(course.challengeCompleted)}/${number(course.challengeTotal)}`,
-                                            size: "xs",
-                                            tone: "muted",
-                                        }}
-                                    /></div>}
-                                    <Progress
-                                        props={{
-                                            value: clamp(course.completionPercent),
-                                            label: courseT("catalog.progressAria", { title: text(course.label) ?? "" }),
-                                        }}
-                                        isLoading={request.isLoading}
-                                    />
+                                    {request.isLoading ? null : <div className={profileCourseQualifierClassName}><Text size={"xs"} tone={"muted"}>{`${courseT("progress.content")} ${number(course.contentCompleted)}/${number(course.contentTotal)} · ${courseT("progress.challenge")} ${number(course.challengeCompleted)}/${number(course.challengeTotal)}`}</Text></div>}
+                                    <Progress label={courseT("catalog.progressAria", { title: text(course.label) ?? "" })} value={clamp(course.completionPercent)} isSkeleton={request.isLoading} />
                                 </div>
                             </div>
                         </PressableSurface>

@@ -1,9 +1,10 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { IconButton } from "@/components/leaves/IconButton"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { IconButton } from "@starci/grammar/common"
 import { StatusDot } from "@/components/leaves/StatusDot"
-import { Text } from "@/components/leaves/Text"
+import { Text } from "@starci/grammar/common"
 import { normalizeSandboxPath } from "@/modules/code/sandbox-repo"
 
 /** One supported text file in the synchronized source explorer. */
@@ -100,7 +101,7 @@ export const SourceFileTree = (props: SourceFileTreeProps) => {
 
     return (
         <nav aria-label={data.label}>
-            <Text props={{ content: data.label, size: "sm", weight: "semibold" }} />
+            <Text size={"sm"} weight={"semibold"}>{data.label}</Text>
             <ul>
                 {visibleNodes.map((node) => {
                     const isFolderOpen = node.kind === "folder" && !closedFolders.has(node.path)
@@ -109,28 +110,12 @@ export const SourceFileTree = (props: SourceFileTreeProps) => {
                         ? `${isFolderOpen ? "Collapse" : "Expand"} ${node.path}`
                         : `Open ${node.path}`
                     return <li key={node.id}>
-                        <IconButton
-                            props={{
-                                icon: node.kind === "folder" ? "disclosure" : "code",
-                                label: controlLabel,
-                                isActive,
-                            }}
-                            on={{
+                        <IconButton source={iconSourceFor(node.kind === "folder" ? "disclosure" : "code", "leading")} label={controlLabel} isSkeleton={isLoading} onPress={({
                                 press: node.kind === "folder"
                                     ? () => toggleFolder(node.path)
                                     : () => on?.activate?.(node.path),
-                            }}
-                            isLoading={isLoading}
-                        />
-                        <Text
-                            props={{
-                                content: node.label,
-                                size: "sm",
-                                tone: isActive ? "accent" : "default",
-                                weight: isActive ? "semibold" : "normal",
-                            }}
-                            isLoading={isLoading}
-                        />
+                            })?.press} />
+                        <Text size={"sm"} tone={isActive ? "accent" : "default"} weight={isActive ? "semibold" : "normal"} isSkeleton={isLoading}>{node.label}</Text>
                         {node.isEdited ? <StatusDot
                             props={{ tone: "warning", label: data.editedLabel ?? "Locally edited" }}
                             isLoading={isLoading}

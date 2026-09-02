@@ -1,7 +1,7 @@
 import { DrawerBranch } from "@/components/branches/DrawerBranch"
-import { Button } from "@/components/leaves/Button"
+import { Button } from "@starci/grammar/common"
 import { Select } from "@/components/leaves/Select"
-import { Text } from "@/components/leaves/Text"
+import { Text } from "@starci/grammar/common"
 
 /** One grading choice resolved from the public model catalogue. */
 export type ChallengeGradingModelOption = {
@@ -52,29 +52,22 @@ export const ChallengeGradingModelDrawerBase = (props: ChallengeGradingModelDraw
             title={props.labels.title}
             onDismiss={props.onDismiss}
         >
-            <Text props={{ content: props.labels.description, size: "sm", tone: "muted" }} />
-            <Text props={{ content: props.quotaLabel ?? props.labels.quotaUnavailable, size: "xs", tone: "muted" }} />
+            <Text size={"sm"} tone={"muted"}>{props.labels.description}</Text>
+            <Text size={"xs"} tone={"muted"}>{props.quotaLabel ?? props.labels.quotaUnavailable}</Text>
             <div>
                 {props.models.map((model) => (
                     <div key={model.id}>
-                        <Button
-                            props={{
-                                label: model.id === props.selectedDefaultModelId
-                                    ? `${model.label} · ${props.labels.selected}`
-                                    : model.label,
-                                variant: model.id === props.selectedDefaultModelId ? "primary" : "outline",
-                                disabled: model.disabled,
-                            }}
-                            on={{ press: () => props.onSelectDefault?.(model.id) }}
-                        />
-                        <Text props={{ content: model.detail, size: "xs", tone: "muted" }} />
+                        <Button variant={model.id === props.selectedDefaultModelId ? "primary" : "outline"} isDisabled={model.disabled} onPress={() => props.onSelectDefault?.(model.id)}>{model.id === props.selectedDefaultModelId
+                            ? `${model.label} · ${props.labels.selected}`
+                            : model.label}</Button>
+                        <Text size={"xs"} tone={"muted"}>{model.detail}</Text>
                     </div>
                 ))}
             </div>
-            <Button props={{ label: props.labels.applyAll, variant: "secondary" }} on={{ press: props.onApplyAll }} />
+            <Button variant="secondary" onPress={props.onApplyAll}>{props.labels.applyAll}</Button>
             {props.deliverables.map((deliverable) => (
                 <div key={deliverable.id}>
-                    <Text props={{ content: props.labels.override(deliverable.title), size: "sm", weight: "semibold" }} />
+                    <Text size={"sm"} weight={"semibold"}>{props.labels.override(deliverable.title)}</Text>
                     <Select
                         props={{
                             id: `challenge-model-${deliverable.id}`,

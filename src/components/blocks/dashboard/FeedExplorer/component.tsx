@@ -1,14 +1,13 @@
 import { ActivityFeed, type ActivityFeedProps } from "@/components/blocks/dashboard/ActivityFeed"
-import { DashboardSurfaceCard } from "@/components/blocks/dashboard/DashboardSurfaceCard"
-import { Button } from "@/components/leaves/Button"
+import { SurfaceCard } from "@starci/grammar/common"
+import { Button } from "@starci/grammar/common"
 import { ChoiceTabs, type ChoiceTabsData } from "@/components/leaves/ChoiceTabs"
-import { Text } from "@/components/leaves/Text"
+import { Text } from "@starci/grammar/common"
 import {
     feedExplorerActivityClassName,
     feedExplorerContinuationClassName,
     feedExplorerClassName,
     feedExplorerNavigationClassName,
-    feedExplorerSurfaceClassName,
 } from "./classNames"
 
 /** Settled controls, feed state and pagination state for Explore. */
@@ -34,23 +33,18 @@ export type FeedExplorerProps = { readonly props: FeedExplorerData; readonly on?
 
 /** Pure Explore feed arrangement. Requests and navigation stay in the connected half. */
 export const FeedExplorerBase = (props: FeedExplorerProps) => (
-    <div className={feedExplorerSurfaceClassName}>
-        <DashboardSurfaceCard props={{ ariaLabel: props.props.label }}>
-            <div className={feedExplorerClassName}>
-                <nav className={feedExplorerNavigationClassName} aria-label={props.props.label}>
-                    <ChoiceTabs props={{ ...props.props.scope, variant: "primary" }} on={{ select: props.on?.selectScope }} />
-                </nav>
-                <section className={feedExplorerActivityClassName} aria-label={props.props.label}>
-                    <ActivityFeed {...props.props.feed} isFrameless on={props.on?.feed} />
-                    {props.props.loadMoreError === undefined && !props.props.canLoadMore ? null : <div className={feedExplorerContinuationClassName}>
-                        {props.props.loadMoreError === undefined ? null : <Text props={{ content: props.props.loadMoreError, size: "xs", tone: "muted" }} />}
-                        {props.props.canLoadMore || props.props.loadMoreError !== undefined ? <Button
-                            props={{ label: props.props.loadMoreError === undefined ? props.props.loadMoreLabel : props.props.retryLabel, size: "sm", variant: "ghost", isPending: props.props.isLoadingMore }}
-                            on={{ press: props.props.loadMoreError === undefined ? props.on?.loadMore : props.on?.retryLoadMore }}
-                        /> : null}
-                    </div>}
-                </section>
-            </div>
-        </DashboardSurfaceCard>
-    </div>
+    <SurfaceCard ariaLabel={props.props.label} composition={"joined"}>
+        <div className={feedExplorerClassName}>
+            <nav className={feedExplorerNavigationClassName} aria-label={props.props.label}>
+                <ChoiceTabs props={{ ...props.props.scope, variant: "primary" }} on={{ select: props.on?.selectScope }} />
+            </nav>
+            <section className={feedExplorerActivityClassName} aria-label={props.props.label}>
+                <ActivityFeed {...props.props.feed} isFrameless hasTrailingContent={props.props.loadMoreError !== undefined || props.props.canLoadMore} on={props.on?.feed} />
+                {props.props.loadMoreError === undefined && !props.props.canLoadMore ? null : <div className={feedExplorerContinuationClassName}>
+                    {props.props.loadMoreError === undefined ? null : <Text size={"xs"} tone={"muted"}>{props.props.loadMoreError}</Text>}
+                    {props.props.canLoadMore || props.props.loadMoreError !== undefined ? <Button variant="ghost" size="sm" isPending={props.props.isLoadingMore} onPress={props.props.loadMoreError === undefined ? props.on?.loadMore : props.on?.retryLoadMore}>{props.props.loadMoreError === undefined ? props.props.loadMoreLabel : props.props.retryLabel}</Button> : null}
+                </div>}
+            </section>
+        </div>
+    </SurfaceCard>
 )

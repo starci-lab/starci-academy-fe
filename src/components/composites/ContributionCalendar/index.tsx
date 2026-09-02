@@ -1,7 +1,7 @@
 import { ChoiceTabs } from "@/components/leaves/ChoiceTabs"
 import { ContributionGrid } from "@/components/leaves/ContributionGrid"
 import { ContributionIntensityLegend } from "@/components/leaves/ContributionIntensityLegend"
-import { Text } from "@/components/leaves/Text"
+import { Text } from "@starci/grammar/common"
 import {
     contributionCalendarClassName,
     contributionCalendarFlushClassName,
@@ -46,12 +46,15 @@ export type ContributionCalendarProps = {
     readonly isFlush?: boolean
 }
 
-const YearSelector = (props: {
+/** Resolved year-selector data inside the calendar composition. */
+type YearSelectorProps = {
     readonly totalLabel?: string
     readonly year: number
     readonly years: ReadonlyArray<number>
     readonly selectYear?: (year: number) => void
-}) => (
+}
+
+const YearSelector = (props: YearSelectorProps) => (
     <ChoiceTabs
         props={{
             label: props.totalLabel ?? "",
@@ -74,7 +77,7 @@ export const ContributionCalendar = (props: ContributionCalendarProps) => {
         return (
             <div className={contributionCalendarFlushClassName} data-part="contribution-calendar">
                 <div className={contributionCalendarHeaderBandClassName} data-part="contribution-header">
-                    <Text props={{ content: data.totalLabel, size: "xs", tone: "muted" }} isLoading={isLoading} />
+                    <Text size={"xs"} tone={"muted"} isSkeleton={isLoading}>{data.totalLabel}</Text>
                     <YearSelector
                         totalLabel={data.totalLabel}
                         year={data.year}
@@ -96,7 +99,7 @@ export const ContributionCalendar = (props: ContributionCalendarProps) => {
                 </div>
                 <div aria-hidden className={contributionCalendarSeparatorClassName} />
                 <div className={contributionCalendarFooterBandClassName} data-part="contribution-footer">
-                    <Text props={{ content: data.streakLabel, size: "sm" }} isLoading={isLoading} />
+                    <Text size={"sm"} isSkeleton={isLoading}>{data.streakLabel}</Text>
                     <ContributionIntensityLegend
                         props={{ lessLabel: data.lessLabel, moreLabel: data.moreLabel }}
                         isLoading={isLoading}
@@ -109,7 +112,7 @@ export const ContributionCalendar = (props: ContributionCalendarProps) => {
     return (
         <div className={contributionCalendarClassName} data-part="contribution-calendar">
             <div className={contributionCalendarRowClassName}>
-                <Text props={{ content: data.totalLabel, size: "xs", tone: "muted" }} isLoading={isLoading} />
+                <Text size={"xs"} tone={"muted"} isSkeleton={isLoading}>{data.totalLabel}</Text>
                 <YearSelector
                     totalLabel={data.totalLabel}
                     year={data.year}
@@ -127,7 +130,7 @@ export const ContributionCalendar = (props: ContributionCalendarProps) => {
                 isLoading={isLoading}
             />
             <div className={contributionCalendarRowClassName}>
-                <Text props={{ content: data.streakLabel, size: "sm" }} isLoading={isLoading} />
+                <Text size={"sm"} isSkeleton={isLoading}>{data.streakLabel}</Text>
                 <ContributionIntensityLegend
                     props={{ lessLabel: data.lessLabel, moreLabel: data.moreLabel }}
                     isLoading={isLoading}

@@ -2,9 +2,9 @@
 
 import { useEffect, useRef, useState } from "react"
 import { motion, useReducedMotion } from "framer-motion"
-import { Badge } from "@/components/leaves/Badge"
+import { Badge } from "@starci/grammar/common"
 import { StarCiAiTeacher } from "@/components/leaves/StarCiAiTeacher"
-import { Text } from "@/components/leaves/Text"
+import { Text } from "@starci/grammar/common"
 import { starCiAiDragBoundaryClassName, starCiAiDragHandleArtClassName, starCiAiFabClassName, starCiAiLabelClassName } from "./classNames"
 
 /** Closed semantic data for the one global AI trigger. */
@@ -76,9 +76,9 @@ export const StarCiAiFab = (props: StarCiAiFabProps) => {
                     <StarCiAiTeacher props={{ size: "md", isOnline: true }} isLoading={props.isLoading} />
                 </span>
                 <span className={starCiAiLabelClassName} aria-hidden="true">
-                    <Text props={{ content: props.props.label, size: "sm", weight: "semibold" }} isLoading={props.isLoading} />
+                    <Text size={"sm"} weight={"semibold"} isSkeleton={props.isLoading}>{props.props.label}</Text>
                 </span>
-                {props.props.hasUnread === true ? <Badge props={{ content: "1", tone: "accent" }} /> : null}
+                {props.props.hasUnread === true ? <Badge tone={"accent"}>{"1"}</Badge> : null}
             </motion.button>
         </div>
     )

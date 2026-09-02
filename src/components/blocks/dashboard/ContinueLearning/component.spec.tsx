@@ -63,6 +63,8 @@ describe("ContinueLearningBase", () => {
         expect(screen.getByText("Continue learning").closest("[data-grammar-surface-label='true']")).not.toBeNull()
         expect(screen.getByText("Continue learning").closest("[data-grammar-label='true']")).not.toBeNull()
         expect(container.querySelector(".grid.items-stretch")).toHaveClass("gap-2")
+        expect(container.querySelector("[data-dashboard-resume-copy=true]")).toHaveClass("gap-3")
+        expect(container.querySelector("[data-dashboard-resume-identity=true]")).toHaveClass("gap-1")
         expect(container.querySelectorAll("[data-grammar-highlight=true]")).toHaveLength(1)
         expect(container.querySelector("[data-dashboard-resume-item=featured]")).toHaveClass("h-full")
         expect(container.querySelector("[data-dashboard-resume-item=supporting]")).toHaveClass("h-full")

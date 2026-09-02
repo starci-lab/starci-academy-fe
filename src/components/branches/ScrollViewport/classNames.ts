@@ -1,7 +1,7 @@
 import { cn } from "@heroui/react"
-import { formScrollViewportClassName } from "@starci/grammar/core"
+import { formScrollViewportClassName } from "@starci/grammar/common"
 
-/** Grammar-owned viewport selected for a compact form surface. */
+/** Grammar-owned compact-form scroll treatment; this app alias adds no visual override. */
 export const authenticationFormScrollViewportClassName = cn(formScrollViewportClassName)
 
 /** Bounded pricing content viewport; HeroUI ScrollShadow owns scrolling and edge cues. */

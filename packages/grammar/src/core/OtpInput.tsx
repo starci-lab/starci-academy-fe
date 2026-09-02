@@ -1,3 +1,5 @@
+"use client"
+
 import { useCallback, useRef } from "react"
 import { InputOTP, REGEXP_ONLY_DIGITS } from "@heroui/react"
 import { horizontalScrollRegionClassName } from "./classNames.js"

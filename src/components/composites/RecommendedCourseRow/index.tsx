@@ -1,10 +1,12 @@
 import { PressableSurface } from "@/components/branches/PressableSurface"
-import { Badge } from "@/components/leaves/Badge"
+import { Badge } from "@starci/grammar/common"
 import { DestinationCue } from "@/components/leaves/DestinationCue"
-import { IconTile } from "@/components/leaves/IconTile"
-import { Text } from "@/components/leaves/Text"
-import { TextLink } from "@/components/leaves/TextLink"
-import { recommendedCourseBodyClassName, recommendedCourseDetailsClassName, recommendedCoursePriceClassName, recommendedCourseRowClassName } from "./classNames"
+import { IconTile } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { Text } from "@starci/grammar/common"
+import { recommendedCourseBodyClassName, recommendedCourseDetailsClassName, recommendedCourseEvidenceClassName, recommendedCoursePriceClassName, recommendedCourseRowClassName } from "./classNames"
+import { TextAction } from "@starci/grammar/common"
+
 
 /**
  * COMPOSITE - `RecommendedCourseRow`: one suggested course, priced.
@@ -62,19 +64,21 @@ export const RecommendedCourseRow = (props: RecommendedCourseRowProps) => {
     const isLoading = props.isLoading ?? false
     const priceDetailLabel = data.priceDetailLabel
     return <PressableSurface hover="label" label={data.title ?? "Course"} press={on?.open} disabled={isLoading}><div className={recommendedCourseRowClassName}>
-        <IconTile props={{ icon: "course", image: data.cover, tone: "accent", size: "md" }} isLoading={isLoading} />
+        <IconTile source={iconSourceFor("course", "leading")} artwork={data.cover ? <img src={data.cover} alt="" className="size-full object-cover" /> : undefined} tone={"accent"} size={"md"} isSkeleton={isLoading} />
         <div className={recommendedCourseBodyClassName} data-recommended-course-body="true">
-            <Text props={{ content: data.title, size: "md", weight: "semibold", isPressLabel: true }} isLoading={isLoading} />
-            <div className={recommendedCoursePriceClassName}>
-                <Text props={{ content: data.price, size: "md", weight: "semibold" }} isLoading={isLoading} />
-                {data.originalPrice === undefined ? null : <Text props={{ content: data.originalPrice, size: "md", tone: "muted", isSuperseded: true }} isLoading={isLoading} />}
-                {data.discount === undefined ? null : <Badge props={{ content: data.discount, tone: "success" }} />}
+            <div className={recommendedCourseEvidenceClassName} data-recommended-course-evidence="true">
+                <Text size={"md"} weight={"semibold"} isPressLabel={true} isSkeleton={isLoading}>{data.title}</Text>
+                <div className={recommendedCoursePriceClassName}>
+                    <Text size={"md"} weight={"semibold"} isSkeleton={isLoading}>{data.price}</Text>
+                    {data.originalPrice === undefined ? null : <Text size={"md"} tone={"muted"} isSuperseded={true} isSkeleton={isLoading}>{data.originalPrice}</Text>}
+                    {data.discount === undefined ? null : <Badge tone={"success"}>{data.discount}</Badge>}
+                </div>
+                {priceDetailLabel === undefined ? null : <div className={recommendedCourseDetailsClassName}>
+                    {data.savings === undefined ? null : <Text size={"sm"} isSkeleton={isLoading}>{data.savings}</Text>}
+                    <TextAction size={"sm"} appearance="inline" onPress={on?.openPriceDetail}>{priceDetailLabel}</TextAction>
+                </div>}
+                {data.reason === undefined ? null : <Text size={"sm"}>{data.reason}</Text>}
             </div>
-            {priceDetailLabel === undefined ? null : <div className={recommendedCourseDetailsClassName}>
-                {data.savings === undefined ? null : <Text props={{ content: data.savings, size: "sm" }} isLoading={isLoading} />}
-                <TextLink props={{ label: priceDetailLabel, size: "sm" }} on={{ press: on?.openPriceDetail }} />
-            </div>}
-            {data.reason === undefined ? null : <Text props={{ content: data.reason, size: "sm" }} />}
             {data.actionLabel === undefined ? null : <DestinationCue props={{ label: data.actionLabel }} isLoading={isLoading} />}
         </div>
     </div></PressableSurface>

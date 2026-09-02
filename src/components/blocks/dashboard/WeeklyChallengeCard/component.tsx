@@ -1,10 +1,11 @@
-import { DashboardSurfaceCard as SurfaceCard } from "@/components/blocks/dashboard/DashboardSurfaceCard"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { SurfaceCard } from "@starci/grammar/common"
+import { EmptyNotice } from "@starci/grammar/common"
 import { Avatar } from "@/components/leaves/Avatar"
-import { Badge } from "@/components/leaves/Badge"
-import { Button } from "@/components/leaves/Button"
-import { IconTile } from "@/components/leaves/IconTile"
-import { Text } from "@/components/leaves/Text"
+import { Badge } from "@starci/grammar/common"
+import { Button } from "@starci/grammar/common"
+import { IconTile } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { Text } from "@starci/grammar/common"
 import {
     challengeCardClassName,
     challengeCountdownClassName,
@@ -14,7 +15,6 @@ import {
     challengeHeadingClassName,
     challengeIdentityClassName,
     challengeSeparatorClassName,
-    challengeSurfaceClassName,
 } from "./classNames"
 
 /** One weekly challenge finisher. */
@@ -31,15 +31,8 @@ export const WeeklyChallengeCardBase = (props: WeeklyChallengeCardProps) => {
     const loading = props.state === "pending"
     if (props.state === "empty" || props.state === "failed") {
         return (
-            <SurfaceCard props={{ label: props.props.label }}>
-                <EmptyNotice
-                    props={{
-                        icon: "practice",
-                        message: props.state === "failed" ? props.props.errorMessage : props.props.emptyMessage,
-                        actionLabel: props.state === "failed" ? props.props.retryLabel : props.props.actionLabel,
-                    }}
-                    on={{ act: props.state === "failed" ? props.on?.retry : props.on?.act }}
-                />
+            <SurfaceCard label={props.props.label} composition={"single"}>
+                <EmptyNotice message={props.state === "failed" ? props.props.errorMessage : props.props.emptyMessage} actionLabel={props.state === "failed" ? props.props.retryLabel : props.props.actionLabel} iconSource={iconSourceFor("practice", "leading")} onAction={({ act: props.state === "failed" ? props.on?.retry : props.on?.act })?.act} />
             </SurfaceCard>
         )
     }
@@ -48,60 +41,46 @@ export const WeeklyChallengeCardBase = (props: WeeklyChallengeCardProps) => {
         ? Array.from({ length: 3 }, (_, index) => ({ id: `resting-${index}`, label: "", passedAtLabel: "" }))
         : props.props.finishers ?? []
     const action = props.props.claimed === true
-        ? <Badge props={{ content: props.props.claimedLabel ?? "", tone: "success" }} />
+        ? <Badge tone={"success"}>{props.props.claimedLabel ?? ""}</Badge>
         : (
-            <Button
-                props={{
-                    label: props.props.actionLabel ?? "",
-                    size: "sm",
-                    variant: "primary",
-                    isPending: props.props.isClaiming,
-                }}
-                on={{ press: props.on?.act }}
-                isLoading={loading}
-            />
+            <Button variant={"primary"} size={"sm"} isPending={props.props.isClaiming} isSkeleton={loading} onPress={({ press: props.on?.act })?.press}>{props.props.actionLabel ?? ""}</Button>
         )
 
     return (
-        <div className={challengeSurfaceClassName}>
-            <SurfaceCard props={{ label: props.props.label }} isLoading={loading}>
-                <div className={challengeCardClassName}>
-                    <div data-part="challenge-countdown" className={challengeCountdownClassName}>
-                        <Text props={{ content: props.props.endsInLabel, size: "sm" }} isLoading={loading} />
-                    </div>
-                    <div aria-hidden className={challengeSeparatorClassName} />
-                    <div data-part="challenge-heading" className={challengeHeadingClassName}>
-                        <IconTile props={{ icon: "practice", tone: "accent", size: "md" }} isLoading={loading} />
-                        <div className={challengeIdentityClassName}>
-                            <Text props={{ content: props.props.title, size: "sm", weight: "normal" }} isLoading={loading} />
-                            {props.props.passedCountLabel === undefined ? null : (
-                                <Text
-                                    props={{ content: props.props.passedCountLabel, size: "xs", tone: "muted" }}
-                                    isLoading={loading}
-                                />
-                            )}
-                        </div>
-                    </div>
-                    <div aria-hidden className={challengeSeparatorClassName} />
-                    <div data-part="challenge-finishers">
-                        <ul className={challengeFinisherListClassName}>
-                            {finishers.map((finisher) => (
-                                <li key={finisher.id}>
-                                    <div data-part="challenge-finisher" className={challengeFinisherClassName}>
-                                        <Avatar props={{ name: finisher.label, size: "sm" }} isLoading={loading} />
-                                        <Text props={{ content: finisher.label, size: "sm", weight: "normal" }} isLoading={loading} />
-                                        <Text props={{ content: finisher.passedAtLabel, size: "xs", tone: "muted" }} isLoading={loading} />
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                    <div aria-hidden className={challengeSeparatorClassName} />
-                    <div data-part="challenge-footer" className={challengeFooterClassName}>
-                        {action}
+        <SurfaceCard label={props.props.label} composition={"joined"} state={loading ? "pending" : "neutral"}>
+            <div className={challengeCardClassName}>
+                <div data-part="challenge-countdown" className={challengeCountdownClassName}>
+                    <Text size={"sm"} tone={"muted"} isSkeleton={loading}>{props.props.endsInLabel}</Text>
+                </div>
+                <div aria-hidden className={challengeSeparatorClassName} />
+                <div data-part="challenge-heading" className={challengeHeadingClassName}>
+                    <IconTile source={iconSourceFor("practice", "leading")} tone={"accent"} size={"md"} isSkeleton={loading} />
+                    <div className={challengeIdentityClassName}>
+                        <Text size={"sm"} weight={"normal"} isSkeleton={loading}>{props.props.title}</Text>
+                        {props.props.passedCountLabel === undefined ? null : (
+                            <Text size={"xs"} tone={"muted"} isSkeleton={loading}>{props.props.passedCountLabel}</Text>
+                        )}
                     </div>
                 </div>
-            </SurfaceCard>
-        </div>
+                <div aria-hidden className={challengeSeparatorClassName} />
+                <div data-part="challenge-finishers">
+                    <ul className={challengeFinisherListClassName}>
+                        {finishers.map((finisher) => (
+                            <li key={finisher.id}>
+                                <div data-part="challenge-finisher" className={challengeFinisherClassName}>
+                                    <Avatar props={{ name: finisher.label, size: "sm" }} isLoading={loading} />
+                                    <Text size={"sm"} weight={"normal"} isSkeleton={loading}>{finisher.label}</Text>
+                                    <Text size={"xs"} tone={"muted"} isSkeleton={loading}>{finisher.passedAtLabel}</Text>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+                <div aria-hidden className={challengeSeparatorClassName} />
+                <div data-part="challenge-footer" className={challengeFooterClassName}>
+                    {action}
+                </div>
+            </div>
+        </SurfaceCard>
     )
 }

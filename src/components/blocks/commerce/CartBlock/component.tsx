@@ -1,15 +1,16 @@
 import { Breadcrumbs } from "@/components/leaves/Breadcrumbs"
-import { Button } from "@/components/leaves/Button"
+import { Button } from "@starci/grammar/common"
 import { ConfirmButton } from "@/components/leaves/ConfirmButton"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
-import { Heading } from "@/components/leaves/Heading"
-import { Text } from "@/components/leaves/Text"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { EmptyNotice } from "@starci/grammar/common"
+import { Heading } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import { CartLine } from "@/components/blocks/commerce/CartLine"
 import { type CartLineData } from "@/components/blocks/commerce/CartLine/component"
 import { OrderSummaryBase, type OrderSummaryLabels } from "@/components/blocks/commerce/OrderSummary/component"
 import { CheckoutOverlayBase, type CheckoutOverlayData } from "@/components/overlays/commerce/CheckoutOverlay/component"
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
+import { SurfaceCard } from "@starci/grammar/common"
+import { SurfaceListCard } from "@starci/grammar/common"
 import {
     cartActionsClassName,
     cartHeaderClassName,
@@ -86,17 +87,17 @@ export const CartBlockBase = (props: CartBlockProps) => {
             <main className={cartPageClassName}>
                 <header className={cartHeaderClassName}>
                     <Breadcrumbs props={{ label: labels.title, steps: [{ id: "home", label: labels.navHome }, { id: "cart", label: labels.navCart }] }} on={{ home: props.on?.goHome }} />
-                    <Heading props={{ content: labels.title, level: 1 }} />
+                    <Heading level={1}>{labels.title}</Heading>
                 </header>
                 {showsNotice ? (
-                    <SurfaceCard>
+                    <SurfaceCard composition="joined">
                         <div className={cartNoticeClassName}>
-                            <EmptyNotice props={{ icon: "cart", message: props.blockState === "failed" ? labels.failedMessage : labels.emptyMessage, actionLabel: props.blockState === "failed" ? labels.failedAction : labels.emptyAction }} on={{ act: props.on?.browse }} />
+                            <EmptyNotice message={props.blockState === "failed" ? labels.failedMessage : labels.emptyMessage} actionLabel={props.blockState === "failed" ? labels.failedAction : labels.emptyAction} iconSource={iconSourceFor("cart", "leading")} onAction={({ act: props.on?.browse })?.act} />
                         </div>
                     </SurfaceCard>
                 ) : (
                     <div className={cartWorkspaceClassName}>
-                        <SurfaceListCard props={{ label: labels.title, isLabelHidden: true }} isLoading={isLoading}>
+                        <SurfaceListCard label={labels.title} labelHidden={true} isLoading={isLoading}>
                             <ul className={cartListClassName}>
                                 {lines.map((line) => (
                                     <li className={cartListItemClassName} key={line.courseId}>
@@ -106,15 +107,15 @@ export const CartBlockBase = (props: CartBlockProps) => {
                             </ul>
                         </SurfaceListCard>
                         <aside className={cartSummaryRailClassName} aria-label={labels.summary.total}>
-                            <SurfaceCard>
+                            <SurfaceCard composition="joined">
                                 <div className={cartSummaryContentClassName}>
                                     <OrderSummaryBase
                                         state={isLoading ? "pending" : props.data.hasPricingFailed === true ? "failed" : "ready"}
                                         props={{ labels: labels.summary, subtotal: props.data.subtotal, savings: props.data.savings, total: props.data.total }}
                                     />
-                                    {isLoading || props.data.hasPricingFailed === true ? null : <Text props={{ content: labels.paymentHint, size: "sm", tone: "muted" }} />}
+                                    {isLoading || props.data.hasPricingFailed === true ? null : <Text size={"sm"} tone={"muted"}>{labels.paymentHint}</Text>}
                                     <div className={cartActionsClassName}>
-                                        <Button props={{ label: labels.checkout, variant: "primary", disabled: isLoading }} on={{ press: props.on?.checkout }} />
+                                        <Button variant="primary" isDisabled={isLoading} onPress={props.on?.checkout}>{labels.checkout}</Button>
                                         <ConfirmButton props={{ label: labels.clearAll, confirmLabel: labels.confirmClearAll, disabled: isLoading }} on={{ confirm: props.on?.clearAll }} />
                                     </div>
                                 </div>

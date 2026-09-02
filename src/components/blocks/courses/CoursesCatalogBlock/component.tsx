@@ -1,17 +1,18 @@
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { EmptyNotice } from "@starci/grammar/common"
 import { Breadcrumbs } from "@/components/leaves/Breadcrumbs"
 import { ChoiceTabs } from "@/components/leaves/ChoiceTabs"
-import { Heading } from "@/components/leaves/Heading"
+import { Heading } from "@starci/grammar/common"
 import { Pagination } from "@/components/leaves/Pagination"
 import { SearchBox } from "@/components/leaves/SearchBox"
-import { Text } from "@/components/leaves/Text"
+import { Text } from "@starci/grammar/common"
 import {
     CourseCatalogCard,
     type CourseCatalogCardData,
 } from "@/components/blocks/courses/CourseCatalogCard"
 import { MyCoursesProgress } from "@/components/blocks/dashboard/MyCoursesProgress"
 import { CoursePriceOverlay } from "@/components/overlays/courses/CoursePriceOverlay"
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
+import { SurfaceCard } from "@starci/grammar/common"
 import {
     catalogGridClassName,
     catalogHeaderClassName,
@@ -98,7 +99,7 @@ export const CoursesCatalogBlockBase = (props: CoursesCatalogBlockProps) => {
                     }}
                     on={{ home: props.on?.goHome }}
                 />
-                <Heading props={{ content: labels.title, level: 1 }} />
+                <Heading level={1}>{labels.title}</Heading>
             </div>
             <div className={catalogToolbarClassName}>
                 <div className={catalogSearchClassName}>
@@ -111,13 +112,7 @@ export const CoursesCatalogBlockBase = (props: CoursesCatalogBlockProps) => {
                         on={{ search: props.on?.search }}
                     />
                     {props.props.countLabel && (
-                        <Text
-                            props={{
-                                content: props.props.countLabel,
-                                size: "sm",
-                                tone: "muted",
-                            }}
-                        />
+                        <Text size={"sm"} tone={"muted"}>{props.props.countLabel}</Text>
                     )}
                 </div>
                 <div className={catalogViewClassName}>
@@ -137,19 +132,12 @@ export const CoursesCatalogBlockBase = (props: CoursesCatalogBlockProps) => {
             </div>
             {!notice && props.props.hasOwned && <MyCoursesProgress />}
             {notice ? (
-                <EmptyNotice
-                    props={{
-                        icon: "course",
-                        message: props.props.noticeMessage ?? "",
-                        actionLabel: props.props.noticeActionLabel,
-                    }}
-                    on={{ act: props.on?.recover }}
-                />
+                <EmptyNotice message={props.props.noticeMessage ?? ""} actionLabel={props.props.noticeActionLabel} iconSource={iconSourceFor("course", "leading")} onAction={({ act: props.on?.recover })?.act} />
             ) : (
                 <section className={catalogSectionClassName}>
-                    <Heading props={{ content: labels.discoverTitle, level: 2 }} />
+                    <Heading level={2}>{labels.discoverTitle}</Heading>
                     {props.props.view === "line" ? (
-                        <SurfaceCard props={{ inset: "none" }}>
+                        <SurfaceCard composition="joined">
                             <div className={catalogLineClassName}>
                                 {courses.map((course) => (
                                     <CourseCatalogCard

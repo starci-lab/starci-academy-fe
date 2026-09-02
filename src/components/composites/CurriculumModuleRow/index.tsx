@@ -1,11 +1,10 @@
 "use client"
 import { useState } from "react"
-import { SurfaceAccordionCard } from "@starci/grammar/core"
+import { SurfaceAccordionCard, Button } from "@starci/grammar/common"
 import { PressableSurface } from "@/components/branches/PressableSurface"
-import { Badge } from "@/components/leaves/Badge"
-import { Button } from "@/components/leaves/Button"
+import { Badge } from "@starci/grammar/common"
 import { DisclosureIndicator } from "@/components/leaves/DisclosureIndicator"
-import { Text } from "@/components/leaves/Text"
+import { Text } from "@starci/grammar/common"
 
 /** One lesson inside a module. */
 export type CurriculumLesson = { readonly id: string; readonly title: string; readonly isPreview?: boolean }
@@ -24,7 +23,7 @@ export const CurriculumModuleRow = (props: CurriculumModuleRowProps) => {
     const [isOpen, setIsOpen] = useState(props.props.isOpen ?? false)
     const lessons = props.props.lessons ?? []
     const loading = props.isLoading === true
-    const summary = <><Text props={{ content: props.props.title, size: "sm", weight: "medium" }} isLoading={loading} />{props.props.levelLabel === undefined ? null : <Badge props={{ content: props.props.levelLabel, tone: props.props.level === undefined ? "neutral" : LEVEL_TONES[props.props.level] }} isLoading={loading} />}{props.props.previewLabel === undefined ? null : <Text props={{ content: props.props.previewLabel, size: "xs", tone: "muted" }} />}{lessons.length === 0 || loading ? null : <DisclosureIndicator props={{ isOpen }} />}</>
+    const summary = <><Text size={"sm"} weight={"medium"} isSkeleton={loading}>{props.props.title}</Text>{props.props.levelLabel === undefined ? null : <Badge tone={props.props.level === undefined ? "neutral" : LEVEL_TONES[props.props.level]} isSkeleton={loading}>{props.props.levelLabel}</Badge>}{props.props.previewLabel === undefined ? null : <Text size={"xs"} tone={"muted"}>{props.props.previewLabel}</Text>}{lessons.length === 0 || loading ? null : <DisclosureIndicator props={{ isOpen }} />}</>
     if (lessons.length === 0 || loading) return props.on?.press === undefined ? <div>{summary}</div> : <PressableSurface label={props.props.title} press={props.on.press} disabled={loading}>{summary}</PressableSurface>
-    return <SurfaceAccordionCard isOpen={isOpen} renderSummary={(value) => <>{value}</>} summaryRender={summary} renderBody={(value) => <>{value}</>} bodyRender={<ol>{lessons.map((lesson) => <li key={lesson.id}>{props.on?.pressLesson === undefined ? <Text props={{ content: lesson.title, size: "sm" }} /> : <Button props={{ label: lesson.title, size: "sm", variant: "ghost" }} on={{ press: () => props.on?.pressLesson?.(lesson.id) }} />}</li>)}</ol>} onOpenChange={setIsOpen} />
+    return <SurfaceAccordionCard isOpen={isOpen} renderSummary={(value) => <>{value}</>} summaryRender={summary} renderBody={(value) => <>{value}</>} bodyRender={<ol>{lessons.map((lesson) => <li key={lesson.id}>{props.on?.pressLesson === undefined ? <Text size={"sm"}>{lesson.title}</Text> : <Button variant="ghost" size="sm" onPress={() => props.on?.pressLesson?.(lesson.id)}>{lesson.title}</Button>}</li>)}</ol>} onOpenChange={setIsOpen} />
 }

@@ -1,20 +1,21 @@
 import { cn } from "@heroui/react"
 import {
-    dashboardAccentBandTopClassName,
     dashboardBandSeparatorClassName,
     dashboardCardFooterClassName,
     dashboardFlushCardClassName,
-    dashboardFlushSurfaceClassName,
+    dashboardNeutralBandTopClassName,
 } from "../classNames"
 
-export const readinessSurfaceClassName = dashboardFlushSurfaceClassName
-export const readinessCardClassName = dashboardFlushCardClassName
-export const readinessSeparatorClassName = dashboardBandSeparatorClassName
-export const readinessFooterClassName = dashboardCardFooterClassName
+/** Stack readiness bands without inserting space around their dividers. */
+export const readinessCardClassName = cn(dashboardFlushCardClassName)
+/** Separate adjacent readiness bands with the shared dashboard rule. */
+export const readinessSeparatorClassName = cn(dashboardBandSeparatorClassName)
+/** Close the auxiliary readiness action against the card's bottom edge. */
+export const readinessFooterClassName = cn(dashboardCardFooterClassName)
 
-/** Readiness score and its qualitative band form one responsive accent band. */
+/** Readiness score and its qualitative label form one responsive neutral summary band. */
 export const readinessHeadlineClassName = cn(
-    dashboardAccentBandTopClassName,
+    dashboardNeutralBandTopClassName,
     "flex",
     "min-w-0",
     "flex-col",

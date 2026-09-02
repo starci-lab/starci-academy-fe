@@ -1,4 +1,4 @@
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
+import { SurfaceCard } from "@starci/grammar/common"
 import { AuthenticationPanel } from "@/components/blocks/auth/AuthenticationPanel"
 import type { AuthMode } from "@/hooks/auth/useAuthPanel"
 import { authenticationPageClassName } from "./classNames"
@@ -29,7 +29,7 @@ export const AuthenticationPageBase = (props: AuthenticationPageProps) => {
     const { on } = props
     return (
         <main className={authenticationPageClassName}>
-            <SurfaceCard props={{ inset: "compact", isScrollable: true, measure: props.measure ?? "form" }}>
+            <SurfaceCard isScrollable={true} measure={props.measure ?? "form"} composition="single">
                 <AuthenticationPanel initialMode={props.initialMode} initialStep={props.initialStep} onSignedIn={on?.signedIn} />
             </SurfaceCard>
         </main>

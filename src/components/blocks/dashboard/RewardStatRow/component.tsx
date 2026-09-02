@@ -1,5 +1,5 @@
-import { dashboardRailRowItemClassName } from "@/components/blocks/dashboard/classNames"
 import { IconLabelFactRow } from "@/components/composites/IconLabelFactRow"
+import { rewardStatRowClassName } from "./classNames"
 
 /** Props for the pure reward row, discriminated at the connected boundary. */
 export type RewardStatRowProps =
@@ -12,7 +12,7 @@ export type RewardStatRowProps =
 
 /** Render the reward row without reading request or locale state. */
 export const RewardStatRowBase = (props: RewardStatRowProps) => props.state === "empty" ? null : (
-    <div className={dashboardRailRowItemClassName} data-part="identity-rail-stat-row">
+    <div className={rewardStatRowClassName} data-part="identity-rail-stat-row">
         <IconLabelFactRow
             props={{
                 icon: "reward",

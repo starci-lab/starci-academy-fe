@@ -19,6 +19,8 @@ export type ActivityFeedProps = {
     readonly reactingId?: string
     /** Let an owning flush card draw the only boundary around Bulletin. */
     readonly isFrameless?: boolean
+    /** Keep the final activity row on divider rhythm when an owning continuation band follows. */
+    readonly hasTrailingContent?: boolean
 }
 
 const startOfDay = (value: Date) => new Date(value.getFullYear(), value.getMonth(), value.getDate()).getTime()
@@ -103,5 +105,5 @@ export const ActivityFeed = (props: ActivityFeedProps) => {
         }
         return [...groups.values()]
     }, [props.items, props.reactingId, locale, t])
-    return <ActivityFeedBase {...{ state: props.state, props: { label: t("scopeLabel"), days, message: props.message, description: props.description, actionLabel: props.actionLabel }, on: props.on, isFrameless: props.isFrameless }} />
+    return <ActivityFeedBase {...{ state: props.state, props: { label: t("scopeLabel"), days, message: props.message, description: props.description, actionLabel: props.actionLabel }, on: props.on, isFrameless: props.isFrameless, hasTrailingContent: props.hasTrailingContent }} />
 }

@@ -1,9 +1,10 @@
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
-import { Button } from "@/components/leaves/Button"
-import { Heading } from "@/components/leaves/Heading"
-import { Icon } from "@/components/leaves/Icon"
-import { Text } from "@/components/leaves/Text"
+import { SurfaceCard } from "@starci/grammar/common"
+import { EmptyNotice } from "@starci/grammar/common"
+import { Button } from "@starci/grammar/common"
+import { Heading } from "@starci/grammar/common"
+import { Icon } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { Text } from "@starci/grammar/common"
 import type { PlaygroundSummary } from "@/modules/api/graphql/queries/query-playgrounds"
 import {
     playgroundCatalogActionClassName,
@@ -71,51 +72,51 @@ export const CoursePlaygroundCatalogBase = (props: CoursePlaygroundCatalogProps)
     const processSteps = props.props.processSteps ?? []
 
     return <section className={playgroundCatalogClassName}>
-        <SurfaceCard isLoading={loading}>
+        <SurfaceCard composition="joined" state={loading ? "pending" : "neutral"}>
             <div className={playgroundCatalogHeroClassName}>
                 <div className={playgroundCatalogHeroContentClassName}>
                     <div className={playgroundCatalogEyebrowClassName}>
-                        <Icon props={{ name: "playground", role: "chip" }} isLoading={loading} />
-                        <Text props={{ content: props.props.eyebrow, size: "sm", weight: "semibold" }} isLoading={loading} />
+                        <Icon source={iconSourceFor("playground", "chip")} role={"chip"} isSkeleton={loading} />
+                        <Text size={"sm"} weight={"semibold"} isSkeleton={loading}>{props.props.eyebrow}</Text>
                     </div>
                     <div className={playgroundCatalogHeroCopyClassName}>
-                        <Heading props={{ content: props.props.title, level: 1 }} isLoading={loading} />
-                        <Text props={{ content: props.props.description, tone: "muted" }} isLoading={loading} />
+                        <Heading level={1} isSkeleton={loading}>{props.props.title}</Heading>
+                        <Text tone={"muted"} isSkeleton={loading}>{props.props.description}</Text>
                     </div>
                     {props.state === "failed" ? null : <div className={playgroundCatalogFactsClassName} aria-label={props.props.labsTitle}>
                         <div className={playgroundCatalogFactClassName}>
-                            <Text props={{ content: String(props.props.playgrounds.length), weight: "semibold" }} isLoading={loading} />
-                            <Text props={{ content: props.props.labCountLabel, size: "sm", tone: "muted" }} isLoading={loading} />
+                            <Text weight={"semibold"} isSkeleton={loading}>{String(props.props.playgrounds.length)}</Text>
+                            <Text size={"sm"} tone={"muted"} isSkeleton={loading}>{props.props.labCountLabel}</Text>
                         </div>
                         <div className={playgroundCatalogFactClassName}>
-                            <Text props={{ content: String(totalSteps), weight: "semibold" }} isLoading={loading} />
-                            <Text props={{ content: props.props.stepLabel, size: "sm", tone: "muted" }} isLoading={loading} />
+                            <Text weight={"semibold"} isSkeleton={loading}>{String(totalSteps)}</Text>
+                            <Text size={"sm"} tone={"muted"} isSkeleton={loading}>{props.props.stepLabel}</Text>
                         </div>
                     </div>}
                     {firstPlayground === undefined || loading || isSettledNotice ? null : <div className={playgroundCatalogActionClassName}>
-                        <Button props={{ label: props.props.startLabel, variant: "primary", icon: "next", iconPlacement: "trailing" }} on={{ press: () => props.on.openSetup(firstPlayground.slug) }} />
+                        <Button variant={"primary"} onPress={({ press: () => props.on.openSetup(firstPlayground.slug) })?.press} endContent={"next" === "next" && "trailing" === "trailing" ? <Icon source={iconSourceFor("next", "chip")} role="chip" /> : undefined}>{props.props.startLabel}</Button>
                     </div>}
                 </div>
                 <div className={playgroundCatalogPreviewClassName}>
                     {loading || props.props.previewImageUrl === null || props.props.previewImageUrl === undefined
                         ? <>
                             <div className={playgroundCatalogVerificationClassName}>
-                                <Icon props={{ name: "complete", role: "chip" }} isLoading={loading} />
-                                <Text props={{ content: props.props.verifiedLabel, size: "xs", weight: "semibold" }} isLoading={loading} />
+                                <Icon source={iconSourceFor("complete", "chip")} role={"chip"} isSkeleton={loading} />
+                                <Text size={"xs"} weight={"semibold"} isSkeleton={loading}>{props.props.verifiedLabel}</Text>
                             </div>
-                            {props.props.processTitle === undefined ? null : <Heading props={{ content: props.props.processTitle, level: 2 }} isLoading={loading} />}
+                            {props.props.processTitle === undefined ? null : <Heading level={2} isSkeleton={loading}>{props.props.processTitle}</Heading>}
                             <ol className={playgroundCatalogProcessClassName} aria-label={props.props.processTitle}>
                                 {(loading && processSteps.length === 0 ? ["", "", ""] : processSteps).map((step, index) => <li className={playgroundCatalogProcessStepClassName} key={`${step}-${index}`}>
                                     <span className={playgroundCatalogProcessNumberClassName} aria-hidden>{index + 1}</span>
-                                    <Text props={{ content: step, size: "sm", weight: "semibold" }} isLoading={loading} />
+                                    <Text size={"sm"} weight={"semibold"} isSkeleton={loading}>{step}</Text>
                                 </li>)}
                             </ol>
                         </>
                         : <>
                             <img src={props.props.previewImageUrl} alt={props.props.previewAlt} className={playgroundCatalogPreviewImageClassName} />
                             <div className={playgroundCatalogVerificationClassName}>
-                                <Icon props={{ name: "complete", role: "chip" }} />
-                                <Text props={{ content: props.props.verifiedLabel, size: "xs", weight: "semibold" }} />
+                                <Icon source={iconSourceFor("complete", "chip")} role={"chip"} />
+                                <Text size={"xs"} weight={"semibold"}>{props.props.verifiedLabel}</Text>
                             </div>
                         </>}
                 </div>
@@ -123,36 +124,29 @@ export const CoursePlaygroundCatalogBase = (props: CoursePlaygroundCatalogProps)
         </SurfaceCard>
 
         <header className={playgroundCatalogHeaderClassName}>
-            <Heading props={{ content: props.props.labsTitle, level: 2 }} isLoading={loading} />
-            <Text props={{ content: props.props.labsDescription, size: "sm", tone: "muted" }} isLoading={loading} />
+            <Heading level={2} isSkeleton={loading}>{props.props.labsTitle}</Heading>
+            <Text size={"sm"} tone={"muted"} isSkeleton={loading}>{props.props.labsDescription}</Text>
         </header>
 
-        {isSettledNotice ? <SurfaceCard><div className={playgroundCatalogNoticeClassName}><EmptyNotice
-            props={{
-                icon: props.state === "failed" ? "incomplete" : "playground",
-                message: props.state === "failed" ? props.props.failedText : props.props.emptyText,
-                actionLabel: props.state === "failed" ? props.props.retryLabel : undefined,
-            }}
-            on={{ act: props.on.retry }}
-        /></div></SurfaceCard> : null}
+        {isSettledNotice ? <SurfaceCard composition="joined"><div className={playgroundCatalogNoticeClassName}><EmptyNotice message={props.state === "failed" ? props.props.failedText : props.props.emptyText} actionLabel={props.state === "failed" ? props.props.retryLabel : undefined} iconSource={iconSourceFor(props.state === "failed" ? "incomplete" : "playground", "leading")} onAction={({ act: props.on.retry })?.act} /></div></SurfaceCard> : null}
 
         {isSettledNotice ? null : <ol className={playgroundCatalogGridClassName}>{rows.map((playground, index) => <li key={playground.id}>
-            <SurfaceCard isLoading={loading}>
+            <SurfaceCard composition="joined" state={loading ? "pending" : "neutral"}>
                 <article className={playgroundCatalogCardClassName}>
                     <div className={playgroundCatalogCardTopClassName}>
-                        <Text props={{ content: `${props.props.labLabel} ${String(index + 1).padStart(2, "0")}`, size: "xs", tone: "muted", weight: "semibold" }} isLoading={loading} />
-                        <div className={playgroundCatalogIconClassName}><Icon props={{ name: "playground", role: "heading" }} isLoading={loading} /></div>
+                        <Text size={"xs"} tone={"muted"} weight={"semibold"} isSkeleton={loading}>{`${props.props.labLabel} ${String(index + 1).padStart(2, "0")}`}</Text>
+                        <div className={playgroundCatalogIconClassName}><Icon source={iconSourceFor("playground", "heading")} role={"heading"} isSkeleton={loading} /></div>
                     </div>
                     <div className={playgroundCatalogCardBodyClassName}>
-                        <Heading props={{ content: playground.title, level: 3 }} isLoading={loading} />
-                        <Text props={{ content: `${playground.stepCount} ${props.props.stepLabel}`, size: "sm", tone: "muted" }} isLoading={loading} />
+                        <Heading level={3} isSkeleton={loading}>{playground.title}</Heading>
+                        <Text size={"sm"} tone={"muted"} isSkeleton={loading}>{`${playground.stepCount} ${props.props.stepLabel}`}</Text>
                     </div>
                     <div className={playgroundCatalogMetaClassName}>
                         <span className={playgroundCatalogVerificationClassName}>
-                            <Icon props={{ name: "complete", role: "chip" }} isLoading={loading} />
-                            <Text props={{ content: props.props.verifiedLabel, size: "xs", tone: "muted" }} isLoading={loading} />
+                            <Icon source={iconSourceFor("complete", "chip")} role={"chip"} isSkeleton={loading} />
+                            <Text size={"xs"} tone={"muted"} isSkeleton={loading}>{props.props.verifiedLabel}</Text>
                         </span>
-                        {loading ? null : <Button props={{ label: props.props.openLabel, variant: "ghost", size: "sm", icon: "next", iconPlacement: "trailing" }} on={{ press: () => props.on.openSetup(playground.slug) }} />}
+                        {loading ? null : <Button variant={"ghost"} size={"sm"} onPress={({ press: () => props.on.openSetup(playground.slug) })?.press} endContent={"next" === "next" && "trailing" === "trailing" ? <Icon source={iconSourceFor("next", "chip")} role="chip" /> : undefined}>{props.props.openLabel}</Button>}
                     </div>
                 </article>
             </SurfaceCard>

@@ -1,10 +1,11 @@
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { SurfaceCard } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { EmptyNotice } from "@starci/grammar/common"
 import { EvidenceRow } from "@/components/composites/EvidenceRow"
-import { Badge } from "@/components/leaves/Badge"
-import { Button } from "@/components/leaves/Button"
-import { Heading } from "@/components/leaves/Heading"
-import { Text } from "@/components/leaves/Text"
+import { Badge } from "@starci/grammar/common"
+import { Button } from "@starci/grammar/common"
+import { Heading } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 /** Public coding problem and accepted submission payload. */
 export type CodingDetail = {
   readonly problem?: {
@@ -41,26 +42,17 @@ export const ProfileCodingProblemBase = (
     const noPublicProof = !loading && !error && (problem === undefined || problem === null) && (submission === undefined || submission === null)
     return (
         <div>
-            <Button
-                props={{ label: "← Solve history", variant: "ghost", size: "sm" }}
-                on={{ press: props.on.back }}
-            />
-            <Heading
-                props={{
-                    content: problem?.title ?? (props.slug ? `Coding problem · ${props.slug}` : error ? "Coding proof unavailable" : "Coding problem"),
-                    level: 2,
-                }}
-                isLoading={loading}
-            />
-            {problem ? <Text props={{ content: `${problem.difficulty} · ${problem.domain}`, size: "sm", tone: "muted" }} isLoading={loading} /> : null}
-            {error ? <Button props={{ label: "Try again", variant: "secondary", size: "sm", icon: "retry" }} on={{ press: props.on.retry }} /> : null}
-            {problem || error ? <SurfaceCard props={{ label: "Problem statement" }}>
-                <Text props={{ content: error ? "This proof couldn't be loaded." : problem?.statement ?? "No public coding proof was found." }} isLoading={loading} />
-                {problem?.tags.map((tag) => <Badge key={tag} props={{ content: tag }} />)}
+            <Button variant="ghost" size="sm" onPress={props.on.back}>{"← Solve history"}</Button>
+            <Heading level={2} isSkeleton={loading}>{problem?.title ?? (props.slug ? `Coding problem · ${props.slug}` : error ? "Coding proof unavailable" : "Coding problem")}</Heading>
+            {problem ? <Text size={"sm"} tone={"muted"} isSkeleton={loading}>{`${problem.difficulty} · ${problem.domain}`}</Text> : null}
+            {error ? <Button variant="secondary" size="sm" onPress={props.on.retry}>{"Try again"}</Button> : null}
+            {problem || error ? <SurfaceCard label={"Problem statement"} composition="joined">
+                <Text isSkeleton={loading}>{error ? "This proof couldn't be loaded." : problem?.statement ?? "No public coding proof was found."}</Text>
+                {problem?.tags.map((tag) => <Badge key={tag}>{tag}</Badge>)}
             </SurfaceCard> : null}
-            {noPublicProof ? <SurfaceCard props={{ label: "Public proof" }}><EmptyNotice props={{ icon: "practice", message: `No public accepted proof was found for ${attemptedIdentity}.`, description: "Accepted solutions appear here when the learner publishes this problem's evidence." }} /></SurfaceCard> : <SurfaceCard props={{ label: "Submission" }}>
+            {noPublicProof ? <SurfaceCard label={"Public proof"} composition="joined"><EmptyNotice message={`No public accepted proof was found for ${attemptedIdentity}.`} description={"Accepted solutions appear here when the learner publishes this problem's evidence."} iconSource={iconSourceFor("practice", "leading")} /></SurfaceCard> : <SurfaceCard label={"Submission"} composition="joined">
                 {loading ? (
-                    <Text props={{ content: undefined }} isLoading />
+                    <Text isSkeleton>{undefined}</Text>
                 ) : submission ? (
                     <>
                         <EvidenceRow
@@ -81,7 +73,7 @@ export const ProfileCodingProblemBase = (
                         />
                     </>
                 ) : (
-                    <EmptyNotice props={{ icon: "practice", message: "No accepted submission", description: "This learner has not published solved evidence for this problem." }} />
+                    <EmptyNotice message={"No accepted submission"} description={"This learner has not published solved evidence for this problem."} iconSource={iconSourceFor("practice", "leading")} />
                 )}
             </SurfaceCard>}
         </div>

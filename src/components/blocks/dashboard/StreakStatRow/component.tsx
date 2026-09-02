@@ -1,5 +1,5 @@
-import { dashboardRailRowItemClassName } from "@/components/blocks/dashboard/classNames"
 import { IconLabelFactRow } from "@/components/composites/IconLabelFactRow"
+import { streakStatRowClassName } from "./classNames"
 
 /** Props for the pure streak row, discriminated at the connected boundary. */
 export type StreakStatRowProps =
@@ -12,7 +12,7 @@ export type StreakStatRowProps =
 
 /** Render the streak row without reading request or locale state. */
 export const StreakStatRowBase = (props: StreakStatRowProps) => props.state === "empty" ? null : (
-    <div className={dashboardRailRowItemClassName} data-part="identity-rail-stat-row">
+    <div className={streakStatRowClassName} data-part="identity-rail-stat-row">
         <IconLabelFactRow
             props={{
                 icon: "streak",

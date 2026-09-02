@@ -1,9 +1,11 @@
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
-import { Heading } from "@/components/leaves/Heading"
-import { SeeMoreLink } from "@/components/leaves/SeeMoreLink"
-import { Text } from "@/components/leaves/Text"
+import { SurfaceCard } from "@starci/grammar/common"
+import { EmptyNotice } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { Heading } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import { courseLearningSignalDetailClassName } from "./classNames"
+import { Icon, TextAction } from "@starci/grammar/common"
+
 
 /** The selected signal and the evidence explaining its consequence. */
 export type CourseLearningSignalDetailData = {
@@ -36,14 +38,12 @@ export type CourseLearningSignalDetailProps = CourseLearningSignalDetailStatePro
 export const CourseLearningSignalDetail = (props: CourseLearningSignalDetailProps) => {
     if (props.state === "failed" || props.state === "empty") {
         return (
-            <SurfaceCard props={{ label: props.props.label }}>
+            <SurfaceCard label={props.props.label} composition="joined">
                 <EmptyNotice
-                    props={{
-                        icon: "course",
-                        message: props.props.message,
-                        ...(props.state === "failed" ? { actionLabel: props.props.retryLabel } : {}),
-                    }}
-                    on={{ act: props.on?.retry }}
+                    iconSource={iconSourceFor("course", "leading")}
+                    message={props.props.message}
+                    actionLabel={props.state === "failed" ? props.props.retryLabel : undefined}
+                    onAction={props.on?.retry}
                 />
             </SurfaceCard>
         )
@@ -52,13 +52,13 @@ export const CourseLearningSignalDetail = (props: CourseLearningSignalDetailProp
     const isLoading = props.state === "pending"
     const detail = props.state === "pending" ? undefined : props.props
     return (
-        <SurfaceCard props={{ label: props.props.label }} isLoading={isLoading}>
+        <SurfaceCard label={props.props.label} composition="joined" state={isLoading ? "pending" : "neutral"}>
             <div className={courseLearningSignalDetailClassName}>
-                <Heading props={{ content: detail?.title, level: 3 }} isLoading={isLoading} />
-                <Text props={{ content: detail?.fact, size: "sm", weight: "medium" }} isLoading={isLoading} />
-                <Text props={{ content: detail?.caption, size: "sm", tone: "muted" }} isLoading={isLoading} />
+                <Heading level={3} isSkeleton={isLoading}>{detail?.title}</Heading>
+                <Text size={"sm"} weight={"medium"} isSkeleton={isLoading}>{detail?.fact}</Text>
+                <Text size={"sm"} tone={"muted"} isSkeleton={isLoading}>{detail?.caption}</Text>
                 {isLoading ? null : (
-                    <SeeMoreLink props={{ label: detail?.actionLabel ?? "" }} on={{ press: props.on?.open }} />
+                    <TextAction appearance="disclosure" onPress={props.on?.open} endContent={<Icon source={iconSourceFor("next", "chip")} role="chip" />}>{detail?.actionLabel ?? ""}</TextAction>
                 )}
             </div>
         </SurfaceCard>

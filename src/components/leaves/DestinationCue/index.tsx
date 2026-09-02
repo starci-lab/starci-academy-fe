@@ -1,4 +1,5 @@
-import { Icon } from "@/components/leaves/Icon"
+import { Icon } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
 import { destinationCueCaretClassName, destinationCueClassName, destinationCueLoadingClassName } from "./classNames"
 
 /** Resolved copy for a destination already owned by a surrounding press target. */
@@ -13,7 +14,7 @@ export const DestinationCue = (props: DestinationCueProps) => {
     return (
         <span className={destinationCueClassName} data-destination-cue="true">
             <span data-tone="accent">{props.props.label ?? ""}</span>
-            <span className={destinationCueCaretClassName} data-destination-cue-caret="true" aria-hidden="true"><Icon props={{ name: "next", role: "chip" }} /></span>
+            <span className={destinationCueCaretClassName} data-destination-cue-caret="true" aria-hidden="true"><Icon source={iconSourceFor("next", "chip")} role={"chip"} /></span>
         </span>
     )
 }

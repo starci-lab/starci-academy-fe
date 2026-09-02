@@ -4,7 +4,6 @@ import { TopLearnersBase } from "./component"
 
 const frame = {
     label: "Top learners",
-    seeMoreLabel: "View leaderboard",
     standing: { rank: 4, rankLabel: "Rank 4", title: "Rank #4 globally", subtitle: "105 XP" },
     emptyMessage: "No leaders",
     errorMessage: "Could not load leaders",

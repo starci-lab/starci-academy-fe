@@ -2,9 +2,12 @@ import { ModalBranch } from "@/components/branches/ModalBranch"
 import { GlobalSearchResultsBase } from "@/components/blocks/search/GlobalSearchResults/component"
 import { SearchCommandField } from "@/components/leaves/SearchCommandField"
 import { SelectionList } from "@/components/leaves/SelectionList"
-import { Text } from "@/components/leaves/Text"
-import { Badge } from "@/components/leaves/Badge"
-import { Button } from "@/components/leaves/Button"
+import { Text } from "@starci/grammar/common"
+import { Badge } from "@starci/grammar/common"
+import { Button } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon } from "@starci/grammar/common"
+
 import type { IconName } from "@/components/leaves/Icon"
 
 /** One localized scope row shown by the pure workspace. */
@@ -158,20 +161,17 @@ export const GlobalSearchOverlayView = (props: GlobalSearchOverlayViewProps) => 
     const detailId = props.state.detail.status === "ready" ? props.state.detail.id : undefined
     const context = detailTitle === undefined || detailKind === undefined ? undefined : (
         <div>
-            <Text props={{ content: detailTitle, size: "sm", weight: "medium" }} />
-            <Text props={{ content: detailKind, size: "xs", tone: "muted" }} />
-            {detailDescription === undefined ? null : <Text props={{ content: detailDescription, size: "sm" }} />}
-            {detailStatus === undefined ? null : <Badge props={{ content: detailStatus, tone: "accent" }} />}
+            <Text size={"sm"} weight={"medium"}>{detailTitle}</Text>
+            <Text size={"xs"} tone={"muted"}>{detailKind}</Text>
+            {detailDescription === undefined ? null : <Text size={"sm"}>{detailDescription}</Text>}
+            {detailStatus === undefined ? null : <Badge tone={"accent"}>{detailStatus}</Badge>}
             {(() => {
                 if (props.state.detail.status === "error") {
-                    return <Button props={{ label: props.copy.retry, variant: "secondary", size: "sm" }} on={{ press: props.on?.retry }} />
+                    return <Button variant="secondary" size="sm" onPress={props.on?.retry}>{props.copy.retry}</Button>
                 }
                 if (detailId === undefined) return undefined
                 return (
-                    <Button
-                        props={{ label: props.copy.openResult, variant: "primary", size: "sm", icon: "next", iconPlacement: "trailing" }}
-                        on={{ press: () => props.on?.resultOpen?.(detailId) }}
-                    />
+                    <Button variant={"primary"} size={"sm"} onPress={({ press: () => props.on?.resultOpen?.(detailId) })?.press} endContent={"next" === "next" && "trailing" === "trailing" ? <Icon source={iconSourceFor("next", "chip")} role="chip" /> : undefined}>{props.copy.openResult}</Button>
                 )
             })()}
         </div>

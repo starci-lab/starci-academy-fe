@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Button } from "@/components/leaves/Button"
+import { Button } from "@starci/grammar/common"
 
 /**
  * LEAF - `ConfirmButton`: a destructive act that will not fire on one stray press.
@@ -65,27 +65,13 @@ export const ConfirmButton = (props: ConfirmButtonProps) => {
     }, [isArmed])
 
     return (
-        <Button
-            props={{
-                label: isArmed ? data.confirmLabel : data.label,
-                // The armed state is drawn by OUTLINE rather than by a filled danger colour. This
-                // product's `Button` has no danger variant, and adding one for a basket would put
-                // a red control in the vocabulary that every later screen may reach for. An
-                // outline is enough to say the control has changed: the label says what it will
-                // do, and the label is the part that has to be read anyway.
-                variant: isArmed ? "outline" : "secondary",
-                disabled: data.disabled,
-            }}
-            on={{
-                press: () => {
-                    if (isArmed) {
-                        on?.confirm?.()
-                        setIsArmed(false)
-                        return
-                    }
-                    setIsArmed(true)
-                },
-            }}
-        />
+        <Button variant={isArmed ? "outline" : "secondary"} isDisabled={data.disabled} onPress={() => {
+            if (isArmed) {
+                on?.confirm?.()
+                setIsArmed(false)
+                return
+            }
+            setIsArmed(true)
+        }}>{isArmed ? data.confirmLabel : data.label}</Button>
     )
 }

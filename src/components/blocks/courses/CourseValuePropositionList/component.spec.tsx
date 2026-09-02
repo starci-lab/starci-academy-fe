@@ -4,7 +4,7 @@ import { CourseValuePropositionList } from "./component"
 
 describe("CourseValuePropositionList", () => {
     it("keeps every grammar row as one direct list item", () => {
-        const { container } = render(<CourseValuePropositionList props={{ label: "Promises", promises: ["First", "Second"] }} />)
+        const { container } = render(<CourseValuePropositionList props={{ promises: ["First", "Second"] }} />)
 
         expect(screen.getByRole("list").children).toHaveLength(2)
         expect(container.querySelector("li li")).toBeNull()

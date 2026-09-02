@@ -1,4 +1,4 @@
-import { Button } from "@/components/leaves/Button"
+import { Button } from "@starci/grammar/common"
 import { CodeBlock } from "@/components/leaves/CodeBlock"
 import type { ContentAiSelectionContext } from "@/modules/ai/content-ai-selection-context"
 
@@ -34,9 +34,9 @@ export const StarCiAiSelectionAskBase = (props: StarCiAiSelectionAskProps) => {
                     language: props.props.selection.kind === "code" ? props.props.selection.path?.split(".").pop() : undefined,
                 }}
             />
-            <Button props={{ label: props.props.appendLabel, variant: "primary", size: "sm" }} on={{ press: props.on?.append }} />
-            <Button props={{ label: props.props.tangentLabel, variant: "secondary", size: "sm" }} on={{ press: props.on?.tangent }} />
-            <Button props={{ label: props.props.dismissLabel, variant: "ghost", size: "sm" }} on={{ press: props.on?.dismiss }} />
+            <Button variant="primary" size="sm" onPress={props.on?.append}>{props.props.appendLabel}</Button>
+            <Button variant="secondary" size="sm" onPress={props.on?.tangent}>{props.props.tangentLabel}</Button>
+            <Button variant="ghost" size="sm" onPress={props.on?.dismiss}>{props.props.dismissLabel}</Button>
         </div>
     )
 }

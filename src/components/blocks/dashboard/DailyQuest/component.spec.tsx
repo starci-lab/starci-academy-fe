@@ -32,7 +32,8 @@ describe("DailyQuestBase", () => {
             />,
         )
         expect(screen.getByText("Complete every task to earn 20 coins")).toBeInTheDocument()
-        expect(screen.getByText("Complete every task to earn 20 coins").closest("[data-dashboard-quest-reward=true]")).toHaveClass("bg-accent-soft", "text-accent-soft-foreground", "px-4", "py-3")
+        expect(screen.getByText("Complete every task to earn 20 coins").closest("[data-dashboard-quest-reward=true]")).toHaveClass("bg-surface-secondary", "px-4", "py-3")
+        expect(screen.getByText("Complete every task to earn 20 coins")).toHaveAttribute("data-tone", "muted")
         expect(container.querySelector("[data-dashboard-quest-hero=true]")).toHaveClass("bg-accent")
         expect(container.querySelector("img[aria-hidden=\"true\"]")).toHaveAttribute("src", expect.stringContaining("daily-quest-reward-v1.png"))
         expect(container.querySelector("button")).toBeNull()
@@ -40,7 +41,7 @@ describe("DailyQuestBase", () => {
 
     it("offers the reward once the day is done", () => {
         const claim = vi.fn()
-        render(
+        const { container } = render(
             <DailyQuestBase
                 state="claimable"
                 props={{ label: "Today's quest", tasks, rewardLine: "unused", claimLabel: "Claim 20 coins" }}
@@ -48,7 +49,10 @@ describe("DailyQuestBase", () => {
             />,
         )
         expect(screen.getByText("unused")).toBeInTheDocument()
-        fireEvent.click(screen.getByRole("button", { name: "Claim 20 coins" }))
+        const action = screen.getByRole("button", { name: "Claim 20 coins" })
+        expect(action.querySelector("svg")).toBeNull()
+        expect(container.querySelector("[data-dashboard-quest-reward=true]")).toHaveClass("bg-surface-secondary")
+        fireEvent.click(action)
         expect(claim).toHaveBeenCalledOnce()
     })
 
@@ -61,7 +65,7 @@ describe("DailyQuestBase", () => {
             />,
         )
         expect(screen.getByText("Reward claimed")).toBeTruthy()
-        expect(screen.getByText("Reward claimed").closest("[data-dashboard-quest-reward=true]")).toBeInTheDocument()
+        expect(screen.getByText("Reward claimed").closest("[data-dashboard-quest-reward=true]")).toHaveClass("bg-success-soft")
         expect(container.querySelector("button")).toBeNull()
     })
 

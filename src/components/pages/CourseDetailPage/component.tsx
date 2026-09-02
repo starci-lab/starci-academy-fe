@@ -4,12 +4,13 @@ import { CourseValuePropositionList } from "@/components/blocks/courses/CourseVa
 import { CoursePricingRail, CoursePricingRailMobile } from "@/components/blocks/courses/CoursePricingRail"
 import { CourseCurriculumAccordion, type CourseCurriculumModule } from "@/components/composites/CourseCurriculumAccordion"
 import { TitleDescriptionAccordion, type TitleDescriptionAccordionItem } from "@/components/composites/TitleDescriptionAccordion"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { EmptyNotice } from "@starci/grammar/common"
+import { SurfaceCard } from "@starci/grammar/common"
+import { SurfaceListCard } from "@starci/grammar/common"
 import { Breadcrumbs } from "@/components/leaves/Breadcrumbs"
-import { Heading } from "@/components/leaves/Heading"
-import { Text } from "@/components/leaves/Text"
+import { Heading } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import {
     courseDetailBodyClassName,
     courseDetailContentClassName,
@@ -55,7 +56,7 @@ const reviewStateOf = (total: number | undefined): "unrated" | "rated" => (total
 
 /** Draw the course detail page with ordinary React composition. */
 export const CourseDetailPageBase = (props: CourseDetailPageProps) => {
-    if (props.pageState === "not-found" || props.pageState === "failed") return <div className={courseDetailStateClassName}><EmptyNotice props={{ icon: "course", message: props.props.noticeMessage ?? "", actionLabel: props.pageState === "failed" ? props.props.noticeActionLabel : undefined }} on={{ act: props.on?.retry }} /></div>
+    if (props.pageState === "not-found" || props.pageState === "failed") return <div className={courseDetailStateClassName}><EmptyNotice message={props.props.noticeMessage ?? ""} actionLabel={props.pageState === "failed" ? props.props.noticeActionLabel : undefined} iconSource={iconSourceFor("course", "leading")} onAction={({ act: props.on?.retry })?.act} /></div>
     const isLoading = props.pageState === "pending"
     const stats = isLoading ? Array.from({ length: RESTING_COUNTS.stats }, (_, index) => ({ id: `resting-${index}`, label: "", value: "" })) : props.props.stats ?? []
     const valueProps = isLoading ? Array.from({ length: RESTING_COUNTS.promises }, () => "") : props.props.valueProps ?? []
@@ -68,20 +69,20 @@ export const CourseDetailPageBase = (props: CourseDetailPageProps) => {
             <div className={courseDetailContentClassName}>
                 <Breadcrumbs props={{ label: props.props.labels.breadcrumbLabel, steps: [{ id: "home", label: props.props.labels.breadcrumbHome }, { id: "courses", label: props.props.labels.breadcrumbCourses }, { id: "course", label: props.props.title ?? "" }] }} on={{ home: props.on?.navigateHome, courses: props.on?.navigateCourses }} isLoading={isLoading} />
                 <header className={courseDetailHeroClassName} id="course-detail-overview">
-                    <Heading props={{ content: props.props.title ?? "", level: 1 }} isLoading={isLoading} />
-                    <Text props={{ content: props.props.tagline ?? "", size: "sm" }} isLoading={isLoading} />
+                    <Heading level={1} isSkeleton={isLoading}>{props.props.title ?? ""}</Heading>
+                    <Text size={"sm"} isSkeleton={isLoading}>{props.props.tagline ?? ""}</Text>
                 </header>
-                <SurfaceCard props={{ inset: "none" }}>
+                <SurfaceCard composition="joined">
                     <section className={courseDetailStatsClassName} aria-label={props.props.labels.valuePropsTitle}>
-                        {stats.map((stat) => <div className={courseDetailStatClassName} key={stat.id}><Text props={{ content: stat.label, size: "xs", tone: "muted" }} isLoading={isLoading} /><Text props={{ content: stat.value, size: "sm", weight: "medium" }} isLoading={isLoading} /></div>)}
+                        {stats.map((stat) => <div className={courseDetailStatClassName} key={stat.id}><Text size={"xs"} tone={"muted"} isSkeleton={isLoading}>{stat.label}</Text><Text size={"sm"} weight={"medium"} isSkeleton={isLoading}>{stat.value}</Text></div>)}
                     </section>
                 </SurfaceCard>
                 <div className={courseDetailOverviewClassName}>
-                    <SurfaceListCard props={{ label: props.props.labels.valuePropsTitle }} isLoading={isLoading}><CourseValuePropositionList props={{ label: props.props.labels.valuePropsTitle, promises: valueProps }} isLoading={isLoading} /></SurfaceListCard>
-                    <SurfaceListCard props={{ label: props.props.labels.prerequisitesTitle }} isLoading={isLoading}><CoursePrerequisiteListBase state={prerequisites.length === 0 ? "none" : "required"} props={{ prerequisites }} /></SurfaceListCard>
+                    <SurfaceListCard label={props.props.labels.valuePropsTitle} isLoading={isLoading}><CourseValuePropositionList props={{ promises: valueProps }} isLoading={isLoading} /></SurfaceListCard>
+                    <SurfaceListCard label={props.props.labels.prerequisitesTitle} isLoading={isLoading}><CoursePrerequisiteListBase state={prerequisites.length === 0 ? "none" : "required"} props={{ prerequisites }} /></SurfaceListCard>
                 </div>
                 <section className={courseDetailSectionClassName} id="course-detail-curriculum"><CourseCurriculumAccordion props={{ label: props.props.labels.curriculumTitle, modules }} isLoading={isLoading} /></section>
-                <section className={courseDetailSectionClassName} id="course-detail-reviews"><Heading props={{ content: props.props.labels.reviewsTitle, level: 2 }} /><CourseReviewBlockBase state={reviewStateOf(props.props.reviewTotal)} props={{ averageScore: props.props.averageScore ?? 0, total: props.props.reviewTotal ?? 0, reviews, countLabel: props.props.labels.reviewCount, emptyLabel: props.props.labels.reviewsEmpty }} /></section>
+                <section className={courseDetailSectionClassName} id="course-detail-reviews"><Heading level={2}>{props.props.labels.reviewsTitle}</Heading><CourseReviewBlockBase state={reviewStateOf(props.props.reviewTotal)} props={{ averageScore: props.props.averageScore ?? 0, total: props.props.reviewTotal ?? 0, reviews, countLabel: props.props.labels.reviewCount, emptyLabel: props.props.labels.reviewsEmpty }} /></section>
                 <section className={courseDetailSectionClassName} id="course-detail-faq"><TitleDescriptionAccordion props={{ label: props.props.labels.faqTitle, items: faqs, emptyLabel: props.props.labels.faqEmpty }} isLoading={isLoading} /></section>
             </div>
             <aside className={courseDetailRailClassName}><CoursePricingRail displayId={props.displayId} /></aside>

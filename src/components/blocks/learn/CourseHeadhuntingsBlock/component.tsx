@@ -1,13 +1,14 @@
-import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { SurfaceListCard } from "@starci/grammar/common"
+import { EmptyNotice } from "@starci/grammar/common"
 import {
     Breadcrumbs,
     type BreadcrumbStep,
 } from "@/components/leaves/Breadcrumbs"
-import { Heading } from "@/components/leaves/Heading"
+import { Heading } from "@starci/grammar/common"
 import { SearchBox } from "@/components/leaves/SearchBox"
-import { Text } from "@/components/leaves/Text"
-import { TextLink } from "@/components/leaves/TextLink"
+import { Text } from "@starci/grammar/common"
+import { TextAction } from "@starci/grammar/common"
+
 /** One company or consultant directory row. */
 export type HeadhuntingDirectoryRow = {
   readonly id: string;
@@ -54,7 +55,7 @@ const Directory = (props: DirectoryProps) => {
         : props.rows
 
     return (
-        <SurfaceListCard props={{ label: props.label }} isLoading={props.loading}>
+        <SurfaceListCard label={props.label} isLoading={props.loading}>
             {rows.map((row) => {
                 const label = [row.label, row.meta, row.actionLabel]
                     .filter(Boolean)
@@ -66,17 +67,9 @@ const Directory = (props: DirectoryProps) => {
                 ? props.on?.[`contact:${row.id}`]
                 : undefined
                 return handler === undefined ? (
-                    <Text
-                        key={row.id}
-                        props={{ content: label, size: "md" }}
-                        isLoading={props.loading}
-                    />
+                    <Text key={row.id} size={"md"} isSkeleton={props.loading}>{label}</Text>
                 ) : (
-                    <TextLink
-                        key={row.id}
-                        props={{ label, size: "md" }}
-                        on={{ press: handler as () => void }}
-                    />
+                    <TextAction key={row.id} size={"md"} appearance="inline" onPress={handler as () => void}>{label}</TextAction>
                 )
             })}
         </SurfaceListCard>
@@ -89,17 +82,9 @@ export const CourseHeadhuntingsBlockBase = (
     const loading = props.blockState === "pending"
     if (props.blockState === "empty" || props.blockState === "failed")
         return (
-            <EmptyNotice
-                props={{
-                    message:
-            props.blockState === "failed"
+            <EmptyNotice message={props.blockState === "failed"
                 ? props.props.errorMessage
-                : props.props.emptyMessage,
-                    actionLabel:
-            props.blockState === "failed" ? props.props.retryLabel : undefined,
-                }}
-                on={{ act: props.on?.retry as (() => void) | undefined }}
-            />
+                : props.props.emptyMessage} actionLabel={props.blockState === "failed" ? props.props.retryLabel : undefined} onAction={({ act: props.on?.retry as (() => void) | undefined })?.act} />
         )
     return (
         <div>
@@ -107,7 +92,7 @@ export const CourseHeadhuntingsBlockBase = (
                 props={{ steps: props.props.trail, label: props.props.title }}
                 on={{ course: props.on?.course as (() => void) | undefined }}
             />
-            <Heading props={{ content: props.props.title, level: 1 }} />
+            <Heading level={1}>{props.props.title}</Heading>
             <SearchBox
                 props={{
                     placeholder: props.props.searchPlaceholder,

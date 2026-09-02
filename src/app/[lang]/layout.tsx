@@ -8,7 +8,7 @@ import {
     openGraphLocale,
     readSeoConfig,
 } from "@/config/seo"
-import { GlobalAiChatLayout } from "@/components/layouts/GlobalAiChatLayout"
+import { GlobalAiChatLayout } from "@/components/product-shells/GlobalAiChatLayout"
 import { AppProviders } from "../providers"
 import "../globals.css"
 

@@ -16,9 +16,9 @@ describe("CoursePricingRailBase", () => {
     it("keeps phase comparison outside the primary purchase card", () => {
         render(<CoursePricingRailBase state="ready" props={{ title: "React", price: "$10", ctaLabel: "Enroll", enrolmentLabel: "20 enrolled", phases: [{ id: "early", name: "Early", value: "Open now", isActive: true }, { id: "standard", name: "Standard", value: "$12" }] }} />)
 
-        const primaryCard = screen.getByText("$10").closest("[data-slot='card']")
+        const primaryCard = screen.getByText("$10").closest(".starci-core-surface")
         const comparisonHeading = screen.getByRole("heading", { name: "React" })
-        const comparisonCard = screen.getByText("Open now").closest("[data-slot='card']")
+        const comparisonCard = screen.getByText("Open now").closest(".starci-core-surface")
         const peerStack = primaryCard?.closest(".gap-6")
         expect(primaryCard).not.toContainElement(comparisonHeading)
         expect(primaryCard).toContainElement(screen.getByText("20 enrolled"))

@@ -1,4 +1,4 @@
-import type { ButtonVariant } from "@/components/leaves/Button"
+import type { ButtonVariant } from "@starci/grammar/common"
 import { getButtonStateSampleClassName } from "./classNames"
 
 /** One non-interactive sample of the exact treatment used by a neighboring button state. */

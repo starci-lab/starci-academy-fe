@@ -1,5 +1,5 @@
-import { Badge } from "@/components/leaves/Badge"
-import { Button } from "@/components/leaves/Button"
+import { Badge } from "@starci/grammar/common"
+import { Button } from "@starci/grammar/common"
 import { CodeBlock } from "@/components/leaves/CodeBlock"
 import { CodeEditor, type EditorTelemetry } from "@/components/leaves/CodeEditor"
 import { Select, type SelectOption } from "@/components/leaves/Select"
@@ -16,5 +16,5 @@ export type SolutionEditorProps = { readonly state: SolutionEditorState; readonl
 /** Draw the editable solution and its judge feedback. */
 export const SolutionEditorBase = (props: SolutionEditorProps) => {
     const busy = props.state === "submitting"; const { props: data, on } = props
-    return <div><div><Select props={{ id: "coding-solution-language", name: "language", label: data.labels.languageField, options: data.languages, selectedKey: data.language, disabled: busy }} on={{ select: on?.changeLanguage }} /><Button props={{ label: data.labels.run, size: "sm", variant: "outline", disabled: busy }} on={{ press: on?.run }} /><Button props={{ label: busy ? data.labels.submitting : data.labels.submit, size: "sm", variant: "primary", isPending: busy }} on={{ press: on?.submit }} /></div><CodeEditor props={{ id: "coding-solution-editor", language: data.language, label: data.labels.editor, defaultValue: data.source, readOnly: busy }} on={{ change: on?.changeSource, telemetry: on?.reportTelemetry }} />{data.testcases && data.testcases.length > 0 && <div>{data.testcases.map((test) => <Badge key={test.id} props={{ content: test.label, tone: test.passed === undefined ? "neutral" : test.passed ? "success" : "danger" }} />)}{data.compilerMessage && <CodeBlock props={{ code: data.compilerMessage }} />}</div>}</div>
+    return <div><div><Select props={{ id: "coding-solution-language", name: "language", label: data.labels.languageField, options: data.languages, selectedKey: data.language, disabled: busy }} on={{ select: on?.changeLanguage }} /><Button variant="outline" size="sm" isDisabled={busy} onPress={on?.run}>{data.labels.run}</Button><Button variant="primary" size="sm" isPending={busy} onPress={on?.submit}>{busy ? data.labels.submitting : data.labels.submit}</Button></div><CodeEditor props={{ id: "coding-solution-editor", language: data.language, label: data.labels.editor, defaultValue: data.source, readOnly: busy }} on={{ change: on?.changeSource, telemetry: on?.reportTelemetry }} />{data.testcases && data.testcases.length > 0 && <div>{data.testcases.map((test) => <Badge key={test.id} tone={test.passed === undefined ? "neutral" : test.passed ? "success" : "danger"}>{test.label}</Badge>)}{data.compilerMessage && <CodeBlock props={{ code: data.compilerMessage }} />}</div>}</div>
 }

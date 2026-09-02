@@ -1,4 +1,10 @@
 import { cn } from "@heroui/react"
+import { formFieldClassName, formScreenReaderLabelClassName } from "@starci/grammar/common"
+
+/** Grammar-owned OTP label-control-help anatomy used unchanged by this owner. */
+export const authenticationCodeFieldClassName = cn(formFieldClassName)
+/** Grammar-owned visually-hidden field label used unchanged by this owner. */
+export const authenticationCodeLabelClassName = cn(formScreenReaderLabelClassName)
 
 /** Compact authentication journey column. */
 export const authenticationPanelClassName = cn("mx-auto", "flex", "w-full", "max-w-md", "flex-col", "gap-6")

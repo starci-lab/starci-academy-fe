@@ -1,7 +1,7 @@
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
-import { Heading } from "@/components/leaves/Heading"
-import { Text } from "@/components/leaves/Text"
-import type { LearnMobileView } from "@/components/layouts/LearnShellLayout/component"
+import { EmptyNotice } from "@starci/grammar/common"
+import { Heading } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
+import type { LearnMobileView } from "@/components/product-shells/LearnShellLayout/component"
 import type { ReactionType } from "@/modules/api/graphql/queries/types/reactions"
 /** One face of a content tab. */
 export type ContentFace = { readonly id: string; readonly label: string }
@@ -24,5 +24,5 @@ export const CourseLearnContentBlockBase = (props: CourseLearnContentBlockProps)
     const loading = props.blockState === "pending"
     const title = props.props.title ?? ""
     const notice = props.blockState === "failed" || props.blockState === "locked"
-    return <main aria-label={title}><Heading props={{ content: title, level: 1 }} isLoading={loading} />{props.props.description === undefined ? null : <Text props={{ content: props.props.description, size: "sm", tone: "muted" }} />}{notice ? <EmptyNotice props={{ message: props.props.noticeMessage ?? "", actionLabel: props.props.noticeActionLabel }} on={{ act: props.on?.act }} /> : <article><Text props={{ content: props.props.body ?? "", size: "md" }} isLoading={loading} /></article>}</main>
+    return <main aria-label={title}><Heading level={1} isSkeleton={loading}>{title}</Heading>{props.props.description === undefined ? null : <Text size={"sm"} tone={"muted"}>{props.props.description}</Text>}{notice ? <EmptyNotice message={props.props.noticeMessage ?? ""} actionLabel={props.props.noticeActionLabel} onAction={({ act: props.on?.act })?.act} /> : <article><Text size={"md"} isSkeleton={loading}>{props.props.body ?? ""}</Text></article>}</main>
 }

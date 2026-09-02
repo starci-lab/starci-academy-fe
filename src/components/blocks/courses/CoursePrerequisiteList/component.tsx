@@ -1,5 +1,5 @@
-import { Text } from "@/components/leaves/Text"
-import { LeadingNumber } from "@starci/grammar/core"
+import { Text } from "@starci/grammar/common"
+import { LeadingNumber } from "@starci/grammar/common"
 import { prerequisiteListClassName, prerequisiteRowClassName } from "./classNames"
 
 /** One requirement a learner should already satisfy. */
@@ -58,7 +58,7 @@ export const CoursePrerequisiteListBase = (props: CoursePrerequisiteListProps) =
                 {data.prerequisites.map((prerequisite, index) => (
                     <li className={prerequisiteRowClassName} key={prerequisite.id}>
                         <LeadingNumber position={index + 1} />
-                        <Text props={{ content: prerequisite.requirement, size: "sm" }} />
+                        <Text size={"sm"}>{prerequisite.requirement}</Text>
                     </li>
                 ))}
             </ol>

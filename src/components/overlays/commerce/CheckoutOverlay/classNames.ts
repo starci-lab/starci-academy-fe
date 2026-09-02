@@ -1,7 +1,7 @@
 import { cn } from "@heroui/react"
 
-/** One scroll owner keeps actions reachable on compact viewports. */
-export const checkoutOverlayClassName = cn("flex", "max-h-[calc(100dvh-2rem)]", "min-w-0", "flex-col", "overflow-y-auto")
+/** Content flows through the modal body's single inside-scroll owner. */
+export const checkoutOverlayClassName = cn("flex", "min-w-0", "w-full", "flex-col")
 /** Payment name and consequence. */
 export const checkoutHeaderClassName = cn("flex", "flex-col", "gap-2", "border-b", "border-separator", "px-5", "py-5", "sm:px-6")
 /** Decision evidence below the header. */

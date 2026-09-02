@@ -1,8 +1,18 @@
+import { Card } from "@heroui/react"
 import { useId, type ReactNode } from "react"
 import { assertPresentationState, treatmentFor, type PresentationState } from "../../state.js"
 import { VerticalScrollRegion } from "../../composite/VerticalScrollRegion/index.js"
 import { Label } from "../../primitive/Label/index.js"
-import { getSurfaceFrameClassName, surfaceCardClassName, surfaceContentClassName, surfaceHighlightClassName, surfaceHighlightSweepClassName, surfaceLabelClassName } from "./classNames.js"
+import {
+    getSurfaceCardClassName,
+    getSurfaceContentClassName,
+    getSurfaceFrameClassName,
+    surfaceHighlightClassName,
+    surfaceHighlightSweepClassName,
+    surfaceLabelClassName,
+    type SurfaceCardHeight,
+    type SurfaceCardMeasure,
+} from "./classNames.js"
 
 export type WholeCardAction =
     | {
@@ -23,7 +33,8 @@ type LabelledSurfaceCard = {
 
 type SelfNamedSurfaceCard = {
     readonly label?: undefined
-    readonly ariaLabel: string
+    /** Optional when the surrounding semantic owner already names this purely visual boundary. */
+    readonly ariaLabel?: string
 }
 
 export type SurfaceCardProps = (LabelledSurfaceCard | SelfNamedSurfaceCard) & {
@@ -40,6 +51,12 @@ export type SurfaceCardProps = (LabelledSurfaceCard | SelfNamedSurfaceCard) & {
     readonly scroll?: "page" | "contained"
     /** Convenience capability: make the content region a HeroUI Vertical ScrollShadow. */
     readonly isScrollable?: boolean
+    /** One inset block or multiple touching child faces separated inside the card. */
+    readonly composition?: "single" | "joined"
+    /** Grammar-owned width contract for ordinary content or compact form surfaces. */
+    readonly measure?: SurfaceCardMeasure
+    /** Let a peer grid stretch the complete surface anatomy without consumer descendant selectors. */
+    readonly height?: SurfaceCardHeight
     /** Draw one legacy accent sweep behind this surface; use for one featured card only. */
     readonly isHighlight?: boolean
 }
@@ -57,6 +74,9 @@ export const SurfaceCard = (props: SurfaceCardProps) => {
         frame = "bounded",
         scroll = "page",
         isScrollable = false,
+        composition = "single",
+        measure = "content",
+        height = "auto",
         isHighlight = false,
     } = props
     assertPresentationState(state)
@@ -85,21 +105,28 @@ export const SurfaceCard = (props: SurfaceCardProps) => {
     ) : null
 
     const surface = (
-        <div
+        <Card.Content
             aria-label={label === undefined ? accessibleName : undefined}
             aria-labelledby={label === undefined ? undefined : headingId}
-            className={getSurfaceFrameClassName(frame)}
+            className={getSurfaceFrameClassName(frame) ?? ""}
             data-grammar-frame={frame}
+            data-grammar-surface-composition={composition}
+            data-grammar-surface-height={height}
             data-grammar-scroll={contained ? "contained" : "page"}
             data-grammar-state={state}
             data-grammar-surface-depth={depth}
             data-grammar-treatment={treatment.tone}
         >
-            <VerticalScrollRegion className={surfaceContentClassName} data-grammar-surface-content="true" isScrollable={contained}>
+            <VerticalScrollRegion
+                className={getSurfaceContentClassName(measure, contained)}
+                data-grammar-surface-content="true"
+                data-grammar-surface-composition={composition}
+                isScrollable={contained}
+            >
                 {children}
             </VerticalScrollRegion>
             {action}
-        </div>
+        </Card.Content>
     )
     const highlightedSurface = isHighlight && state !== "pending" ? (
         <div className={surfaceHighlightClassName} data-grammar-highlight="true">
@@ -109,19 +136,24 @@ export const SurfaceCard = (props: SurfaceCardProps) => {
     ) : surface
 
     return (
-        <section
-            className={surfaceCardClassName}
+        <Card.Root
+            className={getSurfaceCardClassName(measure, height) ?? ""}
             data-grammar-frame={frame}
+            data-grammar-surface-composition={composition}
+            data-grammar-surface-height={height}
             data-grammar-interaction={wholeAction === undefined ? "static" : "whole-action"}
+            data-grammar-surface-labelled={label === undefined ? "false" : "true"}
             data-grammar-surface-card="true"
+            render={(cardProps) => <section {...cardProps} />}
+            variant="transparent"
         >
             {label === undefined ? null : (
-                <div className={surfaceLabelClassName} data-grammar-surface-label="true">
-                    <Label id={headingId}>{label}</Label>
+                <Card.Header className={surfaceLabelClassName ?? ""} data-grammar-surface-label="true">
+                    <Label as="h3" id={headingId}>{label}</Label>
                     {labelEnd ?? (fact === undefined ? null : <span>{fact}</span>)}
-                </div>
+                </Card.Header>
             )}
             {highlightedSurface}
-        </section>
+        </Card.Root>
     )
 }

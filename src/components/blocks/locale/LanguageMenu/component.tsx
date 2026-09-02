@@ -1,4 +1,5 @@
-import { Icon } from "@/components/leaves/Icon"
+import { Icon } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
 import { DropdownBranch } from "@/components/branches/DropdownBranch"
 import type { Locale } from "@/i18n/config"
 
@@ -32,6 +33,6 @@ export const LanguageMenuBase = (props: LanguageMenuProps) => (
             }],
         }}
         on={{ action: (id) => props.on?.select?.(id) }}
-        trigger={<Icon props={{ name: "locale", role: "leading" }} />}
+        trigger={<Icon source={iconSourceFor("locale", "leading")} role={"leading"} />}
     />
 )

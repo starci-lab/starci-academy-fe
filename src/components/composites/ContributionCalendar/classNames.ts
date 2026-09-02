@@ -21,9 +21,10 @@ export const contributionCalendarRowClassName = cn(
 )
 
 /** Full-bleed dashboard calendar body. */
-export const contributionCalendarFlushClassName = dashboardFlushCardClassName
+export const contributionCalendarFlushClassName = cn(dashboardFlushCardClassName)
 
-export const contributionCalendarSeparatorClassName = dashboardBandSeparatorClassName
+/** Divide each full-bleed calendar band without adding another inset. */
+export const contributionCalendarSeparatorClassName = cn(dashboardBandSeparatorClassName)
 
 /** Year summary and selector share one top band. */
 export const contributionCalendarHeaderBandClassName = cn(

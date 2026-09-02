@@ -1,7 +1,8 @@
 import type { ReactNode } from "react"
-import { Icon, type IconName } from "@/components/leaves/Icon"
-import { Badge, type BadgeTone } from "@/components/leaves/Badge"
-import { Text } from "@/components/leaves/Text"
+import { Icon } from "@starci/grammar/common"
+import { iconSourceFor, type IconName } from "@/components/leaves/Icon"
+import { Badge, type BadgeTone } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import { iconLabelFactLabelClassName, iconLabelFactRowClassName } from "./classNames"
 
 /** The closed visual recipes supported by the shared icon-label-fact row. */
@@ -25,7 +26,7 @@ export const IconLabelFactRow = (props: IconLabelFactRowProps) => {
     const data = props.props
     const isLoading = props.isLoading ?? false
     const endBadge = data.endBadge
-    const glyph = <Icon props={{ name: data.icon, role: "leading" }} />
+    const glyph = <Icon source={iconSourceFor(data.icon, "leading")} role={"leading"} />
     const row = (label: ReactNode, fact?: ReactNode) => (
         <div data-part="icon-label-fact-row" data-recipe={data.recipe} className={iconLabelFactRowClassName}>
             {glyph}
@@ -35,21 +36,21 @@ export const IconLabelFactRow = (props: IconLabelFactRowProps) => {
     )
 
     if (data.recipe === "peer") return row(
-        <Text props={{ content: data.label, size: "sm" }} />,
-        <Text props={{ content: data.endText, size: "sm", tone: "muted" }} isLoading={isLoading} />,
+        <Text size={"sm"}>{data.label}</Text>,
+        <Text size={"sm"} tone={"muted"} isSkeleton={isLoading}>{data.endText}</Text>,
     )
 
     if (data.recipe === "label-led") return row(
-        <Text props={{ content: data.label, size: "md" }} />,
-        <Text props={{ content: data.endText, size: "xs", tone: "muted" }} isLoading={isLoading} />,
+        <Text size={"md"}>{data.label}</Text>,
+        <Text size={"xs"} tone={"muted"} isSkeleton={isLoading}>{data.endText}</Text>,
     )
 
     return row(
-        <Text props={{ content: data.label, size: "sm", parentEmphasis: "accent-soft" }} />,
+        <Text size={"sm"} parentEmphasis={"accent-soft"}>{data.label}</Text>,
         endBadge !== undefined
-            ? <Badge props={endBadge} isLoading={isLoading} />
+            ? <Badge tone={endBadge.tone} isSkeleton={isLoading}>{endBadge.content}</Badge>
             : data.endText === undefined
                 ? undefined
-                : <Text props={{ content: data.endText, size: "xs", tone: "muted", parentEmphasis: "accent-soft" }} />,
+                : <Text size={"xs"} tone={"muted"} parentEmphasis={"accent-soft"}>{data.endText}</Text>,
     )
 }

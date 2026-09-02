@@ -18,14 +18,8 @@ describe("application CSS cascade", () => {
         expect(css).toMatch(/\*::-webkit-scrollbar\s*\{[\s\S]*?display: none;[\s\S]*?width: 0;[\s\S]*?height: 0;/)
     })
 
-    it("offsets feature tabs into the main column while the feature layer stays flush", () => {
-        expect(css).toMatch(/\.extended-tabs \.tabs__tab:first-child\s*\{[\s\S]*?padding-inline-start: 0 !important;/)
-        expect(css).toMatch(/\.starci-core-navigation-feature-nav-primary\.starci-core-page-container\s*\{[\s\S]*?padding-inline: 0\.75rem !important;/)
-        expect(css).toMatch(/\.starci-core-navigation-feature-nav-feature\.starci-core-page-container\s*\{[\s\S]*?padding-inline: 0 !important;/)
-        expect(css).toMatch(/grid-template-columns: 16rem minmax\(0, 1fr\) !important;/)
-    })
-
-    it("centres nested compact-subnav links instead of baseline-aligning them", () => {
-        expect(css).toMatch(/\.starci-core-subnav-title\s*\{[\s\S]*?display: flex !important;[\s\S]*?align-items: center !important;/)
+    it("does not reach through Grammar anatomy from the application stylesheet", () => {
+        expect(css).not.toContain(".extended-tabs")
+        expect(css).not.toMatch(/\.starci-core-[^,{\s]+\s+[>.]/)
     })
 })

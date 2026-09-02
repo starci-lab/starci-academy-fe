@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 import NextLink from "next/link"
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
+import { SurfaceCard } from "@starci/grammar/common"
 import { pressableHoverClassName } from "./classNames"
 
 /**
@@ -17,13 +17,12 @@ import { pressableHoverClassName } from "./classNames"
  * handler and the disabled state. Written into the entry instead, the table goes on drawing a
  * pointer over a node whose call site passed no handler at all, and nothing can tell it to stop.
  *
- * ONE GESTURE, ONE ANSWER. A surface whose content NAMES its destination answers hover on that name
- * - the label underlines like the link it stands for - and must not also dim: told twice, the
- * reader learns the whole row is the link and then that one line is. A surface with no such name
- * dims instead, because something has to answer.
+ * ONE GESTURE, ONE ANSWER. Inline actions answer on their named label or CTA and leave the owning
+ * surface still. Whole-surface actions answer across the complete hit target. The distinction is
+ * interaction ownership, never merely whether some title happens to be present.
  */
 
-/** Which part of the surface answers a hover. */
+/** Which interaction scope answers pointer, keyboard-focus and pressed feedback. */
 export type PressableSurfaceHover = "label" | "surface"
 
 /** Props for one content node wrapped in a native press target. */
@@ -37,10 +36,10 @@ export type PressableSurfaceProps = {
     /** Prevent activation while a route is unavailable or already resolving. */
     readonly disabled?: boolean
     /**
-     * Which answer this surface gives on hover.
+     * Which semantic action scope owns interaction feedback.
      *
-     * `label` when the content holds a line marked `isPressLabel` - that line underlines and the
-     * surface stays put. `surface` when it does not, and the whole thing dims.
+     * `label` maps to an inline action: the marked label underlines and the surface stays put.
+     * `surface` maps to a whole action: the complete press target changes material.
      */
     readonly hover?: PressableSurfaceHover
     /**
@@ -73,13 +72,14 @@ export const PressableSurface = (props: PressableSurfaceProps) => {
         isRaised = false,
     } = props
     const content = isRaised
-        ? <SurfaceCard>{children}</SurfaceCard>
+        ? <SurfaceCard composition="joined">{children}</SurfaceCard>
         : children
     if (href !== undefined && !disabled) {
         return (
             <NextLink
                 href={href}
                 aria-label={label}
+                data-interaction-scope={hover === "label" ? "inline-action" : "whole-action"}
                 onClick={press}
                 className={pressableHoverClassName(hover)}
             >
@@ -91,6 +91,7 @@ export const PressableSurface = (props: PressableSurfaceProps) => {
         <button
             type="button"
             aria-label={label}
+            data-interaction-scope={hover === "label" ? "inline-action" : "whole-action"}
             onClick={press}
             disabled={disabled}
             aria-busy={disabled || undefined}

@@ -1,9 +1,8 @@
-import { SurfaceCard as GrammarSurfaceCard } from "@starci/grammar/core"
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { Button } from "@/components/leaves/Button"
-import { Heading } from "@/components/leaves/Heading"
-import { Progress } from "@/components/leaves/Progress"
-import { Text } from "@/components/leaves/Text"
+import { SurfaceCard, SurfaceCard as GrammarSurfaceCard, Button } from "@starci/grammar/common"
+
+import { Heading } from "@starci/grammar/common"
+import { Progress } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import type { FlashcardSessionMode } from "@/modules/api/graphql/queries/query-my-in-progress-flashcard-session"
 import {
     flashcardEvidenceClassName,
@@ -79,29 +78,29 @@ export const FlashcardResultBase = (props: FlashcardResultProps) => {
     return (
         <GrammarSurfaceCard ariaLabel={data.title} frame="frameless" state={grammarState}>
             <main className={flashcardResultWorkspaceClassName}>
-                {blockState === "failed" ? <SurfaceCard><section className={flashcardResultRecoveryClassName}>
-                    <Heading props={{ content: data.title, level: 1 }} />
-                    <Text props={{ content: data.failedText, size: "md" }} />
+                {blockState === "failed" ? <SurfaceCard composition="joined"><section className={flashcardResultRecoveryClassName}>
+                    <Heading level={1}>{data.title}</Heading>
+                    <Text size={"md"}>{data.failedText}</Text>
                     <div className={flashcardResultActionClassName}>
-                        <Button props={{ label: data.retryLabel, variant: "primary" }} on={{ press: on.retryLoad }} />
-                        <Button props={{ label: data.backLabel, variant: "outline" }} on={{ press: on.back }} />
+                        <Button variant="primary" onPress={on.retryLoad}>{data.retryLabel}</Button>
+                        <Button variant="outline" onPress={on.back}>{data.backLabel}</Button>
                     </div>
                 </section></SurfaceCard> : <>
-                    <SurfaceCard><section className={flashcardSummaryClassName}>
-                        <Text props={{ content: data.modeText, size: "sm", tone: "muted" }} />
-                        <div className={titlePairClassName}><Heading props={{ content: data.title, level: 1 }} isLoading={isLoading} /><Text props={{ content: data.subtitle, size: "sm", tone: "muted" }} isLoading={isLoading} /></div>
-                        <div className={flashcardStatGridClassName}>{statValues.map(([label, value]) => <div key={label} className={flashcardStatClassName}><Text props={{ content: label, size: "xs" }} isLoading={isLoading} /><Heading props={{ content: value, level: 2 }} isLoading={isLoading} /></div>)}</div>
-                        {data.scorePercent === undefined ? null : <Progress props={{ value: data.scorePercent, label: data.scoreLabel }} isLoading={isLoading} />}
+                    <SurfaceCard composition="joined"><section className={flashcardSummaryClassName}>
+                        <Text size={"sm"} tone={"muted"}>{data.modeText}</Text>
+                        <div className={titlePairClassName}><Heading level={1} isSkeleton={isLoading}>{data.title}</Heading><Text size={"sm"} tone={"muted"} isSkeleton={isLoading}>{data.subtitle}</Text></div>
+                        <div className={flashcardStatGridClassName}>{statValues.map(([label, value]) => <div key={label} className={flashcardStatClassName}><Text size={"xs"} isSkeleton={isLoading}>{label}</Text><Heading level={2} isSkeleton={isLoading}>{value}</Heading></div>)}</div>
+                        {data.scorePercent === undefined ? null : <Progress label={data.scoreLabel} value={data.scorePercent} isSkeleton={isLoading} />}
                     </section></SurfaceCard>
                     {blockState === "ready" ? <div className={flashcardResultBodyClassName}>
                         <div className={flashcardEvidenceClassName}>
-                            {data.gradeRows.length === 0 ? null : <SurfaceCard props={{ label: data.breakdownTitle }}><div className={flashcardFactListClassName}>{data.gradeRows.map((row) => <div key={row.label} className={flashcardFactRowClassName}><Text props={{ content: row.label, size: "sm", weight: "medium" }} /><Text props={{ content: row.value.toString(), size: "sm", tone: "muted" }} /></div>)}</div></SurfaceCard>}
-                            {data.weakTopics.length === 0 ? null : <SurfaceCard props={{ label: data.weakTopicsTitle }}><div className={flashcardFactListClassName}>{data.weakTopics.map((topic) => <div key={topic.tag} className={flashcardFactRowClassName}><Text props={{ content: topic.tag, size: "sm", weight: "medium" }} /><Text props={{ content: topic.value, size: "sm", tone: "muted" }} />{topic.percent === undefined ? null : <Progress props={{ value: topic.percent, label: topic.tag }} />}</div>)}</div></SurfaceCard>}
+                            {data.gradeRows.length === 0 ? null : <SurfaceCard label={data.breakdownTitle} composition="joined"><div className={flashcardFactListClassName}>{data.gradeRows.map((row) => <div key={row.label} className={flashcardFactRowClassName}><Text size={"sm"} weight={"medium"}>{row.label}</Text><Text size={"sm"} tone={"muted"}>{row.value.toString()}</Text></div>)}</div></SurfaceCard>}
+                            {data.weakTopics.length === 0 ? null : <SurfaceCard label={data.weakTopicsTitle} composition="joined"><div className={flashcardFactListClassName}>{data.weakTopics.map((topic) => <div key={topic.tag} className={flashcardFactRowClassName}><Text size={"sm"} weight={"medium"}>{topic.tag}</Text><Text size={"sm"} tone={"muted"}>{topic.value}</Text>{topic.percent === undefined ? null : <Progress label={topic.tag} value={topic.percent} />}</div>)}</div></SurfaceCard>}
                         </div>
-                        <div className={flashcardNextActionRailClassName}><SurfaceCard><aside className={nextActionClassName}>
-                            {data.nextDueText === undefined ? null : <div className={titlePairClassName}><Heading props={{ content: data.nextDueLabel, level: 3 }} /><Text props={{ content: data.nextDueText, size: "sm", weight: "semibold" }} /></div>}
-                            <Button props={{ label: data.retrySessionLabel, variant: "primary" }} on={{ press: on.retrySession }} />
-                            <Button props={{ label: data.backLabel, variant: "outline" }} on={{ press: on.back }} />
+                        <div className={flashcardNextActionRailClassName}><SurfaceCard composition="joined"><aside className={nextActionClassName}>
+                            {data.nextDueText === undefined ? null : <div className={titlePairClassName}><Heading level={3}>{data.nextDueLabel}</Heading><Text size={"sm"} weight={"semibold"}>{data.nextDueText}</Text></div>}
+                            <Button variant="primary" onPress={on.retrySession}>{data.retrySessionLabel}</Button>
+                            <Button variant="outline" onPress={on.back}>{data.backLabel}</Button>
                         </aside></SurfaceCard></div>
                     </div> : null}
                 </>}

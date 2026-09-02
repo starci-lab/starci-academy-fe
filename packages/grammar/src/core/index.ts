@@ -1,29 +1,61 @@
+"use client"
+
+import {
+    COMMON_GRAMMAR_COMPONENTS,
+    COMMON_UI_RULE_IDS,
+    defineGrammarFamily,
+    defineGrammarRuleConformance,
+    type GrammarComponentRenderer,
+    type GrammarRootProps,
+} from "../common/index.js"
+import { createElement } from "react"
+
 export type { PresentationState } from "./state.js"
-export { STARCI_CORE_DARK_TOKEN_DEFAULTS, STARCI_CORE_DNA, STARCI_CORE_TOKEN_DEFAULTS, STARCI_CORE_TOKEN_NAMES, type StarCiCoreDna, type StarCiCoreTokenDefaults, type StarCiCoreTokenName } from "./dna.js"
-export { GrammarRoot, type GrammarRootProps } from "./primitive/GrammarRoot/index.js"
-export { PageContainer, type PageContainerProps } from "./primitive/PageContainer/index.js"
-export { Label, type LabelProps } from "./primitive/Label/index.js"
-export { SectionHeader, type SectionHeaderProps } from "./primitive/SectionHeader/index.js"
-export { MediaFrame, type MediaFrameProps } from "./primitive/MediaFrame/index.js"
-export { IncludedMark, type IncludedMarkProps } from "./primitive/IncludedMark/index.js"
-export { RankArtwork, type RankArtworkKind, type RankArtworkProps } from "./primitive/RankArtwork/index.js"
-export { SurfaceCopyGroup, type SurfaceCopyGroupProps } from "./primitive/SurfaceCopyGroup/index.js"
-export { PrimaryRailLayout, type PrimaryRailLayoutProps } from "./composition/PrimaryRailLayout/index.js"
-export { NavigationFeatureNav, type NavigationFeatureNavProps } from "./composition/NavigationFeatureNav/index.js"
-export { DashboardShell, type DashboardShellProps } from "./composition/DashboardShell/index.js"
-export { ChatWorkspace, type ChatWorkspaceProps } from "./composition/ChatWorkspace/index.js"
-export { StateMark, type StateMarkProps } from "./StateMark.js"
-export { LeadingNumber, type LeadingNumberProps } from "./LeadingNumber.js"
-export { OtpInput, type OtpInputProps } from "./OtpInput.js"
-export { StaticStateRow, type StaticStateRowData, type StaticStateRowProps } from "./composite/StaticStateRow/index.js"
-export { HorizontalScrollRegion, type HorizontalScrollRegionProps } from "./composite/HorizontalScrollRegion/index.js"
-export { VerticalScrollRegion, type VerticalScrollRegionProps } from "./composite/VerticalScrollRegion/index.js"
-export { SurfaceCard, type SurfaceCardProps, type WholeCardAction } from "./branch/SurfaceCard/index.js"
-export { SurfaceListCard, type SurfaceListCardProps } from "./branch/SurfaceListCard/index.js"
-export { FencedCodeBlock, MarkdownArticle, MarkdownTableFrame, type FencedCodeBlockProps, type MarkdownArticleProps, type MarkdownTableFrameProps } from "./branch/MarkdownArticle/index.js"
-export { SurfaceAccordionCard, type SurfaceAccordionCardItem, type SurfaceAccordionCardProps } from "./branch/SurfaceAccordionCard/index.js"
-export { Rail, type RailProps } from "./branch/Rail/index.js"
-export { Subnav, type SubnavProps } from "./branch/Subnav/index.js"
-export { Tabs, type TabItem, type TabsProps } from "./branch/Tabs/index.js"
-export { Tooltip, type TooltipPlacement, type TooltipProps } from "./branch/Tooltip/index.js"
-export { formCompactSurfaceClassName, formFieldClassName, formPageClassName, formScreenReaderLabelClassName, formScrollViewportClassName, formSurfaceClassName, horizontalScrollRegionClassName } from "./classNames.js"
+export {
+    STARCI_CORE_DARK_TOKEN_DEFAULTS,
+    STARCI_CORE_DNA,
+    STARCI_CORE_SPACING_SCALE,
+    STARCI_CORE_TOKEN_DEFAULTS,
+    STARCI_CORE_TOKEN_NAMES,
+    type StarCiCoreDna,
+    type StarCiCoreSpacingStep,
+    type StarCiCoreSpacingValue,
+    type StarCiCoreTokenDefaults,
+    type StarCiCoreTokenName,
+} from "./dna.js"
+
+/** @deprecated Use COMMON_GRAMMAR_COMPONENTS from `@starci/grammar/common`. */
+export const CORE_GRAMMAR_COMPONENTS = COMMON_GRAMMAR_COMPONENTS
+
+export type CoreGrammarComponentName = keyof typeof CORE_GRAMMAR_COMPONENTS
+
+/** StarCi Core is one visual family implementing the Common contract. */
+const CoreGrammarRootRenderer: GrammarComponentRenderer<GrammarRootProps> = (props) => {
+    const CommonGrammarRoot = COMMON_GRAMMAR_COMPONENTS.GrammarRoot
+    return createElement(CommonGrammarRoot, { ...props, "data-grammar-family": "core" })
+}
+
+export const coreGrammar = defineGrammarFamily({
+    id: "core",
+    styles: {
+        entrypoint: "@starci/grammar/core/styles.css",
+        scope: { attribute: "data-grammar-family", value: "core" },
+    },
+    components: { replacements: { GrammarRoot: CoreGrammarRootRenderer }, extensions: {} },
+})
+
+export const CoreGrammarRoot = coreGrammar.components.GrammarRoot
+
+export const coreRuleConformance = defineGrammarRuleConformance({
+    familyId: "core",
+    inheritedCommonRules: COMMON_UI_RULE_IDS,
+    familyEvidence: {},
+})
+
+// Compatibility re-exports; Common is the canonical family-base authority.
+export { defineGrammarFamily }
+export type {
+    GrammarComponentRenderer,
+    GrammarFamilyContract,
+    GrammarFamilyStyles,
+} from "../common/index.js"

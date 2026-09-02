@@ -1,10 +1,13 @@
 /*
  * Freeze the cross-package cascade before any import registers its own layer.
- * Tailwind's reset must run before Grammar anatomy; app utilities remain the final explicit override.
+ * Tailwind's reset runs before Grammar anatomy; app utilities may style app-owned content but never
+ * reach through a Grammar boundary to replace its anatomy or layout.
+ * Layout variation crosses that boundary only through Grammar props/data attributes, whose rules
+ * remain authoritative over vendor component defaults.
+ * Business copy, data, routes and callbacks remain application-owned.
  */
 @layer theme, base, starci-grammar-common, starci-grammar-core, starci-grammar-extension, components, utilities;
 
-@import "@starci/grammar/common/styles.css";
 @import "@starci/grammar/core/styles.css";
 /* Runtime utilities come from application source only; repository caches are not UI authority. */
 @import "tailwindcss" source("../");
@@ -100,76 +103,6 @@ body {
 /* Sticky app bars must not fully cover the control that receives keyboard focus. */
 html {
     scroll-padding-block: 5rem;
-}
-
-/* Original StarCi secondary-tab skin: the navbar owns the only baseline. */
-.extended-tabs .tabs__list,
-.extended-tabs .tabs__list-container {
-    border-bottom-width: 0 !important;
-    padding-bottom: 0 !important;
-    margin-bottom: 0 !important;
-}
-
-.extended-tabs .tabs__list {
-    align-items: flex-end !important;
-}
-
-.extended-tabs .starci-core-tabs-frame {
-    margin-bottom: 0;
-    padding-bottom: 0;
-}
-
-.extended-tabs .tabs__tab {
-    position: relative;
-    width: fit-content !important;
-    padding-inline: 0.75rem !important;
-    padding-block-end: 0 !important;
-}
-
-.extended-tabs .tabs__tab:first-child {
-    padding-inline-start: 0 !important;
-}
-
-.starci-core-navigation-feature-nav-primary.starci-core-page-container {
-    padding-inline: 0.75rem !important;
-}
-
-.starci-core-navigation-feature-nav-feature.starci-core-page-container {
-    padding-inline: 0.75rem !important;
-}
-
-/* Keep nested link content geometrically centred in the compact subnav row. */
-.starci-core-subnav-title {
-    display: flex !important;
-    align-items: center !important;
-}
-
-/* Navbar feature tabs: kill disabled scroll chrome that eats the left inset. */
-.starci-core-navigation-feature-nav-feature .tabs__list-container__scroll-prev[disabled],
-.starci-core-navigation-feature-nav-feature .tabs__list-container__scroll-prev[tabindex="-1"] {
-    width: 0 !important;
-    min-width: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    overflow: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-}
-
-.starci-core-navigation-feature-nav-feature .starci-core-tabs-scroll {
-    padding-block: 0 !important;
-}
-
-.starci-core-navigation-feature-nav-feature .extended-tabs .tabs__indicator {
-    bottom: 0 !important;
-    inset-block-end: 0 !important;
-}
-
-/* Active underline is 2px; pin it flush to the navbar's bottom seam. */
-.extended-tabs .tabs__indicator {
-    bottom: 0 !important;
-    height: 2px !important;
-    margin-block-end: 0 !important;
 }
 
 /* Ported verbatim from the legacy Academy stylesheet. */
@@ -444,25 +377,6 @@ body {
 }
 
 /*
- * A joined-list surface owns its inset row by row so each divider reaches both card edges. The
- * generic Card inset above is intentionally important, therefore this semantic exception must
- * win at the same cascade strength; a p-0 utility on the element cannot do that by itself.
- */
-.starci-core-surface-list > .card[data-grammar-surface] {
-    padding: 0 !important;
-}
-
-/*
- * A named-section surface now holds the entry's own node rather than wearing it, so the entry
- * carries the inset and the card must carry none. Without this the two stack: the card keeps the
- * important 16px above and the node adds its own inside it, and every card on the screen grows by
- * one whole inset the day the branch stops wearing the node.
- */
-.starci-core-surface-card > .card {
-    padding: 0 !important;
-}
-
-/*
  * A press label is ruled with the SAME mark the vendor link uses, because the two sit in one card
  * and stand for one promise. The vendor bakes `--separator-tertiary` at 1.5px into `.link`; naming
  * a token from the scale instead gave the title a 91% hairline beside a link ruled at 85%, and the
@@ -482,17 +396,4 @@ body {
  */
 .group:has(a:hover, [role="link"]:hover) [data-press-label="true"] {
     text-decoration-line: none;
-}
-
-/* A joined list nested in a larger story keeps its boundary but cannot claim a second elevation. */
-.starci-core-surface-list > .card[data-grammar-surface-depth="nested"] {
-    border: 1px solid var(--border) !important;
-    box-shadow: none !important;
-}
-
-/* The accepted dashboard direction layers its coordinated surfaces without changing their anatomy. */
-.group\/course-today .starci-core-surface-card > .card,
-.group\/course-today .starci-core-surface-list > .card[data-grammar-surface] {
-    box-shadow: var(--dashboard-calm-elevation);
-    transition: box-shadow var(--dashboard-calm-duration) var(--dashboard-calm-easing);
 }

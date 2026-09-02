@@ -1,8 +1,8 @@
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
+import { SurfaceCard } from "@starci/grammar/common"
+import { SurfaceListCard } from "@starci/grammar/common"
 import { EvidenceRow } from "@/components/composites/EvidenceRow"
 import { IconLabelFactRow } from "@/components/composites/IconLabelFactRow"
-import { Text } from "@/components/leaves/Text"
+import { Text } from "@starci/grammar/common"
 import { profileSkillListClassName, skillSnapshotClassName } from "./classNames"
 
 /** One settled count in a skill-evidence breakdown. */
@@ -28,7 +28,7 @@ export const SkillSnapshot = (props: SkillSnapshotProps) => {
     const settledStateMessage = props.isLoading ? undefined : props.stateMessage
 
     return (
-        <SurfaceCard props={{ label: props.label, inset: "compact" }}>
+        <SurfaceCard label={props.label} composition="single">
             <div className={skillSnapshotClassName}>
                 {settledStateMessage ? (
                     <IconLabelFactRow
@@ -49,10 +49,7 @@ export const SkillSnapshot = (props: SkillSnapshotProps) => {
                                 recipe: "label-led",
                             }}
                         />
-                        <SurfaceListCard
-                            props={{ label: props.label, isLabelHidden: true, isNested: true }}
-                            isLoading={props.isLoading}
-                        >
+                        <SurfaceListCard label={props.label} labelHidden={true} depth={true ? "nested" : "top"} isLoading={props.isLoading}>
                             <div className={profileSkillListClassName}>
                                 {props.rows.map((row) => <EvidenceRow
                                     key={row.id}
@@ -61,9 +58,7 @@ export const SkillSnapshot = (props: SkillSnapshotProps) => {
                                 />)}
                             </div>
                         </SurfaceListCard>
-                        {props.supportingMessage === undefined ? null : <Text
-                            props={{ content: props.supportingMessage, size: "xs", tone: "muted" }}
-                        />}
+                        {props.supportingMessage === undefined ? null : <Text size={"xs"} tone={"muted"}>{props.supportingMessage}</Text>}
                     </>
                 )}
             </div>

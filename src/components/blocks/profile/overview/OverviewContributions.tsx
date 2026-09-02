@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useTranslations } from "next-intl"
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
+import { SurfaceCard } from "@starci/grammar/common"
 import { ContributionCalendar } from "@/components/composites/ContributionCalendar"
 import { useOverviewEvidence } from "./useOverviewEvidence"
 import { usePublicWeeklyStats } from "./usePublicWeeklyStats"
@@ -30,7 +30,7 @@ export const OverviewContributions = (props: OverviewContributionsProps) => {
     const total = days.reduce((sum, day) => sum + day.total, 0)
     const currentYear = new Date().getFullYear()
     return (
-        <SurfaceCard props={{ label: t("profile.evidence.contributions.label"), inset: "compact" }}>
+        <SurfaceCard label={t("profile.evidence.contributions.label")} composition="single">
             <ContributionCalendar
                 isLoading={calendar.isLoading}
                 props={{

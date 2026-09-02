@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { EmptyNotice } from "@starci/grammar/common"
 
 /** Data states the persistent playground frame can expose. */
 export type PlaygroundSessionFrameState = "pending" | "ready" | "failed"
@@ -16,9 +16,6 @@ export type PlaygroundSessionLayoutProps = {
 /** Keep the routed setup or session surface mounted inside one persistent data/socket owner. */
 export const PlaygroundSessionLayoutBase = (props: PlaygroundSessionLayoutProps) => (
     props.state === "failed" ? (
-        <EmptyNotice
-            props={{ message: props.failedLabel, actionLabel: props.retryLabel }}
-            on={{ act: props.onRetry }}
-        />
+        <EmptyNotice message={props.failedLabel} actionLabel={props.retryLabel} onAction={({ act: props.onRetry })?.act} />
     ) : <>{props.surface}</>
 )

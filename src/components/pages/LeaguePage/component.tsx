@@ -1,6 +1,6 @@
 import { ChoiceTabs } from "@/components/leaves/ChoiceTabs"
 import { Breadcrumbs, type BreadcrumbStep } from "@/components/leaves/Breadcrumbs"
-import { Heading } from "@/components/leaves/Heading"
+import { Heading } from "@starci/grammar/common"
 import { LeagueBlock, type LeagueBlockScope } from "@/components/blocks/community/LeagueBlock"
 
 /** The two URL-selected competitions this page can show. */
@@ -19,7 +19,7 @@ export type LeaguePageProps = {
 /** Render the canonical page shell and compose the connected board in its inner region. */
 export const LeaguePageBase = (props: LeaguePageProps) => <>
     <Breadcrumbs props={{ steps: props.trail, label: props.title }} on={{ home: props.on?.goHome }} />
-    <Heading props={{ content: props.title, level: 1 }} />
+    <Heading level={1}>{props.title}</Heading>
     <ChoiceTabs props={{ label: props.scopeLabel, selectedKey: props.scope, variant: "primary", tabs: [{ id: "weekly", label: props.weeklyLabel }, { id: "global", label: props.globalLabel }] }} on={{ select: props.on?.selectScope }} />
     <LeagueBlock scope={props.scope} />
 </>

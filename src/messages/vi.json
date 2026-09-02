@@ -321,6 +321,83 @@
         "signedOutMessage": "Đăng nhập để xem giỏ hàng của bạn.",
         "signedOutAction": "Đăng nhập"
     },
+    "toast": {
+        "successTitle": "Thành công",
+        "errorTitle": "Lỗi",
+        "unauthorizedTitle": "Không có quyền",
+        "unauthorizedDescription": "Bạn không có quyền truy cập tài nguyên này.",
+        "defaultSuccess": "Thao tác hoàn tất.",
+        "defaultError": "Đã có lỗi xảy ra."
+    },
+    "proSubscription": {
+        "breadcrumbLabel": "Đường dẫn gói Pro",
+        "breadcrumbHome": "Trang chủ",
+        "breadcrumbCurrent": "StarCi Pro",
+        "title": "Mở toàn bộ hành trình học với StarCi Pro",
+        "description": "Truy cập đầy đủ các tính năng học tập, luyện tập, cộng đồng và nghề nghiệp đã được phát hành cho học viên.",
+        "planName": "StarCi Pro",
+        "planBadge": "Full access",
+        "period": "cho 1 tháng",
+        "benefitsTitle": "Bạn nhận được gì",
+        "benefitsDescription": "Một quyền truy cập xuyên suốt thay cho nhiều lần mua rời.",
+        "journeyAlt": "Hành trình StarCi Pro từ học tập, luyện tập và cộng đồng đến mục tiêu nghề nghiệp",
+        "disclosuresTitle": "Thông tin cần biết",
+        "benefits": {
+            "learning": {
+                "title": "Học tập",
+                "description": "Toàn bộ khóa học, bài học và tài nguyên đã phát hành"
+            },
+            "practice": {
+                "title": "Luyện tập",
+                "description": "Coding, Playground, thử thách và phỏng vấn thử"
+            },
+            "community": {
+                "title": "Cộng đồng",
+                "description": "Thảo luận khóa học, cộng đồng Pro và Global Chat"
+            },
+            "career": {
+                "title": "Nghề nghiệp",
+                "description": "Dự án cá nhân, chấm bài AI và định hướng nghề nghiệp"
+            }
+        },
+        "aiTitle": "AI được tính như thế nào?",
+        "aiDescription": "Các tính năng AI áp dụng hạn mức Pro được công bố theo từng khung sử dụng; không phải quyền sử dụng không giới hạn.",
+        "activationTitle": "Thanh toán và kích hoạt",
+        "activationDescription": "Quyền StarCi Pro chỉ được kích hoạt sau khi hệ thống xác minh giao dịch. Việc trình duyệt quay lại không đồng nghĩa thanh toán đã được xác nhận.",
+        "renewalNote": "Mỗi lần mua lại hoặc gia hạn đều cần bạn chủ động xác nhận thanh toán.",
+        "signedOutAction": "Đăng nhập để mua StarCi Pro",
+        "signedOutHelper": "Bạn cần đăng nhập để tiếp tục thanh toán.",
+        "purchaseAction": "Mua StarCi Pro – {price}",
+        "pendingTitle": "Đang xác minh thanh toán",
+        "pendingDescription": "Vui lòng chờ hệ thống xác minh giao dịch. Không thực hiện thêm một lần mua khi trạng thái này đang được xử lý.",
+        "activeTitle": "StarCi Pro đang hoạt động",
+        "activeDescription": "Bạn đang có quyền truy cập StarCi Pro.",
+        "activeUntil": "Quyền Pro hiện có hiệu lực đến {date}.",
+        "cancelledMessage": "Bạn đã quay lại từ bước thanh toán",
+        "failedTitle": "Chưa thể tải thông tin gói",
+        "failedDescription": "Chưa nhận được thông tin gói từ hệ thống. Vui lòng thử lại sau ít phút.",
+        "retry": "Thử lại",
+        "payment": {
+            "title": "Kiểm tra đăng ký StarCi Pro",
+            "subtitle": "Thanh toán quyền truy cập StarCi Pro trong 1 tháng.",
+            "methodTitle": "Phương thức thanh toán",
+            "provider": "Chuyển khoản ngân hàng qua PayOS",
+            "providerDescription": "Bạn sẽ hoàn tất chuyển khoản trên trang thanh toán của PayOS.",
+            "subtotal": "Gói StarCi Pro",
+            "savings": "Tiết kiệm",
+            "surcharge": "Phụ phí",
+            "total": "Tổng thanh toán",
+            "processTitle": "Tiếp theo sẽ diễn ra thế nào",
+            "handoffStep": "Tiếp tục sang PayOS và hoàn tất chuyển khoản.",
+            "verificationStep": "Giao dịch giữ trạng thái chờ đến khi backend xác minh thanh toán.",
+            "accessStep": "StarCi chỉ mở quyền Pro sau xác nhận đó.",
+            "trustNote": "Việc trình duyệt quay về không tự động đánh dấu đăng ký đã thanh toán.",
+            "action": "Tiếp tục đến PayOS",
+            "cancel": "Quay lại",
+            "close": "Đóng",
+            "failedMessage": "Chưa thể mở trang thanh toán. Nếu bạn đã thanh toán, không thực hiện lần mua mới khi trạng thái còn đang được xác minh."
+        }
+    },
     "community": {
         "anonymous": "Học viên ẩn danh",
         "you": "Bạn",

@@ -1,5 +1,5 @@
-import { Button } from "@/components/leaves/Button"
-import { Text } from "@/components/leaves/Text"
+import { Button } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import { challengeAttemptHistoryClassName, challengeAttemptHistoryRowClassName } from "./classNames"
 
 /** One immutable Challenge grading attempt shown newest-first. */
@@ -43,31 +43,15 @@ export const ChallengeAttemptHistoryBase = (props: ChallengeAttemptHistoryProps)
     const notice = resolveNotice(props)
     return (
         <section className={challengeAttemptHistoryClassName} aria-label={props.labels.summary(props.attempts.length)}>
-            <Text
-                props={{ content: props.labels.summary(props.attempts.length), size: "sm", tone: "muted" }}
-                isLoading={props.state === "pending"}
-            />
+            <Text size={"sm"} tone={"muted"} isSkeleton={props.state === "pending"}>{props.labels.summary(props.attempts.length)}</Text>
             {props.state === "ready" ? props.attempts.map((attempt) => (
                 <div key={attempt.id} className={challengeAttemptHistoryRowClassName}>
-                    <Button
-                        props={{
-                            label: props.labels.attempt(attempt.attemptNumber, attempt.score),
-                            variant: attempt.id === props.selectedAttemptId ? "primary" : "outline",
-                            size: "sm",
-                        }}
-                        on={{ press: () => props.onSelect?.(attempt) }}
-                    />
-                    <Text
-                        props={{
-                            content: [props.labels.outcome[attempt.outcome], attempt.servedModel, attempt.processedAt]
-                                .filter(Boolean).join(" · "),
-                            size: "xs",
-                            tone: "muted",
-                        }}
-                    />
+                    <Button variant={attempt.id === props.selectedAttemptId ? "primary" : "outline"} size="sm" onPress={() => props.onSelect?.(attempt)}>{props.labels.attempt(attempt.attemptNumber, attempt.score)}</Button>
+                    <Text size={"xs"} tone={"muted"}>{[props.labels.outcome[attempt.outcome], attempt.servedModel, attempt.processedAt]
+                                .filter(Boolean).join(" · ")}</Text>
                 </div>
             )) : (
-                <Text props={{ content: notice, live: props.state === "failed" ? "assertive" : "polite" }} />
+                <Text live={props.state === "failed" ? "assertive" : "polite"}>{notice}</Text>
             )}
         </section>
     )

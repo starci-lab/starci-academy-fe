@@ -6,12 +6,12 @@ import {
     navigationFeatureNavPrimaryClassName,
 } from "./classNames.js"
 
-const css = readFileSync(new URL("../../styles.css", import.meta.url), "utf8")
+const css = readFileSync(new URL("../../../common/styles.css", import.meta.url), "utf8")
 const navbarStart = css.indexOf(".starci-core-navigation-feature-nav {")
-const navbarEnd = css.indexOf(".starci-core-dashboard-shell {")
+const navbarEnd = css.indexOf(".starci-core-workspace-shell {")
 const navbarCss = css.slice(navbarStart, navbarEnd)
 
-describe("Core NavigationFeatureNav styles", () => {
+describe("Common NavigationFeatureNav anatomy styles", () => {
     it("draws only the outer bottom separator across its two layers", () => {
         expect(navbarStart).toBeGreaterThanOrEqual(0)
         expect(navbarEnd).toBeGreaterThan(navbarStart)
@@ -22,10 +22,11 @@ describe("Core NavigationFeatureNav styles", () => {
         expect(featureRule).not.toMatch(/border(?:-top|-bottom)?:/)
         expect(navbarCss).toMatch(/\.starci-core-navigation-feature-nav-feature \.tabs__list-container\s*\{[\s\S]*?border-bottom-width: 0 !important;/)
         expect(navbarCss).toMatch(/\.starci-core-navigation-feature-nav-feature \.starci-core-tabs-scroll\s*\{[\s\S]*?padding-block: 0;/)
-        expect(navbarCss).toMatch(/\.starci-core-navigation-feature-nav-feature \.extended-tabs \.tabs__indicator\s*\{[\s\S]*?inset-block-end: 0 !important;/)
+        expect(navbarCss).toMatch(/\.starci-core-navigation-feature-nav-feature \.starci-core-tabs \.tabs__indicator\s*\{[\s\S]*?inset-block-end: 0 !important;/)
         expect(navbarCss).toMatch(/\.starci-core-navigation-feature-nav-primary\.starci-core-page-container\s*\{[\s\S]*?padding-inline: 0\.75rem;/)
-        expect(navbarCss).toMatch(/\.starci-core-navigation-feature-nav-feature\.starci-core-page-container\s*\{[\s\S]*?padding-inline: 0\.75rem;/)
-        expect(navbarCss).not.toMatch(/\.starci-core-navigation-feature-nav-feature \.extended-tabs \.tabs__indicator\s*\{[\s\S]*?inset-block-end: -/)
+        expect(navbarCss).toMatch(/\.starci-core-navigation-feature-nav-feature\s*\{[\s\S]*?width: 100%;[\s\S]*?padding-inline: 0\.75rem;/)
+        expect(navbarCss).not.toMatch(/\.starci-core-navigation-feature-nav-feature\.starci-core-page-container/)
+        expect(navbarCss).not.toContain(".extended-tabs")
         expect(navbarCss).not.toMatch(/grid-template-columns: 16rem minmax\(0, 1fr\)/)
     })
 

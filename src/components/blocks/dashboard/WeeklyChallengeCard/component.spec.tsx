@@ -30,10 +30,11 @@ describe("WeeklyChallengeCardBase", () => {
         expect(screen.getByText("12 learners passed")).toBeInTheDocument()
         expect(screen.getByText("Ada")).toBeInTheDocument()
         expect(screen.getByText("2h ago")).toBeInTheDocument()
-        expect(container.querySelector("[data-part=\"challenge-countdown\"]")).toHaveClass("bg-accent-soft", "px-4", "pt-3", "pb-3")
-        expect(container.querySelector("[data-part=\"challenge-heading\"]")).toHaveClass("flex", "items-start", "gap-3", "p-4", "pb-3")
+        expect(container.querySelector("[data-part=\"challenge-countdown\"]")).toHaveClass("bg-surface-secondary", "px-4", "pt-4", "pb-3")
+        expect(screen.getByText("Ends in 5d 8h")).toHaveAttribute("data-tone", "muted")
+        expect(container.querySelector("[data-part=\"challenge-heading\"]")).toHaveClass("flex", "items-start", "gap-3", "px-4", "py-3")
         expect(container.querySelector("[data-part=\"challenge-footer\"]")).toHaveClass("px-4", "pb-4", "pt-3")
-        expect(container.querySelector("[data-part=\"challenge-countdown\"]")?.compareDocumentPosition(
+        expect(container.querySelector("[data-part=\"challenge-countdown\"]")!.compareDocumentPosition(
             container.querySelector("[data-part=\"challenge-heading\"]") as Node,
         ) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
         expect(container.querySelectorAll("[data-part=\"challenge-finisher\"]")).toHaveLength(2)

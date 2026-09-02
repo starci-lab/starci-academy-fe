@@ -53,20 +53,13 @@ describe("learnSpine", () => {
         expect(screen.getByRole("option", { name: "Home" })).toBeInTheDocument()
         expect(screen.getByText("Modules")).toBeInTheDocument()
         expect(screen.getByText("Leaderboard")).toBeInTheDocument()
-        const navigation = screen.getByRole("navigation", { name: "Home" })
-        expect(navigation).toHaveClass(
-            "px-3",
-            "py-6",
-        )
-        expect(navigation).not.toHaveClass("border-separator", "md:border-r")
-        expect(navigation).not.toHaveClass("p-4")
-        const scrollViewport = container.querySelector("[data-orientation='vertical']")
-        expect(scrollViewport).not.toBeNull()
-        expect(scrollViewport).toHaveAttribute("data-learn-navigation-scroll", "true")
-        expect(scrollViewport).toHaveClass("h-0", "overflow-y-auto", "overscroll-contain")
-        expect(scrollViewport).toContainElement(screen.getByRole("option", { name: "Home" }))
-        expect(scrollViewport).toContainElement(screen.getByRole("option", { name: "Modules" }))
-        expect(scrollViewport).not.toContainElement(screen.getByRole("button", { name: "Collapse" }))
+        const sidebar = container.querySelector("[data-component='Sidebar']")
+        expect(sidebar).toHaveAttribute("data-presentation", "rail")
+        expect(sidebar).toHaveAttribute("data-collapsed", "false")
+        const listbox = screen.getByRole("listbox", { name: "Home" })
+        expect(listbox).toContainElement(screen.getByRole("option", { name: "Home" }))
+        expect(listbox).toContainElement(screen.getByRole("option", { name: "Modules" }))
+        expect(listbox).not.toContainElement(screen.getByRole("button", { name: "Collapse" }))
         expect(container.querySelectorAll("[role=option]")).toHaveLength(5)
     })
 
@@ -88,14 +81,9 @@ describe("learnSpine", () => {
         expect(screen.queryByText("Your path")).not.toBeInTheDocument()
         expect(screen.getByRole("option", { name: "Home" })).toBeInTheDocument()
         expect(screen.getByRole("option", { name: "Modules" })).toBeInTheDocument()
-        expect(screen.getByRole("navigation", { name: "Home" })).toHaveClass(
-            "px-3",
-            "py-6",
-        )
-        expect(screen.getByRole("navigation", { name: "Home" })).not.toHaveClass("p-2", "px-2", "border-separator", "md:border-r")
-        const collapsedScrollViewport = screen.getByRole("option", { name: "Home" }).closest("[data-orientation='vertical']")
-        expect(collapsedScrollViewport).not.toBeNull()
-        expect(collapsedScrollViewport).not.toContainElement(screen.getByRole("button", { name: "Expand" }))
+        const collapsedSidebar = screen.getByRole("listbox", { name: "Home" }).closest("[data-component='Sidebar']")
+        expect(collapsedSidebar).toHaveAttribute("data-collapsed", "true")
+        expect(screen.getByRole("listbox", { name: "Home" })).not.toContainElement(screen.getByRole("button", { name: "Expand" }))
     })
 
     it("stays inert rather than throwing when the frame reported no handlers", () => {
@@ -177,7 +165,7 @@ describe("learnSpine", () => {
         const openRow = vi.fn()
         render(<LearnSpineBase isCollapsed={false} presentation="drawer" props={base} on={{ openRow }} />)
 
-        expect(screen.getByRole("navigation", { name: "Home" })).toBeInTheDocument()
+        expect(screen.getByRole("listbox", { name: "Home" }).closest("[data-component='Sidebar']")).toHaveAttribute("data-presentation", "drawer")
         expect(screen.getByText("Your path")).toBeInTheDocument()
         expect(screen.getByRole("option", { name: "Home" })).toBeInTheDocument()
         fireEvent.click(screen.getByText("Flashcards"))

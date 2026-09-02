@@ -8,6 +8,8 @@ describe("Label", () => {
         expect(markup).toContain("data-grammar-label=\"true\"")
         expect(markup).toContain("data-grammar-label-depth=\"top\"")
         expect(markup).toContain("starci-core-label")
+        expect(markup).toContain("text-sm")
+        expect(markup).toContain("font-semibold")
         expect(markup).not.toContain("<h3")
         expect(markup).toContain(">Weekly goals</span>")
     })
@@ -16,5 +18,12 @@ describe("Label", () => {
         const markup = renderToStaticMarkup(<Label depth="nested">Nested metric</Label>)
         expect(markup).toContain("data-grammar-label-depth=\"nested\"")
         expect(markup).toContain("text-xs")
+    })
+
+    it("can name a semantic section without changing its visual role", () => {
+        const markup = renderToStaticMarkup(<Label as="h3">Session setup</Label>)
+        expect(markup).toContain("<h3")
+        expect(markup).toContain("data-grammar-label=\"true\"")
+        expect(markup).toContain(">Session setup</h3>")
     })
 })

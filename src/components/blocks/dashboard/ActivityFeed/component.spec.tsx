@@ -55,8 +55,21 @@ describe("ActivityFeedBase", () => {
         expect(screen.getByText("Today")).toHaveAttribute("data-size", "xs")
         expect(screen.getByText("Today")).toHaveAttribute("data-weight", "medium")
         expect(container.querySelectorAll("section[data-grammar-surface-list='true']")).toHaveLength(1)
+        expect(container.querySelectorAll("[data-dashboard-activity-row]")).toHaveLength(3)
+        expect(container.querySelector("[data-dashboard-activity-row]")).toHaveClass("px-4", "py-3")
+        expect(container.querySelectorAll("[data-dashboard-activity-row]")[2]).toHaveClass("px-4", "pt-3", "pb-4")
+        expect(screen.getByText("Today").closest(".bg-surface-secondary")).toHaveClass("px-4", "py-2")
         // Each day divider names its own following rows, so the collection label stays hidden.
         expect(screen.getAllByText("Today")).toHaveLength(1)
+    })
+
+    it("keeps the last row on divider rhythm when continuation follows", () => {
+        const { container } = render(<ActivityFeedBase state="ready" hasTrailingContent props={{
+            message: "",
+            days: [{ id: "1", label: "Today", rows: [activityRow("a1", "Ada")] }],
+        }} />)
+        expect(container.querySelector("[data-dashboard-activity-row]")).toHaveClass("px-4", "py-3")
+        expect(container.querySelector("[data-dashboard-activity-row]")).not.toHaveClass("pb-4")
     })
 
     it("holds two resting day groups of three rows so the column keeps its height", () => {

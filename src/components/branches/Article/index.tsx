@@ -6,12 +6,12 @@ import remarkDirective from "remark-directive"
 import remarkGfm from "remark-gfm"
 import remarkParse from "remark-parse"
 import { unified } from "unified"
-import { MarkdownArticle, MarkdownTableFrame } from "@starci/grammar/core"
-import { Heading } from "@/components/leaves/Heading"
+import { MarkdownArticle, MarkdownTableFrame } from "@starci/grammar/common"
+import { Heading } from "@starci/grammar/common"
 import { MarkdownCodeBlock } from "@/components/branches/MarkdownCodeBlock"
 import { TableBranch } from "@/components/branches/TableBranch"
 import { MermaidDiagram } from "@/components/branches/MermaidDiagram"
-import { Badge } from "@/components/leaves/Badge"
+import { Badge } from "@starci/grammar/common"
 import * as articleClasses from "./classNames"
 
 /**
@@ -245,7 +245,7 @@ const block = (node: MarkdownNode, key: string, context: BlockContext): ReactNod
          */
         return (
             <div key={key} id={id} className={articleClasses.articleHeadingClassName}>
-                <Heading props={{ content: heading, level }} />
+                <Heading>{heading}</Heading>
                 <a href={`#${id}`} aria-label={heading} className={articleClasses.articleAnchorClassName}>#</a>
             </div>
         )
@@ -322,7 +322,7 @@ const block = (node: MarkdownNode, key: string, context: BlockContext): ReactNod
             return <div key={key} className={articleClasses.articleMutedClassName}>{node.parts.map((child) => block(child, `${key}-${child.id}`, context))}</div>
         }
         if (node.name === "chip") {
-            return <div key={key} className={articleClasses.articleTagRunClassName}>{plainText(node).split(/[\n·]+/).map((item) => item.trim()).filter(Boolean).map((item) => <Badge key={item} props={{ content: item, tone: "neutral" }} />)}</div>
+            return <div key={key} className={articleClasses.articleTagRunClassName}>{plainText(node).split(/[\n·]+/).map((item) => item.trim()).filter(Boolean).map((item) => <Badge key={item} tone={"neutral"}>{item}</Badge>)}</div>
         }
         if (node.name === "tab") {
             const preview = node.parts.find((part) => part.name === "preview")

@@ -1,7 +1,9 @@
-import { Button } from "@/components/leaves/Button"
-import { Badge } from "@/components/leaves/Badge"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
-import { Text } from "@/components/leaves/Text"
+import { Button } from "@starci/grammar/common"
+
+import { Badge } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { EmptyNotice } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import {
     personalProjectHistoryClassName,
     personalProjectHistoryListClassName,
@@ -67,50 +69,28 @@ export const PersonalProjectHistoryBase = (props: PersonalProjectHistoryProps) =
 
     return (
         <section className={personalProjectHistoryClassName} aria-label={props.props.labels.summary(props.props.attemptCount)}>
-            <Text props={{ content: props.props.labels.summary(props.props.attemptCount), size: "sm", tone: "muted" }} isLoading={loading} />
+            <Text size={"sm"} tone={"muted"} isSkeleton={loading}>{props.props.labels.summary(props.props.attemptCount)}</Text>
             {props.state === "ready" && props.props.attempts.length > 0 ? (
                 <ul className={personalProjectHistoryListClassName} aria-label={props.props.labels.summary(props.props.attemptCount)}>
                     {props.props.attempts.map((attempt) => {
                         const selected = attempt.id === props.props.selectedAttemptId
                         return (
                             <li className={personalProjectHistoryRowClassName} key={attempt.id}>
-                                {selected ? <Badge props={{ content: props.props.labels.selected, tone: "accent" }} /> : null}
-                                {selected ? <Text props={{ content: props.props.labels.selectAttempt(attempt.attemptNumber, attempt.score), weight: "semibold" }} /> : <Button
-                                    props={{
-                                        label: props.props.labels.selectAttempt(attempt.attemptNumber, attempt.score),
-                                        variant: "outline",
-                                        size: "sm",
-                                    }}
-                                    on={{ press: () => props.on?.select?.(attempt) }}
-                                    isLoading={loading}
-                                />}
-                                <Text
-                                    props={{
-                                        content: [attempt.passed ? props.props.labels.passed : props.props.labels.needsWork, attempt.servedProvider, attempt.servedModel, attempt.processedAt]
-                                            .filter(Boolean).join(" · "),
-                                        size: "xs",
-                                        tone: "muted",
-                                    }}
-                                    isLoading={loading}
-                                />
+                                {selected ? <Badge tone={"accent"}>{props.props.labels.selected}</Badge> : null}
+                                {selected ? <Text weight={"semibold"}>{props.props.labels.selectAttempt(attempt.attemptNumber, attempt.score)}</Text> : <Button variant={"outline"} size={"sm"} isSkeleton={loading} onPress={({ press: () => props.on?.select?.(attempt) })?.press}>{props.props.labels.selectAttempt(attempt.attemptNumber, attempt.score)}</Button>}
+                                <Text size={"xs"} tone={"muted"} isSkeleton={loading}>{[attempt.passed ? props.props.labels.passed : props.props.labels.needsWork, attempt.servedProvider, attempt.servedModel, attempt.processedAt]
+                                            .filter(Boolean).join(" · ")}</Text>
                             </li>
                         )
                     })}
                 </ul>
             ) : props.state === "pending" ? (
-                <Text props={{ content: notice, live: "polite" }} isLoading />
-            ) : <EmptyNotice
-                props={{
-                    icon: props.state === "failed" ? "retry" : "saved",
-                    message: notice,
-                    actionLabel: props.state === "failed" ? props.props.labels.retry : undefined,
-                }}
-                on={{ act: props.on?.retry }}
-            />}
+                <Text live={"polite"} isSkeleton>{notice}</Text>
+            ) : <EmptyNotice message={notice} actionLabel={props.state === "failed" ? props.props.labels.retry : undefined} iconSource={iconSourceFor(props.state === "failed" ? "retry" : "saved", "leading")} onAction={({ act: props.on?.retry })?.act} />}
             {hasPrevious || hasNext ? (
                 <nav className={personalProjectHistoryNavClassName} aria-label={props.props.labels.summary(props.props.attemptCount)}>
-                    <Button props={{ label: props.props.labels.previous, disabled: !hasPrevious }} on={{ press: props.on?.previous }} />
-                    <Button props={{ label: props.props.labels.next, disabled: !hasNext }} on={{ press: props.on?.next }} />
+                    <Button isDisabled={!hasPrevious} onPress={props.on?.previous}>{props.props.labels.previous}</Button>
+                    <Button isDisabled={!hasNext} onPress={props.on?.next}>{props.props.labels.next}</Button>
                 </nav>
             ) : null}
         </section>

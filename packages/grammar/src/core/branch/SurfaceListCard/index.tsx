@@ -54,7 +54,7 @@ export const SurfaceListCard = (props: SurfaceListCardProps) => {
         >
             {label === undefined || labelHidden ? null : (
                 <div className={surfaceLabelClassName} data-grammar-surface-label="true">
-                    <Label id={headingId} depth={depth}>{label}</Label>
+                    <Label as="h3" id={headingId} depth={depth}>{label}</Label>
                     {labelEnd ?? (fact === undefined ? null : <span className={getSurfaceFactClassName(depth)}>{fact}</span>)}
                 </div>
             )}

@@ -1,8 +1,9 @@
 import { createContext, useContext, type ReactNode } from "react"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
-import { NavLink } from "@/components/leaves/NavLink"
+import { EmptyNotice } from "@starci/grammar/common"
 import { SearchBox } from "@/components/leaves/SearchBox"
 import type { Foundation } from "@/modules/api/graphql/queries/query-foundations"
+import { TextAction } from "@starci/grammar/common"
+
 
 /** Block state owned by the category resource collection. */
 export type CourseFoundationCategoryBlockState = "pending" | "ready" | "empty" | "failed"
@@ -50,9 +51,9 @@ export const CourseFoundationCategoryBlockResults = (props: CourseFoundationCate
         ? Array.from({ length: 6 }, (_, index) => ({ id: `pending-${index}`, displayId: `pending-${index}`, title: "", description: null }))
         : input.data.foundations
     if (input.blockState === "empty" || input.blockState === "failed") {
-        return <EmptyNotice props={{ message: input.blockState === "failed" ? input.data.failed : input.data.empty, actionLabel: input.blockState === "failed" ? input.data.retry : undefined }} on={{ act: input.on?.retry }} />
+        return <EmptyNotice message={input.blockState === "failed" ? input.data.failed : input.data.empty} actionLabel={input.blockState === "failed" ? input.data.retry : undefined} onAction={({ act: input.on?.retry })?.act} />
     }
-    return <>{rows.map((foundation) => <NavLink key={foundation.id} props={{ label: foundation.description === null ? foundation.title : `${foundation.title} · ${foundation.description}`, kind: "section" }} on={{ press: () => input.on?.openResource?.(foundation.displayId) }} isLoading={loading} />)}</>
+    return <>{rows.map((foundation) => <TextAction key={foundation.id} appearance={"section"} isSkeleton={loading} onPress={() => input.on?.openResource?.(foundation.displayId)}>{foundation.description === null ? foundation.title : `${foundation.title} · ${foundation.description}`}</TextAction>)}</>
 }
 
 /** Provide resolved block state/data/actions to the page's legal inner slots. */

@@ -1,15 +1,15 @@
-import { DashboardSurfaceCard as SurfaceCard } from "@/components/blocks/dashboard/DashboardSurfaceCard"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { SurfaceCard } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { EmptyNotice } from "@starci/grammar/common"
 import { LabelledProgressRow } from "@/components/composites/LabelledProgressRow"
-import { Button } from "@/components/leaves/Button"
-import { Text } from "@/components/leaves/Text"
+import { Button } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import {
     readinessCardClassName,
     readinessFooterClassName,
     readinessHeadlineClassName,
     readinessMetricsClassName,
     readinessSeparatorClassName,
-    readinessSurfaceClassName,
 } from "./classNames"
 /** Readiness band. */
 export type JobReadinessBand = "needsWork" | "building" | "jobReady"
@@ -24,15 +24,8 @@ export type JobReadinessWidgetProps = { readonly state: "pending" | "empty" | "f
 /** Draw learner job readiness and its metrics. */
 export const JobReadinessWidgetBase = (props: JobReadinessWidgetProps) => {
     if (props.state === "empty" || props.state === "failed") return (
-        <SurfaceCard props={{ label: props.props.label }}>
-            <EmptyNotice
-                props={{
-                    icon: "jobs",
-                    message: props.state === "failed" ? props.props.errorMessage : props.props.emptyMessage,
-                    actionLabel: props.state === "failed" ? props.props.retryLabel : props.props.actionLabel,
-                }}
-                on={{ act: props.state === "failed" ? props.on?.retry : props.on?.act }}
-            />
+        <SurfaceCard label={props.props.label} composition={"single"}>
+            <EmptyNotice message={props.state === "failed" ? props.props.errorMessage : props.props.emptyMessage} actionLabel={props.state === "failed" ? props.props.retryLabel : props.props.actionLabel} iconSource={iconSourceFor("jobs", "leading")} onAction={({ act: props.state === "failed" ? props.on?.retry : props.on?.act })?.act} />
         </SurfaceCard>
     )
 
@@ -45,37 +38,35 @@ export const JobReadinessWidgetBase = (props: JobReadinessWidgetProps) => {
         ? null
         : (
             <div className={readinessFooterClassName}>
-                <Button props={{ label: props.props.actionLabel, size: "sm", variant: "secondary" }} on={{ press: props.on?.act }} isLoading={loading} />
+                <Button variant={"secondary"} size={"sm"} isSkeleton={loading} onPress={({ press: props.on?.act })?.press}>{props.props.actionLabel}</Button>
             </div>
         )
 
     return (
-        <div className={readinessSurfaceClassName}>
-            <SurfaceCard props={{ label: props.props.label }} isLoading={loading}>
-                <div className={readinessCardClassName} data-part="readiness-body">
-                    <div className={readinessHeadlineClassName} data-part="readiness-headline">
-                        <Text props={{ content: headline, size: "sm", weight: "semibold" }} isLoading={loading} />
-                        <Text props={{ content: props.props.bandLabel, size: "xs", tone: "muted" }} isLoading={loading} />
-                    </div>
-                    <div aria-hidden className={readinessSeparatorClassName} />
-                    <div className={readinessMetricsClassName} data-part="readiness-metrics">
-                        {metrics.map((metric) => (
-                            <LabelledProgressRow
-                                key={metric.id}
-                                props={{ id: metric.id, title: metric.label, percent: metric.score, percentText: metric.scoreLabel }}
-                                titleWeight="normal"
-                                isLoading={loading}
-                            />
-                        ))}
-                    </div>
-                    {action === null ? null : (
-                        <>
-                            <div aria-hidden className={readinessSeparatorClassName} />
-                            {action}
-                        </>
-                    )}
+        <SurfaceCard label={props.props.label} height={"fill"} composition={"joined"} state={loading ? "pending" : "neutral"}>
+            <div className={readinessCardClassName} data-part="readiness-body">
+                <div className={readinessHeadlineClassName} data-part="readiness-headline">
+                    <Text size={"sm"} weight={"semibold"} isSkeleton={loading}>{headline}</Text>
+                    <Text size={"xs"} tone={"muted"} isSkeleton={loading}>{props.props.bandLabel}</Text>
                 </div>
-            </SurfaceCard>
-        </div>
+                <div aria-hidden className={readinessSeparatorClassName} />
+                <div className={readinessMetricsClassName} data-part="readiness-metrics">
+                    {metrics.map((metric) => (
+                        <LabelledProgressRow
+                            key={metric.id}
+                            props={{ id: metric.id, title: metric.label, percent: metric.score, percentText: metric.scoreLabel }}
+                            titleWeight="normal"
+                            isLoading={loading}
+                        />
+                    ))}
+                </div>
+                {action === null ? null : (
+                    <>
+                        <div aria-hidden className={readinessSeparatorClassName} />
+                        {action}
+                    </>
+                )}
+            </div>
+        </SurfaceCard>
     )
 }

@@ -1,8 +1,9 @@
 import { Avatar } from "@/components/leaves/Avatar"
-import { Badge } from "@/components/leaves/Badge"
-import { Button } from "@/components/leaves/Button"
-import { Text } from "@/components/leaves/Text"
-import { TextLink } from "@/components/leaves/TextLink"
+import { Badge } from "@starci/grammar/common"
+import { Button } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
+import { TextAction } from "@starci/grammar/common"
+
 
 /** Resolved identity, qualification and follow state for one suggested person. */
 export type SuggestedUserRowData = {
@@ -25,14 +26,5 @@ export type SuggestedUserRowProps = { readonly props: SuggestedUserRowData; read
 /** Draw one suggested identity with its optional badge and follow action. */
 export const SuggestedUserRow = (props: SuggestedUserRowProps) => {
     const { props: data, on, isLoading = false } = props
-    return <div><Avatar props={{ name: data.name, src: data.avatar, size: "sm" }} isLoading={isLoading} /><div><TextLink props={{ label: data.name ?? "", size: "sm" }} on={{ press: on?.open }} /><Text props={{ content: data.username, size: "xs", tone: "muted" }} isLoading={isLoading} /></div>{data.openToWork === true ? <Badge props={{ content: data.openToWorkLabel, tone: "success" }} /> : null}<Button
-        props={{
-            label: data.isFollowing === true ? data.followingLabel : data.followLabel,
-            size: "sm",
-            variant: "secondary",
-            isPending: data.isPending,
-        }}
-        on={{ press: data.isFollowing === true ? undefined : on?.follow }}
-        isLoading={isLoading}
-    /></div>
+    return <div><Avatar props={{ name: data.name, src: data.avatar, size: "sm" }} isLoading={isLoading} /><div><TextAction size={"sm"} appearance="inline" onPress={on?.open}>{data.name ?? ""}</TextAction><Text size={"xs"} tone={"muted"} isSkeleton={isLoading}>{data.username}</Text></div>{data.openToWork === true ? <Badge tone={"success"}>{data.openToWorkLabel}</Badge> : null}<Button variant={"secondary"} size={"sm"} isPending={data.isPending} isSkeleton={isLoading} onPress={({ press: data.isFollowing === true ? undefined : on?.follow })?.press}>{data.isFollowing === true ? data.followingLabel : data.followLabel}</Button></div>
 }

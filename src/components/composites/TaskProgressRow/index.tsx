@@ -1,4 +1,4 @@
-import { StaticStateRow } from "@starci/grammar/core"
+import { StaticStateRow } from "@starci/grammar/common"
 
 /** One read-only task row in a progress list. */
 export type TaskProgressRowData = { readonly id: string; readonly title?: string; readonly fact?: string; readonly isComplete?: boolean }

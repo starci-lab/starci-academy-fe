@@ -1,0 +1,134 @@
+import { cn } from "@heroui/react"
+
+/** Vertical route inset for the Pro decision surface. */
+export const proPageClassName = cn(
+    "py-8",
+    "sm:py-12",
+)
+/** Breadcrumb and offer introduction share one compact orientation stack. */
+export const proHeroClassName = cn("flex", "max-w-3xl", "min-w-0", "flex-col", "gap-3")
+/** Failed state preserves route orientation before the recovery surface. */
+export const proFailedStackClassName = cn("flex", "min-w-0", "flex-col", "gap-6")
+/** Responsive offer workspace that promotes the decision rail on narrow screens. */
+export const proWorkspaceClassName = cn(
+    "mt-8",
+    "max-[895px]:[&_.starci-core-primary-rail-layout]:flex",
+    "max-[895px]:[&_.starci-core-primary-rail-layout]:flex-col",
+    "max-[895px]:[&_[data-grammar-primary-region=true]]:w-full",
+    "max-[895px]:[&_[data-grammar-rail-region=true]]:w-full",
+    "[&_[data-grammar-rail-region=true]]:order-first",
+    "min-[896px]:[&_[data-grammar-rail-region=true]]:order-last",
+)
+/** Stack of explanatory product surfaces. */
+export const proMainClassName = cn("flex", "min-w-0", "flex-col", "gap-6")
+/** First flush band: explanatory copy on the shared neutral surface. */
+export const proBenefitIntroClassName = cn(
+    "bg-surface-secondary",
+    "px-4",
+    "py-3",
+    "text-foreground",
+    "sm:px-6",
+)
+/** The generated journey is its own edge-to-edge joined band; the SurfaceCard owns outer clipping. */
+export const proBenefitJourneyBandClassName = cn("min-w-0", "border-t", "border-separator", "bg-surface-secondary")
+/** Preserve the generated asset ratio without an inset frame or letterbox. */
+export const proBenefitJourneyImageClassName = cn("block", "h-auto", "w-full")
+/** Closed grid of the four included outcome groups; the owning surface supplies the outer boundary. */
+export const proBenefitListClassName = cn(
+    "m-0",
+    "grid",
+    "min-w-0",
+    "list-none",
+    "grid-cols-1",
+    "border-t",
+    "border-separator",
+    "p-0",
+    "sm:grid-cols-2",
+)
+/** One included outcome row with shared separators. */
+export const proBenefitClassName = cn(
+    "flex",
+    "min-w-0",
+    "gap-3",
+    "border-b",
+    "border-separator",
+    "p-4",
+    "last:border-b-0",
+    "sm:[&:nth-last-child(-n+2)]:border-b-0",
+    "sm:[&:nth-child(odd)]:border-r",
+)
+/** Stable leading marker alignment inside an outcome row. */
+export const proBenefitMarkClassName = cn("mt-0.5", "size-5", "shrink-0", "text-accent-soft-foreground")
+/** Title and explanation stack for one outcome. */
+export const proBenefitCopyClassName = cn("flex", "min-w-0", "flex-col", "gap-1")
+/** One Grammar-owned joined disclosure surface. */
+export const proDisclosureClassName = cn("min-w-0")
+/** Full-width disclosure trigger content with a standard trailing indicator. */
+export const proDisclosureSummaryClassName = cn("flex", "w-full", "min-w-0", "items-center", "justify-between", "gap-3", "text-left")
+/** Readable disclosure body without another card boundary. */
+export const proDisclosureBodyClassName = cn("min-w-0")
+/** Semantic rail boundary around the purchase decision. */
+export const proRailClassName = cn("min-w-0")
+/** Joined plan composition; each direct child owns its own spacing and boundary. */
+export const proPlanClassName = cn("flex", "min-w-0", "flex-col")
+/** Plan identity and billing facts, separated from the action band by gap-3. */
+export const proPlanDetailsClassName = cn(
+    "flex",
+    "min-w-0",
+    "flex-col",
+    "gap-5",
+    "px-4",
+    "pt-4",
+    "pb-4",
+    "data-[has-actions=true]:pb-3",
+    "sm:px-6",
+    "sm:pt-6",
+    "sm:pb-6",
+    "sm:data-[has-actions=true]:pb-3",
+)
+/** Alignment boundary for plan identity and access badge. */
+export const proPlanHeadingClassName = cn("flex", "items-center", "justify-between", "gap-3")
+/** Restrained access marker using the existing accent-soft tokens. */
+export const proPlanBadgeClassName = cn(
+    "rounded-full",
+    "bg-accent-soft",
+    "px-3",
+    "py-1",
+    "text-xs",
+    "font-semibold",
+    "text-accent-soft-foreground",
+)
+/** Price and billing period share one accessible fact. */
+export const proPriceClassName = cn("flex", "flex-wrap", "items-end", "gap-x-2", "gap-y-1")
+/** Dominant monetary figure in the decision rail. */
+export const proPriceValueClassName = cn("text-4xl", "font-semibold", "tracking-tight", "text-foreground")
+/** Persistent pending or active state explanation. */
+export const proStatusClassName = cn("rounded-medium", "bg-accent-soft", "p-3")
+/** Full-bleed divider and inset action content for the purchase boundary. */
+export const proActionsClassName = cn(
+    "grid",
+    "grid-cols-1",
+    "gap-2",
+    "border-t",
+    "border-separator",
+    "px-4",
+    "pb-4",
+    "pt-3",
+    "sm:px-6",
+    "sm:pb-6",
+    "[&>button]:min-w-0",
+    "[&>button]:w-full",
+    "[&>button]:max-w-full",
+    "max-[399px]:[&>button]:h-auto",
+    "max-[399px]:[&>button]:min-h-10",
+    "max-[399px]:[&>button]:whitespace-normal",
+    "max-[399px]:[&>button]:py-2.5",
+    "max-[399px]:[&>button>span]:min-w-0",
+    "max-[399px]:[&>button>span]:break-words",
+    "max-[399px]:[&>button>span]:text-center",
+    "max-[399px]:[&>button>span]:leading-tight",
+)
+/** Failed-offer notice inset. */
+export const proNoticeClassName = cn("flex", "min-w-0", "flex-col", "gap-4", "p-5")
+/** Compact recovery action that does not overpower a short error explanation. */
+export const proRetryActionsClassName = cn("flex", "justify-start")

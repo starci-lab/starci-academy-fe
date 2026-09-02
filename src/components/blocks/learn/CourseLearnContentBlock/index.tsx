@@ -13,8 +13,8 @@ import { useMutateSubmitContentCommentSwr } from "@/hooks/swr/useMutateSubmitCon
 import { useRepoSandpackFiles } from "@/hooks/swr/useRepoSandpackFiles"
 import { ReactionType } from "@/modules/api/graphql/queries/types/reactions"
 import type { ContentBody } from "@/modules/api/graphql/queries/types/content"
-import { useLearnMobileView } from "@/components/layouts/LearnShellLayout"
-import { useGlobalAiChat } from "@/components/layouts/GlobalAiChatLayout"
+import { useLearnMobileView } from "@/components/product-shells/LearnShellLayout"
+import { useGlobalAiChat } from "@/components/product-shells/GlobalAiChatLayout"
 import type { ContentFaceId } from "@/components/blocks/learn/ContentTabRow/component"
 import {
     CONTENT_AI_SELECTION_MAX,

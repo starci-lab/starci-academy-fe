@@ -1,4 +1,4 @@
-import { Text } from "@/components/leaves/Text"
+import { Text } from "@starci/grammar/common"
 import { supportingDotListClassName, supportingDotListRowClassName } from "./classNames"
 
 /** One stable supporting statement. */
@@ -12,6 +12,6 @@ export type SupportingDotListProps = { readonly props: SupportingDotListData; re
 export const SupportingDotList = (props: SupportingDotListProps) => {
     const { props: data, isLoading = false } = props
     return (
-        <ul className={supportingDotListClassName}>{data.entries.map((entry) => <li className={supportingDotListRowClassName} key={entry.id}><Text props={{ content: "•", size: "sm", tone: "muted" }} isLoading={isLoading} /><Text props={{ content: entry.content, size: "sm", tone: "muted" }} isLoading={isLoading} /></li>)}</ul>
+        <ul className={supportingDotListClassName}>{data.entries.map((entry) => <li className={supportingDotListRowClassName} key={entry.id}><Text size={"sm"} tone={"muted"} isSkeleton={isLoading}>{"•"}</Text><Text size={"sm"} tone={"muted"} isSkeleton={isLoading}>{entry.content}</Text></li>)}</ul>
     )
 }

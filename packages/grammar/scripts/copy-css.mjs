@@ -3,7 +3,7 @@ import { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..")
-const entries = ["common", "core", "offset-pop"]
+const entries = ["common", "core", "heritage", "offset-pop"]
 
 for (const entry of entries) {
     const source = resolve(packageRoot, "src", entry, "styles.css")

@@ -1,14 +1,16 @@
 import Image from "next/image"
-import { DashboardShell, SectionHeader } from "@starci/grammar/core"
+import { WorkspaceShell, SectionHeader, Button } from "@starci/grammar/common"
 import { ContinuationHighlightCard } from "@/components/branches/ContinuationHighlightCard"
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { SurfaceCard } from "@starci/grammar/common"
+import { SurfaceListCard } from "@starci/grammar/common"
+import { EmptyNotice } from "@starci/grammar/common"
 import { LabelledProgressRow } from "@/components/composites/LabelledProgressRow"
-import { Button } from "@/components/leaves/Button"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon } from "@starci/grammar/common"
+
 import { ChoiceTabs } from "@/components/leaves/ChoiceTabs"
-import { Heading } from "@/components/leaves/Heading"
-import { Text } from "@/components/leaves/Text"
+import { Heading } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import {
     mockInterviewDashboardClassName,
     mockInterviewActionRowClassName,
@@ -93,78 +95,78 @@ export const CourseMockInterviewSetupBlockBase = (props: CourseMockInterviewSetu
         <ul className={mockInterviewEvidenceListClassName}>
             {rows.map((row) => <li className={mockInterviewEvidenceRowClassName} key={row.id}>
                 <div className={mockInterviewEvidenceCopyClassName}>
-                    <Text props={{ content: row.title, size: "sm", weight: "medium" }} isLoading={historyLoading} />
-                    <Text props={{ content: row.fact, size: "xs", tone: "muted" }} isLoading={historyLoading} />
+                    <Text size={"sm"} weight={"medium"} isSkeleton={historyLoading}>{row.title}</Text>
+                    <Text size={"xs"} tone={"muted"} isSkeleton={historyLoading}>{row.fact}</Text>
                 </div>
-                {historyLoading ? null : <Button props={{ label: data.historyActionLabel, variant: "ghost", size: "sm", icon: "next", iconPlacement: "trailing" }} on={{ press: () => props.on?.openHistory?.(row.id) }} />}
+                {historyLoading ? null : <Button variant={"ghost"} size={"sm"} onPress={({ press: () => props.on?.openHistory?.(row.id) })?.press} endContent={"next" === "next" && "trailing" === "trailing" ? <Icon source={iconSourceFor("next", "chip")} role="chip" /> : undefined}>{data.historyActionLabel}</Button>}
             </li>)}
         </ul>
     )
 
-    const recentHistory = <SurfaceListCard props={{ label: data.recentHistoryTitle, fact: data.historyCountLabel }} isLoading={historyLoading} labelEnd={historyLoading ? undefined : <Button props={{ label: data.viewHistoryLabel, variant: "secondary", size: "sm", icon: "next", iconPlacement: "trailing" }} on={{ press: () => props.on?.selectTab?.("history") }} />}>
-        {historyNotice === undefined ? renderHistoryRows(historyRows.slice(0, 3)) : <div className={mockInterviewCompactStateClassName}><EmptyNotice props={{ icon: "saved", message: historyNotice }} /></div>}
+    const recentHistory = <SurfaceListCard labelEnd={historyLoading ? undefined : <Button variant={"secondary"} size={"sm"} onPress={({ press: () => props.on?.selectTab?.("history") })?.press} endContent={"next" === "next" && "trailing" === "trailing" ? <Icon source={iconSourceFor("next", "chip")} role="chip" /> : undefined}>{data.viewHistoryLabel}</Button>} label={data.recentHistoryTitle} fact={data.historyCountLabel} isLoading={historyLoading}>
+        {historyNotice === undefined ? renderHistoryRows(historyRows.slice(0, 3)) : <div className={mockInterviewCompactStateClassName}><EmptyNotice message={historyNotice} iconSource={iconSourceFor("saved", "leading")} /></div>}
     </SurfaceListCard>
 
-    const progress = <SurfaceCard props={{ label: data.progressTitle }} isLoading={statsLoading}>
+    const progress = <SurfaceCard label={data.progressTitle} composition="joined" state={statsLoading ? "pending" : "neutral"}>
         {statsNotice === undefined ? <section className={mockInterviewProgressClassName}>
             {statsRows.slice(0, 4).map((row) => <LabelledProgressRow key={row.id} props={row} isLoading={statsLoading} />)}
-            {statsLoading ? null : <div className={mockInterviewActionRowClassName}><Button props={{ label: data.viewStatsLabel, variant: "ghost", size: "sm" }} on={{ press: () => props.on?.selectTab?.("stats") }} /></div>}
-        </section> : <div className={mockInterviewCompactStateClassName}><EmptyNotice props={{ icon: "courseLeaderboard", message: statsNotice }} /></div>}
+            {statsLoading ? null : <div className={mockInterviewActionRowClassName}><Button variant="ghost" size="sm" onPress={() => props.on?.selectTab?.("stats")}>{data.viewStatsLabel}</Button></div>}
+        </section> : <div className={mockInterviewCompactStateClassName}><EmptyNotice message={statsNotice} iconSource={iconSourceFor("courseLeaderboard", "leading")} /></div>}
     </SurfaceCard>
 
-    const setup = <SurfaceCard props={{ label: data.setupTitle }} isLoading={loading}>
+    const setup = <SurfaceCard label={data.setupTitle} composition="joined" state={loading ? "pending" : "neutral"}>
         <section className={mockInterviewSetupFormClassName} id="mock-interview-new-session" tabIndex={-1}>
-            <Text props={{ content: data.setupDescription, size: "sm", tone: "muted" }} isLoading={loading} />
+            <Text size={"sm"} tone={"muted"} isSkeleton={loading}>{data.setupDescription}</Text>
             <div className={mockInterviewFieldClassName}>
-                <Text props={{ content: data.modeLabel, size: "sm", weight: "semibold" }} isLoading={loading} />
+                <Text size={"sm"} weight={"semibold"} isSkeleton={loading}>{data.modeLabel}</Text>
                 <ChoiceTabs props={{ label: data.modeLabel, selectedKey: data.selectedMode, tabs: data.modes, variant: "primary", stackAtNarrow: true }} on={{ select: (key) => props.on?.configure?.("mode", key) }} isLoading={loading} />
-                <Text props={{ content: selectedMode?.description ?? "", size: "xs", tone: "muted" }} isLoading={loading} />
+                <Text size={"xs"} tone={"muted"} isSkeleton={loading}>{selectedMode?.description ?? ""}</Text>
             </div>
             <div className={mockInterviewFieldClassName}>
-                <Text props={{ content: data.levelLabel, size: "sm", weight: "semibold" }} isLoading={loading} />
+                <Text size={"sm"} weight={"semibold"} isSkeleton={loading}>{data.levelLabel}</Text>
                 <ChoiceTabs props={{ label: data.levelLabel, selectedKey: data.selectedLevel, tabs: data.levels, variant: "primary", stackAtNarrow: true }} on={{ select: (key) => props.on?.configure?.("level", key) }} isLoading={loading} />
-                <Text props={{ content: selectedLevel?.description ?? "", size: "xs", tone: "muted" }} isLoading={loading} />
+                <Text size={"xs"} tone={"muted"} isSkeleton={loading}>{selectedLevel?.description ?? ""}</Text>
             </div>
-            <Text props={{ content: data.savedNote, size: "xs", tone: "muted" }} isLoading={loading} />
+            <Text size={"xs"} tone={"muted"} isSkeleton={loading}>{data.savedNote}</Text>
         </section>
     </SurfaceCard>
 
     const preflight = <section className={mockInterviewPreflightClassName}>
         <div className={mockInterviewSummaryClassName}>
-            <Text props={{ content: data.newSessionEyebrow, size: "sm", tone: "accent", weight: "semibold", icon: "talents" }} isLoading={loading} />
-            <Heading props={{ content: data.preflightTitle, level: 3 }} isLoading={loading} />
+            <Text size={"sm"} tone={"accent"} weight={"semibold"} startContent={<Icon source={iconSourceFor("talents", "chip")} role="chip" />} isSkeleton={loading}>{data.newSessionEyebrow}</Text>
+            <Heading level={3} isSkeleton={loading}>{data.preflightTitle}</Heading>
             {[data.focus, selectedMode?.label ?? "", selectedLevel?.label ?? ""].map((value, index) => <div className={mockInterviewFactClassName} key={data.readinessLabels[index]}>
-                <Text props={{ content: data.readinessLabels[index] ?? "", size: "xs", tone: "muted" }} isLoading={loading} />
-                <Text props={{ content: value, size: "sm", weight: "semibold" }} isLoading={loading} />
+                <Text size={"xs"} tone={"muted"} isSkeleton={loading}>{data.readinessLabels[index] ?? ""}</Text>
+                <Text size={"sm"} weight={"semibold"} isSkeleton={loading}>{value}</Text>
             </div>)}
-            <Text props={{ content: data.serverNote, size: "xs", tone: "muted" }} isLoading={loading} />
-            {data.status === undefined ? null : <Text props={{ content: data.status, size: "sm", weight: "semibold", live: "polite" }} />}
+            <Text size={"xs"} tone={"muted"} isSkeleton={loading}>{data.serverNote}</Text>
+            {data.status === undefined ? null : <Text size={"sm"} weight={"semibold"} live={"polite"}>{data.status}</Text>}
         </div>
-        <Button props={{ label: data.startLabel, variant: "primary", disabled: loading || starting, isPending: starting, icon: "next", iconPlacement: "trailing" }} on={{ press: props.on?.start }} isLoading={loading} />
+        <Button variant={"primary"} isDisabled={loading || starting} isPending={starting} isSkeleton={loading} onPress={({ press: props.on?.start })?.press} endContent={"next" === "next" && "trailing" === "trailing" ? <Icon source={iconSourceFor("next", "chip")} role="chip" /> : undefined}>{data.startLabel}</Button>
     </section>
 
     const resume = <ContinuationHighlightCard><section className={mockInterviewResumeClassName}>
-        <div className={mockInterviewResumeCopyClassName}><Text props={{ content: data.briefingEyebrow, size: "sm", tone: "accent", weight: "semibold" }} /><Heading props={{ content: data.resumeTitle, level: 3 }} /><Text props={{ content: data.status ?? "", size: "sm", tone: "muted" }} /></div>
-        <Button props={{ label: data.resumeLabel, variant: "primary", icon: "next", iconPlacement: "trailing" }} on={{ press: props.on?.resume }} />
+        <div className={mockInterviewResumeCopyClassName}><Text size={"sm"} tone={"accent"} weight={"semibold"}>{data.briefingEyebrow}</Text><Heading level={3}>{data.resumeTitle}</Heading><Text size={"sm"} tone={"muted"}>{data.status ?? ""}</Text></div>
+        <Button variant={"primary"} onPress={({ press: props.on?.resume })?.press} endContent={"next" === "next" && "trailing" === "trailing" ? <Icon source={iconSourceFor("next", "chip")} role="chip" /> : undefined}>{data.resumeLabel}</Button>
     </section></ContinuationHighlightCard>
 
-    const destinationHistory = <SurfaceListCard props={{ label: data.historyTitle, fact: data.historyCountLabel }} isLoading={historyLoading}>{historyNotice === undefined ? renderHistoryRows(historyRows) : <div className={mockInterviewStateClassName}><EmptyNotice props={{ icon: "saved", message: historyNotice, actionLabel: data.returnToBegin }} on={{ act: () => props.on?.selectTab?.("begin") }} /></div>}</SurfaceListCard>
-    const destinationStats = <SurfaceListCard props={{ label: data.statsTitle }} isLoading={statsLoading}>{statsNotice === undefined ? <div className={mockInterviewProgressClassName}>{statsRows.map((row) => <LabelledProgressRow key={row.id} props={row} isLoading={statsLoading} />)}</div> : <div className={mockInterviewStateClassName}><EmptyNotice props={{ icon: "courseLeaderboard", message: statsNotice, actionLabel: data.returnToBegin }} on={{ act: () => props.on?.selectTab?.("begin") }} /></div>}</SurfaceListCard>
+    const destinationHistory = <SurfaceListCard label={data.historyTitle} fact={data.historyCountLabel} isLoading={historyLoading}>{historyNotice === undefined ? renderHistoryRows(historyRows) : <div className={mockInterviewStateClassName}><EmptyNotice message={historyNotice} actionLabel={data.returnToBegin} iconSource={iconSourceFor("saved", "leading")} onAction={({ act: () => props.on?.selectTab?.("begin") })?.act} /></div>}</SurfaceListCard>
+    const destinationStats = <SurfaceListCard label={data.statsTitle} isLoading={statsLoading}>{statsNotice === undefined ? <div className={mockInterviewProgressClassName}>{statsRows.map((row) => <LabelledProgressRow key={row.id} props={row} isLoading={statsLoading} />)}</div> : <div className={mockInterviewStateClassName}><EmptyNotice message={statsNotice} actionLabel={data.returnToBegin} iconSource={iconSourceFor("courseLeaderboard", "leading")} onAction={({ act: () => props.on?.selectTab?.("begin") })?.act} /></div>}</SurfaceListCard>
 
     const hero = <section className={mockInterviewHeroClassName} aria-labelledby="mock-interview-heading">
         <div className={mockInterviewHeroCopyClassName}>
             <SectionHeader eyebrow={data.heroEyebrow} title={data.title} description={data.description} level={1} id="mock-interview-heading" composition="context-intro" />
-            {unavailable || setupState === "resumable" ? null : <div className={mockInterviewHeroActionClassName}><Button props={{ label: data.heroActionLabel, variant: "primary", icon: "next", iconPlacement: "trailing" }} on={{ press: props.on?.prepare }} isLoading={loading} /></div>}
+            {unavailable || setupState === "resumable" ? null : <div className={mockInterviewHeroActionClassName}><Button variant={"primary"} isSkeleton={loading} onPress={({ press: props.on?.prepare })?.press} endContent={"next" === "next" && "trailing" === "trailing" ? <Icon source={iconSourceFor("next", "chip")} role="chip" /> : undefined}>{data.heroActionLabel}</Button></div>}
         </div>
         <div className={mockInterviewHeroMediaClassName}>
             <Image className={mockInterviewHeroImageClassName} src="/images/mock-interview/interview-practice-v1.png" alt={data.mediaAlt} width={1536} height={1024} sizes="(max-width: 768px) 100vw, (max-width: 1280px) 34vw, 360px" priority />
         </div>
-        <dl className={mockInterviewHeroFactsClassName}>{data.heroFacts.map((fact) => <div className={mockInterviewHeroFactClassName} key={fact.label}><Text props={{ content: fact.label, size: "xs", tone: "muted" }} isLoading={loading} /><Text props={{ content: fact.value, size: "sm", weight: "semibold" }} isLoading={loading} /></div>)}</dl>
+        <dl className={mockInterviewHeroFactsClassName}>{data.heroFacts.map((fact) => <div className={mockInterviewHeroFactClassName} key={fact.label}><Text size={"xs"} tone={"muted"} isSkeleton={loading}>{fact.label}</Text><Text size={"sm"} weight={"semibold"} isSkeleton={loading}>{fact.value}</Text></div>)}</dl>
     </section>
 
     const destinationNav = unavailable ? null : <nav className={mockInterviewDestinationNavClassName} aria-label={data.tabsLabel}><ChoiceTabs props={{ label: data.tabsLabel, selectedKey: selectedTab, tabs: data.tabs, variant: "secondary" }} on={{ select: (key) => props.on?.selectTab?.(key as "begin" | "history" | "stats") }} /></nav>
-    const unavailableState = <SurfaceCard><section className={mockInterviewStateClassName}><EmptyNotice props={{ icon: setupState === "locked" ? "password" : "retry", message: setupState === "locked" ? data.accessMessage : data.status ?? "", actionLabel: setupState === "locked" ? data.accessLabel : data.retryLabel }} on={{ act: setupState === "locked" ? props.on?.access : props.on?.retry }} /></section></SurfaceCard>
-    const beginContent = setupState === "resumable" ? resume : <><div className={mockInterviewLaunchClassName}>{setup}<SurfaceCard>{preflight}</SurfaceCard></div>{isFirstUse ? null : <div className={mockInterviewDashboardClassName}><div className={mockInterviewHistoryPanelClassName}>{recentHistory}</div>{progress}</div>}</>
+    const unavailableState = <SurfaceCard composition="joined"><section className={mockInterviewStateClassName}><EmptyNotice message={setupState === "locked" ? data.accessMessage : data.status ?? ""} actionLabel={setupState === "locked" ? data.accessLabel : data.retryLabel} iconSource={iconSourceFor(setupState === "locked" ? "password" : "retry", "leading")} onAction={({ act: setupState === "locked" ? props.on?.access : props.on?.retry })?.act} /></section></SurfaceCard>
+    const beginContent = setupState === "resumable" ? resume : <><div className={mockInterviewLaunchClassName}>{setup}<SurfaceCard composition="joined">{preflight}</SurfaceCard></div>{isFirstUse ? null : <div className={mockInterviewDashboardClassName}><div className={mockInterviewHistoryPanelClassName}>{recentHistory}</div>{progress}</div>}</>
     const primary = <div className={mockInterviewWorkspaceClassName}>{destinationNav}{unavailable ? unavailableState : selectedTab === "begin" ? beginContent : selectedTab === "history" ? destinationHistory : destinationStats}</div>
-    return <main aria-label={data.title}><DashboardShell align="start" header={hero} mainLandmark="caller" primary={primary} /></main>
+    return <main aria-label={data.title}><WorkspaceShell align="start" header={hero} mainLandmark="caller" primary={primary} /></main>
 }

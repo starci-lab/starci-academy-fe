@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest"
 import {
     communityActionRowClassName,
+    communityCardsClassName,
+    communityDestinationLinkClassName,
     communityLeagueStandingClassName,
+    communityRankedRowClassName,
+    communityStandingClassName,
     communityTopStandingClassName,
 } from "./classNames"
 
@@ -16,7 +20,16 @@ describe("CommunityTab styles", () => {
     })
 
     it("owns one trailing action row below the ranking cards", () => {
+        expect(communityCardsClassName).toContain("gap-6")
         expect(communityActionRowClassName).toContain("w-full")
         expect(communityActionRowClassName).toContain("justify-end")
+        expect(communityDestinationLinkClassName).toContain("button--primary")
+    })
+
+    it("uses outer-edge and divider-edge padding for joined leaderboard blocks", () => {
+        expect(communityStandingClassName).toContain("pt-4")
+        expect(communityStandingClassName).toContain("pb-3")
+        expect(communityRankedRowClassName).toContain("py-3")
+        expect(communityRankedRowClassName).toContain("last:pb-4")
     })
 })

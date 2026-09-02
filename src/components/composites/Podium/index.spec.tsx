@@ -34,10 +34,9 @@ describe("Podium", () => {
             ...frame,
             entries: [entry({ rank: 1 }), entry({ rank: 2 }), entry({ rank: 3 })],
         }} />)
-        const portraits = screen.getAllByRole("img")
-        expect(portraits[0]?.closest(".avatar")).toHaveClass("avatar--lg")
-        expect(portraits[1]?.closest(".avatar")).toHaveClass("avatar--md")
-        expect(portraits[2]?.closest(".avatar")).toHaveClass("avatar--md")
+        expect(screen.getByRole("img", { name: "Learner 1" }).closest(".avatar")).toHaveClass("avatar--lg")
+        expect(screen.getByRole("img", { name: "Learner 2" }).closest(".avatar")).toHaveClass("avatar--md")
+        expect(screen.getByRole("img", { name: "Learner 3" }).closest(".avatar")).toHaveClass("avatar--md")
     })
 
     it("keeps each finisher's numeric place on the mark it hands assistive technology", () => {

@@ -1,8 +1,9 @@
-import { DashboardSurfaceCard as SurfaceCard } from "@/components/blocks/dashboard/DashboardSurfaceCard"
+import { SurfaceCard } from "@starci/grammar/common"
 import { LabelledProgressRow } from "@/components/composites/LabelledProgressRow"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
-import { Text } from "@/components/leaves/Text"
-import { Button } from "@/components/leaves/Button"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { EmptyNotice } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
+import { Button } from "@starci/grammar/common"
 import type { LabelledProgressRowData } from "@/components/composites/LabelledProgressRow"
 import {
     weeklyGoalsCardClassName,
@@ -11,7 +12,6 @@ import {
     weeklyGoalsGridClassName,
     weeklyGoalsSeparatorClassName,
     weeklyGoalsSummaryBandClassName,
-    weeklyGoalsSurfaceClassName,
 } from "./classNames"
 
 /**
@@ -80,49 +80,37 @@ const RESTING_ROWS: ReadonlyArray<LabelledProgressRowData> = Array.from(
 export const WeeklyGoalsBase = (props: WeeklyGoalsProps) => {
     if (props.state === "failed") {
         return (
-            <SurfaceCard props={{ label: props.props.label }}><EmptyNotice
-                props={{ icon: "league", message: props.props.message, actionLabel: props.props.retryLabel }}
-                on={{ act: props.on?.retry }}
-            /></SurfaceCard>
+            <SurfaceCard label={props.props.label} composition={"single"}><EmptyNotice message={props.props.message} actionLabel={props.props.retryLabel} iconSource={iconSourceFor("league", "leading")} onAction={({ act: props.on?.retry })?.act} /></SurfaceCard>
         )
     }
 
     const isLoading = props.state === "pending"
     const rows = props.state === "ready" ? props.props.rows : RESTING_ROWS
     const edit = props.state === "ready" && props.on?.edit !== undefined
-        ? <div className={weeklyGoalsFooterClassName}><Button props={{ label: props.props.editLabel, variant: "secondary", size: "sm" }} on={{ press: props.on.edit }} /></div>
+        ? <div className={weeklyGoalsFooterClassName}><Button variant="secondary" size="sm" onPress={props.on.edit}>{props.props.editLabel}</Button></div>
         : null
 
     return (
-        <div className={weeklyGoalsSurfaceClassName}>
-            <SurfaceCard props={{ label: props.props.label }} isLoading={isLoading}>
-                <div className={weeklyGoalsCardClassName}>
-                    <div className={weeklyGoalsSummaryBandClassName} data-part="weekly-goals-summary">
-                        <Text
-                            props={{
-                                content: props.state === "ready" ? props.props.summary : undefined,
-                                size: "sm",
-                                weight: "medium",
-                            }}
-                            isLoading={isLoading}
-                        />
-                    </div>
-                    <div aria-hidden className={weeklyGoalsSeparatorClassName} />
-                    <div className={weeklyGoalsGridClassName} data-part="weekly-goals-grid">
-                        {rows.map((row) => (
-                            <div className={weeklyGoalsCellClassName} key={row.id}>
-                                <LabelledProgressRow props={row} titleWeight="normal" isLoading={isLoading} />
-                            </div>
-                        ))}
-                    </div>
-                    {edit === null ? null : (
-                        <>
-                            <div aria-hidden className={weeklyGoalsSeparatorClassName} />
-                            {edit}
-                        </>
-                    )}
+        <SurfaceCard label={props.props.label} height={"fill"} composition={"joined"} state={isLoading ? "pending" : "neutral"}>
+            <div className={weeklyGoalsCardClassName}>
+                <div className={weeklyGoalsSummaryBandClassName} data-part="weekly-goals-summary">
+                    <Text size={"sm"} weight={"medium"} isSkeleton={isLoading}>{props.state === "ready" ? props.props.summary : undefined}</Text>
                 </div>
-            </SurfaceCard>
-        </div>
+                <div aria-hidden className={weeklyGoalsSeparatorClassName} />
+                <div className={weeklyGoalsGridClassName} data-part="weekly-goals-grid">
+                    {rows.map((row) => (
+                        <div className={weeklyGoalsCellClassName} key={row.id}>
+                            <LabelledProgressRow props={row} titleWeight="normal" isLoading={isLoading} />
+                        </div>
+                    ))}
+                </div>
+                {edit === null ? null : (
+                    <>
+                        <div aria-hidden className={weeklyGoalsSeparatorClassName} />
+                        {edit}
+                    </>
+                )}
+            </div>
+        </SurfaceCard>
     )
 }

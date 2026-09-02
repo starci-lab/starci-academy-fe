@@ -1,4 +1,4 @@
-import { Heading } from "@/components/leaves/Heading"
+import { Heading } from "@starci/grammar/common"
 import { CourseFoundationCategoryBlock, CourseFoundationCategoryBlockResults, CourseFoundationCategoryBlockSearch } from "@/components/blocks/learn/CourseFoundationCategoryBlock"
 
 /** Route identities for the category page composition. */
@@ -9,7 +9,7 @@ export const CourseFoundationCategoryPageBase = (props: CourseFoundationCategory
     const { displayId, categoryId, title } = props
     return <CourseFoundationCategoryBlock displayId={displayId} categoryId={categoryId} render={() => (
         <>
-            <Heading props={{ content: title, level: 1 }} />
+            <Heading level={1}>{title}</Heading>
             <CourseFoundationCategoryBlockSearch />
             <CourseFoundationCategoryBlockResults />
         </>

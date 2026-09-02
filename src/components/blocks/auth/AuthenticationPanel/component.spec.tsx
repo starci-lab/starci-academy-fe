@@ -160,7 +160,7 @@ describe("AuthenticationPanelBase", () => {
         } satisfies typeof signUpProps
         render(<AuthenticationPanelBase {...pending} />)
 
-        const submit = screen.getByRole("button", { name: "Create account" })
+        const submit = screen.getByRole("button", { name: /Create account$/ })
         expect(submit).toBeDisabled()
     })
 
@@ -173,8 +173,8 @@ describe("AuthenticationPanelBase", () => {
     it("keeps OAuth shortcuts outlined instead of styling them as secondary actions", () => {
         render(<AuthenticationPanelBase {...signUpProps} />)
 
-        expect(screen.getByRole("button", { name: "Sign In With Google" })).toHaveAttribute("data-variant", "outline")
-        expect(screen.getByRole("button", { name: "Sign In With GitHub" })).toHaveAttribute("data-variant", "outline")
+        expect(screen.getByRole("button", { name: "Sign In With Google" })).toHaveClass("button--outline")
+        expect(screen.getByRole("button", { name: "Sign In With GitHub" })).toHaveClass("button--outline")
     })
 
     it("names the provider each shortcut hands off to", () => {
@@ -241,10 +241,10 @@ describe("AuthenticationPanelBase", () => {
         fireEvent.click(screen.getByRole("checkbox", { name: "Remember me" }))
         expect(changeRememberMe).toHaveBeenCalledWith(true)
 
-        fireEvent.click(screen.getByRole("link", { name: "Forgot Password?" }))
+        fireEvent.click(screen.getByRole("button", { name: "Forgot Password?" }))
         expect(changeMode).toHaveBeenLastCalledWith("forgotPassword")
 
-        fireEvent.click(screen.getByRole("link", { name: "Create an account" }))
+        fireEvent.click(screen.getByRole("button", { name: "Create an account" }))
         expect(changeMode).toHaveBeenLastCalledWith("signUp")
     })
 
@@ -260,14 +260,14 @@ describe("AuthenticationPanelBase", () => {
             "text-center",
         )
         expect(detailsRoot?.querySelector("form")).toHaveClass("flex", "flex-col", "gap-4")
-        expect(screen.getByRole("link", { name: "Forgot Password?" }).parentElement).toHaveClass(
+        expect(screen.getByRole("button", { name: "Forgot Password?" }).parentElement).toHaveClass(
             "flex",
             "flex-row",
             "items-center",
             "justify-between",
             "gap-3",
         )
-        expect(screen.getByRole("link", { name: "Create an account" }).parentElement).toHaveClass(
+        expect(screen.getByRole("button", { name: "Create an account" }).parentElement).toHaveClass(
             "flex",
             "flex-row",
             "items-center",
@@ -280,7 +280,7 @@ describe("AuthenticationPanelBase", () => {
         const codeRoot = code.container.firstElementChild
         expect(codeRoot).toHaveClass("mx-auto", "flex", "w-full", "max-w-md", "flex-col", "gap-6")
         expect(codeRoot?.querySelector("form")).toHaveClass("flex", "flex-col", "gap-4")
-        expect(screen.getByRole("link", { name: "Send another code" }).parentElement).toHaveClass(
+        expect(screen.getByRole("button", { name: "Send another code" }).parentElement).toHaveClass(
             "flex",
             "flex-row",
             "items-center",
@@ -310,10 +310,10 @@ describe("AuthenticationPanelBase", () => {
 
         expect(screen.getByLabelText("New password").getAttribute("autocomplete")).toBe("new-password")
         expect(screen.queryByLabelText("Confirm password")).toBeNull()
-        expect(screen.queryByRole("link", { name: "Forgot Password?" })).toBeNull()
+        expect(screen.queryByRole("button", { name: "Forgot Password?" })).toBeNull()
 
         // From anywhere that is not the sign-in journey, the last line goes back to signing in.
-        fireEvent.click(screen.getByRole("link", { name: "Create an account" }))
+        fireEvent.click(screen.getByRole("button", { name: "Create an account" }))
         expect(changeMode).toHaveBeenCalledWith("signIn")
     })
 
@@ -345,8 +345,8 @@ describe("AuthenticationPanelBase", () => {
 
         expect(screen.getByLabelText("Email")).toBeDisabled()
         expect(screen.getByLabelText("Password")).toBeDisabled()
-        expect(screen.getByRole("button", { name: "Sign in" })).toBeDisabled()
-        expect(screen.getByRole("button", { name: "Sign in" })).toHaveTextContent("Sign in")
+        expect(screen.getByRole("button", { name: /Sign in$/ })).toBeDisabled()
+        expect(screen.getByRole("button", { name: /Sign in$/ })).toHaveTextContent("Sign in")
         expect(screen.getByRole("button", { name: "Sign In With Google" })).toBeDisabled()
     })
 
@@ -354,8 +354,8 @@ describe("AuthenticationPanelBase", () => {
         render(<AuthenticationPanelBase {...signInProps} />)
         fireEvent.click(screen.getByRole("button", { name: "Sign in" }))
         fireEvent.click(screen.getByRole("checkbox", { name: "Remember me" }))
-        fireEvent.click(screen.getByRole("link", { name: "Forgot Password?" }))
-        fireEvent.click(screen.getByRole("link", { name: "Create an account" }))
+        fireEvent.click(screen.getByRole("button", { name: "Forgot Password?" }))
+        fireEvent.click(screen.getByRole("button", { name: "Create an account" }))
         fireEvent.click(screen.getByRole("button", { name: "Sign In With Google" }))
         expect(screen.getByRole("button", { name: "Sign in" })).toBeEnabled()
     })
@@ -381,10 +381,10 @@ describe("AuthenticationPanelBase", () => {
         const changeMode = vi.fn()
         render(<AuthenticationPanelBase {...codeProps} on={{ resend, changeMode }} />)
 
-        fireEvent.click(screen.getByRole("link", { name: "Send another code" }))
+        fireEvent.click(screen.getByRole("button", { name: "Send another code" }))
         expect(resend).toHaveBeenCalledTimes(1)
 
-        fireEvent.click(screen.getByRole("link", { name: "Use another email" }))
+        fireEvent.click(screen.getByRole("button", { name: "Use another email" }))
         expect(changeMode).toHaveBeenCalledWith("signIn")
     })
 
@@ -406,7 +406,7 @@ describe("AuthenticationPanelBase", () => {
         const { container } = render(<AuthenticationPanelBase {...pending} />)
 
         expect(screen.getByLabelText("One-time code")).toBeDisabled()
-        const submit = screen.getByRole("button", { name: "Verify" })
+        const submit = screen.getByRole("button", { name: /Verify$/ })
         expect(submit).toBeDisabled()
         expect(submit.getAttribute("data-action-pending")).toBe("true")
         expect(container.querySelector("[data-slot='spinner']")).toBeTruthy()
@@ -420,13 +420,10 @@ describe("AuthenticationPanelBase", () => {
         } satisfies typeof codeProps
         const { container } = render(<AuthenticationPanelBase {...pending} on={{ resend }} />)
 
-        const action = screen.getByRole("link", { name: "Send another code" })
+        const action = screen.getByRole("button", { name: /Send another code$/ })
         expect(action).toHaveAttribute("data-action-pending", "true")
-        expect(action).toHaveAttribute("aria-disabled", "true")
-        expect(screen.getByRole("link", { name: "Use another email" })).toHaveAttribute(
-            "aria-disabled",
-            "true",
-        )
+        expect(action).toBeDisabled()
+        expect(screen.getByRole("button", { name: "Use another email" })).toBeDisabled()
         expect(container.querySelector("[data-slot='spinner']")).toBeTruthy()
         fireEvent.click(action)
         expect(resend).not.toHaveBeenCalled()
@@ -435,8 +432,8 @@ describe("AuthenticationPanelBase", () => {
     it("submits nothing and throws nothing on the code step with no one wired up", () => {
         render(<AuthenticationPanelBase {...codeProps} />)
         fireEvent.click(screen.getByRole("button", { name: "Verify" }))
-        fireEvent.click(screen.getByRole("link", { name: "Send another code" }))
-        fireEvent.click(screen.getByRole("link", { name: "Use another email" }))
+        fireEvent.click(screen.getByRole("button", { name: "Send another code" }))
+        fireEvent.click(screen.getByRole("button", { name: "Use another email" }))
         expect(screen.getByRole("button", { name: "Verify" })).toBeEnabled()
     })
 

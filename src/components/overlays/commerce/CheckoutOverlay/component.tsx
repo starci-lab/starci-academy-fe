@@ -1,6 +1,9 @@
-import { Button } from "@/components/leaves/Button"
-import { Heading } from "@/components/leaves/Heading"
-import { Text } from "@/components/leaves/Text"
+import { Button } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon } from "@starci/grammar/common"
+
+import { Heading } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import { ModalBranch } from "@/components/branches/ModalBranch"
 import { OrderSummaryBase, type OrderSummaryLabels } from "@/components/blocks/commerce/OrderSummary/component"
 import {
@@ -32,6 +35,7 @@ export type CheckoutOverlayLabels = {
     readonly trustNote: string
     readonly action: string
     readonly cancel: string
+    readonly close?: string
     readonly failedMessage: string
 }
 
@@ -71,14 +75,16 @@ export const CheckoutOverlayBase = (props: CheckoutOverlayProps) => {
         <ModalBranch
             isOpen={data.isOpen}
             size="lg"
+            ariaLabelledBy="checkout-overlay-title"
+            closeLabel={labels.close}
             onDismiss={props.on?.dismiss ?? (() => undefined)}
         >
             <section className={checkoutOverlayClassName} aria-labelledby="checkout-overlay-title">
                 <header className={checkoutHeaderClassName}>
                     <span id="checkout-overlay-title">
-                        <Heading props={{ content: labels.title, level: 2 }} />
+                        <Heading level={2}>{labels.title}</Heading>
                     </span>
-                    <Text props={{ content: labels.subtitle, size: "sm", tone: "muted" }} />
+                    <Text size={"sm"} tone={"muted"}>{labels.subtitle}</Text>
                 </header>
 
                 <div className={checkoutBodyClassName}>
@@ -97,47 +103,35 @@ export const CheckoutOverlayBase = (props: CheckoutOverlayProps) => {
 
                         <section className={checkoutMethodClassName} aria-label={labels.methodTitle}>
                             <div className={checkoutMethodCopyClassName}>
-                                <Text props={{ content: labels.methodTitle, size: "sm", weight: "semibold" }} />
-                                <Text props={{ content: labels.provider, weight: "semibold" }} />
-                                <Text props={{ content: labels.providerDescription, size: "xs", tone: "muted" }} />
+                                <Text size={"sm"} weight={"semibold"}>{labels.methodTitle}</Text>
+                                <Text weight={"semibold"}>{labels.provider}</Text>
+                                <Text size={"xs"} tone={"muted"}>{labels.providerDescription}</Text>
                             </div>
                         </section>
                     </div>
 
                     <section className={checkoutProcessClassName} aria-labelledby="checkout-process-title">
                         <span id="checkout-process-title">
-                            <Heading props={{ content: labels.processTitle, level: 3 }} />
+                            <Heading level={3}>{labels.processTitle}</Heading>
                         </span>
                         <ol className={checkoutProcessListClassName}>
-                            <li><Text props={{ content: labels.handoffStep, size: "sm" }} /></li>
-                            <li><Text props={{ content: labels.verificationStep, size: "sm" }} /></li>
-                            <li><Text props={{ content: labels.accessStep, size: "sm" }} /></li>
+                            <li><Text size={"sm"}>{labels.handoffStep}</Text></li>
+                            <li><Text size={"sm"}>{labels.verificationStep}</Text></li>
+                            <li><Text size={"sm"}>{labels.accessStep}</Text></li>
                         </ol>
                     </section>
 
                     <div className={checkoutTrustClassName}>
-                        <Text props={{ content: labels.trustNote, size: "xs", tone: "muted", icon: "password" }} />
+                        <Text size={"xs"} tone={"muted"} startContent={<Icon source={iconSourceFor("password", "chip")} role="chip" />}>{labels.trustNote}</Text>
                     </div>
 
                     {data.hasFailed === true ? (
-                        <Text props={{ content: labels.failedMessage, size: "sm", tone: "accent", live: "assertive" }} />
+                        <Text size={"sm"} tone={"accent"} live={"assertive"}>{labels.failedMessage}</Text>
                     ) : null}
 
                     <div className={checkoutActionsClassName}>
-                        <Button
-                            props={{
-                                label: labels.action,
-                                variant: "primary",
-                                icon: "next",
-                                iconPlacement: "trailing",
-                                isPending: data.isPaying === true,
-                            }}
-                            on={{ press: props.on?.pay }}
-                        />
-                        <Button
-                            props={{ label: labels.cancel, variant: "ghost", disabled: data.isPaying === true }}
-                            on={{ press: props.on?.dismiss }}
-                        />
+                        <Button variant={"primary"} isPending={data.isPaying === true} onPress={({ press: props.on?.pay })?.press} endContent={"next" === "next" && "trailing" === "trailing" ? <Icon source={iconSourceFor("next", "chip")} role="chip" /> : undefined}>{labels.action}</Button>
+                        <Button variant="ghost" isDisabled={data.isPaying === true} onPress={props.on?.dismiss}>{labels.cancel}</Button>
                     </div>
                 </div>
             </section>

@@ -1,102 +1,97 @@
 import { readFileSync } from "node:fs"
+import { resolve } from "node:path"
 import { describe, expect, it } from "vitest"
 
-const css = readFileSync(new URL("./styles.css", import.meta.url), "utf8")
+const css = readFileSync(resolve(process.cwd(), "src/offset-pop/styles.css"), "utf8")
+const rendererSource = [
+    "src/core/primitive/Badge/index.tsx",
+    "src/core/primitive/Button/index.tsx",
+    "src/core/primitive/Heading/index.tsx",
+    "src/core/primitive/Text/index.tsx",
+    "src/core/branch/SurfaceCard/index.tsx",
+    "src/core/branch/SurfaceListCard/index.tsx",
+    "src/core/branch/Rail/index.tsx",
+    "src/core/composite/StaticStateRow/index.tsx",
+    "src/core/composition/NavigationFeatureNav/index.tsx",
+    "src/core/StateMark.tsx",
+].map((path) => readFileSync(resolve(process.cwd(), path), "utf8")).join("\n")
 
-const indexOf = (fragment: string) => {
-    const index = css.indexOf(fragment)
-    expect(index, `missing CSS fragment: ${fragment}`).toBeGreaterThanOrEqual(0)
-    return index
-}
+describe("Offset Pop family CSS", () => {
+    it("imports Common, uses the formal family scope, and never imports Core", () => {
+        expect(css).toContain("@import \"../common/styles.css\"")
+        expect(css).not.toContain("@import \"../core/styles.css\"")
 
-describe("offset-pop layered CSS", () => {
-    it("declares one deterministic layer order", () => {
-        const tokens = indexOf("starci-grammar.offset-pop.tokens")
-        const foundation = indexOf("starci-grammar.offset-pop.foundation")
-        const components = indexOf("starci-grammar.offset-pop.components")
-        const composition = indexOf("starci-grammar.offset-pop.composition")
-        const states = indexOf("starci-grammar.offset-pop.states")
-        const responsive = indexOf("starci-grammar.offset-pop.responsive")
-
-        expect(tokens).toBeLessThan(foundation)
-        expect(foundation).toBeLessThan(components)
-        expect(components).toBeLessThan(composition)
-        expect(composition).toBeLessThan(states)
-        expect(states).toBeLessThan(responsive)
-    })
-
-    it("scopes component selectors to the routed Grammar", () => {
         const selectorLines = css
             .split("\n")
             .map((line) => line.trim())
-            .filter((line) => line.startsWith("[") && line.endsWith("{") && !line.startsWith("[data-theme"))
+            .filter((line) => line.startsWith(".grammar-common-root") && line.endsWith("{"))
 
-        expect(selectorLines.length).toBeGreaterThan(20)
+        expect(selectorLines.length).toBeGreaterThan(25)
         for (const selector of selectorLines) {
-            expect(selector).toContain("[data-grammar=\"offset-pop\"]")
+            expect(selector).toContain("[data-grammar-family=\"offset-pop\"]")
         }
     })
 
-    it("keeps a hard zero-blur top shadow and a flat nested surface", () => {
-        expect(css).toContain("--offset-pop-shadow-x: 6px")
-        expect(css).toContain("--offset-pop-shadow-y: 7px")
-        expect(css).toContain("--offset-pop-shadow-blur: 0")
+    it("targets only hooks emitted by Common public renderers", () => {
+        const hooks = Array.from(css.matchAll(/\[(data-component|data-grammar-[a-z-]+)(?:[=\]])/g), (match) => match[1])
+        const familyRootHooks = new Set(["data-grammar-family", "data-grammar-theme"])
 
-        const topRule = css.match(/\[data-grammar-surface-depth="top"\][^{]*\{([\s\S]*?)\n\s*\}/)?.[1]
-        const nestedRule = css.match(/\[data-grammar-surface-depth="nested"\][^{]*\{([\s\S]*?)\n\s*\}/)?.[1]
+        expect(hooks.length).toBeGreaterThan(20)
+        for (const hook of new Set(hooks)) {
+            if (familyRootHooks.has(hook)) continue
+            expect(rendererSource, `missing renderer hook: ${hook}`).toContain(hook)
+        }
 
-        expect(topRule).toContain("box-shadow")
-        expect(topRule).toContain("var(--offset-pop-shadow-blur)")
-        expect(nestedRule).toContain("box-shadow: none")
+        for (const invented of [
+            "data-grammar-dot-field",
+            "data-grammar-display",
+            "data-grammar-muted",
+            "data-grammar-accent",
+            "data-grammar-band",
+            "data-grammar-emphasis",
+            "data-grammar-floating-cluster",
+            "data-grammar-floating-item",
+        ]) {
+            expect(css).not.toContain(invented)
+        }
     })
 
-    it("keeps one list shell with strong dividers", () => {
-        expect(css).toContain("[data-grammar-list]")
-        expect(css).toContain("[data-grammar-row]:last-child")
-        expect(css).toContain("border-block-end: var(--offset-pop-divider-width) solid var(--offset-pop-ink)")
+    it("binds semantic Common variables and preserves hard family surface geometry", () => {
+        expect(css).toContain("--accent: var(--offset-pop-pink)")
+        expect(css).toContain("--field-radius: var(--offset-pop-control-radius)")
+        expect(css).toContain("--shadow-surface:")
+        expect(css).not.toContain("--starci-core-")
+        expect(css).toContain("--offset-pop-shadow-x: 0.25rem")
+        expect(css).toContain("--offset-pop-shadow-y: 0.5rem")
+        expect(css).toMatch(/data-grammar-surface-depth="top"[\s\S]*?box-shadow: var\(--shadow-surface\)/)
+        expect(css).toMatch(/data-grammar-surface-depth="nested"[\s\S]*?box-shadow: none/)
+        expect(rendererSource).toContain("<Card.Root")
+        expect(rendererSource).toContain("<Card.Header")
+        expect(rendererSource).toContain("<Card.Content")
+        expect(css).toContain('[data-grammar-surface-card][data-slot="card"]')
+        expect(css).toContain('[data-grammar-frame="bounded"][data-slot="card-content"]')
     })
 
-    it("covers the closed neutral state vocabulary", () => {
-        const expected = new Set([
-            "affirmative",
-            "informative",
-            "cautionary",
-            "negative",
-            "pending",
-            "unavailable",
-        ])
-        const actual = new Set(Array.from(css.matchAll(/data-grammar-state="([a-z-]+)"/g), (match) => match[1]))
-
-        expect(actual).toEqual(expected)
-    })
-
-    it("bounds floating composition and flattens it in a narrow container", () => {
-        expect(css).toContain("container: offset-pop-cluster / inline-size")
-        expect(css).toContain("[data-grammar-floating-item]:nth-child(3n + 1)")
-        expect(css).toContain("[data-grammar-floating-item]:nth-child(3n + 2)")
-        expect(css).toContain("[data-grammar-floating-item]:nth-child(3n)")
-        expect(css).toContain("@container offset-pop-cluster (max-width: 34rem)")
-        expect(css).toMatch(/@container offset-pop-cluster[\s\S]*?transform: rotate\(0deg\)/)
-    })
-
-    it("has explicit reduced-motion and forced-color treatments", () => {
+    it("uses invariant spacing for focus, press, responsive, and reduced-motion vectors", () => {
+        expect(css).toContain("outline-offset: 0.25rem")
+        expect(css).toContain("transform: translate(0.25rem, 0.25rem)")
+        expect(css).toContain("@media (max-width: 40rem)")
         expect(css).toContain("@media (prefers-reduced-motion: reduce)")
         expect(css).toContain("--offset-pop-transition: 0ms linear")
+    })
+
+    it("owns dark, system, forced-color, and closed state treatments", () => {
+        expect(css).toContain("[data-grammar-theme=\"dark\"]")
+        expect(css).toContain("@media (prefers-color-scheme: dark)")
         expect(css).toContain("@media (forced-colors: active)")
-        expect(css).toContain("outline-color: Highlight")
+
+        for (const state of ["affirmative", "informative", "cautionary", "negative", "pending", "unavailable"]) {
+            expect(css).toContain(`data-grammar-state=\"${state}\"`)
+        }
     })
 
     it("contains no domain vocabulary", () => {
-        const forbidden = [
-            ["pri", "ce"],
-            ["check", "out"],
-            ["enroll", "ment"],
-            ["stu", "dent"],
-            ["exam"],
-            ["course"],
-            ["entitle", "ment"],
-        ].map((parts) => parts.join(""))
-
+        const forbidden = ["price", "checkout", "enrollment", "student", "exam", "course", "entitlement"]
         for (const word of forbidden) expect(css.toLowerCase()).not.toContain(word)
     })
 })

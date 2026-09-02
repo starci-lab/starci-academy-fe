@@ -1,15 +1,17 @@
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
+import { SurfaceCard } from "@starci/grammar/common"
 import { CourseLearningSignalDetail, type CourseLearningSignalDetailProps } from "@/components/blocks/learn/CourseLearningSignalDetail"
 import { CourseLearningSignals, type CourseLearningSignalsProps } from "@/components/blocks/learn/CourseLearningSignals"
 import { CourseNextActions, type CourseNextActionsProps } from "@/components/blocks/learn/CourseNextActions"
 import { CourseProgressOverview, type CourseProgressOverviewProps } from "@/components/blocks/learn/CourseProgressOverview"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
-import { Heading } from "@/components/leaves/Heading"
-import { Progress } from "@/components/leaves/Progress"
-import { SeeMoreLink } from "@/components/leaves/SeeMoreLink"
-import { Text } from "@/components/leaves/Text"
-import type { LearnMobileView } from "@/components/layouts/LearnShellLayout/component"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { EmptyNotice } from "@starci/grammar/common"
+import { Heading } from "@starci/grammar/common"
+import { Progress } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
+import type { LearnMobileView } from "@/components/product-shells/LearnShellLayout/component"
 import { courseLearnTodayHostClassName } from "./classNames"
+import { Icon, TextAction } from "@starci/grammar/common"
+
 
 /** The settled route-level situation of the course dashboard. */
 export type CourseLearnTodayState = "pending" | "ready" | "empty" | "failed"
@@ -25,13 +27,13 @@ export type CourseLearnTodayActions = { readonly open?: (id: string) => void; re
 export type CourseLearnTodayBlockProps = { readonly blockState: CourseLearnTodayState; readonly mobileView: Extract<LearnMobileView, "today" | "course" | "progress">; readonly props: CourseLearnTodayData; readonly on?: CourseLearnTodayActions }
 
 type ResumeCardProps = { readonly item: CourseLearnTodayItem; readonly label: string; readonly open?: (id: string) => void; readonly isLoading: boolean }
-const ResumeCard = (props: ResumeCardProps) => <SurfaceCard props={{ label: props.label }} isLoading={props.isLoading}><Text props={{ content: props.item.title, size: "sm", weight: "medium" }} isLoading={props.isLoading} /><Text props={{ content: props.item.kind, size: "sm", tone: "muted" }} isLoading={props.isLoading} />{props.isLoading ? null : <SeeMoreLink props={{ label: props.item.actionLabel }} on={{ press: () => props.open?.(props.item.id) }} />}</SurfaceCard>
+const ResumeCard = (props: ResumeCardProps) => <SurfaceCard label={props.label} composition="joined" state={props.isLoading ? "pending" : "neutral"}><Text size={"sm"} weight={"medium"} isSkeleton={props.isLoading}>{props.item.title}</Text><Text size={"sm"} tone={"muted"} isSkeleton={props.isLoading}>{props.item.kind}</Text>{props.isLoading ? null : <TextAction appearance="disclosure" onPress={() => props.open?.(props.item.id)} endContent={<Icon source={iconSourceFor("next", "chip")} role="chip" />}>{props.item.actionLabel}</TextAction>}</SurfaceCard>
 
 /** Draw mobile alternatives and the desktop command-center dashboard. */
 export const CourseLearnTodayBlockBase = (props: CourseLearnTodayBlockProps) => {
     const loading = props.blockState === "pending"
     const placeholder = { id: "pending", title: "", kind: "", actionLabel: props.props.course.actionLabel }
     const item = props.props.primary ?? placeholder
-    if (props.blockState === "failed" || props.blockState === "empty") return <EmptyNotice props={{ icon: props.blockState === "failed" ? "retry" : "course", message: props.blockState === "failed" ? props.props.failedMessage : props.props.emptyMessage, actionLabel: props.blockState === "failed" ? props.props.retryLabel : undefined }} on={{ act: props.on?.retry }} />
-    return <main className={courseLearnTodayHostClassName} aria-label={props.props.title}><header><Heading props={{ content: props.props.title, level: 1 }} /><Text props={{ content: props.props.subtitle, size: "sm", tone: "muted" }} /></header>{props.mobileView === "today" ? <section><ResumeCard item={item} label={props.props.primaryLabel} open={props.on?.open} isLoading={loading} /><SurfaceCard props={{ label: props.props.secondaryLabel, isFrameless: true }} isLoading={loading}>{(loading ? [placeholder] : props.props.secondary).map((entry) => <ResumeCard key={entry.id} item={entry} label={props.props.secondaryLabel} open={props.on?.open} isLoading={loading} />)}</SurfaceCard></section> : null}{props.mobileView === "course" ? <ResumeCard item={props.props.course} label={props.props.courseLabel} open={props.on?.open} isLoading={loading} /> : null}{props.mobileView === "progress" ? <SurfaceCard props={{ label: props.props.progressLabel }} isLoading={loading}><Text props={{ content: props.props.progressLabel, size: "sm", weight: "semibold" }} /><Progress props={{ label: props.props.progressLabel, value: props.props.progressValue }} isLoading={loading} /><Text props={{ content: props.props.progressFact, size: "xs", tone: "muted" }} isLoading={loading} /></SurfaceCard> : null}<section aria-label="Dashboard"><CourseProgressOverview {...props.props.dashboard.progress} on={{ retry: props.on?.retry }} /><CourseNextActions {...props.props.dashboard.nextActions} on={{ open: props.on?.open, retry: props.on?.retry }} /><CourseLearningSignals {...props.props.dashboard.signals} on={{ select: props.on?.selectSignal, retry: props.on?.retry }} /><CourseLearningSignalDetail {...props.props.dashboard.signalDetail} on={{ open: props.on?.openSignal, retry: props.on?.retry }} /></section></main>
+    if (props.blockState === "failed" || props.blockState === "empty") return <EmptyNotice message={props.blockState === "failed" ? props.props.failedMessage : props.props.emptyMessage} actionLabel={props.blockState === "failed" ? props.props.retryLabel : undefined} iconSource={iconSourceFor(props.blockState === "failed" ? "retry" : "course", "leading")} onAction={({ act: props.on?.retry })?.act} />
+    return <main className={courseLearnTodayHostClassName} aria-label={props.props.title}><header><Heading level={1}>{props.props.title}</Heading><Text size={"sm"} tone={"muted"}>{props.props.subtitle}</Text></header>{props.mobileView === "today" ? <section><ResumeCard item={item} label={props.props.primaryLabel} open={props.on?.open} isLoading={loading} /><SurfaceCard label={props.props.secondaryLabel} frame={true ? "frameless" : "bounded"} composition="joined" state={loading ? "pending" : "neutral"}>{(loading ? [placeholder] : props.props.secondary).map((entry) => <ResumeCard key={entry.id} item={entry} label={props.props.secondaryLabel} open={props.on?.open} isLoading={loading} />)}</SurfaceCard></section> : null}{props.mobileView === "course" ? <ResumeCard item={props.props.course} label={props.props.courseLabel} open={props.on?.open} isLoading={loading} /> : null}{props.mobileView === "progress" ? <SurfaceCard label={props.props.progressLabel} composition="joined" state={loading ? "pending" : "neutral"}><Text size={"sm"} weight={"semibold"}>{props.props.progressLabel}</Text><Progress label={props.props.progressLabel} value={props.props.progressValue} isSkeleton={loading} /><Text size={"xs"} tone={"muted"} isSkeleton={loading}>{props.props.progressFact}</Text></SurfaceCard> : null}<section aria-label="Dashboard"><CourseProgressOverview {...props.props.dashboard.progress} on={{ retry: props.on?.retry }} /><CourseNextActions {...props.props.dashboard.nextActions} on={{ open: props.on?.open, retry: props.on?.retry }} /><CourseLearningSignals {...props.props.dashboard.signals} on={{ select: props.on?.selectSignal, retry: props.on?.retry }} /><CourseLearningSignalDetail {...props.props.dashboard.signalDetail} on={{ open: props.on?.openSignal, retry: props.on?.retry }} /></section></main>
 }

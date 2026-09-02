@@ -1,6 +1,7 @@
-import { Button } from "@/components/leaves/Button"
+import { Button, Icon } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
 import { StatusDot, type StatusDotTone } from "@/components/leaves/StatusDot"
-import { Text } from "@/components/leaves/Text"
+import { Text } from "@starci/grammar/common"
 
 
 /**
@@ -87,5 +88,5 @@ export type JudgeStatusStripProps = { readonly state: JudgeVerdictState; readonl
  */
 export const JudgeStatusStripBase = (props: JudgeStatusStripProps) => {
     const actionLabel = props.props.actionLabel
-    return <div><StatusDot props={{ tone: VERDICT_TONE[props.state], label: props.props.verdictLabel }} /><Text props={{ content: props.props.verdictLabel, size: "sm", weight: "semibold" }} /><Text props={{ content: props.props.detailLabel, size: "xs", tone: "muted" }} />{actionLabel === undefined ? null : <Button props={{ label: actionLabel, size: "sm", variant: props.state === "accepted" ? "primary" : "outline", ...(props.state === "accepted" ? { icon: "next" as const, iconPlacement: "trailing" as const } : {}) }} on={{ press: props.on?.act }} />}</div>
+    return <div><StatusDot props={{ tone: VERDICT_TONE[props.state], label: props.props.verdictLabel }} /><Text size={"sm"} weight={"semibold"}>{props.props.verdictLabel}</Text><Text size={"xs"} tone={"muted"}>{props.props.detailLabel}</Text>{actionLabel === undefined ? null : <Button size="sm" variant={props.state === "accepted" ? "primary" : "outline"} onPress={props.on?.act} endContent={props.state === "accepted" ? <Icon source={iconSourceFor("next", "chip")} role="chip" /> : undefined}>{actionLabel}</Button>}</div>
 }

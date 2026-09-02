@@ -2,74 +2,63 @@ import assert from "node:assert/strict"
 import test from "node:test"
 import * as core from "../../dist/core/index.js"
 
-test("exports traditional React components without metadata registries", () => {
+test("exports Core DNA and the typed family registry boundary", () => {
     assert.equal(core.STARCI_CORE_DNA.id, "starci-core")
     assert.equal(core.STARCI_CORE_DNA.color.accent, "#7547ff")
+    assert.deepEqual(core.STARCI_CORE_SPACING_SCALE, {
+        "0": "0rem",
+        "0.5": "0.125rem",
+        "1": "0.25rem",
+        "1.5": "0.375rem",
+        "2": "0.5rem",
+        "2.5": "0.625rem",
+        "3": "0.75rem",
+        "4": "1rem",
+        "5": "1.25rem",
+        "6": "1.5rem",
+        "8": "2rem",
+        "10": "2.5rem",
+        "12": "3rem",
+        "16": "4rem",
+    })
     assert.equal(core.STARCI_CORE_TOKEN_NAMES.surface, "--starci-core-surface")
-    assert.equal(core.STARCI_CORE_TOKEN_DEFAULTS[core.STARCI_CORE_TOKEN_NAMES.surface], core.STARCI_CORE_DNA.color.light.surface)
-    assert.equal(core.STARCI_CORE_DARK_TOKEN_DEFAULTS[core.STARCI_CORE_TOKEN_NAMES.surface], core.STARCI_CORE_DNA.color.dark.surface)
+    assert.equal(
+        core.STARCI_CORE_TOKEN_DEFAULTS[core.STARCI_CORE_TOKEN_NAMES.surface],
+        core.STARCI_CORE_DNA.color.light.surface,
+    )
     assert.equal(Object.isFrozen(core.STARCI_CORE_DNA), true)
-    assert.equal(typeof core.GrammarRoot, "function")
-    assert.equal(typeof core.PageContainer, "function")
-    assert.equal(typeof core.Label, "function")
-    assert.equal(typeof core.SectionHeader, "function")
-    assert.equal(typeof core.MediaFrame, "function")
-    assert.equal(typeof core.IncludedMark, "function")
-    assert.equal(typeof core.RankArtwork, "function")
-    assert.equal(typeof core.SurfaceCopyGroup, "function")
-    assert.equal(typeof core.PrimaryRailLayout, "function")
-    assert.equal(typeof core.NavigationFeatureNav, "function")
-    assert.equal(typeof core.DashboardShell, "function")
-    assert.equal(typeof core.ChatWorkspace, "function")
-    assert.equal(typeof core.LeadingNumber, "function")
-    assert.equal(typeof core.OtpInput, "function")
-    assert.ok(core.HorizontalScrollRegion)
-    assert.equal(typeof core.VerticalScrollRegion, "function")
-    assert.equal(typeof core.SurfaceCard, "function")
-    assert.equal(typeof core.SurfaceListCard, "function")
-    assert.equal(typeof core.Subnav, "function")
-    assert.equal(typeof core.Tabs, "function")
-    assert.equal(typeof core.Tooltip, "function")
-    assert.equal(core.formPageClassName, "starci-core-form-page")
-    assert.equal(core.formScrollViewportClassName, "starci-core-form-scroll-viewport")
-    assert.equal(core.formSurfaceClassName, "starci-core-form-surface")
-    assert.equal(core.formCompactSurfaceClassName, "starci-core-form-surface--compact")
-    assert.equal(core.horizontalScrollRegionClassName, "starci-core-horizontal-scroll-region")
-    assert.equal(core.formFieldClassName, "starci-core-form-field")
-    assert.equal("coreGrammar" in core, false)
-    assert.equal("CORE_RULES" in core, false)
-    assert.equal("CORE_LAYOUT_CLASS_NAMES" in core, false)
-    assert.equal("CORE_NEUTRAL_TREATMENTS" in core, false)
-    assert.equal("treatmentFor" in core, false)
+    assert.equal(Object.isFrozen(core.CORE_GRAMMAR_COMPONENTS), true)
+    assert.equal(typeof core.CORE_GRAMMAR_COMPONENTS.GrammarRoot, "function")
+    assert.equal(typeof core.CORE_GRAMMAR_COMPONENTS.WorkspaceShell, "function")
+    assert.equal(typeof core.CORE_GRAMMAR_COMPONENTS.Link, "function")
+    assert.equal(typeof core.CORE_GRAMMAR_COMPONENTS.TextAction, "function")
+    assert.equal("DashboardShell" in core.CORE_GRAMMAR_COMPONENTS, false)
+    assert.equal(typeof core.defineGrammarFamily, "function")
+    assert.equal(core.coreGrammar.id, "core")
+    assert.deepEqual(core.coreGrammar.scopeProps, { "data-grammar-family": "core" })
+    assert.equal(core.coreRuleConformance.inheritedCommonRules.length, 117)
 })
 
-test("binds DNA, responsive composition and media through concrete Core components", () => {
-    const root = core.GrammarRoot({ theme: "dark", children: "content" })
-    assert.equal(root.props["data-grammar"], "starci-core")
-    assert.equal(root.props["data-grammar-theme"], "dark")
+test("resolves a scoped family without re-exporting component owners from Core", () => {
+    const Brand = () => null
+    const family = core.defineGrammarFamily({
+        id: "heritage",
+        styles: {
+            entrypoint: "@starci/grammar/heritage/styles.css",
+            scope: { attribute: "data-grammar-family", value: "heritage" },
+        },
+        components: {
+            replacements: {},
+            extensions: { Brand },
+        },
+    })
 
-    const layout = core.PrimaryRailLayout({ primary: "primary", rail: "rail", railWidth: "wide" })
-    assert.match(layout.props.className, /starci-core-primary-rail-container/)
-    assert.equal(layout.props.children.props["data-grammar-layout-rail"], "present")
-    assert.equal(layout.props.children.props["data-grammar-layout-rail-width"], "wide")
-
-    const media = core.MediaFrame({ children: "image", aspect: "square", fit: "contain" })
-    assert.equal(media.props["data-grammar-media-aspect"], "square")
-    assert.equal(media.props["data-grammar-media-fit"], "contain")
-
-    const included = core.IncludedMark({})
-    assert.equal(included.props.viewBox, "0 0 20 20")
-    assert.match(included.props.className, /starci-core-included-mark/)
-
-    const rankArtwork = core.RankArtwork({ kind: "cup" })
-    assert.equal(rankArtwork.props.viewBox, "0 0 32 32")
-    assert.equal(rankArtwork.props["data-grammar-rank-artwork"], "cup")
-    assert.match(rankArtwork.props.className, /starci-core-rank-artwork/)
-
-    const copyGroup = core.SurfaceCopyGroup({ children: "copy" })
-    assert.equal(copyGroup.props["data-grammar-copy-density"], "compact")
-
-    const intro = core.SectionHeader({ eyebrow: "Next", title: "Project", description: "Evidence", level: 1, composition: "context-intro" })
-    assert.equal(intro.props["data-grammar-composition"], "context-intro")
-    assert.equal(intro.props.children[0].props.children[1].type, "h1")
+    assert.equal(family.id, "heritage")
+    assert.equal(family.styles.entrypoint, "@starci/grammar/heritage/styles.css")
+    assert.deepEqual(family.scopeProps, { "data-grammar-family": "heritage" })
+    assert.equal(family.components.Brand, Brand)
+    assert.equal(Object.isFrozen(family.components), true)
+    assert.equal("GrammarRoot" in core, false)
+    assert.equal("Button" in core, false)
+    assert.equal("WorkspaceShell" in core, false)
 })

@@ -8,7 +8,7 @@ vi.mock("next/font/google", () => ({ Be_Vietnam_Pro: () => ({ variable: "--starc
 vi.mock("next-intl", () => ({ hasLocale: (_locales: ReadonlyArray<string>, locale: string) => locale === "en" || locale === "vi" }))
 vi.mock("next-intl/server", () => ({ getTranslations: async () => (key: string) => key, getMessages: async () => ({ app: {} }) }))
 vi.mock("@/config/seo", () => ({ openGraphLocale: (locale: string) => locale, readSeoConfig: () => ({ siteUrl: "https://academy.starci.org", siteName: "StarCi", googleSiteVerification: seo.googleSiteVerification, imagePath: "/og.png" }) }))
-vi.mock("@/components/layouts/GlobalAiChatLayout", () => ({ GlobalAiChatLayout: ({ surface }: LayoutSurface) => surface }))
+vi.mock("@/components/product-shells/GlobalAiChatLayout", () => ({ GlobalAiChatLayout: ({ surface }: LayoutSurface) => surface }))
 vi.mock("../providers", () => ({ AppProviders: ({ children }: LayoutChildren) => children }))
 
 import LocaleLayout, { generateMetadata } from "./layout"

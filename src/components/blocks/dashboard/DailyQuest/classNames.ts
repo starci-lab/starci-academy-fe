@@ -1,11 +1,5 @@
 import { cn } from "@heroui/react"
-import { dashboardAccentBandMiddleClassName } from "../classNames"
-
-/** Flush the grammar surface inset so the quest card owns its own internal rhythm. */
-export const dailyQuestSurfaceClassName = cn(
-    "[&_.starci-core-surface-content]:p-0",
-    "[&_.starci-core-surface-content>div]:gap-0",
-)
+import { dashboardNeutralBandMiddleClassName } from "../classNames"
 
 /** Stack the hero, reward band, and task evidence as one full-bleed card body. */
 export const dailyQuestCardClassName = cn("flex", "min-w-0", "flex-col")
@@ -37,14 +31,15 @@ export const dailyQuestHeroImageClassName = cn(
 /** Separate the three quest bands without inventing extra vertical space. */
 export const dailyQuestSeparatorClassName = cn("border-t", "border-separator")
 
-/** State the day's reward on the soft accent band between hero and evidence. */
-export const dailyQuestRewardBandClassName = cn(
+/** Keep an unclaimed promise neutral; only a proven claimed outcome receives success. */
+export const dailyQuestRewardBandClassName = (claimed: boolean) => cn(
     "flex",
     "min-w-0",
     "items-center",
     "justify-between",
     "gap-2",
-    dashboardAccentBandMiddleClassName,
+    dashboardNeutralBandMiddleClassName,
+    claimed && "bg-success-soft",
 )
 
 /** Lay out the five daily facts as one full-height separated evidence band. */

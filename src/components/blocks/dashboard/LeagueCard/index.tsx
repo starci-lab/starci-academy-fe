@@ -62,7 +62,6 @@ export const LeagueCard = (props: LeagueCardProps) => {
     }
     const viewProps = {
         label: t("league.heading"),
-        seeMoreLabel: t("seeMore"),
         standing: {
             rank: mine?.rank,
             rankLabel: mine && percent !== undefined
@@ -94,7 +93,6 @@ export const LeagueCard = (props: LeagueCardProps) => {
             state="ready"
             props={viewProps}
             on={{
-                seeMore: () => router.push("/league"),
                 ...Object.fromEntries(rows.map((row) => [
                     `open:${row.id}`,
                     () => {

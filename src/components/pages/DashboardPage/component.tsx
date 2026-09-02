@@ -1,4 +1,4 @@
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { EmptyNotice } from "@starci/grammar/common"
 import { DrawerBranch } from "@/components/branches/DrawerBranch"
 import { ContinueLearning } from "@/components/blocks/dashboard/ContinueLearning"
 import { QuickActions } from "@/components/blocks/dashboard/QuickActions"
@@ -14,9 +14,9 @@ import { ExploreTab } from "@/components/blocks/dashboard/ExploreTab"
 import { FeedExplorer } from "@/components/blocks/dashboard/FeedExplorer"
 import { CoursesTab } from "@/components/blocks/dashboard/CoursesTab"
 import { CommunityTab } from "@/components/blocks/dashboard/CommunityTab"
-import { Icon } from "@/components/leaves/Icon"
-import { Link } from "@/components/leaves/Link"
-import { Subnav, VerticalScrollRegion } from "@starci/grammar/core"
+import { Icon } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { Subnav, VerticalScrollRegion } from "@starci/grammar/common"
 import {
     dashboardFrameClassName,
     dashboardCompactSubnavClassName,
@@ -37,6 +37,8 @@ import {
     getDashboardRailScrollRegionClassName,
     dashboardRailScrollContentClassName,
 } from "./classNames"
+import { TextAction } from "@starci/grammar/common"
+
 
 /**
  * PAGE - `DashboardPage`, presentational half.
@@ -132,7 +134,7 @@ export const DashboardPageBase = (props: DashboardPageProps) => {
                     ? <CommunityTab />
                     : props.props.selectedTab === "overview"
                         ? <OverviewTab />
-                        : <EmptyNotice props={{ icon: props.props.selectedTab === "community" ? "community" : "explore", message: props.props.unavailableMessage }} />
+                        : <EmptyNotice message={props.props.unavailableMessage} iconSource={iconSourceFor(props.props.selectedTab === "community" ? "community" : "explore", "leading")} />
 
     const rail = (presentation: "inline" | "drawer") => (
         <div className={getDashboardRailClassName(presentation)} data-dashboard-rail-presentation={presentation}>
@@ -158,8 +160,8 @@ export const DashboardPageBase = (props: DashboardPageProps) => {
                     <Subnav
                         className={dashboardCompactSubnavClassName}
                         label={railLabel}
-                        title={<Link props={{ label: props.props.backLabel ?? "Back", icon: "back", emphasis: "muted" }} on={{ press: props.on?.goBack }} />}
-                        menuIcon={<Icon props={{ name: "collapseRail", role: "leading" }} />}
+                        title={<TextAction appearance={"muted"} startContent={<Icon source={iconSourceFor("back", "chip")} role="chip" />} onPress={props.on?.goBack}>{props.props.backLabel ?? "Back"}</TextAction>}
+                        menuIcon={<Icon source={iconSourceFor("navigationOverflow", "leading")} role={"leading"} />}
                         openMenuLabel={props.props.railOpenLabel ?? railLabel}
                         closeMenuLabel={props.props.railCloseLabel ?? railLabel}
                         isMenuOpen={isRailOpen}

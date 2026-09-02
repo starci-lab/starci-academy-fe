@@ -1,15 +1,18 @@
 import type { ReactNode } from "react"
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { SurfaceCard } from "@starci/grammar/common"
+import { EmptyNotice } from "@starci/grammar/common"
 import { StatusMetadataLine, type StatusMetadataLineStatus } from "@/components/composites/StatusMetadataLine"
 import { CourseContentMap } from "@/components/blocks/learn/CourseContentMap"
 import { Breadcrumbs, type BreadcrumbStep } from "@/components/leaves/Breadcrumbs"
-import { Button } from "@/components/leaves/Button"
-import { Heading } from "@/components/leaves/Heading"
-import { NavLink } from "@/components/leaves/NavLink"
-import { Progress } from "@/components/leaves/Progress"
-import { Text } from "@/components/leaves/Text"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon } from "@starci/grammar/common"
+import { Button } from "@starci/grammar/common"
+import { Heading } from "@starci/grammar/common"
+import { Progress } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import { RailDivider } from "@/components/leaves/RailDivider"
+import { TextAction } from "@starci/grammar/common"
+
 
 /** One lesson destination inside the current module. */
 export type CourseContentHomeLesson = { readonly id: string; readonly moduleId: string; readonly title: string; readonly fact?: string; readonly isCurrent?: boolean }
@@ -30,10 +33,10 @@ export const CourseLearnContentHomeBlockBase = (props: CourseLearnContentHomeBlo
     const lessons: ReadonlyArray<CourseContentHomeLesson> = loading && props.props.currentModule === undefined ? Array.from({ length: 10 }, (_unused, index) => ({ id: `resting-${index + 1}`, moduleId: "", title: "" })) : props.props.currentModule?.lessons ?? []
     const notice = props.blockState === "failed" || props.blockState === "empty"
     const overview = <main aria-label={props.props.title}>
-        <header><Breadcrumbs props={{ steps: props.props.trail, label: props.props.breadcrumbLabel }} on={loading ? undefined : { course: props.on?.course }} isLoading={loading} /><Heading props={{ content: props.props.title, level: 1 }} isLoading={loading} />{props.props.description === undefined ? null : <Text props={{ content: props.props.description, size: "sm", tone: "muted" }} isLoading={loading} />}{props.props.metaFacts.length === 0 && props.props.metaStatus === undefined ? null : <StatusMetadataLine props={{ facts: props.props.metaFacts, status: props.props.metaStatus }} isLoading={loading} />}</header>
-        {props.props.gateMessages.length === 0 ? null : <section aria-label="Requirements">{props.props.gateMessages.map((message) => <Text key={message} props={{ content: message, size: "sm" }} />)}</section>}
-        <section aria-label={props.props.resumeTarget}><Text props={{ content: props.props.resumeEyebrow, size: "xs", tone: "muted" }} isLoading={loading} /><Heading props={{ content: props.props.resumeTarget, level: 2 }} isLoading={loading} />{props.props.resumeAction === undefined ? null : <Button props={{ label: props.props.resumeAction, variant: "primary", size: "md", icon: "next", iconPlacement: "trailing" }} on={loading ? undefined : { press: props.on?.resume }} isLoading={loading} />}<Progress props={{ value: props.props.completionPercent, label: props.props.progressLabel }} isLoading={loading} /><Text props={{ content: props.props.progressFact, size: "sm", tone: "muted" }} isLoading={loading} /></section>
-        {notice ? <EmptyNotice props={{ icon: "course", message: props.blockState === "failed" ? props.props.failedMessage : props.props.emptyMessage, actionLabel: props.blockState === "failed" ? props.props.retryLabel : undefined }} on={{ act: props.on?.retry }} /> : lessons.length === 0 ? null : <SurfaceCard props={{ label: props.props.currentModule?.title ?? "" }} isLoading={loading}><ul aria-label={props.props.currentModule?.title}>{lessons.map((lesson) => <li key={lesson.id}><NavLink props={{ label: lesson.title, kind: "section", isCurrent: lesson.isCurrent }} on={loading ? undefined : { press: () => props.on?.lesson?.(lesson.moduleId, lesson.id) }} isLoading={loading} />{lesson.fact === undefined ? null : <Text props={{ content: lesson.fact, size: "xs", tone: "muted" }} />}</li>)}</ul></SurfaceCard>}
+        <header><Breadcrumbs props={{ steps: props.props.trail, label: props.props.breadcrumbLabel }} on={loading ? undefined : { course: props.on?.course }} isLoading={loading} /><Heading level={1} isSkeleton={loading}>{props.props.title}</Heading>{props.props.description === undefined ? null : <Text size={"sm"} tone={"muted"} isSkeleton={loading}>{props.props.description}</Text>}{props.props.metaFacts.length === 0 && props.props.metaStatus === undefined ? null : <StatusMetadataLine props={{ facts: props.props.metaFacts, status: props.props.metaStatus }} isLoading={loading} />}</header>
+        {props.props.gateMessages.length === 0 ? null : <section aria-label="Requirements">{props.props.gateMessages.map((message) => <Text key={message} size={"sm"}>{message}</Text>)}</section>}
+        <section aria-label={props.props.resumeTarget}><Text size={"xs"} tone={"muted"} isSkeleton={loading}>{props.props.resumeEyebrow}</Text><Heading level={2} isSkeleton={loading}>{props.props.resumeTarget}</Heading>{props.props.resumeAction === undefined ? null : <Button variant={"primary"} size={"md"} isSkeleton={loading} onPress={(loading ? undefined : { press: props.on?.resume })?.press} endContent={"next" === "next" && "trailing" === "trailing" ? <Icon source={iconSourceFor("next", "chip")} role="chip" /> : undefined}>{props.props.resumeAction}</Button>}<Progress label={props.props.progressLabel} value={props.props.completionPercent} isSkeleton={loading} /><Text size={"sm"} tone={"muted"} isSkeleton={loading}>{props.props.progressFact}</Text></section>
+        {notice ? <EmptyNotice message={props.blockState === "failed" ? props.props.failedMessage : props.props.emptyMessage} actionLabel={props.blockState === "failed" ? props.props.retryLabel : undefined} iconSource={iconSourceFor("course", "leading")} onAction={({ act: props.on?.retry })?.act} /> : lessons.length === 0 ? null : <SurfaceCard label={props.props.currentModule?.title ?? ""} composition="joined" state={loading ? "pending" : "neutral"}><ul aria-label={props.props.currentModule?.title}>{lessons.map((lesson) => <li key={lesson.id}><TextAction appearance={"section"} isCurrent={lesson.isCurrent} isSkeleton={loading} onPress={(loading ? undefined : { press: () => props.on?.lesson?.(lesson.moduleId, lesson.id) })?.press}>{lesson.title}</TextAction>{lesson.fact === undefined ? null : <Text size={"xs"} tone={"muted"}>{lesson.fact}</Text>}</li>)}</ul></SurfaceCard>}
     </main>
     return props.displayId === undefined || props.resizeLabel === undefined ? overview : <CourseLearnContentHomeFrame displayId={props.displayId} currentLessonId={props.currentLessonId} resizeLabel={props.resizeLabel} overview={overview} />
 }

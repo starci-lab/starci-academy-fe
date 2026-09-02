@@ -1,4 +1,4 @@
-import { Label } from "@starci/grammar/core"
+import { Label } from "@starci/grammar/common"
 import { QuickActionsList } from "@/components/leaves/QuickActionsList"
 import type { QuickActionItem } from "@/components/leaves/QuickActionsList"
 import { quickActionsRailClassName } from "./classNames"

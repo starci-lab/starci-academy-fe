@@ -1,13 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { SurfaceAccordionCard } from "@starci/grammar/core"
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
+import { SurfaceAccordionCard } from "@starci/grammar/common"
+import { SurfaceCard } from "@starci/grammar/common"
 import { SupportingDotList } from "@/components/composites/SupportingDotList"
-import { Badge } from "@/components/leaves/Badge"
+import { Badge } from "@starci/grammar/common"
 import { DisclosureIndicator } from "@/components/leaves/DisclosureIndicator"
-import { Heading } from "@/components/leaves/Heading"
-import { Text } from "@/components/leaves/Text"
+import { Heading } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import { curriculumBodyClassName, curriculumClassName, curriculumMetaClassName, curriculumSummaryClassName } from "./classNames"
 
 /** Stable difficulty identity used by a course curriculum module. */
@@ -60,15 +60,15 @@ export const CourseCurriculumAccordion = (props: CourseCurriculumAccordionProps)
             id: module.id,
             isOpen,
             isDisabled: isLoading,
-            summaryRender: <div className={curriculumSummaryClassName}><Text props={{ content: module.title, size: "sm", weight: "medium" }} isLoading={isLoading} /><span className={curriculumMetaClassName}><Badge props={{ content: module.levelLabel, tone: LEVEL_TONES[module.level] }} isLoading={isLoading} />{module.previewLabel === undefined ? null : <Text props={{ content: module.previewLabel, size: "xs", tone: "muted" }} />}</span>{isLoading ? null : <DisclosureIndicator props={{ isOpen }} />}</div>,
-            bodyRender: <div className={curriculumBodyClassName}><Text props={{ content: module.summary, size: "xs", tone: "muted" }} />{module.description.trim().length === 0 ? null : <Text props={{ content: module.description, size: "sm" }} />}{module.previews.length === 0 ? null : <SupportingDotList props={{ entries: module.previews.map((preview) => ({ id: preview.id, content: preview.title })) }} />}</div>,
+            summaryRender: <div className={curriculumSummaryClassName}><Text size={"sm"} weight={"medium"} isSkeleton={isLoading}>{module.title}</Text><span className={curriculumMetaClassName}><Badge tone={LEVEL_TONES[module.level]} isSkeleton={isLoading}>{module.levelLabel}</Badge>{module.previewLabel === undefined ? null : <Text size={"xs"} tone={"muted"}>{module.previewLabel}</Text>}</span>{isLoading ? null : <DisclosureIndicator props={{ isOpen }} />}</div>,
+            bodyRender: <div className={curriculumBodyClassName}><Text size={"xs"} tone={"muted"}>{module.summary}</Text>{module.description.trim().length === 0 ? null : <Text size={"sm"}>{module.description}</Text>}{module.previews.length === 0 ? null : <SupportingDotList props={{ entries: module.previews.map((preview) => ({ id: preview.id, content: preview.title })) }} />}</div>,
         }
     })
 
     return (
         <section className={curriculumClassName}>
-            <Heading props={{ content: props.props.label, level: 3 }} />
-            <SurfaceCard props={{ inset: "none" }}>
+            <Heading level={3}>{props.props.label}</Heading>
+            <SurfaceCard composition="joined">
                 <SurfaceAccordionCard
                     items={items}
                     renderSummary={(summary) => <>{summary}</>}

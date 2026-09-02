@@ -1,9 +1,10 @@
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
+import { SurfaceCard } from "@starci/grammar/common"
 import { ActivityFeedBase, type ActivityFeedProps } from "@/components/blocks/dashboard/ActivityFeed/component"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { EmptyNotice } from "@starci/grammar/common"
 import { ProfileAchievement } from "@/components/composites/ProfileAchievement"
-import { Heading } from "@/components/leaves/Heading"
-import { Text } from "@/components/leaves/Text"
+import { Heading } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import type { ProfileAchievement as ProfileAchievementData } from "@/modules/api/graphql/queries/types/profile-evidence"
 import { activityFeedResultClassName, profileAchievementGridClassName, profileActivityEvidenceGridClassName, profileActivityFactClassName, profileActivityFactGridClassName, profileActivityHeadingClassName, profileMainClassName } from "./classNames"
 /** Format public activity dates with the active route locale instead of the browser default. */
@@ -21,21 +22,21 @@ const Achievements = (props: ProfileActivityProps) => {
     const labels = props.labels ?? defaultLabels
     const loading = props.achievementState === "pending"
     const items = loading ? Array.from({ length: 3 }, (_, index): ProfileAchievementData => ({ slug: String(index), name: "", earned: true, currentValue: 0, threshold: 0 })) : props.achievements.filter((item) => item.earned)
-    return <SurfaceCard props={{ label: labels.achievements, isFrameless: true }}><div className={profileAchievementGridClassName}>{!loading && items.length === 0 ? <EmptyNotice props={{ icon: props.achievementState === "error" ? "retry" : "complete", message: props.achievementState === "error" ? labels.achievementsError : labels.achievementsEmpty }} /> : items.map((item) => <ProfileAchievement key={item.slug} props={{ name: item.name, rarity: [item.tierReached == null ? undefined : `${labels.achievementTier} ${item.tierReached}`, item.rarityPercent == null ? undefined : `${labels.achievementRarity} ${item.rarityPercent}%`].filter(Boolean).join(" · ") || labels.achievements }} isLoading={loading} />)}</div></SurfaceCard>
+    return <SurfaceCard label={labels.achievements} frame={true ? "frameless" : "bounded"} composition="joined"><div className={profileAchievementGridClassName}>{!loading && items.length === 0 ? <EmptyNotice message={props.achievementState === "error" ? labels.achievementsError : labels.achievementsEmpty} iconSource={iconSourceFor(props.achievementState === "error" ? "retry" : "complete", "leading")} /> : items.map((item) => <ProfileAchievement key={item.slug} props={{ name: item.name, rarity: [item.tierReached == null ? undefined : `${labels.achievementTier} ${item.tierReached}`, item.rarityPercent == null ? undefined : `${labels.achievementRarity} ${item.rarityPercent}%`].filter(Boolean).join(" · ") || labels.achievements }} isLoading={loading} />)}</div></SurfaceCard>
 }
 const ActivitySummary = (props: ProfileActivityProps) => {
     const labels = props.labels ?? defaultLabels
     const earned = props.achievements.filter((item) => item.earned).length
     const events = props.feed.props.days.reduce((total, day) => total + day.rows.length, 0)
     const loading = props.achievementState === "pending" || props.feed.state === "pending"
-    return <SurfaceCard props={{ inset: "compact" }} isLoading={loading}><div className={profileActivityFactGridClassName}><div className={profileActivityFactClassName}><Text props={{ content: loading ? undefined : String(events), size: "md", weight: "semibold" }} isLoading={loading} /><Text props={{ content: labels.recentActivity, size: "xs", tone: "muted" }} isLoading={loading} /></div><div className={profileActivityFactClassName}><Text props={{ content: loading ? undefined : String(earned), size: "md", weight: "semibold" }} isLoading={loading} /><Text props={{ content: labels.achievements, size: "xs", tone: "muted" }} isLoading={loading} /></div></div></SurfaceCard>
+    return <SurfaceCard composition="single" state={loading ? "pending" : "neutral"}><div className={profileActivityFactGridClassName}><div className={profileActivityFactClassName}><Text size={"md"} weight={"semibold"} isSkeleton={loading}>{loading ? undefined : String(events)}</Text><Text size={"xs"} tone={"muted"} isSkeleton={loading}>{labels.recentActivity}</Text></div><div className={profileActivityFactClassName}><Text size={"md"} weight={"semibold"} isSkeleton={loading}>{loading ? undefined : String(earned)}</Text><Text size={"xs"} tone={"muted"} isSkeleton={loading}>{labels.achievements}</Text></div></div></SurfaceCard>
 }
 const Activity = (props: ProfileActivityProps) => {
     const labels = props.labels ?? defaultLabels
-    return <SurfaceCard props={{ label: props.feed.state === "ready" || props.feed.state === "pending" ? labels.timeline : undefined, isFrameless: true }}><div className={activityFeedResultClassName}><ActivityFeedBase {...props.feed} props={{ ...props.feed.props, label: props.feed.state === "ready" || props.feed.state === "pending" ? props.feed.props.label : labels.timelineStatus }} /></div></SurfaceCard>
+    return <SurfaceCard label={props.feed.state === "ready" || props.feed.state === "pending" ? labels.timeline : undefined} frame={true ? "frameless" : "bounded"} composition="joined"><div className={activityFeedResultClassName}><ActivityFeedBase {...props.feed} props={{ ...props.feed.props, label: props.feed.state === "ready" || props.feed.state === "pending" ? props.feed.props.label : labels.timelineStatus }} /></div></SurfaceCard>
 }
 /** Draw earned achievement proof before the grouped public timeline. */
 export const ProfileActivityBase = (props: ProfileActivityProps) => {
     const labels = props.labels ?? defaultLabels
-    return <div className={profileMainClassName}><div className={profileActivityHeadingClassName}><Heading props={{ content: labels.heading, level: 2 }} /></div><ActivitySummary {...props} /><div className={profileActivityEvidenceGridClassName}><Activity {...props} /><Achievements {...props} /></div></div>
+    return <div className={profileMainClassName}><div className={profileActivityHeadingClassName}><Heading level={2}>{labels.heading}</Heading></div><ActivitySummary {...props} /><div className={profileActivityEvidenceGridClassName}><Activity {...props} /><Achievements {...props} /></div></div>
 }

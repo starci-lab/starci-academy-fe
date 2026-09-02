@@ -1,5 +1,6 @@
-import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { SurfaceListCard } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { EmptyNotice } from "@starci/grammar/common"
 import { Podium, type PodiumEntryData } from "@/components/composites/Podium"
 import { RankedUserRow, type RankedUserRowData } from "@/components/composites/RankedUserRow"
 import { StandingHeroCard, type StandingHeroProgress } from "@/components/composites/StandingHeroCard"
@@ -40,12 +41,12 @@ export const LeagueBlockBase = (props: LeagueBlockProps) => {
     const board = props.data
     const loading = props.state === "pending"
     if (props.state === "empty" || props.state === "failed") {
-        return <EmptyNotice props={{ icon: "league", message: props.state === "empty" ? board.emptyMessage : board.errorMessage, actionLabel: props.state === "failed" ? board.retryLabel : board.ctaLabel }} on={{ act: props.state === "failed" ? props.on?.retry : props.on?.climb }} />
+        return <EmptyNotice message={props.state === "empty" ? board.emptyMessage : board.errorMessage} actionLabel={props.state === "failed" ? board.retryLabel : board.ctaLabel} iconSource={iconSourceFor("league", "leading")} onAction={({ act: props.state === "failed" ? props.on?.retry : props.on?.climb })?.act} />
     }
     return <>
         <StandingHeroCard props={{ standing: board.standing, progress: board.progress, ctaLabel: board.ctaLabel, progressAccessibleLabel: board.progressAccessibleLabel }} on={{ cta: props.on?.climb }} isLoading={loading} />
         <Podium props={{ entries: board.podium, meLabel: board.meLabel, anonymousLabel: board.anonymousLabel }} isLoading={loading} />
-        {board.rows.length === 0 && board.selfRow === undefined ? null : <SurfaceListCard props={{ label: board.listLabel, isLabelHidden: true, isVerdict: board.rows.some((row) => row.verdict !== undefined) }} isLoading={loading}>
+        {board.rows.length === 0 && board.selfRow === undefined ? null : <SurfaceListCard label={board.listLabel} labelHidden={true} isVerdict={board.rows.some((row) => row.verdict !== undefined)} isLoading={loading}>
             {board.rows.map((row) => <RankedUserRow key={row.id} props={row} on={{ open: () => props.on?.open?.(row.id), follow: () => props.on?.follow?.(row.id) }} isLoading={loading} />)}
             {board.ellipsisLabel === undefined ? null : <span>{board.ellipsisLabel}</span>}
             {board.selfRow === undefined ? null : <RankedUserRow props={board.selfRow} isLoading={loading} />}

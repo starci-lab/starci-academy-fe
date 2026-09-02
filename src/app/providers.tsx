@@ -1,6 +1,6 @@
 "use client"
 
-import { I18nProvider } from "@heroui/react"
+import { I18nProvider, ToastProvider } from "@heroui/react"
 import { NextIntlClientProvider } from "next-intl"
 import type { ReactNode } from "react"
 import { StarCiThemeProvider } from "@/modules/theme/theme-context"
@@ -55,6 +55,7 @@ export const AppProviders = (props: AppProvidersProps) => (
               */}
             <StarCiThemeProvider>
                 {props.children}
+                <ToastProvider />
             </StarCiThemeProvider>
         </I18nProvider>
     </NextIntlClientProvider>

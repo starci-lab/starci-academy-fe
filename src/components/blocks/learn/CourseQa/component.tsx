@@ -1,10 +1,11 @@
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { SurfaceCard } from "@starci/grammar/common"
+import { SurfaceListCard } from "@starci/grammar/common"
+import { EmptyNotice } from "@starci/grammar/common"
 import { Breadcrumbs, type BreadcrumbStep } from "@/components/leaves/Breadcrumbs"
-import { Button } from "@/components/leaves/Button"
-import { Heading } from "@/components/leaves/Heading"
-import { Icon } from "@/components/leaves/Icon"
+import { Button } from "@starci/grammar/common"
+import { Heading } from "@starci/grammar/common"
+import { Icon } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
 import { SearchBox } from "@/components/leaves/SearchBox"
 import { Textarea } from "@/components/leaves/Textarea"
 
@@ -23,8 +24,8 @@ export const CourseQaBase = (props: CourseQaProps) => {
     const label = selected ? props.props.repliesLabel : props.props.questionsLabel
     const notice = props.state === "failed" || props.state === "empty"
     return <main aria-label={props.props.title}>
-        <header><Breadcrumbs props={{ steps: props.props.trail, label: props.props.title }} on={{ course: props.on?.course }} /><Heading props={{ content: props.props.title, level: 1 }} /></header>
-        <section><SearchBox props={{ placeholder: props.props.searchPlaceholder, label: props.props.searchLabel, clearLabel: props.props.clearSearchLabel }} on={{ search: props.on?.search }} /><SurfaceCard><Textarea key={props.props.draftKey} props={{ id: "course-question", name: "question", label: props.props.askLabel, placeholder: props.props.askPlaceholder, defaultValue: props.props.draft, rows: 3, disabled: props.props.isSubmitting }} on={{ change: props.on?.changeDraft }} /><Button props={{ label: props.props.askLabel, icon: "send", variant: "primary", isPending: props.props.isSubmitting, disabled: props.props.draft.trim() === "" }} on={{ press: props.on?.ask }} /></SurfaceCard></section>
-        {notice ? <EmptyNotice props={{ icon: props.state === "failed" ? "retry" : "community", message: props.state === "failed" ? props.props.errorMessage : props.props.emptyMessage, actionLabel: props.state === "failed" ? props.props.retryLabel : undefined }} on={{ act: props.on?.retry }} /> : <section>{selected ? <Button props={{ label: props.props.backLabel, variant: "ghost", size: "sm" }} on={{ press: props.on?.closeThread }} /> : null}<SurfaceListCard props={{ label }} isLoading={loading}><ul aria-label={label}>{rows.length === 0 && !loading ? <EmptyNotice props={{ message: props.props.emptySearchMessage }} /> : rows.map((row) => <li key={row.id}><Button props={{ label: row.replyLabel === undefined ? `${row.body} · ${row.meta}` : `${row.body} · ${row.meta} · ${row.replyLabel}`, variant: "ghost", size: "sm" }} on={{ press: selected ? undefined : () => props.on?.openThread?.(row.id) }} />{!selected ? <Icon props={{ name: "disclosure", role: "chip" }} /> : null}</li>)}</ul></SurfaceListCard></section>}
+        <header><Breadcrumbs props={{ steps: props.props.trail, label: props.props.title }} on={{ course: props.on?.course }} /><Heading level={1}>{props.props.title}</Heading></header>
+        <section><SearchBox props={{ placeholder: props.props.searchPlaceholder, label: props.props.searchLabel, clearLabel: props.props.clearSearchLabel }} on={{ search: props.on?.search }} /><SurfaceCard composition="joined"><Textarea key={props.props.draftKey} props={{ id: "course-question", name: "question", label: props.props.askLabel, placeholder: props.props.askPlaceholder, defaultValue: props.props.draft, rows: 3, disabled: props.props.isSubmitting }} on={{ change: props.on?.changeDraft }} /><Button variant="primary" isDisabled={props.props.draft.trim() === ""} isPending={props.props.isSubmitting} onPress={props.on?.ask}>{props.props.askLabel}</Button></SurfaceCard></section>
+        {notice ? <EmptyNotice message={props.state === "failed" ? props.props.errorMessage : props.props.emptyMessage} actionLabel={props.state === "failed" ? props.props.retryLabel : undefined} iconSource={iconSourceFor(props.state === "failed" ? "retry" : "community", "leading")} onAction={({ act: props.on?.retry })?.act} /> : <section>{selected ? <Button variant="ghost" size="sm" onPress={props.on?.closeThread}>{props.props.backLabel}</Button> : null}<SurfaceListCard label={label} isLoading={loading}><ul aria-label={label}>{rows.length === 0 && !loading ? <EmptyNotice message={props.props.emptySearchMessage} /> : rows.map((row) => <li key={row.id}><Button variant="ghost" size="sm" onPress={selected ? undefined : () => props.on?.openThread?.(row.id)}>{row.replyLabel === undefined ? `${row.body} · ${row.meta}` : `${row.body} · ${row.meta} · ${row.replyLabel}`}</Button>{!selected ? <Icon source={iconSourceFor("disclosure", "chip")} role={"chip"} /> : null}</li>)}</ul></SurfaceListCard></section>}
     </main>
 }

@@ -1,9 +1,8 @@
-import { DashboardSurfaceCard as SurfaceCard } from "@/components/blocks/dashboard/DashboardSurfaceCard"
+import { SurfaceCard } from "@starci/grammar/common"
 import {
     ContributionCalendar,
     type ContributionCalendarDay,
 } from "@/components/composites/ContributionCalendar"
-import { contributionsSurfaceClassName } from "./classNames"
 
 /** One calendar day with its already-resolved accessible label. */
 export type ContributionDay = ContributionCalendarDay
@@ -44,25 +43,23 @@ export const OverviewContributionsBase = (props: OverviewContributionsProps) => 
         : props.state === "empty" ? props.props.emptyMessage : props.props.yearLabel
 
     return (
-        <div className={contributionsSurfaceClassName}>
-            <SurfaceCard props={{ label: props.props.label }} isLoading={isLoading}>
-                <ContributionCalendar
-                    isFlush
-                    props={{
-                        year: props.props.year,
-                        years: props.props.years,
-                        totalLabel,
-                        streakLabel: props.props.streakLabel,
-                        lessLabel: props.props.lessLabel,
-                        moreLabel: props.props.moreLabel,
-                        monthLabels: props.props.monthLabels,
-                        weekdayLabels: props.props.weekdayLabels,
-                        days: props.state === "ready" ? props.props.days : [],
-                    }}
-                    on={{ selectYear: props.on?.selectYear }}
-                    isLoading={isLoading}
-                />
-            </SurfaceCard>
-        </div>
+        <SurfaceCard label={props.props.label} composition={"joined"} state={isLoading ? "pending" : "neutral"}>
+            <ContributionCalendar
+                isFlush
+                props={{
+                    year: props.props.year,
+                    years: props.props.years,
+                    totalLabel,
+                    streakLabel: props.props.streakLabel,
+                    lessLabel: props.props.lessLabel,
+                    moreLabel: props.props.moreLabel,
+                    monthLabels: props.props.monthLabels,
+                    weekdayLabels: props.props.weekdayLabels,
+                    days: props.state === "ready" ? props.props.days : [],
+                }}
+                on={{ selectYear: props.on?.selectYear }}
+                isLoading={isLoading}
+            />
+        </SurfaceCard>
     )
 }

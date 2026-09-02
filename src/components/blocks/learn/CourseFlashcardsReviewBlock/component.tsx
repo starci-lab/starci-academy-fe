@@ -1,12 +1,13 @@
 import { ModalBranch } from "@/components/branches/ModalBranch"
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
-import { Button } from "@/components/leaves/Button"
+import { SurfaceCard } from "@starci/grammar/common"
+import { SurfaceListCard } from "@starci/grammar/common"
+import { Button } from "@starci/grammar/common"
+
 import { ChoiceTabs } from "@/components/leaves/ChoiceTabs"
-import { Heading } from "@/components/leaves/Heading"
-import { Progress } from "@/components/leaves/Progress"
+import { Heading } from "@starci/grammar/common"
+import { Progress } from "@starci/grammar/common"
 import { SearchBox } from "@/components/leaves/SearchBox"
-import { Text } from "@/components/leaves/Text"
+import { Text } from "@starci/grammar/common"
 import {
     flashcardActionRowClassName, flashcardDeckCardClassName, flashcardDeckDescriptionClassName, flashcardDeckSectionClassName, flashcardDeckToolbarClassName,
     flashcardDueCardClassName, flashcardEvidenceListClassName, flashcardEvidenceRowClassName,
@@ -68,37 +69,37 @@ export const CourseFlashcardsReviewBlockBase = (props: CourseFlashcardsReviewBlo
     const failed = props.blockState === "failed"
     const gatewayTitle = data.gatewayTitle ?? data.modeTabsLabel
     const gatewayDescription = data.gatewayDescription ?? data.subtitle
-    const renderState = (message: string, isFailure: boolean, title = isFailure ? data.title : data.emptyTitle ?? data.title, showCourseAction = true) => <SurfaceCard><section className={flashcardStateClassName} aria-live={isFailure ? "assertive" : "polite"}>
-        <Heading props={{ content: title, level: 2 }} />
-        <Text props={{ content: message, size: "sm", tone: "muted" }} />
+    const renderState = (message: string, isFailure: boolean, title = isFailure ? data.title : data.emptyTitle ?? data.title, showCourseAction = true) => <SurfaceCard composition="joined"><section className={flashcardStateClassName} aria-live={isFailure ? "assertive" : "polite"}>
+        <Heading level={2}>{title}</Heading>
+        <Text size={"sm"} tone={"muted"}>{message}</Text>
         <div className={flashcardActionRowClassName}>
-            {isFailure ? <Button props={{ label: data.retryLabel, variant: "primary" }} on={{ press: props.on.retry }} /> : null}
-            {props.pageState === "overview" ? null : <Button props={{ label: data.overviewLabel, variant: isFailure ? "outline" : "primary" }} on={{ press: () => props.on.selectView("overview") }} />}
-            {!showCourseAction || props.pageState !== "overview" || props.on.openCourse === undefined || data.emptyActionLabel === undefined ? null : <Button props={{ label: data.emptyActionLabel, variant: isFailure ? "outline" : "primary" }} on={{ press: props.on.openCourse }} />}
+            {isFailure ? <Button variant="primary" onPress={props.on.retry}>{data.retryLabel}</Button> : null}
+            {props.pageState === "overview" ? null : <Button variant={isFailure ? "outline" : "primary"} onPress={() => props.on.selectView("overview")}>{data.overviewLabel}</Button>}
+            {!showCourseAction || props.pageState !== "overview" || props.on.openCourse === undefined || data.emptyActionLabel === undefined ? null : <Button variant={isFailure ? "outline" : "primary"} onPress={props.on.openCourse}>{data.emptyActionLabel}</Button>}
         </div>
     </section></SurfaceCard>
 
     if ((failed || unavailable) && props.pageState === "overview") {
         return <main className={flashcardHubClassName} aria-label={data.title}>
-            <header className={flashcardHubHeaderClassName}><Heading props={{ content: data.title, level: 1 }} /><Text props={{ content: data.subtitle, size: "sm", tone: "muted" }} /></header>
+            <header className={flashcardHubHeaderClassName}><Heading level={1}>{data.title}</Heading><Text size={"sm"} tone={"muted"}>{data.subtitle}</Text></header>
             {renderState(failed ? data.failedText : data.emptyText, failed)}
         </main>
     }
 
     return <>
         <main className={flashcardHubClassName} aria-label={data.title}>
-            <header className={flashcardHubHeaderClassName}><Heading props={{ content: data.title, level: 1 }} /><Text props={{ content: data.subtitle, size: "sm", tone: "muted" }} /></header>
+            <header className={flashcardHubHeaderClassName}><Heading level={1}>{data.title}</Heading><Text size={"sm"} tone={"muted"}>{data.subtitle}</Text></header>
 
             <section className={flashcardModeSectionClassName} aria-label={gatewayTitle}>
-                <div><Heading props={{ content: gatewayTitle, level: 2 }} /><Text props={{ content: gatewayDescription, size: "sm", tone: "muted" }} /></div>
+                <div><Heading level={2}>{gatewayTitle}</Heading><Text size={"sm"} tone={"muted"}>{gatewayDescription}</Text></div>
                 <div className={flashcardModeGridClassName}>
-                    <SurfaceCard isLoading={loading}><article className={flashcardModeCardClassName}>
-                        <div className={flashcardModeCopyClassName}><Heading props={{ content: data.reviewLabel, level: 3 }} /><Text props={{ content: data.reviewDescription ?? data.dueDescription, size: "sm", tone: "muted" }} /><div className={flashcardFactRowClassName}><Text props={{ content: `${data.dueCount} ${data.cardsLabel} ${data.dueLabel}`, size: "sm", weight: "medium" }} isLoading={loading} /></div></div>
-                        {data.resumeSessionId === undefined ? <Button props={{ label: data.reviewActionLabel ?? `Open ${data.reviewLabel}`, variant: "primary", disabled: loading || data.dueCount === 0, isPending: data.startPending }} on={{ press: props.on.startDue }} isLoading={loading} /> : <Button props={{ label: data.resumeActionLabel ?? data.resumeLabel, variant: "primary", disabled: loading }} on={{ press: () => props.on.resume(data.resumeSessionId!) }} isLoading={loading} />}
+                    <SurfaceCard composition="joined" state={loading ? "pending" : "neutral"}><article className={flashcardModeCardClassName}>
+                        <div className={flashcardModeCopyClassName}><Heading level={3}>{data.reviewLabel}</Heading><Text size={"sm"} tone={"muted"}>{data.reviewDescription ?? data.dueDescription}</Text><div className={flashcardFactRowClassName}><Text size={"sm"} weight={"medium"} isSkeleton={loading}>{`${data.dueCount} ${data.cardsLabel} ${data.dueLabel}`}</Text></div></div>
+                        {data.resumeSessionId === undefined ? <Button variant={"primary"} isDisabled={loading || data.dueCount === 0} isPending={data.startPending} isSkeleton={loading} onPress={({ press: props.on.startDue })?.press}>{data.reviewActionLabel ?? `Open ${data.reviewLabel}`}</Button> : <Button variant={"primary"} isDisabled={loading} isSkeleton={loading} onPress={({ press: () => props.on.resume(data.resumeSessionId!) })?.press}>{data.resumeActionLabel ?? data.resumeLabel}</Button>}
                     </article></SurfaceCard>
-                    <SurfaceCard isLoading={loading}><article className={flashcardModeCardClassName}>
-                        <div className={flashcardModeCopyClassName}><Heading props={{ content: data.quizTitleLabel ?? `Quick ${data.quizLabel}`, level: 3 }} /><Text props={{ content: data.quizDescription ?? data.subtitle, size: "sm", tone: "muted" }} /><div className={flashcardFactRowClassName}><Text props={{ content: `${data.quizCardCount} ${data.cardsLabel}`, size: "sm", weight: "medium" }} isLoading={loading} /></div></div>
-                        <Button props={{ label: data.quizActionLabel ?? data.quizLabel, variant: "primary", disabled: loading }} on={{ press: () => props.on.openQuiz() }} isLoading={loading} />
+                    <SurfaceCard composition="joined" state={loading ? "pending" : "neutral"}><article className={flashcardModeCardClassName}>
+                        <div className={flashcardModeCopyClassName}><Heading level={3}>{data.quizTitleLabel ?? `Quick ${data.quizLabel}`}</Heading><Text size={"sm"} tone={"muted"}>{data.quizDescription ?? data.subtitle}</Text><div className={flashcardFactRowClassName}><Text size={"sm"} weight={"medium"} isSkeleton={loading}>{`${data.quizCardCount} ${data.cardsLabel}`}</Text></div></div>
+                        <Button variant={"primary"} isDisabled={loading} isSkeleton={loading} onPress={({ press: () => props.on.openQuiz() })?.press}>{data.quizActionLabel ?? data.quizLabel}</Button>
                     </article></SurfaceCard>
                 </div>
             </section>
@@ -106,23 +107,23 @@ export const CourseFlashcardsReviewBlockBase = (props: CourseFlashcardsReviewBlo
             <div className={flashcardViewNavClassName}><ChoiceTabs props={{ label: data.viewTabsLabel, selectedKey: data.activeView, variant: "secondary", tabs: [{ id: "overview", label: data.overviewLabel }, { id: "history", label: data.historyLabel }, { id: "stats", label: data.statsLabel }] }} on={{ select: (key) => { if (key === "overview" || key === "history" || key === "stats") props.on.selectView(key) } }} /></div>
 
             {props.pageState === "overview" ? <div className={flashcardOverviewClassName}>
-                <SurfaceCard props={{ label: data.dueTitle }} isLoading={loading}><section className={flashcardDueCardClassName}><Text props={{ content: data.dueDescription, size: "sm", tone: "muted" }} /><Text props={{ content: `${data.dueCount} ${data.dueLabel}`, size: "sm", weight: "medium" }} isLoading={loading} />{data.resumeSessionId !== undefined ? <Text props={{ content: data.activeSessionText ?? data.resumeDescription, size: "sm", weight: "semibold" }} /> : data.dueCount === 0 ? null : <Button props={{ label: data.startLabel, variant: "primary", isPending: data.startPending }} on={{ press: props.on.startDue }} />}</section></SurfaceCard>
+                <SurfaceCard label={data.dueTitle} composition="joined" state={loading ? "pending" : "neutral"}><section className={flashcardDueCardClassName}><Text size={"sm"} tone={"muted"}>{data.dueDescription}</Text><Text size={"sm"} weight={"medium"} isSkeleton={loading}>{`${data.dueCount} ${data.dueLabel}`}</Text>{data.resumeSessionId !== undefined ? <Text size={"sm"} weight={"semibold"}>{data.activeSessionText ?? data.resumeDescription}</Text> : data.dueCount === 0 ? null : <Button variant="primary" isPending={data.startPending} onPress={props.on.startDue}>{data.startLabel}</Button>}</section></SurfaceCard>
                 <section className={flashcardDeckSectionClassName} aria-label={data.decksTitle}>
-                    <div className={flashcardDeckToolbarClassName}><div><Heading props={{ content: data.decksTitle, level: 2 }} /><Text props={{ content: data.foundText, size: "sm", tone: "muted" }} isLoading={loading} /></div><div className={flashcardActionRowClassName} aria-label={data.layoutLabel}><Button props={{ label: data.gridLabel, size: "sm", variant: data.layout === "grid" ? "primary" : "outline" }} on={{ press: () => props.on.changeLayout("grid") }} /><Button props={{ label: data.lineLabel, size: "sm", variant: data.layout === "line" ? "primary" : "outline" }} on={{ press: () => props.on.changeLayout("line") }} /></div></div>
+                    <div className={flashcardDeckToolbarClassName}><div><Heading level={2}>{data.decksTitle}</Heading><Text size={"sm"} tone={"muted"} isSkeleton={loading}>{data.foundText}</Text></div><div className={flashcardActionRowClassName} aria-label={data.layoutLabel}><Button variant={data.layout === "grid" ? "primary" : "outline"} size="sm" onPress={() => props.on.changeLayout("grid")}>{data.gridLabel}</Button><Button variant={data.layout === "line" ? "primary" : "outline"} size="sm" onPress={() => props.on.changeLayout("line")}>{data.lineLabel}</Button></div></div>
                     <SearchBox props={{ placeholder: data.searchLabel, label: data.searchLabel, clearLabel: data.searchClearLabel }} on={{ search: props.on.changeSearch }} />
-                    {loading ? <div className={getFlashcardDeckGridClassName(data.layout)}>{[1, 2, 3].map((position) => <SurfaceCard key={position} isLoading><article className={flashcardDeckCardClassName}><Heading props={{ content: data.decksTitle, level: 3 }} isLoading /><Text props={{ content: data.subtitle, size: "sm" }} isLoading /></article></SurfaceCard>)}</div> : data.decks.length === 0 ? renderState(data.noResultsText, false, data.noResultsTitle, false) : <div className={getFlashcardDeckGridClassName(data.layout)}>{data.decks.map((deck) => <SurfaceCard key={deck.id}><article className={flashcardDeckCardClassName}>
-                        <Heading props={{ content: deck.title, level: 3 }} /><div className={flashcardDeckDescriptionClassName}><Text props={{ content: deck.description, size: "sm", tone: "muted" }} /></div><Text props={{ content: [deck.difficulty, `${deck.cardCount} ${data.cardsLabel}`, `${deck.dueCount} ${data.dueLabel}`, `${deck.masteredCount} ${data.masteredLabel}`].join(" · "), size: "xs", tone: "muted" }} />
-                        <div className={flashcardActionRowClassName}><Button props={{ label: data.startLabel, size: "sm", variant: "outline", disabled: data.resumeSessionId !== undefined }} on={{ press: () => props.on.openReview(deck.id) }} />{deck.quizEligible ? <Button props={{ label: data.quizDeckLabel, size: "sm", variant: "outline" }} on={{ press: () => props.on.openQuiz(deck.id) }} /> : null}</div>
+                    {loading ? <div className={getFlashcardDeckGridClassName(data.layout)}>{[1, 2, 3].map((position) => <SurfaceCard key={position} composition="joined" state="pending"><article className={flashcardDeckCardClassName}><Heading level={3} isSkeleton>{data.decksTitle}</Heading><Text size={"sm"} isSkeleton>{data.subtitle}</Text></article></SurfaceCard>)}</div> : data.decks.length === 0 ? renderState(data.noResultsText, false, data.noResultsTitle, false) : <div className={getFlashcardDeckGridClassName(data.layout)}>{data.decks.map((deck) => <SurfaceCard key={deck.id} composition="joined"><article className={flashcardDeckCardClassName}>
+                        <Heading level={3}>{deck.title}</Heading><div className={flashcardDeckDescriptionClassName}><Text size={"sm"} tone={"muted"}>{deck.description}</Text></div><Text size={"xs"} tone={"muted"}>{[deck.difficulty, `${deck.cardCount} ${data.cardsLabel}`, `${deck.dueCount} ${data.dueLabel}`, `${deck.masteredCount} ${data.masteredLabel}`].join(" · ")}</Text>
+                        <div className={flashcardActionRowClassName}><Button variant="outline" size="sm" isDisabled={data.resumeSessionId !== undefined} onPress={() => props.on.openReview(deck.id)}>{data.startLabel}</Button>{deck.quizEligible ? <Button variant="outline" size="sm" onPress={() => props.on.openQuiz(deck.id)}>{data.quizDeckLabel}</Button> : null}</div>
                     </article></SurfaceCard>)}</div>}
                 </section>
-            </div> : failed || unavailable ? renderState(failed ? data.failedText : data.evidenceEmptyText, failed, data.evidenceTitle) : <SurfaceListCard props={{ label: data.evidenceTitle }} isLoading={loading}><ul className={flashcardEvidenceListClassName}>{data.evidenceRows.map((row) => <li className={flashcardEvidenceRowClassName} key={row.id}><Text props={{ content: row.title, size: "sm", weight: "medium" }} /><Text props={{ content: row.description, size: "sm", tone: "muted" }} /><Text props={{ content: row.fact, size: "xs", tone: "muted" }} />{row.percent === undefined ? null : <Progress props={{ value: row.percent, label: row.title }} />}</li>)}</ul></SurfaceListCard>}
+            </div> : failed || unavailable ? renderState(failed ? data.failedText : data.evidenceEmptyText, failed, data.evidenceTitle) : <SurfaceListCard label={data.evidenceTitle} isLoading={loading}><ul className={flashcardEvidenceListClassName}>{data.evidenceRows.map((row) => <li className={flashcardEvidenceRowClassName} key={row.id}><Text size={"sm"} weight={"medium"}>{row.title}</Text><Text size={"sm"} tone={"muted"}>{row.description}</Text><Text size={"xs"} tone={"muted"}>{row.fact}</Text>{row.percent === undefined ? null : <Progress label={row.title} value={row.percent} />}</li>)}</ul></SurfaceListCard>}
         </main>
 
         <ModalBranch isOpen={data.modalOpen} size="md" onDismiss={props.on.dismissModal}><section className={flashcardModalClassName}>
-            <Heading props={{ content: data.modalTitle, level: 2 }} /><Text props={{ content: data.modalDescription, size: "sm", tone: "muted" }} />
-            <div className={flashcardActionRowClassName}><Button props={{ label: data.reviewAllLabel, variant: data.selectedScope === "all" ? "primary" : "outline" }} on={{ press: () => props.on.selectScope("all") }} /><Button props={{ label: data.reviewDueLabel, variant: data.selectedScope === "due" ? "primary" : "outline" }} on={{ press: () => props.on.selectScope("due") }} /></div>
-            {data.startErrorText === undefined ? null : <Text props={{ content: data.startErrorText, size: "sm", weight: "semibold" }} />}
-            <div className={flashcardActionRowClassName}><Button props={{ label: data.cancelLabel, variant: "outline" }} on={{ press: props.on.dismissModal }} /><Button props={{ label: data.startLabel, variant: "primary", isPending: data.startPending }} on={{ press: props.on.confirmReview }} /></div>
+            <Heading level={2}>{data.modalTitle}</Heading><Text size={"sm"} tone={"muted"}>{data.modalDescription}</Text>
+            <div className={flashcardActionRowClassName}><Button variant={data.selectedScope === "all" ? "primary" : "outline"} onPress={() => props.on.selectScope("all")}>{data.reviewAllLabel}</Button><Button variant={data.selectedScope === "due" ? "primary" : "outline"} onPress={() => props.on.selectScope("due")}>{data.reviewDueLabel}</Button></div>
+            {data.startErrorText === undefined ? null : <Text size={"sm"} weight={"semibold"}>{data.startErrorText}</Text>}
+            <div className={flashcardActionRowClassName}><Button variant="outline" onPress={props.on.dismissModal}>{data.cancelLabel}</Button><Button variant="primary" isPending={data.startPending} onPress={props.on.confirmReview}>{data.startLabel}</Button></div>
         </section></ModalBranch>
     </>
 }

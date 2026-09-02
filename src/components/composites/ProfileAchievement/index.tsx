@@ -1,6 +1,7 @@
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { IconTile } from "@/components/leaves/IconTile"
-import { Text } from "@/components/leaves/Text"
+import { SurfaceCard } from "@starci/grammar/common"
+import { IconTile } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { Text } from "@starci/grammar/common"
 import { profileAchievementCardClassName } from "./classNames"
 
 /** One earned achievement name and rarity fact. */
@@ -12,5 +13,5 @@ export type ProfileAchievementProps = { readonly props: ProfileAchievementData; 
 export const ProfileAchievement = (props: ProfileAchievementProps) => {
     const data = props.props
     const isLoading = props.isLoading ?? false
-    return <SurfaceCard><div className={profileAchievementCardClassName}><IconTile props={{ icon: "reward", tone: "accent", size: "md" }} isLoading={isLoading} /><Text props={{ content: data.name, size: "sm", weight: "semibold" }} isLoading={isLoading} /><Text props={{ content: data.rarity, size: "xs", tone: "muted" }} isLoading={isLoading} /></div></SurfaceCard>
+    return <SurfaceCard composition="joined"><div className={profileAchievementCardClassName}><IconTile source={iconSourceFor("reward", "leading")} tone={"accent"} size={"md"} isSkeleton={isLoading} /><Text size={"sm"} weight={"semibold"} isSkeleton={isLoading}>{data.name}</Text><Text size={"xs"} tone={"muted"} isSkeleton={isLoading}>{data.rarity}</Text></div></SurfaceCard>
 }

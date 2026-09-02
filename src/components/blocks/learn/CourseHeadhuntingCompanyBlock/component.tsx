@@ -1,11 +1,13 @@
-import { SurfaceListCard, type SurfaceListCardData } from "@/components/branches/SurfaceListCard"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { SurfaceListCard } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { EmptyNotice } from "@starci/grammar/common"
 import { Breadcrumbs, type BreadcrumbStep } from "@/components/leaves/Breadcrumbs"
-import { Button } from "@/components/leaves/Button"
-import { Heading } from "@/components/leaves/Heading"
-import { Text } from "@/components/leaves/Text"
-import { TextLink } from "@/components/leaves/TextLink"
+import { Button } from "@starci/grammar/common"
+import { Heading } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import type { HeadhuntingDirectoryRow } from "@/components/blocks/learn/CourseHeadhuntingsBlock/component"
+import { TextAction } from "@starci/grammar/common"
+
 
 type CourseHeadhuntingCompanyPageData = {
     readonly description?: string; readonly address?: string; readonly contactLabel?: string; readonly consultantsLabel: string
@@ -15,18 +17,18 @@ type CourseHeadhuntingCompanyPageData = {
 type CourseHeadhuntingCompanyPageActions = { readonly [key: string]: (() => void) | undefined; readonly back?: () => void; readonly retry?: () => void; readonly course?: () => void; readonly companyContact?: () => void }
 /** Pure renderer input for the company profile surface. */
 export type CourseHeadhuntingCompanyPageProps = { readonly blockState: "pending" | "ready" | "not-found" | "failed"; readonly props: CourseHeadhuntingCompanyPageData; readonly on?: CourseHeadhuntingCompanyPageActions }
-type ConsultantListData = SurfaceListCardData & { readonly rows: ReadonlyArray<HeadhuntingDirectoryRow>; readonly emptyMessage: string }
+type ConsultantListData = { readonly label: string; readonly rows: ReadonlyArray<HeadhuntingDirectoryRow>; readonly emptyMessage: string }
 const PENDING_CONSULTANT_ROWS: ReadonlyArray<HeadhuntingDirectoryRow> = Array.from({ length: 3 }, (_unused, index) => ({ id: `pending-${index}`, label: "" }))
 
 type ConsultantListProps = { readonly props: ConsultantListData; readonly on?: CourseHeadhuntingCompanyPageActions; readonly isLoading?: boolean }
 
 const ConsultantList = (props: ConsultantListProps) => {
     const rows = props.isLoading === true ? PENDING_CONSULTANT_ROWS : props.props.rows
-    if (props.isLoading !== true && rows.length === 0) return <EmptyNotice props={{ message: props.props.emptyMessage }} />
+    if (props.isLoading !== true && rows.length === 0) return <EmptyNotice message={props.props.emptyMessage} />
     return <ul aria-label={props.props.label}>{rows.map((row) => {
         const label = [row.label, row.meta, row.actionLabel].filter((part) => part !== undefined).join(" · ")
         const handler = row.isActionAvailable === true ? props.on?.[`contact:${row.id}`] : undefined
-        return <li key={row.id}>{handler === undefined ? <Text props={{ content: label, size: "md" }} isLoading={props.isLoading === true} /> : <TextLink props={{ label, size: "md" }} on={{ press: handler }} />}</li>
+        return <li key={row.id}>{handler === undefined ? <Text size={"md"} isSkeleton={props.isLoading === true}>{label}</Text> : <TextAction size={"md"} appearance="inline" onPress={handler}>{label}</TextAction>}</li>
     })}</ul>
 }
 
@@ -41,16 +43,16 @@ export const CourseHeadhuntingCompanyBlockBase = (props: CourseHeadhuntingCompan
     return <main aria-label={props.props.title}>
         <header>
             <Breadcrumbs props={{ steps: props.props.trail, label: props.props.title }} on={{ course: props.on?.course }} />
-            <Heading props={{ content: props.props.title, level: 1 }} isLoading={isLoading} />
+            <Heading level={1} isSkeleton={isLoading}>{props.props.title}</Heading>
         </header>
         <nav aria-label={props.props.backLabel}>
-            <Button props={{ label: props.props.backLabel, variant: "ghost", size: "sm" }} on={{ press: props.on?.back }} />
-            {props.props.contactLabel === undefined ? null : <Button props={{ label: props.props.contactLabel, variant: "primary", size: "sm", icon: "email" }} on={{ press: props.on?.companyContact }} />}
+            <Button variant="ghost" size="sm" onPress={props.on?.back}>{props.props.backLabel}</Button>
+            {props.props.contactLabel === undefined ? null : <Button variant="primary" size="sm" onPress={props.on?.companyContact}>{props.props.contactLabel}</Button>}
         </nav>
-        {notice ? <EmptyNotice props={{ icon: props.blockState === "failed" ? "retry" : "talents", message: noticeMessage, actionLabel: props.blockState === "failed" ? props.props.retryLabel : props.props.backLabel }} on={{ act: props.blockState === "failed" ? props.on?.retry : props.on?.back }} /> : <section>
-            {props.props.description === undefined ? null : <Text props={{ content: props.props.description, size: "md" }} isLoading={isLoading} />}
-            {props.props.address === undefined ? null : <Text props={{ content: props.props.address, size: "sm", tone: "muted" }} isLoading={isLoading} />}
-            <SurfaceListCard props={{ label: props.props.consultantsLabel }} isLoading={isLoading}><ConsultantList props={{ label: props.props.consultantsLabel, rows: props.props.consultants, emptyMessage: props.props.emptyMessage }} on={props.on} isLoading={isLoading} /></SurfaceListCard>
+        {notice ? <EmptyNotice message={noticeMessage} actionLabel={props.blockState === "failed" ? props.props.retryLabel : props.props.backLabel} iconSource={iconSourceFor(props.blockState === "failed" ? "retry" : "talents", "leading")} onAction={({ act: props.blockState === "failed" ? props.on?.retry : props.on?.back })?.act} /> : <section>
+            {props.props.description === undefined ? null : <Text size={"md"} isSkeleton={isLoading}>{props.props.description}</Text>}
+            {props.props.address === undefined ? null : <Text size={"sm"} tone={"muted"} isSkeleton={isLoading}>{props.props.address}</Text>}
+            <SurfaceListCard label={props.props.consultantsLabel} isLoading={isLoading}><ConsultantList props={{ label: props.props.consultantsLabel, rows: props.props.consultants, emptyMessage: props.props.emptyMessage }} on={props.on} isLoading={isLoading} /></SurfaceListCard>
         </section>}
     </main>
 }

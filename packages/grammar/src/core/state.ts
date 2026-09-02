@@ -2,9 +2,9 @@ import {
     PRESENTATION_STATES,
     assertPresentationState,
     type PresentationState,
-} from "../common/index.js"
+} from "../common/state.js"
 
-export type { PresentationState } from "../common/index.js"
+export type { PresentationState } from "../common/state.js"
 export { assertPresentationState }
 
 type NeutralTreatment = {

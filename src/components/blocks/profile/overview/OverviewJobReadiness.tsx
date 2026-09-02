@@ -1,12 +1,13 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { SurfaceListCard } from "@/components/branches/SurfaceListCard"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { SurfaceCard } from "@starci/grammar/common"
+import { SurfaceListCard } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { EmptyNotice } from "@starci/grammar/common"
 import { EvidenceRow } from "@/components/composites/EvidenceRow"
-import { Badge } from "@/components/leaves/Badge"
-import { Text } from "@/components/leaves/Text"
+import { Badge } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import { useOverviewEvidence } from "./useOverviewEvidence"
 import { clamp } from "./shared"
 import {
@@ -74,15 +75,8 @@ export const OverviewJobReadiness = (props: OverviewJobReadinessProps) => {
     if (request.error || (!request.isLoading && !track)) {
         const failed = Boolean(request.error)
         return (
-            <SurfaceCard props={{ label: common.label }}>
-                <EmptyNotice
-                    props={{
-                        icon: "jobs",
-                        message: failed ? common.errorMessage : common.emptyMessage,
-                        actionLabel: failed ? common.retryLabel : undefined,
-                    }}
-                    on={{ act: failed ? retry : undefined }}
-                />
+            <SurfaceCard label={common.label} composition="joined">
+                <EmptyNotice message={failed ? common.errorMessage : common.emptyMessage} actionLabel={failed ? common.retryLabel : undefined} iconSource={iconSourceFor("jobs", "leading")} onAction={({ act: failed ? retry : undefined })?.act} />
             </SurfaceCard>
         )
     }
@@ -114,34 +108,17 @@ export const OverviewJobReadiness = (props: OverviewJobReadinessProps) => {
         ? t("jobReadiness.foundationPercentile", { percent: codingPercentile })
         : t("jobReadiness.evidencePending")
     return (
-        <SurfaceCard props={{ label: common.label, inset: "compact" }} isLoading={loading}>
+        <SurfaceCard label={common.label} composition="single" state={loading ? "pending" : "neutral"}>
             <div className={profileReadinessCardClassName}>
-                <Text
-                    props={{
-                        content: evidenceMessage,
-                        size: "xs",
-                        tone: "muted",
-                    }}
-                    isLoading={loading}
-                />
+                <Text size={"xs"} tone={"muted"} isSkeleton={loading}>{evidenceMessage}</Text>
                 <div className={profileReadinessSummaryClassName}>
                     <div className={profileReadinessTrackClassName}>
-                        <Badge props={{ content: scoreLabel }} isLoading={loading} />
-                        <Text props={{ content: trackLabel, size: "xs", tone: "muted" }} isLoading={loading} />
+                        <Badge isSkeleton={loading}>{scoreLabel}</Badge>
+                        <Text size={"xs"} tone={"muted"} isSkeleton={loading}>{trackLabel}</Text>
                     </div>
-                    <Text
-                        props={{ content: loading ? undefined : t(`jobReadiness.band.${trackBand}`), size: "xs", tone: "muted" }}
-                        isLoading={loading}
-                    />
+                    <Text size={"xs"} tone={"muted"} isSkeleton={loading}>{loading ? undefined : t(`jobReadiness.band.${trackBand}`)}</Text>
                 </div>
-                <SurfaceListCard
-                    props={{
-                        label: common.label,
-                        isNested: true,
-                        isLabelHidden: true,
-                    }}
-                    isLoading={loading}
-                >
+                <SurfaceListCard label={common.label} labelHidden={true} depth={true ? "nested" : "top"} isLoading={loading}>
                     <div className={profileReadinessListClassName}>
                         {settledMetrics.map((metric) => <EvidenceRow
                             key={metric.id}

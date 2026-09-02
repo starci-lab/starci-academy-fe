@@ -1,13 +1,15 @@
-import { DashboardShell, SectionHeader } from "@starci/grammar/core"
+import { WorkspaceShell, SectionHeader, Button } from "@starci/grammar/common"
 import { ModalBranch } from "@/components/branches/ModalBranch"
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { SurfaceCard } from "@starci/grammar/common"
+import { EmptyNotice } from "@starci/grammar/common"
 import { LabelledProgressRow } from "@/components/composites/LabelledProgressRow"
 import { TitleDescriptionAccordion } from "@/components/composites/TitleDescriptionAccordion"
-import { Button } from "@/components/leaves/Button"
-import { Heading } from "@/components/leaves/Heading"
-import { Progress } from "@/components/leaves/Progress"
-import { Text } from "@/components/leaves/Text"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { Icon } from "@starci/grammar/common"
+
+import { Heading } from "@starci/grammar/common"
+import { Progress } from "@starci/grammar/common"
+import { Text } from "@starci/grammar/common"
 import {
     mockInterviewResultActionsClassName,
     mockInterviewResultEvidenceClassName,
@@ -51,74 +53,74 @@ export const CourseMockInterviewResultBlockBase = (props: CourseMockInterviewRes
     const hero = <section className={mockInterviewResultHeroClassName} aria-labelledby="mock-interview-result-heading">
         <div className={mockInterviewResultHeroCopyClassName}>
             <SectionHeader eyebrow={data.scoreLabel} title={data.title} description={data.description} level={1} id="mock-interview-result-heading" composition="context-intro" />
-            {data.promptTitle === undefined ? null : <Text props={{ content: data.promptTitle, size: "sm", weight: "semibold" }} />}
+            {data.promptTitle === undefined ? null : <Text size={"sm"} weight={"semibold"}>{data.promptTitle}</Text>}
         </div>
         <div className={mockInterviewResultHeroScoreClassName}>
-            <Text props={{ content: data.scoreLabel, size: "sm", tone: "muted" }} />
+            <Text size={"sm"} tone={"muted"}>{data.scoreLabel}</Text>
             {hasScore
-                ? <><div className={mockInterviewResultScoreClassName} aria-label={`${data.scoreLabel}: ${score}/100`}>{score}/100</div><Heading props={{ content: data.verdict ?? data.scoreLabel, level: 2 }} /></>
-                : <Heading props={{ content: loading ? data.gradingScoreLabel ?? data.gradingLabel : data.gradingFailedScoreLabel ?? data.gradingFailedLabel, level: 2 }} />}
+                ? <><div className={mockInterviewResultScoreClassName} aria-label={`${data.scoreLabel}: ${score}/100`}>{score}/100</div><Heading level={2}>{data.verdict ?? data.scoreLabel}</Heading></>
+                : <Heading level={2}>{loading ? data.gradingScoreLabel ?? data.gradingLabel : data.gradingFailedScoreLabel ?? data.gradingFailedLabel}</Heading>}
         </div>
     </section>
 
     const retryActions = <div className={mockInterviewResultActionsClassName}>
-        {data.canRetryGrading ? <Button props={{ label: data.retrying ? data.retryingLabel : data.retryLabel, variant: "primary", isPending: data.retrying }} on={{ press: props.on?.retry }} /> : null}
-        <Button props={{ label: data.abandonLabel, variant: "outline", disabled: data.retrying }} on={{ press: props.on?.abandon }} />
+        {data.canRetryGrading ? <Button variant="primary" isPending={data.retrying} onPress={props.on?.retry}>{data.retrying ? data.retryingLabel : data.retryLabel}</Button> : null}
+        <Button variant="outline" isDisabled={data.retrying} onPress={props.on?.abandon}>{data.abandonLabel}</Button>
     </div>
 
     const readyActions = <div className={mockInterviewResultReadyActionsClassName}>
-        <Button props={{ label: data.newSessionLabel, variant: "primary", icon: "next", iconPlacement: "trailing" }} on={{ press: props.on?.newSession }} />
-        <Button props={{ label: data.openHistoryLabel, variant: "outline" }} on={{ press: props.on?.openHistory }} />
-        <Button props={{ label: data.returnToCourseLabel, variant: "outline" }} on={{ press: props.on?.returnToCourse }} />
-        <Button props={{ label: data.openTranscriptLabel, variant: "outline" }} on={{ press: props.on?.openTranscript }} />
+        <Button variant={"primary"} onPress={({ press: props.on?.newSession })?.press} endContent={"next" === "next" && "trailing" === "trailing" ? <Icon source={iconSourceFor("next", "chip")} role="chip" /> : undefined}>{data.newSessionLabel}</Button>
+        <Button variant="outline" onPress={props.on?.openHistory}>{data.openHistoryLabel}</Button>
+        <Button variant="outline" onPress={props.on?.returnToCourse}>{data.returnToCourseLabel}</Button>
+        <Button variant="outline" onPress={props.on?.openTranscript}>{data.openTranscriptLabel}</Button>
     </div>
 
-    if (state === "failed") return <main className={mockInterviewResultStateClassName} aria-label={data.title}><SurfaceCard><EmptyNotice props={{ message: data.failedLabel, actionLabel: data.retryLabel }} on={{ act: props.on?.retry }} /></SurfaceCard></main>
+    if (state === "failed") return <main className={mockInterviewResultStateClassName} aria-label={data.title}><SurfaceCard composition="joined"><EmptyNotice message={data.failedLabel} actionLabel={data.retryLabel} onAction={({ act: props.on?.retry })?.act} /></SurfaceCard></main>
 
     if (state === "grading" || state === "gradingFailed") {
         const statePanel = <main className={mockInterviewResultStateClassName} aria-label={data.title}>
-            <SurfaceCard props={{ label: state === "grading" ? data.title : data.gradingFailedLabel }}>
+            <SurfaceCard label={state === "grading" ? data.title : data.gradingFailedLabel} composition="joined">
                 <div className={mockInterviewResultSummaryClassName}>
-                    <EmptyNotice props={{ message: state === "grading" ? data.gradingLabel : data.gradingFailureDetail }} />
-                    {state === "grading" ? <Progress props={{ label: data.gradingLabel }} isLoading /> : null}
-                    {state === "gradingFailed" && data.gradingAttemptLabel !== undefined ? <Text props={{ content: data.gradingAttemptLabel, size: "xs", tone: "muted" }} /> : null}
+                    <EmptyNotice message={state === "grading" ? data.gradingLabel : data.gradingFailureDetail} />
+                    {state === "grading" ? <Progress label={data.gradingLabel} isSkeleton /> : null}
+                    {state === "gradingFailed" && data.gradingAttemptLabel !== undefined ? <Text size={"xs"} tone={"muted"}>{data.gradingAttemptLabel}</Text> : null}
                     {state === "gradingFailed" ? retryActions : null}
                 </div>
             </SurfaceCard>
         </main>
-        return <DashboardShell align="start" header={hero} mainLandmark="caller" primary={statePanel} />
+        return <WorkspaceShell align="start" header={hero} mainLandmark="caller" primary={statePanel} />
     }
 
     const primary = <main className={mockInterviewResultPrimaryClassName} aria-label={data.title}>
-        <SurfaceCard props={{ label: data.phaseTitle }}>
+        <SurfaceCard label={data.phaseTitle} composition="joined">
             <div className={mockInterviewResultListClassName}>{data.phases.map((item) => <LabelledProgressRow key={item.id} props={{ id: item.id, title: item.label, percent: item.max === 0 ? 0 : (item.score / item.max) * 100, percentText: `${item.score}/${item.max}` }} />)}</div>
         </SurfaceCard>
         <div className={mockInterviewResultEvidenceClassName}>
-            <SurfaceCard props={{ label: data.strengthsTitle }}><div className={mockInterviewResultListClassName}>{data.strengths.map((item) => <Text key={item} props={{ content: item, size: "sm", icon: "complete" }} />)}</div></SurfaceCard>
-            <SurfaceCard props={{ label: data.gapsTitle }}><div className={mockInterviewResultListClassName}>{data.gaps.map((item) => <Text key={item} props={{ content: item, size: "sm", icon: "next" }} />)}</div></SurfaceCard>
+            <SurfaceCard label={data.strengthsTitle} composition="joined"><div className={mockInterviewResultListClassName}>{data.strengths.map((item) => <Text key={item} size={"sm"} startContent={<Icon source={iconSourceFor("complete", "chip")} role="chip" />}>{item}</Text>)}</div></SurfaceCard>
+            <SurfaceCard label={data.gapsTitle} composition="joined"><div className={mockInterviewResultListClassName}>{data.gaps.map((item) => <Text key={item} size={"sm"} startContent={<Icon source={iconSourceFor("next", "chip")} role="chip" />}>{item}</Text>)}</div></SurfaceCard>
         </div>
         {data.reviews.length === 0 ? null : <div className={mockInterviewResultReviewsClassName}><TitleDescriptionAccordion props={{ label: data.reviewsTitle, items: data.reviews.map((item) => ({ id: item.id, title: `${item.title} · ${item.scoreLabel}`, description: `${data.questionLabel ?? "Question"}\n${item.question}\n\n${data.answerLabel ?? "Answer"}\n${item.answer.trim().length === 0 ? data.unansweredLabel ?? "No answer recorded" : item.answer}\n\n${data.feedbackLabel ?? "Feedback"}\n${item.feedback}` })) }} /></div>}
     </main>
 
     const rail = <aside className={mockInterviewResultRailClassName} aria-label={data.sessionSummaryTitle}>
-        {data.recommendation === undefined ? null : <SurfaceCard props={{ label: data.recommendationTitle }}><div className={mockInterviewResultSummaryClassName}><Text props={{ content: data.recommendation, size: "sm" }} /></div></SurfaceCard>}
-        <SurfaceCard props={{ label: data.sessionSummaryTitle }}><div className={mockInterviewResultSummaryClassName}><Text props={{ content: `${data.sessionSummaryPromptLabel}: ${data.promptTitle ?? "—"}`, size: "sm" }} /><Text props={{ content: `${data.sessionSummaryQuestionLabel}: ${data.reviews.length}`, size: "sm", tone: "muted" }} /></div></SurfaceCard>
-        <SurfaceCard props={{ label: data.actionsTitle ?? data.newSessionLabel }}><div className={mockInterviewResultSummaryClassName}>{readyActions}</div></SurfaceCard>
+        {data.recommendation === undefined ? null : <SurfaceCard label={data.recommendationTitle} composition="joined"><div className={mockInterviewResultSummaryClassName}><Text size={"sm"}>{data.recommendation}</Text></div></SurfaceCard>}
+        <SurfaceCard label={data.sessionSummaryTitle} composition="joined"><div className={mockInterviewResultSummaryClassName}><Text size={"sm"}>{`${data.sessionSummaryPromptLabel}: ${data.promptTitle ?? "—"}`}</Text><Text size={"sm"} tone={"muted"}>{`${data.sessionSummaryQuestionLabel}: ${data.reviews.length}`}</Text></div></SurfaceCard>
+        <SurfaceCard label={data.actionsTitle ?? data.newSessionLabel} composition="joined"><div className={mockInterviewResultSummaryClassName}>{readyActions}</div></SurfaceCard>
     </aside>
 
     return <>
-        <DashboardShell align="start" header={hero} mainLandmark="caller" primary={primary} rail={rail} railLabel={`${data.title} — ${data.sessionSummaryTitle}`} railMode="flow" railWidth="standard" railInset="content" />
+        <WorkspaceShell align="start" header={hero} mainLandmark="caller" primary={primary} rail={rail} railLabel={`${data.title} — ${data.sessionSummaryTitle}`} railMode="flow" railWidth="standard" railInset="content" />
         {data.transcriptOpen === true ? <ModalBranch isOpen size="cover" onDismiss={props.on?.closeTranscript ?? (() => undefined)}>
             <section className={mockInterviewResultTranscriptClassName} aria-label={data.transcriptTitle ?? data.openTranscriptLabel}>
-                <Heading props={{ content: data.transcriptTitle ?? data.openTranscriptLabel, level: 2 }} />
-                {data.transcriptHint === undefined ? null : <Text props={{ content: data.transcriptHint, size: "xs", tone: "muted" }} />}
+                <Heading level={2}>{data.transcriptTitle ?? data.openTranscriptLabel}</Heading>
+                {data.transcriptHint === undefined ? null : <Text size={"xs"} tone={"muted"}>{data.transcriptHint}</Text>}
                 <div className={mockInterviewResultTranscriptListClassName}>
-                    {data.reviews.map((item) => <SurfaceCard key={item.id} props={{ label: item.title }}>
+                    {data.reviews.map((item) => <SurfaceCard key={item.id} label={item.title} composition="joined">
                         <div className={mockInterviewResultTranscriptItemClassName}>
-                            <Text props={{ content: data.interviewerLabel ?? "Interviewer", size: "xs", tone: "muted", weight: "semibold" }} />
-                            <Text props={{ content: item.question, size: "sm" }} />
-                            <Text props={{ content: data.candidateLabel ?? "Your answer", size: "xs", tone: "muted", weight: "semibold" }} />
-                            <Text props={{ content: item.answer.trim().length === 0 ? data.unansweredLabel ?? "No answer recorded" : item.answer, size: "sm" }} />
+                            <Text size={"xs"} tone={"muted"} weight={"semibold"}>{data.interviewerLabel ?? "Interviewer"}</Text>
+                            <Text size={"sm"}>{item.question}</Text>
+                            <Text size={"xs"} tone={"muted"} weight={"semibold"}>{data.candidateLabel ?? "Your answer"}</Text>
+                            <Text size={"sm"}>{item.answer.trim().length === 0 ? data.unansweredLabel ?? "No answer recorded" : item.answer}</Text>
                         </div>
                     </SurfaceCard>)}
                 </div>

@@ -1,5 +1,6 @@
-import { Button } from "@/components/leaves/Button"
-import { EmptyNotice } from "@/components/composites/EmptyNotice"
+import { Button } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
+import { EmptyNotice } from "@starci/grammar/common"
 import { DrawerBranch } from "@/components/branches/DrawerBranch"
 import { CartLine } from "@/components/blocks/commerce/CartLine"
 import { type CartLineData } from "@/components/blocks/commerce/CartLine/component"
@@ -112,14 +113,7 @@ export const CartDrawerBase = (props: CartDrawerProps) => {
             onDismiss={props.on?.dismiss ?? (() => undefined)}
         >
             {showsNotice ? (
-                <EmptyNotice
-                    props={{
-                        icon: "cart",
-                        message: props.state === "failed" ? labels.failedMessage : labels.emptyMessage,
-                        actionLabel: props.state === "failed" ? labels.failedAction : labels.emptyAction,
-                    }}
-                    on={{ act: props.on?.browse }}
-                />
+                <EmptyNotice message={props.state === "failed" ? labels.failedMessage : labels.emptyMessage} actionLabel={props.state === "failed" ? labels.failedAction : labels.emptyAction} iconSource={iconSourceFor("cart", "leading")} onAction={({ act: props.on?.browse })?.act} />
             ) : (
                 <>
                     <div>
@@ -141,14 +135,8 @@ export const CartDrawerBase = (props: CartDrawerProps) => {
                         }}
                     />
                     <div>
-                        <Button
-                            props={{ label: labels.checkout, variant: "primary", disabled: isLoading }}
-                            on={{ press: props.on?.checkout }}
-                        />
-                        <Button
-                            props={{ label: labels.viewFullCart, variant: "secondary" }}
-                            on={{ press: props.on?.viewFullCart }}
-                        />
+                        <Button variant="primary" isDisabled={isLoading} onPress={props.on?.checkout}>{labels.checkout}</Button>
+                        <Button variant="secondary" onPress={props.on?.viewFullCart}>{labels.viewFullCart}</Button>
                     </div>
                 </>
             )}

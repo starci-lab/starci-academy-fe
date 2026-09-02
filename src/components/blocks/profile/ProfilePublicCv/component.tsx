@@ -1,12 +1,14 @@
 import type { IconName } from "@/components/leaves/Icon"
-import { SurfaceCard } from "@/components/branches/SurfaceCard"
-import { Badge } from "@/components/leaves/Badge"
-import { Button } from "@/components/leaves/Button"
-import { Heading } from "@/components/leaves/Heading"
-import { IconTile } from "@/components/leaves/IconTile"
-import { Link } from "@/components/leaves/Link"
+import { SurfaceCard } from "@starci/grammar/common"
+import { Icon } from "@starci/grammar/common"
+import { Badge } from "@starci/grammar/common"
+import { Button } from "@starci/grammar/common"
+
+import { Heading } from "@starci/grammar/common"
+import { IconTile } from "@starci/grammar/common"
+import { iconSourceFor } from "@/components/leaves/Icon"
 import { ProfileCvDocument } from "@/components/leaves/ProfileCvDocument"
-import { Text } from "@/components/leaves/Text"
+import { Text } from "@starci/grammar/common"
 import { ProfileCvBuilder } from "../ProfileCvBuilder"
 import {
     publicCvActionsClassName,
@@ -25,6 +27,8 @@ import {
     publicCvTitleRowClassName,
     publicCvWorkspaceClassName,
 } from "./classNames"
+import { Link } from "@starci/grammar/common"
+
 
 /** Public CV state and content. */
 export type ProfilePublicCvProps = {
@@ -70,12 +74,12 @@ const PublicCvNotice = (props: ProfilePublicCvProps) => {
             : undefined
     return (
         <div className={publicCvNoticeClassName} role={props.state === "error" ? "alert" : "status"}>
-            <IconTile props={{ icon: STATUS_ICONS[props.state], tone: props.state === "error" ? "danger" : "neutral", size: "md" }} />
+            <IconTile source={iconSourceFor(STATUS_ICONS[props.state], "leading")} tone={props.state === "error" ? "danger" : "neutral"} size={"md"} />
             <div className={publicCvNoticeCopyClassName}>
-                <Heading props={{ content: props.noticeTitle, level: 4 }} />
-                <Text props={{ content: props.noticeDescription, tone: "muted", size: "sm" }} />
+                <Heading level={4}>{props.noticeTitle}</Heading>
+                <Text size={"sm"} tone={"muted"}>{props.noticeDescription}</Text>
             </div>
-            {action === undefined ? null : <Button props={{ label: action.label, variant: "secondary", size: "sm", icon: action.icon, isPending: action.pending }} on={{ press: action.press }} />}
+            {action === undefined ? null : <Button variant="secondary" size="sm" isPending={action.pending} onPress={action.press}>{action.label}</Button>}
         </div>
     )
 }
@@ -85,19 +89,19 @@ export const ProfilePublicCvBase = (props: ProfilePublicCvProps) => {
     if (props.isSelf) return <ProfileCvBuilder />
     const loading = props.state === "pending"
     return (
-        <SurfaceCard props={{ label: props.label, isFrameless: true }}>
+        <SurfaceCard label={props.label} frame={true ? "frameless" : "bounded"} composition="joined">
             <section className={publicCvWorkspaceClassName} aria-label={props.label} data-state={props.state}>
                 <header className={publicCvHeaderClassName}>
                     <div className={publicCvIdentityClassName}>
                         <div className={publicCvTitleRowClassName}>
-                            <Text props={{ content: props.title, weight: "semibold" }} isLoading={loading} />
-                            <Badge props={{ content: props.statusLabel, tone: STATUS_TONES[props.state], icon: STATUS_ICONS[props.state] }} isLoading={loading} />
+                            <Text weight={"semibold"} isSkeleton={loading}>{props.title}</Text>
+                            <Badge tone={STATUS_TONES[props.state]} startContent={<Icon source={iconSourceFor(STATUS_ICONS[props.state], "chip")} role="chip" />} isSkeleton={loading}>{props.statusLabel}</Badge>
                         </div>
-                        <Text props={{ content: props.updatedLabel ?? props.description, tone: "muted", size: "sm" }} isLoading={loading} />
+                        <Text size={"sm"} tone={"muted"} isSkeleton={loading}>{props.updatedLabel ?? props.description}</Text>
                     </div>
                     <div className={publicCvActionsClassName}>
-                        {props.state === "ready" && props.pdfUrl !== undefined ? <Link props={{ label: props.openLabel, externalHref: props.pdfUrl, icon: "cv" }} /> : null}
-                        {props.isSelf ? <Button props={{ label: props.editLabel, variant: "secondary", size: "sm", icon: "review" }} on={{ press: props.on?.edit }} isLoading={loading} /> : null}
+                        {props.state === "ready" && props.pdfUrl !== undefined ? <Link href={props.pdfUrl} startContent={<Icon source={iconSourceFor("cv", "chip")} role="chip" />}>{props.openLabel}</Link> : null}
+                        {props.isSelf ? <Button variant={"secondary"} size={"sm"} isSkeleton={loading} onPress={({ press: props.on?.edit })?.press}>{props.editLabel}</Button> : null}
                     </div>
                 </header>
                 {loading ? <PublicCvSkeleton /> : props.state === "ready" && props.pdfUrl !== undefined ? (

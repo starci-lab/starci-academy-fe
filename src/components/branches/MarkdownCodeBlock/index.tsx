@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { codeToHtml } from "shiki"
-import { FencedCodeBlock } from "@starci/grammar/core"
+import { FencedCodeBlock } from "@starci/grammar/common"
 
 /**
  * BRANCH - `MarkdownCodeBlock`: a run of code inside an authored document, set apart from the prose.
