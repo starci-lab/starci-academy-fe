@@ -37,6 +37,6 @@ export const IconButton = ({
         aria-label={label}
         {...(isDisabled || isSkeleton || onPress === undefined ? {} : { onPress })}
     >
-        {isSkeleton ? null : <Icon source={source} role="leading" />}
+        {isSkeleton ? null : <Icon source={source} usage="leading" />}
     </HeroButton>
 )

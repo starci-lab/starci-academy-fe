@@ -79,7 +79,7 @@ export const Breadcrumbs = (props: BreadcrumbsProps) => {
                 onPress={on?.[parent.id]}
                 className={breadcrumbsBackLinkClassName}
             >
-                <Icon source={iconSourceFor("back", "chip")} role={"chip"} />
+                <Icon source={iconSourceFor("back", "chip")} usage={"chip"} />
                 {data.backLabel ?? BACK_LABEL}
             </HeroLink>
         )

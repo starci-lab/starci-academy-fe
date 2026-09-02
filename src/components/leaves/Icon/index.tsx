@@ -121,7 +121,7 @@ import {
     CircleIcon as CircleSolidIcon,
     CourseRailIcon as CourseRailSolidIcon,
 } from "@starci/heroicons/16/solid"
-import type { IconRole, IconSource } from "@starci/grammar/common"
+import type { IconSource, IconUsage } from "@starci/grammar/common"
 import type { SVGProps } from "react"
 import { GithubMark, GoogleMark } from "./brands"
 
@@ -276,4 +276,4 @@ const GLYPHS: Record<IconName, GlyphCuts> = {
 }
 
 /** Resolve a product-owned semantic glyph name to the source Grammar renders. */
-export const iconSourceFor = (name: IconName, role: IconRole = "chip"): IconSource => GLYPHS[name][role]
+export const iconSourceFor = (name: IconName, usage: IconUsage = "chip"): IconSource => GLYPHS[name][usage]

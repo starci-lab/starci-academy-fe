@@ -25,7 +25,7 @@ export const EvidenceRow = (props: EvidenceRowProps) => {
     const data = props.props
     const on = props.on
     const isLoading = props.isLoading ?? false
-    const content = <div className={evidenceRowClassName}><div className={evidenceIdentityClassName}><Text size={"sm"} weight={"semibold"} isSkeleton={isLoading}>{data.title}</Text>{data.subtitle === undefined ? null : <Text size={"xs"} isSkeleton={isLoading}>{data.subtitle}</Text>}</div>{data.fact === undefined ? null : <Badge tone={data.factTone} isSkeleton={isLoading}>{data.fact}</Badge>}{data.isPressable === true ? <Icon source={iconSourceFor("disclosure", "chip")} role={"chip"} /> : null}</div>
+    const content = <div className={evidenceRowClassName}><div className={evidenceIdentityClassName}><Text size={"sm"} weight={"semibold"} isSkeleton={isLoading}>{data.title}</Text>{data.subtitle === undefined ? null : <Text size={"xs"} isSkeleton={isLoading}>{data.subtitle}</Text>}</div>{data.fact === undefined ? null : <Badge tone={data.factTone} isSkeleton={isLoading}>{data.fact}</Badge>}{data.isPressable === true ? <Icon source={iconSourceFor("disclosure", "chip")} usage={"chip"} /> : null}</div>
     return data.isPressable === true ? (
         <PressableSurface label={data.title ?? ""} press={on?.press}>{content}</PressableSurface>
     ) : (

@@ -57,7 +57,7 @@ export const IconTile = ({
             )}
         >
             {isSkeleton ? null : showsArtwork ? artwork : (
-                <Icon source={source} role="leading" {...(ariaLabel === undefined ? {} : { ariaLabel })} />
+                <Icon source={source} usage="leading" {...(ariaLabel === undefined ? {} : { ariaLabel })} />
             )}
         </span>
     )

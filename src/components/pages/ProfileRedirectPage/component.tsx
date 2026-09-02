@@ -15,7 +15,7 @@ export type ProfileRedirectPageProps = {
 /** Keep Profile entry observable instead of handing the host an unexplained blank body. */
 export const ProfileRedirectPageBase = (props: ProfileRedirectPageProps) => {
     if (props.state === "error") {
-        return <div className={profileRedirectStateClassName}><SurfaceCard composition="joined"><EmptyNotice message={"Chưa mở được hồ sơ của bạn."} description={"Kiểm tra kết nối rồi thử lại. Dữ liệu hồ sơ đã lưu không bị thay đổi."} actionLabel={"Thử lại"} isActionPending={props.retryPending} iconSource={iconSourceFor("retry", "leading")} actionStartContent={<Icon source={iconSourceFor("retry", "chip")} role="chip" />} onAction={({ act: props.on.retry })?.act} /></SurfaceCard></div> // vn-ok: localized Profile-entry recovery state.
+        return <div className={profileRedirectStateClassName}><SurfaceCard composition="joined"><EmptyNotice message={"Chưa mở được hồ sơ của bạn."} description={"Kiểm tra kết nối rồi thử lại. Dữ liệu hồ sơ đã lưu không bị thay đổi."} actionLabel={"Thử lại"} isActionPending={props.retryPending} iconSource={iconSourceFor("retry", "leading")} actionStartContent={<Icon source={iconSourceFor("retry", "chip")} usage="chip" />} onAction={({ act: props.on.retry })?.act} /></SurfaceCard></div> // vn-ok: localized Profile-entry recovery state.
     }
     return <div className={profileRedirectStateClassName} role="status" aria-live="polite" aria-busy="true"><SurfaceCard composition="joined" state="pending"><Text tone={"muted"} live={"polite"} isSkeleton>{"Đang mở hồ sơ của bạn…"}</Text></SurfaceCard></div> // vn-ok: localized Profile-entry pending state.
 }

@@ -34,7 +34,7 @@ export const Label = (props: LabelProps) => {
     const data = props.props
     return (
         <label htmlFor={data.htmlFor} className={data.visibility === "screenReader" ? labelScreenReaderClassName : labelClassName}>
-            {data.icon === undefined ? null : <Icon source={iconSourceFor(data.icon, "chip")} role={"chip"} />}
+            {data.icon === undefined ? null : <Icon source={iconSourceFor(data.icon, "chip")} usage={"chip"} />}
             {data.content}
         </label>
     )

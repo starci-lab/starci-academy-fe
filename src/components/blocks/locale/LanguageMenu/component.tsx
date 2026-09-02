@@ -33,6 +33,6 @@ export const LanguageMenuBase = (props: LanguageMenuProps) => (
             }],
         }}
         on={{ action: (id) => props.on?.select?.(id) }}
-        trigger={<Icon source={iconSourceFor("locale", "leading")} role={"leading"} />}
+        trigger={<Icon source={iconSourceFor("locale", "leading")} usage={"leading"} />}
     />
 )

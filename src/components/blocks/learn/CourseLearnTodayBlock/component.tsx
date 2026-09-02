@@ -27,7 +27,7 @@ export type CourseLearnTodayActions = { readonly open?: (id: string) => void; re
 export type CourseLearnTodayBlockProps = { readonly blockState: CourseLearnTodayState; readonly mobileView: Extract<LearnMobileView, "today" | "course" | "progress">; readonly props: CourseLearnTodayData; readonly on?: CourseLearnTodayActions }
 
 type ResumeCardProps = { readonly item: CourseLearnTodayItem; readonly label: string; readonly open?: (id: string) => void; readonly isLoading: boolean }
-const ResumeCard = (props: ResumeCardProps) => <SurfaceCard label={props.label} composition="joined" state={props.isLoading ? "pending" : "neutral"}><Text size={"sm"} weight={"medium"} isSkeleton={props.isLoading}>{props.item.title}</Text><Text size={"sm"} tone={"muted"} isSkeleton={props.isLoading}>{props.item.kind}</Text>{props.isLoading ? null : <TextAction appearance="disclosure" onPress={() => props.open?.(props.item.id)} endContent={<Icon source={iconSourceFor("next", "chip")} role="chip" />}>{props.item.actionLabel}</TextAction>}</SurfaceCard>
+const ResumeCard = (props: ResumeCardProps) => <SurfaceCard label={props.label} composition="joined" state={props.isLoading ? "pending" : "neutral"}><Text size={"sm"} weight={"medium"} isSkeleton={props.isLoading}>{props.item.title}</Text><Text size={"sm"} tone={"muted"} isSkeleton={props.isLoading}>{props.item.kind}</Text>{props.isLoading ? null : <TextAction appearance="disclosure" onPress={() => props.open?.(props.item.id)} endContent={<Icon source={iconSourceFor("next", "chip")} usage="chip" />}>{props.item.actionLabel}</TextAction>}</SurfaceCard>
 
 /** Draw mobile alternatives and the desktop command-center dashboard. */
 export const CourseLearnTodayBlockBase = (props: CourseLearnTodayBlockProps) => {

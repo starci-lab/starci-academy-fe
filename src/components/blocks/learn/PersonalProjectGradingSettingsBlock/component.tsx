@@ -5,8 +5,8 @@ import { Select } from "@/components/leaves/Select"
 import { Text } from "@starci/grammar/common"
 import { personalProjectGradingSettingsActionsClassName, personalProjectGradingSettingsClassName, personalProjectGradingSettingsSectionClassName } from "./classNames"
 
-const RevealTokenIcon = () => <Icon source={iconSourceFor("revealPassword", "chip")} role={"chip"} />
-const HideTokenIcon = () => <Icon source={iconSourceFor("hidePassword", "chip")} role={"chip"} />
+const RevealTokenIcon = () => <Icon source={iconSourceFor("revealPassword", "chip")} usage={"chip"} />
+const HideTokenIcon = () => <Icon source={iconSourceFor("hidePassword", "chip")} usage={"chip"} />
 
 /** One language or grading-model choice shown in the settings drawer. */
 export type PersonalProjectGradingSettingsOption = { readonly id: string; readonly label: string; readonly disabled?: boolean }

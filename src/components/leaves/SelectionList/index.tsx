@@ -101,7 +101,7 @@ export const SelectionList = (props: SelectionListProps) => {
                 >
                     {data.variant === "outline" ? (
                         <span className={selectionListOutlineContentClassName}>
-                            <Icon source={iconSourceFor(item.icon ?? "pending", "leading")} role={"leading"} />
+                            <Icon source={iconSourceFor(item.icon ?? "pending", "leading")} usage={"leading"} />
                             <span data-slot="label" className={selectionListLabelClassName}>
                                 {item.title}
                             </span>
@@ -114,7 +114,7 @@ export const SelectionList = (props: SelectionListProps) => {
                             data-slot="compact-icon"
                             className={selectionListCompactIconClassName}
                         >
-                            <Icon source={iconSourceFor(item.icon ?? "pending", "leading")} role={"leading"} />
+                            <Icon source={iconSourceFor(item.icon ?? "pending", "leading")} usage={"leading"} />
                         </span>
                     ) : data.variant === "scopes" || data.variant === "navigation" ? (
                         <IconLabelFactRow props={{

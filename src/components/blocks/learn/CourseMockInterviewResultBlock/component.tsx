@@ -69,7 +69,7 @@ export const CourseMockInterviewResultBlockBase = (props: CourseMockInterviewRes
     </div>
 
     const readyActions = <div className={mockInterviewResultReadyActionsClassName}>
-        <Button variant={"primary"} onPress={({ press: props.on?.newSession })?.press} endContent={<Icon source={iconSourceFor("next", "chip")} role="chip" />}>{data.newSessionLabel}</Button>
+        <Button variant={"primary"} onPress={({ press: props.on?.newSession })?.press} endContent={<Icon source={iconSourceFor("next", "chip")} usage="chip" />}>{data.newSessionLabel}</Button>
         <Button variant="outline" onPress={props.on?.openHistory}>{data.openHistoryLabel}</Button>
         <Button variant="outline" onPress={props.on?.returnToCourse}>{data.returnToCourseLabel}</Button>
         <Button variant="outline" onPress={props.on?.openTranscript}>{data.openTranscriptLabel}</Button>
@@ -96,8 +96,8 @@ export const CourseMockInterviewResultBlockBase = (props: CourseMockInterviewRes
             <div className={mockInterviewResultListClassName}>{data.phases.map((item) => <LabelledProgressRow key={item.id} props={{ id: item.id, title: item.label, percent: item.max === 0 ? 0 : (item.score / item.max) * 100, percentText: `${item.score}/${item.max}` }} />)}</div>
         </SurfaceCard>
         <div className={mockInterviewResultEvidenceClassName}>
-            <SurfaceCard label={data.strengthsTitle} composition="joined"><div className={mockInterviewResultListClassName}>{data.strengths.map((item) => <Text key={item} size={"sm"} startContent={<Icon source={iconSourceFor("complete", "chip")} role="chip" />}>{item}</Text>)}</div></SurfaceCard>
-            <SurfaceCard label={data.gapsTitle} composition="joined"><div className={mockInterviewResultListClassName}>{data.gaps.map((item) => <Text key={item} size={"sm"} startContent={<Icon source={iconSourceFor("next", "chip")} role="chip" />}>{item}</Text>)}</div></SurfaceCard>
+            <SurfaceCard label={data.strengthsTitle} composition="joined"><div className={mockInterviewResultListClassName}>{data.strengths.map((item) => <Text key={item} size={"sm"} startContent={<Icon source={iconSourceFor("complete", "chip")} usage="chip" />}>{item}</Text>)}</div></SurfaceCard>
+            <SurfaceCard label={data.gapsTitle} composition="joined"><div className={mockInterviewResultListClassName}>{data.gaps.map((item) => <Text key={item} size={"sm"} startContent={<Icon source={iconSourceFor("next", "chip")} usage="chip" />}>{item}</Text>)}</div></SurfaceCard>
         </div>
         {data.reviews.length === 0 ? null : <div className={mockInterviewResultReviewsClassName}><TitleDescriptionAccordion props={{ label: data.reviewsTitle, items: data.reviews.map((item) => ({ id: item.id, title: `${item.title} · ${item.scoreLabel}`, description: `${data.questionLabel ?? "Question"}\n${item.question}\n\n${data.answerLabel ?? "Answer"}\n${item.answer.trim().length === 0 ? data.unansweredLabel ?? "No answer recorded" : item.answer}\n\n${data.feedbackLabel ?? "Feedback"}\n${item.feedback}` })) }} /></div>}
     </main>

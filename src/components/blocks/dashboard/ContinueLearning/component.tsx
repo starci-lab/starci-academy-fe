@@ -41,7 +41,7 @@ export const ContinueLearningBase = (props: ContinueLearningProps) => {
                                         <Text size={"xs"} tone={"muted"} isSkeleton={loading}>{item.kindLabel}</Text>
                                         <Text size={"md"} weight={"semibold"} isSkeleton={loading}>{item.title}</Text>
                                     </div>
-                                    {loading || props.props.resumeLabel === undefined ? null : <TextAction appearance="disclosure" onPress={() => props.on?.resume?.(item.id)} endContent={<Icon source={iconSourceFor("next", "chip")} role="chip" />}>{props.props.resumeLabel}</TextAction>}
+                                    {loading || props.props.resumeLabel === undefined ? null : <TextAction appearance="disclosure" onPress={() => props.on?.resume?.(item.id)} endContent={<Icon source={iconSourceFor("next", "chip")} usage="chip" />}>{props.props.resumeLabel}</TextAction>}
                                 </div>
                             </div>
                         </SurfaceCard>

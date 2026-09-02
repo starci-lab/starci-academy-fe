@@ -26,7 +26,7 @@ export const IconLabelFactRow = (props: IconLabelFactRowProps) => {
     const data = props.props
     const isLoading = props.isLoading ?? false
     const endBadge = data.endBadge
-    const glyph = <Icon source={iconSourceFor(data.icon, "leading")} role={"leading"} />
+    const glyph = <Icon source={iconSourceFor(data.icon, "leading")} usage={"leading"} />
     const row = (label: ReactNode, fact?: ReactNode) => (
         <div data-part="icon-label-fact-row" data-recipe={data.recipe} className={iconLabelFactRowClassName}>
             {glyph}

@@ -47,8 +47,8 @@ export const LearnShellLayoutBase = (props: LearnShellLayoutProps) => {
         <Subnav
             label={props.mobileCourseNavigation.label}
             title={props.mobileCourseNavigation.courseTitle}
-            leading={<Icon source={iconSourceFor("course", "leading")} role="leading" />}
-            menuIcon={<Icon source={iconSourceFor("menu", "leading")} role="leading" />}
+            leading={<Icon source={iconSourceFor("course", "leading")} usage="leading" />}
+            menuIcon={<Icon source={iconSourceFor("menu", "leading")} usage="leading" />}
             openMenuLabel={props.mobileCourseNavigation.label}
             closeMenuLabel={props.mobileCourseNavigation.closeLabel}
             isMenuOpen={props.mobileCourseNavigation.isOpen}
@@ -59,7 +59,7 @@ export const LearnShellLayoutBase = (props: LearnShellLayoutProps) => {
         <Tabs
             label={props.navigationLabel}
             selectedKey={selectedTab}
-            items={tabs.map((tab) => ({ id: tab.id, label: tab.label, leading: <Icon source={iconSourceFor(tab.icon, "leading")} role="leading" /> }))}
+            items={tabs.map((tab) => ({ id: tab.id, label: tab.label, leading: <Icon source={iconSourceFor(tab.icon, "leading")} usage="leading" /> }))}
             labelVisibility="always"
             onSelect={props.on?.openMobileTab}
         />

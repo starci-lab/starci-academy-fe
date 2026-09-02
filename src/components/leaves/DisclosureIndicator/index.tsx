@@ -15,6 +15,6 @@ export const DisclosureIndicator = (props: DisclosureIndicatorProps) => (
     <span
         className={getDisclosureIndicatorClassName(props.props.isOpen)}
     >
-        <Icon source={iconSourceFor("disclosure", "chip")} role={"chip"} />
+        <Icon source={iconSourceFor("disclosure", "chip")} usage={"chip"} />
     </span>
 )

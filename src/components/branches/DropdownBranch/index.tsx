@@ -83,7 +83,7 @@ export const DropdownBranch = <const I extends string>(props: DropdownBranchProp
                                 onAction={() => props.on?.action?.(item.id)}
                             >
                                 {item.showsIndicator === true ? <Dropdown.ItemIndicator /> : null}
-                                {item.icon === undefined ? null : <Icon source={iconSourceFor(item.icon, "leading")} role={"leading"} />}
+                                {item.icon === undefined ? null : <Icon source={iconSourceFor(item.icon, "leading")} usage={"leading"} />}
                                 {item.label}
                             </Dropdown.Item>
                         ))}

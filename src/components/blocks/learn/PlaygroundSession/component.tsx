@@ -99,7 +99,7 @@ export const PlaygroundSessionBase = (props: PlaygroundSessionProps) => {
         <SurfaceCard composition="joined"><header className={playgroundIdentityClassName}>
             <div className={playgroundIdentityTopClassName}>
                 <div className={playgroundIdentityCopyClassName}>
-                    <div className={playgroundIdentityIconClassName}><Icon source={iconSourceFor("playground", "heading")} role={"heading"} /></div>
+                    <div className={playgroundIdentityIconClassName}><Icon source={iconSourceFor("playground", "heading")} usage={"heading"} /></div>
                     <div>
                         {props.props.currentStepLabel === undefined ? null : <Text size={"xs"} tone={"muted"} weight={"semibold"}>{props.props.currentStepLabel}</Text>}
                         <Heading level={1}>{props.props.title}</Heading>
@@ -112,7 +112,7 @@ export const PlaygroundSessionBase = (props: PlaygroundSessionProps) => {
                             ? "problem"
                             : "neutral",
                 )}>
-                    <Icon source={iconSourceFor(connectionIcon, "chip")} role={"chip"} />
+                    <Icon source={iconSourceFor(connectionIcon, "chip")} usage={"chip"} />
                     <Text size={"xs"} weight={"semibold"} live={"polite"}>{props.props.connectionText}</Text>
                 </div>
             </div>
@@ -127,7 +127,7 @@ export const PlaygroundSessionBase = (props: PlaygroundSessionProps) => {
 
         {settled ? <SurfaceCard measure={"form"} composition="joined"><div className={playgroundSettledClassName}>
             <div className={sessionState === "completed" ? playgroundSettledIconClassName : playgroundSettledProblemIconClassName}>
-                <Icon source={iconSourceFor(sessionState === "completed" ? "complete" : "incomplete", "heading")} role={"heading"} />
+                <Icon source={iconSourceFor(sessionState === "completed" ? "complete" : "incomplete", "heading")} usage={"heading"} />
             </div>
             <div>
                 <Heading level={2}>{sessionState === "completed" ? props.props.completedTitle : sessionState === "recovery-failed" ? props.props.recoveryFailedTitle ?? props.props.failedText : props.props.failedText}</Heading>
@@ -196,7 +196,7 @@ export const PlaygroundSessionBase = (props: PlaygroundSessionProps) => {
                         {props.props.passedStepIndexes.length === 0
                             ? props.props.outputWaiting === undefined ? null : <Text size={"sm"} tone={"muted"}>{props.props.outputWaiting}</Text>
                             : props.props.passedStepIndexes.map((index) => <div className={playgroundActivityRowClassName} key={index}>
-                                <Icon source={iconSourceFor("complete", "leading")} role={"leading"} />
+                                <Icon source={iconSourceFor("complete", "leading")} usage={"leading"} />
                                 <div className={playgroundStepCopyClassName}>
                                     <Text size={"sm"} weight={"semibold"}>{props.props.steps[index]?.title ?? `${props.props.stepLabel} ${index + 1}`}</Text>
                                     <Text size={"xs"} tone={"muted"}>{props.props.passedLabel}</Text>

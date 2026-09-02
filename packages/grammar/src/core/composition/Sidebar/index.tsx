@@ -114,7 +114,7 @@ export const Sidebar = ({
                                 {...(collapsed ? { "aria-label": item.label } : {})}
                                 {...(item.isDisabled === undefined ? {} : { isDisabled: item.isDisabled })}
                             >
-                                {item.source === undefined ? null : <Icon source={item.source} role="leading" />}
+                                {item.source === undefined ? null : <Icon source={item.source} usage="leading" />}
                                 {collapsed ? null : <span className="min-w-0 flex-1 truncate text-sm font-medium">{item.label}</span>}
                                 {collapsed || item.trailing == null ? null : <span className="shrink-0">{item.trailing}</span>}
                             </ListBox.Item>

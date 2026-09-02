@@ -113,7 +113,7 @@ export const Input = (props: InputProps) => {
                     className={inputRevealClassName}
                     onClick={() => setIsRevealed(!isRevealed)}
                 >
-                    <Icon source={iconSourceFor(isRevealed ? "hidePassword" : "revealPassword", "chip")} role={"chip"} />
+                    <Icon source={iconSourceFor(isRevealed ? "hidePassword" : "revealPassword", "chip")} usage={"chip"} />
                 </button>
             )}
         </span>

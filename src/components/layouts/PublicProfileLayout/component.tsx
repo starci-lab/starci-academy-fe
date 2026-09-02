@@ -40,13 +40,13 @@ export type PublicProfileLayoutProps = {
 export const PublicProfileLayoutBase = (props: PublicProfileLayoutProps) => {
     const Body = props.body
     if (props.state === "failed") {
-        return <div className={profileStateClassName}><SurfaceCard composition="joined"><EmptyNotice message={props.props.failedMessage} actionLabel={props.props.retryLabel} isActionPending={props.props.retryPending} iconSource={iconSourceFor("retry", "leading")} actionStartContent={<Icon source={iconSourceFor("retry", "chip")} role="chip" />} onAction={({ act: props.on.retry })?.act} /></SurfaceCard></div>
+        return <div className={profileStateClassName}><SurfaceCard composition="joined"><EmptyNotice message={props.props.failedMessage} actionLabel={props.props.retryLabel} isActionPending={props.props.retryPending} iconSource={iconSourceFor("retry", "leading")} actionStartContent={<Icon source={iconSourceFor("retry", "chip")} usage="chip" />} onAction={({ act: props.on.retry })?.act} /></SurfaceCard></div>
     }
     if (props.state === "not-found") {
-        return <div className={profileStateClassName}><SurfaceCard composition="joined"><EmptyNotice message={props.props.notFoundMessage} actionLabel={props.props.browseLabel} iconSource={iconSourceFor("account", "leading")} actionStartContent={<Icon source={iconSourceFor("explore", "chip")} role="chip" />} onAction={({ act: props.on.browse })?.act} /></SurfaceCard></div>
+        return <div className={profileStateClassName}><SurfaceCard composition="joined"><EmptyNotice message={props.props.notFoundMessage} actionLabel={props.props.browseLabel} iconSource={iconSourceFor("account", "leading")} actionStartContent={<Icon source={iconSourceFor("explore", "chip")} usage="chip" />} onAction={({ act: props.on.browse })?.act} /></SurfaceCard></div>
     }
     if (props.state === "locked") {
-        return <div className={profileMeasureClassName}><div className={profileInsetClassName}><div className={profileContentStackClassName}><section className={profileIdentityClassName} aria-label="Profile identity"><ProfileHero /></section><div className={profileBodyClassName}><SurfaceCard composition="joined"><EmptyNotice message={props.props.lockedMessage} description={props.props.lockedDescription} actionLabel={props.props.browseLabel} iconSource={iconSourceFor("password", "leading")} actionStartContent={<Icon source={iconSourceFor("explore", "chip")} role="chip" />} onAction={({ act: props.on.browse })?.act} /></SurfaceCard></div></div></div></div>
+        return <div className={profileMeasureClassName}><div className={profileInsetClassName}><div className={profileContentStackClassName}><section className={profileIdentityClassName} aria-label="Profile identity"><ProfileHero /></section><div className={profileBodyClassName}><SurfaceCard composition="joined"><EmptyNotice message={props.props.lockedMessage} description={props.props.lockedDescription} actionLabel={props.props.browseLabel} iconSource={iconSourceFor("password", "leading")} actionStartContent={<Icon source={iconSourceFor("explore", "chip")} usage="chip" />} onAction={({ act: props.on.browse })?.act} /></SurfaceCard></div></div></div></div>
     }
     return <div className={profileTabsFrameClassName}>
         <ProfileTabsBase props={props.props.tabs} on={{ select: props.on.selectTab }} />

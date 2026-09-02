@@ -84,7 +84,7 @@ export const ChoiceTabs = (props: ChoiceTabsProps) => {
                           * first letter.
                           */}
                             <span className={choiceTabContentClassName}>
-                                {tab.icon === undefined ? null : <Icon source={iconSourceFor(tab.icon, "leading")} role={"leading"} />}
+                                {tab.icon === undefined ? null : <Icon source={iconSourceFor(tab.icon, "leading")} usage={"leading"} />}
                                 {tab.label}
                             </span>
                         </Tabs.Tab>

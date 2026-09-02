@@ -160,8 +160,8 @@ export const DashboardPageBase = (props: DashboardPageProps) => {
                     <Subnav
                         className={dashboardCompactSubnavClassName}
                         label={railLabel}
-                        title={<TextAction appearance={"muted"} startContent={<Icon source={iconSourceFor("back", "chip")} role="chip" />} onPress={props.on?.goBack}>{props.props.backLabel ?? "Back"}</TextAction>}
-                        menuIcon={<Icon source={iconSourceFor("navigationOverflow", "leading")} role={"leading"} />}
+                        title={<TextAction appearance={"muted"} startContent={<Icon source={iconSourceFor("back", "chip")} usage="chip" />} onPress={props.on?.goBack}>{props.props.backLabel ?? "Back"}</TextAction>}
+                        menuIcon={<Icon source={iconSourceFor("navigationOverflow", "leading")} usage={"leading"} />}
                         openMenuLabel={props.props.railOpenLabel ?? railLabel}
                         closeMenuLabel={props.props.railCloseLabel ?? railLabel}
                         isMenuOpen={isRailOpen}

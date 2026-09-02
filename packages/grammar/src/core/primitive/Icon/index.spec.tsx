@@ -5,11 +5,11 @@ import { Icon } from "./index.js"
 const SearchGlyph = (props: React.SVGProps<SVGSVGElement>) => <svg viewBox="0 0 24 24" {...props}><path d="M1 1" /></svg>
 
 describe("Core Icon", () => {
-    it("sizes an app-owned glyph by semantic role and hides decorative icons", () => {
-        const markup = renderToStaticMarkup(<Icon source={SearchGlyph} role="leading" />)
+    it("sizes an app-owned glyph by semantic usage and hides decorative icons", () => {
+        const markup = renderToStaticMarkup(<Icon source={SearchGlyph} usage="leading" />)
 
         expect(markup).toContain("data-component=\"Icon\"")
-        expect(markup).toContain("data-role=\"leading\"")
+        expect(markup).toContain("data-usage=\"leading\"")
         expect(markup).toContain("size-5")
         expect(markup).toContain("aria-hidden=\"true\"")
     })

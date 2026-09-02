@@ -80,9 +80,9 @@ export const ProfileHeroBase = (props: ProfileHeroProps) => {
                 </div>
                 <Text size={"xs"} isSkeleton={loading}>{data.joinedLabel}</Text>
                 <div className={profileMetaListClassName}>
-                    {data.githubUrl && <Link href={data.githubUrl} startContent={<Icon source={iconSourceFor("github", "chip")} role="chip" />}>{"GitHub"}</Link>}
+                    {data.githubUrl && <Link href={data.githubUrl} startContent={<Icon source={iconSourceFor("github", "chip")} usage="chip" />}>{"GitHub"}</Link>}
                     {data.linkedinUrl && <Link href={data.linkedinUrl}>{"LinkedIn"}</Link>}
-                    {data.websiteUrl && <Link href={data.websiteUrl} startContent={<Icon source={iconSourceFor("explore", "chip")} role="chip" />}>{data.websiteUrl}</Link>}
+                    {data.websiteUrl && <Link href={data.websiteUrl} startContent={<Icon source={iconSourceFor("explore", "chip")} usage="chip" />}>{data.websiteUrl}</Link>}
                 </div>
             </div>
             <div className={profileEvidenceSummaryClassName}>

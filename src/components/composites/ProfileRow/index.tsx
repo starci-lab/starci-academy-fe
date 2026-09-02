@@ -33,7 +33,7 @@ export const ProfileRow = (props: ProfileRowProps) => {
                     <Text size={"sm"} weight={"semibold"} isSkeleton={isLoading}>{data.displayName}</Text>
                     <Text size={"xs"} isSkeleton={isLoading}>{data.username === undefined ? undefined : `@${data.username}`}</Text>
                 </div>
-                <Icon source={iconSourceFor("disclosure", "chip")} role={"chip"} />
+                <Icon source={iconSourceFor("disclosure", "chip")} usage={"chip"} />
             </div>
         </PressableSurface>
     )

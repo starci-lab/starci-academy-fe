@@ -36,7 +36,7 @@ export const SearchCommandField = (props: SearchCommandFieldProps) => {
     return (
         <span className={searchCommandFieldClassName}>
             <span className={searchCommandFieldIconClassName}>
-                <Icon source={iconSourceFor("search", "leading")} role={"leading"} />
+                <Icon source={iconSourceFor("search", "leading")} usage={"leading"} />
             </span>
             <HeroInput
                 id={data.id}
@@ -70,7 +70,7 @@ export const SearchCommandField = (props: SearchCommandFieldProps) => {
                     : data.value.length > 0
                         ? (
                             <button type="button" aria-label={data.clearLabel} onClick={on?.clear}>
-                                <Icon source={iconSourceFor("close", "chip")} role={"chip"} />
+                                <Icon source={iconSourceFor("close", "chip")} usage={"chip"} />
                             </button>
                         )
                         : data.shortcut === undefined ? null : <Kbd>{data.shortcut}</Kbd>}

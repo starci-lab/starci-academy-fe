@@ -138,7 +138,7 @@ type ProjectMilestoneRowInput = {
 
 const ProjectMilestoneRow = (input: ProjectMilestoneRowInput) => {
     const marker = input.milestone.tone === "success"
-        ? <span className={projectMilestoneMarkerCompleteClassName}><Icon source={iconSourceFor("complete", "chip")} role={"chip"} /></span>
+        ? <span className={projectMilestoneMarkerCompleteClassName}><Icon source={iconSourceFor("complete", "chip")} usage={"chip"} /></span>
         : <span className={projectMilestoneMarkerClassName}>{input.loading ? "" : String(input.milestone.position ?? input.position).padStart(2, "0")}</span>
     const content = <div className={projectMilestoneRowClassName} data-state={input.milestone.tone ?? "neutral"}>
         <div className={projectMilestoneIdentityClassName}>
@@ -149,7 +149,7 @@ const ProjectMilestoneRow = (input: ProjectMilestoneRowInput) => {
             </div>
         </div>
         <Badge tone={input.milestone.tone} isSkeleton={input.loading}>{input.milestone.progress}</Badge>
-        {input.milestone.targetTaskId === undefined ? null : <Icon source={iconSourceFor("disclosure", "chip")} role={"chip"} />}
+        {input.milestone.targetTaskId === undefined ? null : <Icon source={iconSourceFor("disclosure", "chip")} usage={"chip"} />}
     </div>
 
     return input.milestone.targetTaskId === undefined
@@ -164,7 +164,7 @@ export const CoursePersonalProjectBase = (props: CoursePersonalProjectProps) => 
     const repository = props.data.repository
     const nextTask = props.data.nextTask
     const nextTaskAction = loading
-        ? <Button variant={"primary"} size={"md"} isSkeleton endContent={<Icon source={iconSourceFor("next", "chip")} role="chip" />}>{props.data.continueLabel}</Button>
+        ? <Button variant={"primary"} size={"md"} isSkeleton endContent={<Icon source={iconSourceFor("next", "chip")} usage="chip" />}>{props.data.continueLabel}</Button>
         : nextTask === undefined
             ? null
             : <NextLink href={nextTask.href} className={projectPrimaryActionLinkClassName} aria-label={props.data.continueLabel}>
@@ -272,7 +272,7 @@ export const CoursePersonalProjectBase = (props: CoursePersonalProjectProps) => 
                                                     <span>{repository.continueLabel}</span><span className={projectActionGlyphClassName} aria-hidden="true">→</span>
                                                 </NextLink>
                                                 : null
-                                            : <Link href={repository.url} startContent={<Icon source={iconSourceFor("github", "chip")} role="chip" />}>{repository.openLabel}</Link>}
+                                            : <Link href={repository.url} startContent={<Icon source={iconSourceFor("github", "chip")} usage="chip" />}>{repository.openLabel}</Link>}
                                     </>}
                             </div>
                         </SurfaceCard>

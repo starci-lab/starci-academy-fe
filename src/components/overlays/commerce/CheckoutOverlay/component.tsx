@@ -122,7 +122,7 @@ export const CheckoutOverlayBase = (props: CheckoutOverlayProps) => {
                     </section>
 
                     <div className={checkoutTrustClassName}>
-                        <Text size={"xs"} tone={"muted"} startContent={<Icon source={iconSourceFor("password", "chip")} role="chip" />}>{labels.trustNote}</Text>
+                        <Text size={"xs"} tone={"muted"} startContent={<Icon source={iconSourceFor("password", "chip")} usage="chip" />}>{labels.trustNote}</Text>
                     </div>
 
                     {data.hasFailed === true ? (
@@ -130,7 +130,7 @@ export const CheckoutOverlayBase = (props: CheckoutOverlayProps) => {
                     ) : null}
 
                     <div className={checkoutActionsClassName}>
-                        <Button variant={"primary"} isPending={data.isPaying === true} onPress={({ press: props.on?.pay })?.press} endContent={<Icon source={iconSourceFor("next", "chip")} role="chip" />}>{labels.action}</Button>
+                        <Button variant={"primary"} isPending={data.isPaying === true} onPress={({ press: props.on?.pay })?.press} endContent={<Icon source={iconSourceFor("next", "chip")} usage="chip" />}>{labels.action}</Button>
                         <Button variant="ghost" isDisabled={data.isPaying === true} onPress={props.on?.dismiss}>{labels.cancel}</Button>
                     </div>
                 </div>

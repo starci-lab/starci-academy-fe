@@ -13,7 +13,7 @@ describe("Core IconTile", () => {
         expect(markup).toContain("size-10")
         expect(markup).toContain("bg-success-soft")
         expect(markup).toContain("text-success-soft-foreground")
-        expect(markup).toContain("data-role=\"leading\"")
+        expect(markup).toContain("data-usage=\"leading\"")
     })
 
     it("lets app artwork replace the fallback glyph without owning its content", () => {

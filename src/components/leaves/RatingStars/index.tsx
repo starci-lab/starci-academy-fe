@@ -9,10 +9,10 @@ import { ratingHalfClipClassName, ratingHalfEmptyClassName, ratingHalfFilledClas
 const SCORE_SCALE = 5
 
 /** Outline used by the package for an unfilled position. */
-const EMPTY_STAR = <Icon source={iconSourceFor("ratingStarEmpty", "leading")} role={"leading"} />
+const EMPTY_STAR = <Icon source={iconSourceFor("ratingStarEmpty", "leading")} usage={"leading"} />
 
 /** Solid mark used by the package for a filled position. */
-const FILLED_STAR = <Icon source={iconSourceFor("ratingStarFilled", "leading")} role={"leading"} />
+const FILLED_STAR = <Icon source={iconSourceFor("ratingStarFilled", "leading")} usage={"leading"} />
 
 /**
  * The package accepts a dedicated half icon rather than clipping a supplied full icon. Keep the
@@ -21,11 +21,11 @@ const FILLED_STAR = <Icon source={iconSourceFor("ratingStarFilled", "leading")} 
 const HALF_STAR = (
     <span aria-hidden="true" className={ratingHalfRootClassName}>
         <span className={ratingHalfEmptyClassName}>
-            <Icon source={iconSourceFor("ratingStarEmpty", "leading")} role={"leading"} />
+            <Icon source={iconSourceFor("ratingStarEmpty", "leading")} usage={"leading"} />
         </span>
         <span className={ratingHalfClipClassName}>
             <span className={ratingHalfFilledClassName}>
-                <Icon source={iconSourceFor("ratingStarFilled", "leading")} role={"leading"} />
+                <Icon source={iconSourceFor("ratingStarFilled", "leading")} usage={"leading"} />
             </span>
         </span>
     </span>

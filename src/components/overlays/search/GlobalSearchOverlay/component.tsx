@@ -171,7 +171,7 @@ export const GlobalSearchOverlayView = (props: GlobalSearchOverlayViewProps) => 
                 }
                 if (detailId === undefined) return undefined
                 return (
-                    <Button variant={"primary"} size={"sm"} onPress={({ press: () => props.on?.resultOpen?.(detailId) })?.press} endContent={<Icon source={iconSourceFor("next", "chip")} role="chip" />}>{props.copy.openResult}</Button>
+                    <Button variant={"primary"} size={"sm"} onPress={({ press: () => props.on?.resultOpen?.(detailId) })?.press} endContent={<Icon source={iconSourceFor("next", "chip")} usage="chip" />}>{props.copy.openResult}</Button>
                 )
             })()}
         </div>

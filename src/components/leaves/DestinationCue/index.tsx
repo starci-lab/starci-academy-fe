@@ -14,7 +14,7 @@ export const DestinationCue = (props: DestinationCueProps) => {
     return (
         <span className={destinationCueClassName} data-destination-cue="true">
             <span data-tone="accent">{props.props.label ?? ""}</span>
-            <span className={destinationCueCaretClassName} data-destination-cue-caret="true" aria-hidden="true"><Icon source={iconSourceFor("next", "chip")} role={"chip"} /></span>
+            <span className={destinationCueCaretClassName} data-destination-cue-caret="true" aria-hidden="true"><Icon source={iconSourceFor("next", "chip")} usage={"chip"} /></span>
         </span>
     )
 }

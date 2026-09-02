@@ -1,7 +1,7 @@
 import { skeletonVariants } from "@heroui/react"
 import type { ComponentType, SVGProps } from "react"
 
-export type IconRole = "heading" | "leading" | "chip"
+export type IconUsage = "heading" | "leading" | "chip"
 /**
  * Minimal structural contract passed to an app-owned SVG glyph.
  *
@@ -17,7 +17,7 @@ export type IconSourceProps = {
     readonly "aria-label"?: string
     readonly "data-tier"?: string
     readonly "data-component"?: string
-    readonly "data-role"?: string
+    readonly "data-usage"?: string
 }
 
 /** Function or class SVG glyph selected by the consuming app's icon registry. */
@@ -26,15 +26,15 @@ export type IconSource =
     | (new (props: IconSourceProps) => unknown)
 
 export type IconProps = {
-    /** App-owned glyph identity. Grammar owns only its role, geometry, and accessibility. */
+    /** App-owned glyph identity. Grammar owns only its usage geometry and accessibility. */
     readonly source: IconSource
-    readonly role?: IconRole
+    readonly usage?: IconUsage
     /** Omit for a decorative glyph; provide when the icon itself carries meaning. */
     readonly ariaLabel?: string
     readonly isSkeleton?: boolean
 }
 
-const ROLE_CLASS_NAMES = {
+const USAGE_CLASS_NAMES = {
     heading: "size-6 shrink-0",
     leading: "size-5 shrink-0",
     chip: "size-4 shrink-0",
@@ -45,7 +45,7 @@ const SKELETON_CLASS_NAME = skeletonVariants({ animationType: "shimmer" }).base(
 })
 
 /** Product-neutral icon carrier; semantic glyph names and libraries remain app authority. */
-export const Icon = ({ source: Source, role = "chip", ariaLabel, isSkeleton = false }: IconProps) => {
+export const Icon = ({ source: Source, usage = "chip", ariaLabel, isSkeleton = false }: IconProps) => {
     if (isSkeleton) {
         return <span data-tier="atom" data-component="Icon" data-loading="true" aria-hidden className={SKELETON_CLASS_NAME} />
     }
@@ -57,9 +57,9 @@ export const Icon = ({ source: Source, role = "chip", ariaLabel, isSkeleton = fa
         <SourceComponent
             data-tier="atom"
             data-component="Icon"
-            data-role={role}
+            data-usage={usage}
             focusable="false"
-            className={ROLE_CLASS_NAMES[role]}
+            className={USAGE_CLASS_NAMES[usage]}
             {...(ariaLabel === undefined
                 ? { "aria-hidden": true as const }
                 : { "aria-label": ariaLabel, role: "img" as const })}

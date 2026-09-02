@@ -97,7 +97,7 @@ export const SearchBox = (props: SearchBoxProps) => {
         >
             <InputGroup fullWidth>
                 <InputGroup.Prefix>
-                    <Icon source={iconSourceFor("search", "chip")} role={"chip"} />
+                    <Icon source={iconSourceFor("search", "chip")} usage={"chip"} />
                 </InputGroup.Prefix>
                 <InputGroup.Input
                     name="q"
@@ -136,7 +136,7 @@ export const SearchBox = (props: SearchBoxProps) => {
                                 on?.search?.("")
                             }}
                         >
-                            <Icon source={iconSourceFor("close", "chip")} role={"chip"} />
+                            <Icon source={iconSourceFor("close", "chip")} usage={"chip"} />
                         </button>
                     </InputGroup.Suffix>
                 ) : data.shortcut === undefined ? null : (

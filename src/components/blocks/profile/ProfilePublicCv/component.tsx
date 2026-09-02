@@ -95,12 +95,12 @@ export const ProfilePublicCvBase = (props: ProfilePublicCvProps) => {
                     <div className={publicCvIdentityClassName}>
                         <div className={publicCvTitleRowClassName}>
                             <Text weight={"semibold"} isSkeleton={loading}>{props.title}</Text>
-                            <Badge tone={STATUS_TONES[props.state]} startContent={<Icon source={iconSourceFor(STATUS_ICONS[props.state], "chip")} role="chip" />} isSkeleton={loading}>{props.statusLabel}</Badge>
+                            <Badge tone={STATUS_TONES[props.state]} startContent={<Icon source={iconSourceFor(STATUS_ICONS[props.state], "chip")} usage="chip" />} isSkeleton={loading}>{props.statusLabel}</Badge>
                         </div>
                         <Text size={"sm"} tone={"muted"} isSkeleton={loading}>{props.updatedLabel ?? props.description}</Text>
                     </div>
                     <div className={publicCvActionsClassName}>
-                        {props.state === "ready" && props.pdfUrl !== undefined ? <Link href={props.pdfUrl} startContent={<Icon source={iconSourceFor("cv", "chip")} role="chip" />}>{props.openLabel}</Link> : null}
+                        {props.state === "ready" && props.pdfUrl !== undefined ? <Link href={props.pdfUrl} startContent={<Icon source={iconSourceFor("cv", "chip")} usage="chip" />}>{props.openLabel}</Link> : null}
                         {props.isSelf ? <Button variant={"secondary"} size={"sm"} isSkeleton={loading} onPress={({ press: props.on?.edit })?.press}>{props.editLabel}</Button> : null}
                     </div>
                 </header>

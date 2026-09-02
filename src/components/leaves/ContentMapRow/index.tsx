@@ -57,7 +57,7 @@ export const ContentMapRow = (props: ContentMapRowProps) => (
         onPress={props.on?.press}
         className={getContentMapRowClassName(props.props.isCurrent === true)}
     >
-        <Icon source={iconSourceFor(props.props.isComplete === true ? "complete" : "pending", "leading")} role={"leading"} />
+        <Icon source={iconSourceFor(props.props.isComplete === true ? "complete" : "pending", "leading")} usage={"leading"} />
         <Text size={"sm"} isSkeleton={props.isLoading}>{props.props.title}</Text>
         <Text size={"xs"} tone={"muted"} isSkeleton={props.isLoading}>{props.props.meta}</Text>
     </HeroLink>

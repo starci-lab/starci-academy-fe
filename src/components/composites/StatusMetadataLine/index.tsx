@@ -13,5 +13,5 @@ export const StatusMetadataLine = (props: StatusMetadataLineProps) => {
     const data = props.props
     const isLoading = props.isLoading ?? false
     const facts = data.facts.filter((fact) => fact.trim() !== "").join(" · ")
-    return <div>{data.status === undefined ? null : <Badge tone={data.status.tone} startContent={data.status.icon === undefined ? undefined : <Icon source={iconSourceFor(data.status.icon, "chip")} role="chip" />} isSkeleton={isLoading}>{data.status.content}</Badge>}{facts === "" ? null : <Text size={"sm"} tone={"muted"} isSkeleton={isLoading}>{facts}</Text>}</div>
+    return <div>{data.status === undefined ? null : <Badge tone={data.status.tone} startContent={data.status.icon === undefined ? undefined : <Icon source={iconSourceFor(data.status.icon, "chip")} usage="chip" />} isSkeleton={isLoading}>{data.status.content}</Badge>}{facts === "" ? null : <Text size={"sm"} tone={"muted"} isSkeleton={isLoading}>{facts}</Text>}</div>
 }

@@ -33,7 +33,7 @@ export const PressableInputLike = (props: PressableInputLikeProps) => {
             className={pressableInputLikeClassName}
         >
             <span className={pressableInputLikeContentClassName}>
-                <Icon source={iconSourceFor("search", "leading")} role={"leading"} />
+                <Icon source={iconSourceFor("search", "leading")} usage={"leading"} />
                 <span className={pressableInputLikePlaceholderClassName}>{data.placeholder}</span>
             </span>
             {data.shortcut === undefined ? null : <Kbd>{data.shortcut}</Kbd>}

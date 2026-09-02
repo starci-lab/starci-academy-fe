@@ -23,7 +23,7 @@ const PinnedProjectsList = (props: ProfileProjectsProps) => {
     const loading = props.pinned.state === "pending"
     if (!loading && props.pinned.data.length === 0) {
         return <SurfaceListCard label={props.labels.pinned}>
-            <EmptyNotice message={props.pinned.state === "error" ? props.labels.error : props.labels.emptyPinned} actionLabel={props.pinned.state === "error" ? props.labels.retry : undefined} iconSource={iconSourceFor(props.pinned.state === "error" ? "retry" : "course", "leading")} actionStartContent={<Icon source={iconSourceFor("retry", "chip")} role="chip" />} onAction={({ act: props.on.retry })?.act} />
+            <EmptyNotice message={props.pinned.state === "error" ? props.labels.error : props.labels.emptyPinned} actionLabel={props.pinned.state === "error" ? props.labels.retry : undefined} iconSource={iconSourceFor(props.pinned.state === "error" ? "retry" : "course", "leading")} actionStartContent={<Icon source={iconSourceFor("retry", "chip")} usage="chip" />} onAction={({ act: props.on.retry })?.act} />
         </SurfaceListCard>
     }
     const projects = loading
@@ -38,7 +38,7 @@ const CapstonesList = (props: ProfileProjectsProps) => {
     const loading = props.capstones.state === "pending"
     if (!loading && props.capstones.data.length === 0) {
         return <SurfaceListCard label={props.labels.capstones}>
-            <EmptyNotice message={props.capstones.state === "error" ? props.labels.error : props.labels.emptyCapstones} actionLabel={props.capstones.state === "error" ? props.labels.retry : undefined} iconSource={iconSourceFor(props.capstones.state === "error" ? "retry" : "course", "leading")} actionStartContent={<Icon source={iconSourceFor("retry", "chip")} role="chip" />} onAction={({ act: props.on.retry })?.act} />
+            <EmptyNotice message={props.capstones.state === "error" ? props.labels.error : props.labels.emptyCapstones} actionLabel={props.capstones.state === "error" ? props.labels.retry : undefined} iconSource={iconSourceFor(props.capstones.state === "error" ? "retry" : "course", "leading")} actionStartContent={<Icon source={iconSourceFor("retry", "chip")} usage="chip" />} onAction={({ act: props.on.retry })?.act} />
         </SurfaceListCard>
     }
     const projects = loading

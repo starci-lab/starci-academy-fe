@@ -98,12 +98,12 @@ export const CourseMockInterviewSetupBlockBase = (props: CourseMockInterviewSetu
                     <Text size={"sm"} weight={"medium"} isSkeleton={historyLoading}>{row.title}</Text>
                     <Text size={"xs"} tone={"muted"} isSkeleton={historyLoading}>{row.fact}</Text>
                 </div>
-                {historyLoading ? null : <Button variant={"ghost"} size={"sm"} onPress={({ press: () => props.on?.openHistory?.(row.id) })?.press} endContent={<Icon source={iconSourceFor("next", "chip")} role="chip" />}>{data.historyActionLabel}</Button>}
+                {historyLoading ? null : <Button variant={"ghost"} size={"sm"} onPress={({ press: () => props.on?.openHistory?.(row.id) })?.press} endContent={<Icon source={iconSourceFor("next", "chip")} usage="chip" />}>{data.historyActionLabel}</Button>}
             </li>)}
         </ul>
     )
 
-    const recentHistory = <SurfaceListCard labelEnd={historyLoading ? undefined : <Button variant={"secondary"} size={"sm"} onPress={({ press: () => props.on?.selectTab?.("history") })?.press} endContent={<Icon source={iconSourceFor("next", "chip")} role="chip" />}>{data.viewHistoryLabel}</Button>} label={data.recentHistoryTitle} fact={data.historyCountLabel} isLoading={historyLoading}>
+    const recentHistory = <SurfaceListCard labelEnd={historyLoading ? undefined : <Button variant={"secondary"} size={"sm"} onPress={({ press: () => props.on?.selectTab?.("history") })?.press} endContent={<Icon source={iconSourceFor("next", "chip")} usage="chip" />}>{data.viewHistoryLabel}</Button>} label={data.recentHistoryTitle} fact={data.historyCountLabel} isLoading={historyLoading}>
         {historyNotice === undefined ? renderHistoryRows(historyRows.slice(0, 3)) : <div className={mockInterviewCompactStateClassName}><EmptyNotice message={historyNotice} iconSource={iconSourceFor("saved", "leading")} /></div>}
     </SurfaceListCard>
 
@@ -133,7 +133,7 @@ export const CourseMockInterviewSetupBlockBase = (props: CourseMockInterviewSetu
 
     const preflight = <section className={mockInterviewPreflightClassName}>
         <div className={mockInterviewSummaryClassName}>
-            <Text size={"sm"} tone={"accent"} weight={"semibold"} startContent={<Icon source={iconSourceFor("talents", "chip")} role="chip" />} isSkeleton={loading}>{data.newSessionEyebrow}</Text>
+            <Text size={"sm"} tone={"accent"} weight={"semibold"} startContent={<Icon source={iconSourceFor("talents", "chip")} usage="chip" />} isSkeleton={loading}>{data.newSessionEyebrow}</Text>
             <Heading level={3} isSkeleton={loading}>{data.preflightTitle}</Heading>
             {[data.focus, selectedMode?.label ?? "", selectedLevel?.label ?? ""].map((value, index) => <div className={mockInterviewFactClassName} key={data.readinessLabels[index]}>
                 <Text size={"xs"} tone={"muted"} isSkeleton={loading}>{data.readinessLabels[index] ?? ""}</Text>
@@ -142,12 +142,12 @@ export const CourseMockInterviewSetupBlockBase = (props: CourseMockInterviewSetu
             <Text size={"xs"} tone={"muted"} isSkeleton={loading}>{data.serverNote}</Text>
             {data.status === undefined ? null : <Text size={"sm"} weight={"semibold"} live={"polite"}>{data.status}</Text>}
         </div>
-        <Button variant={"primary"} isDisabled={loading || starting} isPending={starting} isSkeleton={loading} onPress={({ press: props.on?.start })?.press} endContent={<Icon source={iconSourceFor("next", "chip")} role="chip" />}>{data.startLabel}</Button>
+        <Button variant={"primary"} isDisabled={loading || starting} isPending={starting} isSkeleton={loading} onPress={({ press: props.on?.start })?.press} endContent={<Icon source={iconSourceFor("next", "chip")} usage="chip" />}>{data.startLabel}</Button>
     </section>
 
     const resume = <ContinuationHighlightCard><section className={mockInterviewResumeClassName}>
         <div className={mockInterviewResumeCopyClassName}><Text size={"sm"} tone={"accent"} weight={"semibold"}>{data.briefingEyebrow}</Text><Heading level={3}>{data.resumeTitle}</Heading><Text size={"sm"} tone={"muted"}>{data.status ?? ""}</Text></div>
-        <Button variant={"primary"} onPress={({ press: props.on?.resume })?.press} endContent={<Icon source={iconSourceFor("next", "chip")} role="chip" />}>{data.resumeLabel}</Button>
+        <Button variant={"primary"} onPress={({ press: props.on?.resume })?.press} endContent={<Icon source={iconSourceFor("next", "chip")} usage="chip" />}>{data.resumeLabel}</Button>
     </section></ContinuationHighlightCard>
 
     const destinationHistory = <SurfaceListCard label={data.historyTitle} fact={data.historyCountLabel} isLoading={historyLoading}>{historyNotice === undefined ? renderHistoryRows(historyRows) : <div className={mockInterviewStateClassName}><EmptyNotice message={historyNotice} actionLabel={data.returnToBegin} iconSource={iconSourceFor("saved", "leading")} onAction={({ act: () => props.on?.selectTab?.("begin") })?.act} /></div>}</SurfaceListCard>
@@ -156,7 +156,7 @@ export const CourseMockInterviewSetupBlockBase = (props: CourseMockInterviewSetu
     const hero = <section className={mockInterviewHeroClassName} aria-labelledby="mock-interview-heading">
         <div className={mockInterviewHeroCopyClassName}>
             <SectionHeader eyebrow={data.heroEyebrow} title={data.title} description={data.description} level={1} id="mock-interview-heading" composition="context-intro" />
-            {unavailable || setupState === "resumable" ? null : <div className={mockInterviewHeroActionClassName}><Button variant={"primary"} isSkeleton={loading} onPress={({ press: props.on?.prepare })?.press} endContent={<Icon source={iconSourceFor("next", "chip")} role="chip" />}>{data.heroActionLabel}</Button></div>}
+            {unavailable || setupState === "resumable" ? null : <div className={mockInterviewHeroActionClassName}><Button variant={"primary"} isSkeleton={loading} onPress={({ press: props.on?.prepare })?.press} endContent={<Icon source={iconSourceFor("next", "chip")} usage="chip" />}>{data.heroActionLabel}</Button></div>}
         </div>
         <div className={mockInterviewHeroMediaClassName}>
             <Image className={mockInterviewHeroImageClassName} src="/images/mock-interview/interview-practice-v1.png" alt={data.mediaAlt} width={1536} height={1024} sizes="(max-width: 768px) 100vw, (max-width: 1280px) 34vw, 360px" priority />

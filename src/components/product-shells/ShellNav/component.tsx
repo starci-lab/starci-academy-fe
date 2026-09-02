@@ -131,7 +131,7 @@ export const ShellNavigationDrawerBase = (props: ShellNavigationDrawerProps) => 
     <div className={shellNavDrawerContentClassName}>
         <nav aria-label={props.props.brand} className={shellNavDrawerRoutesClassName}>
             {props.props.routes.map((route) => (
-                <TextAction key={route.id} appearance={"route"} isCurrent={route.isCurrent} startContent={<Icon source={iconSourceFor(route.icon, "leading")} role="leading" />} onPress={() => props.on?.navigate?.(route.id)}>{route.label}</TextAction>
+                <TextAction key={route.id} appearance={"route"} isCurrent={route.isCurrent} startContent={<Icon source={iconSourceFor(route.icon, "leading")} usage="leading" />} onPress={() => props.on?.navigate?.(route.id)}>{route.label}</TextAction>
             ))}
         </nav>
         <div aria-label={props.props.utilitiesLabel} className={shellNavDrawerUtilitiesClassName} role="group">

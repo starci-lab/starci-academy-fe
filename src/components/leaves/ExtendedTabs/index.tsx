@@ -46,7 +46,7 @@ export const ExtendedTabs = (props: ExtendedTabsProps) => {
         items={data.tabs.map((tab) => ({
             id: tab.id,
             label: tab.label,
-            leading: <Icon source={iconSourceFor(tab.icon, "leading")} role={"leading"} />,
+            leading: <Icon source={iconSourceFor(tab.icon, "leading")} usage={"leading"} />,
         }))}
         onSelect={on?.select}
         panelId={(key) => `dashboard-panel-${key}`}

@@ -76,7 +76,7 @@ export const CoursePlaygroundCatalogBase = (props: CoursePlaygroundCatalogProps)
             <div className={playgroundCatalogHeroClassName}>
                 <div className={playgroundCatalogHeroContentClassName}>
                     <div className={playgroundCatalogEyebrowClassName}>
-                        <Icon source={iconSourceFor("playground", "chip")} role={"chip"} isSkeleton={loading} />
+                        <Icon source={iconSourceFor("playground", "chip")} usage={"chip"} isSkeleton={loading} />
                         <Text size={"sm"} weight={"semibold"} isSkeleton={loading}>{props.props.eyebrow}</Text>
                     </div>
                     <div className={playgroundCatalogHeroCopyClassName}>
@@ -94,14 +94,14 @@ export const CoursePlaygroundCatalogBase = (props: CoursePlaygroundCatalogProps)
                         </div>
                     </div>}
                     {firstPlayground === undefined || loading || isSettledNotice ? null : <div className={playgroundCatalogActionClassName}>
-                        <Button variant={"primary"} onPress={({ press: () => props.on.openSetup(firstPlayground.slug) })?.press} endContent={<Icon source={iconSourceFor("next", "chip")} role="chip" />}>{props.props.startLabel}</Button>
+                        <Button variant={"primary"} onPress={({ press: () => props.on.openSetup(firstPlayground.slug) })?.press} endContent={<Icon source={iconSourceFor("next", "chip")} usage="chip" />}>{props.props.startLabel}</Button>
                     </div>}
                 </div>
                 <div className={playgroundCatalogPreviewClassName}>
                     {loading || props.props.previewImageUrl === null || props.props.previewImageUrl === undefined
                         ? <>
                             <div className={playgroundCatalogVerificationClassName}>
-                                <Icon source={iconSourceFor("complete", "chip")} role={"chip"} isSkeleton={loading} />
+                                <Icon source={iconSourceFor("complete", "chip")} usage={"chip"} isSkeleton={loading} />
                                 <Text size={"xs"} weight={"semibold"} isSkeleton={loading}>{props.props.verifiedLabel}</Text>
                             </div>
                             {props.props.processTitle === undefined ? null : <Heading level={2} isSkeleton={loading}>{props.props.processTitle}</Heading>}
@@ -115,7 +115,7 @@ export const CoursePlaygroundCatalogBase = (props: CoursePlaygroundCatalogProps)
                         : <>
                             <img src={props.props.previewImageUrl} alt={props.props.previewAlt} className={playgroundCatalogPreviewImageClassName} />
                             <div className={playgroundCatalogVerificationClassName}>
-                                <Icon source={iconSourceFor("complete", "chip")} role={"chip"} />
+                                <Icon source={iconSourceFor("complete", "chip")} usage={"chip"} />
                                 <Text size={"xs"} weight={"semibold"}>{props.props.verifiedLabel}</Text>
                             </div>
                         </>}
@@ -135,7 +135,7 @@ export const CoursePlaygroundCatalogBase = (props: CoursePlaygroundCatalogProps)
                 <article className={playgroundCatalogCardClassName}>
                     <div className={playgroundCatalogCardTopClassName}>
                         <Text size={"xs"} tone={"muted"} weight={"semibold"} isSkeleton={loading}>{`${props.props.labLabel} ${String(index + 1).padStart(2, "0")}`}</Text>
-                        <div className={playgroundCatalogIconClassName}><Icon source={iconSourceFor("playground", "heading")} role={"heading"} isSkeleton={loading} /></div>
+                        <div className={playgroundCatalogIconClassName}><Icon source={iconSourceFor("playground", "heading")} usage={"heading"} isSkeleton={loading} /></div>
                     </div>
                     <div className={playgroundCatalogCardBodyClassName}>
                         <Heading level={3} isSkeleton={loading}>{playground.title}</Heading>
@@ -143,10 +143,10 @@ export const CoursePlaygroundCatalogBase = (props: CoursePlaygroundCatalogProps)
                     </div>
                     <div className={playgroundCatalogMetaClassName}>
                         <span className={playgroundCatalogVerificationClassName}>
-                            <Icon source={iconSourceFor("complete", "chip")} role={"chip"} isSkeleton={loading} />
+                            <Icon source={iconSourceFor("complete", "chip")} usage={"chip"} isSkeleton={loading} />
                             <Text size={"xs"} tone={"muted"} isSkeleton={loading}>{props.props.verifiedLabel}</Text>
                         </span>
-                        {loading ? null : <Button variant={"ghost"} size={"sm"} onPress={({ press: () => props.on.openSetup(playground.slug) })?.press} endContent={<Icon source={iconSourceFor("next", "chip")} role="chip" />}>{props.props.openLabel}</Button>}
+                        {loading ? null : <Button variant={"ghost"} size={"sm"} onPress={({ press: () => props.on.openSetup(playground.slug) })?.press} endContent={<Icon source={iconSourceFor("next", "chip")} usage="chip" />}>{props.props.openLabel}</Button>}
                     </div>
                 </article>
             </SurfaceCard>

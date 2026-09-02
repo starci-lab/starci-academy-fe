@@ -26,7 +26,7 @@ export const CourseValuePropositionList = (props: CourseValuePropositionListProp
         <ul className={courseValueListClassName}>
             {data.promises.map((promise, index) => (
                 <li className={courseValueRowClassName} key={`promise-${index}`}>
-                    <Icon source={iconSourceFor("included", "leading")} role={"leading"} />
+                    <Icon source={iconSourceFor("included", "leading")} usage={"leading"} />
                     <Text size={"md"} isSkeleton={isLoading}>{promise}</Text>
                 </li>
             ))}

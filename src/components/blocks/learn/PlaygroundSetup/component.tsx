@@ -90,7 +90,7 @@ export const PlaygroundSetupBase = (props: PlaygroundSetupProps) => {
                 <Button variant="ghost" size="sm" onPress={props.on.back}>{props.props.catalogLabel}</Button>
             </div>}
             <div className={playgroundSetupIdentityClassName}>
-                <div className={playgroundSetupIdentityIconClassName}><Icon source={iconSourceFor("playground", "heading")} role={"heading"} isSkeleton={loading} /></div>
+                <div className={playgroundSetupIdentityIconClassName}><Icon source={iconSourceFor("playground", "heading")} usage={"heading"} isSkeleton={loading} /></div>
                 <div className={playgroundSetupHeaderClassName}>
                     <Text size={"xs"} tone={"muted"} weight={"semibold"} isSkeleton={loading}>{props.props.titleFallback}</Text>
                     <Heading level={1} isSkeleton={loading}>{props.props.playground?.title ?? props.props.titleFallback}</Heading>
@@ -101,7 +101,7 @@ export const PlaygroundSetupBase = (props: PlaygroundSetupProps) => {
 
         {unavailable ? <SurfaceCard measure={"form"} composition="joined"><div className={playgroundNoticeClassName}>
             <div className={playgroundPairingHeaderClassName}>
-                <Icon source={iconSourceFor("incomplete", "heading")} role={"heading"} />
+                <Icon source={iconSourceFor("incomplete", "heading")} usage={"heading"} />
                 <div>
                     <Heading level={2}>{props.state === "not-found" ? props.props.notFoundText ?? props.props.failedText : props.props.failedText}</Heading>
                     <Text size={"sm"} tone={"muted"}>{props.props.catalogLabel ?? props.props.retryLabel}</Text>
@@ -116,7 +116,7 @@ export const PlaygroundSetupBase = (props: PlaygroundSetupProps) => {
                 {stageLabels.slice(0, 3).map((label, index) => {
                     const stage = stageState(props.state, index)
                     return <li className={stage === "complete" ? playgroundSetupStageCompleteClassName : stage === "current" ? playgroundSetupStageCurrentClassName : playgroundSetupStageClassName} key={label} aria-current={stage === "current" ? "step" : undefined}>
-                        <Icon source={iconSourceFor(stage === "complete" ? "complete" : stage === "current" ? "playground" : "pending", "leading")} role={"leading"} isSkeleton={loading} />
+                        <Icon source={iconSourceFor(stage === "complete" ? "complete" : stage === "current" ? "playground" : "pending", "leading")} usage={"leading"} isSkeleton={loading} />
                         <Text size={"sm"} weight={stage === "current" ? "semibold" : undefined} isSkeleton={loading}>{label}</Text>
                     </li>
                 })}
@@ -133,7 +133,7 @@ export const PlaygroundSetupBase = (props: PlaygroundSetupProps) => {
 
                 <SurfaceCard composition="joined"><aside className={playgroundPairingClassName}>
                     <div className={playgroundPairingHeaderClassName}>
-                        <Icon source={iconSourceFor(props.state === "ready" ? "complete" : "playground", "heading")} role={"heading"} isSkeleton={loading} />
+                        <Icon source={iconSourceFor(props.state === "ready" ? "complete" : "playground", "heading")} usage={"heading"} isSkeleton={loading} />
                         <div>
                             <Heading level={2} isSkeleton={loading}>{props.props.sessionTitle ?? props.props.startLabel}</Heading>
                         </div>
@@ -148,12 +148,12 @@ export const PlaygroundSetupBase = (props: PlaygroundSetupProps) => {
                     </div>}
 
                     <div className={playgroundStatusClassName}>
-                        <Icon source={iconSourceFor(props.state === "ready" ? "complete" : "pending", "leading")} role={"leading"} isSkeleton={loading} />
+                        <Icon source={iconSourceFor(props.state === "ready" ? "complete" : "pending", "leading")} usage={"leading"} isSkeleton={loading} />
                         <Text size={"sm"} tone={"muted"} live={"polite"} isSkeleton={loading}>{statusCopy}</Text>
                     </div>
 
                     <div className={playgroundActionsClassName}>
-                        <Button variant="primary" isDisabled={paired && props.state !== "ready"} isPending={props.state === "starting"} isSkeleton={loading} onPress={paired ? props.on.enter : props.on.start} endContent={paired ? <Icon source={iconSourceFor("next", "chip")} role="chip" /> : undefined}>{paired ? props.props.enterLabel : props.state === "starting" ? props.props.startingLabel : props.props.startLabel}</Button>
+                        <Button variant="primary" isDisabled={paired && props.state !== "ready"} isPending={props.state === "starting"} isSkeleton={loading} onPress={paired ? props.on.enter : props.on.start} endContent={paired ? <Icon source={iconSourceFor("next", "chip")} usage="chip" /> : undefined}>{paired ? props.props.enterLabel : props.state === "starting" ? props.props.startingLabel : props.props.startLabel}</Button>
                     </div>
                 </aside></SurfaceCard>
             </div>

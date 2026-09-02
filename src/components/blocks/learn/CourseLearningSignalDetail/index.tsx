@@ -58,7 +58,7 @@ export const CourseLearningSignalDetail = (props: CourseLearningSignalDetailProp
                 <Text size={"sm"} weight={"medium"} isSkeleton={isLoading}>{detail?.fact}</Text>
                 <Text size={"sm"} tone={"muted"} isSkeleton={isLoading}>{detail?.caption}</Text>
                 {isLoading ? null : (
-                    <TextAction appearance="disclosure" onPress={props.on?.open} endContent={<Icon source={iconSourceFor("next", "chip")} role="chip" />}>{detail?.actionLabel ?? ""}</TextAction>
+                    <TextAction appearance="disclosure" onPress={props.on?.open} endContent={<Icon source={iconSourceFor("next", "chip")} usage="chip" />}>{detail?.actionLabel ?? ""}</TextAction>
                 )}
             </div>
         </SurfaceCard>

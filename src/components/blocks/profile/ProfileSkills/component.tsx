@@ -81,7 +81,7 @@ export const ProfileSkillsBase = (props: ProfileSkillsProps) => {
                     <ProfileMetric key={metric.id} props={metric} isLoading={loading} />
                 ))}</div>
             </SurfaceCard>
-            {hasNoEvidence ? <div className={profileEvidenceSurfaceClassName}><SurfaceListCard label={"Coding evidence"}><EmptyNotice message={"No coding evidence yet."} description={"Complete challenges and practice problems to build your public skills history."} actionLabel={"Browse courses"} iconSource={iconSourceFor("practice", "leading")} actionStartContent={<Icon source={iconSourceFor("course", "chip")} role="chip" />} onAction={({ act: props.on?.browseCourses })?.act} /></SurfaceListCard></div> : <>
+            {hasNoEvidence ? <div className={profileEvidenceSurfaceClassName}><SurfaceListCard label={"Coding evidence"}><EmptyNotice message={"No coding evidence yet."} description={"Complete challenges and practice problems to build your public skills history."} actionLabel={"Browse courses"} iconSource={iconSourceFor("practice", "leading")} actionStartContent={<Icon source={iconSourceFor("course", "chip")} usage="chip" />} onAction={({ act: props.on?.browseCourses })?.act} /></SurfaceListCard></div> : <>
                 <SurfaceCard label={"Stats"} composition="joined">
                     <div className={profileBreakdownStackClassName}>
                         {breakdown("By difficulty", props.props.byDifficulty)}
@@ -106,7 +106,7 @@ export const ProfileSkillsBase = (props: ProfileSkillsProps) => {
                         </div>
                         <SurfaceListCard label={"Solve history"} labelHidden={true} isLoading={loading}>
                             <div className={profileEvidenceListClassName}>{(!loading && props.props.history.length === 0 ? [{ slug: "empty", problemTitle: "", firstSolvedAt: "", domain: "", languages: [] }] : (loading ? Array.from({ length: 4 }, (_, index) => ({ slug: `resting-${index}`, problemTitle: "", firstSolvedAt: "", domain: "", languages: [] })) : props.props.history)).map((row) => (
-                                row.slug === "empty" ? <EmptyNotice key={row.slug} message={props.state === "error" ? "Solve history couldn't be loaded." : "No solved problems yet."} actionLabel={props.state === "error" ? "Try again" : undefined} iconSource={iconSourceFor(props.state === "error" ? "retry" : "practice", "leading")} actionStartContent={<Icon source={iconSourceFor("retry", "chip")} role="chip" />} onAction={({ act: props.on?.retry })?.act} /> : (
+                                row.slug === "empty" ? <EmptyNotice key={row.slug} message={props.state === "error" ? "Solve history couldn't be loaded." : "No solved problems yet."} actionLabel={props.state === "error" ? "Try again" : undefined} iconSource={iconSourceFor(props.state === "error" ? "retry" : "practice", "leading")} actionStartContent={<Icon source={iconSourceFor("retry", "chip")} usage="chip" />} onAction={({ act: props.on?.retry })?.act} /> : (
                                     <EvidenceRow
                                         key={row.slug}
                                         props={{

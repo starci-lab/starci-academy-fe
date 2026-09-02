@@ -82,11 +82,11 @@ export const AccountMenuBase = (props: AccountMenuProps) => (
                 if (id === "sign-out") props.on?.signOut?.()
             },
         }}
-        trigger={props.state === "guest" ? <Icon source={iconSourceFor("account", "leading")} role={"leading"} /> : (
+        trigger={props.state === "guest" ? <Icon source={iconSourceFor("account", "leading")} usage={"leading"} /> : (
             <Avatar props={{ name: props.props.displayName, src: props.props.avatar, size: "sm" }} isLoading={props.props.isIdentityLoading} />
         )}
         header={props.state === "guest" ? (
-            <Text size={"sm"} tone={"muted"} startContent={<Icon source={iconSourceFor("account", "chip")} role="chip" />}>{props.props.guestMessage}</Text>
+            <Text size={"sm"} tone={"muted"} startContent={<Icon source={iconSourceFor("account", "chip")} usage="chip" />}>{props.props.guestMessage}</Text>
         ) : (
             <div>
                 <Avatar props={{ name: props.props.displayName, src: props.props.avatar, size: "sm" }} isLoading={props.props.isIdentityLoading} />

@@ -96,8 +96,8 @@ export type AuthenticationPanelActions = {
 /** Stable heading id used to name the authentication surface. */
 export const AUTHENTICATION_PANEL_TITLE_ID = "authentication-panel-title"
 const EMPTY_VALUES = { email: "", password: "", confirmPassword: "", otp: "" }
-const RevealPasswordIcon = () => <Icon source={iconSourceFor("revealPassword", "chip")} role={"chip"} />
-const HidePasswordIcon = () => <Icon source={iconSourceFor("hidePassword", "chip")} role={"chip"} />
+const RevealPasswordIcon = () => <Icon source={iconSourceFor("revealPassword", "chip")} usage={"chip"} />
+const HidePasswordIcon = () => <Icon source={iconSourceFor("hidePassword", "chip")} usage={"chip"} />
 /** Render the authentication journey from resolved state and callbacks. */
 export const AuthenticationPanelBase = (props: AuthenticationPanelProps) => {
     const values = useRef({ ...EMPTY_VALUES })
