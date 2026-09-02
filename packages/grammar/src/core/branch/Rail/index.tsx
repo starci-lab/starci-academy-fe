@@ -49,10 +49,25 @@ export const Rail = (props: RailProps) => {
     const headingId = useId()
     const treatment = treatmentFor(state)
 
+    const bodyContract = [
+        // The compact `.75rem` reflow only fires below the rail's own 18rem container
+        // breakpoint, which no prop resolves; that variant is not claimed.
+        // At height="fill" the body switches from `overflow-y: auto` to `overflow: hidden`,
+        // so OVERFLOW-3 no longer describes it; MEASURE-6 ("the rail body fills its shell")
+        // takes over instead.
+        height === "fill" ? "MEASURE-6" : "OVERFLOW-3",
+        inset === "content" ? "PADDING-3 PADDING-5" : null,
+    ].filter(Boolean).join(" ")
+
     const frame = (
-        <div className={railFrameClassName} data-grammar-rail-frame="true">
+        <div className={railFrameClassName} data-contract="GAP-4" data-grammar-rail-frame="true">
             {landmark === "content-navigation" ? null : <h2 className={isLabelHidden ? "starci-core-visually-hidden" : undefined} data-grammar-rail-heading="true" id={headingId}>{label}</h2>}
-            <div className={cn(railBodyClassName, inset === "content" && "px-3 py-6")} data-grammar-rail-body="true" data-grammar-rail-inset={inset}>{children}</div>
+            <div
+                className={cn(railBodyClassName, inset === "content" && "px-3 py-6")}
+                data-grammar-rail-body="true"
+                data-grammar-rail-inset={inset}
+                {...(bodyContract === "" ? {} : { "data-contract": bodyContract })}
+            >{children}</div>
             {footer === undefined ? null : (
                 <div className={railFooterClassName} data-grammar-rail-footer="true">{footer}</div>
             )}

@@ -53,15 +53,23 @@ export const SurfaceListCard = (props: SurfaceListCardProps) => {
             data-grammar-surface-depth={depth}
         >
             {label === undefined || labelHidden ? null : (
-                <div className={surfaceLabelClassName} data-grammar-surface-label="true">
+                <div className={surfaceLabelClassName} data-contract="GAP-2" data-grammar-surface-label="true">
                     <Label as="h3" id={headingId} depth={depth}>{label}</Label>
-                    {labelEnd ?? (fact === undefined ? null : <span className={getSurfaceFactClassName(depth)}>{fact}</span>)}
+                    {labelEnd ?? (fact === undefined ? null : (
+                        <span
+                            className={getSurfaceFactClassName(depth)}
+                            data-contract={`TONE-2 ${depth === "nested" ? "FONT-1" : "FONT-2"}`}
+                        >
+                            {fact}
+                        </span>
+                    ))}
                 </div>
             )}
             <div
                 aria-label={labelHidden || label === undefined ? accessibleName : undefined}
                 aria-labelledby={!labelHidden && label !== undefined ? headingId : undefined}
                 className={listShellClassName}
+                data-contract="SURFACE-2 PADDING-0 OVERFLOW-2"
                 data-grammar-surface="true"
                 data-grammar-scroll={isScrollable ? "contained" : "page"}
                 data-grammar-surface-depth={depth}

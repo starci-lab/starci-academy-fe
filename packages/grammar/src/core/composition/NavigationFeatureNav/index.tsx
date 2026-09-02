@@ -53,11 +53,12 @@ export const NavigationFeatureNav = ({
     <header
         {...headerProps}
         className={cn(navigationFeatureNavClassName, position === "sticky" && navigationFeatureNavStickyClassName, className)}
+        data-contract="MEASURE-2 BOUNDARY-1"
         data-grammar-navigation-feature-nav="true"
         data-grammar-navigation-feature-nav-layers={featureNavigation === undefined ? "one" : "two"}
         data-grammar-navigation-feature-nav-position={position}
     >
-        <PageContainer className={navigationFeatureNavPrimaryClassName} data-grammar-navigation-feature-nav-primary="true" measure={measure}>
+        <PageContainer className={navigationFeatureNavPrimaryClassName} data-contract="GAP-3 PADDING-3" data-grammar-navigation-feature-nav-primary="true" measure={measure}>
             <div className={navigationFeatureNavIdentityClassName} data-grammar-navigation-feature-nav-identity="true">{identity}</div>
             <nav aria-label={navigationLabel} className={navigationFeatureNavNavigationClassName} data-grammar-navigation-feature-nav-navigation="true">{navigation}</nav>
             <div
@@ -72,6 +73,7 @@ export const NavigationFeatureNav = ({
                 <div
                     aria-label={actionsLabel}
                     className={navigationFeatureNavActionsClassName}
+                    data-contract="GAP-2"
                     data-grammar-navigation-feature-nav-actions="true"
                     role={actionsLabel === undefined ? undefined : "group"}
                 >

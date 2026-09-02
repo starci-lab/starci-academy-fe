@@ -23,6 +23,7 @@ export const PrimaryRailLayout = ({
     <div className={cn("starci-core-primary-rail-container", className)}>
         <div
             className="starci-core-primary-rail-layout"
+            data-contract="GAP-5"
             data-grammar-layout-align={align}
             data-grammar-layout-rail={rail === undefined ? "absent" : "present"}
             data-grammar-layout-rail-width={railWidth}

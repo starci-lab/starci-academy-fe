@@ -51,6 +51,79 @@ const SKELETON_CLASS_NAME = skeletonVariants({ animationType: "shimmer" }).base(
     className: "inline-flex w-16 shrink-0 select-none text-transparent",
 })
 
+const FONT_RULE_BY_SIZE: Record<ActionTextSize, string> = {
+    xs: "FONT-1",
+    sm: "FONT-2",
+    md: "FONT-3",
+}
+
+/**
+ * Padding rule ids per appearance, from actionStyles.ts's `APPEARANCE_CLASS_NAMES`.
+ * Each side is matched against padding.md's `## Scale` via the axis-variant rule
+ * (`px-*`/`py-*` apply an existing rule to one axis): `px-2 py-1` (choice) is
+ * PADDING-2 inline / PADDING-1 block; `px-3 py-2` (route, section) is PADDING-3
+ * inline / PADDING-2 block; `py-3` (tab) is PADDING-3 block only. `inline`,
+ * `muted`, `disclosure` and `plain` add no inset class.
+ */
+const PADDING_RULES_BY_APPEARANCE: Partial<Record<ActionAppearance, ReadonlyArray<string>>> = {
+    choice: ["PADDING-2", "PADDING-1"],
+    route: ["PADDING-3", "PADDING-2"],
+    section: ["PADDING-3", "PADDING-2"],
+    tab: ["PADDING-3"],
+}
+
+/**
+ * Tone rule ids per appearance, from actionStyles.ts's `APPEARANCE_CLASS_NAMES`,
+ * matched against tone.md `## Scale`. `choice`, `route` and `section` swap to the
+ * accent-soft foreground (TONE-3) only `data-[current=true]`, mirrored here from
+ * the already-known `isCurrent` prop. `tab`'s current-state color is `text-accent`,
+ * which tone.md does not publish, so that state stays unclaimed.
+ */
+const getToneRule = (appearance: ActionAppearance, isCurrent: boolean): string | undefined => {
+    switch (appearance) {
+    case "inline":
+    case "plain":
+        return "TONE-1"
+    case "muted":
+        return "TONE-2"
+    case "choice":
+    case "section":
+        return isCurrent ? "TONE-3" : "TONE-1"
+    case "route":
+        return isCurrent ? "TONE-3" : "TONE-2"
+    case "tab":
+        // Current state renders `text-accent`, which tone.md does not publish.
+        return isCurrent ? undefined : "TONE-2"
+    case "disclosure":
+        return "TONE-3"
+    }
+}
+
+/**
+ * Rule ids this element can claim from actionStyles.ts's shared recipe.
+ * `gap-2` (always present) matches gap.md's scale directly (GAP-2). `w-fit`
+ * (always present) matches measure.md's MEASURE-3 (Content width) catalog
+ * entry. Size selects the FONT-1/2/3 row. Appearance (with `isCurrent`)
+ * selects the tone row and any padding rows. `font-medium`/`font-semibold`,
+ * `rounded-full`/`rounded-large`, and the `tab` underline/border classes carry
+ * no rule id in their topic files and stay unclaimed.
+ */
+/**
+ * `choice`, `route` and `section` swap to `bg-accent-soft` only `data-[current=true]`,
+ * pairing with the same `text-accent-soft-foreground` as TONE-3. That pair matches
+ * surface.md's SURFACE-4 catalog entry exactly.
+ */
+const CURRENT_SURFACE_APPEARANCES: ReadonlySet<ActionAppearance> = new Set(["choice", "route", "section"])
+
+const getActionContract = (appearance: ActionAppearance, size: ActionTextSize, isCurrent: boolean) => {
+    const toneRule = getToneRule(appearance, isCurrent)
+    const ids = ["GAP-2", "MEASURE-3", FONT_RULE_BY_SIZE[size], ...(toneRule === undefined ? [] : [toneRule])]
+    if (isCurrent && CURRENT_SURFACE_APPEARANCES.has(appearance)) ids.push("SURFACE-4")
+    const paddingRules = PADDING_RULES_BY_APPEARANCE[appearance]
+    if (paddingRules !== undefined) ids.push(...paddingRules)
+    return ids.join(" ")
+}
+
 /** Text-shaped action: an anchor for a destination, a button for a command. */
 export const TextAction = (props: TextActionProps) => {
     const {
@@ -78,6 +151,7 @@ export const TextAction = (props: TextActionProps) => {
         "data-current": isCurrent ? "true" : "false",
         "data-action-pending": isPending ? "true" : "false",
         "aria-busy": isPending || undefined,
+        "data-contract": getActionContract(appearance, size, isCurrent),
         className: getActionClassName(appearance, size),
     } as const
     const content = (

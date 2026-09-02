@@ -86,6 +86,15 @@ export const SurfaceCard = (props: SurfaceCardProps) => {
     const accessibleName = ariaLabel ?? label
     const contained = isScrollable || scroll === "contained"
 
+    const compositionContract = composition === "joined" ? "GAP-0 PADDING-0" : "PADDING-4"
+    const contentContract = [
+        frame === "frameless" ? "SURFACE-1" : "SURFACE-2",
+        compositionContract,
+        frame === "frameless" ? "OVERFLOW-1 OVERFLOW-2" : "OVERFLOW-2",
+        depth === "nested" ? "BOUNDARY-5" : "BOUNDARY-6",
+    ].join(" ")
+    const rootContract = wholeAction === undefined ? undefined : "SURFACE-4"
+
     const action = wholeAction?.kind === "link" ? (
         <a
             aria-disabled={disabled || undefined}
@@ -109,6 +118,7 @@ export const SurfaceCard = (props: SurfaceCardProps) => {
             aria-label={label === undefined ? accessibleName : undefined}
             aria-labelledby={label === undefined ? undefined : headingId}
             className={getSurfaceFrameClassName(frame) ?? ""}
+            data-contract={contentContract}
             data-grammar-frame={frame}
             data-grammar-surface-composition={composition}
             data-grammar-surface-height={height}
@@ -138,6 +148,7 @@ export const SurfaceCard = (props: SurfaceCardProps) => {
     return (
         <Card.Root
             className={getSurfaceCardClassName(measure, height) ?? ""}
+            data-contract={rootContract}
             data-grammar-frame={frame}
             data-grammar-surface-composition={composition}
             data-grammar-surface-height={height}
@@ -148,7 +159,7 @@ export const SurfaceCard = (props: SurfaceCardProps) => {
             variant="transparent"
         >
             {label === undefined ? null : (
-                <Card.Header className={surfaceLabelClassName ?? ""} data-grammar-surface-label="true">
+                <Card.Header className={surfaceLabelClassName ?? ""} data-contract="GAP-2" data-grammar-surface-label="true">
                     <Label as="h3" id={headingId}>{label}</Label>
                     {labelEnd ?? (fact === undefined ? null : <span>{fact}</span>)}
                 </Card.Header>

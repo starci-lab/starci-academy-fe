@@ -45,6 +45,7 @@ export const FencedCodeBlock = (props: FencedCodeBlockProps) => {
     return (
         <div
             className={fencedCodeBlockClassName}
+            data-contract="OVERFLOW-4"
         >
             {props.language === undefined && props.action === undefined ? null : (
                 <div className={fencedCodeHeaderClassName}>
@@ -61,6 +62,7 @@ export const FencedCodeBlock = (props: FencedCodeBlockProps) => {
 export const MarkdownTableFrame = (props: MarkdownTableFrameProps) => (
     <div
         className={markdownTableFrameClassName}
+        data-contract="OVERFLOW-4"
     >
         {props.children}
     </div>

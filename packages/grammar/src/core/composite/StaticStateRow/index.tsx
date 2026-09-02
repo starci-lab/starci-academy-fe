@@ -25,9 +25,10 @@ export const StaticStateRow = (props: StaticStateRowProps) => {
             data-grammar-row="true"
             data-grammar-state={state}
             data-grammar-treatment={treatment.tone}
+            data-contract="GAP-2 PADDING-2 BOUNDARY-3"
         >
             <StateMark state={state} />
-            <span className={staticRowCopyClassName}>
+            <span className={staticRowCopyClassName} data-contract="GAP-1">
                 <span>{item.label}</span>
                 {item.description === undefined ? null : <span>{item.description}</span>}
             </span>

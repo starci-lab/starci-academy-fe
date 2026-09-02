@@ -46,10 +46,11 @@ export const Subnav = ({
         data-grammar-subnav="true"
         data-grammar-subnav-position={position}
         data-grammar-subnav-visibility={visibility}
+        data-contract="GAP-3 BOUNDARY-1 PADDING-3"
     >
-        <div className={subnavIdentityClassName} data-grammar-subnav-identity="true">
+        <div className={subnavIdentityClassName} data-grammar-subnav-identity="true" data-contract="GAP-2">
             {leading === undefined ? null : <span className={subnavLeadingClassName} data-grammar-subnav-leading="true">{leading}</span>}
-            <span className={subnavTitleClassName} data-grammar-subnav-title="true">{title}</span>
+            <span className={subnavTitleClassName} data-grammar-subnav-title="true" data-contract="FLOW-4">{title}</span>
         </div>
         <HeroButton
             aria-expanded={isMenuOpen}

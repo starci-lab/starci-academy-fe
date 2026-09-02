@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import { getLabelClassName } from "./classNames.js"
+import { getLabelClassName, getLabelContract } from "./classNames.js"
 
 export type LabelProps = {
     readonly id?: string
@@ -16,6 +16,7 @@ export const Label = ({ id, children, depth = "top", as = "span" }: LabelProps) 
         className: getLabelClassName(depth),
         "data-grammar-label": "true",
         "data-grammar-label-depth": depth,
+        "data-contract": getLabelContract(depth),
     } as const
 
     return as === "h3" ? <h3 {...shared}>{children}</h3> : <span {...shared}>{children}</span>

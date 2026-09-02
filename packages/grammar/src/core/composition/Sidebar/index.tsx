@@ -82,9 +82,10 @@ export const Sidebar = ({
                 presentation === "drawer" ? "w-full" : collapsed ? "h-full w-16" : "h-full w-64",
                 presentation === "rail" ? "border-r border-separator transition-[width] motion-reduce:transition-none" : "",
             ].join(" ")}
+            data-contract={["OVERFLOW-2", presentation === "drawer" ? "MEASURE-2" : "MEASURE-6"].join(" ")}
         >
             {canToggle ? (
-                <div className={collapsed ? "flex justify-center p-2" : "flex justify-end p-2"}>
+                <div className={collapsed ? "flex justify-center p-2" : "flex justify-end p-2"} data-contract="PADDING-2">
                     <IconButton
                         source={toggleSource}
                         label={toggleLabel}
@@ -93,7 +94,7 @@ export const Sidebar = ({
                     />
                 </div>
             ) : null}
-            {collapsed || header == null ? null : <div className="px-3 pb-3">{header}</div>}
+            {collapsed || header == null ? null : <div className="px-3 pb-3" data-contract="PADDING-3">{header}</div>}
             <ListBox
                 aria-label={label}
                 selectionMode="single"
@@ -103,15 +104,20 @@ export const Sidebar = ({
                     if (key !== undefined) onAction?.(key)
                 }}
                 className={collapsed ? "min-h-0 flex-1 items-center gap-1 overflow-y-auto p-2" : "min-h-0 flex-1 gap-1 overflow-y-auto p-3"}
+                data-contract={collapsed ? "GAP-1 PADDING-2" : "GAP-1 PADDING-3"}
             >
                 {groups.map((group) => (
                     <ListBox.Section
                         key={group.id}
                         id={sectionKey(group.id)}
                         className={collapsed ? "flex flex-col items-center gap-1" : "flex flex-col gap-1"}
+                        data-contract="GAP-1"
                     >
                         {group.label === undefined ? null : (
-                            <Header className={collapsed ? "sr-only" : "px-2 pb-1 pt-3 text-xs font-medium text-muted"}>
+                            <Header
+                                className={collapsed ? "sr-only" : "px-2 pb-1 pt-3 text-xs font-medium text-muted"}
+                                {...(collapsed ? {} : { "data-contract": "PADDING-2 PADDING-1 PADDING-3 FONT-1 TONE-2" })}
+                            >
                                 {group.label}
                             </Header>
                         )}
@@ -123,18 +129,19 @@ export const Sidebar = ({
                                 className={collapsed
                                     ? "group flex size-11 cursor-pointer items-center justify-center rounded-full text-foreground outline-none data-[disabled=true]:cursor-default data-[disabled=true]:opacity-50 data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-accent data-[hovered=true]:bg-default data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent-soft-foreground"
                                     : "flex cursor-pointer items-center gap-3 rounded-large px-3 py-2 text-foreground outline-none data-[disabled=true]:cursor-default data-[disabled=true]:opacity-50 data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-accent data-[hovered=true]:bg-default data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent-soft-foreground"}
+                                data-contract={collapsed ? "TONE-1 SURFACE-4" : "GAP-3 PADDING-3 PADDING-2 TONE-1 SURFACE-4"}
                                 {...(collapsed ? { "aria-label": item.label } : {})}
                                 {...(item.isDisabled === undefined ? {} : { isDisabled: item.isDisabled })}
                             >
                                 {item.source === undefined ? null : <Icon source={item.source} usage="leading" />}
-                                {collapsed ? null : <span className="min-w-0 flex-1 truncate text-sm font-medium">{item.label}</span>}
+                                {collapsed ? null : <span className="min-w-0 flex-1 truncate text-sm font-medium" data-contract="FLOW-4 FONT-2">{item.label}</span>}
                                 {collapsed || item.trailing == null ? null : <span className="shrink-0">{item.trailing}</span>}
                             </ListBox.Item>
                         ))}
                     </ListBox.Section>
                 ))}
             </ListBox>
-            {collapsed || footer == null ? null : <div className="p-3 pt-0">{footer}</div>}
+            {collapsed || footer == null ? null : <div className="p-3 pt-0" data-contract="PADDING-3 PADDING-0">{footer}</div>}
         </div>
     )
 }

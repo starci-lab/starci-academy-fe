@@ -77,7 +77,7 @@ export const Input = ({
 
     if (isSkeleton) {
         return (
-            <div data-tier="atom" data-component="Input" data-state="skeleton" className="grid gap-2">
+            <div data-tier="atom" data-component="Input" data-state="skeleton" data-contract="GAP-2" className="grid gap-2">
                 <HeroSkeleton className="h-4 w-1/3 rounded-md" />
                 <HeroSkeleton className="h-10 w-full rounded-field" />
             </div>
@@ -93,6 +93,7 @@ export const Input = ({
             isInvalid={invalid}
             isDisabled={isDisabled}
             isRequired={isRequired}
+            data-contract="GAP-2"
             className="grid gap-2"
         >
             <HeroLabel>{label}</HeroLabel>
@@ -117,10 +118,11 @@ export const Input = ({
                         type="button"
                         aria-label={toggleLabel}
                         disabled={isDisabled}
+                        data-contract="TONE-2"
                         className="text-muted absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer disabled:cursor-default [&_svg]:size-4"
                         onClick={() => setIsRevealed((current) => !current)}
                     >
-                        {ToggleIcon === undefined ? <span className="text-xs">{toggleLabel}</span> : <ToggleIcon className="size-4" />}
+                        {ToggleIcon === undefined ? <span data-contract="FONT-1" className="text-xs">{toggleLabel}</span> : <ToggleIcon className="size-4" />}
                     </button>
                 )}
             </div>

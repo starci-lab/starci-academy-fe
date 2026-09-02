@@ -29,7 +29,7 @@ export const OtpInput = (props: OtpInputProps) => {
     }, [props.onChange])
 
     return (
-        <HorizontalScrollRegion ref={regionRef} className={horizontalScrollRegionClassName}>
+        <HorizontalScrollRegion ref={regionRef} className={horizontalScrollRegionClassName} data-contract="PADDING-1 OVERFLOW-3 OVERFLOW-5">
             <InputOTP
                 id={props.id}
                 name={props.name}

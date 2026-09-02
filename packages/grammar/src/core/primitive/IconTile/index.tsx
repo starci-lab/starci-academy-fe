@@ -31,6 +31,17 @@ const TONE_CLASS_NAMES = {
 
 const SKELETON_CLASS_NAME = skeletonVariants({ animationType: "shimmer" }).base()
 
+/**
+ * surface.md Catalog / tone.md Scale: only these tone classes have a published rule for their exact
+ * pairing. `bg-default` (neutral) and the warning/danger soft pairs are not catalogued, so they are
+ * left unclaimed.
+ */
+const TONE_CONTRACT: Partial<Record<IconTileTone, string>> = {
+    neutral: "TONE-2",
+    accent: "SURFACE-4",
+    success: "SURFACE-5",
+}
+
 /** Filled icon plate with one owned size, radius, tone pair, and loading geometry. */
 export const IconTile = ({
     source,
@@ -41,6 +52,7 @@ export const IconTile = ({
     isSkeleton = false,
 }: IconTileProps) => {
     const showsArtwork = !isSkeleton && artwork != null
+    const toneRule = isSkeleton || showsArtwork ? undefined : TONE_CONTRACT[tone]
     return (
         <span
             data-tier="atom"
@@ -50,6 +62,7 @@ export const IconTile = ({
             data-artwork={showsArtwork ? "true" : "false"}
             data-loading={isSkeleton ? "true" : "false"}
             aria-hidden={isSkeleton || undefined}
+            data-contract={["OVERFLOW-2", toneRule].filter(Boolean).join(" ")}
             className={cn(
                 "inline-flex shrink-0 items-center justify-center overflow-hidden",
                 SIZE_CLASS_NAMES[size],

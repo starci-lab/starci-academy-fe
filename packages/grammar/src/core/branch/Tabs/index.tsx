@@ -46,15 +46,17 @@ export const Tabs = (props: TabsProps) => {
     }, [isClientReady, props.items, props.panelId])
 
     const inset = props.inset ?? "none"
-    if (!isClientReady) return <div aria-hidden="true" className={tabsFrameClassName} data-grammar-tabs="true" data-grammar-tabs-client="pending" data-grammar-tabs-inset={inset} style={{ minHeight: "3rem" }} />
+    const frameContract = inset === "page" ? "PADDING-5" : undefined
+    if (!isClientReady) return <div aria-hidden="true" className={tabsFrameClassName} data-contract={frameContract} data-grammar-tabs="true" data-grammar-tabs-client="pending" data-grammar-tabs-inset={inset} style={{ minHeight: "3rem" }} />
 
-    return <div ref={frameRef} className={tabsFrameClassName} data-grammar-tabs="true" data-grammar-tabs-client="ready" data-grammar-tabs-inset={inset} data-grammar-tab-labels={props.labelVisibility ?? "responsive"}>
-        <HorizontalScrollRegion className={tabsScrollClassName} data-grammar-tabs-overflow="scroll" hideScrollBar>
+    return <div ref={frameRef} className={tabsFrameClassName} data-contract={frameContract} data-grammar-tabs="true" data-grammar-tabs-client="ready" data-grammar-tabs-inset={inset} data-grammar-tab-labels={props.labelVisibility ?? "responsive"}>
+        <HorizontalScrollRegion className={tabsScrollClassName} data-contract="OVERFLOW-4" data-grammar-tabs-overflow="scroll" hideScrollBar>
             <HeroTabs
                 variant="secondary"
                 selectedKey={props.selectedKey}
                 onSelectionChange={(key) => props.onSelect?.(String(key))}
                 className={tabsClassName ?? ""}
+                data-contract="FLOW-2"
             >
                 <HeroTabs.ListContainer>
                     <HeroTabs.List aria-label={props.label}>
@@ -64,8 +66,9 @@ export const Tabs = (props: TabsProps) => {
                                 id={item.id}
                                 aria-label={item.label}
                                 aria-controls={props.panelId?.(item.id)}
+                                data-contract="PADDING-3"
                             >
-                                <span className={tabContentClassName} data-grammar-tab-id={item.id}>
+                                <span className={tabContentClassName} data-contract="GAP-2" data-grammar-tab-id={item.id}>
                                     {item.leading}
                                     <span className={tabLabelClassName} style={props.labelVisibility === "always" ? { display: "inline" } : undefined}>{item.label}</span>
                                 </span>

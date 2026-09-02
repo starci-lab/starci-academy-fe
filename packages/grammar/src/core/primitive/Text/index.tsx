@@ -38,6 +38,41 @@ const TEXT_CLASS_NAME = cn(
     "data-[superseded=true]:line-through",
 )
 
+const FONT_RULE_BY_SIZE: Record<TextSize, string> = {
+    xs: "FONT-1",
+    sm: "FONT-2",
+    md: "FONT-3",
+    "metric-lead": "FONT-5",
+}
+
+const TONE_RULE_BY_RESOLVED_TONE: Record<TextTone, string> = {
+    default: "TONE-1",
+    muted: "TONE-2",
+    accent: "TONE-3",
+}
+
+/**
+ * Rule ids this element can claim from its resolved size and tone.
+ * `size` selects the exact scale row in font.md `## Scale` (FONT-1/2/3/5); the
+ * resolved tone (forced `muted` at `size="xs"`) selects the exact row in
+ * tone.md `## Scale` (TONE-1/2/3). `gap-2` fires only while `startContent` is
+ * shown, matching the `Text` with `startContent` row in gap.md's
+ * "Gaps Common already owns" table (GAP-2). Weight classes (`font-medium`,
+ * `font-semibold`) and the `parentEmphasis` accent-soft variant carry no rule
+ * id here and stay unclaimed.
+ */
+const getTextContract = (size: TextSize, resolvedTone: TextTone, showsStartContent: boolean) => {
+    const ids = [FONT_RULE_BY_SIZE[size], TONE_RULE_BY_RESOLVED_TONE[resolvedTone]]
+    if (showsStartContent) ids.push("GAP-2")
+    return ids.join(" ")
+}
+
+/**
+ * The skeleton keeps the size geometry (FONT-1/2/3/5) but its copy is
+ * `text-transparent`, so no tone is actually visible to claim.
+ */
+const getTextSkeletonContract = (size: TextSize) => FONT_RULE_BY_SIZE[size]
+
 const SKELETON_CLASS_NAMES = {
     xs: skeletonVariants({ animationType: "shimmer" }).base({
         className: "inline-block w-10 select-none rounded text-xs leading-4 text-muted text-transparent",
@@ -83,6 +118,7 @@ export const Text = ({
             data-parent-emphasis={parentEmphasis}
             data-live={live}
             data-loading={isSkeleton ? "true" : "false"}
+            data-contract={isSkeleton ? getTextSkeletonContract(size) : getTextContract(size, resolvedTone, showsStartContent)}
             role={isSkeleton ? undefined : LIVE_ROLES[live]}
             aria-live={isSkeleton || live === "off" ? undefined : live}
             aria-hidden={isSkeleton || undefined}

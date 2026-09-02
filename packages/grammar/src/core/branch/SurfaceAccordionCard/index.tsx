@@ -82,7 +82,7 @@ const SurfaceAccordionRows = <Summary, Body>({
             data-grammar-surface-accordion-card="true"
         >
             {label === undefined ? null : (
-                <div className={surfaceLabelClassName} data-grammar-surface-label="true">
+                <div className={surfaceLabelClassName} data-contract="GAP-2" data-grammar-surface-label="true">
                     <Label as="h3" depth={depth ?? "top"} id={headingId}>{label}</Label>
                 </div>
             )}
@@ -90,6 +90,11 @@ const SurfaceAccordionRows = <Summary, Body>({
                 aria-label={label === undefined ? accessibleName : undefined}
                 aria-labelledby={label === undefined ? undefined : headingId}
                 className={getAccordionShellClassName(bounded)}
+                data-contract={[
+                    bounded ? "SURFACE-2" : "SURFACE-1",
+                    bounded ? "OVERFLOW-2" : "OVERFLOW-1 OVERFLOW-2",
+                    depth === "nested" ? "BOUNDARY-5" : depth === "top" ? "BOUNDARY-6" : undefined,
+                ].filter(Boolean).join(" ")}
                 data-grammar-accordion-shell="true"
                 data-grammar-frame={bounded ? "bounded" : "frameless"}
                 data-grammar-scroll={isScrollable ? "contained" : "page"}
@@ -108,21 +113,23 @@ const SurfaceAccordionRows = <Summary, Body>({
                             return (
                                 <Accordion.Item
                                     className={accordionRowClassName ?? ""}
+                                    data-contract="BOUNDARY-3"
                                     data-grammar-accordion-row="true"
                                     data-grammar-disclosure-state={item.isOpen ? "open" : "closed"}
                                     id={item.id}
                                     {...(item.isDisabled === undefined ? {} : { isDisabled: item.isDisabled })}
                                     key={item.id}
                                 >
-                                    <Accordion.Heading className={accordionHeadingClassName ?? ""}>
+                                    <Accordion.Heading className={accordionHeadingClassName ?? ""} data-contract="MARGIN-0">
                                         <Accordion.Trigger
                                             className={accordionTriggerClassName ?? ""}
+                                            data-contract="PADDING-4 PADDING-3"
                                         >
                                             {renderSummary(item.summaryRender)}
                                         </Accordion.Trigger>
                                     </Accordion.Heading>
-                                    <Accordion.Panel className={accordionPanelClassName ?? ""} role="region">
-                                        <Accordion.Body className={accordionBodyClassName ?? ""}>
+                                    <Accordion.Panel className={accordionPanelClassName ?? ""} data-contract="PADDING-0" role="region">
+                                        <Accordion.Body className={accordionBodyClassName ?? ""} data-contract="PADDING-8 TONE-1">
                                             {renderBody(item.bodyRender)}
                                         </Accordion.Body>
                                     </Accordion.Panel>

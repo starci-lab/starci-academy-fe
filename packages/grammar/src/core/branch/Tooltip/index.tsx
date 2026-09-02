@@ -38,6 +38,7 @@ export const Tooltip = ({
                 id={tooltipId}
                 role="tooltip"
                 className={tooltipContentClassName}
+                data-contract="PADDING-1 PADDING-2 FLOW-2 FONT-1"
                 data-grammar-tooltip-content="true"
             >
                 {content}

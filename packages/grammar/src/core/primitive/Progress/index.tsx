@@ -22,6 +22,9 @@ export const Progress = ({ label, value = 0, isSkeleton = false }: ProgressProps
                 data-component="Progress"
                 data-loading="true"
                 aria-hidden
+                // `w-full` matches MEASURE-2 (Fluid width). `h-2` is a fixed height,
+                // which measure.md excludes from its catalog on purpose, so it stays unclaimed.
+                data-contract="MEASURE-2"
                 className={SKELETON_CLASS_NAME}
             />
         )
@@ -38,6 +41,8 @@ export const Progress = ({ label, value = 0, isSkeleton = false }: ProgressProps
             maxValue={100}
             color="accent"
             size="sm"
+            // `w-full` matches MEASURE-2 (Fluid width) in measure.md `## Scale`/catalog.
+            data-contract="MEASURE-2"
             className="w-full"
         >
             <ProgressBar.Track>

@@ -30,6 +30,7 @@ export const EmptyNotice = ({
     <div
         data-tier="composite"
         data-component="EmptyNotice"
+        data-contract="GAP-3 PADDING-4"
         className="flex flex-col items-center gap-3 p-4 text-center"
     >
         {iconSource === undefined ? null : <IconTile source={iconSource} tone="neutral" size="md" />}

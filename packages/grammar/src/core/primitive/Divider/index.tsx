@@ -12,10 +12,11 @@ export const Divider = ({ label }: DividerProps) => (
         data-component="Divider"
         role="separator"
         aria-label={label}
+        data-contract="GAP-3"
         className="flex flex-row items-center gap-3"
     >
-        <span aria-hidden="true" className="h-px grow bg-border" />
+        <span aria-hidden="true" data-contract="BOUNDARY-5" className="h-px grow bg-border" />
         <Text as="span" size="sm" tone="muted">{label}</Text>
-        <span aria-hidden="true" className="h-px grow bg-border" />
+        <span aria-hidden="true" data-contract="BOUNDARY-5" className="h-px grow bg-border" />
     </div>
 )

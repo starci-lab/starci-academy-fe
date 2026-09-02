@@ -153,8 +153,8 @@ export const ChatWorkspace = (props: ChatWorkspaceProps) => {
                     isOpen={railConfig.isOpen}
                     onOpenChange={railConfig.onOpenChange}
                 >
-                    <div className={chatWorkspaceRailTriggerBoundaryClassName}>
-                        <Drawer.Trigger className={chatWorkspaceRailTriggerClassName}>
+                    <div className={chatWorkspaceRailTriggerBoundaryClassName} data-contract="BOUNDARY-1 PADDING-4 PADDING-2">
+                        <Drawer.Trigger className={chatWorkspaceRailTriggerClassName} data-contract="PADDING-3 SURFACE-2 FONT-2 TONE-1">
                             {railConfig.openLabel}
                         </Drawer.Trigger>
                     </div>
@@ -170,11 +170,13 @@ export const ChatWorkspace = (props: ChatWorkspaceProps) => {
                                 <Drawer.CloseTrigger
                                     aria-label={railConfig.closeLabel}
                                     className={chatWorkspaceDrawerCloseClassName}
+                                    data-contract="SURFACE-2 TONE-1"
                                 />
-                                <Drawer.Body className={chatWorkspaceDrawerBodyClassName}>
+                                <Drawer.Body className={chatWorkspaceDrawerBodyClassName} data-contract="OVERFLOW-2 PADDING-0">
                                     <VerticalScrollRegion
                                         aria-label={railConfig.label}
                                         className={chatWorkspaceOverlayRailClassName}
+                                        data-contract="OVERFLOW-4 OVERFLOW-5 PADDING-4"
                                         data-grammar-chat-workspace-rail-presentation="overlay"
                                         data-grammar-chat-workspace-slot="rail"
                                         isScrollable
@@ -192,6 +194,7 @@ export const ChatWorkspace = (props: ChatWorkspaceProps) => {
 
             <div
                 className={getChatWorkspaceLayoutClassName(railWidth, hasRail)}
+                data-contract="GAP-5"
                 data-grammar-chat-workspace-layout="true"
                 data-grammar-chat-workspace-rail-width={hasRail ? railWidth : undefined}
             >
@@ -199,6 +202,7 @@ export const ChatWorkspace = (props: ChatWorkspaceProps) => {
                     <VerticalScrollRegion
                         aria-label={conversationLabel}
                         className={chatWorkspaceConversationClassName}
+                        data-contract="OVERFLOW-4 OVERFLOW-5"
                         data-grammar-chat-workspace-scroll-owner="conversation"
                         data-grammar-chat-workspace-slot="conversation"
                         isScrollable
@@ -209,6 +213,7 @@ export const ChatWorkspace = (props: ChatWorkspaceProps) => {
                     </VerticalScrollRegion>
                     <div
                         className={chatWorkspaceComposerClassName}
+                        data-contract="BOUNDARY-1"
                         data-grammar-chat-workspace-slot="composer"
                     >
                         {composer}
@@ -228,6 +233,7 @@ export const ChatWorkspace = (props: ChatWorkspaceProps) => {
                             <VerticalScrollRegion
                                 aria-label={railConfig.label}
                                 className={chatWorkspaceOverlayRailClassName}
+                                data-contract="OVERFLOW-4 OVERFLOW-5 PADDING-4"
                                 data-grammar-chat-workspace-rail-presentation="inline"
                                 data-grammar-chat-workspace-slot="rail"
                                 isScrollable

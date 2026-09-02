@@ -24,11 +24,16 @@ export const MediaFrame = ({
 }: MediaFrameProps) => (
     <figure
         className={cn("starci-core-media-frame", className)}
+        data-contract="GAP-2 MARGIN-0"
         data-grammar-media-aspect={aspect}
         data-grammar-media-fit={fit}
         data-grammar-media-treatment={treatment}
     >
-        <div className="starci-core-media-viewport" data-grammar-media="true">{children}</div>
-        {caption === undefined ? null : <figcaption className="starci-core-media-caption">{caption}</figcaption>}
+        <div
+            className="starci-core-media-viewport"
+            data-contract={treatment === "plain" ? "OVERFLOW-2 SURFACE-1" : "OVERFLOW-2 BOUNDARY-5 SURFACE-3"}
+            data-grammar-media="true"
+        >{children}</div>
+        {caption === undefined ? null : <figcaption className="starci-core-media-caption" data-contract="FLOW-3">{caption}</figcaption>}
     </figure>
 )
