@@ -383,9 +383,21 @@ body {
  * pair read as two different weights of underline. These are the vendor's own values rather than a
  * new rung, which is why they are written here beside the other cascade exceptions.
  */
-[data-press-label="true"] {
+.press-label > [data-component="Text"]:first-child {
     text-decoration-color: var(--separator-tertiary);
     text-decoration-thickness: 1.5px;
+    text-underline-offset: 4px;
+}
+
+/*
+ * The press target rules its own label. `Text` carries no press state and never did anything with
+ * one: it has no handler and no disabled state, so a leaf that underlined itself was answering for
+ * a gesture it cannot receive. `PressableSurface` marks the identity wrapper, and the mark answers
+ * to the control's own hover and keyboard focus.
+ */
+.group:hover .press-label > [data-component="Text"]:first-child,
+.group:focus-visible .press-label > [data-component="Text"]:first-child {
+    text-decoration-line: underline;
 }
 
 /*
@@ -394,6 +406,6 @@ body {
  * something else, that sentence is false: the reader is told two destinations answer one gesture.
  * `:has()` is the only thing that can see a descendant's hover, so the exception lives here.
  */
-.group:has(a:hover, [role="link"]:hover) [data-press-label="true"] {
+.group:has(a:hover, [role="link"]:hover) .press-label > [data-component="Text"]:first-child {
     text-decoration-line: none;
 }

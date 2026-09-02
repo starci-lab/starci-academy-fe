@@ -47,16 +47,16 @@ describe("Heritage family CSS", () => {
 
     it("keeps the Common SurfaceCard label outside the Heritage material boundary", () => {
         expect(css).toMatch(
-            /\[data-grammar-surface-card\]\[data-slot="card"\]\s*\{[^}]*border:\s*0;[^}]*background:\s*transparent;[^}]*box-shadow:\s*none;/s,
+            /\[data-grammar-surface-card\]\[data-slot="card"\]\s*\{[^}]*border:\s*0;[^}]*background:\s*transparent;[^}]*box-shadow:\s*none;/,
         )
         expect(css).toMatch(
-            /\[data-grammar-surface-card\]\[data-slot="card"\]\s+\[data-grammar-frame="bounded"\]\[data-slot="card-content"\][^{]*\{[^}]*border:[^}]*background:\s*var\(--surface\);[^}]*box-shadow:\s*var\(--shadow-surface\);/s,
+            /\[data-grammar-surface-card\]\[data-slot="card"\]\s+\[data-grammar-frame="bounded"\]\[data-slot="card-content"\][^{]*\{[^}]*border:[^}]*background:\s*var\(--surface\);[^}]*box-shadow:\s*var\(--shadow-surface\);/,
         )
         expect(commonRendererSource).toContain("<Card.Root")
         expect(commonRendererSource).toContain("<Card.Header")
         expect(commonRendererSource).toContain("<Card.Content")
         expect(css).not.toMatch(
-            /\[data-grammar-surface-label\][^{]*\{[^}]*(?:background|border|box-shadow):/s,
+            /\[data-grammar-surface-label\][^{]*\{[^}]*(?:background|border|box-shadow):/,
         )
     })
 

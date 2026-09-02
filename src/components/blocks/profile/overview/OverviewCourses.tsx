@@ -89,7 +89,7 @@ export const OverviewCourses = (props: OverviewCoursesProps) => {
                                 <IconTile source={iconSourceFor("course", "leading")} artwork={course.thumbnailUrl ? <img src={course.thumbnailUrl} alt="" className={overviewCourseCoverClassName} /> : undefined} tone={"accent"} size={"md"} isSkeleton={request.isLoading} />
                                 <div className={profileCourseIdentityClassName}>
                                     <div className={profileCourseHeadingClassName}>
-                                        <Text size={"sm"} weight={"semibold"} isPressLabel={true} isSkeleton={request.isLoading}>{text(course.label)}</Text>
+                                        <Text size={"sm"} weight={"semibold"} isSkeleton={request.isLoading}>{text(course.label)}</Text>
                                         {request.isLoading ? null : <Badge>{`${clamp(course.completionPercent)}%`}</Badge>}
                                     </div>
                                     {request.isLoading ? null : <div className={profileCourseQualifierClassName}><Text size={"xs"} tone={"muted"}>{`${courseT("progress.content")} ${number(course.contentCompleted)}/${number(course.contentTotal)} · ${courseT("progress.challenge")} ${number(course.challengeCompleted)}/${number(course.challengeTotal)}`}</Text></div>}

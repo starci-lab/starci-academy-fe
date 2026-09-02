@@ -1,4 +1,5 @@
 import { cn } from "@heroui/react"
+import { pressableLabelClassName } from "@/components/branches/PressableSurface/classNames"
 
 /** Joined course evidence rows. */
 export const profileEvidenceListClassName = cn("flex", "flex-col", "divide-y", "divide-separator", "p-0")
@@ -11,7 +12,7 @@ export const profileCourseIdentityClassName = cn("flex", "min-w-0", "max-w-full"
 /** Qualifier copy is explicitly allowed to wrap inside the compact course row. */
 export const profileCourseQualifierClassName = cn("min-w-0", "max-w-full", "whitespace-normal", "break-words", "[overflow-wrap:anywhere]", "[&>div]:whitespace-normal", "[&>div]:break-words", "[&>div]:[overflow-wrap:anywhere]")
 /** Course title and compact completion fact share one scan line. */
-export const profileCourseHeadingClassName = cn("flex", "min-w-0", "max-w-full", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-3")
+export const profileCourseHeadingClassName = cn(pressableLabelClassName, "flex", "min-w-0", "max-w-full", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-3")
 /** Readiness content flow; the owning SurfaceCard supplies the single compact inset. */
 export const profileReadinessCardClassName = cn("flex", "flex-col", "gap-3")
 /** Readiness summary remains left aligned while its band settles at the far edge. */

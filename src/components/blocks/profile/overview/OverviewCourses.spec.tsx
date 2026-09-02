@@ -95,7 +95,9 @@ describe("OverviewCourses", () => {
         expect(screen.getByRole("link", { name: "Frontend fundamentals" })).toHaveAttribute("href", "/vi/courses/frontend-fundamentals")
         expect(screen.getAllByRole("progressbar")).toHaveLength(2)
         expect(screen.getByRole("progressbar", { name: "catalog.progressAria:Backend fundamentals" })).toHaveAttribute("aria-valuenow", "29")
-        expect(screen.getByText("Backend fundamentals")).toHaveAttribute("data-press-label", "true")
+        // The press target marks its identity line; the Text itself knows nothing about being pressed.
+        expect(screen.getByText("Backend fundamentals").parentElement).toHaveClass("press-label")
+        expect(screen.getByText("Backend fundamentals")).not.toHaveAttribute("data-press-label")
         const qualifier = screen.getByText("progress.content 3/10 · progress.challenge 1/4").parentElement
         expect(qualifier).toHaveClass("min-w-0", "max-w-full", "whitespace-normal", "break-words")
         expect(qualifier?.closest("a")).toBeInTheDocument()

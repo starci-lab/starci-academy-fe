@@ -20,7 +20,6 @@ export type TextProps = {
     readonly live?: TextLive
     readonly isSkeleton?: boolean
     readonly isSuperseded?: boolean
-    readonly isPressLabel?: boolean
     /** Opt into the shared selected-parent accent treatment. */
     readonly parentEmphasis?: "accent-soft"
 }
@@ -37,9 +36,6 @@ const TEXT_CLASS_NAME = cn(
     "data-[weight=medium]:font-medium", "data-[weight=semibold]:font-semibold",
     "data-[start-content=true]:inline-flex", "data-[start-content=true]:items-center", "data-[start-content=true]:gap-2",
     "data-[superseded=true]:line-through",
-    "data-[press-label=true]:underline-offset-4",
-    "data-[press-label=true]:group-hover:underline",
-    "data-[press-label=true]:group-focus-visible:underline",
 )
 
 const SKELETON_CLASS_NAMES = {
@@ -69,7 +65,6 @@ export const Text = ({
     live = "off",
     isSkeleton = false,
     isSuperseded = false,
-    isPressLabel = false,
     parentEmphasis,
 }: TextProps) => {
     const resolvedTone = size === "xs" ? "muted" : tone ?? "default"
@@ -85,7 +80,6 @@ export const Text = ({
             data-weight={weight}
             data-start-content={showsStartContent ? "true" : "false"}
             data-superseded={isSuperseded ? "true" : "false"}
-            data-press-label={isPressLabel ? "true" : "false"}
             data-parent-emphasis={parentEmphasis}
             data-live={live}
             data-loading={isSkeleton ? "true" : "false"}

@@ -1,4 +1,5 @@
 import { cn } from "@heroui/react"
+import { pressableLabelClassName } from "@/components/branches/PressableSurface/classNames"
 
 /** Keep artwork and commerce facts in one dense, scan-friendly row at every width. */
 export const recommendedCourseRowClassName = cn("grid", "min-w-0", "grid-cols-[3rem_1fr]", "items-start", "gap-3")
@@ -7,7 +8,7 @@ export const recommendedCourseRowClassName = cn("grid", "min-w-0", "grid-cols-[3
 export const recommendedCourseBodyClassName = cn("flex", "min-w-0", "flex-col", "gap-3")
 
 /** Stack recommendation evidence at the compact fact rhythm. */
-export const recommendedCourseEvidenceClassName = cn("flex", "min-w-0", "flex-col", "gap-2")
+export const recommendedCourseEvidenceClassName = cn(pressableLabelClassName, "flex", "min-w-0", "flex-col", "gap-2")
 
 /** Keep current, superseded, and discount facts together as one price hierarchy. */
 export const recommendedCoursePriceClassName = cn("flex", "min-w-0", "flex-wrap", "items-baseline", "gap-x-2", "gap-y-1")

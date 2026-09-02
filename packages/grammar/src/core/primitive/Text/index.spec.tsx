@@ -37,13 +37,13 @@ describe("Core Text", () => {
         expect(markup).not.toContain("aria-live")
     })
 
-    it("keeps shared parent, press-label and superseded treatments explicit", () => {
+    it("keeps shared parent and superseded treatments explicit, and owns no press state", () => {
         const markup = renderToStaticMarkup(
-            <Text size="xs" tone="accent" isPressLabel isSuperseded parentEmphasis="accent-soft">Old price</Text>,
+            <Text size="xs" tone="accent" isSuperseded parentEmphasis="accent-soft">Old price</Text>,
         )
 
         expect(markup).toContain("data-tone=\"muted\"")
-        expect(markup).toContain("data-press-label=\"true\"")
+        expect(markup).not.toContain("press-label")
         expect(markup).toContain("data-superseded=\"true\"")
         expect(markup).toContain("data-parent-emphasis=\"accent-soft\"")
     })

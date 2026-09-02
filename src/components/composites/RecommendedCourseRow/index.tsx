@@ -71,7 +71,7 @@ export const RecommendedCourseRow = (props: RecommendedCourseRowProps) => {
         <IconTile source={iconSourceFor("course", "leading")} artwork={data.cover ? <img src={data.cover} alt="" className={recommendedCourseCoverClassName} /> : undefined} tone={"accent"} size={"md"} isSkeleton={isLoading} />
         <div className={recommendedCourseBodyClassName} data-recommended-course-body="true">
             <div className={recommendedCourseEvidenceClassName} data-recommended-course-evidence="true">
-                <Text size={"md"} weight={"semibold"} isPressLabel={true} isSkeleton={isLoading}>{data.title}</Text>
+                <Text size={"md"} weight={"semibold"} isSkeleton={isLoading}>{data.title}</Text>
                 <div className={recommendedCoursePriceClassName}>
                     <Text size={"md"} weight={"semibold"} isSkeleton={isLoading}>{data.price}</Text>
                     {data.originalPrice === undefined ? null : <Text size={"md"} tone={"muted"} isSuperseded={true} isSkeleton={isLoading}>{data.originalPrice}</Text>}
