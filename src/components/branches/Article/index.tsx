@@ -244,7 +244,7 @@ const block = (node: MarkdownNode, key: string, context: BlockContext): ReactNod
          */
         return (
             <div key={key} id={id} className={articleClasses.articleHeadingClassName}>
-                <Heading>{heading}</Heading>
+                <Heading level={(node.depth ?? 1) >= 3 ? 3 : 2}>{heading}</Heading>
                 <a href={`#${id}`} aria-label={heading} className={articleClasses.articleAnchorClassName}>#</a>
             </div>
         )

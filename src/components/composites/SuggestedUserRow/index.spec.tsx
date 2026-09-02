@@ -14,7 +14,9 @@ describe("SuggestedUserRow", () => {
         expect(screen.getByText("Ada Lovelace")).toBeInTheDocument()
         expect(screen.getByText("@ada")).toBeInTheDocument()
         expect(screen.getByRole("img", { name: "Ada Lovelace" })).toBeInTheDocument()
-        fireEvent.click(screen.getByRole("link", { name: "Ada Lovelace" }))
+        // The row reports the journey to its owner rather than owning a URL, so the name is a
+        // command: TextAction renders an anchor only for a real `href`.
+        fireEvent.click(screen.getByRole("button", { name: "Ada Lovelace" }))
         expect(open).toHaveBeenCalledOnce()
     })
 
@@ -37,7 +39,8 @@ describe("SuggestedUserRow", () => {
         const follow = vi.fn()
         render(<SuggestedUserRow props={{ ...frame, name: "Ada" }} on={{ follow }} />)
         const action = screen.getByRole("button", { name: "Follow" })
-        expect(action).toHaveAttribute("data-variant", "secondary")
+        expect(action).toHaveAttribute("data-element", "button")
+        expect(action).toHaveClass("button--secondary")
         fireEvent.click(action)
         expect(follow).toHaveBeenCalledOnce()
     })
@@ -67,6 +70,9 @@ describe("SuggestedUserRow", () => {
         expect(container.querySelector("[aria-hidden=\"true\"]")).toBeInTheDocument()
         expect(container.querySelector("[data-loading=\"true\"]")).toBeInTheDocument()
         expect(screen.getByRole("button", { name: "Follow" })).toHaveAttribute("data-loading", "true")
-        expect(screen.getByRole("link").textContent).toBe("")
+        // The identity rests as geometry rather than as an empty pressable target.
+        const identity = container.querySelector("[data-component='TextAction']")
+        expect(identity).toHaveAttribute("data-loading", "true")
+        expect(identity).toHaveAttribute("aria-hidden", "true")
     })
 })

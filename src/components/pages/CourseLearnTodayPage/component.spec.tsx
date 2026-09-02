@@ -68,7 +68,7 @@ describe("CourseLearnTodayPageBase", () => {
         expect(screen.getByText("Resume lesson")).toBeTruthy()
         expect(screen.getByText("Three cards due")).toBeTruthy()
         expect(screen.getByText("42% complete")).toBeTruthy()
-        const resumeAction = screen.getByText("Resume lesson").parentElement?.querySelector<HTMLElement>("[role=link]")
+        const resumeAction = screen.getByText("Resume lesson").parentElement?.querySelector<HTMLElement>("button[data-component='TextAction']")
         expect(resumeAction).not.toBeNull()
         fireEvent.click(resumeAction!)
         expect(open).toHaveBeenCalledWith("lesson")

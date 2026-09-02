@@ -208,6 +208,7 @@
             "failed": "Could not load the course list.",
             "retry": "Try again",
             "priceDetail": "Why this price?",
+            "priceDetailClose": "Close price breakdown",
             "priceDetailGuest": "Sign in to see the price for you.",
             "lineList": "List price",
             "linePhase": "Current phase price",

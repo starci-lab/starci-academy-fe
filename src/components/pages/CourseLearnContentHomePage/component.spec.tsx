@@ -49,7 +49,7 @@ describe("CourseLearnContentHomeBlockBase", () => {
         expect(screen.getByRole("heading", { level: 2, name: "Consistent hashing" })).toBeVisible()
         expect(screen.getByRole("heading", { level: 3, name: "Current module · Foundations" })).toBeVisible()
 
-        fireEvent.click(screen.getByRole("link", { name: "Consistent hashing" }))
+        fireEvent.click(screen.getByRole("button", { name: "Consistent hashing" }))
         expect(lesson).toHaveBeenCalledWith("module-1", "lesson-1")
     })
 

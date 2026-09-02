@@ -70,7 +70,7 @@ describe("CourseCatalogCard", () => {
         expect(screen.getByText("₫1,290,000")).toBeInTheDocument()
         expect(screen.getByText("discount:31")).toBeInTheDocument()
         expect(screen.getByText("savings:₫400,000")).toBeInTheDocument()
-        expect(screen.getByRole("link", { name: "priceDetail" })).toBeInTheDocument()
+        expect(screen.getByRole("button", { name: "priceDetail" })).toBeInTheDocument()
     })
 
     it("keeps the phase price when the viewer's answer takes nothing off it", () => {
@@ -135,7 +135,7 @@ describe("CourseCatalogCard", () => {
         render(<CourseCatalogCard course={course} onView={onView} onOpenPriceDetail={onOpenPriceDetail} />)
         fireEvent.click(screen.getByRole("button", { name: "View course" }))
         expect(onView).toHaveBeenCalledOnce()
-        fireEvent.click(screen.getByRole("link", { name: "priceDetail" }))
+        fireEvent.click(screen.getByRole("button", { name: "priceDetail" }))
         expect(onOpenPriceDetail).toHaveBeenCalledOnce()
     })
 })

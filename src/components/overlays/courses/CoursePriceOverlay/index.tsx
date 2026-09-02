@@ -106,6 +106,7 @@ export const CoursePriceOverlay = (props: CoursePriceOverlayProps) => {
     return (
         <CoursePriceOverlayView
             isOpen={props.isOpen}
+            closeLabel={t("priceDetailClose")}
             onDismiss={props.onDismiss}
         >
             <CoursePriceDetailBase

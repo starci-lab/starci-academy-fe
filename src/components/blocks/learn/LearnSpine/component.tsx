@@ -37,7 +37,7 @@ const sidebarItemOf = (row: LearnSpineRow, lockedLabel: string): SidebarItem => 
     id: row.id,
     label: row.label,
     source: iconSourceFor(row.icon, "leading"),
-    ...(row.isLocked === true ? { isDisabled: true, trailing: <Badge tone="warning">{lockedLabel}</Badge> } : row.fact === undefined ? {} : { trailing: <Badge tone="accent">{row.fact}</Badge> }),
+    ...(row.isLocked === true ? { trailing: <Badge tone="warning">{lockedLabel}</Badge> } : row.fact === undefined ? {} : { trailing: <Badge tone="accent">{row.fact}</Badge> }),
 })
 
 const renderSidebar = (input: LearnSpineProps, collapsed: boolean, presentation: "rail" | "drawer") => {

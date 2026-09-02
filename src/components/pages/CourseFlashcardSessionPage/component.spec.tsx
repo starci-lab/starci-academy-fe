@@ -134,8 +134,8 @@ describe("CourseFlashcardSessionBlockBase", () => {
             questions: progressedQuestions(),
         })
 
-        expect(screen.getByRole("button", { name: "7" })).toHaveAttribute("data-variant", "primary")
-        expect(screen.getByRole("button", { name: "1" })).toHaveAttribute("data-variant", "outline")
+        expect(screen.getByRole("button", { name: "7" })).toHaveClass("button--primary")
+        expect(screen.getByRole("button", { name: "1" })).toHaveClass("button--outline")
         expect(screen.getByRole("button", { name: "8" })).toBeDisabled()
         fireEvent.click(screen.getByRole("button", { name: "4" }))
         expect(on.selectQuestion).toHaveBeenCalledWith(4)
@@ -193,10 +193,10 @@ describe("CourseFlashcardSessionBlockBase", () => {
     it("keeps every unselected recall grade at equal visual weight", () => {
         draw("active")
 
-        expect(screen.getByRole("button", { name: "Good" })).toHaveAttribute("data-variant", "outline")
-        expect(screen.getByRole("button", { name: "Again" })).toHaveAttribute("data-variant", "outline")
-        expect(screen.getByRole("button", { name: "Hard" })).toHaveAttribute("data-variant", "outline")
-        expect(screen.getByRole("button", { name: "Easy" })).toHaveAttribute("data-variant", "outline")
+        expect(screen.getByRole("button", { name: "Good" })).toHaveClass("button--outline")
+        expect(screen.getByRole("button", { name: "Again" })).toHaveClass("button--outline")
+        expect(screen.getByRole("button", { name: "Hard" })).toHaveClass("button--outline")
+        expect(screen.getByRole("button", { name: "Easy" })).toHaveClass("button--outline")
     })
 
     it("runs a cloze quiz with opaque tokens and no client-side score or SM-2 rating", () => {

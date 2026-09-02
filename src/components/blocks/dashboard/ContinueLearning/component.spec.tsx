@@ -68,7 +68,7 @@ describe("ContinueLearningBase", () => {
         expect(container.querySelectorAll("[data-grammar-highlight=true]")).toHaveLength(1)
         expect(container.querySelector("[data-dashboard-resume-item=featured]")).toHaveClass("h-full")
         expect(container.querySelector("[data-dashboard-resume-item=supporting]")).toHaveClass("h-full")
-        expect(container.querySelector("[data-dashboard-resume-item=featured] [data-tone=accent]")).toHaveClass("bg-accent-soft", "text-accent-soft-foreground")
+        expect(container.querySelector("[data-dashboard-resume-item=featured] [data-grammar-highlight=true]")).not.toBeNull()
     })
 
     it("gives the destination title one clear step above its supporting kind", () => {

@@ -9,7 +9,7 @@ describe("CoursePricingRailBase", () => {
         const evidence = screen.getByText("$10").parentElement?.parentElement
         expect(evidence).toHaveClass("flex-col", "gap-2")
         expect(evidence).toContainElement(screen.getByText("Save $2"))
-        expect(evidence).toContainElement(screen.getByRole("link", { name: "Why this price?" }))
+        expect(evidence).toContainElement(screen.getByRole("button", { name: "Why this price?" }))
         expect(screen.getByRole("button", { name: "Enroll" })).toBeInTheDocument()
     })
 

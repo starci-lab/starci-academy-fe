@@ -37,7 +37,7 @@ describe("CoursePersonalProjectTaskBase", () => {
         render(<PersonalProjectTaskBase state="ready" props={props} on={{ submit: vi.fn() }} />)
 
         expect(screen.getByRole("heading", { name: "Build the API client" })).toBeInTheDocument()
-        expect(screen.getByRole("link", { name: "Back" })).toBeInTheDocument()
+        expect(screen.getByRole("button", { name: "Back" })).toBeInTheDocument()
         expect(screen.getByRole("heading", { name: "Common errors", level: 3 })).toBeInTheDocument()
         expect(screen.getByRole("heading", { name: "Steps", level: 3 })).toBeInTheDocument()
         expect(screen.getByText("Handles timeouts")).toBeInTheDocument()
@@ -88,7 +88,7 @@ describe("CoursePersonalProjectTaskBase", () => {
         expect(screen.getAllByText("Enroll to unlock.")).toHaveLength(2)
         expect(screen.queryByText("Implement the client.")).not.toBeInTheDocument()
         expect(screen.queryByRole("button", { name: "Try again" })).not.toBeInTheDocument()
-        expect(screen.getAllByRole("link", { name: "Back" })).toHaveLength(2)
+        expect(screen.getAllByRole("button", { name: "Back" })).toHaveLength(2)
         expect(screen.getByRole("button", { name: "Settings" })).toBeDisabled()
         expect(screen.getByRole("button", { name: "Submit for review" })).toBeDisabled()
         expect(screen.queryByRole("button", { name: "View feedback" })).not.toBeInTheDocument()

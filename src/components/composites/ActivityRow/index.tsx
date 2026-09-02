@@ -24,9 +24,9 @@ export const ActivityRow = (props: ActivityRowProps) => {
             <div className={activityBodyClassName}>
                 <div className={activityContentClassName}>
                     <div className={activitySentenceClassName}>
-                        <TextAction size={"sm"} appearance="inline" onPress={on?.openActor}>{data.actor ?? ""}</TextAction>
+                        <TextAction size={"sm"} appearance="inline" isSkeleton={isLoading} onPress={on?.openActor}>{data.actor ?? ""}</TextAction>
                         <Text size={"sm"} isSkeleton={isLoading}>{data.action}</Text>
-                        {data.target === undefined ? null : <TextAction size={"sm"} appearance="inline" onPress={on?.openTarget}>{data.target}</TextAction>}
+                        {data.target === undefined ? null : <TextAction size={"sm"} appearance="inline" isSkeleton={isLoading} onPress={on?.openTarget}>{data.target}</TextAction>}
                     </div>
                     <div className={activityTimeClassName}><Text size={"xs"} tone={"muted"} isSkeleton={isLoading}>{data.time}</Text></div>
                 </div>

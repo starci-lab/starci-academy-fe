@@ -57,7 +57,7 @@ describe("RecommendedCourseRow", () => {
             on={{ openPriceDetail }}
         />)
         expect(screen.getByText("You save 300.000 ₫")).toBeInTheDocument()
-        fireEvent.click(screen.getByRole("link", { name: "Why this price?" }))
+        fireEvent.click(screen.getByRole("button", { name: "Why this price?" }))
         expect(openPriceDetail).toHaveBeenCalledOnce()
     })
 
@@ -68,8 +68,11 @@ describe("RecommendedCourseRow", () => {
             price: "690.000 ₫",
             priceDetailLabel: "Why this price?",
         }} />)
-        expect(screen.getByRole("link", { name: "Why this price?" })).toBeInTheDocument()
-        expect(screen.getByRole("link", { name: "Why this price?" })).toBeInTheDocument()
+        // The question opens an explanation on this same surface, so it is a command and not a
+        // destination: the anchor branch of TextAction belongs to a real href.
+        const question = screen.getByRole("button", { name: "Why this price?" })
+        expect(question).toBeInTheDocument()
+        expect(question).toHaveAttribute("data-element", "button")
     })
 
     it("says why the course is being suggested when the caller has a reason", () => {

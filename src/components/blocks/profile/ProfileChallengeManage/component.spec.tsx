@@ -13,7 +13,7 @@ describe("ProfileChallengeManageBase", () => {
         expect(screen.getByText("No passed submissions were found.")).toBeInTheDocument()
         expect(screen.queryByText("0 found")).not.toBeInTheDocument()
         expect(screen.queryByText("0 passed submissions")).not.toBeInTheDocument()
-        expect(screen.getByRole("button", { name: "Filters" })).toHaveAttribute("data-size", "md")
+        expect(screen.getByRole("button", { name: "Filters" })).toHaveClass("button--md")
         fireEvent.click(screen.getByRole("button", { name: "Browse courses" }))
         expect(on.browseCourses).toHaveBeenCalledOnce()
     })

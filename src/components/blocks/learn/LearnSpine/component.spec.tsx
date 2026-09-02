@@ -78,7 +78,9 @@ describe("learnSpine", () => {
 
         rerender(learnSpineCollapsed({ props: { ...base, isCollapsed: true }, on: { toggleCollapse } }))
         expect(screen.getByRole("button", { name: "Expand" })).toBeInTheDocument()
-        expect(screen.queryByText("Your path")).not.toBeInTheDocument()
+        // The narrow rail hides the group name from the eye, not from the listbox: a screen reader
+        // still hears which run a destination belongs to.
+        expect(screen.getByText("Your path")).toHaveClass("sr-only")
         expect(screen.getByRole("option", { name: "Home" })).toBeInTheDocument()
         expect(screen.getByRole("option", { name: "Modules" })).toBeInTheDocument()
         const collapsedSidebar = screen.getByRole("listbox", { name: "Home" }).closest("[data-component='Sidebar']")

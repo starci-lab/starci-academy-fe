@@ -208,6 +208,7 @@
             "failed": "Không tải được danh sách khóa học.",
             "retry": "Thử lại",
             "priceDetail": "Vì sao giá này?",
+            "priceDetailClose": "Đóng bảng chi tiết giá",
             "priceDetailGuest": "Đăng nhập để xem giá dành riêng cho bạn.",
             "lineList": "Giá niêm yết",
             "linePhase": "Giá đợt hiện tại",

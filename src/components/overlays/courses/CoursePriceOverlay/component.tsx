@@ -26,6 +26,8 @@ export type CoursePriceOverlayViewProps = {
     readonly isOpen: boolean
     /** Content mounted inside the modal mechanics branch. */
     readonly children: ReactNode
+    /** Resolved name for the glyph-only close control; the vendor supplies none. */
+    readonly closeLabel: string
     /** Every way out: the close control, Escape and the backdrop. */
     readonly onDismiss: () => void
 }
@@ -39,6 +41,7 @@ export const CoursePriceOverlayView = (props: CoursePriceOverlayViewProps) => (
     <ModalBranch
         isOpen={props.isOpen}
         size="sm"
+        closeLabel={props.closeLabel}
         onDismiss={props.onDismiss}
     >
         {props.children}

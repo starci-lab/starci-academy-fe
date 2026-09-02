@@ -9,7 +9,7 @@ describe("application CSS cascade", () => {
         const order = "@layer theme, base, starci-grammar-common, starci-grammar-core, starci-grammar-extension, components, utilities;"
 
         expect(css).toContain(order)
-        expect(css.indexOf(order)).toBeLessThan(css.indexOf("@import \"@starci/grammar/common/styles.css\""))
+        expect(css.indexOf(order)).toBeLessThan(css.indexOf("@import \"@starci/grammar/core/styles.css\""))
         expect(css.indexOf(order)).toBeLessThan(css.indexOf("@import \"tailwindcss\""))
     })
 

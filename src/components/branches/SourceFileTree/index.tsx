@@ -110,7 +110,7 @@ export const SourceFileTree = (props: SourceFileTreeProps) => {
                         ? `${isFolderOpen ? "Collapse" : "Expand"} ${node.path}`
                         : `Open ${node.path}`
                     return <li key={node.id}>
-                        <IconButton source={iconSourceFor(node.kind === "folder" ? "disclosure" : "code", "leading")} label={controlLabel} isSkeleton={isLoading} onPress={({
+                        <IconButton source={iconSourceFor(node.kind === "folder" ? "disclosure" : "code", "leading")} label={controlLabel} isActive={isActive} isSkeleton={isLoading} onPress={({
                             press: node.kind === "folder"
                                 ? () => toggleFolder(node.path)
                                 : () => on?.activate?.(node.path),

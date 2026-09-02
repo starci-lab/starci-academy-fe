@@ -172,7 +172,7 @@ describe("DashboardPageBase", () => {
         expect(container.querySelector("[data-grammar-subnav='true']")).toHaveAttribute("data-grammar-subnav-position", "sticky")
         expect(container.querySelector("[data-grammar-subnav='true']")).toHaveClass("!top-[calc(6rem+1px)]", "[--starci-core-subnav-offset:calc(6rem+1px)]")
         expect(container.querySelector("[data-dashboard-rail='true']")).toBeNull()
-        expect(screen.getByRole("link", { name: "Back" })).toHaveAttribute("data-emphasis", "muted")
+        expect(screen.getByRole("button", { name: "Back" })).toHaveAttribute("data-appearance", "muted")
         const openButton = screen.getByRole("button", { name: "Open stats and quick access" })
         expect(openButton).toHaveAttribute("aria-expanded", "false")
         expect(openButton).toHaveClass("rounded-none", "bg-transparent", "shadow-none")

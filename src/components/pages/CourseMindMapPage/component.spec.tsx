@@ -56,7 +56,7 @@ describe("CourseMindMapBase", () => {
     it("draws the graph scale, the selected node's detail and its route into real content", () => {
         draw("ready")
         expect(screen.getByText("18 concepts · 24 connections")).toBeInTheDocument()
-        expect(screen.getByRole("link", { name: "Containers · 12 lessons" })).toHaveAttribute("aria-current", "page")
+        expect(screen.getByRole("button", { name: "Containers · 12 lessons" })).toHaveAttribute("aria-current", "true")
         expect(screen.getByText("12 lessons")).toBeInTheDocument()
         expect(screen.getByRole("button", { name: "Open content" })).toBeInTheDocument()
     })
@@ -67,7 +67,7 @@ describe("CourseMindMapBase", () => {
 
         fireEvent.change(screen.getByRole("searchbox", { name: "Search concepts" }), { target: { value: "container" } })
         fireEvent.submit(screen.getByRole("search"))
-        fireEvent.click(screen.getByRole("link", { name: "Containers · 12 lessons" }))
+        fireEvent.click(screen.getByRole("button", { name: "Containers · 12 lessons" }))
         fireEvent.click(screen.getByRole("button", { name: "Open content" }))
 
         expect(on.search).toHaveBeenCalledWith("container")
@@ -78,14 +78,14 @@ describe("CourseMindMapBase", () => {
     it("names a node the graph gave no detail for by its label alone", () => {
         draw("ready", { nodes: [node({ detail: undefined })] })
 
-        expect(screen.getByRole("link", { name: "Containers" })).toBeInTheDocument()
+        expect(screen.getByRole("button", { name: "Containers" })).toBeInTheDocument()
         expect(screen.getByRole("button", { name: "Open content" })).toBeInTheDocument()
     })
 
     it("says nothing about a selection and offers no route while no node is selected", () => {
         draw("ready", { selectedId: undefined })
 
-        expect(screen.getByRole("link", { name: "Containers · 12 lessons" })).not.toHaveAttribute("aria-current")
+        expect(screen.getByRole("button", { name: "Containers · 12 lessons" })).not.toHaveAttribute("aria-current")
         expect(screen.queryByText("12 lessons")).not.toBeInTheDocument()
         expect(screen.queryByRole("button", { name: "Open content" })).not.toBeInTheDocument()
     })
@@ -99,7 +99,7 @@ describe("CourseMindMapBase", () => {
 
     it("rests the graph facts it cannot yet state while keeping the nodes it already holds", () => {
         draw("pending")
-        expect(screen.getByRole("link", { name: "Containers · 12 lessons" })).toBeInTheDocument()
+        expect(screen.getByRole("button", { name: "Containers · 12 lessons" })).toBeInTheDocument()
         expect(screen.queryByText("This course has no concept map yet")).not.toBeInTheDocument()
     })
 

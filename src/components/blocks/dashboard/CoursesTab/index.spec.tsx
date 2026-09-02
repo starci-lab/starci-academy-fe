@@ -117,7 +117,7 @@ describe("CoursesTab", () => {
         fireEvent.click(screen.getByText("priceDetail"))
         expect(screen.getByRole("dialog")).toBeInTheDocument()
 
-        fireEvent.click(screen.getByRole("button", { name: "Close" }))
+        fireEvent.click(screen.getByRole("button", { name: "priceDetailClose" }))
         expect(screen.queryByRole("dialog")).toBeNull()
         expect(vi.mocked(useQueryCoursePricePreviewSwr)).toHaveBeenLastCalledWith(undefined)
     })

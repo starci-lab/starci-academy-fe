@@ -24,7 +24,7 @@ describe("ProfileChallengeSubmissionBase", () => {
 
         expect(container.querySelectorAll("[data-loading='true']").length).toBeGreaterThanOrEqual(6)
         expect(screen.getByRole("button", { name: "← Challenges" })).toBeInTheDocument()
-        expect(screen.getByText("Loading proof")).toBeInTheDocument()
+        expect(container.querySelector("[data-component='TextAction'][data-loading='true']")).toBeInTheDocument()
         expect(screen.getAllByRole("heading").length).toBeGreaterThan(0)
     })
 

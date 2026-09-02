@@ -39,7 +39,7 @@ const reckoning = <span>1.750.000 ₫</span>
 
 describe("CoursePriceOverlayView", () => {
     it("reads the reckoning at the measure a two-column amount needs", () => {
-        render(<CoursePriceOverlayView isOpen onDismiss={vi.fn()}>{reckoning}</CoursePriceOverlayView>)
+        render(<CoursePriceOverlayView isOpen closeLabel="Close price breakdown" onDismiss={vi.fn()}>{reckoning}</CoursePriceOverlayView>)
 
         expect(mocks.size).toHaveBeenCalledWith("sm")
         expect(mocks.children).toHaveBeenCalledWith(reckoning)
@@ -47,14 +47,14 @@ describe("CoursePriceOverlayView", () => {
     })
 
     it("draws no surface of its own around a body that is already framed", () => {
-        render(<CoursePriceOverlayView isOpen onDismiss={vi.fn()}>{reckoning}</CoursePriceOverlayView>)
+        render(<CoursePriceOverlayView isOpen closeLabel="Close price breakdown" onDismiss={vi.fn()}>{reckoning}</CoursePriceOverlayView>)
 
         expect(screen.getByTestId("modal")).toBeInTheDocument()
     })
 
     it("hands every way out to whatever mounted the surface", () => {
         const onDismiss = vi.fn()
-        render(<CoursePriceOverlayView isOpen={false} onDismiss={onDismiss}>{reckoning}</CoursePriceOverlayView>)
+        render(<CoursePriceOverlayView isOpen={false} closeLabel="Close price breakdown" onDismiss={onDismiss}>{reckoning}</CoursePriceOverlayView>)
 
         expect(screen.getByTestId("modal")).toHaveAttribute("data-open", "false")
         fireEvent.click(screen.getByRole("button", { name: "Close" }))
