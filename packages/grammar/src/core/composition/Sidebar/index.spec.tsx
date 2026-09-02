@@ -17,6 +17,18 @@ describe("Core Sidebar", () => {
         expect(screen.getByRole("option", { name: "Locked" }).getAttribute("data-disabled")).toBe("true")
     })
 
+    it("keeps every group when a group is named after the destination it holds", () => {
+        const groups = [
+            { id: "home", items: [{ id: "home", label: "Home", source: HomeGlyph }] },
+            { id: "path", label: "Your path", items: [{ id: "modules", label: "Modules", source: HomeGlyph }] },
+        ]
+        const { container, rerender } = render(<Sidebar label="Workspace" groups={groups} collapseLabel="Collapse" expandLabel="Expand" toggleSource={HomeGlyph} onCollapsedChange={() => {}} />)
+        expect(container.querySelectorAll("[role=option]")).toHaveLength(2)
+        expect(screen.getByText("Your path")).toBeTruthy()
+        rerender(<Sidebar label="Workspace" groups={groups} isCollapsed collapseLabel="Collapse" expandLabel="Expand" toggleSource={HomeGlyph} onCollapsedChange={() => {}} />)
+        expect(container.querySelectorAll("[role=option]")).toHaveLength(2)
+    })
+
     it("owns collapse geometry while caller owns collapse state", () => {
         const change = vi.fn()
         render(<Sidebar label="Workspace" isCollapsed collapseLabel="Collapse" expandLabel="Expand" toggleSource={HomeGlyph} groups={[{ id: "main", items: [{ id: "home", label: "Home", source: HomeGlyph }] }]} onCollapsedChange={change} />)

@@ -34,6 +34,18 @@ export type SidebarProps = {
     readonly onCollapsedChange?: (collapsed: boolean) => void
 }
 
+/**
+ * Sections and items share ONE key namespace inside the collection.
+ *
+ * A caller naturally writes `{ id: "home", items: [{ id: "home" }] }` - the group that holds the
+ * home destination, named after it. That duplicate key made the collection unresolvable: every
+ * section after the first was dropped from the render, and a re-render (collapsing the rail) sent
+ * reconciliation into a loop that never settled, which under Vitest reads as a worker that never
+ * reports. Prefixing the section key keeps the caller's vocabulary free: a group id and an item id
+ * may be the same word, because only the item id is ever a real collection key.
+ */
+const sectionKey = (id: string) => `sidebar-section:${id}`
+
 const firstKey = (keys: "all" | Set<Key>): string | undefined => {
     if (keys === "all") return undefined
     const value = keys.values().next().value
@@ -95,7 +107,7 @@ export const Sidebar = ({
                 {groups.map((group) => (
                     <ListBox.Section
                         key={group.id}
-                        id={group.id}
+                        id={sectionKey(group.id)}
                         className={collapsed ? "flex flex-col items-center gap-1" : "flex flex-col gap-1"}
                     >
                         {group.label === undefined ? null : (
