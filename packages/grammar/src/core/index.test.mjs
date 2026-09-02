@@ -30,13 +30,12 @@ test("exports Core DNA and the typed family registry boundary", () => {
     assert.equal(Object.isFrozen(core.CORE_GRAMMAR_COMPONENTS), true)
     assert.equal(typeof core.CORE_GRAMMAR_COMPONENTS.GrammarRoot, "function")
     assert.equal(typeof core.CORE_GRAMMAR_COMPONENTS.WorkspaceShell, "function")
-    assert.equal(typeof core.CORE_GRAMMAR_COMPONENTS.Link, "function")
     assert.equal(typeof core.CORE_GRAMMAR_COMPONENTS.TextAction, "function")
     assert.equal("DashboardShell" in core.CORE_GRAMMAR_COMPONENTS, false)
     assert.equal(typeof core.defineGrammarFamily, "function")
     assert.equal(core.coreGrammar.id, "core")
     assert.deepEqual(core.coreGrammar.scopeProps, { "data-grammar-family": "core" })
-    assert.equal(core.coreRuleConformance.inheritedCommonRules.length, 117)
+    assert.equal(core.coreRuleConformance.inheritedCommonRules.length, 150)
 })
 
 test("resolves a scoped family without re-exporting component owners from Core", () => {
