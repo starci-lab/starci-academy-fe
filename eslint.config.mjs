@@ -129,7 +129,7 @@ export default defineConfig([
         // and exit with a code, both of which are the point rather than an oversight. Declaring
         // the environment is what keeps `no-undef` meaningful everywhere else - the alternative
         // is silencing the rule per line in the one place a real leak would look identical.
-        files: ["scripts/**/*.{js,mjs,cjs}"],
+        files: ["scripts/**/*.{js,mjs,cjs}", "packages/*/scripts/**/*.{js,mjs,cjs}"],
         languageOptions: { globals: globals.node },
     },
     {

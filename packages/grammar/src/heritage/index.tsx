@@ -57,7 +57,7 @@ export const heritageGrammar = defineGrammarFamily({
 })
 
 const HERITAGE_FAMILY_EVIDENCE = {
-    "ACCESSIBILITY-4": ["Brand is non-interactive and its supplied image is decorative."],
+    "A11Y-4": ["Brand is non-interactive and its supplied image is decorative."],
     "BOUNDARY-1": ["Heritage surfaces bind material only through emitted Common surface hooks."],
     "COLOR-5": ["Heritage owns scoped light, dark, system, and forced-color variables."],
     "FOCUS-1": ["Heritage binds the shared visible focus variable without replacing focus ownership."],
