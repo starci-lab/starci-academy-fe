@@ -13,7 +13,6 @@ describe("@starci/grammar/core family registry", () => {
             "GrammarRoot",
             "Button",
             "Heading",
-            "Link",
             "Sidebar",
             "TextAction",
             "WorkspaceShell",

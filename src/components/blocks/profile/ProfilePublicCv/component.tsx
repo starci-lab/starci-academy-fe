@@ -27,7 +27,7 @@ import {
     publicCvTitleRowClassName,
     publicCvWorkspaceClassName,
 } from "./classNames"
-import { Link } from "@starci/grammar/common"
+import { TextAction } from "@starci/grammar/common"
 
 
 /** Public CV state and content. */
@@ -100,7 +100,7 @@ export const ProfilePublicCvBase = (props: ProfilePublicCvProps) => {
                         <Text size={"sm"} tone={"muted"} isSkeleton={loading}>{props.updatedLabel ?? props.description}</Text>
                     </div>
                     <div className={publicCvActionsClassName}>
-                        {props.state === "ready" && props.pdfUrl !== undefined ? <Link href={props.pdfUrl} startContent={<Icon source={iconSourceFor("cv", "chip")} usage="chip" />}>{props.openLabel}</Link> : null}
+                        {props.state === "ready" && props.pdfUrl !== undefined ? <TextAction href={props.pdfUrl} startContent={<Icon source={iconSourceFor("cv", "chip")} usage="chip" />}>{props.openLabel}</TextAction> : null}
                         {props.isSelf ? <Button variant={"secondary"} size={"sm"} isSkeleton={loading} onPress={({ press: props.on?.edit })?.press}>{props.editLabel}</Button> : null}
                     </div>
                 </header>

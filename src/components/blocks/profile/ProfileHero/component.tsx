@@ -17,7 +17,7 @@ import {
     profileProfessionalStackClassName,
     profileProofRowClassName,
 } from "./classNames"
-import { Icon, Link } from "@starci/grammar/common"
+import { Icon, TextAction } from "@starci/grammar/common"
 import { iconSourceFor } from "@/components/leaves/Icon"
 
 /** Resolved public identity drawn by the profile rail. */
@@ -80,9 +80,9 @@ export const ProfileHeroBase = (props: ProfileHeroProps) => {
                 </div>
                 <Text size={"xs"} isSkeleton={loading}>{data.joinedLabel}</Text>
                 <div className={profileMetaListClassName}>
-                    {data.githubUrl && <Link href={data.githubUrl} startContent={<Icon source={iconSourceFor("github", "chip")} usage="chip" />}>{"GitHub"}</Link>}
-                    {data.linkedinUrl && <Link href={data.linkedinUrl}>{"LinkedIn"}</Link>}
-                    {data.websiteUrl && <Link href={data.websiteUrl} startContent={<Icon source={iconSourceFor("explore", "chip")} usage="chip" />}>{data.websiteUrl}</Link>}
+                    {data.githubUrl && <TextAction href={data.githubUrl} startContent={<Icon source={iconSourceFor("github", "chip")} usage="chip" />}>{"GitHub"}</TextAction>}
+                    {data.linkedinUrl && <TextAction href={data.linkedinUrl}>{"LinkedIn"}</TextAction>}
+                    {data.websiteUrl && <TextAction href={data.websiteUrl} startContent={<Icon source={iconSourceFor("explore", "chip")} usage="chip" />}>{data.websiteUrl}</TextAction>}
                 </div>
             </div>
             <div className={profileEvidenceSummaryClassName}>

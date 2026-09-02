@@ -40,6 +40,8 @@ export const ChangelogList = (props: ChangelogListProps) => {
                 title: entry.title,
                 body: entry.body,
                 isAction: typeof entry.linkUrl === "string" && entry.linkUrl.length > 0,
+                // The update's own destination, so the title is a real anchor rather than a press.
+                href: typeof entry.linkUrl === "string" && entry.linkUrl.length > 0 ? entry.linkUrl : undefined,
             }
         }) }, on: { open: (id: string) => {
         const destination = byId.get(id)?.linkUrl

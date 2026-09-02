@@ -10,7 +10,6 @@ export { Heading, type HeadingLevel, type HeadingProps, type HeadingScale } from
 export { Icon, type IconProps, type IconUsage, type IconSource, type IconSourceProps } from "../core/primitive/Icon/index.js"
 export { IconTile, type IconTileProps, type IconTileSize, type IconTileTone } from "../core/primitive/IconTile/index.js"
 export { IconButton, type IconButtonProps } from "../core/primitive/IconButton/index.js"
-export { Link, type LinkAppearance, type LinkProps, type LinkSize } from "../core/primitive/Link/index.js"
 export { Label, type LabelProps } from "../core/primitive/Label/index.js"
 export { Input, type InputKind, type InputProps, type InputVariant } from "../core/primitive/Input/index.js"
 export { Progress, type ProgressProps } from "../core/primitive/Progress/index.js"

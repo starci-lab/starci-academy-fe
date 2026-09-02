@@ -226,6 +226,7 @@ export const PersonalProjectTask = (props: PersonalProjectTaskProps) => {
             // Mutation hooks retain the backend error for the pure state mapper.
         }
     }
+    const backPath = `/courses/${props.displayId}/learn/personal-project`
     return <PersonalProjectTaskBase
         state={state}
         props={{
@@ -248,10 +249,11 @@ export const PersonalProjectTask = (props: PersonalProjectTaskProps) => {
             latestAttempt: attempts.data?.data?.[0],
             notice,
             isSubmissionOpen: submissionOpen,
+            backHref: backPath,
             labels: copy,
         }}
         on={{
-            back: () => router.push(`/courses/${props.displayId}/learn/personal-project`),
+            back: () => router.push(backPath),
             toggleBriefSection: (id, isOpen) => setExpandedBriefSectionIds((current) => isOpen
                 ? current.includes(id) ? current : [...current, id]
                 : current.filter((value) => value !== id)),

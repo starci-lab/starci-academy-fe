@@ -13,6 +13,14 @@ export type ChangelogEntryRowData = {
     readonly title?: string
     readonly body?: string
     readonly isAction?: boolean
+    /**
+     * The update's own destination, when the entry has one.
+     *
+     * An entry that points somewhere is a place, not a state change, so it is drawn as a real
+     * anchor: middle-click, copy-link and the status bar all work without this row knowing how the
+     * surrounding app routes. Locale ownership stays with the connected caller.
+     */
+    readonly href?: string
 }
 
 /** What the changelog row reports when its title opens an update. */
@@ -36,7 +44,9 @@ export const ChangelogEntryRow = (props: ChangelogEntryRowProps) => {
                     <Badge tone={data.categoryTone} isSkeleton={isLoading}>{data.categoryLabel}</Badge>
                 )}
             </div>
-            {data.isAction === true && on?.open !== undefined ? (
+            {data.href !== undefined ? (
+                <TextAction size={"sm"} appearance="inline" href={data.href} onFollow={on?.open}>{data.title ?? ""}</TextAction>
+            ) : data.isAction === true && on?.open !== undefined ? (
                 <TextAction size={"sm"} appearance="inline" onPress={on.open}>{data.title ?? ""}</TextAction>
             ) : (
                 <Text size={"sm"} weight={"normal"} isSkeleton={isLoading}>{data.title}</Text>

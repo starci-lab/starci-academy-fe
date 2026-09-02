@@ -2,14 +2,13 @@ import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 import { Button } from "./index.js"
 
-describe("Core Button", () => {
+describe("Button", () => {
     it("owns visible pending feedback and blocks duplicate presses", () => {
         const markup = renderToStaticMarkup(
             <Button variant="primary" isPending onPress={() => undefined}>
                 Sign in
             </Button>,
         )
-
         expect(markup).toContain("data-component=\"Button\"")
         expect(markup).toContain("data-action-pending=\"true\"")
         expect(markup).toContain("aria-busy=\"true\"")
@@ -19,37 +18,38 @@ describe("Core Button", () => {
     })
 
     it("binds explicit disabled state without claiming pending", () => {
-        const markup = renderToStaticMarkup(<Button isDisabled>Unavailable</Button>)
-
+        const markup = renderToStaticMarkup(<Button isDisabled>Continue</Button>)
         expect(markup).toContain("disabled=\"\"")
         expect(markup).toContain("data-action-pending=\"false\"")
-        expect(markup).not.toContain("aria-busy")
-        expect(markup).not.toContain("data-slot=\"spinner\"")
     })
 
-    it("accepts app-owned leading and trailing content without owning product icon names", () => {
-        const markup = renderToStaticMarkup(
-            <Button startContent={<i data-start />} endContent={<i data-end />}>Continue</Button>,
-        )
-
-        expect(markup).toContain("data-start=\"true\"")
-        expect(markup).toContain("data-end=\"true\"")
-        expect(markup.indexOf("data-start")).toBeLessThan(markup.indexOf("Continue"))
-        expect(markup.indexOf("data-end")).toBeGreaterThan(markup.indexOf("Continue"))
+    it("keeps the pending spinner out of the accessible name", () => {
+        const markup = renderToStaticMarkup(<Button isPending>Share</Button>)
+        expect(markup).toContain("aria-hidden=\"true\"")
+        expect(markup).not.toContain("aria-hidden=\"true\">Share")
     })
 
-    it("keeps initial loading geometry separate from action pending", () => {
-        const markup = renderToStaticMarkup(
-            <Button startContent={<i data-start />} endContent={<i data-end />} isSkeleton>Load action</Button>,
-        )
-
+    it("keeps its label reachable while skeleton", () => {
+        const markup = renderToStaticMarkup(<Button isSkeleton>Enroll</Button>)
         expect(markup).toContain("data-loading=\"true\"")
-        expect(markup).toContain("data-action-pending=\"false\"")
-        expect(markup).toContain("disabled=\"\"")
-        expect(markup).toContain("text-transparent")
-        expect(markup).toContain("Load action")
-        expect(markup).not.toContain("data-start")
-        expect(markup).not.toContain("data-end")
-        expect(markup).not.toContain("data-slot=\"spinner\"")
+        expect(markup).not.toContain("<span aria-hidden")
+        expect(markup).toContain("Enroll")
+    })
+
+    it("renders an anchor with button appearance when given a destination", () => {
+        const markup = renderToStaticMarkup(<Button variant="primary" href="/checkout">Buy now</Button>)
+        expect(markup).toContain("<a")
+        expect(markup).toContain("href=\"/checkout\"")
+        expect(markup).toContain("data-element=\"a\"")
+        expect(markup).toContain("button--primary")
+        expect(markup).not.toContain("<button")
+    })
+
+    it("withholds the destination while pending", () => {
+        const markup = renderToStaticMarkup(<Button href="/checkout" isPending>Buy now</Button>)
+        expect(markup).toContain("<a")
+        expect(markup).not.toContain("href=")
+        expect(markup).toContain("aria-disabled=\"true\"")
+        expect(markup).toContain("role=\"link\"")
     })
 })

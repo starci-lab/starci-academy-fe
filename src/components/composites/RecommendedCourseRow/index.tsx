@@ -4,7 +4,7 @@ import { DestinationCue } from "@/components/leaves/DestinationCue"
 import { IconTile } from "@starci/grammar/common"
 import { iconSourceFor } from "@/components/leaves/Icon"
 import { Text } from "@starci/grammar/common"
-import { recommendedCourseBodyClassName, recommendedCourseDetailsClassName, recommendedCourseEvidenceClassName, recommendedCoursePriceClassName, recommendedCourseRowClassName, recommendedCourseCoverClassName } from "./classNames"
+import { recommendedCourseBodyClassName, recommendedCourseDetailsClassName, recommendedCourseEvidenceClassName, recommendedCoursePriceClassName, recommendedCourseRowClassName, recommendedCourseShellClassName, recommendedCourseCoverClassName } from "./classNames"
 import { TextAction } from "@starci/grammar/common"
 
 
@@ -63,7 +63,11 @@ export const RecommendedCourseRow = (props: RecommendedCourseRowProps) => {
     const on = props.on
     const isLoading = props.isLoading ?? false
     const priceDetailLabel = data.priceDetailLabel
-    return <PressableSurface hover="label" label={data.title ?? "Course"} press={on?.open} disabled={isLoading}><div className={recommendedCourseRowClassName}>
+    const priceDetail = priceDetailLabel === undefined ? null : <div className={recommendedCourseDetailsClassName}>
+        {data.savings === undefined ? null : <Text size={"sm"} isSkeleton={isLoading}>{data.savings}</Text>}
+        <TextAction size={"sm"} appearance="inline" onPress={on?.openPriceDetail}>{priceDetailLabel}</TextAction>
+    </div>
+    return <div className={recommendedCourseShellClassName}><PressableSurface hover="label" label={data.title ?? "Course"} press={on?.open} disabled={isLoading}><div className={recommendedCourseRowClassName}>
         <IconTile source={iconSourceFor("course", "leading")} artwork={data.cover ? <img src={data.cover} alt="" className={recommendedCourseCoverClassName} /> : undefined} tone={"accent"} size={"md"} isSkeleton={isLoading} />
         <div className={recommendedCourseBodyClassName} data-recommended-course-body="true">
             <div className={recommendedCourseEvidenceClassName} data-recommended-course-evidence="true">
@@ -73,13 +77,9 @@ export const RecommendedCourseRow = (props: RecommendedCourseRowProps) => {
                     {data.originalPrice === undefined ? null : <Text size={"md"} tone={"muted"} isSuperseded={true} isSkeleton={isLoading}>{data.originalPrice}</Text>}
                     {data.discount === undefined ? null : <Badge tone={"success"}>{data.discount}</Badge>}
                 </div>
-                {priceDetailLabel === undefined ? null : <div className={recommendedCourseDetailsClassName}>
-                    {data.savings === undefined ? null : <Text size={"sm"} isSkeleton={isLoading}>{data.savings}</Text>}
-                    <TextAction size={"sm"} appearance="inline" onPress={on?.openPriceDetail}>{priceDetailLabel}</TextAction>
-                </div>}
                 {data.reason === undefined ? null : <Text size={"sm"}>{data.reason}</Text>}
             </div>
             {data.actionLabel === undefined ? null : <DestinationCue props={{ label: data.actionLabel }} isLoading={isLoading} />}
         </div>
-    </div></PressableSurface>
+    </div></PressableSurface>{priceDetail}</div>
 }

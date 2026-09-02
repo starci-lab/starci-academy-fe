@@ -45,7 +45,7 @@ import {
     projectSidebarClassName,
     projectStackClassName,
 } from "./classNames"
-import { Link } from "@starci/grammar/common"
+import { TextAction } from "@starci/grammar/common"
 
 
 /** One milestone summary in the whole-project roadmap. */
@@ -272,7 +272,7 @@ export const CoursePersonalProjectBase = (props: CoursePersonalProjectProps) => 
                                                     <span>{repository.continueLabel}</span><span className={projectActionGlyphClassName} aria-hidden="true">→</span>
                                                 </NextLink>
                                                 : null
-                                            : <Link href={repository.url} startContent={<Icon source={iconSourceFor("github", "chip")} usage="chip" />}>{repository.openLabel}</Link>}
+                                            : <TextAction href={repository.url} startContent={<Icon source={iconSourceFor("github", "chip")} usage="chip" />}>{repository.openLabel}</TextAction>}
                                     </>}
                             </div>
                         </SurfaceCard>

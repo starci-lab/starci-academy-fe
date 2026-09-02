@@ -32,6 +32,25 @@ const primaryActionOf = (activeInterview: TodayResumeInterview | undefined, chal
     if (lesson !== undefined) return { id: "resolve:" + lesson.globalId, title: lesson.label, kind: t("kinds.lesson"), actionLabel: t("resume") }
     return { id: "modules", title: courseTitle ?? t("modules"), kind: t("kinds.course"), actionLabel: t("open") }
 }
+/**
+ * The path one dashboard action opens, when it is knowable without asking the server.
+ *
+ * A `resolve:` action is deliberately absent: only the backend knows where a lesson or challenge
+ * globalId lives, so that row stays a press until the round trip answers. Everything else is a real
+ * place, and this map is the one statement of where.
+ */
+const staticActionPathOf = (id: string, base: string, activeInterviewSessionId: string | undefined): string | undefined => {
+    if (id === "interview-resume") return activeInterviewSessionId === undefined ? undefined : base + "/mock-interview/interview/" + activeInterviewSessionId
+    if (id.startsWith("project:")) return base + "/personal-project/tasks/" + id.slice("project:".length)
+    const paths: Record<string, string> = {
+        modules: base + "/content",
+        flashcards: base + "/flashcards/review",
+        "interview-setup": base + "/mock-interview",
+        leaderboard: base + "/leaderboard",
+    }
+    return paths[id]
+}
+
 const pageStateOf = (failed: boolean, pending: boolean, course: unknown) => {
     if (failed) return "failed" as const
     if (pending) return "pending" as const
@@ -80,12 +99,12 @@ const signalsBlockOf = (state: CourseLearnTodayState | "partial", t: TodayTransl
 }
 
 type TodaySignalDetail = Omit<CourseLearningSignal, "isSelected"> & { readonly caption: string; readonly destination: string }
-const signalDetailBlockOf = (state: CourseLearnTodayState | "partial", t: TodayTranslator, selectedSignal: TodaySignalDetail | undefined): CourseLearningSignalDetailProps => {
+const signalDetailBlockOf = (state: CourseLearnTodayState | "partial", t: TodayTranslator, selectedSignal: TodaySignalDetail | undefined, href: string | undefined): CourseLearningSignalDetailProps => {
     const label = t("signalDetailLabel")
     if (state === "pending") return { state, props: { label } }
     if (state === "failed") return { state, props: { label, message: t("signalsFailed"), retryLabel: t("retry") } }
     if (selectedSignal === undefined) return { state: "empty", props: { label, message: t("signalsEmpty") } }
-    return { state: "ready", props: { label, title: selectedSignal.label, fact: selectedSignal.fact, caption: selectedSignal.caption, actionLabel: t("signals.open") } }
+    return { state: "ready", props: { label, title: selectedSignal.label, fact: selectedSignal.fact, caption: selectedSignal.caption, actionLabel: t("signals.open"), href } }
 }
 
 /** Rank live learning facts into the accepted course-dashboard composition. */
@@ -197,7 +216,10 @@ export const CourseLearnTodayBlock = (props: CourseLearnTodayBlockProps) => {
         actionLabel: signal.actionLabel,
         isSelected: signal.id === selectedSignal?.id,
     }))
-    const nextActions: ReadonlyArray<CourseNextAction> = [primary, ...secondary]
+    const nextActions: ReadonlyArray<CourseNextAction> = [primary, ...secondary].map((action) => {
+        const path = staticActionPathOf(action.id, base, activeInterview?.sessionId)
+        return path === undefined ? action : { ...action, href: path }
+    })
 
     const open = async (id: string) => {
         if (id.startsWith("resolve:")) {
@@ -206,21 +228,7 @@ export const CourseLearnTodayBlock = (props: CourseLearnTodayBlockProps) => {
             if (path !== null && path !== undefined) router.push(path)
             return
         }
-        if (id === "interview-resume" && activeInterview !== undefined) {
-            router.push(base + "/mock-interview/interview/" + activeInterview.sessionId)
-            return
-        }
-        if (id.startsWith("project:")) {
-            router.push(base + "/personal-project/tasks/" + id.slice("project:".length))
-            return
-        }
-        const paths: Record<string, string> = {
-            modules: base + "/content",
-            flashcards: base + "/flashcards/review",
-            "interview-setup": base + "/mock-interview",
-            leaderboard: base + "/leaderboard",
-        }
-        const path = paths[id]
+        const path = staticActionPathOf(id, base, activeInterview?.sessionId)
         if (path !== undefined) router.push(path)
     }
 
@@ -256,7 +264,8 @@ export const CourseLearnTodayBlock = (props: CourseLearnTodayBlockProps) => {
     const progress = progressBlockOf(progressState, t, enrolledCourse?.completionPercent ?? 0, streak, rank)
     const nextActionsBlock = nextActionsBlockOf(nextState, t, nextActions)
     const signalsBlock = signalsBlockOf(signalsState, t, signals)
-    const signalDetailBlock = signalDetailBlockOf(signalsState, t, selectedSignal)
+    const selectedSignalPath = selectedSignal === undefined ? undefined : staticActionPathOf(selectedSignal.destination, base, activeInterview?.sessionId)
+    const signalDetailBlock = signalDetailBlockOf(signalsState, t, selectedSignal, selectedSignalPath)
 
     return (
         <CourseLearnTodayBlockBase

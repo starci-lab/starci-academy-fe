@@ -15,7 +15,14 @@ import { TextAction } from "@starci/grammar/common"
 
 
 /** One lesson destination inside the current module. */
-export type CourseContentHomeLesson = { readonly id: string; readonly moduleId: string; readonly title: string; readonly fact?: string; readonly isCurrent?: boolean }
+/**
+ * One lesson in the current module.
+ *
+ * `href` IS THE LESSON'S OWN PAGE when the owner has resolved it. A lesson is a place, so with a
+ * route it is drawn as an anchor and keeps middle-click, copy-link and the status bar; a resting
+ * row has no place yet and stays a press. Locale ownership stays with the connected caller.
+ */
+export type CourseContentHomeLesson = { readonly id: string; readonly moduleId: string; readonly title: string; readonly fact?: string; readonly isCurrent?: boolean; readonly href?: string }
 /** One current module and its ordered lesson path. */
 export type CourseContentHomeModule = { readonly title: string; readonly lessons: ReadonlyArray<CourseContentHomeLesson> }
 /** Resolved course identity, progress evidence and recovery copy. */
@@ -36,7 +43,7 @@ export const CourseLearnContentHomeBlockBase = (props: CourseLearnContentHomeBlo
         <header><Breadcrumbs props={{ steps: props.props.trail, label: props.props.breadcrumbLabel }} on={loading ? undefined : { course: props.on?.course }} isLoading={loading} /><Heading level={1} isSkeleton={loading}>{props.props.title}</Heading>{props.props.description === undefined ? null : <Text size={"sm"} tone={"muted"} isSkeleton={loading}>{props.props.description}</Text>}{props.props.metaFacts.length === 0 && props.props.metaStatus === undefined ? null : <StatusMetadataLine props={{ facts: props.props.metaFacts, status: props.props.metaStatus }} isLoading={loading} />}</header>
         {props.props.gateMessages.length === 0 ? null : <section aria-label="Requirements">{props.props.gateMessages.map((message) => <Text key={message} size={"sm"}>{message}</Text>)}</section>}
         <section aria-label={props.props.resumeTarget}><Text size={"xs"} tone={"muted"} isSkeleton={loading}>{props.props.resumeEyebrow}</Text><Heading level={2} isSkeleton={loading}>{props.props.resumeTarget}</Heading>{props.props.resumeAction === undefined ? null : <Button variant={"primary"} size={"md"} isSkeleton={loading} onPress={(loading ? undefined : { press: props.on?.resume })?.press} endContent={<Icon source={iconSourceFor("next", "chip")} usage="chip" />}>{props.props.resumeAction}</Button>}<Progress label={props.props.progressLabel} value={props.props.completionPercent} isSkeleton={loading} /><Text size={"sm"} tone={"muted"} isSkeleton={loading}>{props.props.progressFact}</Text></section>
-        {notice ? <EmptyNotice message={props.blockState === "failed" ? props.props.failedMessage : props.props.emptyMessage} actionLabel={props.blockState === "failed" ? props.props.retryLabel : undefined} iconSource={iconSourceFor("course", "leading")} onAction={({ act: props.on?.retry })?.act} /> : lessons.length === 0 ? null : <SurfaceCard label={props.props.currentModule?.title ?? ""} composition="joined" state={loading ? "pending" : "neutral"}><ul aria-label={props.props.currentModule?.title}>{lessons.map((lesson) => <li key={lesson.id}><TextAction appearance={"section"} isCurrent={lesson.isCurrent} isSkeleton={loading} onPress={(loading ? undefined : { press: () => props.on?.lesson?.(lesson.moduleId, lesson.id) })?.press}>{lesson.title}</TextAction>{lesson.fact === undefined ? null : <Text size={"xs"} tone={"muted"}>{lesson.fact}</Text>}</li>)}</ul></SurfaceCard>}
+        {notice ? <EmptyNotice message={props.blockState === "failed" ? props.props.failedMessage : props.props.emptyMessage} actionLabel={props.blockState === "failed" ? props.props.retryLabel : undefined} iconSource={iconSourceFor("course", "leading")} onAction={({ act: props.on?.retry })?.act} /> : lessons.length === 0 ? null : <SurfaceCard label={props.props.currentModule?.title ?? ""} composition="joined" state={loading ? "pending" : "neutral"}><ul aria-label={props.props.currentModule?.title}>{lessons.map((lesson) => <li key={lesson.id}>{loading || lesson.href === undefined ? <TextAction appearance={"section"} isCurrent={lesson.isCurrent} isSkeleton={loading} onPress={(loading ? undefined : { press: () => props.on?.lesson?.(lesson.moduleId, lesson.id) })?.press}>{lesson.title}</TextAction> : <TextAction appearance={"section"} isCurrent={lesson.isCurrent} href={lesson.href} onFollow={() => props.on?.lesson?.(lesson.moduleId, lesson.id)}>{lesson.title}</TextAction>}{lesson.fact === undefined ? null : <Text size={"xs"} tone={"muted"}>{lesson.fact}</Text>}</li>)}</ul></SurfaceCard>}
     </main>
     return props.displayId === undefined || props.resizeLabel === undefined ? overview : <CourseLearnContentHomeFrame displayId={props.displayId} currentLessonId={props.currentLessonId} resizeLabel={props.resizeLabel} overview={overview} />
 }

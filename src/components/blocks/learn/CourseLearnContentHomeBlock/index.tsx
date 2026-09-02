@@ -65,6 +65,10 @@ const lessonStatus = (
     return labels.unread
 }
 
+/** Where one lesson lives. Stated once, so the anchor and the press cannot disagree. */
+const lessonPath = (displayId: string, moduleId: string, lessonId: string): string =>
+    `/courses/${displayId}/learn/content/modules/${moduleId}/contents/${lessonId}`
+
 /** Load course identity and viewer outline, then seat the map beside the legacy overview hierarchy. */
 export const CourseLearnContentHomeBlock = (props: CourseLearnContentHomeBlockProps) => {
     const { displayId } = props
@@ -142,6 +146,7 @@ export const CourseLearnContentHomeBlock = (props: CourseLearnContentHomeBlockPr
                             }),
                         }),
                         isCurrent: lesson.id === target?.lessonId,
+                        href: lessonPath(displayId, module.id, lesson.id),
                     })),
                 },
                 emptyMessage: t("empty"),
@@ -151,9 +156,7 @@ export const CourseLearnContentHomeBlock = (props: CourseLearnContentHomeBlockPr
             on={{
                 course: () => router.push(`/courses/${displayId}`),
                 resume,
-                lesson: (moduleId, lessonId) => router.push(
-                    `/courses/${displayId}/learn/content/modules/${moduleId}/contents/${lessonId}`,
-                ),
+                lesson: (moduleId, lessonId) => router.push(lessonPath(displayId, moduleId, lessonId)),
                 retry,
             }}
         />

@@ -14,6 +14,14 @@ export type CourseLearningSignalDetailData = {
     readonly fact: string
     readonly caption: string
     readonly actionLabel: string
+    /**
+     * Where the onward action goes, when the owner has resolved it.
+     *
+     * The signal's own action leaves this card for a real page, so with a destination it is drawn
+     * as an anchor. Absent one - the owner has not resolved the route yet - it stays the press it
+     * was. Locale ownership stays with the connected caller.
+     */
+    readonly href?: string
 }
 
 /** Props for the accepted contextual signal-detail anatomy. */
@@ -57,8 +65,10 @@ export const CourseLearningSignalDetail = (props: CourseLearningSignalDetailProp
                 <Heading level={3} isSkeleton={isLoading}>{detail?.title}</Heading>
                 <Text size={"sm"} weight={"medium"} isSkeleton={isLoading}>{detail?.fact}</Text>
                 <Text size={"sm"} tone={"muted"} isSkeleton={isLoading}>{detail?.caption}</Text>
-                {isLoading ? null : (
+                {isLoading ? null : detail?.href === undefined ? (
                     <TextAction appearance="disclosure" onPress={props.on?.open} endContent={<Icon source={iconSourceFor("next", "chip")} usage="chip" />}>{detail?.actionLabel ?? ""}</TextAction>
+                ) : (
+                    <TextAction appearance="disclosure" href={detail.href} onFollow={props.on?.open} endContent={<Icon source={iconSourceFor("next", "chip")} usage="chip" />}>{detail.actionLabel}</TextAction>
                 )}
             </div>
         </SurfaceCard>

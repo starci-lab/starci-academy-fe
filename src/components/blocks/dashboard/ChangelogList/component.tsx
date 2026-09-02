@@ -7,7 +7,7 @@ import { changelogListClassName } from "./classNames"
 /** Supported changelog categories. */
 export type ChangelogCategory = "feature" | "fix" | "announcement"
 /** One resolved product update. */
-export type ChangelogEntry = { readonly id: string; readonly dateLabel: string; readonly category?: ChangelogCategory; readonly categoryLabel?: string; readonly title: string; readonly body?: string; readonly isAction?: boolean }
+export type ChangelogEntry = { readonly id: string; readonly dateLabel: string; readonly category?: ChangelogCategory; readonly categoryLabel?: string; readonly title: string; readonly body?: string; readonly isAction?: boolean; readonly href?: string }
 /** Changelog section copy and entries. */
 export type ChangelogListData = { readonly label: string; readonly emptyMessage: string; readonly errorMessage: string; readonly retryLabel?: string; readonly entries?: ReadonlyArray<ChangelogEntry> }
 /** Changelog navigation actions. */
