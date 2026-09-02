@@ -14,7 +14,24 @@ describe("CourseLearningSignalDetail", () => {
         }} on={{ open }} />)
 
         expect(screen.getByText("Three cards are ready.")).toBeTruthy()
-        fireEvent.click(screen.getByRole("link", { name: "Open details" }))
+        fireEvent.click(screen.getByRole("button", { name: "Open details" }))
+        expect(open).toHaveBeenCalledOnce()
+    })
+
+    it("renders a real anchor when the detail carries a destination", () => {
+        const open = vi.fn()
+        render(<CourseLearningSignalDetail state="ready" props={{
+            label: "Signal detail",
+            title: "Due review",
+            fact: "3 cards",
+            caption: "Three cards are ready.",
+            actionLabel: "Open details",
+            href: "/courses/foundations/signals/due-review",
+        }} on={{ open }} />)
+
+        const link = screen.getByRole("link", { name: "Open details" })
+        expect(link.getAttribute("href")).toBe("/courses/foundations/signals/due-review")
+        fireEvent.click(link)
         expect(open).toHaveBeenCalledOnce()
     })
 
