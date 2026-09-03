@@ -2,11 +2,23 @@ import { StateMark } from "../../StateMark.js"
 import { treatmentFor, type PresentationState } from "../../state.js"
 import { staticRowClassName, staticRowCopyClassName } from "../../classNames.js"
 
+/**
+ * The outcome a row in a verdict collection reports.
+ *
+ * This is not `PresentationState`: a state describes how the row itself is doing, while a verdict
+ * describes the direction of what the row REPORTS - a movement up or down a board - and it is drawn
+ * as the collection's leading edge rather than as the row's own treatment. The same union is the
+ * slot contract `SurfaceListCard` documents for an application-owned row.
+ */
+export type RowVerdict = "success" | "danger"
+
 export type StaticStateRowData = {
     readonly id: string
     readonly label: string
     readonly description?: string
     readonly state?: PresentationState
+    /** Draws the collection's 2px leading verdict edge on this row. */
+    readonly verdict?: RowVerdict
 }
 
 export type StaticStateRowProps = {
@@ -25,6 +37,7 @@ export const StaticStateRow = (props: StaticStateRowProps) => {
             data-grammar-row="true"
             data-grammar-state={state}
             data-grammar-treatment={treatment.tone}
+            data-verdict={item.verdict}
             data-contract="GAP-3 PADDING-4 BOUNDARY-3"
         >
             <StateMark state={state} />

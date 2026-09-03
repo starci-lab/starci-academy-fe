@@ -1,5 +1,66 @@
 # Changelog
 
+## 0.4.5
+
+Additive. Two numbers that consumers were restating, and one edge they were painting themselves,
+move into the package.
+
+### The sticky band publishes where it stops
+
+- `NavigationFeatureNav` and `Subnav` now publish `--starci-core-band-offset` on the Grammar root
+  when they are sticky, and a page pins to it with `top: var(--starci-core-band-offset)` and bounds
+  itself with `max-height: calc(100dvh - var(--starci-core-band-offset))`. It is the sum of two
+  parts, each published on its own: `--starci-core-band-height` is the navigation band -
+  `calc(4rem + 1px)`, and `calc(4rem + 2rem + 1px)` once a feature layer is stacked on it - and
+  `--starci-core-band-subnav-height` is a stacked sticky `Subnav`, `calc(3.25rem + 1px)`, which
+  drops to `0rem` above 70rem where a compact one is not on screen.
+- It is CSS ONLY. Presence and stacking are already spelled by the data attributes these
+  compositions emit, so the sheet selects them with `:has()` on `.grammar-common-root` rather than
+  measuring anything in JS; no hook, no new data attribute, and no rule reaching `:root`, which
+  would put the package outside its own boundary.
+- Nothing is defined when no sticky band is present, so `var(--starci-core-band-offset, X)` still
+  resolves to a page's own `X` exactly as before this property existed.
+- `Rail` in `mode="sticky"` consumes it: `--starci-core-rail-offset` is still the override a host
+  sets, and unset it now reads the published band before falling back to the 5.5rem it always used.
+  A `WorkspaceShell` rail region gets this through the `Rail` it hosts. `Subnav`'s own sticky `top`
+  reads `--starci-core-band-height` the same way, so a subnav stacked under a two-layer band no
+  longer needs `--starci-core-subnav-offset` set by hand.
+- `STARCI_CORE_BAND_TOKEN_NAMES` publishes all five property names from `@starci/grammar/core`.
+  They are deliberately NOT in `STARCI_CORE_TOKEN_NAMES`: a theme token has one default the family
+  always defines, while each of these is derived from what is on the page or supplied by a host.
+
+### A verdict collection paints its verdict
+
+- `SurfaceListCard` with `isVerdict` already squared its collection's corners for these rows; it now
+  ships the edge those corners were preparing for - 2px on the row's leading side, in `--success` or
+  `--danger` - selected by `data-verdict` on the row.
+- The row is where the value has to live, because the rows of this collection are the CALLER'S
+  children and no prop of the card can reach them. `data-verdict="success" | "danger"` is therefore
+  published as the card's slot contract: `StaticStateRow` gained a `verdict` prop that emits it, and
+  an application-owned row spells the attribute and gets the identical shipped edge. The union is
+  exported as `RowVerdict` and re-exported as `SurfaceListRowVerdict`.
+- The edge is an INSET SHADOW, read from `--starci-core-verdict-edge`. A border would move a
+  caller's row content by two pixels and a padding would fight the inset the row already owns; a
+  shadow paints inside the box that is already there. The hover-invariant reset that clears row
+  shadows reads the same property, so a verdict does not vanish under the pointer.
+- It is drawn but NOT claimed. `data-contract` ids address the boundary catalog, whose six rows are
+  seams, an outline and elevation; a one-sided semantic accent is none of them, so inventing an id
+  would make the claim checker agree with a promise the catalog never made. The specs assert the
+  shipped rule and the rendered attribute directly instead.
+- `verdict` is not `state`. A `PresentationState` says how the row itself is doing; a verdict is the
+  direction of what the row REPORTS, and it is drawn as the collection's edge rather than as the
+  row's treatment.
+
+### Intentional visual deltas
+
+- `Subnav`'s toggle keeps its 2.75rem target with `!important`, and takes no new prop. The size was
+  already in the sheet, but it lost to the vendor button's own sizing declared in a later layer -
+  the same reason the four declarations beside it are important - so a consumer was re-forcing
+  `size-11` from outside the package to get a 44px target back. A spec now asserts the rendered
+  control carries the class the rule selects.
+- A sticky `Rail` under a Grammar band moves from 5.5rem to the band's real bottom. That is the
+  point of the offset, and the number was only ever right for a one-layer band plus a gap.
+
 ## 0.4.4
 
 - The utility debt is PAID. Every object 0.4.3 recorded as still spelling its layout in Tailwind

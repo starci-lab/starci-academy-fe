@@ -51,7 +51,45 @@ describe("Common NavigationFeatureNav anatomy styles", () => {
     })
 
     it("keeps Subnav compact and gives its icon trigger a 44px target", () => {
-        expect(navbarCss).toMatch(/\.starci-core-subnav-toggle\s*\{[\s\S]*?width: 2\.75rem;[\s\S]*?height: 2\.75rem;/)
+        expect(navbarCss).toMatch(/\.starci-core-subnav-toggle\s*\{[\s\S]*?width: 2\.75rem !important;[\s\S]*?height: 2\.75rem !important;/)
         expect(navbarCss).toMatch(/@media \(min-width: 70rem\)[\s\S]*?data-grammar-subnav-visibility="compact"[\s\S]*?display: none;/)
+    })
+})
+
+/**
+ * The band publishes where it stops, so no page has to restate it.
+ *
+ * Four consumer lines motivated this: a dashboard rail pinned with `calc(6rem+1px)` and bounded
+ * with `calc(100dvh-4rem-2rem-1px)`, both of which are this band's own geometry written out by
+ * hand. The check is that the numbers live HERE, once, keyed by the attributes the compositions
+ * already emit - and that a page with no band still resolves its own fallback.
+ */
+describe("Common sticky band offset", () => {
+    it("publishes the primary row, its separator and the stacked feature layer", () => {
+        expect(navbarCss).toMatch(/:has\(\.starci-core-navigation-feature-nav\[data-grammar-navigation-feature-nav-position="sticky"\]\)\s*\{\s*--starci-core-band-height: calc\(4rem \+ 1px\);/)
+        expect(navbarCss).toMatch(/data-grammar-navigation-feature-nav-layers="two"\]\)\s*\{\s*--starci-core-band-height: calc\(4rem \+ 2rem \+ 1px\);/)
+    })
+
+    it("adds a stacked sticky Subnav and drops it once a compact one is hidden", () => {
+        expect(navbarCss).toMatch(/:has\(\.starci-core-subnav\[data-grammar-subnav-position="sticky"\]\)\s*\{\s*--starci-core-band-subnav-height: calc\(3\.25rem \+ 1px\);/)
+        expect(navbarCss).toMatch(/@media \(min-width: 70rem\)[\s\S]*?data-grammar-subnav-visibility="compact"\]\)\s*\{\s*--starci-core-band-subnav-height: 0rem;/)
+    })
+
+    it("sums the two into one property a page reads", () => {
+        expect(navbarCss).toContain("--starci-core-band-offset: calc(var(--starci-core-band-height, 0rem) + var(--starci-core-band-subnav-height, 0rem));")
+    })
+
+    it("defines nothing when no band is sticky, so an existing fallback still resolves", () => {
+        expect(css.match(/--starci-core-band-(?:offset|height|subnav-height):/g)?.length).toBe(5)
+        for (const rule of css.split("}")) {
+            if (!rule.includes("--starci-core-band-offset:") && !rule.includes("--starci-core-band-height:") && !rule.includes("--starci-core-band-subnav-height:")) continue
+            expect(rule, "a band property may only be defined under a presence selector").toContain(":has(")
+        }
+    })
+
+    it("lets the Subnav and a sticky Rail read it instead of taking a consumer's calc", () => {
+        expect(css).toMatch(/\.starci-core-subnav\[data-grammar-subnav-position="sticky"\]\s*\{[\s\S]*?top: var\(--starci-core-subnav-offset, var\(--starci-core-band-height, 4rem\)\);/)
+        expect(css).toMatch(/\.starci-core-rail\[data-grammar-rail-mode="sticky"\] \.starci-core-rail-frame\s*\{[\s\S]*?top: var\(--starci-core-rail-offset, var\(--starci-core-band-offset, 5\.5rem\)\);/)
+        expect(css).toMatch(/\.starci-core-rail-frame\s*\{[\s\S]*?max-height: calc\(100dvh - var\(--starci-core-rail-offset, var\(--starci-core-band-offset, 5\.5rem\)\) - 1\.5rem\);/)
     })
 })

@@ -1,4 +1,5 @@
 import { useId, type ReactNode } from "react"
+import type { RowVerdict } from "../../composite/StaticStateRow/index.js"
 import { VerticalScrollRegion } from "../../composite/VerticalScrollRegion/index.js"
 import { Label } from "../../primitive/Label/index.js"
 import { collectionClassName, listShellClassName, surfaceFactClassName, surfaceFooterClassName, surfaceLabelClassName, surfaceListClassName } from "./classNames.js"
@@ -20,9 +21,20 @@ type SurfaceListFrameProps = (LabelledSurfaceList | SelfNamedSurfaceList) & {
     readonly footer?: ReactNode
     readonly depth?: "top" | "nested"
     readonly isLoading?: boolean
+    /**
+     * The collection reports outcomes: it squares its corners and paints each row's verdict edge.
+     *
+     * A row opts into that edge by carrying `data-verdict="success" | "danger"` - the slot contract
+     * this card publishes for its collection. `StaticStateRow` takes a `verdict` prop that emits it;
+     * an application-owned row spells the attribute itself and gets exactly the same shipped edge,
+     * because rows here are the caller's children and no prop of this card can reach them.
+     */
     readonly isVerdict?: boolean
     readonly isScrollable?: boolean
 }
+
+/** The value a row in a verdict collection puts in `data-verdict`. */
+export type SurfaceListRowVerdict = RowVerdict
 
 export type SurfaceListCardProps = SurfaceListFrameProps & {
     readonly children: ReactNode

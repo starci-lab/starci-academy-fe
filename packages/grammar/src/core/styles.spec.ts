@@ -126,6 +126,26 @@ describe("Core capability styles", () => {
         expect(css).toMatch(/\.starci-core-list-shell\[data-grammar-hover="invariant"\] \.starci-core-static-row:hover\s*\{[\s\S]*?background: transparent;[\s\S]*?box-shadow: none;[\s\S]*?transform: none;/)
     })
 
+    /*
+     * The verdict collection now PAINTS the verdict.
+     *
+     * It already squared its corners for these rows while the edge itself stayed with the
+     * application, which had to reach across the boundary with its own inset shadow to draw it. The
+     * edge is an inset shadow rather than a border because the rows are usually the caller's own
+     * children, and a border would move their content by two pixels.
+     */
+    it("draws a 2px leading verdict edge on a row in a verdict collection", () => {
+        expect(css).toMatch(/\.starci-core-owned-collection\[data-grammar-collection="verdict"\] \[data-verdict="success"\],[\s\S]*?--starci-core-verdict-edge: inset 2px 0 0 0 var\(--success,/)
+        expect(css).toMatch(/\.starci-core-owned-collection\[data-grammar-collection="verdict"\] \[data-verdict="danger"\],[\s\S]*?--starci-core-verdict-edge: inset 2px 0 0 0 var\(--danger,/)
+        expect(css).toContain("box-shadow: var(--starci-core-verdict-edge, none);")
+        const edgeRules = css.match(/inset 2px 0 0 0 var\(--(?:success|danger)/g) ?? []
+        expect(edgeRules, "one value per verdict, read from a property everywhere else").toHaveLength(2)
+    })
+
+    it("keeps the verdict edge under the hover-invariant reset that clears row shadows", () => {
+        expect(css).toMatch(/\.starci-core-list-shell\[data-grammar-hover="invariant"\] \.starci-core-static-row\[data-verdict="success"\]:hover,[\s\S]*?box-shadow: var\(--starci-core-verdict-edge, none\);/)
+    })
+
     it("keeps ordered row prefixes quiet and free of badge decoration", () => {
         const rule = css.match(/\.starci-core-leading-number\s*\{([\s\S]*?)\}/)?.[1] ?? ""
         expect(rule).toContain("font-size: 0.875rem")

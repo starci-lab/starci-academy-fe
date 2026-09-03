@@ -640,6 +640,50 @@
         border-radius: 0 !important;
     }
 
+    /*
+     * THE VERDICT EDGE IS SHIPPED.
+     *
+     * A row in a verdict collection reports an outcome, and the outcome is drawn as a 2px edge on
+     * the row's leading side. The collection already squares its corners for exactly these rows;
+     * this is the paint the squaring was preparing for, and without it an application had to reach
+     * across the Grammar boundary with its own inset shadow to get it.
+     *
+     * It is an INSET SHADOW, not a border and not a padded rule, because the rows of a verdict
+     * collection are usually the consumer's own children: a border would move their content two
+     * pixels and a padding would fight the inset they already own, while a shadow paints inside the
+     * box that is already there. The row is addressed by `data-verdict`, which is the slot contract
+     * `SurfaceListCard` documents for its collection, so a Grammar row and an application row draw
+     * the same edge from the same attribute.
+     *
+     * The offset is physical because `box-shadow` has no logical form; under `dir="rtl"` the edge
+     * stays on the left. No shipped object mirrors yet, so this is consistent rather than a new gap.
+     */
+    .starci-core-owned-collection[data-grammar-collection="verdict"] [data-verdict="success"],
+    .starci-core-static-row[data-verdict="success"] {
+        --starci-core-verdict-edge: inset 2px 0 0 0 var(--success, var(--starci-core-success, #15803d));
+    }
+
+    .starci-core-owned-collection[data-grammar-collection="verdict"] [data-verdict="danger"],
+    .starci-core-static-row[data-verdict="danger"] {
+        --starci-core-verdict-edge: inset 2px 0 0 0 var(--danger, var(--starci-core-danger, #b91c1c));
+    }
+
+    /*
+     * The edge is painted from that one property, including under hover.
+     *
+     * A hover-invariant list clears every row shadow below, which is right for decoration and wrong
+     * for a verdict: an outcome that disappears while the pointer rests on its row is a worse row
+     * than one that never drew it. Reading the same property in both places keeps one value.
+     */
+    .starci-core-owned-collection[data-grammar-collection="verdict"] [data-verdict="success"],
+    .starci-core-owned-collection[data-grammar-collection="verdict"] [data-verdict="danger"],
+    .starci-core-static-row[data-verdict="success"],
+    .starci-core-static-row[data-verdict="danger"],
+    .starci-core-list-shell[data-grammar-hover="invariant"] .starci-core-static-row[data-verdict="success"]:hover,
+    .starci-core-list-shell[data-grammar-hover="invariant"] .starci-core-static-row[data-verdict="danger"]:hover {
+        box-shadow: var(--starci-core-verdict-edge, none);
+    }
+
     .starci-core-surface-footer {
         display: flex;
         min-width: 0;
@@ -1043,17 +1087,25 @@
         max-width: var(--starci-core-rail-wide, 24rem);
     }
 
+    /*
+     * A sticky rail starts where the band stops.
+     *
+     * `--starci-core-rail-offset` is still the one a consumer sets; when it does not, the rail reads
+     * the offset the sticky band publishes about itself, and only when there is no band at all does
+     * it fall back to the 5.5rem it always used. So `mode="sticky"` under a Grammar band needs no
+     * `calc()` at the call site, and a rail with no band above it is unchanged.
+     */
     .starci-core-rail-frame {
         display: flex;
         min-width: 0;
-        max-height: calc(100dvh - var(--starci-core-rail-offset, 5.5rem) - 1.5rem);
+        max-height: calc(100dvh - var(--starci-core-rail-offset, var(--starci-core-band-offset, 5.5rem)) - 1.5rem);
         flex-direction: column;
         gap: var(--starci-core-rail-gap, 1rem);
     }
 
     .starci-core-rail[data-grammar-rail-mode="sticky"] .starci-core-rail-frame {
         position: sticky;
-        top: var(--starci-core-rail-offset, 5.5rem);
+        top: var(--starci-core-rail-offset, var(--starci-core-band-offset, 5.5rem));
     }
 
     .starci-core-rail-body {
@@ -1163,6 +1215,40 @@
         top: 0;
     }
 
+    /*
+     * THE BAND PUBLISHES ITS OWN HEIGHT.
+     *
+     * A page under a sticky band needs exactly one number - where the band stops - to pin a rail
+     * beneath it, and until now every consumer RESTATED that number: `calc(4rem + 1px)` for the
+     * primary row and its separator, `calc(4rem + 2rem + 1px)` once a feature layer is stacked.
+     * Restated geometry is wrong the moment the band changes, so the band publishes it instead.
+     *
+     * It is published with `:has()` on the Grammar root, not measured in JS, because presence and
+     * stacking are already spelled by the data attributes these compositions emit, and a custom
+     * property set on the root inherits to every page inside it. The root - not `:root` - keeps the
+     * package inside its own boundary, which is the same reason no rule here touches the document.
+     *
+     * NOTHING is defined when no sticky band is present, so `var(--starci-core-band-offset, X)`
+     * still resolves to a consumer's own X exactly as it did before this property existed.
+     */
+    .grammar-common-root:has(.starci-core-navigation-feature-nav[data-grammar-navigation-feature-nav-position="sticky"]),
+    .grammar-common-root:has(.starci-core-subnav[data-grammar-subnav-position="sticky"]) {
+        --starci-core-band-offset: calc(var(--starci-core-band-height, 0rem) + var(--starci-core-band-subnav-height, 0rem));
+    }
+
+    .grammar-common-root:has(.starci-core-navigation-feature-nav[data-grammar-navigation-feature-nav-position="sticky"]) {
+        --starci-core-band-height: calc(4rem + 1px);
+    }
+
+    .grammar-common-root:has(.starci-core-navigation-feature-nav[data-grammar-navigation-feature-nav-position="sticky"][data-grammar-navigation-feature-nav-layers="two"]) {
+        --starci-core-band-height: calc(4rem + 2rem + 1px);
+    }
+
+    /* A sticky Subnav stacks under the band, so it adds its own height and separator to the offset. */
+    .grammar-common-root:has(.starci-core-subnav[data-grammar-subnav-position="sticky"]) {
+        --starci-core-band-subnav-height: calc(3.25rem + 1px);
+    }
+
     .starci-core-navigation-feature-nav-primary {
         display: grid !important;
         min-height: 4rem;
@@ -1265,7 +1351,8 @@
     .starci-core-subnav[data-grammar-subnav-position="sticky"] {
         position: sticky;
         z-index: var(--starci-core-subnav-z, 40);
-        top: var(--starci-core-subnav-offset, 4rem);
+        /* The band's own published height, so a stacked Subnav no longer needs a consumer's calc. */
+        top: var(--starci-core-subnav-offset, var(--starci-core-band-height, 4rem));
         backface-visibility: hidden;
         transform: translateZ(0);
         will-change: transform;
@@ -1296,13 +1383,14 @@
     /*
      * The toggle is a HeroUI `Button`, whose own fill, corner and shadow live in the vendor's
      * `components` layer - declared after `starci-grammar-common`, so it wins every normal
-     * declaration here regardless of specificity. These four are the ones the utilities used to
-     * carry, so they are the ones that have to be important.
+     * declaration here regardless of specificity. These are the ones the utilities used to carry,
+     * so they are the ones that have to be important - the 2.75rem target included, because the
+     * vendor sizes its own button and a consumer was re-forcing `size-11` to get the target back.
      */
     .starci-core-subnav-toggle {
         display: inline-flex;
-        width: 2.75rem;
-        height: 2.75rem;
+        width: 2.75rem !important;
+        height: 2.75rem !important;
         align-items: center;
         justify-content: center;
         border-radius: 0 !important;
@@ -1338,6 +1426,11 @@
     @media (min-width: 70rem) {
         .starci-core-subnav[data-grammar-subnav-visibility="compact"] {
             display: none;
+        }
+
+        /* A compact Subnav is not on screen here, so it contributes no height to the band offset. */
+        .grammar-common-root:has(.starci-core-subnav[data-grammar-subnav-position="sticky"][data-grammar-subnav-visibility="compact"]) {
+            --starci-core-band-subnav-height: 0rem;
         }
     }
 
