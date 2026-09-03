@@ -39,7 +39,7 @@ export const trendingMediaClassName = cn(
 )
 
 /**
- * Boundary and list-position inset for one ranked result; TrendingContentRow owns its own grid,
+ * Boundary and list-position inset for one ranked result; TrendingContentRow owns its own row,
  * rank mark and title wrap. The extra 4px on `lg:first` completes the row's own 12px inset to the
  * card's 16px outer edge, matching the flush-band top/middle rhythm used elsewhere in this family.
  */
