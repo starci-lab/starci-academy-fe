@@ -3,7 +3,13 @@ import { Button } from "@starci/grammar/common"
 import { RankDeltaCaret } from "@/components/leaves/RankDeltaCaret"
 import { RankMark } from "@/components/leaves/RankMark"
 import { Text } from "@starci/grammar/common"
-import { getRankedUserVerdictClassName } from "./classNames"
+import {
+    getRankedUserFollowColumnClassName,
+    getRankedUserMovementColumnClassName,
+    getRankedUserRowClassName,
+    rankedUserNameColumnClassName,
+    rankedUserPointsColumnClassName,
+} from "./classNames"
 import { TextAction } from "@starci/grammar/common"
 
 
@@ -40,8 +46,8 @@ export type RankedUserRowActions = {
     readonly follow?: () => void
 }
 
-/** Public inputs for a ranked identity row. */
-export type RankedUserRowProps = { readonly props: RankedUserRowData; readonly on?: RankedUserRowActions; readonly isLoading?: boolean }
+/** Public inputs for a ranked identity row. `layout` defers the movement/follow columns below `sm` on a narrow rail card. */
+export type RankedUserRowProps = { readonly props: RankedUserRowData; readonly on?: RankedUserRowActions; readonly isLoading?: boolean; readonly layout?: "full" | "compact" }
 
 const RankedName = ({ props, on, isLoading }: RankedUserRowProps) => props.isMe === true
     ? <Text size={"sm"} tone={props.isMe === true ? "accent" : "default"} weight={"semibold"} isSkeleton={isLoading}>{props.name}</Text>
@@ -63,6 +69,7 @@ export const RankedUserRow = (props: RankedUserRowProps) => {
     const data = props.props
     const on = props.on
     const isLoading = props.isLoading ?? false
+    const layout = props.layout ?? "full"
     // Movement and follow are no longer rivals for one slot: the leaderboard page shows both, and
     // the dashboard preview shows neither a follow control nor the space one would take.
     const followLabel = data.followLabel
@@ -83,9 +90,12 @@ export const RankedUserRow = (props: RankedUserRowProps) => {
             : followLabel}</Button>
         : undefined
     return (
-        <div className={getRankedUserVerdictClassName(data.verdict)} data-verdict={data.verdict}><RankMark
-            props={{ rank: data.rank, placement: "row", accessibleLabel: data.rankLabel }}
-            isLoading={isLoading}
-        /><Avatar props={{ name: data.name, src: data.avatar ?? undefined, size: "sm" }} isLoading={isLoading} /><div>{name}{data.subtitle === undefined && !isLoading ? null : <Text size={"xs"} tone={"muted"} isSkeleton={isLoading}>{data.subtitle}</Text>}</div><Text size={"xs"} tone={"muted"} isSkeleton={isLoading}>{data.points}</Text>{movement}{follow}</div>
+        <div
+            className={getRankedUserRowClassName(layout, data.verdict)}
+            data-verdict={data.verdict}
+        ><RankMark
+                props={{ rank: data.rank, placement: "row", accessibleLabel: data.rankLabel }}
+                isLoading={isLoading}
+            /><Avatar props={{ name: data.name, src: data.avatar ?? undefined, size: "sm" }} isLoading={isLoading} /><div className={rankedUserNameColumnClassName}>{name}{data.subtitle === undefined && !isLoading ? null : <Text size={"xs"} tone={"muted"} isSkeleton={isLoading}>{data.subtitle}</Text>}</div><div className={rankedUserPointsColumnClassName}><Text size={"xs"} tone={"muted"} isSkeleton={isLoading}>{data.points}</Text></div><span className={getRankedUserMovementColumnClassName(layout)}>{movement}</span>{follow === undefined ? null : <span className={getRankedUserFollowColumnClassName(layout)}>{follow}</span>}</div>
     )
 }
