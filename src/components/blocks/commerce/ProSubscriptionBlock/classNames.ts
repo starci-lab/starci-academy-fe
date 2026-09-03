@@ -9,16 +9,8 @@ export const proPageClassName = cn(
 export const proHeroClassName = cn("flex", "max-w-3xl", "min-w-0", "flex-col", "gap-3")
 /** Failed state preserves route orientation before the recovery surface. */
 export const proFailedStackClassName = cn("flex", "min-w-0", "flex-col", "gap-6")
-/** Responsive offer workspace that promotes the decision rail on narrow screens. */
-export const proWorkspaceClassName = cn(
-    "mt-8",
-    "max-[895px]:[&_.starci-core-primary-rail-layout]:flex",
-    "max-[895px]:[&_.starci-core-primary-rail-layout]:flex-col",
-    "max-[895px]:[&_[data-grammar-primary-region=true]]:w-full",
-    "max-[895px]:[&_[data-grammar-rail-region=true]]:w-full",
-    "[&_[data-grammar-rail-region=true]]:order-first",
-    "min-[896px]:[&_[data-grammar-rail-region=true]]:order-last",
-)
+/** Hero introduction above the offer workspace: two page regions with distinct purposes. */
+export const proPageStackClassName = cn("flex", "min-w-0", "flex-col", "gap-6")
 /** Stack of explanatory product surfaces. */
 export const proMainClassName = cn("flex", "min-w-0", "flex-col", "gap-6")
 /** First flush band: explanatory copy on the shared neutral surface. */
@@ -93,7 +85,7 @@ export const proPriceClassName = cn("flex", "flex-wrap", "items-end", "gap-x-2",
 /** Dominant monetary figure in the decision rail. */
 export const proPriceValueClassName = cn("text-4xl", "font-semibold", "tracking-tight", "text-foreground")
 /** Persistent pending or active state explanation. */
-export const proStatusClassName = cn("rounded-medium", "bg-accent-soft", "p-3")
+export const proStatusClassName = cn("rounded-xl", "bg-accent-soft", "p-3")
 /** Full-bleed divider and inset action content for the purchase boundary. */
 export const proActionsClassName = cn(
     "grid",
@@ -106,17 +98,6 @@ export const proActionsClassName = cn(
     "pt-3",
     "sm:px-6",
     "sm:pb-6",
-    "[&>button]:min-w-0",
-    "[&>button]:w-full",
-    "[&>button]:max-w-full",
-    "max-[399px]:[&>button]:h-auto",
-    "max-[399px]:[&>button]:min-h-10",
-    "max-[399px]:[&>button]:whitespace-normal",
-    "max-[399px]:[&>button]:py-2.5",
-    "max-[399px]:[&>button>span]:min-w-0",
-    "max-[399px]:[&>button>span]:break-words",
-    "max-[399px]:[&>button>span]:text-center",
-    "max-[399px]:[&>button>span]:leading-tight",
 )
 /** Failed-offer notice inset. */
 export const proNoticeClassName = cn("flex", "min-w-0", "flex-col", "gap-4", "p-4")

@@ -24,6 +24,7 @@ import {
     proMainClassName,
     proNoticeClassName,
     proPageClassName,
+    proPageStackClassName,
     proPlanClassName,
     proPlanDetailsClassName,
     proPlanHeadingClassName,
@@ -32,7 +33,6 @@ import {
     proRailClassName,
     proRetryActionsClassName,
     proStatusClassName,
-    proWorkspaceClassName,
 } from "./classNames"
 
 /** Transport state for public offer and authenticated lifecycle reads. */
@@ -190,76 +190,77 @@ export const ProSubscriptionBlockBase = (props: ProSubscriptionBlockProps) => {
         <>
             <main className={proPageClassName}>
                 <PageContainer>
-                    <div className={proHeroClassName}>
-                        {breadcrumb}
-                        <SectionHeader
-                            composition="context-intro"
-                            title={labels.title}
-                            description={labels.description}
-                            level={1}
+                    <div className={proPageStackClassName}>
+                        <div className={proHeroClassName}>
+                            {breadcrumb}
+                            <SectionHeader
+                                composition="context-intro"
+                                title={labels.title}
+                                description={labels.description}
+                                level={1}
+                            />
+                        </div>
+                        <PrimaryRailLayout
+                            railWidth="wide"
+                            primary={(
+                                <div className={proMainClassName}>
+                                    <SurfaceCard label={labels.benefitsTitle} composition={"joined"}>
+                                        <section aria-label={labels.benefitsTitle}>
+                                            <div className={proBenefitIntroClassName}>
+                                                <Text size={"sm"} tone={"muted"}>{labels.benefitsDescription}</Text>
+                                            </div>
+                                            <div className={proBenefitJourneyBandClassName}>
+                                                <Image
+                                                    alt={labels.journeyAlt}
+                                                    className={proBenefitJourneyImageClassName}
+                                                    height={941}
+                                                    priority
+                                                    sizes="(max-width: 895px) calc(100vw - 2rem), 58vw"
+                                                    src="/images/pro-subscription/pro-learning-journey-v1.png"
+                                                    width={1672}
+                                                />
+                                            </div>
+                                            <ul className={proBenefitListClassName}>
+                                                {labels.benefits.map((benefit) => (
+                                                    <li className={proBenefitClassName} key={benefit.title}>
+                                                        <IncludedMark className={proBenefitMarkClassName} />
+                                                        <div className={proBenefitCopyClassName}>
+                                                            <Text size={"sm"} weight={"semibold"}>{benefit.title}</Text>
+                                                            <Text size={"xs"} tone={"muted"}>{benefit.description}</Text>
+                                                        </div>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </section>
+                                    </SurfaceCard>
+                                    <div className={proDisclosureClassName}>
+                                        <SurfaceAccordionCard
+                                            depth="top"
+                                            label={labels.disclosuresTitle}
+                                            items={[
+                                                { id: "ai-usage", isOpen: expandedDisclosureIds.has("ai-usage"), summaryRender: { id: "ai-usage", title: labels.aiTitle }, bodyRender: labels.aiDescription },
+                                                { id: "payment-activation", isOpen: expandedDisclosureIds.has("payment-activation"), summaryRender: { id: "payment-activation", title: labels.activationTitle }, bodyRender: labels.activationDescription },
+                                            ]}
+                                            renderSummary={(summary) => (
+                                                <div className={proDisclosureSummaryClassName}>
+                                                    <Text size={"sm"} weight={"semibold"}>{summary.title}</Text>
+                                                    <DisclosureIndicator props={{ isOpen: expandedDisclosureIds.has(summary.id) }} />
+                                                </div>
+                                            )}
+                                            renderBody={(body) => <div className={proDisclosureBodyClassName}><Text size={"sm"}>{body}</Text></div>}
+                                            onItemOpenChange={(id, isOpen) => setExpandedDisclosureIds((current) => {
+                                                const next = new Set(current)
+                                                if (isOpen) next.add(id)
+                                                else next.delete(id)
+                                                return next
+                                            })}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                            rail={plan}
                         />
                     </div>
-                    <PrimaryRailLayout
-                        className={proWorkspaceClassName}
-                        railWidth="wide"
-                        primary={(
-                            <div className={proMainClassName}>
-                                <SurfaceCard label={labels.benefitsTitle} composition={"joined"}>
-                                    <section aria-label={labels.benefitsTitle}>
-                                        <div className={proBenefitIntroClassName}>
-                                            <Text size={"sm"} tone={"muted"}>{labels.benefitsDescription}</Text>
-                                        </div>
-                                        <div className={proBenefitJourneyBandClassName}>
-                                            <Image
-                                                alt={labels.journeyAlt}
-                                                className={proBenefitJourneyImageClassName}
-                                                height={941}
-                                                priority
-                                                sizes="(max-width: 895px) calc(100vw - 2rem), 58vw"
-                                                src="/images/pro-subscription/pro-learning-journey-v1.png"
-                                                width={1672}
-                                            />
-                                        </div>
-                                        <ul className={proBenefitListClassName}>
-                                            {labels.benefits.map((benefit) => (
-                                                <li className={proBenefitClassName} key={benefit.title}>
-                                                    <IncludedMark className={proBenefitMarkClassName} />
-                                                    <div className={proBenefitCopyClassName}>
-                                                        <Text size={"sm"} weight={"semibold"}>{benefit.title}</Text>
-                                                        <Text size={"xs"} tone={"muted"}>{benefit.description}</Text>
-                                                    </div>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </section>
-                                </SurfaceCard>
-                                <div className={proDisclosureClassName}>
-                                    <SurfaceAccordionCard
-                                        depth="top"
-                                        label={labels.disclosuresTitle}
-                                        items={[
-                                            { id: "ai-usage", isOpen: expandedDisclosureIds.has("ai-usage"), summaryRender: { id: "ai-usage", title: labels.aiTitle }, bodyRender: labels.aiDescription },
-                                            { id: "payment-activation", isOpen: expandedDisclosureIds.has("payment-activation"), summaryRender: { id: "payment-activation", title: labels.activationTitle }, bodyRender: labels.activationDescription },
-                                        ]}
-                                        renderSummary={(summary) => (
-                                            <div className={proDisclosureSummaryClassName}>
-                                                <Text size={"sm"} weight={"semibold"}>{summary.title}</Text>
-                                                <DisclosureIndicator props={{ isOpen: expandedDisclosureIds.has(summary.id) }} />
-                                            </div>
-                                        )}
-                                        renderBody={(body) => <div className={proDisclosureBodyClassName}><Text size={"sm"}>{body}</Text></div>}
-                                        onItemOpenChange={(id, isOpen) => setExpandedDisclosureIds((current) => {
-                                            const next = new Set(current)
-                                            if (isOpen) next.add(id)
-                                            else next.delete(id)
-                                            return next
-                                        })}
-                                    />
-                                </div>
-                            </div>
-                        )}
-                        rail={plan}
-                    />
                 </PageContainer>
             </main>
             {data.payment === undefined ? null : (

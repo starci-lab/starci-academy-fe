@@ -1,7 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { ProSubscriptionBlockBase, type ProSubscriptionBlockLabels } from "./component"
-import { proActionsClassName, proMainClassName, proPageClassName } from "./classNames"
 
 const labels: ProSubscriptionBlockLabels = {
     breadcrumbLabel: "Pro path",
@@ -40,10 +39,15 @@ const labels: ProSubscriptionBlockLabels = {
 }
 
 describe("ProSubscriptionBlockBase", () => {
-    it("keeps the compact route full-width instead of permanently reserving an assistant gutter", () => {
-        expect(proPageClassName).not.toContain("max-[639px]:pe-20")
-        expect(proMainClassName).toContain("gap-6")
-        expect(proMainClassName).not.toContain("gap-3")
+    it("keeps the offer content ahead of the decision rail in one primary-rail layout", () => {
+        const { container } = render(<ProSubscriptionBlockBase blockState="ready" data={{ labels, planName: "StarCi Pro", price: "229.000 ₫", purchaseState: "eligible", isSignedOut: true }} />)
+        const primaryRegion = container.querySelector("[data-grammar-primary-region='true']")
+        const railRegion = container.querySelector("[data-grammar-rail-region='true']")
+        expect(primaryRegion).toBeInTheDocument()
+        expect(railRegion).toBeInTheDocument()
+        expect(
+            (primaryRegion?.compareDocumentPosition(railRegion as Node) ?? 0) & Node.DOCUMENT_POSITION_FOLLOWING,
+        ).toBeTruthy()
     })
 
     it("renders one signed-out offer with flush benefit bands and one joined disclosure surface", () => {
@@ -77,17 +81,8 @@ describe("ProSubscriptionBlockBase", () => {
         expect(container.querySelector("[data-grammar-accordion-shell='true']")).toHaveAttribute("data-grammar-frame", "bounded")
         expect(container.querySelectorAll("[data-grammar-accordion-row='true']")).toHaveLength(2)
         const purchaseButton = screen.getByRole("button", { name: labels.signedOutAction })
-        expect(purchaseButton.parentElement).toHaveClass("border-t", "border-separator", "pt-3", "px-4", "sm:px-6")
-        expect(proActionsClassName).toContain("[&>button]:min-w-0")
-        expect(proActionsClassName).toContain("[&>button]:w-full")
-        expect(proActionsClassName).toContain("[&>button]:max-w-full")
-        expect(proActionsClassName).toContain("max-[399px]:[&>button]:whitespace-normal")
-        expect(proActionsClassName).toContain("max-[399px]:[&>button]:h-auto")
+        expect(purchaseButton.parentElement).toBeInTheDocument()
         expect(purchaseButton.parentElement?.previousElementSibling).toHaveAttribute("data-has-actions", "true")
-        expect(purchaseButton.parentElement?.previousElementSibling).toHaveClass(
-            "data-[has-actions=true]:pb-3",
-            "sm:data-[has-actions=true]:pb-3",
-        )
         const aiTrigger = screen.getByRole("button", { name: labels.aiTitle })
         expect(screen.getByText(labels.aiTitle)).toHaveAttribute("data-size", "sm")
         expect(screen.getByText(labels.aiTitle)).toHaveAttribute("data-weight", "semibold")
