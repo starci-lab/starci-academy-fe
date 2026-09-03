@@ -3,19 +3,19 @@ import { describe, expect, it, vi } from "vitest"
 import { RankedUserRow } from "./index"
 
 describe("RankedUserRow", () => {
-    it("maps success and danger verdicts to inset bands without adding a border", () => {
+    it("reports a movement verdict on the row rather than painting one", () => {
         const success = render(<RankedUserRow props={{
             id: "one",
             rank: 1,
             rankLabel: "Rank 1",
             name: "Ada",
             points: "480 XP",
+            rankDelta: 1,
             movementLabel: "Up 1",
             verdict: "success",
         }} />)
-        const successRow = success.getByText("Ada").closest("[data-verdict=success]")
-        expect(successRow).toHaveClass("pl-4", "inset-shadow-[2px_0_0_0_var(--success)]")
-        expect(successRow).not.toHaveClass("border")
+        expect(success.getByText("Ada").closest("[data-verdict=success]")).toBeInTheDocument()
+        expect(success.container.querySelector('[data-direction="up"]')).toHaveAttribute("aria-label", "Up 1")
         success.unmount()
 
         const danger = render(<RankedUserRow props={{
@@ -24,12 +24,12 @@ describe("RankedUserRow", () => {
             rankLabel: "Rank 2",
             name: "Grace",
             points: "400 XP",
+            rankDelta: -2,
             movementLabel: "Down 2",
             verdict: "danger",
         }} />)
-        const dangerRow = danger.getByText("Grace").closest("[data-verdict=danger]")
-        expect(dangerRow).toHaveClass("pl-4", "inset-shadow-[2px_0_0_0_var(--danger)]")
-        expect(dangerRow).not.toHaveClass("border")
+        expect(danger.getByText("Grace").closest("[data-verdict=danger]")).toBeInTheDocument()
+        expect(danger.container.querySelector('[data-direction="down"]')).toHaveAttribute("aria-label", "Down 2")
     })
 
     it("keeps the viewer accented and removes the follow action", () => {

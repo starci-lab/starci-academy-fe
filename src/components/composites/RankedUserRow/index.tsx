@@ -91,7 +91,7 @@ export const RankedUserRow = (props: RankedUserRowProps) => {
         : undefined
     return (
         <div
-            className={getRankedUserRowClassName(layout, data.verdict)}
+            className={getRankedUserRowClassName(layout)}
             data-verdict={data.verdict}
         ><RankMark
                 props={{ rank: data.rank, placement: "row", accessibleLabel: data.rankLabel }}
