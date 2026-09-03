@@ -2,11 +2,17 @@ import { cn } from "@heroui/react"
 
 /** Contribution grid styles. */
 /** Calendar viewport. */
-export const contributionViewportClassName = cn("cursor-grab", "overflow-hidden", "active:cursor-grabbing")
+export const contributionViewportClassName = cn(
+    "cursor-grab",
+    "active:cursor-grabbing",
+    "lg:overflow-hidden",
+    "max-lg:overflow-x-auto",
+    "max-lg:pb-2",
+)
 /** Calendar grid. */
 export const contributionGridClassName = cn("flex", "w-full", "flex-row", "items-stretch", "gap-0.5")
-/** Weekday column. */
-export const contributionWeekdayColumnClassName = cn("flex", "w-12", "shrink-0", "flex-col", "gap-0.5", "pr-1")
+/** Weekday column: dropped below the wide rail so a narrow drag surface keeps its full year visible. */
+export const contributionWeekdayColumnClassName = cn("flex", "w-12", "shrink-0", "flex-col", "gap-0.5", "pr-1", "max-lg:hidden")
 /** Spacer aligning weekday labels with the month row above the plot. */
 export const contributionMonthSpacerClassName = cn("h-4", "shrink-0")
 /** Weekday label. */

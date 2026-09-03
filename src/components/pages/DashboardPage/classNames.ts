@@ -17,13 +17,22 @@ export const dashboardFrameClassName = cn(
     "lg:pl-0",
 )
 
-/** Pin compact rail controls immediately below the two-layer application navigation. */
+/**
+ * Pin compact rail controls immediately below the two-layer application navigation.
+ * Sticky offset, transform and backface-visibility are Subnav's own
+ * `data-grammar-subnav-position="sticky"` styling; only the offset token is an
+ * app value, published as `--starci-core-subnav-offset`.
+ *
+ * GRAMMAR-GAP: Subnav publishes no size prop for its menu-toggle Button, which
+ * renders at the vendor's default (`size-10`, 40px). The dashboard drawer toggle
+ * is the sole compact-rail entry point, so a sub-44px target regresses a WCAG
+ * touch-target minimum with no published Grammar capability to fix it from the
+ * app. See src/components/pages/DashboardPage/component.tsx (Subnav usage) and
+ * this file for the two call sites; report lists the gap for a future Subnav
+ * `toggleSize` prop.
+ */
 export const dashboardCompactSubnavClassName = cn(
-    "!top-[calc(6rem+1px)]",
     "[--starci-core-subnav-offset:calc(6rem+1px)]",
-    "transform-gpu",
-    "will-change-transform",
-    "[backface-visibility:hidden]",
     "[&_[data-grammar-subnav-toggle=true]]:!size-11",
 )
 
@@ -178,9 +187,6 @@ export const dashboardOverviewSupportClassName = cn(
     "min-w-0",
     "flex-col",
     "gap-6",
-    "max-lg:[&_[data-part=calendar-viewport]]:!overflow-x-auto",
-    "max-lg:[&_[data-part=calendar-viewport]]:pb-2",
-    "max-lg:[&_[data-part=calendar-grid]>span:first-child]:hidden",
 )
 
 /** Preserve a quiet, deliberate terminal update rhythm beneath the primary task. */
