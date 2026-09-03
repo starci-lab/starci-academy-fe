@@ -10,6 +10,7 @@ import {
     useQueryProOfferSwr,
 } from "@/hooks"
 import { useSessionToken } from "@/hooks/auth/useSessionToken"
+import { useStarCiTheme } from "@/modules/theme/theme-context"
 import { useGraphQLWithToast } from "@/modules/toast/hooks"
 import { ProSubscriptionBlockBase, type ProPurchaseState } from "./component"
 
@@ -24,6 +25,8 @@ export const ProSubscriptionBlock = (props: ProSubscriptionBlockProps) => {
     const router = useRouter()
     const searchParams = useSearchParams()
     const token = useSessionToken()
+    // Undefined until the provider's effect resolves, so server and first client render agree.
+    const { resolvedTheme } = useStarCiTheme()
     const isSignedOut = token === undefined
     const isPaymentReturn = searchParams.get("payment") === "return"
     const isPaymentCancelled = searchParams.get("payment") === "cancel"
@@ -102,6 +105,7 @@ export const ProSubscriptionBlock = (props: ProSubscriptionBlockProps) => {
                 price,
                 purchaseState,
                 isSignedOut,
+                isDarkScheme: resolvedTheme === "dark",
                 labels: {
                     breadcrumbLabel: t("breadcrumbLabel"), breadcrumbHome: t("breadcrumbHome"), breadcrumbCurrent: t("breadcrumbCurrent"),
                     title: t("title"), description: t("description"),

@@ -63,6 +63,7 @@ describe("ProSubscriptionBlockBase", () => {
         expect(screen.getByLabelText(labels.breadcrumbLabel).querySelector("[aria-current='page']")).toHaveTextContent(labels.breadcrumbCurrent)
         const journeyImage = screen.getByRole("img", { name: labels.journeyAlt })
         expect(journeyImage).toHaveClass("block", "h-auto", "w-full")
+        expect(journeyImage).toHaveAttribute("data-theme-variant", "light-only")
         expect(journeyImage.parentElement).toHaveClass("border-t", "border-separator", "bg-surface-secondary")
         // The outline runs H1 -> H2 -> H3 in reading order; a labelled surface would have jumped to h3.
         expect(screen.getByRole("heading", { level: 2, name: labels.benefitsTitle })).toBeInTheDocument()
@@ -107,6 +108,13 @@ describe("ProSubscriptionBlockBase", () => {
         expect(screen.getByText(labels.aiDescription)).toHaveClass("starci-core-text")
         fireEvent.click(purchaseButton)
         expect(purchase).toHaveBeenCalledOnce()
+    })
+
+    it("withholds the light-only journey raster in the dark scheme and keeps the region complete", () => {
+        render(<ProSubscriptionBlockBase blockState="ready" data={{ labels, planName: "StarCi Pro", price: "229.000 ₫", purchaseState: "eligible", isSignedOut: true, isDarkScheme: true }} />)
+        expect(screen.queryByRole("img", { name: labels.journeyAlt })).not.toBeInTheDocument()
+        expect(screen.getByRole("heading", { level: 2, name: labels.benefitsTitle })).toBeInTheDocument()
+        for (const benefit of labels.benefits) expect(screen.getByText(benefit.title)).toBeInTheDocument()
     })
 
     it("suppresses duplicate purchase while payment is being verified", () => {

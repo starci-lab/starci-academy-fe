@@ -87,6 +87,12 @@ export type ProSubscriptionBlockData = {
     readonly price?: string
     readonly purchaseState: ProPurchaseState
     readonly isSignedOut: boolean
+    /**
+     * The resolved colour scheme, resolved by the route owner. The journey illustration exists as a
+     * light-ground raster only, so the block withholds it rather than serving a white block against
+     * the dark surface; nothing here paints or filters the asset.
+     */
+    readonly isDarkScheme?: boolean
     readonly payment?: CheckoutOverlayData
 }
 
@@ -234,17 +240,29 @@ export const ProSubscriptionBlockBase = (props: ProSubscriptionBlockProps) => {
                                             <div className={proBenefitIntroClassName}>
                                                 <Text size={"sm"} tone={"muted"}>{labels.benefitsDescription}</Text>
                                             </div>
-                                            <div className={proBenefitJourneyBandClassName}>
-                                                <Image
-                                                    alt={labels.journeyAlt}
-                                                    className={proBenefitJourneyImageClassName}
-                                                    height={941}
-                                                    priority
-                                                    sizes="(max-width: 895px) calc(100vw - 2rem), 58vw"
-                                                    src="/images/pro-subscription/pro-learning-journey-v1.png"
-                                                    width={1672}
-                                                />
-                                            </div>
+                                            {/*
+                                              * MISSING-ASSET: only a light-ground raster of the
+                                              * journey exists, so the dark scheme gets no
+                                              * illustration at all rather than a white slab on the
+                                              * dark surface. Nothing about the outcomes below is
+                                              * carried by this band, so the region stays complete
+                                              * without it. Replace this branch the moment a dark
+                                              * variant ships; do not filter the light one.
+                                              */}
+                                            {data.isDarkScheme === true ? null : (
+                                                <div className={proBenefitJourneyBandClassName}>
+                                                    <Image
+                                                        alt={labels.journeyAlt}
+                                                        className={proBenefitJourneyImageClassName}
+                                                        data-theme-variant="light-only"
+                                                        height={941}
+                                                        priority
+                                                        sizes="(max-width: 895px) calc(100vw - 2rem), 58vw"
+                                                        src="/images/pro-subscription/pro-learning-journey-v1.png"
+                                                        width={1672}
+                                                    />
+                                                </div>
+                                            )}
                                             <ul className={proBenefitListClassName}>
                                                 {labels.benefits.map((benefit) => (
                                                     <li className={proBenefitClassName} key={benefit.title}>
