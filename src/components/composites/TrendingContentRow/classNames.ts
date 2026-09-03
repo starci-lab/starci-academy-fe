@@ -2,9 +2,8 @@ import { cn } from "@heroui/react"
 
 /** Rank mark and title share one compact two-column row inset. */
 export const trendingContentRowLayoutClassName = cn(
-    "grid",
+    "flex",
     "min-w-0",
-    "grid-cols-[auto_1fr]",
     "items-start",
     "gap-3",
     "px-4",
@@ -22,5 +21,5 @@ export const trendingContentRowMarkClassName = cn(
     "bg-accent/10",
 )
 
-/** Title wraps at the flexible column instead of overflowing it. */
-export const trendingContentRowTitleClassName = cn("min-w-0", "break-words")
+/** Title owns the row's spare width and wraps inside it instead of overflowing. */
+export const trendingContentRowTitleClassName = cn("min-w-0", "flex-1", "break-words")
