@@ -46,7 +46,7 @@ export const LeagueBlockBase = (props: LeagueBlockProps) => {
     return <>
         <StandingHeroCard props={{ standing: board.standing, progress: board.progress, ctaLabel: board.ctaLabel, progressAccessibleLabel: board.progressAccessibleLabel }} on={{ cta: props.on?.climb }} isLoading={loading} />
         <Podium props={{ entries: board.podium, meLabel: board.meLabel, anonymousLabel: board.anonymousLabel }} isLoading={loading} />
-        {board.rows.length === 0 && board.selfRow === undefined ? null : <SurfaceListCard label={board.listLabel} labelHidden={true} isLoading={loading}>
+        {board.rows.length === 0 && board.selfRow === undefined ? null : <SurfaceListCard label={board.listLabel} labelHidden={true} isVerdict={board.rows.some((row) => row.verdict !== undefined)} isLoading={loading}>
             {board.rows.map((row) => <RankedUserRow key={row.id} props={row} on={{ open: () => props.on?.open?.(row.id), follow: () => props.on?.follow?.(row.id) }} isLoading={loading} />)}
             {board.ellipsisLabel === undefined ? null : <span>{board.ellipsisLabel}</span>}
             {board.selfRow === undefined ? null : <RankedUserRow props={board.selfRow} isLoading={loading} />}

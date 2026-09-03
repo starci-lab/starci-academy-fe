@@ -34,19 +34,23 @@ describe("LeagueCardBase", () => {
         expect(screen.getByText("Weekly league")).toBeInTheDocument()
     })
 
-    it("squares the list only while some row is actually drawing a verdict band", () => {
+    it("opens the verdict collection only while some row is actually reporting one", () => {
+        // The edge is Grammar's: the card selects the verdict collection, and the row it draws on is
+        // the one carrying `data-verdict`. The block owns neither colour.
         const withVerdict = render(<LeagueCardBase state="ready" props={{
             ...frame,
             rows: [{ id: "one", rank: 1, name: "Ada", points: "13 XP", rankDelta: 2, verdict: "success" }],
         }} />)
-        expect(withVerdict.getByText("Ada")).toBeInTheDocument()
+        expect(withVerdict.container.querySelector("[data-grammar-collection='verdict']")).toBeInTheDocument()
+        expect(withVerdict.getByText("Ada").closest("[data-verdict=success]")).toBeInTheDocument()
         cleanup()
 
         const withoutVerdict = render(<LeagueCardBase state="ready" props={{
             ...frame,
             rows: [{ id: "one", rank: 1, name: "Ada", points: "13 XP", rankDelta: 0, movementLabel: "No movement" }],
         }} />)
-        expect(withoutVerdict.getByText("Ada")).toBeInTheDocument()
+        expect(withoutVerdict.container.querySelector("[data-grammar-collection='verdict']")).toBeNull()
+        expect(withoutVerdict.getByText("Ada").closest("[data-verdict=success],[data-verdict=danger]")).toBeNull()
     })
 
     it("keeps the notice empty rather than printing the word undefined at a reader", () => {
