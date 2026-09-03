@@ -10,6 +10,11 @@ import {
 } from "../common/index.js"
 import { createElement } from "react"
 
+// The Core family inherits every Common renderer and type; the names Core defines itself (its root, tokens,
+// DNA, conformance) win over the same names below. A consumer may import renderers from this entry or from
+// @starci/grammar/common; both name the same Common components.
+export * from "../common/index.js"
+
 export type { PresentationState } from "./state.js"
 export {
     STARCI_CORE_DARK_TOKEN_DEFAULTS,

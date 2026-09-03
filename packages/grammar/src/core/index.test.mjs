@@ -1,6 +1,7 @@
 import assert from "node:assert/strict"
 import test from "node:test"
 import * as core from "../../dist/core/index.js"
+import * as common from "../../dist/common/index.js"
 
 test("exports Core DNA and the typed family registry boundary", () => {
     assert.equal(core.STARCI_CORE_DNA.id, "starci-core")
@@ -38,7 +39,7 @@ test("exports Core DNA and the typed family registry boundary", () => {
     assert.equal(core.coreRuleConformance.inheritedCommonRules.length, 150)
 })
 
-test("resolves a scoped family without re-exporting component owners from Core", () => {
+test("resolves a scoped family and re-exports every Common renderer from Core", () => {
     const Brand = () => null
     const family = core.defineGrammarFamily({
         id: "heritage",
@@ -57,7 +58,12 @@ test("resolves a scoped family without re-exporting component owners from Core",
     assert.deepEqual(family.scopeProps, { "data-grammar-family": "heritage" })
     assert.equal(family.components.Brand, Brand)
     assert.equal(Object.isFrozen(family.components), true)
-    assert.equal("GrammarRoot" in core, false)
-    assert.equal("Button" in core, false)
-    assert.equal("WorkspaceShell" in core, false)
+    // The Core entry is the family's complete surface: every Common renderer, the same object as in Common,
+    // plus the family root. A consumer imports renderers and CoreGrammarRoot from one entry.
+    assert.equal("Button" in core, true)
+    assert.equal(core.Button, common.Button)
+    assert.equal(core.WorkspaceShell, common.WorkspaceShell)
+    assert.equal(core.SurfaceCard, common.SurfaceCard)
+    assert.equal(typeof core.CoreGrammarRoot, "function")
+    assert.notEqual(core.CoreGrammarRoot, common.GrammarRoot)
 })
