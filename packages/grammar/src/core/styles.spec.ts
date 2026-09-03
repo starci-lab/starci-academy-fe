@@ -114,6 +114,20 @@ describe("Core capability styles", () => {
         expect(coreCss).toMatch(/> \[data-grammar-frame="bounded"\][\s\S]*?background: transparent;[\s\S]*?box-shadow: none;/)
     })
 
+    /**
+     * Two members of the surface family standing in one column drew the same boundary in two
+     * different places: the card's root is a HeroUI `Card`, whose own 1rem padding pushed its
+     * visible surface and its label 16px further in than the accordion's, which is a plain Grammar
+     * section. The boundary is the outer box for all three; the single inset belongs INSIDE it.
+     */
+    it("insets the surface family once, inside a boundary all three roots share", () => {
+        expect(css).toMatch(/\.starci-core-surface-card\s*\{[\s\S]*?padding: 0 !important;/)
+        const shared = css.slice(css.indexOf(".starci-core-surface-card,"))
+        expect(shared.slice(0, shared.indexOf("}")), "the family roots take no inset of their own").not.toContain("padding")
+        expect(css).toMatch(/\.starci-core-surface-content\s*\{[\s\S]*?padding: var\(--starci-core-surface-inset, 1rem\);/)
+        expect(css).toMatch(/\.starci-core-accordion-trigger\s*\{[\s\S]*?padding: var\(--starci-core-row-inset, 1rem\) !important;/)
+    })
+
     it("gives Grammar whole-card actions hover, focus, active and reduced-motion parity", () => {
         expect(css).toContain(".starci-core-surface-card[data-grammar-interaction=\"whole-action\"]")
         expect(css).toContain("[data-grammar-whole-action]:hover")

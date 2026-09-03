@@ -172,21 +172,36 @@
         min-width: 0;
     }
 
+    /*
+     * THE COLLAPSED FORM IS THE DEFAULT. Every two-column form lives INSIDE the container query.
+     *
+     * A container query adds no specificity, so while the expanded tracks were written outside it
+     * as attribute selectors, `[data-grammar-layout-rail-width="wide"]` (0,2,0) outranked the
+     * collapse (0,1,0) and the layout never collapsed at all: in a 358px container the primary
+     * track computed to 0px and the entire primary column vanished on a phone.
+     *
+     * Restating the collapse once per attribute value would repair today's three variants and break
+     * again on the fourth one somebody adds. The two ranges are made MUTUALLY EXCLUSIVE instead:
+     * the narrow form is what remains when the query does not match, so no selector inside the
+     * query - at any specificity, with any attribute invented later - can outrank it. It is also
+     * what a renderer without container queries gets, which is the safe half of the pair.
+     */
     .starci-core-primary-rail-layout {
         display: grid;
         min-width: 0;
-        grid-template-columns: minmax(0, 1fr) minmax(16rem, 20rem);
+        grid-template-columns: minmax(0, 1fr);
         gap: var(--starci-core-region-gap, 1.5rem);
     }
 
-    .starci-core-primary-rail-layout[data-grammar-layout-rail="absent"] {
-        grid-template-columns: minmax(0, 1fr);
-    }
-
-    .starci-core-primary-rail-layout[data-grammar-layout-rail-width="compact"] { grid-template-columns: minmax(0, 1fr) minmax(14rem, 16rem); }
-    .starci-core-primary-rail-layout[data-grammar-layout-rail-width="wide"] { grid-template-columns: minmax(0, 1fr) minmax(20rem, 24rem); }
     .starci-core-primary-rail-layout[data-grammar-layout-align="start"] { align-items: start; }
     .starci-core-primary-rail-layout[data-grammar-layout-align="stretch"] { align-items: stretch; }
+
+    /* The rail track is spelled once per width, and only where there is a rail to give it to. */
+    @container starci-core-primary-rail (min-width: 56.001rem) {
+        .starci-core-primary-rail-layout[data-grammar-layout-rail="present"] { grid-template-columns: minmax(0, 1fr) minmax(16rem, 20rem); }
+        .starci-core-primary-rail-layout[data-grammar-layout-rail="present"][data-grammar-layout-rail-width="compact"] { grid-template-columns: minmax(0, 1fr) minmax(14rem, 16rem); }
+        .starci-core-primary-rail-layout[data-grammar-layout-rail="present"][data-grammar-layout-rail-width="wide"] { grid-template-columns: minmax(0, 1fr) minmax(20rem, 24rem); }
+    }
 
     .starci-core-primary-region,
     .starci-core-rail-region {
@@ -1167,11 +1182,13 @@
     }
 
     @container starci-core-primary-rail (max-width: 56rem) {
-        .starci-core-primary-rail-layout {
-            grid-template-columns: minmax(0, 1fr);
-        }
-
-        /* Collapsed, the rail may lead - a filter or summary a reader needs before the content. */
+        /*
+         * The single column itself is the DEFAULT above, not an override here - see the note on
+         * `.starci-core-primary-rail-layout`. This block owns only what is true of the collapsed
+         * reading order, which has no counterpart outside the query to fight with.
+         *
+         * Collapsed, the rail may lead - a filter or summary a reader needs before the content.
+         */
         .starci-core-primary-rail-layout[data-grammar-layout-collapsed-order="rail-first"] .starci-core-rail-region {
             order: -1;
         }
@@ -1291,6 +1308,30 @@
         align-items: center;
         justify-content: end;
         gap: var(--starci-core-inline-gap, 0.5rem);
+    }
+
+    /*
+     * THE BAND'S OWN CONTROLS MEET THE 44px TOUCH FLOOR.
+     *
+     * Every pressable in the two action slots was the vendor button's own height - 2.25rem on
+     * desktop and 2.5rem compact - so the language menu, the cart, the account button, the compact
+     * drawer trigger and the field-shaped search trigger all sat under the floor, on the surface a
+     * reader is most likely to touch. It is a MINIMUM, not a size: `min-inline-size` and
+     * `min-block-size` are properties the vendor's rules never set, so the glyph, the label, the
+     * paint and the corner are all untouched and no `!important` is owed to the components layer.
+     *
+     * The band does NOT grow. The primary row is 4rem with a 0.5rem block inset on each side, so
+     * 44px is 4px short of the 3rem it already offers a control, and `--starci-core-band-height`
+     * stays `calc(4rem + 1px)`. The floor is spelled on the pressable, never on the slot: a slot
+     * with a min-height would pad a row that has nothing in it.
+     *
+     * The feature layer is deliberately out of scope - its tabs are a Tabs branch, and a tab's
+     * target is that branch's to answer.
+     */
+    .starci-core-navigation-feature-nav-actions :where(button, [role="button"], a[href]),
+    .starci-core-navigation-feature-nav-compact-navigation :where(button, [role="button"], a[href]) {
+        min-inline-size: 44px;
+        min-block-size: 44px;
     }
 
     .starci-core-navigation-feature-nav-feature {
@@ -1450,16 +1491,26 @@
         display: none;
     }
 
+    /*
+     * THE COLLAPSED FORM IS THE DEFAULT here too, for the reason recorded on
+     * `.starci-core-primary-rail-layout`: every multi-track form lives INSIDE a container query, so
+     * the stacked one cannot be outranked by an attribute selector written outside it. Before this,
+     * the two-track rule for `[navigation="present"][rail="present"]` (0,3,0) in the 72rem query
+     * beat the collapse group's bare class (0,1,0), and the leading four-track rule (0,4,0) beat
+     * every collapse rule there is, so a shell carrying a navigation and a rail never stacked.
+     *
+     * The tiers are mutually exclusive ranges, narrowest first:
+     *   default        one column, one row per region
+     *   > 56rem        the regions take their own tracks
+     *   > 72rem        a navigation AND a rail stand beside the primary at the same time
+     */
     .starci-core-workspace-shell-layout {
         --starci-core-workspace-navigation-track: minmax(14rem, var(--starci-core-workspace-navigation-width, 18rem));
         --starci-core-workspace-rail-track: minmax(16rem, var(--starci-core-rail-standard, 20rem));
         display: grid;
         min-width: 0;
-        grid-template-areas: "navigation primary rail";
-        grid-template-columns:
-            var(--starci-core-workspace-navigation-track)
-            minmax(0, 1fr)
-            var(--starci-core-workspace-rail-track);
+        grid-template-areas: "navigation" "primary" "rail";
+        grid-template-columns: minmax(0, 1fr);
         gap: var(--starci-core-region-gap, 1.5rem);
     }
 
@@ -1467,25 +1518,22 @@
         --starci-core-workspace-navigation-track: max-content;
     }
 
-    .starci-core-workspace-shell-layout[data-grammar-workspace-navigation="absent"][data-grammar-workspace-rail="present"] {
-        grid-template-areas: "primary rail";
-        grid-template-columns: minmax(0, 1fr) var(--starci-core-workspace-rail-track);
+    /* Stacked, an absent region leaves no row behind - an empty one would still take a gap. */
+    .starci-core-workspace-shell-layout[data-grammar-workspace-navigation="absent"] {
+        grid-template-areas: "primary" "rail";
     }
 
+    .starci-core-workspace-shell-layout[data-grammar-workspace-rail="absent"] {
+        grid-template-areas: "navigation" "primary";
+    }
+
+    .starci-core-workspace-shell-layout[data-grammar-workspace-navigation="absent"][data-grammar-workspace-rail="absent"] {
+        grid-template-areas: "primary";
+    }
+
+    /* A leading rail keeps its precedence in the reading order once the tracks are gone. */
     .starci-core-workspace-shell-layout[data-grammar-workspace-rail-position="leading"][data-grammar-workspace-navigation="absent"][data-grammar-workspace-rail="present"] {
-        grid-template-areas: "rail rule primary";
-        grid-template-columns: var(--starci-core-workspace-rail-track) 1px minmax(0, 1fr);
-        column-gap: 0;
-    }
-
-    .starci-core-workspace-shell-layout[data-grammar-workspace-rail-position="leading"][data-grammar-workspace-navigation="present"][data-grammar-workspace-rail="present"] {
-        grid-template-areas: "navigation rail rule primary";
-        grid-template-columns:
-            var(--starci-core-workspace-navigation-track)
-            var(--starci-core-workspace-rail-track)
-            1px
-            minmax(0, 1fr);
-        column-gap: 0;
+        grid-template-areas: "rail" "primary";
     }
 
     .starci-core-workspace-shell-leading-rule {
@@ -1497,22 +1545,61 @@
         background: var(--separator, var(--starci-core-separator, GrayText));
     }
 
-    .starci-core-workspace-shell-layout[data-grammar-workspace-rail-position="leading"] .starci-core-workspace-shell-leading-rule {
-        display: block;
+    @container starci-core-workspace-shell (min-width: 56.001rem) {
+        .starci-core-workspace-shell-layout[data-grammar-workspace-navigation="present"][data-grammar-workspace-rail="present"] {
+            grid-template-areas: "navigation primary" "navigation rail";
+            grid-template-columns: var(--starci-core-workspace-navigation-track) minmax(0, 1fr);
+        }
+
+        .starci-core-workspace-shell-layout[data-grammar-workspace-navigation="absent"][data-grammar-workspace-rail="present"] {
+            grid-template-areas: "primary rail";
+            grid-template-columns: minmax(0, 1fr) var(--starci-core-workspace-rail-track);
+        }
+
+        .starci-core-workspace-shell-layout[data-grammar-workspace-navigation="present"][data-grammar-workspace-rail="absent"] {
+            grid-template-areas: "navigation primary";
+            grid-template-columns: var(--starci-core-workspace-navigation-track) minmax(0, 1fr);
+        }
+
+        .starci-core-workspace-shell-layout[data-grammar-workspace-navigation="absent"][data-grammar-workspace-rail="absent"] {
+            grid-template-areas: "primary";
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .starci-core-workspace-shell-layout[data-grammar-workspace-rail-position="leading"][data-grammar-workspace-navigation="absent"][data-grammar-workspace-rail="present"] {
+            grid-template-areas: "rail rule primary";
+            grid-template-columns: var(--starci-core-workspace-rail-track) 1px minmax(0, 1fr);
+            column-gap: 0;
+        }
+
+        .starci-core-workspace-shell-layout[data-grammar-workspace-rail-position="leading"][data-grammar-workspace-navigation="present"][data-grammar-workspace-rail="present"] {
+            grid-template-areas: "navigation rail rule primary";
+            grid-template-columns:
+                var(--starci-core-workspace-navigation-track)
+                var(--starci-core-workspace-rail-track)
+                1px
+                minmax(0, 1fr);
+            column-gap: 0;
+        }
+
+        /* The seam and its rule belong to the side-by-side form, so they arrive with the tracks. */
+        .starci-core-workspace-shell-layout[data-grammar-workspace-rail-position="leading"] .starci-core-workspace-shell-leading-rule {
+            display: block;
+        }
+
+        .starci-core-workspace-shell-layout[data-grammar-workspace-rail-position="leading"] .starci-core-workspace-shell-primary {
+            padding-inline-start: var(--starci-core-workspace-leading-seam, 2rem);
+        }
     }
 
-    .starci-core-workspace-shell-layout[data-grammar-workspace-rail-position="leading"] .starci-core-workspace-shell-primary {
-        padding-inline-start: var(--starci-core-workspace-leading-seam, 2rem);
-    }
-
-    .starci-core-workspace-shell-layout[data-grammar-workspace-navigation="present"][data-grammar-workspace-rail="absent"] {
-        grid-template-areas: "navigation primary";
-        grid-template-columns: var(--starci-core-workspace-navigation-track) minmax(0, 1fr);
-    }
-
-    .starci-core-workspace-shell-layout[data-grammar-workspace-navigation="absent"][data-grammar-workspace-rail="absent"] {
-        grid-template-areas: "primary";
-        grid-template-columns: minmax(0, 1fr);
+    @container starci-core-workspace-shell (min-width: 72.001rem) {
+        .starci-core-workspace-shell-layout[data-grammar-workspace-navigation="present"][data-grammar-workspace-rail="present"] {
+            grid-template-areas: "navigation primary rail";
+            grid-template-columns:
+                var(--starci-core-workspace-navigation-track)
+                minmax(0, 1fr)
+                var(--starci-core-workspace-rail-track);
+        }
     }
 
     .starci-core-workspace-shell-layout[data-grammar-workspace-rail-width="compact"] {
@@ -1847,62 +1934,16 @@
     }
 
     @container starci-core-workspace-shell (max-width: 72rem) {
-        .starci-core-workspace-shell-layout[data-grammar-workspace-navigation="present"][data-grammar-workspace-rail="present"] {
-            grid-template-areas: "navigation primary" "navigation rail";
-            grid-template-columns: var(--starci-core-workspace-navigation-track) minmax(0, 1fr);
-        }
-
-        .starci-core-workspace-shell-layout[data-grammar-workspace-rail-position="leading"][data-grammar-workspace-navigation="present"][data-grammar-workspace-rail="present"] {
-            grid-template-areas: "navigation rail rule primary";
-            grid-template-columns:
-                var(--starci-core-workspace-navigation-track)
-                var(--starci-core-workspace-rail-track)
-                1px
-                minmax(0, 1fr);
-        }
-
         .starci-core-workspace-shell-rail .starci-core-rail {
             max-width: none;
         }
     }
 
+    /*
+     * Every grid template this shell can take now lives in the two `min-width` tiers above. What
+     * stays here is the behaviour of a STACKED rail, which no rule outside the query contradicts.
+     */
     @container starci-core-workspace-shell (max-width: 56rem) {
-        .starci-core-workspace-shell-layout,
-        .starci-core-workspace-shell-layout[data-grammar-workspace-navigation="absent"][data-grammar-workspace-rail="present"],
-        .starci-core-workspace-shell-layout[data-grammar-workspace-navigation="present"][data-grammar-workspace-rail="absent"],
-        .starci-core-workspace-shell-layout[data-grammar-workspace-navigation="absent"][data-grammar-workspace-rail="absent"] {
-            grid-template-areas: "navigation" "primary" "rail";
-            grid-template-columns: minmax(0, 1fr);
-        }
-
-        .starci-core-workspace-shell-layout[data-grammar-workspace-rail-position="leading"][data-grammar-workspace-navigation="absent"][data-grammar-workspace-rail="present"] {
-            grid-template-areas: "rail" "primary";
-        }
-
-        .starci-core-workspace-shell-layout[data-grammar-workspace-navigation="absent"] {
-            grid-template-areas: "primary" "rail";
-        }
-
-        .starci-core-workspace-shell-layout[data-grammar-workspace-rail-position="leading"][data-grammar-workspace-navigation="absent"] {
-            grid-template-areas: "rail" "primary";
-        }
-
-        .starci-core-workspace-shell-layout[data-grammar-workspace-rail-position="leading"] .starci-core-workspace-shell-leading-rule {
-            display: none;
-        }
-
-        .starci-core-workspace-shell-layout[data-grammar-workspace-rail-position="leading"] .starci-core-workspace-shell-primary {
-            padding-inline-start: 0;
-        }
-
-        .starci-core-workspace-shell-layout[data-grammar-workspace-rail="absent"] {
-            grid-template-areas: "navigation" "primary";
-        }
-
-        .starci-core-workspace-shell-layout[data-grammar-workspace-navigation="absent"][data-grammar-workspace-rail="absent"] {
-            grid-template-areas: "primary";
-        }
-
         .starci-core-workspace-shell-rail .starci-core-rail-frame {
             position: static;
             max-height: none;
@@ -2006,12 +2047,26 @@
      */
 
     /* --- Surface card: the card, its label row and its content shell are HeroUI `Card` parts. --- */
+    /*
+     * THE CARD'S OUTER BOX IS ITS BOUNDARY, exactly as the list's and the accordion's are.
+     *
+     * `SurfaceCard` is the only one of the three whose root is a HeroUI `Card`, and the vendor's
+     * `.card` carries a 1rem padding of its own. That inset moved the card's visible surface AND
+     * its label a further 16px inward, so a padded `SurfaceCard` and an unpadded
+     * `SurfaceAccordionCard` standing in one column disagreed by 16px at both edges - two members
+     * of one family drawing the same boundary in two places. The label row and the content shell
+     * were already given `padding: 0 !important` here for the same reason; the root was missed.
+     *
+     * The card keeps its inset where the contract puts it: `PADDING-4` is claimed by the CONTENT
+     * REGION inside the surface, which is where the reader's copy is held off the boundary.
+     */
     .starci-core-surface-card {
         display: flex !important;
         width: 100% !important;
         min-width: 0;
         flex-direction: column !important;
         gap: var(--starci-core-section-gap, 0.75rem) !important;
+        padding: 0 !important;
     }
 
     .starci-core-surface-label {

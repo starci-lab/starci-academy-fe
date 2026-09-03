@@ -203,6 +203,43 @@ describe("Shipped Core geometry replaces the utilities it used to spell", () => 
         expect(css).toMatch(/data-grammar-navigation-feature-nav-destinations="absent"\] \.starci-core-navigation-feature-nav-primary\s*\{[\s\S]*?grid-template-columns: minmax\(0, 1fr\) auto !important;/)
     })
 
+    /**
+     * The surface family draws ONE boundary and takes ONE inset inside it.
+     *
+     * `SurfaceCard` is the only member whose root is a HeroUI `Card`, and the vendor's `.card`
+     * carries a 1rem padding. Unreset, it inset the card's visible surface and its label 16px
+     * further than a `SurfaceListCard` or a `SurfaceAccordionCard` standing beside it, and stacked
+     * a second inset under the content region's own `PADDING-4`. The two `<section>`-rooted members
+     * never had it, which is why the claim is checked against all three renders at once.
+     */
+    it("resets the vendor inset on the card root and keeps the family's own inset inside it", () => {
+        const cardStart = css.indexOf(".starci-core-surface-card {")
+        expect(cardStart).toBeGreaterThanOrEqual(0)
+        expect(css.slice(cardStart, css.indexOf("}", cardStart))).toContain("padding: 0 !important;")
+        expect(css).toMatch(/\.starci-core-surface-content\s*\{[\s\S]*?padding: var\(--starci-core-surface-inset, 1rem\);/)
+
+        const card = renderToStaticMarkup(<SurfaceCard label="Included"><p>Body</p></SurfaceCard>)
+        expect(card).toMatch(/<section[^>]*class="[^"]*starci-core-surface-card[^"]*"[^>]*data-slot="card"|<section[^>]*data-slot="card"[^>]*class="[^"]*starci-core-surface-card/)
+        expect(card).toContain("data-contract=\"PADDING-4\"")
+
+        for (const markup of [
+            renderToStaticMarkup(<SurfaceListCard label="Rows"><StaticStateRow item={{ id: "a", label: "One" }} /></SurfaceListCard>),
+            renderToStaticMarkup(
+                <SurfaceAccordionCard
+                    bodyRender="Body"
+                    isOpen={false}
+                    label="Terms"
+                    onOpenChange={vi.fn()}
+                    renderBody={(body: string) => <p>{body}</p>}
+                    renderSummary={(summary: string) => <span>{summary}</span>}
+                    summaryRender="Summary"
+                />,
+            ),
+        ]) {
+            expect(markup, "a Grammar-rooted family member takes no vendor card slot").not.toContain("data-slot=\"card\"")
+        }
+    })
+
     it("keeps `!important` to the vendor parts it was introduced for", () => {
         for (const selector of [
             ".starci-core-surface-card",
