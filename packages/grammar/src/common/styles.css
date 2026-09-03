@@ -1327,11 +1327,28 @@
      *
      * The feature layer is deliberately out of scope - its tabs are a Tabs branch, and a tab's
      * target is that branch's to answer.
+     *
+     * The primary destinations in the `navigation` slot carry the identical selector: a
+     * `route`-appearance TextAction already meets the floor on its own (below), but the slot rule
+     * is the family's general-purpose net for ANY pressable a consumer puts there, the same way the
+     * action slots protect a control regardless of which leaf renders it.
      */
     .starci-core-navigation-feature-nav-actions :where(button, [role="button"], a[href]),
+    .starci-core-navigation-feature-nav-navigation :where(button, [role="button"], a[href]),
     .starci-core-navigation-feature-nav-compact-navigation :where(button, [role="button"], a[href]) {
         min-inline-size: 44px;
         min-block-size: 44px;
+    }
+
+    /*
+     * The identity slot's brand link is a `plain` TextAction used as a same-document pressable, not
+     * a route: `plain` elsewhere in the family stays a compact inline mark with no reserved hit
+     * area, so the floor is scoped to this one band slot instead of the bare `[data-appearance]`
+     * rule, which would grow every quiet inline action across the app that never claimed to be a
+     * touch target.
+     */
+    .starci-core-navigation-feature-nav-identity .starci-core-text-action[data-appearance="plain"] {
+        min-block-size: var(--starci-core-control-min-size, 2.75rem);
     }
 
     .starci-core-navigation-feature-nav-feature {
@@ -2406,9 +2423,19 @@
         font-weight: 500;
     }
 
+    /*
+     * A `route` TextAction is always a destination, so its 44px floor is unconditional rather than
+     * scoped to one composition: this is the SAME family law the band's action slots carry, applied
+     * to a text-shaped pressable. `min-block-size` is used instead of a taller `padding-block`
+     * because `route` draws no background at rest - only `data-current="true"` paints one - so the
+     * extra block size is invisible chrome around unchanged FONT-2/PADDING-2 typography, not a
+     * bigger pill. The band row still has 3rem (48px) to give a control after its own block inset,
+     * so 44px fits with headroom and `--starci-core-band-height` is untouched.
+     */
     .starci-core-text-action[data-appearance="route"] {
         border-radius: var(--starci-core-pill-radius, 999px);
         padding: 0.5rem 0.75rem;
+        min-block-size: var(--starci-core-control-min-size, 2.75rem);
         color: var(--muted, var(--starci-core-muted, GrayText));
     }
 

@@ -1,5 +1,65 @@
 # Changelog
 
+## 0.4.7
+
+Fixes only. 0.4.6 raised the band's action and compact-navigation slots to the 44px touch floor and
+declared the feature layer out of scope; a reference-app measurement at 1280 found two more misses
+the same law reaches, plus one it cannot reach without a vendor edit.
+
+### The navigation slot's own destinations meet the floor
+
+- The three primary destinations in the `navigation` slot are `route`-appearance TextAction
+  elements, and they were the vendor-inherited 36px - `.starci-core-text-action[data-appearance="route"]`
+  carried `padding: 0.5rem 0.75rem` over a `sm` line-height, 36px total, with nothing raising it.
+  `route` now also carries `min-block-size: var(--starci-core-control-min-size, 2.75rem)`.
+- `min-block-size` was chosen over a taller `padding-block` because `route` paints no background at
+  rest - only `data-current="true"` does - so the extra block size is invisible chrome around
+  unchanged FONT-2/PADDING-2 typography, not a bigger pill. `route` is always a destination, so the
+  floor is unconditional on the appearance itself rather than scoped to one composition, the same
+  way `choice`/`section`/`tab` are free to keep their own geometry.
+- The `navigation` slot's CSS also gained the family's `:where(button, [role="button"], a[href])`
+  selector already shipped on the action and compact-navigation slots, so a consumer that renders
+  anything other than a `route` TextAction there - a plain button, a differently-appearanced link -
+  is still caught, the same general-purpose net the other two slots already are.
+- The identity slot's brand mark is a `plain`-appearance TextAction used as a same-document
+  pressable (`onPress`, not `href`), and it was 36px for the same reason. `plain` elsewhere in the
+  family stays a compact inline mark with no reserved hit area - it is not always a pressable - so
+  the floor is scoped to `.starci-core-navigation-feature-nav-identity .starci-core-text-action[data-appearance="plain"]`
+  instead of the bare `[data-appearance="plain"]` rule, which would have grown every quiet inline
+  action across the app that never claimed to be a touch target.
+- The band still does not grow: the primary row keeps its 4rem height and 0.5rem block inset on
+  each side, `--starci-core-band-height` stays `calc(4rem + 1px)`, and a spec still asserts the
+  arithmetic that 44px fits inside the 3rem the row already offers a control.
+
+### The theme switch is a documented gap, not a silent one
+
+- The vendor theme switch inside the actions slot is a bare HeroUI `Switch` rendered by the
+  consumer's own `ThemeSwitch` leaf (`src/components/leaves/ThemeSwitch`), not a Grammar
+  composition, and it measures 64x36. A HeroUI `Switch` puts its real interactive node on a hidden
+  `input`/label pairing that the shipped `:where(button, [role="button"], a[href])` selector does
+  not address, and does not visibly own a `button`, `[role="button"]` or `a[href]` node to hang a
+  rule on without reaching into vendor markup the family does not own.
+- Grammar does not publish a `ThemeSwitch` today - the only one in the codebase is the app-owned
+  leaf above - and none is added here. Rather than grow the vendor selector into an `!important`
+  override of HeroUI internals, or publish a one-consumer component the family has no second use
+  for yet, this stays an open gap: the consumer should wrap the switch in an IconButton-sized
+  pressable (the same 2.75rem hit area `IconButton` already gives the cart and account controls
+  beside it) until a real second consumer justifies a Grammar `ThemeSwitch`.
+
+### Specs
+
+- `styles.spec.ts` asserts the `route` and identity-slot `plain` rules verbatim, and that the
+  `navigation` slot now carries the same three-slot `:where(...)` selector as the action and
+  compact-navigation slots, still with no `min-height`/`min-block-size`/`height` on any of the three
+  slots themselves.
+- `index.spec.tsx` adds a rendered check that a realistic consumer's markup - a `plain` identity
+  link, three `route` destinations, a compact trigger button, and a mixed button/anchor actions
+  group - actually matches the selectors the shipped rules target, so the floor is proven to land on
+  what gets rendered, not only on the selector text.
+- The band-height arithmetic assertion from 0.4.6 (`4rem` row minus `0.5rem` block inset either side
+  is still `>= 44px`) is unchanged and still passes: nothing in this release raises the floor past
+  what the row already offers.
+
 ## 0.4.6
 
 Fixes only. Three defects a screenshot audit found on a real surface, all three of them Grammar's.

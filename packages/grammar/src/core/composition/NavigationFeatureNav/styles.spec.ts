@@ -50,18 +50,23 @@ describe("Common NavigationFeatureNav anatomy styles", () => {
         expect(grammarClassTokens).not.toEqual(expect.arrayContaining(responsiveUtilityTokens))
     })
 
-    it("gives every pressable in the band's action slots a 44px minimum target", () => {
-        expect(navbarCss).toMatch(/\.starci-core-navigation-feature-nav-actions :where\(button, \[role="button"\], a\[href\]\),\s*\.starci-core-navigation-feature-nav-compact-navigation :where\(button, \[role="button"\], a\[href\]\)\s*\{\s*min-inline-size: 44px;\s*min-block-size: 44px;\s*\}/)
+    it("gives every pressable in the band's navigation, action and compact slots a 44px minimum target", () => {
+        expect(navbarCss).toMatch(/\.starci-core-navigation-feature-nav-actions :where\(button, \[role="button"\], a\[href\]\),\s*\.starci-core-navigation-feature-nav-navigation :where\(button, \[role="button"\], a\[href\]\),\s*\.starci-core-navigation-feature-nav-compact-navigation :where\(button, \[role="button"\], a\[href\]\)\s*\{\s*min-inline-size: 44px;\s*min-block-size: 44px;\s*\}/)
     })
 
     it("keeps the floor on the pressable and the row height off the slot", () => {
-        for (const slot of [".starci-core-navigation-feature-nav-actions {", ".starci-core-navigation-feature-nav-compact-navigation {"]) {
+        for (const slot of [".starci-core-navigation-feature-nav-actions {", ".starci-core-navigation-feature-nav-navigation {", ".starci-core-navigation-feature-nav-compact-navigation {"]) {
             const start = navbarCss.indexOf(slot)
             expect(start, `missing shipped rule for ${slot}`).toBeGreaterThanOrEqual(0)
             expect(navbarCss.slice(start, navbarCss.indexOf("}", start)), `${slot} must not size the row itself`).not.toMatch(/min-height|min-block-size|height:/)
         }
         expect(navbarCss).toMatch(/\.starci-core-navigation-feature-nav-primary\s*\{[\s\S]*?min-height: 4rem;/)
         expect(navbarCss).toMatch(/\.starci-core-navigation-feature-nav-primary\s*\{[\s\S]*?padding-block: var\(--starci-core-inline-gap, 0\.5rem\);/)
+    })
+
+    it("gives the identity slot's plain pressable and every route destination the same 44px floor", () => {
+        expect(navbarCss).toMatch(/\.starci-core-navigation-feature-nav-identity \.starci-core-text-action\[data-appearance="plain"\]\s*\{\s*min-block-size: var\(--starci-core-control-min-size, 2\.75rem\);\s*\}/)
+        expect(css).toMatch(/\.starci-core-text-action\[data-appearance="route"\]\s*\{\s*border-radius: var\(--starci-core-pill-radius, 999px\);\s*padding: 0\.5rem 0\.75rem;\s*min-block-size: var\(--starci-core-control-min-size, 2\.75rem\);/)
     })
 
     it("keeps Subnav compact and gives its icon trigger a 44px target", () => {
