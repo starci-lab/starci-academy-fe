@@ -24,8 +24,8 @@ export const SectionHeader = ({
     id,
     composition = "section-header",
 }: SectionHeaderProps) => (
-    <header className={cn("starci-core-section-header", className)} data-grammar-section-header="true" data-grammar-composition={composition}>
-        <div className="starci-core-section-header-copy">
+    <header className={cn("starci-core-section-header", className)} data-contract="GAP-5" data-grammar-section-header="true" data-grammar-composition={composition}>
+        <div className="starci-core-section-header-copy" data-contract="GAP-2">
             {eyebrow === undefined ? null : <div className="starci-core-section-eyebrow">{eyebrow}</div>}
             {createElement(`h${level}`, { className: "starci-core-section-title", id, "data-contract": "MARGIN-0 FLOW-3" }, title)}
             {description === undefined ? null : <div className="starci-core-section-description">{description}</div>}

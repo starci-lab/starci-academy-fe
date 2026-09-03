@@ -12,6 +12,6 @@ export type VerticalScrollRegionProps = Omit<ComponentProps<"div">, "children"> 
 export const VerticalScrollRegion = (props: VerticalScrollRegionProps) => {
     const { children, isScrollable, hideScrollBar = true, ...regionProps } = props
     return isScrollable
-        ? <ScrollShadow {...regionProps} hideScrollBar={hideScrollBar} orientation="vertical">{children}</ScrollShadow>
+        ? <ScrollShadow {...regionProps} data-contract="MEASURE-7 OVERFLOW-3" hideScrollBar={hideScrollBar} orientation="vertical">{children}</ScrollShadow>
         : <div {...regionProps}>{children}</div>
 }

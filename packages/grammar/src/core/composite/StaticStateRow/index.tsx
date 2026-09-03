@@ -25,7 +25,7 @@ export const StaticStateRow = (props: StaticStateRowProps) => {
             data-grammar-row="true"
             data-grammar-state={state}
             data-grammar-treatment={treatment.tone}
-            data-contract="GAP-2 PADDING-2 BOUNDARY-3"
+            data-contract="GAP-3 PADDING-4 BOUNDARY-3"
         >
             <StateMark state={state} />
             <span className={staticRowCopyClassName} data-contract="GAP-1">

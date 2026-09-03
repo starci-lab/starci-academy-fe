@@ -123,7 +123,7 @@ const SurfaceAccordionRows = <Summary, Body>({
                                     <Accordion.Heading className={accordionHeadingClassName ?? ""} data-contract="MARGIN-0">
                                         <Accordion.Trigger
                                             className={accordionTriggerClassName ?? ""}
-                                            data-contract="PADDING-4 PADDING-3"
+                                            data-contract="PADDING-4"
                                         >
                                             {renderSummary(item.summaryRender)}
                                         </Accordion.Trigger>
