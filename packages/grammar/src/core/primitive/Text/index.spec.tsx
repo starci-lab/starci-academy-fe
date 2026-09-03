@@ -32,7 +32,7 @@ describe("Core Text", () => {
 
         expect(markup).toContain("data-loading=\"true\"")
         expect(markup).toContain("aria-hidden=\"true\"")
-        expect(markup).toContain("text-3xl")
+        expect(markup).toContain("data-size=\"metric-lead\"")
         expect(markup).not.toContain("role=\"alert\"")
         expect(markup).not.toContain("aria-live")
     })

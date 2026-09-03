@@ -95,7 +95,17 @@ describe("Core capability styles", () => {
         expect(css).toMatch(/\.starci-core-accordion-trigger\s*\{[\s\S]*?padding:/)
         expect(css).toMatch(/\.starci-core-accordion-trigger:hover,[\s\S]*?\.starci-core-accordion-trigger:active,[\s\S]*?\[aria-expanded="true"\][\s\S]*?background: transparent;[\s\S]*?transform: none;/)
         expect(css).toMatch(/\.starci-core-accordion-trigger:focus-visible,[\s\S]*?outline: 2px solid var\(--focus,/)
-        expect(css).not.toMatch(/\.starci-core-accordion-trigger:hover,[\s\S]*?background: var\(--accent-soft,/)
+        /*
+         * Scoped to the trigger's OWN rule.
+         *
+         * The guard used to be an unbounded `[\s\S]*?` over the whole sheet, so it went red the
+         * first time any later object painted a selected state with `--accent-soft` - which says
+         * nothing about the accordion trigger. What it means is that the trigger's hover rule must
+         * not tint; that is the block it now reads.
+         */
+        const accordionHoverRule = css.match(/\.starci-core-accordion-trigger:hover,[^{]*\{[^}]*\}/)?.[0] ?? ""
+        expect(accordionHoverRule).not.toBe("")
+        expect(accordionHoverRule).not.toContain("var(--accent-soft")
     })
 
     it("paints a labelled Core SurfaceCard as one label-inside material box", () => {
@@ -114,6 +124,26 @@ describe("Core capability styles", () => {
     it("keeps static joined lists full-bleed and hover-invariant", () => {
         expect(css).toMatch(/\.starci-core-static-row \+ \.starci-core-static-row\s*\{[\s\S]*?border-top:/)
         expect(css).toMatch(/\.starci-core-list-shell\[data-grammar-hover="invariant"\] \.starci-core-static-row:hover\s*\{[\s\S]*?background: transparent;[\s\S]*?box-shadow: none;[\s\S]*?transform: none;/)
+    })
+
+    /*
+     * The verdict collection now PAINTS the verdict.
+     *
+     * It already squared its corners for these rows while the edge itself stayed with the
+     * application, which had to reach across the boundary with its own inset shadow to draw it. The
+     * edge is an inset shadow rather than a border because the rows are usually the caller's own
+     * children, and a border would move their content by two pixels.
+     */
+    it("draws a 2px leading verdict edge on a row in a verdict collection", () => {
+        expect(css).toMatch(/\.starci-core-owned-collection\[data-grammar-collection="verdict"\] \[data-verdict="success"\],[\s\S]*?--starci-core-verdict-edge: inset 2px 0 0 0 var\(--success,/)
+        expect(css).toMatch(/\.starci-core-owned-collection\[data-grammar-collection="verdict"\] \[data-verdict="danger"\],[\s\S]*?--starci-core-verdict-edge: inset 2px 0 0 0 var\(--danger,/)
+        expect(css).toContain("box-shadow: var(--starci-core-verdict-edge, none);")
+        const edgeRules = css.match(/inset 2px 0 0 0 var\(--(?:success|danger)/g) ?? []
+        expect(edgeRules, "one value per verdict, read from a property everywhere else").toHaveLength(2)
+    })
+
+    it("keeps the verdict edge under the hover-invariant reset that clears row shadows", () => {
+        expect(css).toMatch(/\.starci-core-list-shell\[data-grammar-hover="invariant"\] \.starci-core-static-row\[data-verdict="success"\]:hover,[\s\S]*?box-shadow: var\(--starci-core-verdict-edge, none\);/)
     })
 
     it("keeps ordered row prefixes quiet and free of badge decoration", () => {

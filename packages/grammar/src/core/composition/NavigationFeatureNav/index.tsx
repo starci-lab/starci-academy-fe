@@ -9,13 +9,20 @@ import {
     navigationFeatureNavIdentityClassName,
     navigationFeatureNavNavigationClassName,
     navigationFeatureNavPrimaryClassName,
-    navigationFeatureNavStickyClassName,
 } from "./classNames.js"
 
-export type NavigationFeatureNavProps = Omit<ComponentPropsWithoutRef<"header">, "children"> & {
+/**
+ * The primary destination row, and its label, travel together.
+ *
+ * A bar without destinations renders NO `nav` element: an empty navigation landmark is announced,
+ * reached and counted by assistive technology, and it names nothing. This is the same union shape
+ * `WorkspaceShell` uses for the same reason.
+ */
+type WithNavigation = { readonly navigation: ReactNode; readonly navigationLabel: string }
+type WithoutNavigation = { readonly navigation?: undefined; readonly navigationLabel?: never }
+
+export type NavigationFeatureNavProps = Omit<ComponentPropsWithoutRef<"header">, "children"> & (WithNavigation | WithoutNavigation) & {
     readonly identity: ReactNode
-    readonly navigation: ReactNode
-    readonly navigationLabel: string
     /** Compact trigger for an application-owned drawer containing the same primary destinations. */
     readonly compactNavigationTrigger: ReactNode
     readonly compactNavigationTriggerLabel: string
@@ -52,15 +59,18 @@ export const NavigationFeatureNav = ({
 }: NavigationFeatureNavProps) => (
     <header
         {...headerProps}
-        className={cn(navigationFeatureNavClassName, position === "sticky" && navigationFeatureNavStickyClassName, className)}
+        className={cn(navigationFeatureNavClassName, className)}
         data-contract="MEASURE-2 BOUNDARY-1"
         data-grammar-navigation-feature-nav="true"
+        data-grammar-navigation-feature-nav-destinations={navigation === undefined ? "absent" : "present"}
         data-grammar-navigation-feature-nav-layers={featureNavigation === undefined ? "one" : "two"}
         data-grammar-navigation-feature-nav-position={position}
     >
         <PageContainer className={navigationFeatureNavPrimaryClassName} data-contract="GAP-3 PADDING-3" data-grammar-navigation-feature-nav-primary="true" measure={measure}>
             <div className={navigationFeatureNavIdentityClassName} data-grammar-navigation-feature-nav-identity="true">{identity}</div>
-            <nav aria-label={navigationLabel} className={navigationFeatureNavNavigationClassName} data-grammar-navigation-feature-nav-navigation="true">{navigation}</nav>
+            {navigation === undefined ? null : (
+                <nav aria-label={navigationLabel} className={navigationFeatureNavNavigationClassName} data-grammar-navigation-feature-nav-navigation="true">{navigation}</nav>
+            )}
             <div
                 aria-label={compactNavigationTriggerLabel}
                 className={navigationFeatureNavCompactNavigationClassName}

@@ -13,7 +13,7 @@ export type LabelProps = {
 export const Label = ({ id, children, depth = "top", as = "span" }: LabelProps) => {
     const shared = {
         id,
-        className: getLabelClassName(depth),
+        className: getLabelClassName(),
         "data-grammar-label": "true",
         "data-grammar-label-depth": depth,
         "data-contract": getLabelContract(depth),

@@ -1,4 +1,4 @@
-import { Button as HeroButton, skeletonVariants } from "@heroui/react"
+import { Button as HeroButton, cn, skeletonVariants } from "@heroui/react"
 import { Icon, type IconSource } from "../Icon/index.js"
 
 export type IconButtonProps = {
@@ -11,9 +11,11 @@ export type IconButtonProps = {
     readonly onPress?: () => void
 }
 
-const SKELETON_CLASS_NAME = skeletonVariants({ animationType: "shimmer" }).base({
-    className: "rounded-full",
-})
+/**
+ * The pill corner is SHIPPED by `.starci-core-icon-button` in `src/common/styles.css`, for the
+ * resolved action and its resting shimmer alike; only the shimmer itself comes from the vendor.
+ */
+const SKELETON_CLASS_NAME = skeletonVariants({ animationType: "shimmer" }).base()
 
 /** Circular glyph-only action with a mandatory accessible name. */
 export const IconButton = ({
@@ -31,7 +33,7 @@ export const IconButton = ({
         data-loading={isSkeleton ? "true" : "false"}
         type="button"
         variant="tertiary"
-        className={isSkeleton ? SKELETON_CLASS_NAME : "rounded-full"}
+        className={cn("starci-core-icon-button", isSkeleton ? SKELETON_CLASS_NAME : undefined) ?? "starci-core-icon-button"}
         isIconOnly
         isDisabled={isDisabled || isSkeleton}
         aria-label={label}

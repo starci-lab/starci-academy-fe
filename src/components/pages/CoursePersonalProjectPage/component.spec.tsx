@@ -62,7 +62,7 @@ describe("CoursePersonalProjectPageBase", () => {
         expect(screen.getByText("18/20")).toBeInTheDocument()
         expect(container.querySelector("[data-grammar-composition='context-intro']")).not.toBeNull()
         expect(container.querySelector("[data-grammar-primary-region='true']")).not.toBeNull()
-        expect(container.querySelector("[data-grammar-rail-inset='content'].px-3.py-6")).not.toBeNull()
+        expect(container.querySelector("[data-grammar-rail-inset='content'].starci-core-rail-body")).not.toBeNull()
         expect(container.querySelector("[data-grammar-rail-mode='sticky']")).not.toBeNull()
         expect(container.querySelectorAll("ol[data-project-roadmap='true'] > li")).toHaveLength(3)
         expect(screen.getByText("Tasks").parentElement?.parentElement).toHaveClass("flex-col")

@@ -79,8 +79,10 @@ describe("learnSpine", () => {
         rerender(learnSpineCollapsed({ props: { ...base, isCollapsed: true }, on: { toggleCollapse } }))
         expect(screen.getByRole("button", { name: "Expand" })).toBeInTheDocument()
         // The narrow rail hides the group name from the eye, not from the listbox: a screen reader
-        // still hears which run a destination belongs to.
-        expect(screen.getByText("Your path")).toHaveClass("sr-only")
+        // still hears which run a destination belongs to. Grammar 0.4.3 moved that from an
+        // `sr-only` utility to the shipped rule the collapsed root selects, so the assertion is
+        // the group's own class plus the state that hides it.
+        expect(screen.getByText("Your path")).toHaveClass("starci-core-sidebar-section-label")
         expect(screen.getByRole("option", { name: "Home" })).toBeInTheDocument()
         expect(screen.getByRole("option", { name: "Modules" })).toBeInTheDocument()
         const collapsedSidebar = screen.getByRole("listbox", { name: "Home" }).closest("[data-component='Sidebar']")

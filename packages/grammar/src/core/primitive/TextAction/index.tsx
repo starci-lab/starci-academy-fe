@@ -48,7 +48,7 @@ type CommandAction = {
 export type TextActionProps = ActionBase & (DestinationAction | CommandAction)
 
 const SKELETON_CLASS_NAME = skeletonVariants({ animationType: "shimmer" }).base({
-    className: "inline-flex w-16 shrink-0 select-none text-transparent",
+    className: "starci-core-text-action-resting",
 })
 
 const FONT_RULE_BY_SIZE: Record<ActionTextSize, string> = {
@@ -58,12 +58,11 @@ const FONT_RULE_BY_SIZE: Record<ActionTextSize, string> = {
 }
 
 /**
- * Padding rule ids per appearance, from actionStyles.ts's `APPEARANCE_CLASS_NAMES`.
- * Each side is matched against padding.md's `## Scale` via the axis-variant rule
- * (`px-*`/`py-*` apply an existing rule to one axis): `px-2 py-1` (choice) is
- * PADDING-2 inline / PADDING-1 block; `px-3 py-2` (route, section) is PADDING-3
- * inline / PADDING-2 block; `py-3` (tab) is PADDING-3 block only. `inline`,
- * `muted`, `disclosure` and `plain` add no inset class.
+ * Padding rule ids per appearance, from the shipped `.starci-core-text-action`
+ * appearance rules. Each side is matched against padding.md's `## Scale` via the
+ * axis-variant rule: choice is PADDING-2 inline / PADDING-1 block; route and
+ * section are PADDING-3 inline / PADDING-2 block; tab is PADDING-3 block only.
+ * `inline`, `muted`, `disclosure` and `plain` draw no inset.
  */
 const PADDING_RULES_BY_APPEARANCE: Partial<Record<ActionAppearance, ReadonlyArray<string>>> = {
     choice: ["PADDING-2", "PADDING-1"],
@@ -73,11 +72,12 @@ const PADDING_RULES_BY_APPEARANCE: Partial<Record<ActionAppearance, ReadonlyArra
 }
 
 /**
- * Tone rule ids per appearance, from actionStyles.ts's `APPEARANCE_CLASS_NAMES`,
- * matched against tone.md `## Scale`. `choice`, `route` and `section` swap to the
- * accent-soft foreground (TONE-3) only `data-[current=true]`, mirrored here from
- * the already-known `isCurrent` prop. `tab`'s current-state color is `text-accent`,
- * which tone.md does not publish, so that state stays unclaimed.
+ * Tone rule ids per appearance, from the shipped `.starci-core-text-action`
+ * appearance rules, matched against tone.md `## Scale`. `choice`, `route` and
+ * `section` swap to the accent-soft foreground (TONE-3) only at
+ * `data-current="true"`, mirrored here from the already-known `isCurrent` prop.
+ * `tab`'s current-state colour is the accent itself, which tone.md does not
+ * publish, so that state stays unclaimed.
  */
 const getToneRule = (appearance: ActionAppearance, isCurrent: boolean): string | undefined => {
     switch (appearance) {
@@ -92,7 +92,7 @@ const getToneRule = (appearance: ActionAppearance, isCurrent: boolean): string |
     case "route":
         return isCurrent ? "TONE-3" : "TONE-2"
     case "tab":
-        // Current state renders `text-accent`, which tone.md does not publish.
+        // Current state renders the accent itself, which tone.md does not publish.
         return isCurrent ? undefined : "TONE-2"
     case "disclosure":
         return "TONE-3"
@@ -101,17 +101,17 @@ const getToneRule = (appearance: ActionAppearance, isCurrent: boolean): string |
 
 /**
  * Rule ids this element can claim from actionStyles.ts's shared recipe.
- * `gap-2` (always present) matches gap.md's scale directly (GAP-2). `w-fit`
- * (always present) matches measure.md's MEASURE-3 (Content width) catalog
- * entry. Size selects the FONT-1/2/3 row. Appearance (with `isCurrent`)
- * selects the tone row and any padding rows. `font-medium`/`font-semibold`,
- * `rounded-full`/`rounded-large`, and the `tab` underline/border classes carry
- * no rule id in their topic files and stay unclaimed.
+ * The always-present 0.5rem gap matches gap.md's scale directly (GAP-2), and the
+ * content width matches measure.md's MEASURE-3 (Content width) catalog entry.
+ * Size selects the FONT-1/2/3 row. Appearance (with `isCurrent`) selects the tone
+ * row and any padding rows. Medium/semibold weight, the pill and section corners,
+ * and the `tab` underline/border carry no rule id in their topic files and stay
+ * unclaimed.
  */
 /**
- * `choice`, `route` and `section` swap to `bg-accent-soft` only `data-[current=true]`,
- * pairing with the same `text-accent-soft-foreground` as TONE-3. That pair matches
- * surface.md's SURFACE-4 catalog entry exactly.
+ * `choice`, `route` and `section` swap to the accent-soft surface only at
+ * `data-current="true"`, pairing with the same accent-soft foreground as TONE-3.
+ * That pair matches surface.md's SURFACE-4 catalog entry exactly.
  */
 const CURRENT_SURFACE_APPEARANCES: ReadonlySet<ActionAppearance> = new Set(["choice", "route", "section"])
 
@@ -151,8 +151,9 @@ export const TextAction = (props: TextActionProps) => {
         "data-current": isCurrent ? "true" : "false",
         "data-action-pending": isPending ? "true" : "false",
         "aria-busy": isPending || undefined,
+        "data-size": size,
         "data-contract": getActionContract(appearance, size, isCurrent),
-        className: getActionClassName(appearance, size),
+        className: getActionClassName(),
     } as const
     const content = (
         <>

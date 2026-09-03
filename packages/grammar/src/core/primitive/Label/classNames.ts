@@ -1,18 +1,17 @@
 import { cn } from "@heroui/react"
 
-/** Select surface label copy that recedes when the owner is nested. */
-export const getLabelClassName = (depth: "top" | "nested") => cn(
-    "starci-core-label",
-    "min-w-0",
-    "font-semibold",
-    depth === "nested" ? "text-xs leading-4" : "text-sm leading-5",
-)
+/**
+ * Identifies surface label copy. The scale that recedes when the owner is nested is SHIPPED by
+ * `.starci-core-label[data-grammar-label-depth]` in `src/common/styles.css`, read from the
+ * attribute the component already emits.
+ */
+export const getLabelClassName = () => cn("starci-core-label") ?? "starci-core-label"
 
 /**
- * Rule ids this element can claim for the presentation classes above.
- * `text-xs`/`leading-4` and `text-sm`/`leading-5` match FONT-1 and FONT-2 on the
- * closed type scale (font.md `## Scale`). `font-semibold` (weight) and `min-w-0`
- * (measure) carry no rule id in their topic files and stay unclaimed.
+ * Rule ids this element can claim from the shipped rule above.
+ * The nested and top scales match FONT-1 and FONT-2 on the closed type scale
+ * (font.md `## Scale`). The semibold weight and the zero measure floor carry no
+ * rule id in their topic files and stay unclaimed.
  * `.starci-core-label { margin: 0 }` (common/styles.css) is unconditional across both
  * depths and matches margin.md's "Label | 0 | MARGIN-0" row.
  */

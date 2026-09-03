@@ -11,7 +11,7 @@ describe("ContinueLearningBase", () => {
         const { container } = render(<ContinueLearningBase state="empty" props={{ label: "Continue learning", message: "Nothing to resume", actionLabel: "Browse courses" }} on={{ act }} />)
 
         expect(screen.getByText("Nothing to resume")).toHaveAttribute("data-size", "sm")
-        expect(screen.getByText("Nothing to resume").parentElement).toHaveClass("items-center", "text-center")
+        expect(screen.getByText("Nothing to resume").parentElement).toHaveClass("starci-core-empty-notice")
         expect(container.querySelector(".bg-gradient-to-br")).toBeNull()
         const action = screen.getByRole("button", { name: "Browse courses" })
         expect(action.querySelector("svg")).toBeNull()

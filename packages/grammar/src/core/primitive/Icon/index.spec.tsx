@@ -10,7 +10,7 @@ describe("Core Icon", () => {
 
         expect(markup).toContain("data-component=\"Icon\"")
         expect(markup).toContain("data-usage=\"leading\"")
-        expect(markup).toContain("size-5")
+        expect(markup).toContain("starci-core-icon")
         expect(markup).toContain("aria-hidden=\"true\"")
     })
 

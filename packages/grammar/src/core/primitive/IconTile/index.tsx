@@ -16,18 +16,12 @@ export type IconTileProps = {
     readonly isSkeleton?: boolean
 }
 
-const SIZE_CLASS_NAMES = {
-    sm: "size-8 rounded-lg",
-    md: "size-10 rounded-xl",
-} as const
-
-const TONE_CLASS_NAMES = {
-    neutral: "bg-default text-muted",
-    accent: "bg-accent-soft text-accent-soft-foreground",
-    success: "bg-success-soft text-success-soft-foreground",
-    warning: "bg-warning-soft text-warning-soft-foreground",
-    danger: "bg-danger-soft text-danger-soft-foreground",
-} as const
+/*
+ * Plate size, corner and tone pair are SHIPPED by `.starci-core-icon-tile` in
+ * `src/common/styles.css`, selected by the `data-size`, `data-tone`, `data-artwork` and
+ * `data-loading` attributes this element already emits. The corner comes from the theme radius
+ * ramp (`--radius-lg` / `--radius-xl`), not from a HeroUI v2 radius name.
+ */
 
 const SKELETON_CLASS_NAME = skeletonVariants({ animationType: "shimmer" }).base()
 
@@ -63,11 +57,7 @@ export const IconTile = ({
             data-loading={isSkeleton ? "true" : "false"}
             aria-hidden={isSkeleton || undefined}
             data-contract={["OVERFLOW-2", toneRule].filter(Boolean).join(" ")}
-            className={cn(
-                "inline-flex shrink-0 items-center justify-center overflow-hidden",
-                SIZE_CLASS_NAMES[size],
-                isSkeleton ? SKELETON_CLASS_NAME : showsArtwork ? undefined : TONE_CLASS_NAMES[tone],
-            )}
+            className={cn("starci-core-icon-tile", isSkeleton ? SKELETON_CLASS_NAME : undefined)}
         >
             {isSkeleton ? null : showsArtwork ? artwork : (
                 <Icon source={source} usage="leading" {...(ariaLabel === undefined ? {} : { ariaLabel })} />

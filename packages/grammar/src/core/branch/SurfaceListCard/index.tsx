@@ -1,7 +1,8 @@
 import { useId, type ReactNode } from "react"
+import type { RowVerdict } from "../../composite/StaticStateRow/index.js"
 import { VerticalScrollRegion } from "../../composite/VerticalScrollRegion/index.js"
 import { Label } from "../../primitive/Label/index.js"
-import { getCollectionClassName, getSurfaceFactClassName, listShellClassName, surfaceFooterClassName, surfaceLabelClassName, surfaceListClassName } from "./classNames.js"
+import { collectionClassName, listShellClassName, surfaceFactClassName, surfaceFooterClassName, surfaceLabelClassName, surfaceListClassName } from "./classNames.js"
 
 type LabelledSurfaceList = {
     readonly label: string
@@ -20,9 +21,20 @@ type SurfaceListFrameProps = (LabelledSurfaceList | SelfNamedSurfaceList) & {
     readonly footer?: ReactNode
     readonly depth?: "top" | "nested"
     readonly isLoading?: boolean
+    /**
+     * The collection reports outcomes: it squares its corners and paints each row's verdict edge.
+     *
+     * A row opts into that edge by carrying `data-verdict="success" | "danger"` - the slot contract
+     * this card publishes for its collection. `StaticStateRow` takes a `verdict` prop that emits it;
+     * an application-owned row spells the attribute itself and gets exactly the same shipped edge,
+     * because rows here are the caller's children and no prop of this card can reach them.
+     */
     readonly isVerdict?: boolean
     readonly isScrollable?: boolean
 }
+
+/** The value a row in a verdict collection puts in `data-verdict`. */
+export type SurfaceListRowVerdict = RowVerdict
 
 export type SurfaceListCardProps = SurfaceListFrameProps & {
     readonly children: ReactNode
@@ -57,7 +69,8 @@ export const SurfaceListCard = (props: SurfaceListCardProps) => {
                     <Label as="h3" id={headingId} depth={depth}>{label}</Label>
                     {labelEnd ?? (fact === undefined ? null : (
                         <span
-                            className={getSurfaceFactClassName(depth)}
+                            className={surfaceFactClassName}
+                            data-grammar-surface-depth={depth}
                             data-contract={`TONE-2 ${depth === "nested" ? "FONT-1" : "FONT-2"}`}
                         >
                             {fact}
@@ -77,7 +90,8 @@ export const SurfaceListCard = (props: SurfaceListCardProps) => {
                 data-verdict={String(isVerdict)}
             >
                 <VerticalScrollRegion
-                    className={getCollectionClassName(isVerdict)}
+                    className={collectionClassName}
+                    data-grammar-collection={isVerdict ? "verdict" : "list"}
                     data-grammar-list="true"
                     data-loading={String(isLoading)}
                     isScrollable={isScrollable}

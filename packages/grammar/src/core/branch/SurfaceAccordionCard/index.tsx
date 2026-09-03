@@ -129,8 +129,17 @@ const SurfaceAccordionRows = <Summary, Body>({
                                         </Accordion.Trigger>
                                     </Accordion.Heading>
                                     <Accordion.Panel className={accordionPanelClassName ?? ""} data-contract="PADDING-0" role="region">
-                                        <Accordion.Body className={accordionBodyClassName ?? ""} data-contract="PADDING-8 TONE-1">
-                                            {renderBody(item.bodyRender)}
+                                        {/*
+                                          * The vendor's `Body` puts a className on an inner node it
+                                          * owns and every other prop on the outer one, which would
+                                          * split the shipped rule from the claim that promises it.
+                                          * Grammar draws its own inset element instead, so the class
+                                          * and the `data-contract` stay on the same box.
+                                          */}
+                                        <Accordion.Body>
+                                            <div className={accordionBodyClassName ?? ""} data-contract="PADDING-0 PADDING-3 PADDING-4 PADDING-5 TONE-1">
+                                                {renderBody(item.bodyRender)}
+                                            </div>
                                         </Accordion.Body>
                                     </Accordion.Panel>
                                 </Accordion.Item>

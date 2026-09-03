@@ -4,8 +4,8 @@ import {
     Badge, Button, ChatWorkspace, Divider, EmptyNotice, FencedCodeBlock, GrammarRoot,
     Heading, HorizontalScrollRegion, Icon, IconButton, IconTile, IncludedMark, Input,
     Label, LeadingNumber, MarkdownArticle, MarkdownTableFrame, MediaFrame,
-    NavigationFeatureNav, OtpInput, PageContainer, PrimaryRailLayout, Progress, Rail,
-    RankArtwork, SectionHeader, Sidebar, StateMark, StaticStateRow, Subnav,
+    NavigationFeatureNav, OtpInput, PageContainer, PressableField, PrimaryRailLayout,
+    Progress, Rail, RankArtwork, SectionHeader, Sidebar, StateMark, StaticStateRow, Subnav,
     SurfaceAccordionCard, SurfaceCard, SurfaceCopyGroup, SurfaceListCard, Tabs, Text,
     TextAction, Tooltip, VerticalScrollRegion, WorkspaceShell,
 } from "./renderers.js"
@@ -23,8 +23,8 @@ export const COMMON_GRAMMAR_COMPONENTS = Object.freeze({
     Badge, Button, ChatWorkspace, Divider, EmptyNotice, FencedCodeBlock, GrammarRoot,
     Heading, HorizontalScrollRegion, Icon, IconButton, IconTile, IncludedMark, Input,
     Label, LeadingNumber, MarkdownArticle, MarkdownTableFrame, MediaFrame,
-    NavigationFeatureNav, OtpInput, PageContainer, PrimaryRailLayout, Progress, Rail,
-    RankArtwork, SectionHeader, Sidebar, StateMark, StaticStateRow, Subnav,
+    NavigationFeatureNav, OtpInput, PageContainer, PressableField, PrimaryRailLayout,
+    Progress, Rail, RankArtwork, SectionHeader, Sidebar, StateMark, StaticStateRow, Subnav,
     SurfaceAccordionCard, SurfaceCard, SurfaceCopyGroup, SurfaceListCard, Tabs, Text,
     TextAction, Tooltip, VerticalScrollRegion, WorkspaceShell,
 } as const)

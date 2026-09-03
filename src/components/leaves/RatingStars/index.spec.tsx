@@ -13,7 +13,7 @@ describe("RatingStars", () => {
         })
         expect(rating.querySelectorAll("svg")).toHaveLength(6)
         for (const star of rating.querySelectorAll("svg")) {
-            expect(star).toHaveClass("size-5")
+            expect(star).toHaveClass("starci-core-icon")
         }
         expect(rating.innerHTML).toContain("var(--warning)")
     })
