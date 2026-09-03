@@ -21,7 +21,14 @@ export const getRankedUserRowClassName = (layout: "full" | "compact") => cn(
     layout === "full" && "gap-3",
 )
 
-/** Name/subtitle stack owns the row's spare width and truncates before the trailing facts. */
+/**
+ * Name/subtitle stack owns the row's spare width and clips before the trailing facts.
+ *
+ * The wrapper stays: the two lines are the flex item that must give way, and the linked name is a
+ * `TextAction`, which publishes no `overflow`. The lines Grammar CAN answer for - the viewer's own
+ * name and the subtitle - carry `overflow="truncate"` on the `Text` itself instead of a selector
+ * reaching in at them.
+ */
 export const rankedUserNameColumnClassName = cn("min-w-0", "flex-1", "overflow-hidden")
 
 /** Points cell never wraps and stays right-aligned against the trailing edge. */

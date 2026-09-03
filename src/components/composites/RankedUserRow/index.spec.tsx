@@ -40,10 +40,15 @@ describe("RankedUserRow", () => {
             rankLabel: "Rank 4",
             name: "Learner · You",
             points: "105 XP",
+            subtitle: "Đang giữ chuỗi học 42 ngày liên tiếp",
             followLabel: "Follow",
             isMe: true,
         }} on={{ follow }} />)
         expect(screen.getByText("Learner · You")).toHaveAttribute("data-tone", "accent")
+        // The name column cuts before the trailing facts, and each line Grammar can answer for says
+        // so itself rather than being reached at through the wrapper.
+        expect(screen.getByText("Learner · You")).toHaveAttribute("data-overflow", "truncate")
+        expect(screen.getByText("Đang giữ chuỗi học 42 ngày liên tiếp")).toHaveAttribute("data-overflow", "truncate")
         expect(screen.queryByRole("button", { name: "Follow" })).toBeNull()
     })
 

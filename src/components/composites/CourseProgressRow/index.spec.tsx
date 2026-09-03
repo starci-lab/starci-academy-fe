@@ -21,6 +21,16 @@ describe("CourseProgressRow", () => {
         expect(caret).toHaveClass("group-focus-visible:translate-x-1")
     })
 
+    it("lets a long trailing fact wrap on the line itself rather than in a wrapper", () => {
+        const { container } = render(<CourseProgressRow props={{
+            ...row,
+            percentLabel: "Đã hoàn thành 87% chương trình",
+            dimensions: [{ id: "lessons", label: "Bài học", completed: 12, total: 40, percent: 30, tone: "accent" }],
+        }} />)
+        const facts = container.querySelectorAll("[data-component='Text'][data-overflow='wrap']")
+        expect(facts).toHaveLength(2)
+    })
+
     it("retains one whole-row destination", () => {
         const open = vi.fn()
         render(<CourseProgressRow props={row} on={{ open }} />)

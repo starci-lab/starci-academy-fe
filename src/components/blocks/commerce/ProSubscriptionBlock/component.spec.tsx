@@ -80,6 +80,9 @@ describe("ProSubscriptionBlockBase", () => {
         expect(container.querySelector("[data-grammar-accordion-shell='true']")).toHaveAttribute("data-grammar-frame", "bounded")
         expect(container.querySelectorAll("[data-grammar-accordion-row='true']")).toHaveLength(2)
         const purchaseButton = screen.getByRole("button", { name: labels.signedOutAction })
+        // A long localized purchase label fills the action band and wraps inside it; that is
+        // Grammar's `width="fill"`, not a descendant width utility reaching through the boundary.
+        expect(purchaseButton).toHaveAttribute("data-width", "fill")
         expect(purchaseButton.parentElement).toBeInTheDocument()
         expect(purchaseButton.parentElement?.previousElementSibling).toHaveAttribute("data-has-actions", "true")
         const aiTrigger = screen.getByRole("button", { name: labels.aiTitle })

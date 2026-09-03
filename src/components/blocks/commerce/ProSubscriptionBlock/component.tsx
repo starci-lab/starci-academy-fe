@@ -178,7 +178,7 @@ export const ProSubscriptionBlockBase = (props: ProSubscriptionBlockProps) => {
                     </div>
                     {hasPurchaseAction ? (
                         <div className={proActionsClassName}>
-                            <Button variant="primary" isDisabled={isLoading} onPress={on?.purchase}>{actionLabel}</Button>
+                            <Button variant="primary" width="fill" isDisabled={isLoading} onPress={on?.purchase}>{actionLabel}</Button>
                             {data.isSignedOut ? <Text size={"xs"} tone={"muted"}>{labels.signedOutHelper}</Text> : null}
                         </div>
                     ) : null}

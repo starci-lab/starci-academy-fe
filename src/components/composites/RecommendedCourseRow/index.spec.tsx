@@ -25,6 +25,17 @@ describe("RecommendedCourseRow", () => {
         expect(open).toHaveBeenCalledOnce()
     })
 
+    it("wraps a long title and a long reason on the line, not through a descendant selector", () => {
+        render(<RecommendedCourseRow props={{
+            id: "one",
+            title: "Lập trình Backend chuyên sâu với NestJS và PostgreSQL",
+            price: "990.000 ₫",
+            reason: "Vì bạn vừa hoàn thành khóa nền tảng cơ sở dữ liệu quan hệ",
+        }} />)
+        expect(screen.getByText("Lập trình Backend chuyên sâu với NestJS và PostgreSQL")).toHaveAttribute("data-overflow", "wrap")
+        expect(screen.getByText("Vì bạn vừa hoàn thành khóa nền tảng cơ sở dữ liệu quan hệ")).toHaveAttribute("data-overflow", "wrap")
+    })
+
     it("omits the list price, the discount, the saving and the reason a course does not have", () => {
         render(<RecommendedCourseRow props={{ id: "one", title: "Backend basics", price: "990.000 ₫" }} />)
         expect(screen.getByText("Backend basics")).toBeInTheDocument()

@@ -71,13 +71,13 @@ export const RecommendedCourseRow = (props: RecommendedCourseRowProps) => {
         <IconTile source={iconSourceFor("course", "leading")} artwork={data.cover ? <img src={data.cover} alt="" className={recommendedCourseCoverClassName} /> : undefined} tone={"accent"} size={"md"} isSkeleton={isLoading} />
         <div className={recommendedCourseBodyClassName} data-recommended-course-body="true">
             <div className={recommendedCourseEvidenceClassName} data-recommended-course-evidence="true">
-                <Text size={"md"} weight={"semibold"} isSkeleton={isLoading}>{data.title}</Text>
+                <Text size={"md"} weight={"semibold"} overflow={"wrap"} isSkeleton={isLoading}>{data.title}</Text>
                 <div className={recommendedCoursePriceClassName}>
                     <Text size={"md"} weight={"semibold"} isSkeleton={isLoading}>{data.price}</Text>
                     {data.originalPrice === undefined ? null : <Text size={"md"} tone={"muted"} isSuperseded={true} isSkeleton={isLoading}>{data.originalPrice}</Text>}
                     {data.discount === undefined ? null : <Badge tone={"success"}>{data.discount}</Badge>}
                 </div>
-                {data.reason === undefined ? null : <Text size={"sm"}>{data.reason}</Text>}
+                {data.reason === undefined ? null : <Text size={"sm"} overflow={"wrap"}>{data.reason}</Text>}
             </div>
             {data.actionLabel === undefined ? null : <DestinationCue props={{ label: data.actionLabel }} isLoading={isLoading} />}
         </div>

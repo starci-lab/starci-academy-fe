@@ -50,7 +50,7 @@ export type RankedUserRowActions = {
 export type RankedUserRowProps = { readonly props: RankedUserRowData; readonly on?: RankedUserRowActions; readonly isLoading?: boolean; readonly layout?: "full" | "compact" }
 
 const RankedName = ({ props, on, isLoading }: RankedUserRowProps) => props.isMe === true
-    ? <Text size={"sm"} tone={props.isMe === true ? "accent" : "default"} weight={"semibold"} isSkeleton={isLoading}>{props.name}</Text>
+    ? <Text size={"sm"} tone={props.isMe === true ? "accent" : "default"} weight={"semibold"} overflow={"truncate"} isSkeleton={isLoading}>{props.name}</Text>
     : <TextAction size={"sm"} appearance="inline" isSkeleton={isLoading} onPress={on?.open}>{props.name ?? ""}</TextAction>
 
 const RankedMovement = ({ props, isLoading }: RankedUserRowProps) => props.rankDelta !== undefined
@@ -96,6 +96,6 @@ export const RankedUserRow = (props: RankedUserRowProps) => {
         ><RankMark
                 props={{ rank: data.rank, placement: "row", accessibleLabel: data.rankLabel }}
                 isLoading={isLoading}
-            /><Avatar props={{ name: data.name, src: data.avatar ?? undefined, size: "sm" }} isLoading={isLoading} /><div className={rankedUserNameColumnClassName}>{name}{data.subtitle === undefined && !isLoading ? null : <Text size={"xs"} tone={"muted"} isSkeleton={isLoading}>{data.subtitle}</Text>}</div><div className={rankedUserPointsColumnClassName}><Text size={"xs"} tone={"muted"} isSkeleton={isLoading}>{data.points}</Text></div><span className={getRankedUserMovementColumnClassName(layout)}>{movement}</span>{follow === undefined ? null : <span className={getRankedUserFollowColumnClassName(layout)}>{follow}</span>}</div>
+            /><Avatar props={{ name: data.name, src: data.avatar ?? undefined, size: "sm" }} isLoading={isLoading} /><div className={rankedUserNameColumnClassName}>{name}{data.subtitle === undefined && !isLoading ? null : <Text size={"xs"} tone={"muted"} overflow={"truncate"} isSkeleton={isLoading}>{data.subtitle}</Text>}</div><div className={rankedUserPointsColumnClassName}><Text size={"xs"} tone={"muted"} isSkeleton={isLoading}>{data.points}</Text></div><span className={getRankedUserMovementColumnClassName(layout)}>{movement}</span>{follow === undefined ? null : <span className={getRankedUserFollowColumnClassName(layout)}>{follow}</span>}</div>
     )
 }
