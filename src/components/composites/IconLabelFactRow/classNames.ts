@@ -3,6 +3,7 @@ import { cn } from "@heroui/react"
 /** Leading glyph, primary label and optional fact share one content-row seam. */
 export const iconLabelFactRowClassName = `${cn(
     "grid",
+    "w-full",
     "min-w-0",
     "items-center",
     "gap-3",

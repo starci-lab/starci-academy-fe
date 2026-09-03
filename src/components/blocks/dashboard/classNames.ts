@@ -13,8 +13,6 @@ export const dashboardRailRowItemClassName = cn(
     "rounded-lg",
     "px-2",
     "py-2",
-    "[&>[data-part=icon-label-fact-row]]:min-w-0",
-    "[&>[data-part=icon-label-fact-row]]:flex-1",
 )
 
 /** Stack full-bleed bands inside one bounded dashboard surface. */
