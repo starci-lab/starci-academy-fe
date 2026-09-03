@@ -215,6 +215,21 @@ export const ProSubscriptionBlockBase = (props: ProSubscriptionBlockProps) => {
                                           * region actually holds (HIERARCHY-1 Case 1).
                                           */}
                                         <Heading level={2}>{labels.benefitsTitle}</Heading>
+                                        {/*
+                                          * GRAMMAR-GAP: this surface and the SurfaceAccordionCard in
+                                          * the peer section below sit in the same column and are 16px
+                                          * out of alignment, and no prop closes it. `SurfaceCard`
+                                          * renders a HeroUI `Card.Root`, whose `.card` rule sets
+                                          * `padding: calc(var(--spacing) * 4)`. Grammar re-states
+                                          * `padding: 0 !important` for `.starci-core-surface-label`
+                                          * and `.starci-core-surface` but not for
+                                          * `.starci-core-surface-card`, so the vendor inset survives
+                                          * on the root; `.starci-core-surface-accordion-card` is a
+                                          * plain section and has none. The fix is that missing reset
+                                          * in `packages/grammar/src/common/styles.css`. Nothing is
+                                          * padded here to hide it: an app-owned inset on either card
+                                          * would be APP_OVERRIDE.
+                                          */}
                                         <SurfaceCard composition={"joined"}>
                                             <div className={proBenefitIntroClassName}>
                                                 <Text size={"sm"} tone={"muted"}>{labels.benefitsDescription}</Text>
