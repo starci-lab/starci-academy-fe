@@ -41,6 +41,7 @@ export const proBenefitListClassName = cn(
 export const proBenefitClassName = cn(
     "flex",
     "min-w-0",
+    "items-start",
     "gap-3",
     "border-b",
     "border-separator",
@@ -49,8 +50,8 @@ export const proBenefitClassName = cn(
     "sm:[&:nth-last-child(-n+2)]:border-b-0",
     "sm:[&:nth-child(odd)]:border-r",
 )
-/** Stable leading marker alignment inside an outcome row. */
-export const proBenefitMarkClassName = cn("mt-0.5", "size-5", "shrink-0", "text-accent-soft-foreground")
+/** App-owned cell holding the Grammar mark against the first line of the outcome copy. */
+export const proBenefitMarkClassName = cn("flex", "shrink-0", "text-accent-soft-foreground")
 /** Title and explanation stack for one outcome. */
 export const proBenefitCopyClassName = cn("flex", "min-w-0", "flex-col", "gap-1")
 /** One Grammar-owned joined disclosure surface. */
@@ -68,7 +69,7 @@ export const proPlanDetailsClassName = cn(
     "flex",
     "min-w-0",
     "flex-col",
-    "gap-5",
+    "gap-4",
     "px-4",
     "pt-4",
     "pb-4",

@@ -223,7 +223,7 @@ export const ProSubscriptionBlockBase = (props: ProSubscriptionBlockProps) => {
                                             <ul className={proBenefitListClassName}>
                                                 {labels.benefits.map((benefit) => (
                                                     <li className={proBenefitClassName} key={benefit.title}>
-                                                        <IncludedMark className={proBenefitMarkClassName} />
+                                                        <span className={proBenefitMarkClassName}><IncludedMark /></span>
                                                         <div className={proBenefitCopyClassName}>
                                                             <Text size={"sm"} weight={"semibold"}>{benefit.title}</Text>
                                                             <Text size={"xs"} tone={"muted"}>{benefit.description}</Text>
