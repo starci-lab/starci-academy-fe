@@ -1195,10 +1195,17 @@
     }
 
     @container starci-core-primary-rail (max-width: 32rem) {
+        /*
+         * Collapsed to a column, the header stays a region boundary, not a tighter internal
+         * rhythm - `PrimaryRailLayout` and `WorkspaceShell` both hold `--starci-core-region-gap`
+         * across every collapse tier and only ever change track/area, never the gap itself. The
+         * stamped `data-contract="GAP-5"` on this root must stay true here too, so this rule may
+         * change direction and alignment but not the gap value.
+         */
         .starci-core-section-header {
             align-items: flex-start;
             flex-direction: column;
-            gap: 0.75rem;
+            gap: var(--starci-core-region-gap, 1.5rem);
         }
     }
 

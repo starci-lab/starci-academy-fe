@@ -4,7 +4,7 @@ import { resolve } from "node:path"
 import { createElement, type ReactElement } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
-import { unbackedClaims } from "../__test__/styleClaims.js"
+import { cssRules, unbackedClaims } from "../__test__/styleClaims.js"
 import { MarkdownArticle, FencedCodeBlock, MarkdownTableFrame } from "./branch/MarkdownArticle/index.js"
 import { Rail } from "./branch/Rail/index.js"
 import { Subnav } from "./branch/Subnav/index.js"
@@ -22,6 +22,7 @@ import { IconButton } from "./primitive/IconButton/index.js"
 import { IconTile } from "./primitive/IconTile/index.js"
 import { Input } from "./primitive/Input/index.js"
 import { Progress } from "./primitive/Progress/index.js"
+import { SectionHeader } from "./primitive/SectionHeader/index.js"
 import { Text } from "./primitive/Text/index.js"
 import { TextAction } from "./primitive/TextAction/index.js"
 
@@ -80,6 +81,7 @@ const CONVERTED_OBJECTS: ReadonlyArray<readonly [string, () => ReactElement]> = 
         />
     )],
     ["PrimaryRailLayout", () => <PrimaryRailLayout primary={<p>Primary</p>} rail={<p>Rail</p>} collapsedOrder="rail-first" />],
+    ["SectionHeader", () => <SectionHeader title="Section" description="Detail" action={<span>Action</span>} />],
     ["Divider", () => <Divider label="or" />],
     ["Icon", () => <Icon source={Glyph} usage="leading" />],
     ["IconButton", () => <IconButton source={Glyph} label="Collapse" />],
@@ -188,6 +190,39 @@ describe("Shipped Core geometry replaces the utilities it used to spell", () => 
 
     it("lifts the rail above the primary content once the container collapses", () => {
         expect(css).toMatch(/@container starci-core-primary-rail \(max-width: 56rem\)[\s\S]*?data-grammar-layout-collapsed-order="rail-first"\] \.starci-core-rail-region\s*\{[\s\S]*?order: -1;/)
+    })
+
+    /**
+     * `SectionHeader` stamps `data-contract="GAP-5"` on its root, but `declarationsFor` unions
+     * declarations across every rule that targets the class - it would call the claim backed as
+     * long as ANY rule resolves to 1.5rem, even if a narrower `@container` rule quietly overrides
+     * it to something else. jsdom never evaluates a container query, so the union check is blind to
+     * that override; only reading every rule that targets `.starci-core-section-header` catches it.
+     *
+     * `PrimaryRailLayout` and `WorkspaceShell` are the other two GAP-5 region roots in the family,
+     * and both hold `var(--starci-core-region-gap)` across every collapse tier - only the grid
+     * columns/areas change underneath them. A collapsed `SectionHeader` follows the same rule: it
+     * may stack to a column, but it stays a region boundary, so its gap must stay GAP-5 too.
+     */
+    it("keeps the SectionHeader root at GAP-5 in every state, including the narrow-container collapse", () => {
+        const rulesForRoot = cssRules(css).filter((rule) =>
+            rule.selector.split(",").some((part) => part.trim().split(/\s+/).at(-1) === ".starci-core-section-header"),
+        )
+        // The default rule plus the `@container starci-core-primary-rail (max-width: 32rem)` collapse rule.
+        expect(rulesForRoot.length).toBeGreaterThanOrEqual(2)
+
+        for (const rule of rulesForRoot) {
+            const gapDeclarations = rule.body
+                .split(";")
+                .map((declaration) => declaration.split(":"))
+                .filter((parts) => parts.length >= 2 && parts[0]?.trim() === "gap")
+            for (const [, ...rest] of gapDeclarations) {
+                expect(
+                    rest.join(":").trim(),
+                    `.starci-core-section-header gap must resolve to GAP-5 (1.5rem) in every rule, including narrow collapse: { ${rule.body.trim()} }`,
+                ).toMatch(/1\.5rem/)
+            }
+        }
     })
 
     it("renders no navigation landmark when the bar has no destinations", () => {

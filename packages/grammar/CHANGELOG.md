@@ -1,5 +1,39 @@
 # Changelog
 
+## 0.4.8
+
+Fix only. A live audit found `SectionHeader` stamping `data-contract="GAP-5"` on its root while the
+narrow `@container starci-core-primary-rail (max-width: 32rem)` collapse rule hard-coded `gap: 0.75rem`
+underneath it - true at the default width, false the moment the header's own container collapses.
+
+### The collapsed header keeps the region gap instead of inventing a tighter one
+
+- `.starci-core-section-header`'s narrow-container rule now sets `gap: var(--starci-core-region-gap,
+  1.5rem)` instead of the literal `0.75rem`. The direction and alignment still change (`flex-direction:
+  column; align-items: flex-start`) - only the gap value was wrong.
+- The family already answers this question twice: `PrimaryRailLayout` and `WorkspaceShell` are the
+  other two GAP-5 region roots, and both hold `var(--starci-core-region-gap)` across every collapse
+  tier they define - only the grid columns/areas change underneath them, never the gap. A collapsed
+  `SectionHeader` follows the same law: stacking to a column is a reading-order change, not a demotion
+  from a region boundary to a tighter internal rhythm, so its claim stays GAP-5 in every state.
+- This is different from `.starci-core-rail-frame`'s and `.starci-core-static-row`'s own narrow-container
+  rules, which genuinely relax to a named compact custom property (`--starci-core-rail-gap-compact`,
+  `--starci-core-row-gap-compact`) - those are component-internal frames with no `data-contract` GAP
+  claim of their own to keep honest, not region roots.
+
+### A spec that a container query can actually catch
+
+- `shipped-claims.spec.tsx`'s existing `unbackedClaims` check unions declarations across every rule
+  that targets a class, so it would have called `GAP-5` backed as long as ANY rule - even one buried
+  inside a narrow `@container` query jsdom never evaluates - resolved to 1.5rem. It could not have
+  caught this regression, and would not catch a repeat of it.
+- Added a dedicated case that reads every stylesheet rule whose subject is
+  `.starci-core-section-header` (via `cssRules`, not `unbackedClaims`) and asserts each one's `gap`
+  declaration, if it has one, resolves to `1.5rem` - covering the narrow-container rule directly
+  instead of trusting the union.
+- `SectionHeader` was also added to the general `CONVERTED_OBJECTS` claims table alongside the other
+  Core primitives.
+
 ## 0.4.7
 
 Fixes only. 0.4.6 raised the band's action and compact-navigation slots to the 44px touch floor and
