@@ -8,6 +8,7 @@ import {
     readinessCardClassName,
     readinessFooterClassName,
     readinessHeadlineClassName,
+    readinessMetricRowClassName,
     readinessMetricsClassName,
     readinessSeparatorClassName,
 } from "./classNames"
@@ -52,12 +53,13 @@ export const JobReadinessWidgetBase = (props: JobReadinessWidgetProps) => {
                 <div aria-hidden className={readinessSeparatorClassName} />
                 <div className={readinessMetricsClassName} data-part="readiness-metrics">
                     {metrics.map((metric) => (
-                        <LabelledProgressRow
-                            key={metric.id}
-                            props={{ id: metric.id, title: metric.label, percent: metric.score, percentText: metric.scoreLabel }}
-                            titleWeight="normal"
-                            isLoading={loading}
-                        />
+                        <div className={readinessMetricRowClassName} key={metric.id}>
+                            <LabelledProgressRow
+                                props={{ id: metric.id, title: metric.label, percent: metric.score, percentText: metric.scoreLabel }}
+                                titleWeight="normal"
+                                isLoading={loading}
+                            />
+                        </div>
                     ))}
                 </div>
                 {action === null ? null : (

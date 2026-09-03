@@ -3,8 +3,11 @@ import {
     dashboardBandSeparatorClassName,
     dashboardCardFooterClassName,
     dashboardFlushCardClassName,
+    dashboardFlushListEntryClassName,
     dashboardNeutralBandTopClassName,
 } from "../classNames"
+
+export { dashboardFlushListEntryClassName as readinessMetricRowClassName }
 
 /** Stack readiness bands without inserting space around their dividers. */
 export const readinessCardClassName = cn(dashboardFlushCardClassName)
@@ -25,14 +28,11 @@ export const readinessHeadlineClassName = cn(
     "sm:justify-between",
 )
 
-/** Pillars are peer measures in one full-bleed separated stack. */
+/** Pillars are peer measures in one full-bleed separated stack; each row wraps in readinessMetricRowClassName. */
 export const readinessMetricsClassName = cn(
     "grid",
     "min-w-0",
     "grid-cols-1",
     "divide-y",
     "divide-separator",
-    "[&>div]:px-4",
-    "[&>div]:py-3",
-    "[&>div:last-child]:pb-4",
 )
