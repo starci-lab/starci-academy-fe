@@ -4,6 +4,7 @@ import type { ReactNode } from "react"
 export type ButtonVariant = "primary" | "secondary" | "tertiary" | "outline" | "ghost"
 export type ButtonSize = "sm" | "md" | "lg"
 export type ButtonType = "button" | "submit" | "reset"
+export type ButtonWidth = "content" | "fill"
 
 type ButtonBase = {
     /** The visible action label. It remains present while the action is pending. */
@@ -19,6 +20,15 @@ type ButtonBase = {
     readonly isSkeleton?: boolean
     /** Pending belongs to the action that started the work and blocks duplicate presses. */
     readonly isPending?: boolean
+    /**
+     * How the action takes its inline space: to its own content, or filling its parent.
+     *
+     * `fill` forwards the vendor's own full-width variant and adds the part the vendor does not
+     * own - a label that WRAPS onto a second line instead of overflowing, with the control height
+     * released to follow it - from `.starci-core-button[data-width="fill"]` in the packaged
+     * stylesheet. An app never has to reach through the boundary with a descendant width utility.
+     */
+    readonly width?: ButtonWidth
 }
 
 /**
@@ -77,6 +87,7 @@ export const Button = (props: ButtonProps) => {
         isDisabled = false,
         isSkeleton = false,
         isPending = false,
+        width = "content",
     } = props
     const unavailable = isDisabled || isPending || isSkeleton
     const content = (
@@ -100,7 +111,9 @@ export const Button = (props: ButtonProps) => {
                 aria-disabled={unavailable || undefined}
                 aria-busy={isPending || undefined}
                 aria-hidden={isSkeleton || undefined}
-                className={buttonVariants({ variant: VARIANTS[variant], size: SIZES[size], className: isSkeleton ? SKELETON_CLASS_NAME : undefined })}
+                data-width={width}
+                data-contract={width === "fill" ? "MEASURE-2" : undefined}
+                className={buttonVariants({ variant: VARIANTS[variant], size: SIZES[size], fullWidth: width === "fill", className: isSkeleton ? `starci-core-button ${SKELETON_CLASS_NAME}` : "starci-core-button" })}
                 {...(unavailable ? {} : { href })}
                 {...(target === undefined ? {} : { target })}
                 {...(rel === undefined ? target === "_blank" ? { rel: "noopener noreferrer" } : {} : { rel })}
@@ -125,7 +138,10 @@ export const Button = (props: ButtonProps) => {
             size={SIZES[size]}
             isDisabled={unavailable}
             isPending={isPending}
-            {...(isSkeleton ? { className: SKELETON_CLASS_NAME } : {})}
+            data-width={width}
+            data-contract={width === "fill" ? "MEASURE-2" : undefined}
+            fullWidth={width === "fill"}
+            className={isSkeleton ? `starci-core-button ${SKELETON_CLASS_NAME}` : "starci-core-button"}
             {...(unavailable || onPress === undefined ? {} : { onPress })}
         >
             {content}

@@ -86,10 +86,14 @@ export const SurfaceCard = (props: SurfaceCardProps) => {
     const accessibleName = ariaLabel ?? label
     const contained = isScrollable || scroll === "contained"
 
+    /*
+     * The inset is drawn on the CONTENT REGION, not on the surface shell, so its claim rides the
+     * element whose shipped rule backs it. The shell keeps what it actually paints: its ground, its
+     * clipping and its boundary.
+     */
     const compositionContract = composition === "joined" ? "GAP-0 PADDING-0" : "PADDING-4"
     const contentContract = [
         frame === "frameless" ? "SURFACE-1" : "SURFACE-2",
-        compositionContract,
         frame === "frameless" ? "OVERFLOW-1 OVERFLOW-2" : "OVERFLOW-2",
         depth === "nested" ? "BOUNDARY-5" : "BOUNDARY-6",
     ].join(" ")
@@ -129,6 +133,7 @@ export const SurfaceCard = (props: SurfaceCardProps) => {
         >
             <VerticalScrollRegion
                 className={getSurfaceContentClassName(measure, contained)}
+                data-contract={compositionContract}
                 data-grammar-surface-content="true"
                 data-grammar-surface-composition={composition}
                 isScrollable={contained}

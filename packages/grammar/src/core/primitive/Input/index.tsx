@@ -8,7 +8,6 @@ import {
     Label as HeroLabel,
     Skeleton as HeroSkeleton,
     TextField as HeroTextField,
-    cn,
 } from "@heroui/react"
 
 export type InputKind = "email" | "password" | "newPassword" | "code" | "text"
@@ -77,9 +76,9 @@ export const Input = ({
 
     if (isSkeleton) {
         return (
-            <div data-tier="atom" data-component="Input" data-state="skeleton" data-contract="GAP-2" className="grid gap-2">
-                <HeroSkeleton className="h-4 w-1/3 rounded-md" />
-                <HeroSkeleton className="h-10 w-full rounded-field" />
+            <div data-tier="atom" data-component="Input" data-state="skeleton" data-contract="GAP-2" className="starci-core-input">
+                <HeroSkeleton className="starci-core-input-resting-label" />
+                <HeroSkeleton className="starci-core-input-resting-control" />
             </div>
         )
     }
@@ -94,11 +93,11 @@ export const Input = ({
             isDisabled={isDisabled}
             isRequired={isRequired}
             data-contract="GAP-2"
-            className="grid gap-2"
+            className="starci-core-input"
         >
             <HeroLabel>{label}</HeroLabel>
             {hint == null ? null : <HeroDescription>{hint}</HeroDescription>}
-            <div className="relative flex items-center">
+            <div className="starci-core-input-control" data-reveal={isSecret && toggleLabel !== undefined ? "true" : "false"}>
                 <HeroInput
                     id={id}
                     name={name}
@@ -110,7 +109,7 @@ export const Input = ({
                         ? defaultValue === undefined ? {} : { defaultValue }
                         : { value })}
                     fullWidth
-                    className={cn(isSecret && toggleLabel !== undefined ? "pr-9" : undefined) ?? ""}
+                    className="starci-core-input-field"
                     onChange={(event) => onValueChange?.(event.target.value)}
                 />
                 {!isSecret || toggleLabel === undefined ? null : (
@@ -119,10 +118,10 @@ export const Input = ({
                         aria-label={toggleLabel}
                         disabled={isDisabled}
                         data-contract="TONE-2"
-                        className="text-muted absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer disabled:cursor-default [&_svg]:size-4"
+                        className="starci-core-input-reveal"
                         onClick={() => setIsRevealed((current) => !current)}
                     >
-                        {ToggleIcon === undefined ? <span data-contract="FONT-1" className="text-xs">{toggleLabel}</span> : <ToggleIcon className="size-4" />}
+                        {ToggleIcon === undefined ? <span data-contract="FONT-1" className="starci-core-input-reveal-label">{toggleLabel}</span> : <ToggleIcon className="starci-core-input-reveal-icon" />}
                     </button>
                 )}
             </div>

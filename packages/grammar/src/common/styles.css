@@ -390,6 +390,14 @@
     .starci-core-label {
         min-width: 0;
         margin: 0;
+        font-size: 0.875rem;
+        font-weight: 600;
+        line-height: 1.25rem;
+    }
+
+    .starci-core-label[data-grammar-label-depth="nested"] {
+        font-size: 0.75rem;
+        line-height: 1rem;
     }
 
     .starci-core-tooltip {
@@ -600,6 +608,7 @@
     .starci-core-leading-number {
         display: inline-block;
         flex: none;
+        font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
         min-width: 1.25rem;
         color: var(--muted, GrayText);
         font-size: 0.875rem;
@@ -622,11 +631,19 @@
     }
 
     .starci-core-owned-collection {
+        width: 100%;
         min-width: 0;
     }
 
+    /* A verdict list is flush inside its shell; the shell already owns the corner. */
+    .starci-core-owned-collection[data-grammar-collection="verdict"] {
+        border-radius: 0 !important;
+    }
+
     .starci-core-surface-footer {
+        display: flex;
         min-width: 0;
+        align-items: center;
     }
 
     .starci-core-tabs-frame,
@@ -721,8 +738,27 @@
     }
 
     .starci-core-accordion-row {
+        width: 100% !important;
+        min-width: 0;
+    }
+
+    /* HeroUI's `Accordion` root sizes itself; the Grammar shell owns the measure. */
+    .starci-core-accordion-root {
+        width: 100% !important;
+        min-width: 0;
+    }
+
+    .starci-core-accordion-scroll-region {
         width: 100%;
         min-width: 0;
+    }
+
+    /* Expanded content starts flush beneath its trigger, keeping the bottom and inline insets. */
+    .starci-core-accordion-body {
+        width: 100% !important;
+        min-width: 0;
+        padding: 0 1rem 0.75rem 1.5rem !important;
+        color: var(--foreground, var(--starci-core-foreground, CanvasText));
     }
 
     .starci-core-accordion-row + .starci-core-accordion-row {
@@ -730,22 +766,22 @@
     }
 
     .starci-core-accordion-heading {
-        margin: 0;
+        margin: 0 !important;
     }
 
     .starci-core-accordion-trigger {
         display: block;
-        width: 100%;
+        width: 100% !important;
         min-width: 0;
         min-height: 44px;
-        padding: var(--starci-core-row-inset, 1rem);
+        padding: var(--starci-core-row-inset, 1rem) !important;
         border: 0;
         background: transparent;
         box-shadow: none;
         color: inherit;
         cursor: pointer;
         font: inherit;
-        text-align: left;
+        text-align: left !important;
         transform: none;
         transition: none;
     }
@@ -776,10 +812,11 @@
         }
     }
 
+    /* The animated vendor region owns no inset, so a closed panel collapses to zero height. */
     .starci-core-accordion-panel {
-        width: 100%;
+        width: 100% !important;
         min-width: 0;
-        padding: 0 var(--starci-core-row-inset, 1rem) var(--starci-core-row-inset, 1rem);
+        padding: 0 !important;
     }
 
     .starci-core-markdown-article {
@@ -875,6 +912,7 @@
         width: 100%;
         min-width: 0;
         margin: 0 0 1rem;
+        overflow: auto;
     }
 
     .starci-core-fenced-code-header {
@@ -1019,9 +1057,17 @@
     }
 
     .starci-core-rail-body {
+        min-width: 0;
         min-height: 0;
+        flex: 1 1 0%;
         overflow-y: auto;
         overscroll-behavior: contain;
+    }
+
+    /* Grammar-owned content inset, selected by the attribute the branch already emits. */
+    .starci-core-rail-body[data-grammar-rail-inset="content"] {
+        padding-inline: 0.75rem;
+        padding-block: 1.5rem;
     }
 
     .starci-core-rail[data-grammar-rail-height="fill"],
@@ -1041,6 +1087,8 @@
     }
 
     .starci-core-rail-footer {
+        display: flex;
+        align-items: center;
         flex: none;
     }
 
@@ -1069,6 +1117,11 @@
     @container starci-core-primary-rail (max-width: 56rem) {
         .starci-core-primary-rail-layout {
             grid-template-columns: minmax(0, 1fr);
+        }
+
+        /* Collapsed, the rail may lead - a filter or summary a reader needs before the content. */
+        .starci-core-primary-rail-layout[data-grammar-layout-collapsed-order="rail-first"] .starci-core-rail-region {
+            order: -1;
         }
     }
 
@@ -1133,6 +1186,14 @@
 
     .starci-core-navigation-feature-nav-navigation {
         display: none !important;
+    }
+
+    /*
+     * A bar with no primary destinations renders no `nav` at all, so the grid loses a track rather
+     * than keeping an empty one: identity leads, the remaining row belongs to what is still there.
+     */
+    .starci-core-navigation-feature-nav[data-grammar-navigation-feature-nav-destinations="absent"] .starci-core-navigation-feature-nav-primary {
+        grid-template-columns: minmax(0, 1fr) auto !important;
     }
 
     .starci-core-navigation-feature-nav-compact-navigation {
@@ -1232,20 +1293,35 @@
         white-space: nowrap;
     }
 
+    /*
+     * The toggle is a HeroUI `Button`, whose own fill, corner and shadow live in the vendor's
+     * `components` layer - declared after `starci-grammar-common`, so it wins every normal
+     * declaration here regardless of specificity. These four are the ones the utilities used to
+     * carry, so they are the ones that have to be important.
+     */
     .starci-core-subnav-toggle {
         display: inline-flex;
         width: 2.75rem;
         height: 2.75rem;
         align-items: center;
         justify-content: center;
-        border-radius: 0;
-        background: transparent;
-        box-shadow: none;
+        border-radius: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
         color: inherit;
         cursor: pointer;
     }
 
+    .starci-core-subnav-toggle:hover,
+    .starci-core-subnav-toggle[data-hovered="true"] {
+        background: transparent !important;
+    }
+
     @media (min-width: 48rem) {
+        .starci-core-navigation-feature-nav[data-grammar-navigation-feature-nav-destinations="absent"] .starci-core-navigation-feature-nav-primary {
+            grid-template-columns: auto minmax(0, 1fr) !important;
+        }
+
         .starci-core-navigation-feature-nav-primary {
             grid-template-columns: auto minmax(0, 1fr) auto !important;
         }
@@ -1815,5 +1891,462 @@
             scroll-behavior: auto;
         }
     }
+
+    /*
+     * ============================================================================================
+     * SHIPPED OBJECT GEOMETRY (0.4.4)
+     * ============================================================================================
+     *
+     * Everything below used to be a Tailwind utility string inside a Grammar component or its
+     * `classNames.ts`. A class only exists if the CONSUMER's Tailwind build scanned the file that
+     * spells it, and almost nobody scans `node_modules/@starci/grammar` - so those objects arrived
+     * in a consuming app with no box at all. The utilities are gone; the box lives here, selected
+     * by the data attributes each component already emits.
+     *
+     * `!important` appears ONLY where the class lands on a HeroUI part - `Card`, `Accordion`,
+     * `Button`, `TextField`, `Input`, `Skeleton`, `ProgressBar`, `ScrollShadow` - whose own rules
+     * live in the vendor's `components` layer. That layer is declared AFTER `starci-grammar-common`
+     * and therefore wins every normal declaration regardless of specificity; an important
+     * declaration in the earlier layer is the only thing that reproduces what the utilities did.
+     * Corners come from the theme radius ramp (`--radius-*`), never from a HeroUI v2 radius name
+     * such as `rounded-large`, which emits nothing anywhere.
+     */
+
+    /* --- Surface card: the card, its label row and its content shell are HeroUI `Card` parts. --- */
+    .starci-core-surface-card {
+        display: flex !important;
+        width: 100% !important;
+        min-width: 0;
+        flex-direction: column !important;
+        gap: var(--starci-core-section-gap, 0.75rem) !important;
+    }
+
+    .starci-core-surface-label {
+        padding: 0 !important;
+    }
+
+    .starci-core-surface {
+        padding: 0 !important;
+    }
+
+    .starci-core-surface-highlight {
+        position: relative;
+        height: 100%;
+    }
+
+    /* --- Surface list --- */
+    .starci-core-surface-fact {
+        color: var(--muted, var(--starci-core-muted, GrayText));
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+    }
+
+    .starci-core-surface-fact[data-grammar-surface-depth="nested"] {
+        font-size: 0.75rem;
+        line-height: 1rem;
+    }
+
+    /* --- Empty notice --- */
+    .starci-core-empty-notice {
+        display: flex;
+        min-width: 0;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        text-align: center;
+    }
+
+    /* --- Divider --- */
+    .starci-core-divider {
+        display: flex;
+        min-width: 0;
+        flex-direction: row;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .starci-core-divider-rule {
+        height: 1px;
+        flex: 1 1 0%;
+        background: var(--border, var(--separator, var(--starci-core-separator, GrayText)));
+    }
+
+    /* --- Icon: an app-owned SVG has no intrinsic box, so usage sizing must ship. --- */
+    .starci-core-icon {
+        flex: none;
+    }
+
+    .starci-core-icon[data-usage="heading"] {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+
+    .starci-core-icon[data-usage="leading"] {
+        width: 1.25rem;
+        height: 1.25rem;
+    }
+
+    .starci-core-icon[data-usage="chip"] {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    .starci-core-icon-skeleton {
+        display: inline-block;
+        width: 1.25rem !important;
+        height: 1.25rem !important;
+        flex: none;
+        border-radius: var(--starci-core-pill-radius, 999px) !important;
+    }
+
+    /* --- Icon button: a HeroUI `Button` worn as a circle. --- */
+    .starci-core-icon-button {
+        border-radius: var(--starci-core-pill-radius, 999px) !important;
+    }
+
+    /* --- Icon tile --- */
+    .starci-core-icon-tile {
+        display: inline-flex;
+        flex: none;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .starci-core-icon-tile[data-size="sm"] {
+        width: 2rem;
+        height: 2rem;
+        border-radius: var(--radius-lg, var(--radius, 0.5rem));
+    }
+
+    .starci-core-icon-tile[data-size="md"] {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: var(--radius-xl, calc(var(--radius, 0.5rem) * 1.5));
+    }
+
+    /* A tone pair is painted only when the plate draws its own glyph. */
+    .starci-core-icon-tile[data-tone="neutral"][data-artwork="false"][data-loading="false"] {
+        background: var(--default, var(--starci-core-surface-secondary, Canvas));
+        color: var(--muted, var(--starci-core-muted, GrayText));
+    }
+
+    .starci-core-icon-tile[data-tone="accent"][data-artwork="false"][data-loading="false"] {
+        background: var(--accent-soft, var(--starci-core-accent, Highlight));
+        color: var(--accent-soft-foreground, var(--starci-core-accent, HighlightText));
+    }
+
+    .starci-core-icon-tile[data-tone="success"][data-artwork="false"][data-loading="false"] {
+        background: var(--success-soft, var(--success, Canvas));
+        color: var(--success-soft-foreground, var(--success-foreground, CanvasText));
+    }
+
+    .starci-core-icon-tile[data-tone="warning"][data-artwork="false"][data-loading="false"] {
+        background: var(--warning-soft, var(--warning, Canvas));
+        color: var(--warning-soft-foreground, var(--warning-foreground, CanvasText));
+    }
+
+    .starci-core-icon-tile[data-tone="danger"][data-artwork="false"][data-loading="false"] {
+        background: var(--danger-soft, var(--danger, Canvas));
+        color: var(--danger-soft-foreground, var(--danger-foreground, CanvasText));
+    }
+
+    /* --- Progress: a HeroUI `ProgressBar`, and a resting bar of the same measure. --- */
+    .starci-core-progress {
+        width: 100% !important;
+    }
+
+    .starci-core-progress[data-loading="true"] {
+        display: block;
+        height: 0.5rem !important;
+    }
+
+    /*
+     * --- Input ---
+     *
+     * The reveal toggle sits on top of the control, so the field RESERVES room for it rather than
+     * letting the value slide underneath. That inset used to be spelled `pr-9`, a utility no app in
+     * this repository writes, so it was generated nowhere and the toggle overlapped the text at
+     * every width.
+     */
+    .starci-core-input {
+        display: grid !important;
+        min-width: 0;
+        gap: 0.5rem !important;
+    }
+
+    .starci-core-input-control {
+        position: relative;
+        display: flex;
+        min-width: 0;
+        align-items: center;
+    }
+
+    .starci-core-input-control[data-reveal="true"] .starci-core-input-field {
+        padding-inline-end: 2.75rem !important;
+    }
+
+    .starci-core-input-reveal {
+        position: absolute;
+        inset-inline-end: 0.5rem;
+        top: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transform: translateY(-50%);
+        border: 0;
+        background: transparent;
+        color: var(--muted, var(--starci-core-muted, GrayText));
+        cursor: pointer;
+    }
+
+    .starci-core-input-reveal:disabled {
+        cursor: default;
+    }
+
+    .starci-core-input-reveal :where(svg),
+    .starci-core-input-reveal-icon {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    .starci-core-input-reveal-label {
+        font-size: 0.75rem;
+    }
+
+    .starci-core-input-resting-label {
+        width: 33.333333% !important;
+        height: 1rem !important;
+        border-radius: var(--radius-md, calc(var(--radius, 0.5rem) * 0.75)) !important;
+    }
+
+    .starci-core-input-resting-control {
+        width: 100% !important;
+        height: 2.5rem !important;
+        border-radius: var(--field-radius, calc(var(--radius, 0.5rem) * 1.5)) !important;
+    }
+
+    /* --- Text: one resolved line of copy, drawn from the attributes it already emits. --- */
+    .starci-core-text {
+        color: var(--foreground, var(--starci-core-foreground, CanvasText));
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5rem;
+    }
+
+    .starci-core-text[data-size="xs"] {
+        font-size: 0.75rem;
+        line-height: 1rem;
+    }
+
+    .starci-core-text[data-size="sm"] {
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+    }
+
+    .starci-core-text[data-size="metric-lead"] {
+        font-size: 1.875rem;
+        line-height: 2.25rem;
+    }
+
+    .starci-core-text[data-tone="muted"] {
+        color: var(--muted, var(--starci-core-muted, GrayText));
+    }
+
+    .starci-core-text[data-tone="accent"] {
+        color: var(--accent-soft-foreground, var(--starci-core-accent, HighlightText));
+    }
+
+    .starci-core-text[data-weight="medium"] { font-weight: 500; }
+    .starci-core-text[data-weight="semibold"] { font-weight: 600; }
+
+    .starci-core-text[data-start-content="true"] {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .starci-core-text[data-superseded="true"] {
+        text-decoration-line: line-through;
+    }
+
+    :where(.group)[data-selected="true"] .starci-core-text[data-parent-emphasis="accent-soft"] {
+        color: var(--accent-soft-foreground, var(--starci-core-accent, HighlightText));
+    }
+
+    /* Authored overflow behaviour: wrap is the resting answer, the other two are opted into. */
+    .starci-core-text[data-overflow="wrap"] {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .starci-core-text[data-overflow="truncate"] {
+        display: block;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .starci-core-text[data-overflow="clamp-2"] {
+        display: -webkit-box;
+        overflow: hidden;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+    }
+
+    /* The resting line keeps its size geometry and hides its copy; no tone is visible to claim. */
+    .starci-core-text[data-loading="true"] {
+        display: inline-block;
+        max-width: 100%;
+        border-radius: var(--radius, 0.25rem);
+        color: transparent;
+        user-select: none;
+    }
+
+    .starci-core-text[data-loading="true"][data-size="xs"] { width: 2.5rem; }
+    .starci-core-text[data-loading="true"][data-size="sm"] { width: 3rem; }
+    .starci-core-text[data-loading="true"][data-size="md"] { width: 10rem; }
+    .starci-core-text[data-loading="true"][data-size="metric-lead"] { width: 10rem; }
+
+    /* --- Text action: one recipe, eight appearances, selected by data attributes. --- */
+    .starci-core-text-action {
+        display: inline-flex;
+        width: fit-content;
+        min-width: 0;
+        flex: none;
+        align-items: center;
+        gap: 0.5rem;
+        outline: none;
+        text-underline-offset: 4px;
+    }
+
+    .starci-core-text-action:disabled {
+        opacity: 0.5;
+        cursor: default;
+    }
+
+    .starci-core-text-action[data-size="xs"] { font-size: 0.75rem; line-height: 1rem; }
+    .starci-core-text-action[data-size="sm"] { font-size: 0.875rem; line-height: 1.25rem; }
+    .starci-core-text-action[data-size="md"] { font-size: 1rem; line-height: 1.5rem; }
+
+    .starci-core-text-action[data-appearance="inline"] {
+        color: var(--foreground, var(--starci-core-foreground, CanvasText));
+        font-weight: 500;
+    }
+
+    .starci-core-text-action[data-appearance="muted"] {
+        color: var(--muted, var(--starci-core-muted, GrayText));
+        font-weight: 500;
+    }
+
+    .starci-core-text-action[data-appearance="inline"]:hover,
+    .starci-core-text-action[data-appearance="inline"]:focus-visible,
+    .starci-core-text-action[data-appearance="muted"]:hover,
+    .starci-core-text-action[data-appearance="muted"]:focus-visible,
+    .starci-core-text-action[data-appearance="disclosure"]:hover,
+    .starci-core-text-action[data-appearance="disclosure"]:focus-visible {
+        text-decoration-line: underline;
+    }
+
+    .starci-core-text-action[data-appearance="choice"] {
+        border-radius: var(--starci-core-pill-radius, 999px);
+        padding: 0.25rem 0.5rem;
+        color: var(--foreground, var(--starci-core-foreground, CanvasText));
+        font-weight: 500;
+    }
+
+    .starci-core-text-action[data-appearance="route"] {
+        border-radius: var(--starci-core-pill-radius, 999px);
+        padding: 0.5rem 0.75rem;
+        color: var(--muted, var(--starci-core-muted, GrayText));
+    }
+
+    .starci-core-text-action[data-appearance="section"] {
+        border-radius: var(--radius-xl, calc(var(--radius, 0.5rem) * 1.5));
+        padding: 0.5rem 0.75rem;
+        color: var(--foreground, var(--starci-core-foreground, CanvasText));
+    }
+
+    .starci-core-text-action[data-appearance="section"]:hover,
+    .starci-core-text-action[data-appearance="section"]:focus-visible {
+        background: var(--default, var(--starci-core-surface-secondary, Canvas));
+    }
+
+    .starci-core-text-action[data-appearance="tab"] {
+        border-block-end: 2px solid transparent;
+        padding-block: 0.75rem;
+        color: var(--muted, var(--starci-core-muted, GrayText));
+    }
+
+    .starci-core-text-action[data-appearance="tab"][data-current="true"] {
+        border-block-end-color: var(--accent, var(--starci-core-accent, Highlight));
+        color: var(--accent, var(--starci-core-accent, Highlight));
+        font-weight: 600;
+    }
+
+    .starci-core-text-action[data-appearance="choice"][data-current="true"],
+    .starci-core-text-action[data-appearance="route"][data-current="true"],
+    .starci-core-text-action[data-appearance="section"][data-current="true"] {
+        background: var(--accent-soft, var(--starci-core-accent, Highlight));
+        color: var(--accent-soft-foreground, var(--starci-core-accent, HighlightText));
+    }
+
+    .starci-core-text-action[data-appearance="route"][data-current="true"],
+    .starci-core-text-action[data-appearance="section"][data-current="true"] {
+        font-weight: 600;
+    }
+
+    .starci-core-text-action[data-appearance="disclosure"] {
+        color: var(--accent-soft-foreground, var(--starci-core-accent, HighlightText));
+        font-weight: 600;
+    }
+
+    .starci-core-text-action[data-appearance="plain"] {
+        color: var(--foreground, var(--starci-core-foreground, CanvasText));
+        text-decoration-line: none;
+    }
+
+    .starci-core-text-action-resting {
+        display: inline-flex;
+        width: 4rem;
+        flex: none;
+        color: transparent;
+        user-select: none;
+    }
+
+    /*
+     * --- Button: full width ---
+     *
+     * A full-width action stretches to its parent and lets its label wrap onto a second line rather
+     * than overflow, so the vendor's fixed control height is released to the content.
+     */
+    .starci-core-button[data-width="fill"] {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        min-height: var(--starci-core-control-min-size, 2.75rem);
+        white-space: normal !important;
+    }
+
+    /* --- Chat workspace: the compact rail trigger's resting paint. --- */
+    .starci-core-chat-workspace-rail-trigger {
+        box-shadow: 0 1px 2px 0 color-mix(in srgb, CanvasText 8%, transparent);
+        outline: none;
+        transition: background-color var(--starci-core-motion-duration, 180ms) var(--starci-core-motion-easing, cubic-bezier(0.2, 0, 0, 1));
+    }
+
+    .starci-core-chat-workspace-rail-trigger:hover {
+        background: var(--default, var(--starci-core-surface-secondary, Canvas));
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .starci-core-chat-workspace-rail-trigger {
+            transition: none;
+        }
+    }
+
 }
 

@@ -17,7 +17,7 @@ describe("ProfileHeroBase", () => {
         expect(grid).toHaveClass("grid", "grid-cols-[auto_minmax(0,1fr)]", "gap-3")
         expect(screen.getByRole("button", { name: "Follow" }).parentElement).toHaveClass("grid", "min-w-0", "max-w-full", "w-full", "grid-cols-[minmax(0,1fr)_auto]", "gap-2")
         expect(screen.getByText("Ho Chi Minh City, Vietnam")).not.toHaveAttribute("data-slot", "base")
-        expect(screen.getByText("128 followers")).toHaveClass("font-normal")
+        expect(screen.getByText("128 followers")).toHaveAttribute("data-weight", "normal")
         const evidence = screen.getByText("Evidence highlights").parentElement
         expect(evidence).toHaveClass("col-span-full", "bg-accent-soft", "text-accent-soft-foreground", "@app-md:col-span-2")
         expect(screen.getByText("Evidence highlights").querySelector("svg")).not.toBeInTheDocument()

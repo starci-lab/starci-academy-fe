@@ -10,9 +10,9 @@ describe("Core IconTile", () => {
 
         expect(markup).toContain("data-component=\"IconTile\"")
         expect(markup).toContain("data-tone=\"success\"")
-        expect(markup).toContain("size-10")
-        expect(markup).toContain("bg-success-soft")
-        expect(markup).toContain("text-success-soft-foreground")
+        expect(markup).toContain("data-size=\"md\"")
+        expect(markup).toContain("starci-core-icon-tile")
+        expect(markup).toContain("data-artwork=\"false\"")
         expect(markup).toContain("data-usage=\"leading\"")
     })
 
@@ -31,7 +31,7 @@ describe("Core IconTile", () => {
 
         expect(markup).toContain("data-loading=\"true\"")
         expect(markup).toContain("aria-hidden=\"true\"")
-        expect(markup).toContain("size-10")
+        expect(markup).toContain("data-size=\"md\"")
         expect(markup).not.toContain("<svg")
     })
 })

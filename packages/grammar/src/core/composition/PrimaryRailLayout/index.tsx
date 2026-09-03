@@ -6,6 +6,12 @@ export type PrimaryRailLayoutProps = {
     readonly rail?: ReactNode
     readonly railWidth?: "compact" | "standard" | "wide"
     readonly align?: "start" | "stretch"
+    /**
+     * Reading order once the container collapses to one column. `primary-first` keeps the dominant
+     * content on top; `rail-first` lifts the rail above it, for a filter or summary a reader needs
+     * before the content itself. Shipped in the container query, so no consumer reorders by hand.
+     */
+    readonly collapsedOrder?: "primary-first" | "rail-first"
     readonly className?: string
 }
 
@@ -18,6 +24,7 @@ export const PrimaryRailLayout = ({
     rail,
     railWidth = "standard",
     align = "start",
+    collapsedOrder = "primary-first",
     className,
 }: PrimaryRailLayoutProps) => (
     <div className={cn("starci-core-primary-rail-container", className)}>
@@ -25,6 +32,7 @@ export const PrimaryRailLayout = ({
             className="starci-core-primary-rail-layout"
             data-contract="GAP-5"
             data-grammar-layout-align={align}
+            data-grammar-layout-collapsed-order={collapsedOrder}
             data-grammar-layout-rail={rail === undefined ? "absent" : "present"}
             data-grammar-layout-rail-width={railWidth}
         >

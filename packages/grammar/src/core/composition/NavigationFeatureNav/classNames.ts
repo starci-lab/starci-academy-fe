@@ -1,22 +1,18 @@
 import { cn } from "@heroui/react"
 
-export const navigationFeatureNavClassName = cn(
-    "starci-core-navigation-feature-nav",
-    "w-full",
-    "border-b",
-    "border-separator",
-    "bg-background",
-    "text-foreground",
-)
+/**
+ * Navigation geometry is SHIPPED: `.starci-core-navigation-feature-nav*` in
+ * `src/common/styles.css` owns the bar, its grid, the identity/navigation/actions tracks and the
+ * feature row. The sticky projection is selected there by
+ * `data-grammar-navigation-feature-nav-position`, which the component already emits.
+ */
 
-export const navigationFeatureNavStickyClassName = cn("sticky", "top-0", "z-50")
+export const navigationFeatureNavClassName = cn("starci-core-navigation-feature-nav") ?? "starci-core-navigation-feature-nav"
 
-export const navigationFeatureNavPrimaryClassName = cn(
-    "starci-core-navigation-feature-nav-primary",
-)
+export const navigationFeatureNavPrimaryClassName = cn("starci-core-navigation-feature-nav-primary") ?? "starci-core-navigation-feature-nav-primary"
 
-export const navigationFeatureNavIdentityClassName = cn("starci-core-navigation-feature-nav-identity", "min-w-0")
-export const navigationFeatureNavNavigationClassName = cn("starci-core-navigation-feature-nav-navigation", "min-w-0")
-export const navigationFeatureNavCompactNavigationClassName = cn("starci-core-navigation-feature-nav-compact-navigation", "min-w-0")
-export const navigationFeatureNavActionsClassName = cn("starci-core-navigation-feature-nav-actions", "flex", "min-w-0", "items-center", "justify-end", "gap-2")
-export const navigationFeatureNavFeatureClassName = cn("starci-core-navigation-feature-nav-feature", "min-w-0")
+export const navigationFeatureNavIdentityClassName = cn("starci-core-navigation-feature-nav-identity") ?? "starci-core-navigation-feature-nav-identity"
+export const navigationFeatureNavNavigationClassName = cn("starci-core-navigation-feature-nav-navigation") ?? "starci-core-navigation-feature-nav-navigation"
+export const navigationFeatureNavCompactNavigationClassName = cn("starci-core-navigation-feature-nav-compact-navigation") ?? "starci-core-navigation-feature-nav-compact-navigation"
+export const navigationFeatureNavActionsClassName = cn("starci-core-navigation-feature-nav-actions") ?? "starci-core-navigation-feature-nav-actions"
+export const navigationFeatureNavFeatureClassName = cn("starci-core-navigation-feature-nav-feature") ?? "starci-core-navigation-feature-nav-feature"

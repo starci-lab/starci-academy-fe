@@ -13,7 +13,7 @@ describe("CourseValuePropositionList", () => {
         expect(container.querySelector("[data-course-value-marker]")).toBeNull()
         expect(container.querySelectorAll("svg")).toHaveLength(2)
         for (const glyph of container.querySelectorAll("svg")) {
-            expect(glyph).toHaveClass("size-5")
+            expect(glyph).toHaveClass("starci-core-icon")
             expect(glyph).not.toHaveClass("text-success-soft-foreground")
         }
     })

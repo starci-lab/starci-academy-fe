@@ -1,4 +1,3 @@
-import { cn } from "@heroui/react"
 import { useId, type ReactNode } from "react"
 import { assertPresentationState, treatmentFor, type PresentationState } from "../../state.js"
 import { railBodyClassName, railClassName, railFooterClassName, railFrameClassName } from "./classNames.js"
@@ -63,7 +62,7 @@ export const Rail = (props: RailProps) => {
         <div className={railFrameClassName} data-contract="GAP-4" data-grammar-rail-frame="true">
             {landmark === "content-navigation" ? null : <h2 className={isLabelHidden ? "starci-core-visually-hidden" : undefined} data-grammar-rail-heading="true" id={headingId}>{label}</h2>}
             <div
-                className={cn(railBodyClassName, inset === "content" && "px-3 py-6")}
+                className={railBodyClassName}
                 data-grammar-rail-body="true"
                 data-grammar-rail-inset={inset}
                 {...(bodyContract === "" ? {} : { "data-contract": bodyContract })}

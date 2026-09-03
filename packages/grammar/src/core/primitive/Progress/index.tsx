@@ -9,8 +9,12 @@ export type ProgressProps = {
     readonly isSkeleton?: boolean
 }
 
+/**
+ * Fluid width and the resting bar's height are SHIPPED by `.starci-core-progress` in
+ * `src/common/styles.css`, keyed by `data-loading`.
+ */
 const SKELETON_CLASS_NAME = skeletonVariants({ animationType: "shimmer" }).base({
-    className: "h-2 w-full",
+    className: "starci-core-progress",
 })
 
 /** Accessible, full-width completion bar with an inert initial-loading shape. */
@@ -22,8 +26,8 @@ export const Progress = ({ label, value = 0, isSkeleton = false }: ProgressProps
                 data-component="Progress"
                 data-loading="true"
                 aria-hidden
-                // `w-full` matches MEASURE-2 (Fluid width). `h-2` is a fixed height,
-                // which measure.md excludes from its catalog on purpose, so it stays unclaimed.
+                // Fluid width matches MEASURE-2. The resting bar's 0.5rem height is a fixed
+                // height, which measure.md excludes from its catalog on purpose, so it stays unclaimed.
                 data-contract="MEASURE-2"
                 className={SKELETON_CLASS_NAME}
             />
@@ -41,9 +45,9 @@ export const Progress = ({ label, value = 0, isSkeleton = false }: ProgressProps
             maxValue={100}
             color="accent"
             size="sm"
-            // `w-full` matches MEASURE-2 (Fluid width) in measure.md `## Scale`/catalog.
+            // Fluid width matches MEASURE-2 in measure.md `## Scale`/catalog.
             data-contract="MEASURE-2"
-            className="w-full"
+            className="starci-core-progress"
         >
             <ProgressBar.Track>
                 <ProgressBar.Fill />

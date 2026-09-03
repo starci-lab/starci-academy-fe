@@ -37,7 +37,7 @@ describe("SelectionList", () => {
         expect(count).toHaveAttribute("data-size", "xs")
         expect(count).toHaveAttribute("data-tone", "muted")
         expect(count).toHaveAttribute("data-parent-emphasis", "accent-soft")
-        expect(count.className).toContain("group-data-[selected=true]:text-accent-soft-foreground")
+        expect(count.className).toContain("starci-core-text")
         expect(count.className).not.toContain("group-hover:text-accent-soft")
         expect(count.className).not.toContain("rounded")
         expect(count.className).not.toContain("bg-")

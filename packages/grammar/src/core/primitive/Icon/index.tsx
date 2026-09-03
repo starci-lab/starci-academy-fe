@@ -34,14 +34,15 @@ export type IconProps = {
     readonly isSkeleton?: boolean
 }
 
-const USAGE_CLASS_NAMES = {
-    heading: "size-6 shrink-0",
-    leading: "size-5 shrink-0",
-    chip: "size-4 shrink-0",
-} as const
+/*
+ * Usage sizing is SHIPPED by `.starci-core-icon[data-usage]` in `src/common/styles.css`, and the
+ * resting glyph by `.starci-core-icon-skeleton`. A glyph sized only by a Tailwind utility collapses
+ * to the SVG default box in any consumer whose build does not scan this package.
+ */
+const ICON_CLASS_NAME = "starci-core-icon"
 
 const SKELETON_CLASS_NAME = skeletonVariants({ animationType: "shimmer" }).base({
-    className: "size-5 shrink-0 rounded-full",
+    className: "starci-core-icon-skeleton",
 })
 
 /** Product-neutral icon carrier; semantic glyph names and libraries remain app authority. */
@@ -59,7 +60,7 @@ export const Icon = ({ source: Source, usage = "chip", ariaLabel, isSkeleton = f
             data-component="Icon"
             data-usage={usage}
             focusable="false"
-            className={USAGE_CLASS_NAMES[usage]}
+            className={ICON_CLASS_NAME}
             {...(ariaLabel === undefined
                 ? { "aria-hidden": true as const }
                 : { "aria-label": ariaLabel, role: "img" as const })}

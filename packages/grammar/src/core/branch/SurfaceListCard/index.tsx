@@ -1,7 +1,7 @@
 import { useId, type ReactNode } from "react"
 import { VerticalScrollRegion } from "../../composite/VerticalScrollRegion/index.js"
 import { Label } from "../../primitive/Label/index.js"
-import { getCollectionClassName, getSurfaceFactClassName, listShellClassName, surfaceFooterClassName, surfaceLabelClassName, surfaceListClassName } from "./classNames.js"
+import { collectionClassName, listShellClassName, surfaceFactClassName, surfaceFooterClassName, surfaceLabelClassName, surfaceListClassName } from "./classNames.js"
 
 type LabelledSurfaceList = {
     readonly label: string
@@ -57,7 +57,8 @@ export const SurfaceListCard = (props: SurfaceListCardProps) => {
                     <Label as="h3" id={headingId} depth={depth}>{label}</Label>
                     {labelEnd ?? (fact === undefined ? null : (
                         <span
-                            className={getSurfaceFactClassName(depth)}
+                            className={surfaceFactClassName}
+                            data-grammar-surface-depth={depth}
                             data-contract={`TONE-2 ${depth === "nested" ? "FONT-1" : "FONT-2"}`}
                         >
                             {fact}
@@ -77,7 +78,8 @@ export const SurfaceListCard = (props: SurfaceListCardProps) => {
                 data-verdict={String(isVerdict)}
             >
                 <VerticalScrollRegion
-                    className={getCollectionClassName(isVerdict)}
+                    className={collectionClassName}
+                    data-grammar-collection={isVerdict ? "verdict" : "list"}
                     data-grammar-list="true"
                     data-loading={String(isLoading)}
                     isScrollable={isScrollable}

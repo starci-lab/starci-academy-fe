@@ -175,7 +175,7 @@ describe("DashboardPageBase", () => {
         expect(screen.getByRole("button", { name: "Back" })).toHaveAttribute("data-appearance", "muted")
         const openButton = screen.getByRole("button", { name: "Open stats and quick access" })
         expect(openButton).toHaveAttribute("aria-expanded", "false")
-        expect(openButton).toHaveClass("rounded-none", "bg-transparent", "shadow-none")
+        expect(openButton).toHaveClass("starci-core-subnav-toggle")
         expect(openButton).not.toHaveClass("rounded-full", "bg-default")
         fireEvent.click(openButton)
         expect(setRailOpen).toHaveBeenCalledWith(true)

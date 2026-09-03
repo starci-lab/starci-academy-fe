@@ -2,10 +2,8 @@ import { Button as HeroButton, cn } from "@heroui/react"
 import type { ComponentPropsWithoutRef, ReactNode } from "react"
 import {
     subnavClassName,
-    subnavCompactClassName,
     subnavIdentityClassName,
     subnavLeadingClassName,
-    subnavStickyClassName,
     subnavTitleClassName,
     subnavToggleClassName,
 } from "./classNames.js"
@@ -42,7 +40,7 @@ export const Subnav = ({
     <nav
         {...navProps}
         aria-label={label}
-        className={cn(subnavClassName, visibility === "compact" && subnavCompactClassName, position === "sticky" && subnavStickyClassName, className)}
+        className={cn(subnavClassName, className)}
         data-grammar-subnav="true"
         data-grammar-subnav-position={position}
         data-grammar-subnav-visibility={visibility}

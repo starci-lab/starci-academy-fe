@@ -19,7 +19,7 @@ describe("Core Progress", () => {
 
         expect(markup).toContain("data-loading=\"true\"")
         expect(markup).toContain("aria-hidden=\"true\"")
-        expect(markup).toContain("h-2")
+        expect(markup).toContain("starci-core-progress")
         expect(markup).not.toContain("progressbar")
         expect(markup).not.toContain("Course completion")
     })

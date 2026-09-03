@@ -29,30 +29,10 @@ const utilityTokens = (source: string): ReadonlyArray<string> => [...source.matc
  * Files that still spell geometry in utilities, recorded rather than silently tolerated.
  *
  * Nothing may be ADDED here: the list only shrinks as each object moves its layout into
- * `src/common/styles.css`. Sidebar was the entry removed in 0.4.3.
+ * `src/common/styles.css`. Sidebar was the entry removed in 0.4.3; 0.4.4 paid the rest of it, so
+ * the debt is now empty and the check below is the thing that keeps it that way.
  */
-const UTILITY_DEBT: ReadonlyArray<string> = [
-    "core/branch/MarkdownArticle/classNames.ts",
-    "core/branch/Rail/classNames.ts",
-    "core/branch/Rail/index.tsx",
-    "core/branch/Subnav/classNames.ts",
-    "core/branch/SurfaceAccordionCard/classNames.ts",
-    "core/branch/SurfaceCard/classNames.ts",
-    "core/branch/SurfaceListCard/classNames.ts",
-    "core/classNames.ts",
-    "core/composite/EmptyNotice/index.tsx",
-    "core/composition/ChatWorkspace/classNames.ts",
-    "core/composition/NavigationFeatureNav/classNames.ts",
-    "core/primitive/Divider/index.tsx",
-    "core/primitive/IconButton/index.tsx",
-    "core/primitive/IconTile/index.tsx",
-    "core/primitive/Icon/index.tsx",
-    "core/primitive/Input/index.tsx",
-    "core/primitive/Progress/index.tsx",
-    "core/primitive/Text/index.tsx",
-    "core/primitive/TextAction/index.tsx",
-    "core/primitive/actionStyles.ts",
-]
+const UTILITY_DEBT: ReadonlyArray<string> = []
 
 describe("Shipped geometry", () => {
     const files = [...sourceFiles(join(sourceRoot, "core")), ...sourceFiles(join(sourceRoot, "common"))]

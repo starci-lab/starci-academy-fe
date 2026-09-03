@@ -27,7 +27,7 @@ describe("scrollable Core surfaces", () => {
     it("owns right-rail padding and sticky lifecycle", () => {
         const markup = renderToStaticMarkup(<Rail label="Project evidence" mode="sticky" inset="content" isLabelHidden>Facts</Rail>)
         expect(markup).toContain("data-grammar-rail-mode=\"sticky\"")
-        expect(markup).toContain("px-3 py-6")
+        expect(markup).toContain("data-grammar-rail-inset=\"content\"")
         expect(markup).toContain("starci-core-visually-hidden")
         expect(markup).toContain("starci-core-rail")
         expect(markup).toContain("starci-core-rail-frame")
@@ -83,8 +83,7 @@ describe("scrollable Core surfaces", () => {
         )
         expect(markup).toContain("starci-core-surface-card")
         expect(markup).toContain("starci-core-surface starci-core-frameless-surface")
-        expect(markup).toContain("overflow-visible")
-        expect(markup).not.toContain("overflow-hidden")
+        expect(markup).toContain("data-grammar-frame=\"frameless\"")
         expect(markup).toContain("starci-core-surface-content")
     })
 
@@ -132,8 +131,8 @@ describe("scrollable Core surfaces", () => {
         expect(markup).toContain("data-slot=\"accordion\"")
         expect(markup).toContain("data-slot=\"accordion-panel\"")
         expect(markup).toContain("accordion__panel")
-        expect(markup).toMatch(/class="[^"]*starci-core-accordion-panel[^"]*p-0[^"]*"/)
-        expect(markup).toMatch(/class="[^"]*starci-core-accordion-body[^"]*pt-0[^"]*pb-3[^"]*pl-6[^"]*pr-4[^"]*"/)
+        expect(markup).toMatch(/class="[^"]*starci-core-accordion-panel[^"]*"/)
+        expect(markup).toMatch(/class="[^"]*starci-core-accordion-body[^"]*"/)
         expect(markup).not.toContain("border-t")
     })
 
