@@ -70,6 +70,10 @@ describe("ProSubscriptionBlockBase", () => {
             .toEqual(["H1", "H2", "H2", "H3", "H3", "H2"])
         expect(screen.getByText(labels.benefitsDescription).parentElement).toHaveClass("bg-surface-secondary", "px-4", "py-3")
         expect(screen.getByText(labels.benefitsDescription).closest("[data-grammar-surface-content='true']")).toHaveAttribute("data-grammar-surface-composition", "joined")
+        // The second outcome column answers to the card's container, never to the layout viewport.
+        const benefitList = screen.getByText(labels.benefits[0]!.title).closest("ul")
+        expect(benefitList).toHaveClass("@app-sm:grid-cols-2")
+        expect(benefitList?.className).not.toMatch(/(?:^|\s)(?:sm|md|lg|xl|2xl):/)
         expect(screen.getByText(labels.benefits[3]!.title)).toHaveAttribute("data-weight", "semibold")
         expect(screen.getByText(labels.benefits[3]!.title)).toHaveAttribute("data-size", "sm")
         expect(screen.getByText(labels.benefits[3]!.title)).toHaveAttribute("data-tone", "default")
