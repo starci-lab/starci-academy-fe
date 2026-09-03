@@ -58,69 +58,23 @@ export const dashboardMainTrackClassName = cn(
     "mx-auto",
 )
 
-/** Keep standing fixed while the destination stack owns the remaining rail height. */
-export const dashboardRailClassName = cn(
+/**
+ * The rail's own reading order, inside the Grammar `Rail` that owns everything else.
+ *
+ * `Rail` supplies the landmark, the inset, the bounded height and the single scroll owner at both
+ * placements, so nothing here restates a viewport measure or a second overflow rule; this is the
+ * vertical run between who the reader is and where they might go.
+ */
+export const dashboardRailContentClassName = cn(
     "flex",
     "w-full",
     "min-w-0",
     "flex-col",
     "gap-6",
-    "lg:h-full",
-    "lg:min-h-0",
-    "lg:overflow-hidden",
 )
 
-/** Give the compact drawer the same one-scroll-owner rail anatomy at every viewport width. */
-export const dashboardRailDrawerClassName = cn("h-full", "min-h-0", "overflow-hidden")
-
-/** Drawer body owns no inset; keep the dashboard rail comfortably clear of its edges. */
-export const dashboardRailDrawerViewportClassName = cn("h-full", "min-h-0", "w-full", "min-w-0", "px-3", "py-6")
-
-/** Select the one rail presentation without rebuilding its anatomy at the call site. */
-export const getDashboardRailClassName = (presentation: "inline" | "drawer") => cn(
-    dashboardRailClassName,
-    presentation === "drawer" && dashboardRailDrawerClassName,
-)
-
-/** Grammar-owned bounded viewport for quick access and panel-specific rail context. */
-export const dashboardRailScrollRegionClassName = cn(
-    "w-full",
-    "min-w-0",
-    "lg:h-0",
-    "lg:min-h-0",
-    "lg:max-h-full",
-    "lg:flex-1",
-    "lg:overflow-y-auto",
-    "lg:overscroll-contain",
-    "lg:touch-pan-y",
-)
-
-/** Compact rail destinations scroll inside the drawer while identity remains visible. */
-export const dashboardRailDrawerScrollRegionClassName = cn(
-    "h-0",
-    "min-h-0",
-    "max-h-full",
-    "flex-1",
-    "overflow-y-auto",
-    "overscroll-contain",
-    "touch-pan-y",
-)
-
-/** Select the bounded scroll contract that belongs to the active rail presentation. */
-export const getDashboardRailScrollRegionClassName = (presentation: "inline" | "drawer") => cn(
-    dashboardRailScrollRegionClassName,
-    presentation === "drawer" && dashboardRailDrawerScrollRegionClassName,
-)
-
-/** Keep every scroll-owned rail section in one readable vertical run. */
-export const dashboardRailScrollContentClassName = cn(
-    "flex",
-    "w-full",
-    "min-w-0",
-    "flex-col",
-    "gap-6",
-    "pb-1",
-)
+/** Drawer body owns no inset of its own; let the rail fill the panel it is placed in. */
+export const dashboardRailDrawerViewportClassName = cn("h-full", "min-h-0", "w-full", "min-w-0")
 
 /** Bound the shortcut list as a flush rail band instead of a nested card. */
 export const dashboardRailActionsClassName = cn("min-w-0")

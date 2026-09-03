@@ -138,8 +138,10 @@ describe("DashboardPageBase", () => {
         expect(rail?.className).not.toMatch(/calc\(/)
         expect(rail?.querySelector("[data-grammar-rail-mode='sticky']")).toBeInTheDocument()
         expect(container.querySelector("[data-dashboard-leading-rule=\"true\"]")).toBeNull()
-        const railScroll = container.querySelector("[data-dashboard-rail-scroll=\"true\"]")
-        expect(railScroll).toHaveClass("scroll-shadow", "scroll-shadow--vertical", "lg:h-0", "lg:flex-1")
+        // One scroll owner, and it is Grammar's rail body, not a second bounded viewport the page
+        // sized itself.
+        expect(rail?.querySelector("[data-grammar-rail-inset='content']")).toBeInTheDocument()
+        expect(container.querySelector("[data-dashboard-rail-scroll=\"true\"]")).toBeNull()
         const railComesFirst = primary !== null && rail !== null
             && Boolean(rail.compareDocumentPosition(primary) & Node.DOCUMENT_POSITION_FOLLOWING)
         expect(railComesFirst).toBe(true)
@@ -188,10 +190,16 @@ describe("DashboardPageBase", () => {
         rerender(<DashboardPageBase props={{ ...compactProps, isRailOpen: true }} on={{ setRailOpen }} />)
         expect(screen.getByRole("button", { name: "Close stats and quick access" })).toHaveAttribute("aria-expanded", "true")
         expect(screen.getByTestId("dashboard-rail-drawer")).toHaveAttribute("data-inset", "none")
-        expect(screen.queryByText(railLabel)).toBeNull()
+        // The drawer's own title row draws nothing; the rail's landmark heading names the region
+        // without a reader seeing the label twice.
+        expect(screen.getByText(railLabel)).toHaveClass("starci-core-visually-hidden")
+        expect(screen.getAllByText(railLabel)).toHaveLength(1)
         expect(screen.getAllByTestId("IdentityRail")).toHaveLength(1)
         expect(screen.getAllByTestId("QuickActions")).toHaveLength(1)
-        expect(container.querySelector("[data-dashboard-rail='true']")).toHaveClass("px-3", "py-6")
+        // The drawer places the rail; Grammar still owns the inset and the scroll inside it.
+        expect(container.querySelector("[data-dashboard-rail='true']")).toHaveClass("h-full", "min-h-0")
+        expect(container.querySelector("[data-grammar-rail-mode='flow']")).toBeInTheDocument()
+        expect(container.querySelector("[data-grammar-rail-inset='content']")).toBeInTheDocument()
         expect(container.querySelector("[data-dashboard-rail-presentation='drawer']")).toBeInTheDocument()
 
         fireEvent.click(screen.getByRole("button", { name: "dismiss drawer" }))

@@ -15,7 +15,7 @@ import { FeedExplorer } from "@/components/blocks/dashboard/FeedExplorer"
 import { CoursesTab } from "@/components/blocks/dashboard/CoursesTab"
 import { CommunityTab } from "@/components/blocks/dashboard/CommunityTab"
 import { Icon, iconSourceFor } from "@/components/leaves/Icon"
-import { Rail, Subnav, VerticalScrollRegion } from "@starci/grammar/common"
+import { Rail, Subnav } from "@starci/grammar/common"
 import {
     dashboardFrameClassName,
     dashboardLeadingRailRegionClassName,
@@ -30,10 +30,8 @@ import {
     dashboardOverviewUpdatesClassName,
     dashboardPanelClassName,
     dashboardRailActionsClassName,
+    dashboardRailContentClassName,
     dashboardRailDrawerViewportClassName,
-    getDashboardRailClassName,
-    getDashboardRailScrollRegionClassName,
-    dashboardRailScrollContentClassName,
 } from "./classNames"
 import { TextAction } from "@starci/grammar/common"
 
@@ -134,21 +132,29 @@ export const DashboardPageBase = (props: DashboardPageProps) => {
                         ? <OverviewTab />
                         : <EmptyNotice message={props.props.unavailableMessage} iconSource={iconSourceFor(props.props.selectedTab === "community" ? "community" : "explore", "leading")} />
 
+    /*
+     * ONE RAIL, TWO PLACEMENTS, AND GRAMMAR OWNS BOTH.
+     *
+     * `Rail` is the landmark, the inset, the bounded height and the one scroll owner. Sticky pins
+     * it to the band offset the navbar publishes; flow lets the drawer place it. The page keeps
+     * only the reading order inside, which is the one thing it actually owns: who the reader is
+     * comes first, where they might go comes after.
+     */
     const rail = (presentation: "inline" | "drawer") => (
-        <div className={getDashboardRailClassName(presentation)} data-dashboard-rail-presentation={presentation}>
-            <IdentityRail />
-            <VerticalScrollRegion
-                className={getDashboardRailScrollRegionClassName(presentation)}
-                data-dashboard-rail-scroll="true"
-                isScrollable
-            >
-                <div className={dashboardRailScrollContentClassName}>
-                    {props.props.selectedTab === "community" ? null : (
-                        <div className={dashboardRailActionsClassName}><QuickActions /></div>
-                    )}
-                </div>
-            </VerticalScrollRegion>
-        </div>
+        <Rail
+            inset="content"
+            isLabelHidden
+            label={railLabel}
+            mode={presentation === "inline" ? "sticky" : "flow"}
+            width={presentation === "inline" ? "compact" : "wide"}
+        >
+            <div className={dashboardRailContentClassName} data-dashboard-rail-presentation={presentation}>
+                <IdentityRail />
+                {props.props.selectedTab === "community" ? null : (
+                    <div className={dashboardRailActionsClassName}><QuickActions /></div>
+                )}
+            </div>
+        </Rail>
     )
 
     return (
@@ -168,15 +174,7 @@ export const DashboardPageBase = (props: DashboardPageProps) => {
                     />
                 ) : (
                     <div className={dashboardLeadingRailRegionClassName} data-dashboard-rail="true">
-                        {/*
-                          * Grammar owns where the rail stops: `mode="sticky"` pins the frame to the
-                          * band offset the navbar publishes and bounds it to the viewport that is
-                          * left, so the page restates neither number. The label is the landmark's,
-                          * hidden because the rail's own blocks carry the visible headings.
-                          */}
-                        <Rail inset="content" isLabelHidden label={railLabel} mode="sticky" width="compact">
-                            {rail("inline")}
-                        </Rail>
+                        {rail("inline")}
                     </div>
                 )}
                 <div
