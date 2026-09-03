@@ -4,6 +4,18 @@ import { Header, ListBox } from "@heroui/react"
 import type { Key, ReactNode } from "react"
 import { Icon, type IconSource } from "../../primitive/Icon/index.js"
 import { IconButton } from "../../primitive/IconButton/index.js"
+import {
+    sidebarClassName,
+    sidebarFooterClassName,
+    sidebarHeaderClassName,
+    sidebarItemClassName,
+    sidebarItemLabelClassName,
+    sidebarItemTrailingClassName,
+    sidebarListClassName,
+    sidebarSectionClassName,
+    sidebarSectionLabelClassName,
+    sidebarToggleClassName,
+} from "./classNames.js"
 
 export type SidebarItem = {
     readonly id: string
@@ -52,7 +64,13 @@ const firstKey = (keys: "all" | Set<Key>): string | undefined => {
     return value === undefined ? undefined : String(value)
 }
 
-/** Shared grouped sidebar renderer; apps own route, permission, copy and persistence policy. */
+/**
+ * Shared grouped sidebar renderer; apps own route, permission, copy and persistence policy.
+ *
+ * Geometry is owned by `.starci-core-sidebar*` in the packaged stylesheet, and the collapsed and
+ * drawer projections are read from `data-collapsed` and `data-presentation` on this root. Nothing
+ * here depends on a consumer's Tailwind build scanning the package.
+ */
 export const Sidebar = ({
     label,
     groups,
@@ -77,15 +95,11 @@ export const Sidebar = ({
             data-component="Sidebar"
             data-presentation={presentation}
             data-collapsed={collapsed ? "true" : "false"}
-            className={[
-                "flex min-h-0 flex-col overflow-hidden bg-background text-foreground",
-                presentation === "drawer" ? "w-full" : collapsed ? "h-full w-16" : "h-full w-64",
-                presentation === "rail" ? "border-r border-separator transition-[width] motion-reduce:transition-none" : "",
-            ].join(" ")}
+            className={sidebarClassName}
             data-contract={["OVERFLOW-2", presentation === "drawer" ? "MEASURE-2" : "MEASURE-6"].join(" ")}
         >
             {canToggle ? (
-                <div className={collapsed ? "flex justify-center p-2" : "flex justify-end p-2"} data-contract="PADDING-2">
+                <div className={sidebarToggleClassName} data-contract="PADDING-2">
                     <IconButton
                         source={toggleSource}
                         label={toggleLabel}
@@ -94,7 +108,7 @@ export const Sidebar = ({
                     />
                 </div>
             ) : null}
-            {collapsed || header == null ? null : <div className="px-3 pb-3" data-contract="PADDING-3">{header}</div>}
+            {collapsed || header == null ? null : <div className={sidebarHeaderClassName} data-contract="PADDING-3">{header}</div>}
             <ListBox
                 aria-label={label}
                 selectionMode="single"
@@ -103,19 +117,19 @@ export const Sidebar = ({
                     const key = firstKey(keys as "all" | Set<Key>)
                     if (key !== undefined) onAction?.(key)
                 }}
-                className={collapsed ? "min-h-0 flex-1 items-center gap-1 overflow-y-auto p-2" : "min-h-0 flex-1 gap-1 overflow-y-auto p-3"}
+                className={sidebarListClassName}
                 data-contract={collapsed ? "GAP-1 PADDING-2" : "GAP-1 PADDING-3"}
             >
                 {groups.map((group) => (
                     <ListBox.Section
                         key={group.id}
                         id={sectionKey(group.id)}
-                        className={collapsed ? "flex flex-col items-center gap-1" : "flex flex-col gap-1"}
+                        className={sidebarSectionClassName}
                         data-contract="GAP-1"
                     >
                         {group.label === undefined ? null : (
                             <Header
-                                className={collapsed ? "sr-only" : "px-2 pb-1 pt-3 text-xs font-medium text-muted"}
+                                className={sidebarSectionLabelClassName}
                                 {...(collapsed ? {} : { "data-contract": "PADDING-2 PADDING-1 PADDING-3 FONT-1 TONE-2" })}
                             >
                                 {group.label}
@@ -126,22 +140,20 @@ export const Sidebar = ({
                                 key={item.id}
                                 id={item.id}
                                 textValue={item.label}
-                                className={collapsed
-                                    ? "group flex size-11 cursor-pointer items-center justify-center rounded-full text-foreground outline-none data-[disabled=true]:cursor-default data-[disabled=true]:opacity-50 data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-accent data-[hovered=true]:bg-default data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent-soft-foreground"
-                                    : "flex cursor-pointer items-center gap-3 rounded-large px-3 py-2 text-foreground outline-none data-[disabled=true]:cursor-default data-[disabled=true]:opacity-50 data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-accent data-[hovered=true]:bg-default data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent-soft-foreground"}
+                                className={sidebarItemClassName}
                                 data-contract={collapsed ? "TONE-1 SURFACE-4" : "GAP-3 PADDING-3 PADDING-2 TONE-1 SURFACE-4"}
                                 {...(collapsed ? { "aria-label": item.label } : {})}
                                 {...(item.isDisabled === undefined ? {} : { isDisabled: item.isDisabled })}
                             >
                                 {item.source === undefined ? null : <Icon source={item.source} usage="leading" />}
-                                {collapsed ? null : <span className="min-w-0 flex-1 truncate text-sm font-medium" data-contract="FLOW-4 FONT-2">{item.label}</span>}
-                                {collapsed || item.trailing == null ? null : <span className="shrink-0">{item.trailing}</span>}
+                                {collapsed ? null : <span className={sidebarItemLabelClassName} data-contract="FLOW-4 FONT-2">{item.label}</span>}
+                                {collapsed || item.trailing == null ? null : <span className={sidebarItemTrailingClassName}>{item.trailing}</span>}
                             </ListBox.Item>
                         ))}
                     </ListBox.Section>
                 ))}
             </ListBox>
-            {collapsed || footer == null ? null : <div className="p-3 pt-0" data-contract="PADDING-3 PADDING-0">{footer}</div>}
+            {collapsed || footer == null ? null : <div className={sidebarFooterClassName} data-contract="PADDING-3 PADDING-0">{footer}</div>}
         </div>
     )
 }

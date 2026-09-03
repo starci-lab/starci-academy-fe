@@ -95,7 +95,17 @@ describe("Core capability styles", () => {
         expect(css).toMatch(/\.starci-core-accordion-trigger\s*\{[\s\S]*?padding:/)
         expect(css).toMatch(/\.starci-core-accordion-trigger:hover,[\s\S]*?\.starci-core-accordion-trigger:active,[\s\S]*?\[aria-expanded="true"\][\s\S]*?background: transparent;[\s\S]*?transform: none;/)
         expect(css).toMatch(/\.starci-core-accordion-trigger:focus-visible,[\s\S]*?outline: 2px solid var\(--focus,/)
-        expect(css).not.toMatch(/\.starci-core-accordion-trigger:hover,[\s\S]*?background: var\(--accent-soft,/)
+        /*
+         * Scoped to the trigger's OWN rule.
+         *
+         * The guard used to be an unbounded `[\s\S]*?` over the whole sheet, so it went red the
+         * first time any later object painted a selected state with `--accent-soft` - which says
+         * nothing about the accordion trigger. What it means is that the trigger's hover rule must
+         * not tint; that is the block it now reads.
+         */
+        const accordionHoverRule = css.match(/\.starci-core-accordion-trigger:hover,[^{]*\{[^}]*\}/)?.[0] ?? ""
+        expect(accordionHoverRule).not.toBe("")
+        expect(accordionHoverRule).not.toContain("var(--accent-soft")
     })
 
     it("paints a labelled Core SurfaceCard as one label-inside material box", () => {

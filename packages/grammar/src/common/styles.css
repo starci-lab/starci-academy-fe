@@ -251,6 +251,89 @@
         border: 0;
     }
 
+    /*
+     * A field-shaped press target is FIELD anatomy, not a button variant.
+     *
+     * Two applications had already cloned it - a search trigger that looks exactly like the input
+     * it replaces - and both did it by pushing field geometry into a Grammar Button through
+     * `className`, which is an app override of a Grammar object. The anatomy lives here instead,
+     * reading the same `--field-*` contract the Input primitive reads, so the two clones can be
+     * deleted and no application has to restate the field's height, inset, corner or paint.
+     */
+    .starci-core-pressable-field {
+        display: flex;
+        width: 100%;
+        min-width: 0;
+        height: 2.25rem;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        border: var(--field-border-width, 1px) solid var(--field-border, var(--border, ButtonBorder));
+        border-radius: var(--field-radius, calc(var(--radius, 0.5rem) * 1.5));
+        padding-inline: 0.75rem;
+        background: var(--field-background, var(--surface, Canvas));
+        color: var(--field-foreground, var(--foreground, CanvasText));
+        box-shadow: var(--field-shadow, none);
+        font: inherit;
+        text-align: start;
+        cursor: pointer;
+        transition:
+            background-color var(--starci-core-motion-duration, 180ms) var(--starci-core-motion-easing, cubic-bezier(0.2, 0, 0, 1)),
+            border-color var(--starci-core-motion-duration, 180ms) var(--starci-core-motion-easing, cubic-bezier(0.2, 0, 0, 1));
+        -webkit-appearance: none;
+        appearance: none;
+    }
+
+    .starci-core-pressable-field:hover {
+        border-color: var(--field-border-hover, var(--field-border, var(--border, ButtonBorder)));
+        background: var(--field-hover, var(--field-background, var(--surface, Canvas)));
+    }
+
+    .starci-core-pressable-field:focus-visible {
+        outline: 2px solid var(--focus, var(--starci-core-focus, Highlight));
+        outline-offset: 2px;
+    }
+
+    .starci-core-pressable-field:disabled,
+    .starci-core-pressable-field[data-disabled="true"] {
+        opacity: 0.5;
+        cursor: default;
+    }
+
+    .starci-core-pressable-field-content {
+        display: inline-flex;
+        min-width: 0;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .starci-core-pressable-field-placeholder {
+        min-width: 0;
+        overflow: hidden;
+        font-size: 0.875rem;
+        color: var(--field-placeholder, var(--muted, GrayText));
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .starci-core-pressable-field-shortcut {
+        flex-shrink: 0;
+        border: 1px solid var(--border, var(--starci-core-border, ButtonBorder));
+        border-radius: var(--radius-sm, calc(var(--radius, 0.5rem) * 0.75));
+        padding: 0.25rem;
+        background: var(--surface-secondary, var(--starci-core-surface-secondary, Canvas));
+        color: var(--muted, var(--starci-core-muted, GrayText));
+        font-family: inherit;
+        font-size: 0.75rem;
+        line-height: 1;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .starci-core-pressable-field {
+            transition: none;
+        }
+    }
+
     .starci-core-horizontal-scroll-region {
         width: 100%;
         min-width: 0;
@@ -1300,6 +1383,176 @@
         max-block-size: calc(100dvh - 2 * var(--starci-core-workspace-floating-inset, 1rem));
         overflow: auto;
         overscroll-behavior: contain;
+    }
+
+    /*
+     * Sidebar geometry is SHIPPED, not generated.
+     *
+     * Every rule below used to be a Tailwind utility string in the component's JSX, which means a
+     * consumer only saw a sidebar if its own Tailwind build happened to scan
+     * `node_modules/@starci/grammar`. One that scans only its own source got no separator, no rail
+     * width and square items - and `rounded-large` emitted nothing anywhere, because the theme's
+     * radius ramp is `--radius-*`, not a HeroUI v2 name. A composition object owns its layout in
+     * this stylesheet; the JSX carries class names and state attributes only.
+     *
+     * `!important` appears exactly where HeroUI's own `.list-box`, `.list-box-item`,
+     * `.list-box-section` and `.header` rules set the same property. Those live in the vendor's
+     * `components` layer, which is declared after `starci-grammar-common` and therefore wins every
+     * normal declaration regardless of specificity; an important declaration in the earlier layer
+     * is the only thing that keeps the geometry the utilities used to produce.
+     */
+    .starci-core-sidebar {
+        display: flex;
+        min-height: 0;
+        min-width: 0;
+        flex-direction: column;
+        overflow: hidden;
+        background: var(--background, var(--starci-core-canvas, Canvas));
+        color: var(--foreground, var(--starci-core-foreground, CanvasText));
+    }
+
+    .starci-core-sidebar[data-presentation="drawer"] {
+        width: 100%;
+    }
+
+    .starci-core-sidebar[data-presentation="rail"] {
+        width: var(--starci-core-sidebar-width, 16rem);
+        height: 100%;
+        border-inline-end: 1px solid var(--separator, var(--starci-core-separator, GrayText));
+        transition: width var(--starci-core-motion-duration, 180ms) var(--starci-core-motion-easing, cubic-bezier(0.2, 0, 0, 1));
+    }
+
+    .starci-core-sidebar[data-presentation="rail"][data-collapsed="true"] {
+        width: var(--starci-core-sidebar-collapsed-width, 4rem);
+    }
+
+    .starci-core-sidebar-toggle {
+        display: flex;
+        justify-content: flex-end;
+        padding: 0.5rem;
+    }
+
+    .starci-core-sidebar[data-collapsed="true"] .starci-core-sidebar-toggle {
+        justify-content: center;
+    }
+
+    .starci-core-sidebar-header {
+        min-width: 0;
+        padding-inline: 0.75rem;
+        padding-block-end: 0.75rem;
+    }
+
+    .starci-core-sidebar-list {
+        display: flex;
+        min-height: 0;
+        min-width: 0;
+        flex: 1 1 0%;
+        flex-direction: column;
+        gap: 0.25rem;
+        overflow-y: auto !important;
+        padding: 0.75rem !important;
+    }
+
+    .starci-core-sidebar[data-collapsed="true"] .starci-core-sidebar-list {
+        align-items: center;
+        padding: 0.5rem !important;
+    }
+
+    .starci-core-sidebar-section {
+        display: flex;
+        min-width: 0;
+        flex-direction: column;
+        gap: 0.25rem !important;
+    }
+
+    .starci-core-sidebar[data-collapsed="true"] .starci-core-sidebar-section {
+        align-items: center !important;
+    }
+
+    .starci-core-sidebar-section-label {
+        padding-inline: 0.5rem;
+        padding-block: 0.75rem 0.25rem !important;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--muted, var(--starci-core-muted, GrayText));
+    }
+
+    /* A collapsed rail keeps the group name for assistive technology and drops it from the paint. */
+    .starci-core-sidebar[data-collapsed="true"] .starci-core-sidebar-section-label {
+        position: absolute;
+        width: 1px !important;
+        height: 1px;
+        overflow: hidden;
+        margin: -1px;
+        padding: 0 !important;
+        border: 0;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+    }
+
+    .starci-core-sidebar-item {
+        display: flex;
+        min-width: 0;
+        align-items: center;
+        gap: 0.75rem;
+        border-radius: var(--radius-xl, calc(var(--radius, 0.5rem) * 1.5)) !important;
+        padding: 0.5rem 0.75rem !important;
+        color: var(--foreground, var(--starci-core-foreground, CanvasText));
+        cursor: pointer;
+        outline: none;
+    }
+
+    .starci-core-sidebar[data-collapsed="true"] .starci-core-sidebar-item {
+        width: 2.75rem !important;
+        height: 2.75rem;
+        justify-content: center !important;
+        gap: 0 !important;
+        border-radius: var(--starci-core-pill-radius, 999px) !important;
+        padding: 0 !important;
+    }
+
+    .starci-core-sidebar-item[data-hovered="true"] {
+        background: var(--default, var(--starci-core-surface-secondary, Canvas));
+    }
+
+    .starci-core-sidebar-item[data-selected="true"] {
+        background: var(--accent-soft, var(--starci-core-accent, Highlight)) !important;
+        color: var(--accent-soft-foreground, var(--starci-core-accent, HighlightText));
+    }
+
+    .starci-core-sidebar-item[data-focus-visible="true"] {
+        box-shadow: 0 0 0 2px var(--accent, var(--starci-core-accent, Highlight));
+    }
+
+    .starci-core-sidebar-item[data-disabled="true"] {
+        opacity: 0.5;
+        cursor: default;
+    }
+
+    .starci-core-sidebar-item-label {
+        min-width: 0;
+        flex: 1 1 0%;
+        overflow: hidden;
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .starci-core-sidebar-item-trailing {
+        flex-shrink: 0;
+    }
+
+    .starci-core-sidebar-footer {
+        min-width: 0;
+        padding: 0.75rem;
+        padding-block-start: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .starci-core-sidebar[data-presentation="rail"] {
+            transition: none;
+        }
     }
 
     .starci-core-chat-workspace {

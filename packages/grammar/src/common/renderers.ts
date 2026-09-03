@@ -12,6 +12,7 @@ export { IconTile, type IconTileProps, type IconTileSize, type IconTileTone } fr
 export { IconButton, type IconButtonProps } from "../core/primitive/IconButton/index.js"
 export { Label, type LabelProps } from "../core/primitive/Label/index.js"
 export { Input, type InputKind, type InputProps, type InputVariant } from "../core/primitive/Input/index.js"
+export { PressableField, type PressableFieldProps } from "../core/primitive/PressableField/index.js"
 export { Progress, type ProgressProps } from "../core/primitive/Progress/index.js"
 export { Text, type TextAs, type TextLive, type TextProps, type TextSize, type TextTone, type TextWeight } from "../core/primitive/Text/index.js"
 export { TextAction, type TextActionAppearance, type TextActionProps, type TextActionSize } from "../core/primitive/TextAction/index.js"
