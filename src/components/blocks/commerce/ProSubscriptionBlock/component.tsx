@@ -32,6 +32,7 @@ import {
     proPriceValueClassName,
     proRailClassName,
     proRetryActionsClassName,
+    proSectionClassName,
     proStatusClassName,
 } from "./classNames"
 
@@ -206,8 +207,15 @@ export const ProSubscriptionBlockBase = (props: ProSubscriptionBlockProps) => {
                             collapsedOrder="rail-first"
                             primary={(
                                 <div className={proMainClassName}>
-                                    <SurfaceCard label={labels.benefitsTitle} composition={"joined"}>
-                                        <section aria-label={labels.benefitsTitle}>
+                                    <section aria-label={labels.benefitsTitle} className={proSectionClassName}>
+                                        {/*
+                                          * The section anchor is a Heading, not the surface `label`:
+                                          * a labelled surface is fixed at h3, which would make the
+                                          * page outline jump H1 -> H3. Level 2 is the rank this
+                                          * region actually holds (HIERARCHY-1 Case 1).
+                                          */}
+                                        <Heading level={2}>{labels.benefitsTitle}</Heading>
+                                        <SurfaceCard composition={"joined"}>
                                             <div className={proBenefitIntroClassName}>
                                                 <Text size={"sm"} tone={"muted"}>{labels.benefitsDescription}</Text>
                                             </div>
@@ -233,31 +241,34 @@ export const ProSubscriptionBlockBase = (props: ProSubscriptionBlockProps) => {
                                                     </li>
                                                 ))}
                                             </ul>
-                                        </section>
-                                    </SurfaceCard>
-                                    <div className={proDisclosureClassName}>
-                                        <SurfaceAccordionCard
-                                            depth="top"
-                                            label={labels.disclosuresTitle}
-                                            items={[
-                                                { id: "ai-usage", isOpen: expandedDisclosureIds.has("ai-usage"), summaryRender: { id: "ai-usage", title: labels.aiTitle }, bodyRender: labels.aiDescription },
-                                                { id: "payment-activation", isOpen: expandedDisclosureIds.has("payment-activation"), summaryRender: { id: "payment-activation", title: labels.activationTitle }, bodyRender: labels.activationDescription },
-                                            ]}
-                                            renderSummary={(summary) => (
-                                                <div className={proDisclosureSummaryClassName}>
-                                                    <Text size={"sm"} weight={"semibold"}>{summary.title}</Text>
-                                                    <DisclosureIndicator props={{ isOpen: expandedDisclosureIds.has(summary.id) }} />
-                                                </div>
-                                            )}
-                                            renderBody={(body) => <div className={proDisclosureBodyClassName}><Text size={"sm"}>{body}</Text></div>}
-                                            onItemOpenChange={(id, isOpen) => setExpandedDisclosureIds((current) => {
-                                                const next = new Set(current)
-                                                if (isOpen) next.add(id)
-                                                else next.delete(id)
-                                                return next
-                                            })}
-                                        />
-                                    </div>
+                                        </SurfaceCard>
+                                    </section>
+                                    <section aria-label={labels.disclosuresTitle} className={proSectionClassName}>
+                                        {/* Same reason as the benefits region: the disclosures are a peer section, not an h3. */}
+                                        <Heading level={2}>{labels.disclosuresTitle}</Heading>
+                                        <div className={proDisclosureClassName}>
+                                            <SurfaceAccordionCard
+                                                depth="top"
+                                                items={[
+                                                    { id: "ai-usage", isOpen: expandedDisclosureIds.has("ai-usage"), summaryRender: { id: "ai-usage", title: labels.aiTitle }, bodyRender: labels.aiDescription },
+                                                    { id: "payment-activation", isOpen: expandedDisclosureIds.has("payment-activation"), summaryRender: { id: "payment-activation", title: labels.activationTitle }, bodyRender: labels.activationDescription },
+                                                ]}
+                                                renderSummary={(summary) => (
+                                                    <div className={proDisclosureSummaryClassName}>
+                                                        <Text size={"sm"} weight={"semibold"}>{summary.title}</Text>
+                                                        <DisclosureIndicator props={{ isOpen: expandedDisclosureIds.has(summary.id) }} />
+                                                    </div>
+                                                )}
+                                                renderBody={(body) => <div className={proDisclosureBodyClassName}><Text size={"sm"}>{body}</Text></div>}
+                                                onItemOpenChange={(id, isOpen) => setExpandedDisclosureIds((current) => {
+                                                    const next = new Set(current)
+                                                    if (isOpen) next.add(id)
+                                                    else next.delete(id)
+                                                    return next
+                                                })}
+                                            />
+                                        </div>
+                                    </section>
                                 </div>
                             )}
                             rail={plan}

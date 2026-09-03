@@ -13,6 +13,8 @@ export const proFailedStackClassName = cn("flex", "min-w-0", "flex-col", "gap-6"
 export const proPageStackClassName = cn("flex", "min-w-0", "flex-col", "gap-6")
 /** Stack of explanatory product surfaces. */
 export const proMainClassName = cn("flex", "min-w-0", "flex-col", "gap-6")
+/** One explanatory region: its own section anchor above the surface that carries the content. */
+export const proSectionClassName = cn("flex", "min-w-0", "flex-col", "gap-3")
 /** First flush band: explanatory copy on the shared neutral surface. */
 export const proBenefitIntroClassName = cn(
     "bg-surface-secondary",
