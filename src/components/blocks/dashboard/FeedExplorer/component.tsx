@@ -36,7 +36,7 @@ export const FeedExplorerBase = (props: FeedExplorerProps) => (
     <SurfaceCard ariaLabel={props.props.label} composition={"joined"}>
         <div className={feedExplorerClassName}>
             <nav className={feedExplorerNavigationClassName} aria-label={props.props.label}>
-                <ChoiceTabs props={{ ...props.props.scope, variant: "primary" }} on={{ select: props.on?.selectScope }} />
+                <ChoiceTabs props={{ ...props.props.scope, variant: "primary", fitWidthFrom: "md" }} on={{ select: props.on?.selectScope }} />
             </nav>
             <section className={feedExplorerActivityClassName} aria-label={props.props.label}>
                 <ActivityFeed {...props.props.feed} isFrameless hasTrailingContent={props.props.loadMoreError !== undefined || props.props.canLoadMore} on={props.on?.feed} />

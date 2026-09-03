@@ -2,7 +2,7 @@
 
 import { Tabs } from "@heroui/react"
 import { Icon, iconSourceFor, type IconName } from "@/components/leaves/Icon"
-import { choiceTabContentClassName, getChoiceTabClassName, getChoiceTabsListClassName } from "./classNames"
+import { choiceTabContentClassName, getChoiceTabClassName, getChoiceTabsListClassName, getChoiceTabsRootClassName } from "./classNames"
 
 /** One peer choice, optionally led by a glyph naming the shape it selects. */
 export type ChoiceTabData = {
@@ -31,6 +31,8 @@ export type ChoiceTabsData = {
     readonly variant?: "primary" | "secondary"
     /** Long primary labels may become one target per row at the narrowest effective width. */
     readonly stackAtNarrow?: boolean
+    /** Fill the host's width until the `md` breakpoint, then shrink to content width. */
+    readonly fitWidthFrom?: "md"
 }
 /** Selection reported by the peer-choice control. */
 export type ChoiceTabsActions = { readonly select?: (key: string) => void }
@@ -63,6 +65,7 @@ export const ChoiceTabs = (props: ChoiceTabsProps) => {
     const variant = data.variant ?? "secondary"
     return (
         <Tabs
+            className={getChoiceTabsRootClassName(data.fitWidthFrom)}
             variant={variant}
             selectedKey={data.selectedKey}
             onSelectionChange={(key) => on?.select?.(String(key))}

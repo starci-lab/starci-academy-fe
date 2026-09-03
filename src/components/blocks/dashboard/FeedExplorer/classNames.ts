@@ -13,8 +13,6 @@ export const feedExplorerNavigationClassName = cn(
     "px-4",
     "pt-4",
     "pb-3",
-    "[&>[data-slot=tabs]]:w-full",
-    "md:[&>[data-slot=tabs]]:w-fit",
 )
 
 /** The dated feed and its continuation state share the card without a second tab layer. */
