@@ -56,7 +56,12 @@ describe("ShellNavBase", () => {
 
     it("draws search as one press target rather than a text field", () => {
         render(<ShellNavBase props={props} />)
-        expect(screen.getByRole("button", { name: "Open search" })).toBeTruthy()
+        // Field anatomy, no form value: Grammar's PressableField owns the geometry the shell used
+        // to restate on a Button, so the shell asks for a name, a placeholder and a shortcut only.
+        const trigger = screen.getByRole("button", { name: "Open search" })
+        expect(trigger).toHaveAttribute("data-component", "PressableField")
+        expect(screen.getByText("Search")).toBeInTheDocument()
+        expect(screen.getByText("Ctrl K").tagName).toBe("KBD")
         expect(screen.queryByRole("textbox")).toBeNull()
     })
 

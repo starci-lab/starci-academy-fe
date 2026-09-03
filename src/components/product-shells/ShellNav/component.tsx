@@ -3,7 +3,7 @@ import { Icon, iconSourceFor } from "@/components/leaves/Icon"
 import { IconButton } from "@starci/grammar/common"
 import { AccountMenu } from "@/components/blocks/auth/AccountMenu"
 import { LanguageMenu } from "@/components/blocks/locale/LanguageMenu"
-import { PressableInputLike } from "@/components/leaves/PressableInputLike"
+import { PressableField } from "@starci/grammar/common"
 import { ThemeSwitch } from "@/components/leaves/ThemeSwitch"
 import { ExtendedTabs } from "@/components/leaves/ExtendedTabs"
 import { NavigationFeatureNav, Button } from "@starci/grammar/common"
@@ -104,7 +104,7 @@ export const ShellNavBase = (props: ShellNavProps) => {
             compactNavigationTriggerLabel={props.props.utilitiesLabel}
             actions={<div className={shellNavActionsClassName}>
                 <div className={shellNavDesktopToolsClassName}>
-                    <PressableInputLike props={{ placeholder: props.props.searchPlaceholder, label: props.props.searchLabel, shortcut: props.props.searchShortcut }} on={{ press: props.on?.openSearch }} />
+                    <PressableField label={props.props.searchLabel} placeholder={props.props.searchPlaceholder} shortcut={props.props.searchShortcut} source={iconSourceFor("search", "leading")} onPress={props.on?.openSearch} />
                     <LanguageMenu />
                     <ThemeSwitch props={{ isDark: props.props.isDark, label: props.props.themeLabel }} on={{ change: props.on?.toggleTheme }} />
                 </div>
