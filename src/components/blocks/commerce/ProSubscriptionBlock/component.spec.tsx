@@ -45,6 +45,8 @@ describe("ProSubscriptionBlockBase", () => {
         const railRegion = container.querySelector("[data-grammar-rail-region='true']")
         expect(primaryRegion).toBeInTheDocument()
         expect(railRegion).toBeInTheDocument()
+        // The decision leads once the container collapses; Grammar owns the reflow, the block only names the order.
+        expect(container.querySelector("[data-grammar-layout-collapsed-order]")).toHaveAttribute("data-grammar-layout-collapsed-order", "rail-first")
         expect(
             (primaryRegion?.compareDocumentPosition(railRegion as Node) ?? 0) & Node.DOCUMENT_POSITION_FOLLOWING,
         ).toBeTruthy()

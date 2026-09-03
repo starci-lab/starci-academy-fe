@@ -202,6 +202,8 @@ export const ProSubscriptionBlockBase = (props: ProSubscriptionBlockProps) => {
                         </div>
                         <PrimaryRailLayout
                             railWidth="wide"
+                            // One decision owns this route, so the collapsed flow leads with the price and its action.
+                            collapsedOrder="rail-first"
                             primary={(
                                 <div className={proMainClassName}>
                                     <SurfaceCard label={labels.benefitsTitle} composition={"joined"}>
