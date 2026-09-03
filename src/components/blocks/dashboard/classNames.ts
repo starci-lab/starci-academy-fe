@@ -10,7 +10,7 @@ export const dashboardRailRowItemClassName = cn(
     "w-full",
     "items-center",
     "gap-2",
-    "rounded-large",
+    "rounded-lg",
     "px-2",
     "py-2",
     "[&>[data-part=icon-label-fact-row]]:min-w-0",
