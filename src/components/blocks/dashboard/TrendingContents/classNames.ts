@@ -32,34 +32,22 @@ export const trendingMediaClassName = cn(
     "bg-accent-soft",
     "p-4",
     "lg:order-2",
-    "lg:w-[38%]",
+    "lg:w-3/8",
     "lg:shrink-0",
     "lg:border-l",
     "lg:border-separator",
 )
 
-/** Keep rank and title as a compact, wrapping two-column result inside the local list surface. */
+/**
+ * Boundary and list-position inset for one ranked result; TrendingContentRow owns its own grid,
+ * rank mark and title wrap. The extra 4px on `lg:first` completes the row's own 12px inset to the
+ * card's 16px outer edge, matching the flush-band top/middle rhythm used elsewhere in this family.
+ */
 export const trendingContentRowClassName = cn(
     "min-w-0",
     "border-b",
     "border-separator",
     "bg-surface/90",
     "last:border-b-0",
-    "[&>button]:px-4",
-    "[&>button]:py-3",
-    "lg:first:[&>button]:pt-4",
-    "[&>button>div]:grid",
-    "[&>button>div]:min-w-0",
-    "[&>button>div]:grid-cols-[auto_1fr]",
-    "[&>button>div]:items-start",
-    "[&>button>div]:gap-3",
-    "[&>button>div>div]:min-w-0",
-    "[&>button>div>div:first-child]:flex",
-    "[&>button>div>div:first-child]:size-6",
-    "[&>button>div>div:first-child]:shrink-0",
-    "[&>button>div>div:first-child]:items-center",
-    "[&>button>div>div:first-child]:justify-center",
-    "[&>button>div>div:first-child]:rounded-full",
-    "[&>button>div>div:first-child]:bg-accent/10",
-    "[&>button>div>div:last-child]:break-words",
+    "lg:first:pt-1",
 )

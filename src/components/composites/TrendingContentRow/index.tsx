@@ -1,5 +1,6 @@
 import { PressableSurface } from "@/components/branches/PressableSurface"
 import { Text } from "@starci/grammar/common"
+import { trendingContentRowLayoutClassName, trendingContentRowMarkClassName, trendingContentRowTitleClassName } from "./classNames"
 
 /** Rank and title for one trending result. */
 export type TrendingContentRowData = {
@@ -21,9 +22,9 @@ export const TrendingContentRow = (props: TrendingContentRowProps) => (
         press={props.on?.open}
         hover="surface"
     >
-        <div>
-            <Text size={"sm"} tone={props.props.isTopRank === true ? "accent" : "muted"} weight={"semibold"} isSkeleton={props.isLoading ?? false}>{props.props.rank}</Text>
-            <Text size={"sm"} weight={"semibold"} isSkeleton={props.isLoading ?? false}>{props.props.title ?? ""}</Text>
+        <div className={trendingContentRowLayoutClassName}>
+            <span className={trendingContentRowMarkClassName}><Text size={"sm"} tone={props.props.isTopRank === true ? "accent" : "muted"} weight={"semibold"} isSkeleton={props.isLoading ?? false}>{props.props.rank}</Text></span>
+            <div className={trendingContentRowTitleClassName}><Text size={"sm"} weight={"semibold"} isSkeleton={props.isLoading ?? false}>{props.props.title ?? ""}</Text></div>
         </div>
     </PressableSurface>
 )
