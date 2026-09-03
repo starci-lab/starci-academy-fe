@@ -15,7 +15,7 @@ describe("RankedUserRow", () => {
             verdict: "success",
         }} />)
         expect(success.getByText("Ada").closest("[data-verdict=success]")).toBeInTheDocument()
-        expect(success.container.querySelector('[data-direction="up"]')).toHaveAttribute("aria-label", "Up 1")
+        expect(success.container.querySelector("[data-direction='up']")).toHaveAttribute("aria-label", "Up 1")
         success.unmount()
 
         const danger = render(<RankedUserRow props={{
@@ -29,7 +29,7 @@ describe("RankedUserRow", () => {
             verdict: "danger",
         }} />)
         expect(danger.getByText("Grace").closest("[data-verdict=danger]")).toBeInTheDocument()
-        expect(danger.container.querySelector('[data-direction="down"]')).toHaveAttribute("aria-label", "Down 2")
+        expect(danger.container.querySelector("[data-direction='down']")).toHaveAttribute("aria-label", "Down 2")
     })
 
     it("keeps the viewer accented and removes the follow action", () => {
