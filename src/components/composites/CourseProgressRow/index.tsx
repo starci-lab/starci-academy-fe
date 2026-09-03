@@ -6,7 +6,7 @@ import { iconSourceFor } from "@/components/leaves/Icon"
 import { Progress } from "@starci/grammar/common"
 import { StatusDot, type StatusDotTone } from "@/components/leaves/StatusDot"
 import { Text } from "@starci/grammar/common"
-import { courseProgressBodyClassName, courseProgressHeadingClassName, courseProgressLegendClassName, courseProgressLegendItemClassName, courseProgressRowClassName, courseProgressTrackClassName, courseProgressCoverClassName } from "./classNames"
+import { courseProgressBodyClassName, courseProgressFactClassName, courseProgressHeadingClassName, courseProgressLegendClassName, courseProgressLegendItemClassName, courseProgressRowClassName, courseProgressTrackClassName, courseProgressCoverClassName } from "./classNames"
 
 /** One semantic course-progress dimension. */
 export type CourseProgressDimension = { readonly id: string; readonly label: string; readonly completed: number; readonly total: number; readonly percent: number; readonly tone: StatusDotTone }
@@ -25,9 +25,9 @@ export const CourseProgressRow = (props: CourseProgressRowProps) => {
             <div className={courseProgressRowClassName}>
                 <IconTile source={iconSourceFor("course", "leading")} artwork={data.cover ? <img src={data.cover} alt="" className={courseProgressCoverClassName} /> : undefined} tone={"accent"} size={"md"} isSkeleton={isLoading} />
                 <div className={courseProgressBodyClassName}>
-                    <div className={courseProgressHeadingClassName}><Text size={"md"} weight={"semibold"} isSkeleton={isLoading}>{data.title}</Text>{data.isTrial === true && !isLoading ? <Badge tone={"neutral"}>{data.trialLabel}</Badge> : null}<Text size={"xs"} tone={"muted"} isSkeleton={isLoading}>{data.percentLabel}</Text></div>
+                    <div className={courseProgressHeadingClassName}><Text size={"md"} weight={"semibold"} isSkeleton={isLoading}>{data.title}</Text>{data.isTrial === true && !isLoading ? <Badge tone={"neutral"}>{data.trialLabel}</Badge> : null}<span className={courseProgressFactClassName}><Text size={"xs"} tone={"muted"} isSkeleton={isLoading}>{data.percentLabel}</Text></span></div>
                     <div className={courseProgressTrackClassName}>{data.dimensions.map((dimension) => <Progress key={dimension.id} label={dimension.label} value={dimension.percent} isSkeleton={isLoading} />)}</div>
-                    <div className={courseProgressLegendClassName}>{data.dimensions.map((dimension) => <span className={courseProgressLegendItemClassName} key={dimension.id}><StatusDot props={{ tone: dimension.tone, label: dimension.label }} isLoading={isLoading} /><Text size={"xs"} tone={"muted"} isSkeleton={isLoading}>{`${dimension.label} · ${dimension.completed}/${dimension.total}`}</Text></span>)}</div>
+                    <div className={courseProgressLegendClassName}>{data.dimensions.map((dimension) => <span className={courseProgressLegendItemClassName} key={dimension.id}><StatusDot props={{ tone: dimension.tone, label: dimension.label }} isLoading={isLoading} /><span className={courseProgressFactClassName}><Text size={"xs"} tone={"muted"} isSkeleton={isLoading}>{`${dimension.label} · ${dimension.completed}/${dimension.total}`}</Text></span></span>)}</div>
                     {data.actionLabel === undefined ? null : <DestinationCue props={{ label: data.actionLabel }} isLoading={isLoading} />}
                 </div>
             </div>

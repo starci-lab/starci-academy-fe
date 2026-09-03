@@ -15,3 +15,5 @@ export const courseProgressLegendClassName = cn("flex", "flex-row", "flex-wrap",
 export const courseProgressLegendItemClassName = cn("flex", "flex-row", "items-center", "gap-2")
 /** The cover fills the tile it is dropped into, cropping rather than letterboxing. */
 export const courseProgressCoverClassName = cn("size-full", "object-cover")
+/** Trailing facts wrap at a long value instead of overflowing their flex-wrap row. */
+export const courseProgressFactClassName = cn("min-w-0", "break-words")
