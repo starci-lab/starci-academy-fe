@@ -15,10 +15,9 @@ import { FeedExplorer } from "@/components/blocks/dashboard/FeedExplorer"
 import { CoursesTab } from "@/components/blocks/dashboard/CoursesTab"
 import { CommunityTab } from "@/components/blocks/dashboard/CommunityTab"
 import { Icon, iconSourceFor } from "@/components/leaves/Icon"
-import { Subnav, VerticalScrollRegion } from "@starci/grammar/common"
+import { Rail, Subnav, VerticalScrollRegion } from "@starci/grammar/common"
 import {
     dashboardFrameClassName,
-    dashboardCompactSubnavClassName,
     dashboardLeadingRailRegionClassName,
     dashboardMainTrackClassName,
     dashboardOverviewClassName,
@@ -157,7 +156,6 @@ export const DashboardPageBase = (props: DashboardPageProps) => {
             <div className={dashboardFrameClassName} data-dashboard-frame="true">
                 {railPresentation === "drawer" ? (
                     <Subnav
-                        className={dashboardCompactSubnavClassName}
                         label={railLabel}
                         title={<TextAction appearance={"muted"} startContent={<Icon source={iconSourceFor("back", "chip")} usage="chip" />} onPress={props.on?.goBack}>{props.props.backLabel ?? "Back"}</TextAction>}
                         menuIcon={<Icon source={iconSourceFor("navigationOverflow", "leading")} usage={"leading"} />}
@@ -169,9 +167,17 @@ export const DashboardPageBase = (props: DashboardPageProps) => {
                         visibility="always"
                     />
                 ) : (
-                    <aside aria-label={railLabel} className={dashboardLeadingRailRegionClassName} data-dashboard-rail="true">
-                        {rail("inline")}
-                    </aside>
+                    <div className={dashboardLeadingRailRegionClassName} data-dashboard-rail="true">
+                        {/*
+                          * Grammar owns where the rail stops: `mode="sticky"` pins the frame to the
+                          * band offset the navbar publishes and bounds it to the viewport that is
+                          * left, so the page restates neither number. The label is the landmark's,
+                          * hidden because the rail's own blocks carry the visible headings.
+                          */}
+                        <Rail inset="content" isLabelHidden label={railLabel} mode="sticky" width="compact">
+                            {rail("inline")}
+                        </Rail>
+                    </div>
                 )}
                 <div
                     className={dashboardMainTrackClassName}

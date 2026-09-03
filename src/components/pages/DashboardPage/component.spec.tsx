@@ -45,7 +45,7 @@ describe("DashboardPageBase", () => {
 
         const rail = container.querySelector("[data-dashboard-rail=\"true\"]")
         const railText = rail?.innerHTML ?? ""
-        expect(rail).toHaveClass("lg:top-[calc(4rem+2rem+1px)]")
+        expect(rail?.querySelector("[data-grammar-rail-mode='sticky']")).toBeInTheDocument()
         expect(railText.indexOf("IdentityRail")).toBeLessThan(railText.indexOf("QuickActions"))
         expect(screen.getByTestId("IdentityRail")).toBeInTheDocument()
         expect(screen.getByTestId("QuickActions")).toBeInTheDocument()
@@ -132,7 +132,11 @@ describe("DashboardPageBase", () => {
         expect(frame).toBeInTheDocument()
         expect(primary).toHaveClass("mx-auto", "py-6")
         expect(primary).not.toHaveClass("lg:mx-0", "pt-6")
-        expect(rail).toHaveClass("lg:h-[calc(100dvh-4rem-2rem-1px)]", "lg:max-h-[calc(100dvh-4rem-2rem-1px)]", "lg:border-r", "lg:overflow-hidden")
+        // The region owns the track and the separator; the sticky offset and the bounded height are
+        // Grammar's, so the page names neither.
+        expect(rail).toHaveClass("lg:w-64", "lg:self-stretch", "lg:border-r")
+        expect(rail?.className).not.toMatch(/calc\(/)
+        expect(rail?.querySelector("[data-grammar-rail-mode='sticky']")).toBeInTheDocument()
         expect(container.querySelector("[data-dashboard-leading-rule=\"true\"]")).toBeNull()
         const railScroll = container.querySelector("[data-dashboard-rail-scroll=\"true\"]")
         expect(railScroll).toHaveClass("scroll-shadow", "scroll-shadow--vertical", "lg:h-0", "lg:flex-1")
@@ -170,7 +174,8 @@ describe("DashboardPageBase", () => {
         expect(container.querySelector("[data-dashboard-selected-panel='true']")).toHaveClass("px-3", "py-6")
         expect(container.querySelector("[data-dashboard-selected-panel='true']")).not.toHaveClass("sm:px-5", "lg:px-8")
         expect(container.querySelector("[data-grammar-subnav='true']")).toHaveAttribute("data-grammar-subnav-position", "sticky")
-        expect(container.querySelector("[data-grammar-subnav='true']")).toHaveClass("[--starci-core-subnav-offset:calc(6rem+1px)]")
+        // Subnav reads the band height it publishes about itself; the page sets no offset token.
+        expect(container.querySelector("[data-grammar-subnav='true']")?.className).not.toMatch(/subnav-offset/)
         expect(container.querySelector("[data-dashboard-rail='true']")).toBeNull()
         expect(screen.getByRole("button", { name: "Back" })).toHaveAttribute("data-appearance", "muted")
         const openButton = screen.getByRole("button", { name: "Open stats and quick access" })

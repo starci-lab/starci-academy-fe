@@ -18,63 +18,28 @@ export const dashboardFrameClassName = cn(
 )
 
 /**
- * Pin compact rail controls immediately below the two-layer application navigation.
- * Sticky offset, transform and backface-visibility are Subnav's own
- * `data-grammar-subnav-position="sticky"` styling; only the offset token is an
- * app value, published as `--starci-core-subnav-offset`.
+ * The leading rail's track, and nothing about where it stops.
  *
- * GRAMMAR-GAP: nothing publishes the height of the application band, so the app
- * restates it. `calc(6rem+1px)` is `NavigationFeatureNav` (4rem) plus `Subnav`
- * (2rem) plus the separator between them (1px) - three numbers this page cannot
- * read from anywhere, and the sole reason the value is arbitrary rather than a
- * token. The capability wanted is that the shell publish its own stacked band
- * height as a custom property on the element it wraps the page in - a
- * `--grammar-band-offset` set by `WorkspaceShell`/`Subnav` and readable below
- * them - so this class and the three sticky measures on
- * `dashboardLeadingRailRegionClassName` become `top-(--grammar-band-offset)`
- * and `calc(100dvh-var(--grammar-band-offset))` instead of arithmetic. Until
- * then the sweep reports all four as OFF_SCALE; it has no allowlist, so the
- * finding stands rather than being hidden.
+ * A page owns the rail's width, the separator between it and the main track, and the stretch that
+ * gives a sticky child room to travel. Where the rail begins and how tall it may be belong to
+ * Grammar `Rail mode="sticky"`, which reads the `--starci-core-band-offset` the sticky band above it
+ * publishes (@starci/grammar 0.4.5). The four `calc()` measures that used to restate that band -
+ * the subnav offset token and the rail's `top`, `height` and `max-height` - are gone with the gap
+ * that forced them, and the compact Subnav toggle keeps its 44px target from the package too.
  *
- * GRAMMAR-GAP: Subnav publishes no size prop for its menu-toggle Button, which
- * renders at the vendor's default (`size-10`, 40px). The dashboard drawer toggle
- * is the sole compact-rail entry point, so a sub-44px target regresses a WCAG
- * touch-target minimum with no published Grammar capability to fix it from the
- * app. See src/components/pages/DashboardPage/component.tsx (Subnav usage) and
- * this file for the two call sites; report lists the gap for a future Subnav
- * `toggleSize` prop.
- */
-export const dashboardCompactSubnavClassName = cn(
-    "[--starci-core-subnav-offset:calc(6rem+1px)]",
-    "[&_[data-grammar-subnav-toggle=true]]:!size-11",
-)
-
-/**
- * Identity and shortcuts stay pinned flush left with an independent scroll lane.
- *
- * GRAMMAR-GAP: the lg sticky offset below and the two viewport-height measures under it restate the
- * same application band height as `dashboardCompactSubnavClassName` above, for the same reason and
- * with the same fix - see the GRAMMAR-GAP note there. The rail pins below the band and claims the
- * viewport height that remains, so all three follow whatever the band publishes.
+ * `lg:grid` is the stretch: one grid item takes the region's full height by default, so the rail's
+ * own sticky frame has the travel a `self-start` flex item never had.
  */
 export const dashboardLeadingRailRegionClassName = cn(
     "w-full",
     "min-w-0",
     "shrink-0",
-    "px-3",
-    "py-6",
     "border-separator",
-    "lg:sticky",
-    "lg:top-[calc(4rem+2rem+1px)]",
     "lg:z-10",
-    "lg:flex",
-    "lg:h-[calc(100dvh-4rem-2rem-1px)]",
-    "lg:max-h-[calc(100dvh-4rem-2rem-1px)]",
+    "lg:grid",
     "lg:w-64",
     "lg:shrink-0",
-    "lg:flex-col",
-    "lg:self-start",
-    "lg:overflow-hidden",
+    "lg:self-stretch",
     "lg:border-r",
 )
 
