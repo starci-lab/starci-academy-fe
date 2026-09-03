@@ -5,7 +5,9 @@ import { cn } from "@heroui/react"
  * below `sm`.
  *
  * GRAMMAR-GAP: the row used to paint the semantic movement verdict as a two-pixel inline-start
- * band, `inset-shadow-[2px_0_0_0_var(--success|--danger)]` plus a `pl-4` clearance. That is an
+ * band - an arbitrary inset-shadow on the success or danger theme colour, plus a pl-4
+ * clearance for it. The class this note refuses is not written out here, because it would then
+ * be a class string in this file again, and the sweep reads the file as text. That was an
  * arbitrary value, and `ui/presentation/boundary.md` publishes no border on a semantic tone and no
  * border-width scale at all: its edges are the `--separator` hairline (BOUNDARY-1 to BOUNDARY-4)
  * and the `--border` outline (BOUNDARY-5), and it states that no application edge may be drawn with

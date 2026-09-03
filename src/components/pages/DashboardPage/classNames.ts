@@ -52,7 +52,7 @@ export const dashboardCompactSubnavClassName = cn(
 /**
  * Identity and shortcuts stay pinned flush left with an independent scroll lane.
  *
- * GRAMMAR-GAP: `lg:top-[calc(4rem+2rem+1px)]` and the two `100dvh` measures under it restate the
+ * GRAMMAR-GAP: the lg sticky offset below and the two viewport-height measures under it restate the
  * same application band height as `dashboardCompactSubnavClassName` above, for the same reason and
  * with the same fix - see the GRAMMAR-GAP note there. The rail pins below the band and claims the
  * viewport height that remains, so all three follow whatever the band publishes.
