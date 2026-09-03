@@ -78,8 +78,8 @@ export const RankedUserRow = (props: RankedUserRowProps) => {
     /*
      * MOVEMENT IS ALWAYS DRAWN, EVEN WHEN THERE IS NONE.
      *
-     * The row is a grid and its slots are placed in declaration order, so a missing movement cell
-     * would slide the follow control one column left - and the follow control on the global board,
+     * The row is a flex line and its cells sit in declaration order, so a missing movement cell
+     * would slide the follow control one place left - and the follow control on the global board,
      * which has no movement concept at all, would sit where the caret belongs on the weekly one.
      * An empty text holds the column open; it draws nothing and announces nothing.
      */
