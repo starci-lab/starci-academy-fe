@@ -50,6 +50,20 @@ describe("Common NavigationFeatureNav anatomy styles", () => {
         expect(grammarClassTokens).not.toEqual(expect.arrayContaining(responsiveUtilityTokens))
     })
 
+    it("gives every pressable in the band's action slots a 44px minimum target", () => {
+        expect(navbarCss).toMatch(/\.starci-core-navigation-feature-nav-actions :where\(button, \[role="button"\], a\[href\]\),\s*\.starci-core-navigation-feature-nav-compact-navigation :where\(button, \[role="button"\], a\[href\]\)\s*\{\s*min-inline-size: 44px;\s*min-block-size: 44px;\s*\}/)
+    })
+
+    it("keeps the floor on the pressable and the row height off the slot", () => {
+        for (const slot of [".starci-core-navigation-feature-nav-actions {", ".starci-core-navigation-feature-nav-compact-navigation {"]) {
+            const start = navbarCss.indexOf(slot)
+            expect(start, `missing shipped rule for ${slot}`).toBeGreaterThanOrEqual(0)
+            expect(navbarCss.slice(start, navbarCss.indexOf("}", start)), `${slot} must not size the row itself`).not.toMatch(/min-height|min-block-size|height:/)
+        }
+        expect(navbarCss).toMatch(/\.starci-core-navigation-feature-nav-primary\s*\{[\s\S]*?min-height: 4rem;/)
+        expect(navbarCss).toMatch(/\.starci-core-navigation-feature-nav-primary\s*\{[\s\S]*?padding-block: var\(--starci-core-inline-gap, 0\.5rem\);/)
+    })
+
     it("keeps Subnav compact and gives its icon trigger a 44px target", () => {
         expect(navbarCss).toMatch(/\.starci-core-subnav-toggle\s*\{[\s\S]*?width: 2\.75rem !important;[\s\S]*?height: 2\.75rem !important;/)
         expect(navbarCss).toMatch(/@media \(min-width: 70rem\)[\s\S]*?data-grammar-subnav-visibility="compact"[\s\S]*?display: none;/)
@@ -73,6 +87,13 @@ describe("Common sticky band offset", () => {
     it("adds a stacked sticky Subnav and drops it once a compact one is hidden", () => {
         expect(navbarCss).toMatch(/:has\(\.starci-core-subnav\[data-grammar-subnav-position="sticky"\]\)\s*\{\s*--starci-core-band-subnav-height: calc\(3\.25rem \+ 1px\);/)
         expect(navbarCss).toMatch(/@media \(min-width: 70rem\)[\s\S]*?data-grammar-subnav-visibility="compact"\]\)\s*\{\s*--starci-core-band-subnav-height: 0rem;/)
+    })
+
+    it("keeps its published height, because a 44px target still fits the 4rem row", () => {
+        expect(navbarCss).toMatch(/--starci-core-band-height: calc\(4rem \+ 1px\);/)
+        const rowHeight = 4 * 16
+        const blockInset = 0.5 * 16 * 2
+        expect(rowHeight - blockInset, "raising the touch floor above this would grow the band").toBeGreaterThanOrEqual(44)
     })
 
     it("sums the two into one property a page reads", () => {

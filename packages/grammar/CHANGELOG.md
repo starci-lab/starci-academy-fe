@@ -1,5 +1,81 @@
 # Changelog
 
+## 0.4.6
+
+Fixes only. Three defects a screenshot audit found on a real surface, all three of them Grammar's.
+
+### A collapse can no longer be outranked
+
+- `PrimaryRailLayout` NEVER COLLAPSED when `railWidth` was set. The collapse was a bare class inside
+  a container query, `(0,1,0)`; the rail track was an attribute selector outside it,
+  `[data-grammar-layout-rail-width="wide"]`, `(0,2,0)`. A container query adds no specificity of its
+  own, so the two-column form survived at every width: in a 358px container the primary track
+  computed to `0px` and the whole product explanation - illustration, benefits, disclosures - was
+  invisible on a phone while the rail floated over the remains of a heading.
+- `WorkspaceShell` had the identical defect one tier up. Its `[navigation="present"][rail="present"]`
+  rule `(0,3,0)` in the 72rem query, and its leading-rail rule `(0,4,0)`, both outranked the collapse
+  group's bare class, so a shell carrying a navigation and a rail never stacked either.
+- The repair is NOT a longer list of overrides. Restating the collapse once per attribute value
+  repairs today's variants and breaks again on the one somebody adds next year, and the break is
+  silent: jsdom evaluates no container query, so no render test can see it. The narrow form is the
+  DEFAULT instead, and every wide form moved inside a `min-width` container query. The two ranges
+  are mutually exclusive, so nothing inside the query can reach the collapsed layout at any
+  specificity, whatever attribute is invented later - and a renderer without container queries gets
+  the stacked form, which is the safe half of the pair.
+- `PrimaryRailLayout` gained one correctness rule on the way: a rail track is only granted to
+  `[data-grammar-layout-rail="present"]`, so `railWidth` on a layout with no rail can no longer
+  reserve a column for a rail that was never passed.
+- The sweep for the same pattern covered every container query in the sheet. `Rail` (18rem),
+  `SurfaceCard`'s label and rows (28rem), the section header (32rem) and `ChatWorkspace` are clean -
+  their collapses either have no attribute rule competing for the property or already read
+  mobile-first. `PrimaryRailLayout` and `WorkspaceShell` were the only two, and both are fixed.
+- `src/core/composition/collapse.spec.tsx` is the guard. It renders every `railWidth` x
+  `collapsedOrder` variant and every navigation x rail x position x width combination, matches the
+  attributes each one emits against the selectors the sheet contains, and fails if any rule outside
+  a container query gives a matching element a side-by-side grid. The last check is a law rather
+  than a list: it holds for EVERY class a container query touches, so a new composition inherits it.
+
+### The band's controls meet the touch floor
+
+- Every pressable in `NavigationFeatureNav`'s action slots was the vendor button's own height -
+  36px on desktop, 40px compact - and the touch floor is 44px. The language menu, the cart, the
+  account button, the compact drawer trigger and the field-shaped search trigger all sat under it.
+  Both action slots now give their controls `min-inline-size` and `min-block-size` of 44px.
+- It is a MINIMUM, not a size, and it is spelled on the pressable, never on the slot. `min-*` are
+  properties the vendor's rules never set, so nothing here is owed an `!important`, and the glyph,
+  the label, the paint and the corner are untouched. A slot with a min-height would have padded a
+  row that has nothing in it.
+- The feature layer is deliberately out of scope: its tabs belong to the `Tabs` branch, and a tab's
+  target is that branch's answer to give.
+
+### One boundary for the surface family
+
+- `SurfaceCard` beside `SurfaceAccordionCard` in one column disagreed by 16px at both edges.
+  `SurfaceCard` is the only member of the three whose root is a HeroUI `Card`, and the vendor's
+  `.card` carries a 1rem padding that pushed the card's visible surface and its label further in
+  than its siblings'. The label row and the content shell were already given `padding: 0 !important`
+  for exactly this reason; the root had been missed. It is zeroed now, and the content region keeps
+  the family's single `--starci-core-surface-inset` where the `PADDING-4` claim already puts it, so
+  the vendor inset is removed rather than moved.
+- `SurfaceListCard` and `SurfaceAccordionCard` were checked for the same thing and are clean: both
+  are rooted in a Grammar `<section>` and take no vendor slot at all. The claims spec now renders
+  all three together and fails if a family root picks one up.
+
+### Intentional visual deltas
+
+- A `PrimaryRailLayout` or a `WorkspaceShell` in a narrow container STACKS, which is what both
+  always claimed to do. Anything that was reading as a squeezed two-column form on a phone becomes
+  one column, and a rail passed `collapsedOrder="rail-first"` finally leads.
+- The band's controls grow from 36/40px to 44px. The band itself does not: the primary row is 4rem
+  with a 0.5rem block inset on each side, so 44px is 4px short of the 3rem the row already offers,
+  and `--starci-core-band-height` stays `calc(4rem + 1px)`. A spec asserts the arithmetic, so
+  raising the floor again would fail rather than quietly desynchronise the published offset.
+- A `SurfaceCard`'s interior moves outward by 16px. For a transparent card the visible surface now
+  starts at the object's own box, level with a list or an accordion beside it, and its copy keeps
+  the single `PADDING-4` inset. For a labelled Core card the material box is UNCHANGED - a padding
+  paints inside its own background - and only the label and content lose the doubled inset, leaving
+  the one `--starci-core-surface-inset` the family rule was written for.
+
 ## 0.4.5
 
 Additive. Two numbers that consumers were restating, and one edge they were painting themselves,
