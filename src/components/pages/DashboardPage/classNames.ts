@@ -23,6 +23,19 @@ export const dashboardFrameClassName = cn(
  * `data-grammar-subnav-position="sticky"` styling; only the offset token is an
  * app value, published as `--starci-core-subnav-offset`.
  *
+ * GRAMMAR-GAP: nothing publishes the height of the application band, so the app
+ * restates it. `calc(6rem+1px)` is `NavigationFeatureNav` (4rem) plus `Subnav`
+ * (2rem) plus the separator between them (1px) - three numbers this page cannot
+ * read from anywhere, and the sole reason the value is arbitrary rather than a
+ * token. The capability wanted is that the shell publish its own stacked band
+ * height as a custom property on the element it wraps the page in - a
+ * `--grammar-band-offset` set by `WorkspaceShell`/`Subnav` and readable below
+ * them - so this class and the three sticky measures on
+ * `dashboardLeadingRailRegionClassName` become `top-(--grammar-band-offset)`
+ * and `calc(100dvh-var(--grammar-band-offset))` instead of arithmetic. Until
+ * then the sweep reports all four as OFF_SCALE; it has no allowlist, so the
+ * finding stands rather than being hidden.
+ *
  * GRAMMAR-GAP: Subnav publishes no size prop for its menu-toggle Button, which
  * renders at the vendor's default (`size-10`, 40px). The dashboard drawer toggle
  * is the sole compact-rail entry point, so a sub-44px target regresses a WCAG
@@ -36,7 +49,14 @@ export const dashboardCompactSubnavClassName = cn(
     "[&_[data-grammar-subnav-toggle=true]]:!size-11",
 )
 
-/** Identity and shortcuts stay pinned flush left with an independent scroll lane. */
+/**
+ * Identity and shortcuts stay pinned flush left with an independent scroll lane.
+ *
+ * GRAMMAR-GAP: `lg:top-[calc(4rem+2rem+1px)]` and the two `100dvh` measures under it restate the
+ * same application band height as `dashboardCompactSubnavClassName` above, for the same reason and
+ * with the same fix - see the GRAMMAR-GAP note there. The rail pins below the band and claims the
+ * viewport height that remains, so all three follow whatever the band publishes.
+ */
 export const dashboardLeadingRailRegionClassName = cn(
     "w-full",
     "min-w-0",
@@ -51,7 +71,6 @@ export const dashboardLeadingRailRegionClassName = cn(
     "lg:h-[calc(100dvh-4rem-2rem-1px)]",
     "lg:max-h-[calc(100dvh-4rem-2rem-1px)]",
     "lg:w-64",
-    "lg:max-w-64",
     "lg:shrink-0",
     "lg:flex-col",
     "lg:self-start",
@@ -142,7 +161,7 @@ export const dashboardRailScrollContentClassName = cn(
 export const dashboardRailActionsClassName = cn("min-w-0")
 
 /** Let the selected dashboard panel consume the remaining width inside the main track. */
-export const dashboardPanelClassName = cn("flex", "w-full", "max-w-none", "min-w-0", "flex-1", "flex-col", "gap-6")
+export const dashboardPanelClassName = cn("flex", "w-full", "min-w-0", "flex-1", "flex-col", "gap-6")
 
 /** Compose Overview as one command-center stack: a lead decision, then supporting evidence. */
 export const dashboardOverviewClassName = cn("flex", "min-w-0", "flex-col", "gap-6")
