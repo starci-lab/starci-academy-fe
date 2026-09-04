@@ -37,13 +37,38 @@ export const Tabs = (props: TabsProps) => {
     const frameRef = useRef<HTMLDivElement>(null)
     useEffect(() => setIsClientReady(true), [])
     useLayoutEffect(() => {
-        if (!isClientReady || props.panelId === undefined) return
-        frameRef.current?.querySelectorAll<HTMLElement>("[data-grammar-tab-id]").forEach((identity) => {
-            const itemId = identity.dataset.grammarTabId
-            const tab = identity.closest<HTMLElement>("[role='tab']")
-            if (itemId !== undefined && tab !== null) tab.setAttribute("aria-controls", props.panelId?.(itemId) ?? "")
-        })
-    }, [isClientReady, props.items, props.panelId])
+        const frame = frameRef.current
+        const panelId = props.panelId
+        if (!isClientReady || frame === null || panelId === undefined) return
+
+        // HeroUI's collection may mount or update after this layout effect. Observe
+        // only the owned relationship, preserving the actual vendor value for cleanup.
+        const relationships = new Map<HTMLElement, { original: string | null; applied: string }>()
+        const syncPanelIds = () => {
+            frame.querySelectorAll<HTMLElement>("[data-grammar-tab-id]").forEach((identity) => {
+                const itemId = identity.dataset.grammarTabId
+                const tab = identity.closest<HTMLElement>("[role='tab']")
+                if (itemId === undefined || tab === null) return
+                const current = tab.getAttribute("aria-controls")
+                const previous = relationships.get(tab)
+                const expected = panelId(itemId)
+                const original = previous !== undefined && current === previous.applied ? previous.original : current
+                relationships.set(tab, { original, applied: expected })
+                if (current !== expected) tab.setAttribute("aria-controls", expected)
+            })
+        }
+        const observer = new MutationObserver(syncPanelIds)
+        observer.observe(frame, { childList: true, subtree: true, attributes: true, attributeFilter: ["aria-controls", "data-grammar-tab-id"] })
+        syncPanelIds()
+        return () => {
+            observer.disconnect()
+            relationships.forEach(({ original, applied }, tab) => {
+                if (tab.getAttribute("aria-controls") !== applied) return
+                if (original === null) tab.removeAttribute("aria-controls")
+                else tab.setAttribute("aria-controls", original)
+            })
+        }
+    }, [isClientReady, props.items, props.panelId, props.selectedKey])
 
     const inset = props.inset ?? "none"
     const frameContract = inset === "page" ? "PADDING-5" : undefined
@@ -65,7 +90,6 @@ export const Tabs = (props: TabsProps) => {
                                 key={item.id}
                                 id={item.id}
                                 aria-label={item.label}
-                                aria-controls={props.panelId?.(item.id)}
                                 data-contract="PADDING-3"
                             >
                                 <span className={tabContentClassName} data-contract="GAP-2" data-grammar-tab-id={item.id}>

@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.4.9
+
+Fix Core `Tabs` external panel relationships after the underlying collection mounts or updates.
+
+- A `panelId` callback now remains authoritative on initial render, pointer/keyboard selection,
+  and collection changes, including stable callbacks. Tabs keep their existing focus and selection behavior.
+- The adapter preserves the vendor relationship it actually observes and restores it when `panelId`
+  is removed. Cleanup disconnects observation; unchanged attributes are not rewritten.
+- Regression tests render real external panels with the real HeroUI collection and cover initial
+  linkage, selection, changed/removed callbacks, collection replacement, multiple instances and cleanup.
+- No public API, presentation, dependency or consumer changes.
+
+
 ## 0.4.8
 
 Fix only. A live audit found `SectionHeader` stamping `data-contract="GAP-5"` on its root while the

@@ -1,13 +1,24 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen } from "@testing-library/react"
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react"
+import { useState } from "react"
 import { renderToString } from "react-dom/server"
-import { describe, expect, it, vi } from "vitest"
+import { afterAll, afterEach, describe, expect, it, vi } from "vitest"
 import { Tabs } from "./index.js"
 
 vi.stubGlobal("ResizeObserver", class ResizeObserver {
     observe() {}
     unobserve() {}
     disconnect() {}
+})
+
+afterEach(cleanup)
+
+// jsdom has no Web Animations API; the real collection uses it for indicator moves.
+const getAnimationsDescriptor = Object.getOwnPropertyDescriptor(Element.prototype, "getAnimations")
+Object.defineProperty(Element.prototype, "getAnimations", { configurable: true, value: () => [] })
+afterAll(() => {
+    if (getAnimationsDescriptor) Object.defineProperty(Element.prototype, "getAnimations", getAnimationsDescriptor)
+    else Reflect.deleteProperty(Element.prototype, "getAnimations")
 })
 
 describe("Core Tabs", () => {
@@ -49,4 +60,121 @@ describe("Core Tabs", () => {
         const { container } = render(<Tabs inset="page" label="Workspace" selectedKey="content" items={[{ id: "content", label: "Task brief" }]} />)
         expect(container.querySelector("[data-grammar-tabs-inset='page']")).not.toBeNull()
     })
+    it.each(["stable", "inline"] as const)("links real external panels on mount and selection with a %s callback", async (callbackMode) => {
+        const items = [{ id: "overview", label: "Overview" }, { id: "community", label: "Community" }]
+        const stablePanelId = (key: string) => `external-${key}`
+        const onSelect = vi.fn()
+        const Example = () => {
+            const [selectedKey, setSelectedKey] = useState("overview")
+            return <>
+                <Tabs label="External panels" selectedKey={selectedKey} items={items}
+                    panelId={callbackMode === "stable" ? stablePanelId : (key) => `external-${key}`}
+                    onSelect={(key) => { onSelect(key); setSelectedKey(key) }} />
+                {items.map((item) => <section key={item.id} id={stablePanelId(item.id)} role="tabpanel"
+                    aria-label={item.label} hidden={selectedKey !== item.id}>{item.label} body</section>)}
+            </>
+        }
+        const { container, unmount } = render(<Example />)
+        const assertLinks = async (selectedLabel: string) => {
+            await waitFor(() => {
+                for (const item of items) {
+                    const tab = screen.getByRole("tab", { name: item.label })
+                    expect(tab.getAttribute("aria-controls")).toBe(stablePanelId(item.id))
+                    const panel = document.getElementById(tab.getAttribute("aria-controls")!)
+                    expect(panel?.getAttribute("role")).toBe("tabpanel")
+                    expect(panel?.textContent).toBe(`${item.label} body`)
+                }
+                expect(screen.getByRole("tab", { name: selectedLabel }).getAttribute("aria-selected")).toBe("true")
+                expect(screen.getByRole("tabpanel", { name: selectedLabel })).not.toBeNull()
+            })
+        }
+        await assertLinks("Overview")
+        fireEvent.click(screen.getByRole("tab", { name: "Community" }))
+        await assertLinks("Community")
+        expect(onSelect).toHaveBeenCalledTimes(1)
+        expect(onSelect).toHaveBeenLastCalledWith("community")
+        const community = screen.getByRole("tab", { name: "Community" })
+        community.focus()
+        fireEvent.keyDown(community, { key: "ArrowLeft" })
+        await assertLinks("Overview")
+        expect(document.activeElement).toBe(screen.getByRole("tab", { name: "Overview" }))
+        expect(onSelect).toHaveBeenCalledTimes(2)
+        unmount()
+        expect(container.childElementCount).toBe(0)
+    })
+
+    it("updates external targets when the callback and item collection change", async () => {
+        const first = [{ id: "overview", label: "Overview" }]
+        const next = [...first, { id: "community", label: "Community" }]
+        const { rerender } = render(<Tabs label="Targets" selectedKey="overview" items={first} panelId={(key) => `old-${key}`} />)
+        await waitFor(() => expect(screen.getByRole("tab", { name: "Overview" }).getAttribute("aria-controls")).toBe("old-overview"))
+        rerender(<Tabs label="Targets" selectedKey="community" items={next} panelId={(key) => `new-${key}`} />)
+        await waitFor(() => {
+            expect(screen.getByRole("tab", { name: "Overview" }).getAttribute("aria-controls")).toBe("new-overview")
+            expect(screen.getByRole("tab", { name: "Community" }).getAttribute("aria-controls")).toBe("new-community")
+            expect(screen.getByRole("tab", { name: "Community" }).getAttribute("aria-selected")).toBe("true")
+        })
+    })
+
+    it("leaves vendor relationships alone without panelId", async () => {
+        const { rerender } = render(<Tabs label="Default panels" selectedKey="overview" items={[{ id: "overview", label: "Overview" }]} />)
+        const tab = await screen.findByRole("tab", { name: "Overview" })
+        const generated = tab.getAttribute("aria-controls")
+        expect(generated).toBeTruthy()
+        rerender(<Tabs label="Default panels" selectedKey="overview" items={[{ id: "overview", label: "Overview" }]} />)
+        expect(screen.getByRole("tab", { name: "Overview" }).getAttribute("aria-controls")).toBe(generated)
+    })
+
+    it("restores the observed default relationship when external panels are removed", async () => {
+        const items = [{ id: "overview", label: "Overview" }]
+        const { rerender } = render(<Tabs label="Optional panels" selectedKey="overview" items={items} />)
+        const tab = await screen.findByRole("tab", { name: "Overview" })
+        const original = tab.getAttribute("aria-controls")
+        expect(original).toBeTruthy()
+        rerender(<Tabs label="Optional panels" selectedKey="overview" items={items} panelId={(key) => `external-${key}`} />)
+        await waitFor(() => expect(tab.getAttribute("aria-controls")).toBe("external-overview"))
+        rerender(<Tabs label="Optional panels" selectedKey="overview" items={items} />)
+        await waitFor(() => expect(tab.getAttribute("aria-controls")).toBe(original))
+    })
+
+    it("maps reordered and replaced collection entries by item identity", async () => {
+        const panelId = (key: string) => `external-${key}`
+        const { rerender } = render(<Tabs label="Changing collection" selectedKey="overview"
+            items={[{ id: "overview", label: "Overview" }, { id: "community", label: "Community" }]} panelId={panelId} />)
+        await waitFor(() => expect(screen.getByRole("tab", { name: "Overview" }).getAttribute("aria-controls")).toBe("external-overview"))
+        rerender(<Tabs label="Changing collection" selectedKey="settings"
+            items={[{ id: "community", label: "Community" }, { id: "settings", label: "Settings" }]} panelId={panelId} />)
+        await waitFor(() => {
+            expect(screen.queryByRole("tab", { name: "Overview" })).toBeNull()
+            expect(screen.getByRole("tab", { name: "Community" }).getAttribute("aria-controls")).toBe("external-community")
+            expect(screen.getByRole("tab", { name: "Settings" }).getAttribute("aria-controls")).toBe("external-settings")
+            expect(screen.getByRole("tab", { name: "Settings" }).getAttribute("aria-selected")).toBe("true")
+        })
+    })
+
+    it("isolates identical item keys across instances and stops synchronization after unmount", async () => {
+        const items = [{ id: "overview", label: "Overview" }]
+        const { container, unmount } = render(<>
+            <div data-testid="first"><Tabs label="First" selectedKey="overview" items={items} panelId={(key) => `first-${key}`} /></div>
+            <div data-testid="second"><Tabs label="Second" selectedKey="overview" items={items} panelId={(key) => `second-${key}`} /></div>
+        </>)
+        const first = await within(screen.getByTestId("first")).findByRole("tab", { name: "Overview" })
+        const second = await within(screen.getByTestId("second")).findByRole("tab", { name: "Overview" })
+        await waitFor(() => {
+            expect(first.getAttribute("aria-controls")).toBe("first-overview")
+            expect(second.getAttribute("aria-controls")).toBe("second-overview")
+        })
+        let mutations = 0
+        const observer = new MutationObserver((records) => { mutations += records.length })
+        observer.observe(container, { subtree: true, attributes: true, attributeFilter: ["aria-controls"] })
+        // No idle observer feedback loop after the public relationship settles.
+        await new Promise<void>((resolve) => setTimeout(resolve, 0))
+        expect(mutations).toBe(0)
+        observer.disconnect()
+        unmount()
+        first.setAttribute("aria-controls", "detached-target")
+        await new Promise<void>((resolve) => setTimeout(resolve, 0))
+        expect(first.getAttribute("aria-controls")).toBe("detached-target")
+    })
+
 })
