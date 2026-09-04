@@ -2384,10 +2384,22 @@
     .starci-core-text[data-loading="true"][data-size="metric-lead"] { width: 10rem; }
 
     /* --- Text action: one recipe, eight appearances, selected by data attributes. --- */
+    /*
+     * A TextAction is a BUTTON however text-shaped it looks, so the family's pressable floor belongs
+     * to the recipe rather than to one appearance. `route` carried it alone until 0.4.10, which left
+     * the padding-less appearances - inline, muted, disclosure, plain - collapsing to their line box:
+     * a rail action measured 86 x 20 CSS px against a 44px floor. The floor moves up to the recipe
+     * here and `route` keeps its own row, now redundant but harmless, so no appearance can lose it
+     * again. `min-block-size` rather than `padding-block` for the reason `route` already states:
+     * these appearances draw no background at rest, so the extra block size is invisible chrome
+     * around unchanged FONT-2/PADDING-2 typography and never a bigger pill. `align-items: center`
+     * above keeps the glyph and label centred inside the taller box.
+     */
     .starci-core-text-action {
         display: inline-flex;
         width: fit-content;
         min-width: 0;
+        min-block-size: var(--starci-core-control-min-size, 2.75rem);
         flex: none;
         align-items: center;
         gap: 0.5rem;
