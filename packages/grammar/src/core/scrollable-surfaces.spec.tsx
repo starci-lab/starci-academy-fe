@@ -7,6 +7,7 @@ import { SurfaceCard } from "./branch/SurfaceCard/index.js"
 import { SurfaceListCard } from "./branch/SurfaceListCard/index.js"
 import { HorizontalScrollRegion } from "./composite/HorizontalScrollRegion/index.js"
 import { StaticStateRow } from "./composite/StaticStateRow/index.js"
+import { VerticalScrollRegion } from "./composite/VerticalScrollRegion/index.js"
 import { OtpInput } from "./OtpInput.js"
 import { SectionHeader } from "./primitive/SectionHeader/index.js"
 import { Rail } from "./branch/Rail/index.js"
@@ -179,6 +180,26 @@ describe("scrollable Core surfaces", () => {
 
         const needed = renderToStaticMarkup(
             <HorizontalScrollRegion overflow="needed"><div>Six fixed slots</div></HorizontalScrollRegion>,
+        )
+        expect(tagWith(needed, marker)).toContain("data-grammar-overflow=\"needed\"")
+        expect(axisClaims(claimsOn(needed, marker))).toEqual(["OVERFLOW-4"])
+    })
+
+    it("gives VerticalScrollRegion one overflow answer and one scrolling axis", () => {
+        const marker = "data-grammar-scroll-region"
+        const always = renderToStaticMarkup(
+            <VerticalScrollRegion isScrollable><p>Conversation</p></VerticalScrollRegion>,
+        )
+        expect(tagWith(always, marker)).toContain("data-grammar-scroll-region=\"vertical\"")
+        expect(tagWith(always, marker)).toContain("data-grammar-overflow=\"always\"")
+        expect(axisClaims(claimsOn(always, marker))).toEqual(["OVERFLOW-3"])
+
+        const region = scopedDeclarations("[data-grammar-scroll-region=\"vertical\"]")
+        expect(region).toContainEqual({ property: "overflow-y", value: "auto" })
+        expect(region).toContainEqual({ property: "overflow-x", value: "hidden" })
+
+        const needed = renderToStaticMarkup(
+            <VerticalScrollRegion isScrollable overflow="needed"><p>Conversation</p></VerticalScrollRegion>,
         )
         expect(tagWith(needed, marker)).toContain("data-grammar-overflow=\"needed\"")
         expect(axisClaims(claimsOn(needed, marker))).toEqual(["OVERFLOW-4"])

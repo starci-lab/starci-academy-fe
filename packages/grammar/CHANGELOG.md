@@ -1,5 +1,48 @@
 # Changelog
 
+## 0.4.13
+
+Fix only. A live audit measured the conversation region of `ChatWorkspace` - the node stamped
+`MEASURE-7 OVERFLOW-3` and named "Tin nhắn thiết lập" - rendering `overflow: auto auto` on every
+capture. OVERFLOW-3 promises one scrolling axis and a second axis left clipped or visible on purpose;
+both axes scrolled. This is the defect 0.4.11 repaired on `HorizontalScrollRegion`, on the sibling
+region nobody had measured yet.
+
+### The vertical region owns its overflow answer, and one axis
+
+- Nothing in the family's sheet named `overflow-x` for this region. The vendor's
+  `.scroll-shadow--vertical` sets `overflow-y: auto` alone, and every host class the region wears -
+  `.starci-core-chat-workspace-conversation`, `.starci-core-chat-workspace-overlay-rail`,
+  `.starci-core-accordion-scroll-region`, `.starci-core-form-scroll-viewport` - names that same one
+  axis or names none at all. Per CSS a non-visible overflow on one axis forces the other from
+  `visible` to `auto`, so the region rendered two scrolling axes under a one-axis claim.
+- `src/common/styles.css` now declares `overflow-x: hidden; overflow-y: auto` on
+  `[data-grammar-scroll-region="vertical"]`, the identity `VerticalScrollRegion` stamps on the
+  scrollable branch. No `!important`: no host class and no vendor rule ever names `overflow-x`, so
+  the declaration is unopposed whichever order a consumer imports the two sheets in.
+- `VerticalScrollRegion` takes an `overflow?: "always" | "needed"` prop (default `"always"`), stamps
+  `data-grammar-overflow` beside `data-grammar-scroll-region="vertical"`, and claims
+  `MEASURE-7 OVERFLOW-3` or `MEASURE-7 OVERFLOW-4` accordingly - the shape `HorizontalScrollRegion`
+  already has. `ChatWorkspace` asks for nothing, so its conversation, its inline rail and its overlay
+  rail keep claiming `MEASURE-7 OVERFLOW-3`, as does every other host. A `data-contract` a caller
+  passes in is still replaced by the region's own: one claim per node, and the node's own claim.
+- No class, no markup, no JSX and no consumer prop changed. The non-scrollable branch is untouched.
+
+### Tests
+
+- `src/core/scrollable-surfaces.spec.tsx` gains the stamp-versus-render case the sibling region
+  already had: the rendered node carries `data-grammar-scroll-region="vertical"` and
+  `data-grammar-overflow="always"` under the single axis claim `OVERFLOW-3`, the shipped sheet
+  declares both `overflow-y: auto` and `overflow-x: hidden` for that identity, and `overflow="needed"`
+  moves the stamp and the claim together to `OVERFLOW-4`.
+- `src/core/composition/ChatWorkspace/index.spec.tsx` measures the repair where the audit measured
+  the defect: it renders the workspace under the shipped sheet in jsdom and reads the conversation
+  region's COMPUTED overflow per axis, not the class list. Both axes are measured because a sheet
+  that names one renders two - reading `overflow-y` alone would have called the old render correct.
+  Without the repair the inline axis measures `visible`.
+- The repository has no story for this component, so no story was updated. `SurfaceAccordionCard`'s
+  own frameless double stamp stays out of scope and unchanged, and no consumer changed.
+
 ## 0.4.12
 
 Fix only. A live audit measured a `Heading` stamped `FONT-4` rendering 36px and one stamped `FONT-3`

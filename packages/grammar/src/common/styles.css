@@ -371,6 +371,23 @@
         min-width: max-content;
     }
 
+    /*
+     * The same one scrolling axis, for the vertical region.
+     *
+     * The vendor's `.scroll-shadow--vertical` sets `overflow-y: auto` alone, and every host class
+     * this region wears - the chat conversation, the chat overlay rail, the accordion region, the
+     * form scroll viewport - names that same single axis or names none at all. A computed non-visible
+     * overflow on one axis forces the other from `visible` to `auto`, so the region rendered
+     * `overflow: auto auto`: two scrolling axes under an OVERFLOW-3 claim that promises one. Naming
+     * both axes on the region's own identity holds the render at the one axis the claim describes,
+     * and needs no `!important` to do it: no host class and no vendor rule ever names `overflow-x`,
+     * so this declaration is unopposed whichever order a consumer imports the two sheets in.
+     */
+    [data-grammar-scroll-region="vertical"] {
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
     @media (min-width: 40rem) {
         .starci-core-form-page {
             padding-block: 2.5rem;

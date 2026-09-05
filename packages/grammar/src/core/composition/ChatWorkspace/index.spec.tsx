@@ -1,5 +1,8 @@
 // @vitest-environment jsdom
 
+import { readFileSync } from "node:fs"
+import { dirname, resolve } from "node:path"
+import { fileURLToPath } from "node:url"
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import type { ComponentProps, PropsWithChildren } from "react"
 import { createContext, useContext } from "react"
@@ -39,6 +42,37 @@ vi.mock("@heroui/react", async (importOriginal) => {
 })
 
 import { ChatWorkspace } from "./index.js"
+
+/*
+ * Read through `fileURLToPath` rather than `new URL(..., import.meta.url)`: Vite rewrites that exact
+ * form into an asset URL, which under the jsdom environment resolves to `http://localhost:3000/...`
+ * and never reaches the file the package ships.
+ */
+const SHIPPED_SHEET = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), "../../../common/styles.css"), "utf8")
+
+/**
+ * jsdom parses `@layer` blocks into `CSSLayerBlockRule`, but its cascade never visits the rules
+ * inside one, so the shipped sheet is lifted out of its layer before anything is measured. What is
+ * measured is still the sheet this package ships, declaration for declaration.
+ */
+const liftLayers = (rules: CSSRuleList): ReadonlyArray<string> => Array.from(rules).flatMap((rule) =>
+    rule.constructor.name === "CSSLayerBlockRule"
+        ? liftLayers((rule as CSSGroupingRule).cssRules)
+        : [rule.cssText])
+
+/** Puts the shipped sheet, flattened, behind this document and hands back the node to take away again. */
+const installShippedSheet = () => {
+    const parser = document.createElement("style")
+    parser.textContent = SHIPPED_SHEET
+    document.head.append(parser)
+    const flattened = liftLayers(parser.sheet!.cssRules).join("\n")
+    parser.remove()
+
+    const sheet = document.createElement("style")
+    sheet.textContent = flattened
+    document.head.append(sheet)
+    return sheet
+}
 
 const mediaListeners = new Set<() => void>()
 let compact = false
@@ -187,5 +221,42 @@ describe("ChatWorkspace", () => {
         setCompact(false)
         expect(onRailOpenChange).toHaveBeenCalledWith(false)
         expect(screen.getByRole("complementary", { name: "Context" })).not.toBeNull()
+    })
+
+    /*
+     * Both axes are measured, because a sheet that names one renders two.
+     *
+     * OVERFLOW-3 promises one scrolling axis and a second axis left clipped or visible on purpose.
+     * The vendor's `.scroll-shadow--vertical` sets `overflow-y: auto` alone and this family's own
+     * `.starci-core-chat-workspace-conversation` does the same, and per CSS a non-visible overflow on
+     * one axis forces the other from `visible` to `auto` - so a region whose sheet names only the
+     * block axis paints `overflow: auto auto`, two scrolling axes under a one-axis claim. Reading
+     * `overflow-y` alone would call that render correct. The inline axis is therefore measured too.
+     */
+    it("renders the conversation region on the one axis its OVERFLOW-3 stamp claims, measured per axis", () => {
+        const sheet = installShippedSheet()
+        try {
+            render(
+                <div className="grammar-common-root" data-grammar-family="core">
+                    <ChatWorkspace
+                        composer={<form aria-label="Soạn tin"><input aria-label="Tin nhắn" /></form>}
+                        conversation={<p>Nội dung hội thoại</p>}
+                        conversationLabel="Tin nhắn thiết lập"
+                        header={<h1>Thiết lập</h1>}
+                        label="Thiết lập"
+                    />
+                </div>,
+            )
+
+            const region = screen.getByRole("region", { name: "Tin nhắn thiết lập" })
+            const claims = (region.getAttribute("data-contract") ?? "").split(" ").filter(Boolean)
+            expect(claims.filter((claim) => /^OVERFLOW-[34]$/.test(claim))).toEqual(["OVERFLOW-3"])
+
+            const computed = getComputedStyle(region)
+            expect(computed.overflowY, "the conversation must scroll on the block axis").toBe("auto")
+            expect(computed.overflowX, "the conversation must stay clipped on the inline axis").toBe("hidden")
+        } finally {
+            sheet.remove()
+        }
     })
 })
