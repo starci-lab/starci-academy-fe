@@ -349,10 +349,20 @@
         }
     }
 
+    /*
+     * One scrolling axis, drawn by the family's own sheet.
+     *
+     * The vendor's `.scroll-shadow--horizontal` sets `overflow-x: auto` alone, and a computed
+     * `overflow-x: auto` forces `overflow-y` to compute to `auto` as well, so the region rendered
+     * `overflow: auto auto` - two scrolling axes under an OVERFLOW-3 claim that promises one. Naming
+     * both axes here keeps the render at the one axis the claim describes.
+     */
     .starci-core-horizontal-scroll-region {
         width: 100%;
         min-width: 0;
         padding-block: 0.25rem;
+        overflow-x: auto;
+        overflow-y: hidden;
         overscroll-behavior-inline: contain;
     }
 

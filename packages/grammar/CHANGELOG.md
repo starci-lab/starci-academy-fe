@@ -1,5 +1,55 @@
 # Changelog
 
+## 0.4.11
+
+Fix only. A live audit measured three of the family's own nodes stamping a `data-contract` the same
+node's render contradicts. Every one of them is Core's render and Core's stamp, so every one of them
+is repaired here rather than explained to a consumer.
+
+### One node, one overflow answer
+
+- `SurfaceCard`'s content node claimed `OVERFLOW-1 OVERFLOW-2` under `frame="frameless"` - "this
+  surface does not clip" and "this surface clips" on one element. The shipped sheet paints
+  `overflow: visible` on `.starci-core-surface.starci-core-frameless-surface` and `overflow: hidden`
+  on `.starci-core-surface`, so the node now claims `OVERFLOW-1` alone when frameless and
+  `OVERFLOW-2` alone when bounded. No class, no markup and no paint changed.
+
+### A frameless surface takes no inset, and now says so
+
+- The frameless card's body claimed `PADDING-4` (1rem) and rendered 0px on every side, because
+  `.starci-core-frameless-surface > .starci-core-surface-content` sets `padding: 0`.
+- The ruling is the family's own canon, not a convenience: `frame="frameless"` means the content
+  already owns its visible boundaries, so Core must not draw another shell - and the shipped sheet
+  drops the inset together with the frame. `PADDING-0` is how this family answers "no inset"
+  everywhere else, on this same body under `composition="joined"`, on `SurfaceListCard`'s root and on
+  `SurfaceAccordionCard`'s panel. So the frameless body claims `PADDING-0`; `joined` keeps
+  `GAP-0 PADDING-0` and the bounded single body keeps `PADDING-4`. The render (0) is unchanged - only
+  the promise moved to meet it.
+
+### The scroll region owns its overflow answer, and one axis
+
+- `HorizontalScrollRegion` stamps its own `data-contract`, so a `data-contract` a caller passed in was
+  silently replaced and never reached the DOM - `Tabs` passed `OVERFLOW-4` and the strip rendered
+  `OVERFLOW-3`. The region now takes an `overflow?: "always" | "needed"` prop (default `"always"`),
+  stamps `data-grammar-overflow`, and claims `PADDING-1 MEASURE-3 OVERFLOW-3 OVERFLOW-5` or
+  `PADDING-1 MEASURE-3 OVERFLOW-4 OVERFLOW-5` accordingly. `Tabs` asks for `overflow="needed"`.
+- `.starci-core-horizontal-scroll-region` now declares `overflow-x: auto; overflow-y: hidden`. The
+  vendor's `.scroll-shadow--horizontal` sets `overflow-x: auto` alone, and a computed `overflow-x:
+  auto` forces `overflow-y` to `auto` too, so the node rendered `overflow: auto auto` - two scrolling
+  axes under a claim that promises one.
+
+### Tests
+
+- `src/core/scrollable-surfaces.spec.tsx` gains three stamp-versus-render cases that read the stamp
+  off the rendered markup and the declaration out of the shipped sheet: one overflow id on the
+  frameless and bounded content nodes, `PADDING-0` on the frameless body against the sheet's
+  `padding: 0`, and the region's single axis claim against `overflow-x`/`overflow-y`.
+- `src/core/branch/Tabs/index.spec.tsx` gains a case that the real rendered strip claims `OVERFLOW-4`,
+  not `OVERFLOW-3`, and carries `data-grammar-overflow="needed"`.
+- No consumer changes. `SurfaceAccordionCard`'s own frameless double stamp and `OtpInput`'s claim are
+  out of this fix's scope and unchanged.
+
+
 ## 0.4.9
 
 Fix Core `Tabs` external panel relationships after the underlying collection mounts or updates.

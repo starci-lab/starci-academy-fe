@@ -90,11 +90,25 @@ export const SurfaceCard = (props: SurfaceCardProps) => {
      * The inset is drawn on the CONTENT REGION, not on the surface shell, so its claim rides the
      * element whose shipped rule backs it. The shell keeps what it actually paints: its ground, its
      * clipping and its boundary.
+     *
+     * A frameless surface takes NO inset, and says so. `frame="frameless"` means the content already
+     * owns its visible boundaries, so Core must not draw another shell - and the shipped sheet drops
+     * the inset with the frame (`.starci-core-frameless-surface > .starci-core-surface-content {
+     * padding: 0 }`). PADDING-0 is how the family answers "no inset" everywhere else: on this same
+     * body under `composition="joined"`, on SurfaceListCard's root and on SurfaceAccordionCard's
+     * panel. The render is unchanged; only the promise now matches it.
      */
-    const compositionContract = composition === "joined" ? "GAP-0 PADDING-0" : "PADDING-4"
+    const compositionContract = composition === "joined"
+        ? "GAP-0 PADDING-0"
+        : frame === "frameless" ? "PADDING-0" : "PADDING-4"
+    /*
+     * One node, one overflow answer. The frameless shell paints `overflow: visible` and the bounded
+     * shell paints `overflow: hidden`; a node that claimed both said the surface clips and does not
+     * clip at once, and an audit measuring it could only ever find one of the two true.
+     */
     const contentContract = [
         frame === "frameless" ? "SURFACE-1" : "SURFACE-2",
-        frame === "frameless" ? "OVERFLOW-1 OVERFLOW-2" : "OVERFLOW-2",
+        frame === "frameless" ? "OVERFLOW-1" : "OVERFLOW-2",
         depth === "nested" ? "BOUNDARY-5" : "BOUNDARY-6",
     ].join(" ")
     const rootContract = wholeAction === undefined ? undefined : "SURFACE-4"

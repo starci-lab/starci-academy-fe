@@ -18,7 +18,14 @@ export type TabItem = {
     readonly leading?: ReactNode
 }
 
-/** Business-neutral controlled peer tabs with one declared overflow owner. */
+/**
+ * Business-neutral controlled peer tabs with one declared overflow owner.
+ *
+ * The strip's scroll owner is `HorizontalScrollRegion`, and that region stamps its own
+ * `data-contract`: a `data-contract` passed into it was silently replaced and never reached the DOM.
+ * The strip asks for its answer with the region's `overflow` prop instead, so the id the node carries
+ * is the id the node renders - one axis, scrolling only where the destinations overflow.
+ */
 export type TabsProps = {
     readonly label: string
     readonly selectedKey: string
@@ -75,7 +82,7 @@ export const Tabs = (props: TabsProps) => {
     if (!isClientReady) return <div aria-hidden="true" className={tabsFrameClassName} data-contract={frameContract} data-grammar-tabs="true" data-grammar-tabs-client="pending" data-grammar-tabs-inset={inset} style={{ minHeight: "3rem" }} />
 
     return <div ref={frameRef} className={tabsFrameClassName} data-contract={frameContract} data-grammar-tabs="true" data-grammar-tabs-client="ready" data-grammar-tabs-inset={inset} data-grammar-tab-labels={props.labelVisibility ?? "responsive"}>
-        <HorizontalScrollRegion className={tabsScrollClassName} data-contract="OVERFLOW-4" data-grammar-tabs-overflow="scroll" hideScrollBar>
+        <HorizontalScrollRegion className={tabsScrollClassName} overflow="needed" data-grammar-tabs-overflow="scroll" hideScrollBar>
             <HeroTabs
                 variant="secondary"
                 selectedKey={props.selectedKey}

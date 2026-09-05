@@ -50,6 +50,25 @@ describe("Core Tabs", () => {
         expect(onSelect).toHaveBeenCalledWith("community")
     })
 
+    /*
+     * The strip's stamp is the region's, so the strip's answer has to be the region's too. Tabs used
+     * to pass `data-contract="OVERFLOW-4"` into a region that stamped `OVERFLOW-3` over it, and the
+     * node then promised the axis always scrolls while it scrolls only when the destinations overflow.
+     */
+    it("claims the one overflow answer the peer strip actually renders", () => {
+        const { container } = render(<Tabs label="Dashboard" selectedKey="overview" items={[
+            { id: "overview", label: "Overview" },
+            { id: "community", label: "Community" },
+        ]} />)
+
+        const strip = container.querySelector("[data-grammar-tabs-overflow='scroll']")
+        expect(strip).not.toBeNull()
+        const claims = (strip?.getAttribute("data-contract") ?? "").split(" ").filter(Boolean)
+        expect(claims).toContain("OVERFLOW-4")
+        expect(claims).not.toContain("OVERFLOW-3")
+        expect(strip?.getAttribute("data-grammar-overflow")).toBe("needed")
+    })
+
     it("exposes an explicit compact-label identity mode", () => {
         const { container } = render(<Tabs label="Workspace" selectedKey="content" labelVisibility="always" items={[{ id: "content", label: "Task brief" }]} />)
         expect(container.querySelector("[data-grammar-tab-labels='always']")).not.toBeNull()
