@@ -1,5 +1,41 @@
 # Changelog
 
+## 0.4.12
+
+Fix only. A live audit measured a `Heading` stamped `FONT-4` rendering 36px and one stamped `FONT-3`
+rendering 30px, where 0.4.9 rendered the same nodes at 20px and 16px - with `Heading/index.tsx`
+unchanged between those versions. The component was never the defect. The family had no sheet behind
+its own type scale.
+
+### The FONT scale is the family's, so the family's sheet draws it
+
+- `Heading` renders through the vendor's `Typography.Heading`, which adds `typography--h<level>`, and
+  the vendor's sheet sizes those in its `components` layer. Against that the family fielded only the
+  Tailwind utility classes on the component - `text-xl`, `text-base`, `text-sm`, `text-xs`,
+  `text-4xl` - and a utility class exists only where the CONSUMER's Tailwind build scanned this
+  package's dist. In the audited consumer that scan stopped finding the package after it was hoisted,
+  the utilities vanished, and the vendor's sizes won under the family's stamps.
+- `src/common/styles.css` now draws the scale itself, off the attributes `Heading` already stamps
+  (`data-component`, `data-level`, `data-scale`): FONT-4 1.25rem/1.75rem, FONT-3 1rem/1.5rem, FONT-2
+  0.875rem/1.25rem, FONT-1 0.75rem/1rem and FONT-6 2.25rem/1.25, with the recipe's weight and the
+  `tracking-tight` that `font.md` gives FONT-4 and FONT-6 alone. This is what `.starci-core-text` has
+  always done for its own sizes, and what `shipped-geometry.spec.ts` already demands of layout: a
+  shipped object may not spell itself in classes only a consumer's build can create.
+- `!important` on the standard levels, because a consumer may import this sheet before or after
+  `@heroui/styles` and layer rank alone cannot decide the winner in both orders. The values re-state
+  what the utilities carry, so where a scan still finds the package nothing moves. Only FONT-6's SIZE
+  is important: `offset-pop` re-cuts the display row with its own weight, tracking and 0.96 line
+  height, so display rhythm stays a normal declaration that a later family layer still owns.
+- No class, no markup, no JSX and no component prop changed. `Heading/index.tsx` is untouched.
+
+### The paired regression measures the render, not the class list
+
+- `src/core/primitive/Heading/index.spec.tsx` renders every level and the display scale under the
+  shipped sheet in jsdom, reads the `data-contract` off the node, and measures the computed size
+  against the rank that stamp claims. jsdom's cascade skips rules inside an `@layer` block, so the
+  spec lifts the sheet's rules out of their layer before measuring - the declarations it measures are
+  the shipped ones. Without the repair the nodes measure UA defaults (32px under `FONT-4`).
+
 ## 0.4.11
 
 Fix only. A live audit measured three of the family's own nodes stamping a `data-contract` the same

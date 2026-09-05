@@ -2309,6 +2309,57 @@
         border-radius: var(--field-radius, calc(var(--radius, 0.5rem) * 1.5)) !important;
     }
 
+    /* --- Heading: the FONT rank each level stamps, drawn from the family's own sheet. --- */
+    /*
+     * `Heading` renders through the vendor's `Typography.Heading`, which sizes `.typography--h1`
+     * through `--h4` from the vendor's own sheet. Until 0.4.12 the family answered that with the
+     * Tailwind utility classes on the component alone - and a utility class exists only where the
+     * CONSUMER's Tailwind build scanned this package's dist, which is the same debt
+     * `shipped-geometry.spec.ts` already refuses for layout. A consumer whose scan stopped finding
+     * the package measured 36px under a `FONT-4` stamp and 30px under `FONT-3`: the vendor's sizes,
+     * under the family's promise. The scale is the family's, so the family's sheet draws it, the way
+     * `.starci-core-text` above already draws its own.
+     *
+     * `!important` because the vendor rule has to lose in either import order - consumers import
+     * this sheet both before and after `@heroui/styles`, so layer rank alone cannot decide it. The
+     * values re-state what the utilities carry, so nothing moves where a scan still finds them.
+     *
+     * `display` is the one row a family may re-cut: `offset-pop` gives it its own weight, tracking
+     * and 0.96 line height. So only FONT-6's SIZE is important here; its rhythm stays a normal
+     * declaration that a later family layer can still own.
+     */
+    .grammar-common-root [data-component="Heading"][data-scale="standard"][data-level="1"] {
+        font-size: 1.25rem !important;
+        font-weight: 600 !important;
+        letter-spacing: -0.025em !important;
+        line-height: 1.75rem !important;
+    }
+
+    .grammar-common-root [data-component="Heading"][data-scale="standard"][data-level="2"] {
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        line-height: 1.5rem !important;
+    }
+
+    .grammar-common-root [data-component="Heading"][data-scale="standard"][data-level="3"] {
+        font-size: 0.875rem !important;
+        font-weight: 500 !important;
+        line-height: 1.25rem !important;
+    }
+
+    .grammar-common-root [data-component="Heading"][data-scale="standard"][data-level="4"] {
+        font-size: 0.75rem !important;
+        font-weight: 500 !important;
+        line-height: 1rem !important;
+    }
+
+    .grammar-common-root [data-component="Heading"][data-scale="display"] {
+        font-size: 2.25rem !important;
+        font-weight: 600;
+        letter-spacing: -0.025em;
+        line-height: 1.25;
+    }
+
     /* --- Text: one resolved line of copy, drawn from the attributes it already emits. --- */
     .starci-core-text {
         color: var(--foreground, var(--starci-core-foreground, CanvasText));
