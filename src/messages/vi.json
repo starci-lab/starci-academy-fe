@@ -1348,5 +1348,49 @@
         "catalogFailed": "Không tải được danh sách chủ đề.",
         "retry": "Thử lại",
         "noDomains": "Chưa có chủ đề nào."
+    },
+    "concept": {
+        "catalog": {
+            "eyebrow": "Khái niệm độc lập",
+            "title": "Học sâu từng khái niệm",
+            "description": "Bảy bài học tập trung nối bối cảnh phỏng vấn, phần giải thích, sơ đồ, code và bài luyện tập mà không phụ thuộc khóa học.",
+            "empty": "Chưa có khái niệm nào.",
+            "failed": "Không tải được thư viện khái niệm.",
+            "retry": "Thử lại",
+            "open": "Mở {title}",
+            "minutes": "{count} phút",
+            "category": { "backend": "Backend", "frontend": "Frontend", "systemDesign": "Thiết kế hệ thống", "testing": "Kiểm thử", "devops": "DevOps", "cloud": "Cloud", "aiHarness": "AI harness" },
+            "difficulty": { "foundation": "Nền tảng", "intermediate": "Trung cấp", "advanced": "Nâng cao" }
+        },
+        "detail": {
+            "back": "Về danh sách khái niệm",
+            "loadingTitle": "Đang tải khái niệm",
+            "loadingDescription": "Đang tải bài học, source và các câu luyện tập.",
+            "failed": "Không tải được khái niệm này.",
+            "missing": "Khái niệm này không tồn tại hoặc không còn được cung cấp.",
+            "retry": "Thử lại",
+            "minutes": "Đọc {count} phút",
+            "overview": "Tổng quan",
+            "overviewPosition": "Tổng quan khái niệm",
+            "path": "Lộ trình bài học",
+            "position": "Bước {current} / {total}",
+            "tabs": { "group": "Nội dung khái niệm", "lesson": "Bài học", "source": "Source", "practice": "Luyện tập" },
+            "outcomes": "Bạn sẽ học được",
+            "prerequisites": "Kiến thức đầu vào",
+            "sources": "Source thực hành",
+            "sourceUnavailable": "Khái niệm này chưa có source an toàn dành cho người học.",
+            "runCommand": "Chạy ví dụ",
+            "practice": "Câu luyện tập",
+            "practiceUnavailable": "Bản đọc thử chưa hỗ trợ trả lời và chấm điểm.",
+            "currentPrompt": "Câu hỏi hiện tại",
+            "references": "Tham khảo",
+            "noActivities": "Phần này không có câu luyện tập.",
+            "diagnostic": "Câu hỏi chẩn đoán",
+            "delayed": "Ôn lại sau {days} ngày",
+            "category": { "backend": "Backend", "frontend": "Frontend", "systemDesign": "Thiết kế hệ thống", "testing": "Kiểm thử", "devops": "DevOps", "cloud": "Cloud", "aiHarness": "AI harness" },
+            "difficulty": { "foundation": "Nền tảng", "intermediate": "Trung cấp", "advanced": "Nâng cao" },
+            "phase": { "challenge": "Bối cảnh phỏng vấn", "predict": "Dự đoán", "explore": "Khám phá", "explain": "Giải thích", "apply": "Luyện tập", "reflect": "Chiêm nghiệm" },
+            "activity": { "choice": "Chọn đáp án", "exercise": "Bài thực hành", "explain": "Giải thích", "retrieval": "Ôn tập", "simulation": "Mô phỏng" }
+        }
     }
 }

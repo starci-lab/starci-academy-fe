@@ -1347,5 +1347,49 @@
         "catalogFailed": "Không tải được danh sách chủ đề.",
         "retry": "Thử lại",
         "noDomains": "Chưa có chủ đề nào."
+    },
+    "concept": {
+        "catalog": {
+            "eyebrow": "Standalone concepts",
+            "title": "Learn one concept deeply",
+            "description": "Seven focused lessons connect interview context, explanation, diagrams, code, and practice without requiring a course.",
+            "empty": "No concepts are available yet.",
+            "failed": "The concept library could not be loaded.",
+            "retry": "Try again",
+            "open": "Open {title}",
+            "minutes": "{count} min",
+            "category": { "backend": "Backend", "frontend": "Frontend", "systemDesign": "System design", "testing": "Testing", "devops": "DevOps", "cloud": "Cloud", "aiHarness": "AI harness" },
+            "difficulty": { "foundation": "Foundation", "intermediate": "Intermediate", "advanced": "Advanced" }
+        },
+        "detail": {
+            "back": "Back to concepts",
+            "loadingTitle": "Loading concept",
+            "loadingDescription": "Loading the lesson, source, and practice prompts.",
+            "failed": "This concept could not be loaded.",
+            "missing": "This concept does not exist or is no longer available.",
+            "retry": "Try again",
+            "minutes": "{count} min read",
+            "overview": "Overview",
+            "overviewPosition": "Concept overview",
+            "path": "Lesson path",
+            "position": "Step {current} of {total}",
+            "tabs": { "group": "Concept material", "lesson": "Lesson", "source": "Source", "practice": "Practice" },
+            "outcomes": "What you will learn",
+            "prerequisites": "Before you begin",
+            "sources": "Source workspace",
+            "sourceUnavailable": "This concept does not expose a learner-safe source snapshot.",
+            "runCommand": "Run the example",
+            "practice": "Practice prompts",
+            "practiceUnavailable": "Answers and grading are not available in this reading preview.",
+            "currentPrompt": "Current prompt",
+            "references": "References",
+            "noActivities": "This section has no practice prompt.",
+            "diagnostic": "Diagnostic prompt",
+            "delayed": "Review after {days} days",
+            "category": { "backend": "Backend", "frontend": "Frontend", "systemDesign": "System design", "testing": "Testing", "devops": "DevOps", "cloud": "Cloud", "aiHarness": "AI harness" },
+            "difficulty": { "foundation": "Foundation", "intermediate": "Intermediate", "advanced": "Advanced" },
+            "phase": { "challenge": "Interview context", "predict": "Predict", "explore": "Explore", "explain": "Explanation", "apply": "Practice", "reflect": "Reflect" },
+            "activity": { "choice": "Choose", "exercise": "Exercise", "explain": "Explain", "retrieval": "Review", "simulation": "Simulation" }
+        }
     }
 }
